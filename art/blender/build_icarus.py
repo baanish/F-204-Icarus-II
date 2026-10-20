@@ -11,9 +11,13 @@ given as station `s` (metres aft of the radome tip), lateral `x` and height `z` 
 import math
 import os
 
+import sys
+
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # so internals.py imports in a headless run
 
 # Station 0 (the radome tip) sits this far ahead of the origin.
 S0 = 8.0
@@ -79,6 +83,8 @@ PARAMS = {
     # (s, centre x, centre z, radius).
     "duct": [(6.86, 0.515, 0.22, 0.386), (7.80, 0.47, 0.24, 0.37), (8.80, 0.38, 0.28, 0.33), (9.60, 0.30, 0.31, 0.30)],
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
+    # No wing fence at the crank: considered and left off, since the strake and crank vortices and the leading-edge
+    # flaps already keep the outboard panel's flow attached.
     # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
     # crank, and a 35 degree outboard panel; trailing edge nearly unswept. The first two rows are buried in the fairing
     # so the wing meets the body without a gap; rows are (s of leading edge, x, trailing edge s) here and expanded
@@ -210,7 +216,7 @@ def body_ring(s, hw, top, bot, e_top, e_bot=2.0, xc=0.0, zmid=None):
     return ring
 
 
-def loft(name, rings, tip_front=None, cap_back=False):
+def loft(name, rings, tip_front=None, cap_back=False, cap_front=False):
     verts, faces = [], []
     if tip_front is not None:
         verts.append(tip_front)
@@ -226,6 +232,8 @@ def loft(name, rings, tip_front=None, cap_back=False):
     if cap_back:
         last = base + (len(rings) - 1) * n
         faces.append(tuple(last + k for k in range(n)))
+    if cap_front:
+        faces.append(tuple(base + k for k in range(n))[::-1])
     return mesh_object(name, verts, faces)
 
 
@@ -827,10 +835,25 @@ def _build(repo):
     parts += build_ducts(p, duct)
     parts += build_surfaces(p, body)
     parts += build_speed_brakes(p, body)
+    import internals  # imports this module back for its helpers, so it loads after them
+
+    inner_mats = {
+        "fuel_tank": material("Icarus_Int_Fuel", (0.85, 0.55, 0.12, 1.0), 0.0, 0.6),
+        "engine": material("Icarus_Int_Engine", (0.30, 0.28, 0.26, 1.0), 0.9, 0.4),
+        "structure": material("Icarus_Int_Structure", (0.70, 0.72, 0.74, 1.0), 0.6, 0.5),
+        "avionics": material("Icarus_Int_Avionics", (0.20, 0.45, 0.30, 1.0), 0.1, 0.6),
+        "radar": material("Icarus_Int_Avionics", (0.20, 0.45, 0.30, 1.0), 0.1, 0.6),
+        "cockpit": material("Icarus_Int_Cockpit", (0.32, 0.33, 0.35, 1.0), 0.2, 0.6),
+        "gear_bay": material("Icarus_Int_Bay", (0.10, 0.10, 0.11, 1.0), 0.0, 0.8),
+    }
+    inner = internals.build(p, collection("Internals"), inner_mats)
     refs = build_references(p, repo)
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])
     out["parts"] = len(TARGET.objects)
+    out["internal_parts"] = len(inner)
+    out["fuel_kg"] = round(sum(o.get("fuel_kg", 0.0) for o in inner), 1)
+    out["internal_mass_kg"] = round(sum(o.get("mass_kg", 0.0) for o in inner), 1)
     out["references"] = refs
     return out
 
