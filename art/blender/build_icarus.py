@@ -849,11 +849,16 @@ def _build(repo):
         "gear_bay": material("Icarus_Int_Bay", (0.10, 0.10, 0.11, 1.0), 0.0, 0.8),
     }
     inner = internals.build(p, collection("Internals"), inner_mats)
+    bpy.context.view_layer.update()
+    import hulls
+
+    hull_count = hulls.build(TARGET)
     refs = build_references(p, repo)
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])
     out["parts"] = len(TARGET.objects)
     out["internal_parts"] = len(inner)
+    out.update(hull_count)
     out["fuel_kg"] = round(sum(o.get("fuel_kg", 0.0) for o in inner), 1)
     out["internal_mass_kg"] = round(sum(o.get("mass_kg", 0.0) for o in inner), 1)
     out["references"] = refs
