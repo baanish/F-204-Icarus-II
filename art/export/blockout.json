@@ -1,0 +1,5530 @@
+{
+ "source_generator": "art/blender/build_icarus.py",
+ "source_sha256": "bf9ff8c21fb8e52628dbf67015e0400b05549fddd33cb741019870635ea44181",
+ "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
+ "parts": {
+  "aileron_L": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    2.086,
+    3.32612,
+    -0.06555
+   ],
+   "pivot_unity": [
+    -2.086,
+    -0.06555,
+    -3.32612
+   ],
+   "axes_unity": {
+    "right": [
+     0.98239,
+     0.17322,
+     0.07004
+    ],
+    "up": [
+     -0.17365,
+     0.98481,
+     0.0
+    ],
+    "forward": [
+     -0.06897,
+     -0.01216,
+     0.99754
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.98239,
+    -0.17322,
+    -0.07004
+   ]
+  },
+  "aileron_L_visible": {
+   "fbx": "aileron_L_visible.fbx",
+   "blender_parent": "aileron_L",
+   "pivot_blender": [
+    2.086,
+    3.32612,
+    -0.06555
+   ],
+   "pivot_unity": [
+    -2.086,
+    -0.06555,
+    -3.32612
+   ],
+   "axes_unity": {
+    "right": [
+     0.98239,
+     0.17322,
+     0.07004
+    ],
+    "up": [
+     -0.17365,
+     0.98481,
+     0.0
+    ],
+    "forward": [
+     -0.06897,
+     -0.01216,
+     0.99754
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.23451,
+     -0.03011,
+     -0.60119
+    ],
+    [
+     0.0053,
+     0.03011,
+     0.00037
+    ]
+   ],
+   "sha256": "c5fbdb2a25e01004b78d9eb594436394b27cbd39f38a6d5260ae87ca2758159a",
+   "bounds_blender": [
+    [
+     -0.0053,
+     -0.00037,
+     -0.03011
+    ],
+    [
+     1.23451,
+     0.60119,
+     0.03011
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "aileron_R": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    -2.086,
+    3.32612,
+    -0.06555
+   ],
+   "pivot_unity": [
+    2.086,
+    -0.06555,
+    -3.32612
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98239,
+     0.17322,
+     0.07004
+    ],
+    "up": [
+     -0.17365,
+     -0.98481,
+     0.0
+    ],
+    "forward": [
+     0.06897,
+     -0.01216,
+     0.99754
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.98239,
+    -0.17322,
+    -0.07004
+   ]
+  },
+  "aileron_R_visible": {
+   "fbx": "aileron_R_visible.fbx",
+   "blender_parent": "aileron_R",
+   "pivot_blender": [
+    -2.086,
+    3.32612,
+    -0.06555
+   ],
+   "pivot_unity": [
+    2.086,
+    -0.06555,
+    -3.32612
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98239,
+     0.17322,
+     0.07004
+    ],
+    "up": [
+     -0.17365,
+     -0.98481,
+     0.0
+    ],
+    "forward": [
+     0.06897,
+     -0.01216,
+     0.99754
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.23451,
+     -0.03011,
+     -0.60119
+    ],
+    [
+     0.0053,
+     0.03011,
+     0.00037
+    ]
+   ],
+   "sha256": "fdb5bb8228290382688ef4502b1a8d5703c13d3e76b7533a711ed0f4171b828c",
+   "bounds_blender": [
+    [
+     -0.0053,
+     -0.00037,
+     -0.03011
+    ],
+    [
+     1.23451,
+     0.60119,
+     0.03011
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "canopy": {
+   "fbx": "canopy.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.39,
+     0.5,
+     2.9
+    ],
+    [
+     0.39,
+     1.12954,
+     5.68
+    ]
+   ],
+   "sha256": "59cd0b1056aae234c6755652eefa94b9e9501da69c169990c58f79d5369a0e03",
+   "bounds_blender": [
+    [
+     -0.39,
+     -5.68,
+     0.5
+    ],
+    [
+     0.39,
+     -2.9,
+     1.12954
+    ]
+   ],
+   "tris": 6766,
+   "materials": [
+    [
+     "Icarus_Glass",
+     6766
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "duct_L": {
+   "fbx": "duct_L.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.901,
+     -0.166,
+     -1.6
+    ],
+    [
+     -0.0,
+     0.61058,
+     1.14
+    ]
+   ],
+   "sha256": "9ceea9a88d216a16c8c82de366358f9b84c228a6e69b7f06d06bb3f758d3f71b",
+   "bounds_blender": [
+    [
+     0.0,
+     -1.14,
+     -0.166
+    ],
+    [
+     0.901,
+     1.6,
+     0.61058
+    ]
+   ],
+   "tris": 1486,
+   "materials": [
+    [
+     "Icarus_Duct",
+     1486
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "duct_R": {
+   "fbx": "duct_R.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     0.0,
+     -0.166,
+     -1.6
+    ],
+    [
+     0.901,
+     0.61058,
+     1.14
+    ]
+   ],
+   "sha256": "5862634756e9932fa78635b69b570e360ce8adb5a902bbff87c168ebca66e31a",
+   "bounds_blender": [
+    [
+     -0.901,
+     -1.14,
+     -0.166
+    ],
+    [
+     -0.0,
+     1.6,
+     0.61058
+    ]
+   ],
+   "tris": 1486,
+   "materials": [
+    [
+     "Icarus_Duct",
+     1486
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "fin": {
+   "fbx": "fin.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.08357,
+     0.7,
+     -7.68
+    ],
+    [
+     0.08357,
+     2.88,
+     -4.0
+    ]
+   ],
+   "sha256": "19079664ebb8a304d048ceb38d072454f62be9e37cc86189491c957c42d1ea4d",
+   "bounds_blender": [
+    [
+     -0.08357,
+     4.0,
+     0.7
+    ],
+    [
+     0.08357,
+     7.68,
+     2.88
+    ]
+   ],
+   "tris": 2108,
+   "materials": [
+    [
+     "Icarus_Body",
+     2108
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "flap_L": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    1.086,
+    3.04892,
+    0.11078
+   ],
+   "pivot_unity": [
+    -1.086,
+    0.11078,
+    -3.04892
+   ],
+   "axes_unity": {
+    "right": [
+     0.9169,
+     0.16167,
+     0.36491
+    ],
+    "up": [
+     -0.17365,
+     0.98481,
+     0.0
+    ],
+    "forward": [
+     -0.35936,
+     -0.06337,
+     0.93104
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.9169,
+    -0.16167,
+    -0.36491
+   ]
+  },
+  "flap_L_visible": {
+   "fbx": "flap_L_visible.fbx",
+   "blender_parent": "flap_L",
+   "pivot_blender": [
+    1.086,
+    3.04892,
+    0.11078
+   ],
+   "pivot_unity": [
+    -1.086,
+    0.11078,
+    -3.04892
+   ],
+   "axes_unity": {
+    "right": [
+     0.9169,
+     0.16167,
+     0.36491
+    ],
+    "up": [
+     -0.17365,
+     0.98481,
+     0.0
+    ],
+    "forward": [
+     -0.35936,
+     -0.06337,
+     0.93104
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.20222,
+     -0.05168,
+     -0.91425
+    ],
+    [
+     0.00848,
+     0.05168,
+     0.00333
+    ]
+   ],
+   "sha256": "dca592754f2688b181b80386980b224dda49b0c341934e4fa591270d06e7c058",
+   "bounds_blender": [
+    [
+     -0.00848,
+     -0.00333,
+     -0.05168
+    ],
+    [
+     1.20222,
+     0.91425,
+     0.05168
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "flap_R": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    -1.086,
+    3.04892,
+    0.11078
+   ],
+   "pivot_unity": [
+    1.086,
+    0.11078,
+    -3.04892
+   ],
+   "axes_unity": {
+    "right": [
+     -0.9169,
+     0.16167,
+     0.36491
+    ],
+    "up": [
+     -0.17365,
+     -0.98481,
+     -0.0
+    ],
+    "forward": [
+     0.35936,
+     -0.06337,
+     0.93104
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.9169,
+    -0.16167,
+    -0.36491
+   ]
+  },
+  "flap_R_visible": {
+   "fbx": "flap_R_visible.fbx",
+   "blender_parent": "flap_R",
+   "pivot_blender": [
+    -1.086,
+    3.04892,
+    0.11078
+   ],
+   "pivot_unity": [
+    1.086,
+    0.11078,
+    -3.04892
+   ],
+   "axes_unity": {
+    "right": [
+     -0.9169,
+     0.16167,
+     0.36491
+    ],
+    "up": [
+     -0.17365,
+     -0.98481,
+     -0.0
+    ],
+    "forward": [
+     0.35936,
+     -0.06337,
+     0.93104
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.20222,
+     -0.05168,
+     -0.91425
+    ],
+    [
+     0.00848,
+     0.05168,
+     0.00333
+    ]
+   ],
+   "sha256": "bbdd015cc9b7063859dacc1ceb476bb0d3d2f2a4ff9b16d81ad2b14461253aa8",
+   "bounds_blender": [
+    [
+     -0.00848,
+     -0.00333,
+     -0.05168
+    ],
+    [
+     1.20222,
+     0.91425,
+     0.05168
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "fuselage": {
+   "fbx": "fuselage.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.08168,
+     -0.51,
+     -7.2
+    ],
+    [
+     1.08168,
+     1.04239,
+     8.0
+    ]
+   ],
+   "sha256": "fdf0a3b58344ec38bab9f633bca60ed387a117d04b724254911db676297e3ea5",
+   "bounds_blender": [
+    [
+     -1.08168,
+     -8.0,
+     -0.51
+    ],
+    [
+     1.08168,
+     7.2,
+     1.04239
+    ]
+   ],
+   "tris": 34146,
+   "materials": [
+    [
+     "Icarus_Body",
+     34004
+    ],
+    [
+     "Icarus_Duct",
+     142
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "lef_L": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    1.956,
+    1.84942,
+    -0.04263
+   ],
+   "pivot_unity": [
+    -1.956,
+    -0.04263,
+    -1.84942
+   ],
+   "axes_unity": {
+    "right": [
+     0.86431,
+     0.1524,
+     0.47931
+    ],
+    "up": [
+     -0.17365,
+     0.98481,
+     -0.0
+    ],
+    "forward": [
+     -0.47203,
+     -0.08323,
+     0.87765
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.86431,
+    -0.1524,
+    -0.47931
+   ]
+  },
+  "lef_L_visible": {
+   "fbx": "lef_L_visible.fbx",
+   "blender_parent": "lef_L",
+   "pivot_blender": [
+    1.956,
+    1.84942,
+    -0.04263
+   ],
+   "pivot_unity": [
+    -1.956,
+    -0.04263,
+    -1.84942
+   ],
+   "axes_unity": {
+    "right": [
+     0.86431,
+     0.1524,
+     0.47931
+    ],
+    "up": [
+     -0.17365,
+     0.98481,
+     -0.0
+    ],
+    "forward": [
+     -0.47203,
+     -0.08323,
+     0.87765
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.52681,
+     -0.02163,
+     -0.00183
+    ],
+    [
+     0.1832,
+     0.02163,
+     0.33515
+    ]
+   ],
+   "sha256": "ffac4dbc24cae717f0f7054eb1f51043b949ee81627200322ac3f3aca2c35c4f",
+   "bounds_blender": [
+    [
+     -0.1832,
+     -0.33515,
+     -0.02163
+    ],
+    [
+     1.52681,
+     0.00183,
+     0.02163
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "lef_R": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    -1.956,
+    1.84942,
+    -0.04263
+   ],
+   "pivot_unity": [
+    1.956,
+    -0.04263,
+    -1.84942
+   ],
+   "axes_unity": {
+    "right": [
+     -0.86431,
+     0.1524,
+     0.47931
+    ],
+    "up": [
+     -0.17365,
+     -0.98481,
+     -0.0
+    ],
+    "forward": [
+     0.47203,
+     -0.08323,
+     0.87765
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.86431,
+    -0.1524,
+    -0.47931
+   ]
+  },
+  "lef_R_visible": {
+   "fbx": "lef_R_visible.fbx",
+   "blender_parent": "lef_R",
+   "pivot_blender": [
+    -1.956,
+    1.84942,
+    -0.04263
+   ],
+   "pivot_unity": [
+    1.956,
+    -0.04263,
+    -1.84942
+   ],
+   "axes_unity": {
+    "right": [
+     -0.86431,
+     0.1524,
+     0.47931
+    ],
+    "up": [
+     -0.17365,
+     -0.98481,
+     -0.0
+    ],
+    "forward": [
+     0.47203,
+     -0.08323,
+     0.87765
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.52681,
+     -0.02163,
+     -0.00183
+    ],
+    [
+     0.1832,
+     0.02163,
+     0.33515
+    ]
+   ],
+   "sha256": "e972480a2a4fe58aa3e7d287f164d4511f1859462bb42bd5ab45c9667ba6f043",
+   "bounds_blender": [
+    [
+     -0.1832,
+     -0.33515,
+     -0.02163
+    ],
+    [
+     1.52681,
+     0.00183,
+     0.02163
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_00": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.375,
+    7.3,
+    0.37
+   ],
+   "pivot_unity": [
+    -0.375,
+    0.37,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.0,
+     1.0,
+     -0.0
+    ],
+    "up": [
+     -0.98769,
+     0.0,
+     0.15643
+    ],
+    "forward": [
+     0.15643,
+     -0.0,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  "nozzle_petal_00_visible": {
+   "fbx": "nozzle_petal_00_visible.fbx",
+   "blender_parent": "nozzle_petal_00",
+   "pivot_blender": [
+    0.375,
+    7.3,
+    0.37
+   ],
+   "pivot_unity": [
+    -0.375,
+    0.37,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.0,
+     1.0,
+     -0.0
+    ],
+    "up": [
+     -0.98769,
+     0.0,
+     0.15643
+    ],
+    "forward": [
+     0.15643,
+     -0.0,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "039988c12f086ca6c4cf1021eb520050ef333920f933b5febc96e9fbc274fd56",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_01": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.34645,
+    7.3,
+    0.51351
+   ],
+   "pivot_unity": [
+    -0.34645,
+    0.51351,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.38268,
+     0.92388,
+     0.0
+    ],
+    "up": [
+     -0.91251,
+     0.37797,
+     0.15643
+    ],
+    "forward": [
+     0.14453,
+     -0.05986,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.38268,
+    -0.92388,
+    -0.0
+   ]
+  },
+  "nozzle_petal_01_visible": {
+   "fbx": "nozzle_petal_01_visible.fbx",
+   "blender_parent": "nozzle_petal_01",
+   "pivot_blender": [
+    0.34645,
+    7.3,
+    0.51351
+   ],
+   "pivot_unity": [
+    -0.34645,
+    0.51351,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.38268,
+     0.92388,
+     0.0
+    ],
+    "up": [
+     -0.91251,
+     0.37797,
+     0.15643
+    ],
+    "forward": [
+     0.14453,
+     -0.05986,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "39a8e3cf22b36666b3634f4df712c5c2ac7c4eef7b67ee8313e6464e31fe0a32",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_02": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.26517,
+    7.3,
+    0.63517
+   ],
+   "pivot_unity": [
+    -0.26517,
+    0.63517,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.70711,
+     0.70711,
+     0.0
+    ],
+    "up": [
+     -0.6984,
+     0.6984,
+     0.15643
+    ],
+    "forward": [
+     0.11062,
+     -0.11062,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.70711,
+    -0.70711,
+    -0.0
+   ]
+  },
+  "nozzle_petal_02_visible": {
+   "fbx": "nozzle_petal_02_visible.fbx",
+   "blender_parent": "nozzle_petal_02",
+   "pivot_blender": [
+    0.26517,
+    7.3,
+    0.63517
+   ],
+   "pivot_unity": [
+    -0.26517,
+    0.63517,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.70711,
+     0.70711,
+     0.0
+    ],
+    "up": [
+     -0.6984,
+     0.6984,
+     0.15643
+    ],
+    "forward": [
+     0.11062,
+     -0.11062,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "f34f5d7f7848e6b21436fcf61be585ca37e577c1e35293eeb1a6d73303bf1657",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_03": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.14351,
+    7.3,
+    0.71645
+   ],
+   "pivot_unity": [
+    -0.14351,
+    0.71645,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.92388,
+     0.38268,
+     -0.0
+    ],
+    "up": [
+     -0.37797,
+     0.9125,
+     0.15643
+    ],
+    "forward": [
+     0.05986,
+     -0.14453,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.92388,
+    -0.38268,
+    -0.0
+   ]
+  },
+  "nozzle_petal_03_visible": {
+   "fbx": "nozzle_petal_03_visible.fbx",
+   "blender_parent": "nozzle_petal_03",
+   "pivot_blender": [
+    0.14351,
+    7.3,
+    0.71645
+   ],
+   "pivot_unity": [
+    -0.14351,
+    0.71645,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.92388,
+     0.38268,
+     -0.0
+    ],
+    "up": [
+     -0.37797,
+     0.9125,
+     0.15643
+    ],
+    "forward": [
+     0.05986,
+     -0.14453,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "61f1ca564394d9371880fdf6855976249d8dd5e8a3dd4d41e1aed177d101ba1b",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_04": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.0,
+    7.3,
+    0.745
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.745,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     0.98769,
+     0.15643
+    ],
+    "forward": [
+     0.0,
+     -0.15643,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -1.0,
+    -0.0,
+    0.0
+   ]
+  },
+  "nozzle_petal_04_visible": {
+   "fbx": "nozzle_petal_04_visible.fbx",
+   "blender_parent": "nozzle_petal_04",
+   "pivot_blender": [
+    0.0,
+    7.3,
+    0.745
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.745,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     0.98769,
+     0.15643
+    ],
+    "forward": [
+     0.0,
+     -0.15643,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "2cf2191f6b10882cff1761716fa0bd000bb70b15dd9606c79ff84f1cd2fce892",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_05": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.14351,
+    7.3,
+    0.71645
+   ],
+   "pivot_unity": [
+    0.14351,
+    0.71645,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.92388,
+     -0.38268,
+     0.0
+    ],
+    "up": [
+     0.37797,
+     0.9125,
+     0.15643
+    ],
+    "forward": [
+     -0.05986,
+     -0.14453,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.92388,
+    0.38268,
+    -0.0
+   ]
+  },
+  "nozzle_petal_05_visible": {
+   "fbx": "nozzle_petal_05_visible.fbx",
+   "blender_parent": "nozzle_petal_05",
+   "pivot_blender": [
+    -0.14351,
+    7.3,
+    0.71645
+   ],
+   "pivot_unity": [
+    0.14351,
+    0.71645,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.92388,
+     -0.38268,
+     0.0
+    ],
+    "up": [
+     0.37797,
+     0.9125,
+     0.15643
+    ],
+    "forward": [
+     -0.05986,
+     -0.14453,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "d2431a11fbf8c24c5dc4e6b2d2ff1bb3e1a1b6252bd4ce5a27d21d13ada42676",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_06": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.26517,
+    7.3,
+    0.63517
+   ],
+   "pivot_unity": [
+    0.26517,
+    0.63517,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.70711,
+     -0.70711,
+     -0.0
+    ],
+    "up": [
+     0.6984,
+     0.6984,
+     0.15643
+    ],
+    "forward": [
+     -0.11062,
+     -0.11062,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.70711,
+    0.70711,
+    0.0
+   ]
+  },
+  "nozzle_petal_06_visible": {
+   "fbx": "nozzle_petal_06_visible.fbx",
+   "blender_parent": "nozzle_petal_06",
+   "pivot_blender": [
+    -0.26517,
+    7.3,
+    0.63517
+   ],
+   "pivot_unity": [
+    0.26517,
+    0.63517,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.70711,
+     -0.70711,
+     -0.0
+    ],
+    "up": [
+     0.6984,
+     0.6984,
+     0.15643
+    ],
+    "forward": [
+     -0.11062,
+     -0.11062,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "fb9ade7928d8d3ef6918577087e5fc98d6a7ca6877a074a7c2e58e7595c63c7f",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_07": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.34645,
+    7.3,
+    0.51351
+   ],
+   "pivot_unity": [
+    0.34645,
+    0.51351,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.38268,
+     -0.92388,
+     -0.0
+    ],
+    "up": [
+     0.91251,
+     0.37797,
+     0.15643
+    ],
+    "forward": [
+     -0.14453,
+     -0.05986,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.38268,
+    0.92388,
+    0.0
+   ]
+  },
+  "nozzle_petal_07_visible": {
+   "fbx": "nozzle_petal_07_visible.fbx",
+   "blender_parent": "nozzle_petal_07",
+   "pivot_blender": [
+    -0.34645,
+    7.3,
+    0.51351
+   ],
+   "pivot_unity": [
+    0.34645,
+    0.51351,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.38268,
+     -0.92388,
+     -0.0
+    ],
+    "up": [
+     0.91251,
+     0.37797,
+     0.15643
+    ],
+    "forward": [
+     -0.14453,
+     -0.05986,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "ca7a91433a12b47dab04160d2966ce2efd6a0b6ce9e01f4e4a7e4e6141ca12af",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_08": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.375,
+    7.3,
+    0.37
+   ],
+   "pivot_unity": [
+    0.375,
+    0.37,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "up": [
+     0.98769,
+     0.0,
+     0.15643
+    ],
+    "forward": [
+     -0.15643,
+     -0.0,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  "nozzle_petal_08_visible": {
+   "fbx": "nozzle_petal_08_visible.fbx",
+   "blender_parent": "nozzle_petal_08",
+   "pivot_blender": [
+    -0.375,
+    7.3,
+    0.37
+   ],
+   "pivot_unity": [
+    0.375,
+    0.37,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "up": [
+     0.98769,
+     0.0,
+     0.15643
+    ],
+    "forward": [
+     -0.15643,
+     -0.0,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "a3bc953ed49e7628fa3d3c8d04cc9d40f88f7a36c819d89716c2a077ae3ee9eb",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_09": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.34645,
+    7.3,
+    0.22649
+   ],
+   "pivot_unity": [
+    0.34645,
+    0.22649,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.38268,
+     -0.92388,
+     0.0
+    ],
+    "up": [
+     0.91251,
+     -0.37797,
+     0.15643
+    ],
+    "forward": [
+     -0.14453,
+     0.05986,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.38268,
+    0.92388,
+    -0.0
+   ]
+  },
+  "nozzle_petal_09_visible": {
+   "fbx": "nozzle_petal_09_visible.fbx",
+   "blender_parent": "nozzle_petal_09",
+   "pivot_blender": [
+    -0.34645,
+    7.3,
+    0.22649
+   ],
+   "pivot_unity": [
+    0.34645,
+    0.22649,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.38268,
+     -0.92388,
+     0.0
+    ],
+    "up": [
+     0.91251,
+     -0.37797,
+     0.15643
+    ],
+    "forward": [
+     -0.14453,
+     0.05986,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "7c0cc8e95d2dd814b16f5b47e1948bead7d8a175d1ca976c570d94aa2623d2d3",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_10": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.26517,
+    7.3,
+    0.10483
+   ],
+   "pivot_unity": [
+    0.26517,
+    0.10483,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.70711,
+     -0.70711,
+     0.0
+    ],
+    "up": [
+     0.6984,
+     -0.6984,
+     0.15643
+    ],
+    "forward": [
+     -0.11062,
+     0.11062,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.70711,
+    0.70711,
+    -0.0
+   ]
+  },
+  "nozzle_petal_10_visible": {
+   "fbx": "nozzle_petal_10_visible.fbx",
+   "blender_parent": "nozzle_petal_10",
+   "pivot_blender": [
+    -0.26517,
+    7.3,
+    0.10483
+   ],
+   "pivot_unity": [
+    0.26517,
+    0.10483,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.70711,
+     -0.70711,
+     0.0
+    ],
+    "up": [
+     0.6984,
+     -0.6984,
+     0.15643
+    ],
+    "forward": [
+     -0.11062,
+     0.11062,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "704b0c8831008cbf2bdc6a24d3520f9b2fc838b7c27455ffcc47ba3f3e3e6659",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_11": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.14351,
+    7.3,
+    0.02355
+   ],
+   "pivot_unity": [
+    0.14351,
+    0.02355,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.92388,
+     -0.38268,
+     -0.0
+    ],
+    "up": [
+     0.37797,
+     -0.91251,
+     0.15643
+    ],
+    "forward": [
+     -0.05986,
+     0.14453,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.92388,
+    0.38268,
+    0.0
+   ]
+  },
+  "nozzle_petal_11_visible": {
+   "fbx": "nozzle_petal_11_visible.fbx",
+   "blender_parent": "nozzle_petal_11",
+   "pivot_blender": [
+    -0.14351,
+    7.3,
+    0.02355
+   ],
+   "pivot_unity": [
+    0.14351,
+    0.02355,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.92388,
+     -0.38268,
+     -0.0
+    ],
+    "up": [
+     0.37797,
+     -0.91251,
+     0.15643
+    ],
+    "forward": [
+     -0.05986,
+     0.14453,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "50767b157a863ec721faf43758048a01a6017d29a670a2f79b1a53406cd5c566",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_12": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.0,
+    7.3,
+    -0.005
+   ],
+   "pivot_unity": [
+    0.0,
+    -0.005,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "up": [
+     -0.0,
+     -0.98769,
+     0.15643
+    ],
+    "forward": [
+     0.0,
+     0.15643,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    1.0,
+    -0.0,
+    -0.0
+   ]
+  },
+  "nozzle_petal_12_visible": {
+   "fbx": "nozzle_petal_12_visible.fbx",
+   "blender_parent": "nozzle_petal_12",
+   "pivot_blender": [
+    -0.0,
+    7.3,
+    -0.005
+   ],
+   "pivot_unity": [
+    0.0,
+    -0.005,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "up": [
+     -0.0,
+     -0.98769,
+     0.15643
+    ],
+    "forward": [
+     0.0,
+     0.15643,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "5aaccfae748e8d1c67807cad144b577b7c6d0cbcf3b87f10602207f5b039fb9a",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_13": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.14351,
+    7.3,
+    0.02355
+   ],
+   "pivot_unity": [
+    -0.14351,
+    0.02355,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.92388,
+     0.38268,
+     0.0
+    ],
+    "up": [
+     -0.37797,
+     -0.91251,
+     0.15643
+    ],
+    "forward": [
+     0.05986,
+     0.14453,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.92388,
+    -0.38268,
+    -0.0
+   ]
+  },
+  "nozzle_petal_13_visible": {
+   "fbx": "nozzle_petal_13_visible.fbx",
+   "blender_parent": "nozzle_petal_13",
+   "pivot_blender": [
+    0.14351,
+    7.3,
+    0.02355
+   ],
+   "pivot_unity": [
+    -0.14351,
+    0.02355,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.92388,
+     0.38268,
+     0.0
+    ],
+    "up": [
+     -0.37797,
+     -0.91251,
+     0.15643
+    ],
+    "forward": [
+     0.05986,
+     0.14453,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "e19c978a12f38850b713dc3fa59ad9793981067f6b7987676840f7808d85e181",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_14": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.26517,
+    7.3,
+    0.10483
+   ],
+   "pivot_unity": [
+    -0.26517,
+    0.10483,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.70711,
+     0.70711,
+     -0.0
+    ],
+    "up": [
+     -0.6984,
+     -0.6984,
+     0.15643
+    ],
+    "forward": [
+     0.11062,
+     0.11062,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.70711,
+    -0.70711,
+    0.0
+   ]
+  },
+  "nozzle_petal_14_visible": {
+   "fbx": "nozzle_petal_14_visible.fbx",
+   "blender_parent": "nozzle_petal_14",
+   "pivot_blender": [
+    0.26517,
+    7.3,
+    0.10483
+   ],
+   "pivot_unity": [
+    -0.26517,
+    0.10483,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.70711,
+     0.70711,
+     -0.0
+    ],
+    "up": [
+     -0.6984,
+     -0.6984,
+     0.15643
+    ],
+    "forward": [
+     0.11062,
+     0.11062,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "093e131f8179bf6c92dac3befeda6230a26da516dd8bc3e7835aa09ef450d9eb",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_petal_15": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.34645,
+    7.3,
+    0.22649
+   ],
+   "pivot_unity": [
+    -0.34645,
+    0.22649,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.38268,
+     0.92388,
+     -0.0
+    ],
+    "up": [
+     -0.91251,
+     -0.37797,
+     0.15643
+    ],
+    "forward": [
+     0.14453,
+     0.05986,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.38268,
+    -0.92388,
+    0.0
+   ]
+  },
+  "nozzle_petal_15_visible": {
+   "fbx": "nozzle_petal_15_visible.fbx",
+   "blender_parent": "nozzle_petal_15",
+   "pivot_blender": [
+    0.34645,
+    7.3,
+    0.22649
+   ],
+   "pivot_unity": [
+    -0.34645,
+    0.22649,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.38268,
+     0.92388,
+     -0.0
+    ],
+    "up": [
+     -0.91251,
+     -0.37797,
+     0.15643
+    ],
+    "forward": [
+     0.14453,
+     0.05986,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.075,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.075,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "4b72223a7c4d6311d5a63daa2d4b549875a3f48bc08c62b470fad86ef6f3191a",
+   "bounds_blender": [
+    [
+     -0.075,
+     0.0,
+     -0.012
+    ],
+    [
+     0.075,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Petal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_00": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.35603,
+    7.3,
+    0.44082
+   ],
+   "pivot_unity": [
+    -0.35603,
+    0.44082,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.19509,
+     0.98079,
+     -0.0
+    ],
+    "up": [
+     -0.96871,
+     0.19269,
+     0.15643
+    ],
+    "forward": [
+     0.15343,
+     -0.03052,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.19509,
+    -0.98079,
+    0.0
+   ]
+  },
+  "nozzle_seal_00_visible": {
+   "fbx": "nozzle_seal_00_visible.fbx",
+   "blender_parent": "nozzle_seal_00",
+   "pivot_blender": [
+    0.35603,
+    7.3,
+    0.44082
+   ],
+   "pivot_unity": [
+    -0.35603,
+    0.44082,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.19509,
+     0.98079,
+     -0.0
+    ],
+    "up": [
+     -0.96871,
+     0.19269,
+     0.15643
+    ],
+    "forward": [
+     0.15343,
+     -0.03052,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "41af8aa35d2e75cae3f9d214d23cf318d9e25923b8b3ebd62ca42a0ad8eda67c",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_01": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.30182,
+    7.3,
+    0.57167
+   ],
+   "pivot_unity": [
+    -0.30182,
+    0.57167,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     0.83147,
+     0.0
+    ],
+    "up": [
+     -0.82123,
+     0.54873,
+     0.15643
+    ],
+    "forward": [
+     0.13007,
+     -0.08691,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.55557,
+    -0.83147,
+    -0.0
+   ]
+  },
+  "nozzle_seal_01_visible": {
+   "fbx": "nozzle_seal_01_visible.fbx",
+   "blender_parent": "nozzle_seal_01",
+   "pivot_blender": [
+    0.30182,
+    7.3,
+    0.57167
+   ],
+   "pivot_unity": [
+    -0.30182,
+    0.57167,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     0.83147,
+     0.0
+    ],
+    "up": [
+     -0.82123,
+     0.54873,
+     0.15643
+    ],
+    "forward": [
+     0.13007,
+     -0.08691,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "41836bca8bb4bc706999f6de5bb4687d2cc7cd203874ee7fbc7f534f00335e99",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_02": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.20167,
+    7.3,
+    0.67182
+   ],
+   "pivot_unity": [
+    -0.20167,
+    0.67182,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.83147,
+     0.55557,
+     0.0
+    ],
+    "up": [
+     -0.54873,
+     0.82123,
+     0.15643
+    ],
+    "forward": [
+     0.08691,
+     -0.13007,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.83147,
+    -0.55557,
+    -0.0
+   ]
+  },
+  "nozzle_seal_02_visible": {
+   "fbx": "nozzle_seal_02_visible.fbx",
+   "blender_parent": "nozzle_seal_02",
+   "pivot_blender": [
+    0.20167,
+    7.3,
+    0.67182
+   ],
+   "pivot_unity": [
+    -0.20167,
+    0.67182,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.83147,
+     0.55557,
+     0.0
+    ],
+    "up": [
+     -0.54873,
+     0.82123,
+     0.15643
+    ],
+    "forward": [
+     0.08691,
+     -0.13007,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "76d9cc8ea85186786030fa096a73202dd59640dcf7a411ee2d6e8406d2ed5224",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_03": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.07082,
+    7.3,
+    0.72603
+   ],
+   "pivot_unity": [
+    -0.07082,
+    0.72603,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     0.19509,
+     -0.0
+    ],
+    "up": [
+     -0.19269,
+     0.96871,
+     0.15643
+    ],
+    "forward": [
+     0.03052,
+     -0.15343,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.98079,
+    -0.19509,
+    0.0
+   ]
+  },
+  "nozzle_seal_03_visible": {
+   "fbx": "nozzle_seal_03_visible.fbx",
+   "blender_parent": "nozzle_seal_03",
+   "pivot_blender": [
+    0.07082,
+    7.3,
+    0.72603
+   ],
+   "pivot_unity": [
+    -0.07082,
+    0.72603,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     0.19509,
+     -0.0
+    ],
+    "up": [
+     -0.19269,
+     0.96871,
+     0.15643
+    ],
+    "forward": [
+     0.03052,
+     -0.15343,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "7dae3c7b6682ba822ac098da40b203c43e2a193e7b6f3618aff7b400ed0ec0e9",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_04": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.07082,
+    7.3,
+    0.72603
+   ],
+   "pivot_unity": [
+    0.07082,
+    0.72603,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     -0.19509,
+     0.0
+    ],
+    "up": [
+     0.19269,
+     0.96871,
+     0.15643
+    ],
+    "forward": [
+     -0.03052,
+     -0.15343,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.98079,
+    0.19509,
+    -0.0
+   ]
+  },
+  "nozzle_seal_04_visible": {
+   "fbx": "nozzle_seal_04_visible.fbx",
+   "blender_parent": "nozzle_seal_04",
+   "pivot_blender": [
+    -0.07082,
+    7.3,
+    0.72603
+   ],
+   "pivot_unity": [
+    0.07082,
+    0.72603,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     -0.19509,
+     0.0
+    ],
+    "up": [
+     0.19269,
+     0.96871,
+     0.15643
+    ],
+    "forward": [
+     -0.03052,
+     -0.15343,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "c6b4ae286b89dca6f6cdb0cf59e9b9a13b6ad83f49eea55cba4e8da48e588996",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_05": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.20167,
+    7.3,
+    0.67182
+   ],
+   "pivot_unity": [
+    0.20167,
+    0.67182,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.83147,
+     -0.55557,
+     -0.0
+    ],
+    "up": [
+     0.54873,
+     0.82123,
+     0.15643
+    ],
+    "forward": [
+     -0.08691,
+     -0.13007,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.83147,
+    0.55557,
+    0.0
+   ]
+  },
+  "nozzle_seal_05_visible": {
+   "fbx": "nozzle_seal_05_visible.fbx",
+   "blender_parent": "nozzle_seal_05",
+   "pivot_blender": [
+    -0.20167,
+    7.3,
+    0.67182
+   ],
+   "pivot_unity": [
+    0.20167,
+    0.67182,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.83147,
+     -0.55557,
+     -0.0
+    ],
+    "up": [
+     0.54873,
+     0.82123,
+     0.15643
+    ],
+    "forward": [
+     -0.08691,
+     -0.13007,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "1c4bf41cf046992770a1c3b03fbaf4c8b7432959e045094040747586c3eb62ea",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_06": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.30182,
+    7.3,
+    0.57167
+   ],
+   "pivot_unity": [
+    0.30182,
+    0.57167,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     -0.83147,
+     -0.0
+    ],
+    "up": [
+     0.82123,
+     0.54873,
+     0.15643
+    ],
+    "forward": [
+     -0.13007,
+     -0.08691,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.55557,
+    0.83147,
+    -0.0
+   ]
+  },
+  "nozzle_seal_06_visible": {
+   "fbx": "nozzle_seal_06_visible.fbx",
+   "blender_parent": "nozzle_seal_06",
+   "pivot_blender": [
+    -0.30182,
+    7.3,
+    0.57167
+   ],
+   "pivot_unity": [
+    0.30182,
+    0.57167,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     -0.83147,
+     -0.0
+    ],
+    "up": [
+     0.82123,
+     0.54873,
+     0.15643
+    ],
+    "forward": [
+     -0.13007,
+     -0.08691,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "2a1878aa245d007c00a7a86c2a21e15413a4b79b690040b1a1a200638d664c7e",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_07": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.35603,
+    7.3,
+    0.44082
+   ],
+   "pivot_unity": [
+    0.35603,
+    0.44082,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.19509,
+     -0.98079,
+     0.0
+    ],
+    "up": [
+     0.96871,
+     0.19269,
+     0.15643
+    ],
+    "forward": [
+     -0.15343,
+     -0.03052,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.19509,
+    0.98079,
+    -0.0
+   ]
+  },
+  "nozzle_seal_07_visible": {
+   "fbx": "nozzle_seal_07_visible.fbx",
+   "blender_parent": "nozzle_seal_07",
+   "pivot_blender": [
+    -0.35603,
+    7.3,
+    0.44082
+   ],
+   "pivot_unity": [
+    0.35603,
+    0.44082,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     0.19509,
+     -0.98079,
+     0.0
+    ],
+    "up": [
+     0.96871,
+     0.19269,
+     0.15643
+    ],
+    "forward": [
+     -0.15343,
+     -0.03052,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "1e1ea259c2e2bf5a28281ef04c24743642efdbe8443c19009c8bbdf936e3046f",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_08": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.35603,
+    7.3,
+    0.29918
+   ],
+   "pivot_unity": [
+    0.35603,
+    0.29918,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.19509,
+     -0.98079,
+     -0.0
+    ],
+    "up": [
+     0.96871,
+     -0.19269,
+     0.15643
+    ],
+    "forward": [
+     -0.15343,
+     0.03052,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.19509,
+    0.98079,
+    0.0
+   ]
+  },
+  "nozzle_seal_08_visible": {
+   "fbx": "nozzle_seal_08_visible.fbx",
+   "blender_parent": "nozzle_seal_08",
+   "pivot_blender": [
+    -0.35603,
+    7.3,
+    0.29918
+   ],
+   "pivot_unity": [
+    0.35603,
+    0.29918,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.19509,
+     -0.98079,
+     -0.0
+    ],
+    "up": [
+     0.96871,
+     -0.19269,
+     0.15643
+    ],
+    "forward": [
+     -0.15343,
+     0.03052,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "364bcbf809e8840d70173bba62a06e59077bf44d34007c1cc7bf3a96fe856906",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_09": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.30182,
+    7.3,
+    0.16833
+   ],
+   "pivot_unity": [
+    0.30182,
+    0.16833,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     -0.83147,
+     -0.0
+    ],
+    "up": [
+     0.82123,
+     -0.54873,
+     0.15643
+    ],
+    "forward": [
+     -0.13007,
+     0.08691,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.55557,
+    0.83147,
+    -0.0
+   ]
+  },
+  "nozzle_seal_09_visible": {
+   "fbx": "nozzle_seal_09_visible.fbx",
+   "blender_parent": "nozzle_seal_09",
+   "pivot_blender": [
+    -0.30182,
+    7.3,
+    0.16833
+   ],
+   "pivot_unity": [
+    0.30182,
+    0.16833,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     -0.83147,
+     -0.0
+    ],
+    "up": [
+     0.82123,
+     -0.54873,
+     0.15643
+    ],
+    "forward": [
+     -0.13007,
+     0.08691,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "d601b7867b58353b44de623cabd057ffde494d0da333f09183977793711d4cdc",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_10": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.20167,
+    7.3,
+    0.06818
+   ],
+   "pivot_unity": [
+    0.20167,
+    0.06818,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.83147,
+     -0.55557,
+     0.0
+    ],
+    "up": [
+     0.54873,
+     -0.82123,
+     0.15643
+    ],
+    "forward": [
+     -0.08691,
+     0.13007,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.83147,
+    0.55557,
+    -0.0
+   ]
+  },
+  "nozzle_seal_10_visible": {
+   "fbx": "nozzle_seal_10_visible.fbx",
+   "blender_parent": "nozzle_seal_10",
+   "pivot_blender": [
+    -0.20167,
+    7.3,
+    0.06818
+   ],
+   "pivot_unity": [
+    0.20167,
+    0.06818,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.83147,
+     -0.55557,
+     0.0
+    ],
+    "up": [
+     0.54873,
+     -0.82123,
+     0.15643
+    ],
+    "forward": [
+     -0.08691,
+     0.13007,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "8ddfad599ccd77cb30fd770033be6e6cbfe4f8bb56f81106e14ad112407f7c0e",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_11": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    -0.07082,
+    7.3,
+    0.01397
+   ],
+   "pivot_unity": [
+    0.07082,
+    0.01397,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     -0.19509,
+     -0.0
+    ],
+    "up": [
+     0.19269,
+     -0.96871,
+     0.15643
+    ],
+    "forward": [
+     -0.03052,
+     0.15343,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.98079,
+    0.19509,
+    0.0
+   ]
+  },
+  "nozzle_seal_11_visible": {
+   "fbx": "nozzle_seal_11_visible.fbx",
+   "blender_parent": "nozzle_seal_11",
+   "pivot_blender": [
+    -0.07082,
+    7.3,
+    0.01397
+   ],
+   "pivot_unity": [
+    0.07082,
+    0.01397,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     -0.19509,
+     -0.0
+    ],
+    "up": [
+     0.19269,
+     -0.96871,
+     0.15643
+    ],
+    "forward": [
+     -0.03052,
+     0.15343,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "fd4c372b499801adcd54dc2b352af10bfebdef57f612a21de4443850da4702a2",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_12": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.07082,
+    7.3,
+    0.01397
+   ],
+   "pivot_unity": [
+    -0.07082,
+    0.01397,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     0.19509,
+     0.0
+    ],
+    "up": [
+     -0.19269,
+     -0.96871,
+     0.15643
+    ],
+    "forward": [
+     0.03052,
+     0.15343,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.98079,
+    -0.19509,
+    -0.0
+   ]
+  },
+  "nozzle_seal_12_visible": {
+   "fbx": "nozzle_seal_12_visible.fbx",
+   "blender_parent": "nozzle_seal_12",
+   "pivot_blender": [
+    0.07082,
+    7.3,
+    0.01397
+   ],
+   "pivot_unity": [
+    -0.07082,
+    0.01397,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     0.19509,
+     0.0
+    ],
+    "up": [
+     -0.19269,
+     -0.96871,
+     0.15643
+    ],
+    "forward": [
+     0.03052,
+     0.15343,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "1e977a8e273de4576f73b257055bfc7a3485601390f26d20c846cad0bbd7c1c8",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_13": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.20167,
+    7.3,
+    0.06818
+   ],
+   "pivot_unity": [
+    -0.20167,
+    0.06818,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.83147,
+     0.55557,
+     -0.0
+    ],
+    "up": [
+     -0.54873,
+     -0.82123,
+     0.15643
+    ],
+    "forward": [
+     0.08691,
+     0.13007,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.83147,
+    -0.55557,
+    -0.0
+   ]
+  },
+  "nozzle_seal_13_visible": {
+   "fbx": "nozzle_seal_13_visible.fbx",
+   "blender_parent": "nozzle_seal_13",
+   "pivot_blender": [
+    0.20167,
+    7.3,
+    0.06818
+   ],
+   "pivot_unity": [
+    -0.20167,
+    0.06818,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.83147,
+     0.55557,
+     -0.0
+    ],
+    "up": [
+     -0.54873,
+     -0.82123,
+     0.15643
+    ],
+    "forward": [
+     0.08691,
+     0.13007,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "87bbe032c8ed8501c52dda4d86a7d23214b2ccd251bb4a792dd25bd54fd6a75d",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_14": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.30182,
+    7.3,
+    0.16833
+   ],
+   "pivot_unity": [
+    -0.30182,
+    0.16833,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     0.83147,
+     0.0
+    ],
+    "up": [
+     -0.82123,
+     -0.54873,
+     0.15643
+    ],
+    "forward": [
+     0.13007,
+     0.08691,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.55557,
+    -0.83147,
+    -0.0
+   ]
+  },
+  "nozzle_seal_14_visible": {
+   "fbx": "nozzle_seal_14_visible.fbx",
+   "blender_parent": "nozzle_seal_14",
+   "pivot_blender": [
+    0.30182,
+    7.3,
+    0.16833
+   ],
+   "pivot_unity": [
+    -0.30182,
+    0.16833,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     0.83147,
+     0.0
+    ],
+    "up": [
+     -0.82123,
+     -0.54873,
+     0.15643
+    ],
+    "forward": [
+     0.13007,
+     0.08691,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "1b9eeeec875bb406b4edf32a0de120ea726eaff67f8067d5fadc5158eafca996",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_seal_15": {
+   "fbx": null,
+   "blender_parent": "nozzle_vector",
+   "pivot_blender": [
+    0.35603,
+    7.3,
+    0.29918
+   ],
+   "pivot_unity": [
+    -0.35603,
+    0.29918,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.19509,
+     0.98079,
+     0.0
+    ],
+    "up": [
+     -0.96871,
+     -0.19269,
+     0.15643
+    ],
+    "forward": [
+     0.15343,
+     0.03052,
+     0.98769
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.19509,
+    -0.98079,
+    -0.0
+   ]
+  },
+  "nozzle_seal_15_visible": {
+   "fbx": "nozzle_seal_15_visible.fbx",
+   "blender_parent": "nozzle_seal_15",
+   "pivot_blender": [
+    0.35603,
+    7.3,
+    0.29918
+   ],
+   "pivot_unity": [
+    -0.35603,
+    0.29918,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     -0.19509,
+     0.98079,
+     0.0
+    ],
+    "up": [
+     -0.96871,
+     -0.19269,
+     0.15643
+    ],
+    "forward": [
+     0.15343,
+     0.03052,
+     0.98769
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.0525,
+     -0.012,
+     -0.48
+    ],
+    [
+     0.0525,
+     0.0,
+     -0.0
+    ]
+   ],
+   "sha256": "61625116bd7b21a730344a1b3a98f6350e61c0849c42502a0ff2458c759177df",
+   "bounds_blender": [
+    [
+     -0.0525,
+     0.0,
+     -0.012
+    ],
+    [
+     0.0525,
+     0.48,
+     0.0
+    ]
+   ],
+   "tris": 12,
+   "materials": [
+    [
+     "Icarus_Seal",
+     12
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_shroud": {
+   "fbx": "nozzle_shroud.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.387,
+     -0.017,
+     -7.3
+    ],
+    [
+     0.387,
+     0.757,
+     -7.0
+    ]
+   ],
+   "sha256": "30ba4d19b4663cc7efd6021d80c2f91741711f2bf7d0a689906ef618b64a5e8f",
+   "bounds_blender": [
+    [
+     -0.387,
+     7.0,
+     -0.017
+    ],
+    [
+     0.387,
+     7.3,
+     0.757
+    ]
+   ],
+   "tris": 1006,
+   "materials": [
+    [
+     "Icarus_Nozzle",
+     864
+    ],
+    [
+     "Icarus_Duct",
+     142
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_vector": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    7.3,
+    0.37
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.37,
+    -7.3
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": null
+  },
+  "probe": {
+   "fbx": "probe.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.07,
+     -0.04,
+     7.7
+    ],
+    [
+     0.07,
+     0.1,
+     9.17
+    ]
+   ],
+   "sha256": "ae4addf89aa64ac686f94b6adba200d0358cee201e6b1cdd97b595b24e60fe31",
+   "bounds_blender": [
+    [
+     -0.07,
+     -9.17,
+     -0.04
+    ],
+    [
+     0.07,
+     -7.7,
+     0.1
+    ]
+   ],
+   "tris": 264,
+   "materials": [
+    [
+     "Icarus_Nozzle",
+     264
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "rudder": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    6.69465,
+    1.156
+   ],
+   "pivot_unity": [
+    -0.0,
+    1.156,
+    -6.69465
+   ],
+   "axes_unity": {
+    "right": [
+     -0.0,
+     -0.92917,
+     0.36966
+    ],
+    "up": [
+     1.0,
+     -0.0,
+     0.0
+    ],
+    "forward": [
+     0.0,
+     0.36966,
+     0.92917
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.0,
+    0.92917,
+    -0.36966
+   ]
+  },
+  "rudder_visible": {
+   "fbx": "rudder_visible.fbx",
+   "blender_parent": "rudder",
+   "pivot_blender": [
+    0.0,
+    6.69465,
+    1.156
+   ],
+   "pivot_unity": [
+    -0.0,
+    1.156,
+    -6.69465
+   ],
+   "axes_unity": {
+    "right": [
+     -0.0,
+     -0.92917,
+     0.36966
+    ],
+    "up": [
+     1.0,
+     -0.0,
+     0.0
+    ],
+    "forward": [
+     0.0,
+     0.36966,
+     0.92917
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.65101,
+     -0.06554,
+     -0.88768
+    ],
+    [
+     -0.0,
+     0.06554,
+     -0.0
+    ]
+   ],
+   "sha256": "9a8943240f60643e4829a9c56bdf59c8185bc340ec8d5d1b28a78b4a88f8ac7e",
+   "bounds_blender": [
+    [
+     0.0,
+     0.0,
+     -0.06554
+    ],
+    [
+     1.65101,
+     0.88768,
+     0.06554
+    ]
+   ],
+   "tris": 860,
+   "materials": [
+    [
+     "Icarus_Body",
+     860
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "shock_cone_L": {
+   "fbx": "shock_cone_L.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.88,
+     -0.08,
+     0.6
+    ],
+    [
+     -0.28,
+     0.52,
+     1.85
+    ]
+   ],
+   "sha256": "a18ad4464ad640af8689ab4b1d779c2d3ac6c4a812889fa3c635400697d9fc8c",
+   "bounds_blender": [
+    [
+     0.28,
+     -1.85,
+     -0.08
+    ],
+    [
+     0.88,
+     -0.6,
+     0.52
+    ]
+   ],
+   "tris": 3166,
+   "materials": [
+    [
+     "Icarus_Body",
+     3166
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "shock_cone_L_bleed": {
+   "fbx": "shock_cone_L_bleed.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.83428,
+     -0.03428,
+     0.745
+    ],
+    [
+     -0.32572,
+     0.47428,
+     0.78
+    ]
+   ],
+   "sha256": "6a59b1f17741d5129375d3a9ddb614f13e550724cc9ac104de8c014a05a5120d",
+   "bounds_blender": [
+    [
+     0.32572,
+     -0.78,
+     -0.03428
+    ],
+    [
+     0.83428,
+     -0.745,
+     0.47428
+    ]
+   ],
+   "tris": 288,
+   "materials": [
+    [
+     "Icarus_Duct",
+     288
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "shock_cone_R": {
+   "fbx": "shock_cone_R.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     0.28,
+     -0.08,
+     0.6
+    ],
+    [
+     0.88,
+     0.52,
+     1.85
+    ]
+   ],
+   "sha256": "558b9a81426f98b0060e2ef3c1e226f98ba4b46487b88939891f62b298858ba0",
+   "bounds_blender": [
+    [
+     -0.88,
+     -1.85,
+     -0.08
+    ],
+    [
+     -0.28,
+     -0.6,
+     0.52
+    ]
+   ],
+   "tris": 3166,
+   "materials": [
+    [
+     "Icarus_Body",
+     3166
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "shock_cone_R_bleed": {
+   "fbx": "shock_cone_R_bleed.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     0.32572,
+     -0.03428,
+     0.745
+    ],
+    [
+     0.83428,
+     0.47428,
+     0.78
+    ]
+   ],
+   "sha256": "44ef328d67db2e08e6595c35f386a74ae4bac7dec9ac4822c6c204a089035358",
+   "bounds_blender": [
+    [
+     -0.83428,
+     -0.78,
+     -0.03428
+    ],
+    [
+     -0.32572,
+     -0.745,
+     0.47428
+    ]
+   ],
+   "tris": 288,
+   "materials": [
+    [
+     "Icarus_Duct",
+     288
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "speed_brake_L": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    0.46121,
+    4.55,
+    -0.17552
+   ],
+   "pivot_unity": [
+    -0.46121,
+    -0.17552,
+    -4.55
+   ],
+   "axes_unity": {
+    "right": [
+     0.49326,
+     -0.86988,
+     -0.0
+    ],
+    "up": [
+     0.86988,
+     0.49326,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -0.49326,
+    0.86988,
+    -0.0
+   ]
+  },
+  "speed_brake_L_visible": {
+   "fbx": "speed_brake_L_visible.fbx",
+   "blender_parent": "speed_brake_L",
+   "pivot_blender": [
+    0.46121,
+    4.55,
+    -0.17552
+   ],
+   "pivot_unity": [
+    -0.46121,
+    -0.17552,
+    -4.55
+   ],
+   "axes_unity": {
+    "right": [
+     0.49326,
+     -0.86988,
+     -0.0
+    ],
+    "up": [
+     0.86988,
+     0.49326,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.5233,
+     -0.07242,
+     -0.8
+    ],
+    [
+     0.04512,
+     0.09156,
+     -0.0
+    ]
+   ],
+   "sha256": "c6848e0c9ffd6225e22ca3dedb74d86e01196f3dcac6d0b908952ba4851b458f",
+   "bounds_blender": [
+    [
+     -0.04512,
+     0.0,
+     -0.07242
+    ],
+    [
+     0.5233,
+     0.8,
+     0.09156
+    ]
+   ],
+   "tris": 360,
+   "materials": [
+    [
+     "Icarus_Body",
+     360
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "speed_brake_R": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    -0.46121,
+    4.55,
+    -0.17552
+   ],
+   "pivot_unity": [
+    0.46121,
+    -0.17552,
+    -4.55
+   ],
+   "axes_unity": {
+    "right": [
+     -0.49326,
+     -0.86988,
+     -0.0
+    ],
+    "up": [
+     0.86988,
+     -0.49326,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    0.49326,
+    0.86988,
+    -0.0
+   ]
+  },
+  "speed_brake_R_visible": {
+   "fbx": "speed_brake_R_visible.fbx",
+   "blender_parent": "speed_brake_R",
+   "pivot_blender": [
+    -0.46121,
+    4.55,
+    -0.17552
+   ],
+   "pivot_unity": [
+    0.46121,
+    -0.17552,
+    -4.55
+   ],
+   "axes_unity": {
+    "right": [
+     -0.49326,
+     -0.86988,
+     -0.0
+    ],
+    "up": [
+     0.86988,
+     -0.49326,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.5233,
+     -0.09156,
+     -0.8
+    ],
+    [
+     0.04512,
+     0.07242,
+     -0.0
+    ]
+   ],
+   "sha256": "6af0ed06f94f696c3942d14495a52464edb13962092971e99cc92c1601fe0a02",
+   "bounds_blender": [
+    [
+     -0.04512,
+     0.0,
+     -0.09156
+    ],
+    [
+     0.5233,
+     0.8,
+     0.07242
+    ]
+   ],
+   "tris": 360,
+   "materials": [
+    [
+     "Icarus_Body",
+     360
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "stabilator_L": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    7.45,
+    2.82
+   ],
+   "pivot_unity": [
+    -0.0,
+    2.82,
+    -7.45
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    -1.0,
+    0.0,
+    -0.0
+   ]
+  },
+  "stabilator_L_visible": {
+   "fbx": "stabilator_L_visible.fbx",
+   "blender_parent": "stabilator_L",
+   "pivot_blender": [
+    0.0,
+    7.45,
+    2.82
+   ],
+   "pivot_unity": [
+    -0.0,
+    2.82,
+    -7.45
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.815,
+     -0.04277,
+     -1.24
+    ],
+    [
+     -0.0,
+     0.04277,
+     0.67
+    ]
+   ],
+   "sha256": "e96e8fa7a127636be800e8a4fd225f4efbdd8209a532257ad76465c19e03f2ba",
+   "bounds_blender": [
+    [
+     0.0,
+     -0.67,
+     -0.04277
+    ],
+    [
+     1.815,
+     1.24,
+     0.04277
+    ]
+   ],
+   "tris": 272,
+   "materials": [
+    [
+     "Icarus_Body",
+     272
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "stabilator_R": {
+   "fbx": null,
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    7.45,
+    2.82
+   ],
+   "pivot_unity": [
+    -0.0,
+    2.82,
+    -7.45
+   ],
+   "axes_unity": {
+    "right": [
+     -1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "hinge_axis": "X"
+   },
+   "bounds_unity": null,
+   "hinge_axis_unity": [
+    1.0,
+    -0.0,
+    -0.0
+   ]
+  },
+  "stabilator_R_visible": {
+   "fbx": "stabilator_R_visible.fbx",
+   "blender_parent": "stabilator_R",
+   "pivot_blender": [
+    0.0,
+    7.45,
+    2.82
+   ],
+   "pivot_unity": [
+    -0.0,
+    2.82,
+    -7.45
+   ],
+   "axes_unity": {
+    "right": [
+     -1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -1.815,
+     -0.04277,
+     -1.24
+    ],
+    [
+     -0.0,
+     0.04277,
+     0.67
+    ]
+   ],
+   "sha256": "ea60ae733c4ff337f69a7a18120151ff01840abede52901463611fb0b6346123",
+   "bounds_blender": [
+    [
+     0.0,
+     -0.67,
+     -0.04277
+    ],
+    [
+     1.815,
+     1.24,
+     0.04277
+    ]
+   ],
+   "tris": 272,
+   "materials": [
+    [
+     "Icarus_Body",
+     272
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "ventral_fin": {
+   "fbx": "ventral_fin.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -0.05599,
+     -0.62,
+     -5.1
+    ],
+    [
+     0.05599,
+     -0.22,
+     -2.85
+    ]
+   ],
+   "sha256": "925d231228cb6b22e2601f2664b0fd997008f1ef981882c0c6ac035d0ca35eca",
+   "bounds_blender": [
+    [
+     -0.05599,
+     2.85,
+     -0.62
+    ],
+    [
+     0.05599,
+     5.1,
+     -0.22
+    ]
+   ],
+   "tris": 180,
+   "materials": [
+    [
+     "Icarus_Body",
+     180
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "wing_L": {
+   "fbx": "wing_L.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     -3.4,
+     -0.31924,
+     -4.05
+    ],
+    [
+     -0.58,
+     0.26853,
+     0.87176
+    ]
+   ],
+   "sha256": "3fb152e4787409e2884088d38d4f1e6380ba5117db20e35666ae47f5a4c85ffd",
+   "bounds_blender": [
+    [
+     0.58,
+     -0.87176,
+     -0.31924
+    ],
+    [
+     3.4,
+     4.05,
+     0.26853
+    ]
+   ],
+   "tris": 3164,
+   "materials": [
+    [
+     "Icarus_Body",
+     3164
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "wing_R": {
+   "fbx": "wing_R.fbx",
+   "blender_parent": null,
+   "pivot_blender": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.0,
+    -0.0
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {},
+   "bounds_unity": [
+    [
+     0.58,
+     -0.31924,
+     -4.05
+    ],
+    [
+     3.4,
+     0.26853,
+     0.87176
+    ]
+   ],
+   "sha256": "1ae15ebf351f039cd69c511b738e2c5228160b4705d87444b3dd558a4d8d7869",
+   "bounds_blender": [
+    [
+     -3.4,
+     -0.87176,
+     -0.31924
+    ],
+    [
+     -0.58,
+     4.05,
+     0.26853
+    ]
+   ],
+   "tris": 3164,
+   "materials": [
+    [
+     "Icarus_Body",
+     3164
+    ]
+   ],
+   "colliders": [],
+   "lod1": null
+  }
+ }
+}

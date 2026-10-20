@@ -699,12 +699,14 @@ def nozzle_hinge_matrix(p, kind, i, open_deg=0.0, pitch_deg=0.0, yaw_deg=0.0):
     count = n["petals"]
     phi = 2 * math.pi * i / count + (math.pi / count if kind == "seal" else 0.0)
     radial = Vector((math.cos(phi), 0.0, math.sin(phi)))
-    tangent = Vector((-math.sin(phi), 0.0, math.cos(phi)))
-    basis = Matrix((tangent, Vector((0.0, 1.0, 0.0)), radial)).transposed().to_4x4()
+    # X runs clockwise round the ring seen from behind, so X, aft and outward make a right-handed frame; a positive
+    # rotation about X closes the petal.
+    hinge_x = Vector((math.sin(phi), 0.0, -math.cos(phi)))
+    basis = Matrix((hinge_x, Vector((0.0, 1.0, 0.0)), radial)).transposed().to_4x4()
     inset = n["seal_inset"] if kind == "seal" else 0.0
     hinge_at = P(n["ring_s"], 0.0, n["z"]) + radial * (n["ring_r"] - inset)
     angle = n["dry_angle_deg"] + open_deg - pitch_deg * math.sin(phi) - yaw_deg * math.cos(phi)
-    return Matrix.Translation(hinge_at) @ basis @ Matrix.Rotation(math.radians(angle), 4, "X")
+    return Matrix.Translation(hinge_at) @ basis @ Matrix.Rotation(math.radians(-angle), 4, "X")
 
 
 def pose_nozzle(open_deg=0.0, pitch_deg=0.0, yaw_deg=0.0):
