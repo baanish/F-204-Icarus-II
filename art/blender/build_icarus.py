@@ -30,9 +30,10 @@ PARAMS = {
         (4.00, 0.585, 0.86, -0.51, 1.8),
         (4.90, 0.610, 1.00, -0.51, 1.6),
         (6.20, 0.640, 1.04, -0.51, 1.5),
-        (8.00, 0.650, 1.04, -0.48, 1.5),
-        (10.0, 0.650, 1.06, -0.42, 1.5),
-        (12.2, 0.650, 1.07, -0.39, 1.5),
+        (8.00, 0.645, 1.04, -0.48, 1.5),
+        (9.20, 0.620, 1.05, -0.45, 1.5),  # area-rule waist along the wing root: a look only, the game has no
+        (10.6, 0.600, 1.06, -0.41, 1.5),  # cross-section drag term
+        (12.2, 0.630, 1.07, -0.39, 1.5),
         (13.2, 0.640, 1.02, -0.30, 1.6),
         (14.0, 0.610, 0.94, -0.21, 1.8),  # the boat tail steepens progressively to the nozzle
         (14.6, 0.540, 0.85, -0.11, 1.9),
@@ -54,8 +55,8 @@ PARAMS = {
         (6.85, 0.955, 0.22, 0.44),
         (7.60, 0.990, 0.22, 0.44),
         (8.60, 0.990, 0.22, 0.43),
-        (10.0, 0.940, 0.22, 0.40),
-        (11.4, 0.830, 0.22, 0.35),
+        (10.0, 0.920, 0.22, 0.40),
+        (11.4, 0.800, 0.22, 0.35),
         (12.6, 0.680, 0.22, 0.26),
         (13.6, 0.090, 0.22, 0.01),  # shrinks to a point inside the body, so the fairing fades with no bulge
     ],
@@ -87,6 +88,19 @@ PARAMS = {
                      (13.30, 0.0, 1.60, 2.35), (14.68, 0.0, 2.88, 1.00)],
         "thickness": 0.05,
     },
+    # Control surfaces cut from the wing and fin: (name, span from, span to, chord fraction from, to). Span is x on
+    # the wing, z on the fin; chord fractions are of the local full chord. Each becomes a hinge empty with the
+    # surface as its _visible child.
+    "wing_surfaces": [
+        ("lef_L", 1.95, 3.28, 0.00, 0.16),  # automatic leading-edge flap, outboard of the crank
+        ("flap_L", 1.08, 2.02, 0.78, 1.00),
+        ("aileron_L", 2.08, 3.28, 0.74, 1.00),
+    ],
+    "fin_surfaces": [("rudder", 1.15, 2.55, 0.68, 1.00)],
+    "surface_gap": 0.012,  # metres between a surface and the box, spanwise and chordwise
+    "stabilator_pivot_s": 15.45,
+    # Speed brakes on the aft fuselage sides: s range and the height band of skin they cover; hinged at the front.
+    "speed_brake": {"s0": 12.55, "s1": 13.35, "z0": -0.18, "z1": 0.30},
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
     # with a small 45 degree cut at the tip's trailing corner.
     "stabilator": {
@@ -229,12 +243,6 @@ def lifting_surface(name, sections, thickness, thick_axis):
     faces.append(tuple((len(rings) - 1) * n + k for k in range(n)))
     faces.append(tuple(range(n))[::-1])
     return mesh_object(name, verts, faces)
-
-
-def mirror_x(obj):
-    obj.data.transform(Matrix.Scale(-1, 4, (1, 0, 0)))
-    obj.data.flip_normals()
-    return obj
 
 
 # --- scene plumbing ------------------------------------------------------------------------------------------------
@@ -426,15 +434,174 @@ def build_shock_cones(p, mat):
     return parts
 
 
+def section_at(sections, u, axis):
+    """Section (s_le, x, z, chord) interpolated at span position u (x on a wing, z on a fin)."""
+    key = 1 if axis == "x" else 2
+    for a, b in zip(sections, sections[1:]):
+        if a[key] <= u <= b[key] + 1e-9:
+            t = (u - a[key]) / (b[key] - a[key])
+            return tuple(a[i] + (b[i] - a[i]) * t for i in range(4))
+    raise ValueError("span position %.3f outside the sections" % u)
+
+
+def strip(name, sections, stations, thickness, axis):
+    """A closed piece of a lifting surface. stations: (u, f0, f1) along the span; each ring spans chord fractions
+    f0..f1 of the full-chord airfoil, so neighbouring pieces share one airfoil. Two stations at the same u with
+    different fractions make the wall at a cutout's end."""
+    rings = []
+    for u, f0, f1 in stations:
+        s_le, x, z, chord = section_at(sections, u, axis)
+        ts = [f0 + (f1 - f0) * 0.5 * (1 - math.cos(math.pi * i / (CHORD - 1))) for i in range(CHORD)]
+        upper, lower = [], []
+        for t in ts:
+            half = max(airfoil(t) * thickness * chord, 0.0015)
+            d = Vector((0.0, 0.0, half)) if axis == "x" else Vector((half, 0.0, 0.0))
+            base = P(s_le + t * chord, x, z)
+            upper.append(base + d)
+            lower.append(base - d)
+        rings.append(upper + lower[::-1])
+    n = len(rings[0])
+    verts = [v for r in rings for v in r]
+    faces = [(j * n + k, j * n + (k + 1) % n, (j + 1) * n + (k + 1) % n, (j + 1) * n + k)
+             for j in range(len(rings) - 1) for k in range(n)]
+    faces.append(tuple(range(n))[::-1])
+    faces.append(tuple((len(rings) - 1) * n + k for k in range(n)))
+    return mesh_object(name, verts, faces)
+
+
+def box_stations(u0, u1, cuts, gap, step=0.12):
+    """Stations for the fixed box of a surface: full chord except where a control surface is cut out."""
+    edges = sorted({u0, u1} | {c for _, a, b, _, _ in cuts for c in (a - gap / 2, b + gap / 2) if u0 < c < u1})
+
+    def chord_range(u):
+        f0, f1 = 0.0, 1.0
+        for _, a, b, c0, c1 in cuts:
+            if a - gap / 2 <= u <= b + gap / 2:
+                if c0 == 0.0:
+                    f0 = max(f0, c1 + gap / 2)
+                else:
+                    f1 = min(f1, c0 - gap / 2)
+        return f0, f1
+
+    stations = []
+    for a, b in zip(edges, edges[1:]):
+        mid = chord_range(0.5 * (a + b))
+        count = max(2, int(math.ceil((b - a) / step)) + 1)
+        stations += [(a + (b - a) * i / (count - 1),) + mid for i in range(count)]
+    return stations
+
+
+def hinge_frame(a, b):
+    """Hinge empty matrix: origin at a, X along the hinge a->b, Y as close to aft as the hinge allows.
+
+    Wing hinges run inboard to outboard, so Z is up on the left and down on the right: a positive rotation about X
+    raises a left trailing edge and lowers a right one, and droops a right leading-edge flap. The rudder's X runs
+    up the fin, so positive moves its trailing edge to the right (-X)."""
+    x_axis = (b - a).normalized()
+    y_axis = Vector((0.0, 1.0, 0.0))
+    y_axis = (y_axis - x_axis * x_axis.dot(y_axis)).normalized()
+    z_axis = x_axis.cross(y_axis)
+    return Matrix.Translation(a) @ Matrix((x_axis, y_axis, z_axis)).transposed().to_4x4()
+
+
+def hinged(name, mesh_obj, frame, parent=None):
+    """Re-express mesh_obj in the hinge frame and hang it from a new hinge empty called name."""
+    mesh_obj.name = mesh_obj.data.name = name + "_visible"  # frees the name for the hinge
+    hinge = empty(name, frame, parent)
+    hinge["hinge_axis"] = "X"
+    mesh_obj.data.transform(frame.inverted())
+    mesh_obj.parent = hinge
+    return [hinge, mesh_obj]
+
+
+def control_surface(name, sections, cut, thickness, axis, gap, mat):
+    _, u0, u1, f0, f1 = cut
+    u0, u1 = u0 + gap / 2, u1 - gap / 2
+    f0 = f0 + gap / 2 if f0 > 0 else f0
+    f1 = f1 - gap / 2 if f1 < 1 else f1
+    stations = [(u0 + (u1 - u0) * i / 8, f0, f1) for i in range(9)]
+    obj = finish(strip(name, sections, stations, thickness, axis), mat)
+    hinge_f = f1 if f0 == 0.0 else f0  # a leading-edge device hinges on its aft edge, the rest on their front edge
+    ends = []
+    for u in (u0, u1):
+        s_le, x, z, chord = section_at(sections, u, axis)
+        ends.append(P(s_le + hinge_f * chord, x, z))
+    return hinged(name, obj, hinge_frame(*ends))
+
+
+def mirror_part(parts):
+    """Right-hand twins of left-hand parts, mirrored across x = 0. A twin hinge is rebuilt from the mirrored hinge
+    line, so its X still runs inboard to outboard and its frame stays right-handed."""
+    flip = Matrix.Scale(-1, 4, (1, 0, 0))
+    out = []
+    for obj in parts:
+        if obj.type == "EMPTY":
+            a = obj.matrix_world.translation.copy()
+            b = a + obj.matrix_world.col[0].xyz
+            twin = empty(obj.name.replace("_L", "_R"), hinge_frame(flip @ a, flip @ b))
+            twin["hinge_axis"] = "X"
+            out.append(twin)
+    for obj in parts:
+        if obj.type != "MESH":
+            continue
+        twin = obj.copy()
+        twin.data = obj.data.copy()
+        twin.name = twin.data.name = obj.name.replace("_L", "_R")
+        TARGET.objects.link(twin)
+        if obj.parent is not None:
+            parent = bpy.data.objects[obj.parent.name.replace("_L", "_R")]
+            twin.data.transform(parent.matrix_world.inverted() @ flip @ obj.parent.matrix_world)
+            twin.parent = parent
+        else:
+            twin.data.transform(flip)
+        twin.data.flip_normals()
+        out.append(twin)
+    return out
+
+
 def build_surfaces(p, mat):
-    wing = finish(lifting_surface("wing_L", wing_sections(p["wing"]), p["wing"]["thickness"], "z"), mat)
-    wing_r = finish(mirror_x(lifting_surface("wing_R", wing_sections(p["wing"]), p["wing"]["thickness"], "z")), mat)
-    fin = finish(lifting_surface("fin", p["fin"]["sections"], p["fin"]["thickness"], "x"), mat)
-    ventral = finish(lifting_surface("ventral_fin", p["ventral_fin"]["sections"], p["ventral_fin"]["thickness"], "x"), mat)
+    gap = p["surface_gap"]
+    wing = wing_sections(p["wing"])
+    cuts = p["wing_surfaces"]
+    t = p["wing"]["thickness"]
+    left = [finish(strip("wing_L", wing, box_stations(wing[0][1], wing[-1][1], cuts, gap), t, "x"), mat)]
+    for cut in cuts:
+        left += control_surface(cut[0], wing, cut, t, "x", gap, mat)
+    parts = left + mirror_part(left)
+    fin, ft = p["fin"]["sections"], p["fin"]["thickness"]
+    parts.append(finish(strip("fin", fin, box_stations(fin[0][2], fin[-1][2], p["fin_surfaces"], gap), ft, "z"), mat))
+    for cut in p["fin_surfaces"]:
+        parts += control_surface(cut[0], fin, cut, ft, "z", gap, mat)
+    vf = p["ventral_fin"]
+    parts.append(finish(lifting_surface("ventral_fin", vf["sections"], vf["thickness"], "x"), mat))
     st = p["stabilator"]["sections"]
-    stab_l = finish(lifting_surface("stabilator_L", st, p["stabilator"]["thickness"], "z"), mat)
-    stab_r = finish(mirror_x(lifting_surface("stabilator_R", st, p["stabilator"]["thickness"], "z")), mat)
-    return [wing, wing_r, fin, ventral, stab_l, stab_r]
+    stab = finish(lifting_surface("stabilator_L", st, p["stabilator"]["thickness"], "z"), mat)
+    left = hinged("stabilator_L", stab, Matrix.Translation(P(p["stabilator_pivot_s"], 0.0, st[0][2])))
+    return parts + left + mirror_part(left)
+
+
+def build_speed_brakes(p, mat):
+    """Panels lifted 6 mm off the side skin, hinged on their front edge to open outward."""
+    sb = p["speed_brake"]
+    columns = []
+    for i in range(6):
+        s = sb["s0"] + (sb["s1"] - sb["s0"]) * i / 5
+        side = sorted((v for v in blended_ring(p, s) if v.x > 0.05 and sb["z0"] <= v.z <= sb["z1"]), key=lambda v: v.z)
+        columns.append([v + Vector((1.0, 0.0, 0.0)) * 0.006 for v in side])
+    n = min(len(c) for c in columns)
+    columns = [c[:n] for c in columns]
+    outer = [v for c in columns for v in c]
+    inner = [v - Vector((1.0, 0.0, 0.0)) * 0.012 for v in outer]
+    m = len(outer)
+    faces = []
+    for j in range(len(columns) - 1):
+        for k in range(n - 1):
+            a, b, c, d = j * n + k, j * n + k + 1, (j + 1) * n + k + 1, (j + 1) * n + k
+            faces += [(d, c, b, a), (a + m, b + m, c + m, d + m)]
+    obj = finish(mesh_object("speed_brake_L", outer + inner, faces), mat)
+    front = columns[0]
+    left = hinged("speed_brake_L", obj, hinge_frame(front[0], front[-1]))
+    return left + mirror_part(left)
 
 
 def ring_points(s, r, z, n=RING):
@@ -606,7 +773,9 @@ def _build(repo):
     parts += build_nozzle(p, metal, duct)
     parts += build_shock_cones(p, body)
     parts += build_surfaces(p, body)
+    parts += build_speed_brakes(p, body)
     refs = build_references(p, repo)
+    bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])
     out["parts"] = len(TARGET.objects)
     out["references"] = refs
