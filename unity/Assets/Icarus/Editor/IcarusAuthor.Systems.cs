@@ -10,83 +10,10 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The Revoker's gear is borrowed for the blockout at F-104 positions: the nose leg under the cockpit and the mains
-        // in the mid fuselage, at the F-104G's 2.74 m track. Each leg keeps its Revoker length and hangs from its gear_leg
-        // part's pivot in the bay, so the stance stands taller than an F-104's until the Icarus gear exists.
-        private const float MainTrack = 2.74f;
         // The pilot's eye sits this far under the canopy's highest point, below it.
         private const float EyeBelowCanopyTop = 0.20f;
         // TargetCam renders from 2 m out: its mounts sit 2.5 m clear of every mesh (Centurion's measured margin).
         private const float CameraClearance = 2.5f;
-
-        private static void BuildGear(Build b)
-        {
-            var lines = new List<string>();
-            void Rig(string rigName, string[] extras, string wheelName, string leg, float x)
-            {
-                var rig = b.Root.transform.Find(rigName) ?? throw new MissingReferenceException("rescued gear rig " + rigName);
-                var wheel = FindDeep(rig, wheelName);
-                var legPart = b.Parts[leg].transform;
-                var delta = new Vector3(x - wheel.position.x, legPart.position.y - rig.position.y, legPart.position.z - wheel.position.z);
-                foreach (var t in new[] { rig }.Concat(extras.Select(e => b.Root.transform.Find(e) ?? throw new MissingReferenceException("rescued " + e))))
-                {
-                    t.position += delta;
-                    t.SetParent(legPart, true);
-                    b.Placed.Add(t);
-                }
-                var gear = rig.GetComponentInChildren(GameType("LandingGear"), true);
-                var so = new SerializedObject(gear);
-                Prop(so, "attachedPart").objectReferenceValue = b.Part(leg);
-                Prop(so, "gearDoors").arraySize = 0;
-                so.ApplyModifiedPropertiesWithoutUndo();
-                lines.Add($"{gear.name} on {leg}: wheel at {wheel.position}, radius {Prop(so, "wheelRadius").floatValue}, travel {Prop(so, "suspensionTravel").floatValue}");
-            }
-            Rig("gearHinge_F", new[] { "gear_F_armTarget", "gearlight_F" }, "wheel_F", "gear_leg_N", 0f);
-            Rig("gearMount_L", new[] { "gear_armtarget_L" }, "wheel_L", "gear_leg_L", -MainTrack / 2);
-            Rig("gearMount_R", new[] { "gear_armtarget_R" }, "wheel_R", "gear_leg_R", MainTrack / 2);
-            b.Report.Add("gear: Revoker legs, doors removed; " + string.Join("; ", lines));
-        }
-
-        // The Revoker's cockpit, crew and ladder move as one so its pilot's eye lands under the Icarus canopy; the
-        // Revoker canopy rig is gone and its Canopy now ejects the Icarus canopy part.
-        private static void BuildCockpit(Build b)
-        {
-            var canopy = b.Parts["canopy"].transform;
-            var points = WorldVertices(canopy, b.Meshes["canopy"].Render);
-            var topY = points.Max(p => p.y);
-            var crown = points.Where(p => p.y > topY - 0.01f).ToArray();
-            var eye = new Vector3(0f, topY - EyeBelowCanopyTop, crown.Average(p => p.z));
-            var helmet = (Transform)GetRef(b.Aircraft, "cockpitViewPoint");
-            var delta = eye - helmet.position;
-            var cockpit = b.Parts["cockpit_cell"].transform;
-            foreach (var name in new[] { "cockpit_interior", "cockpit_interior_simple", "targetScreen", "pilot", "joystick", "throttle" })
-            {
-                var t = cockpit.Find(name) ?? throw new MissingReferenceException("cockpit_cell/" + name);
-                t.position += delta;
-                b.Placed.Add(t);
-            }
-            var ladder = b.Find("ladder");
-            ladder.position += delta;
-            b.Placed.Add(ladder);
-
-            var component = canopy.gameObject.AddComponent(GameType("Canopy"));
-            EditorUtility.CopySerialized(b.Donor.CanopyTemplate, component);
-            var so = new SerializedObject(component);
-            Prop(so, "attachedPart").objectReferenceValue = b.Part("canopy");
-            Prop(so, "ejectionTransform").objectReferenceValue = canopy;
-            Prop(so, "ejectionCollider").objectReferenceValue = canopy.GetComponent<MeshCollider>();
-            Prop(so, "canopyHinges").arraySize = 0; // no opening animation on the blockout canopy
-            SetList(Prop(so, "glassRenderers"), new Object[] { canopy.GetComponent<MeshRenderer>() });
-            so.ApplyModifiedPropertiesWithoutUndo();
-
-            var aircraft = new SerializedObject(b.Aircraft);
-            SetList(Prop(aircraft, "canopies"), new Object[] { component });
-            // Hidden in cockpit view: the internal meshes round the pilot, which the Revoker interior stands inside.
-            SetList(Prop(aircraft, "exteriorRenderers"), new[] { "cockpit_cell", "avionics_tray", "radar_tray", "gear_leg_N" }
-                .Select(n => (Object)b.Parts[n].GetComponent<MeshRenderer>()).ToArray());
-            aircraft.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add($"cockpit: eye at {eye} ({EyeBelowCanopyTop} m under the canopy crown), Revoker interior, crew and ladder moved {delta}; canopy ejects as its own part");
-        }
 
         private static void PlaceSystems(Build b)
         {
@@ -126,21 +53,44 @@ namespace Icarus.Editor
             }
             ejector.ApplyModifiedPropertiesWithoutUndo();
 
-            // Nav lights and vortices at the wing skins' tips, which carry them away when they go; wing vapour over the spars.
+            // The export's light empties on the Revoker's lights: the nav lamps on the wing skins' tips, which carry them
+            // away when they go, the gear light as the landing light on the nose leg, and the Revoker's formation-light
+            // switching on copies of the nav lamp. It has no anticollision beacon to give the two beacon empties.
             var navLights = new SerializedObject(b.Root.GetComponent(GameType("NavLights")));
+            Vector3 Lamp(Transform lamp, string empty) => b.Blockout.Local(empty)
+                - (lamp.GetComponent<MeshFilter>() is MeshFilter filter && filter.sharedMesh != null ? lamp.TransformVector(filter.sharedMesh.bounds.center) : Vector3.zero);
+            var lights = new List<string>();
             foreach (var side in new[] { "L", "R" })
             {
                 var skin = b.Parts["wing_skin_" + side].transform;
-                var vertices = WorldVertices(skin, b.Meshes["wing_skin_" + side].Render);
-                var outer = vertices.Max(v => Mathf.Abs(v.x));
-                var tip = vertices.Where(v => Mathf.Abs(v.x) > outer - 0.05f).ToArray();
-                var tipCentre = tip.Aggregate(Vector3.zero, (s, v) => s + v) / tip.Length;
                 var nav = root.Find("navlight_" + side);
                 nav.SetParent(skin, true);
-                var lamp = nav.GetComponent<MeshFilter>();
-                nav.position = new Vector3(Mathf.Sign(tipCentre.x) * outer, tipCentre.y, tipCentre.z)
-                    - (lamp != null && lamp.sharedMesh != null ? nav.TransformVector(lamp.sharedMesh.bounds.center) : Vector3.zero);
+                nav.position = Lamp(nav, "light_nav_" + side);
                 NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
+                lights.Add($"{nav.name} at light_nav_{side}");
+
+                var formation = Object.Instantiate(nav.gameObject, b.Parts["skin_mid_" + side].transform).transform;
+                formation.name = "light_formation_" + side;
+                foreach (var child in formation.Cast<Transform>().ToArray())
+                    Object.DestroyImmediate(child.gameObject);
+                formation.rotation = nav.rotation;
+                formation.position = Lamp(formation, "light_formation_" + side);
+                var entries = Prop(navLights, "navLights");
+                entries.arraySize++;
+                var entry = entries.GetArrayElementAtIndex(entries.arraySize - 1);
+                entry.FindPropertyRelative("renderer").objectReferenceValue = formation.GetComponent<Renderer>();
+                entry.FindPropertyRelative("objects").arraySize = 0;
+                entry.FindPropertyRelative("litMaterial").objectReferenceValue = b.Donor.FormationLit;
+                entry.FindPropertyRelative("part").objectReferenceValue = b.Part("skin_mid_" + side);
+                entry.FindPropertyRelative("gear").objectReferenceValue = null;
+                entry.FindPropertyRelative("controlState").intValue = b.Donor.FormationState;
+                b.Placed.Add(formation);
+                lights.Add($"{formation.name} on skin_mid_{side}");
+
+                var tipVertices = WorldVertices(skin, b.Meshes["wing_skin_" + side].Render);
+                var outer = tipVertices.Max(v => Mathf.Abs(v.x));
+                var tip = tipVertices.Where(v => Mathf.Abs(v.x) > outer - 0.05f).ToArray();
+                var tipCentre = tip.Aggregate(Vector3.zero, (s, v) => s + v) / tip.Length;
                 var vortex = root.Find("wingtipvortex_" + side);
                 vortex.SetParent(skin, true);
                 vortex.position = new Vector3(Mathf.Sign(tipCentre.x) * outer, tipCentre.y, tip.Min(v => v.z));
@@ -149,7 +99,16 @@ namespace Icarus.Editor
                 vapour.position = AreaCentroid(skin, b.Meshes["wing_skin_" + side].Render);
                 b.Placed.UnionWith(new[] { nav, vortex, vapour });
             }
+            var landingLight = root.Find("gearlight_F") ?? throw new MissingReferenceException("rescued gearlight_F");
+            landingLight.SetParent(b.Parts["gear_leg_N"].transform.Find("gear_leg_N_hinge"), true);
+            landingLight.SetPositionAndRotation(b.Blockout.Local("light_landing"), Quaternion.LookRotation(new Vector3(0f, -0.07f, 1f), Vector3.up));
+            var gearLightEntry = Enumerable.Range(0, Prop(navLights, "navLights").arraySize).Select(Prop(navLights, "navLights").GetArrayElementAtIndex)
+                .Single(e => e.FindPropertyRelative("gear").objectReferenceValue != null);
+            gearLightEntry.FindPropertyRelative("part").objectReferenceValue = b.Part("gear_leg_N");
+            b.Placed.Add(landingLight);
+            lights.Add("gearlight_F at light_landing on the nose leg");
             navLights.ApplyModifiedPropertiesWithoutUndo();
+            b.Report.Add("lights: " + string.Join("; ", lights) + "; light_beacon_top and light_beacon_belly unwired (no Revoker beacon)");
 
             // The transonic vapour cone where the wing root meets the body; the downwash under the nozzle on the Icarus
             // ground line; the scrape sparks on the belly.
@@ -295,8 +254,12 @@ namespace Icarus.Editor
             var height = slope * mainZ - mainY;
             var noseUp = Mathf.Atan(-slope) * Mathf.Rad2Deg;
 
-            var renderers = b.Root.GetComponentsInChildren<MeshRenderer>(true).Where(r => r.gameObject.layer != 3 && !b.Lod1.Contains(r)).ToArray();
+            // Measured on the Icarus meshes alone: the Revoker's afterburner flame and lamps reach well past the airframe.
+            var icarus = new HashSet<Mesh>(b.Meshes.Values.Select(m => m.Render));
+            var renderers = b.Root.GetComponentsInChildren<MeshRenderer>(true)
+                .Where(r => r.TryGetComponent<MeshFilter>(out var f) && icarus.Contains(f.sharedMesh)).ToArray();
             var bounds = renderers.Select(r => r.bounds).Aggregate((x, y) => { x.Encapsulate(y); return x; });
+            b.Size = new Vector3(bounds.size.x, bounds.max.y + height, bounds.size.z);
             var donor = new SerializedObject(Load<Object>(DonorDefinition));
             var donorNose = Prop(donor, "spawnOffset").vector3Value.z + b.Donor.NoseZ;
             var def = new SerializedObject(definition);
@@ -358,6 +321,7 @@ namespace Icarus.Editor
             var full = renderers.Except(hulls).ToArray();
             lod.SetLODs(new[] { new LOD(0.05f, full), new LOD(0.001f, hulls) });
             lod.RecalculateBounds();
+            lod.size = Mathf.Max(b.Size.x, b.Size.z);
             b.Report.Add($"LODGroup: {full.Length} renderers to 5% of the screen, {hulls.Length} LOD1 hulls to 0.1%, size {lod.size:F2} m");
         }
     }

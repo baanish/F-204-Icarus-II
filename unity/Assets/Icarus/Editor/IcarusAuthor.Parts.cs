@@ -291,6 +291,7 @@ namespace Icarus.Editor
             var name = b.Parts.ToDictionary(p => (Object)p.Value.GetComponent(aeroType), p => p.Key);
             bool Linked(string x, string y) => b.Joints.TryGetValue(x, out var a) && a.Contains(y) || b.Joints.TryGetValue(y, out var c) && c.Contains(x);
             var braces = new List<string>();
+            var blocking = new List<string>();
             for (var i = 0; i < colliders.Length; i++)
                 for (var j = i + 1; j < colliders.Length; j++)
                 {
@@ -309,10 +310,19 @@ namespace Icarus.Editor
                             throw new InvalidDataException($"{child} overlaps {other} by {depth:F3} m and can't be braced; it is the root");
                         b.Joints[child].Add(other);
                         braces.Add($"{child}->{other} ({depth:F3} m)");
+                        if (!Shelters(na) && !Shelters(nc))
+                            blocking.Add($"{na} / {nc} {depth:F3} m");
                     }
                 }
-            b.Report.Add($"braces: {braces.Count} touching pairs jointed: {string.Join(", ", braces)}");
+            b.Report.Add($"braces: {braces.Count} touching pairs jointed, {braces.Count - blocking.Count} of them a part inside a structure core or against a skin panel (intended); " +
+                $"{blocking.Count} where one part's collider would block hits on another: {string.Join(", ", blocking)}");
         }
+
+        // The structure cores (keel strips and spars) and the thin skin panels, which other parts sit inside or against by
+        // design: a hit passes through them to what is underneath.
+        private static bool Shelters(string part) => part == "fuselage_forward" || part == RootPart || part == "fuselage_aft"
+            || part.StartsWith("wing_spar_", StringComparison.Ordinal) || part == "fin_spar"
+            || part.StartsWith("skin_", StringComparison.Ordinal) || part.StartsWith("wing_skin_", StringComparison.Ordinal) || part == "fin_skin" || part == "dorsal_cover";
 
         private static int Depth(Transform t)
         {

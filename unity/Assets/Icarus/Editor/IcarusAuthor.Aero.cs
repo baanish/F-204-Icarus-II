@@ -27,17 +27,22 @@ namespace Icarus.Editor
         private const float FlapDroop = 25f, FlapSpeedDeployed = 90f, FlapSpeedRetracted = 150f;
         private const float LefDroop = 20f, LefSpeedDeployed = 100f, LefSpeedRetracted = 160f, LefAddedArea = 1.25f;
 
-        // R7's areas: 18.2 m2 of main wing (both sides, surfaces included), 3.0 of horizontal tail, 2.0 of body; the fin and
-        // rudder carry their drawn side areas.
-        private const float WingArea = 18.2f, TailArea = 3.0f, BodyArea = 2.0f;
-        // R7's 0.60 of aggregate clean dragArea, shared over the parts that meet the air.
+        // R14's areas: 20.8079 m2 of main wing, the gross planform with the root chord carried to the centreline (both sides,
+        // surfaces included), 3.0 of horizontal tail (R7's, not the drawn 5.75), 2.0 of body; the fin and rudder carry
+        // their drawn side areas.
+        private const float WingArea = 20.8079f, TailArea = 3.0f, BodyArea = 2.0f;
+        // R14's 0.55 of aggregate clean dragArea, shared over the parts that meet the air.
         private static readonly Dictionary<string, float> DragAreas = new Dictionary<string, float>
         {
-            { RootPart, 0.15f }, { "fuselage_forward", 0.12f }, { "canopy", 0.04f }, { "radome", 0.02f }, { "fuselage_aft", 0.10f },
-            { "nozzle", 0.02f }, { "intake_duct_L", 0.03f }, { "intake_duct_R", 0.03f }, { "wing_spar_L", 0.025f }, { "wing_spar_R", 0.025f },
-            { "fin_spar", 0.02f }, { "stabilator_L", 0.01f }, { "stabilator_R", 0.01f },
+            { RootPart, 0.135f }, { "fuselage_forward", 0.11f }, { "canopy", 0.04f }, { "radome", 0.02f }, { "fuselage_aft", 0.09f },
+            { "nozzle", 0.02f }, { "intake_duct_L", 0.03f }, { "intake_duct_R", 0.03f }, { "wing_spar_L", 0.02f }, { "wing_spar_R", 0.02f },
+            { "fin_spar", 0.015f }, { "stabilator_L", 0.01f }, { "stabilator_R", 0.01f },
         };
-        private const float DragAreaTotal = 0.60f;
+        private const float DragAreaTotal = 0.55f;
+        // R14: each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, for a
+        // 5% MAC static margin empty and 8.7% at 20% fuel (its neutral point 9.326 m, MAC 3.491 m).
+        private const float SparForceStation = 7.83455f;
+        private const float WingMac = 3.4911f;
 
         // Each hinged part: the part at its hinge (local X along the hinge), a hinge child at identity that turns, and the
         // _visible mesh under it. Ailerons, rudder and stabilators are ControlSurfaces on that hinge; flaps and leading-edge
@@ -273,9 +278,11 @@ namespace Icarus.Editor
             var part = b.Part(spar.name);
             Set(part, "liftNormal", lift);
             var com = ((Transform)GetRef(part, "centerOfMass")).position;
-            var centerOfLift = Quaternion.Inverse(lift.rotation) * new Vector3(0, 0, quarter.z - com.z);
+            var force = GeneratorS0 - SparForceStation - b.Blockout.Origin.z;
+            var centerOfLift = Quaternion.Inverse(lift.rotation) * new Vector3(0, 0, force - com.z);
             Set(part, "centerOfLift", centerOfLift);
-            b.Report.Add($"lift {spar.name}: quarter chord {quarter} (chord {le - te:F2} m at x {centroid.x:F2}), {quarter.z - com.z:+0.00;-0.00} m from the spar's centre of mass, dihedral {Mathf.Atan2(span.y, Mathf.Abs(span.x)) * Mathf.Rad2Deg:F1} deg");
+            b.Report.Add($"lift {spar.name}: measured quarter chord station {Station(b, quarter.z):F3} m (chord {le - te:F2} m at x {centroid.x:F2}); force at R14's station {SparForceStation} m, " +
+                $"{Station(b, quarter.z) - SparForceStation:F3} m ahead of it and {force - com.z:+0.000;-0.000} m from the spar's centre of mass; dihedral {Mathf.Atan2(span.y, Mathf.Abs(span.x)) * Mathf.Rad2Deg:F1} deg");
         }
 
         // The fin spar carries the fin's side force, in a frame along the fin skin's span.
@@ -320,16 +327,32 @@ namespace Icarus.Editor
                 var so = new SerializedObject(part);
                 var lift = (Transform)so.FindProperty("liftNormal").objectReferenceValue ?? part.transform;
                 var com = (Transform)so.FindProperty("centerOfMass").objectReferenceValue ?? part.transform;
-                var slope = so.FindProperty("airfoil").intValue == BodyAirfoil ? 2.5f : so.FindProperty("airfoil").intValue == TailAirfoil ? 4.0f : 4.4f;
+                var slope = so.FindProperty("airfoil").intValue == BodyAirfoil ? 2.5f : 4.0f; // R14: wing and tail both 4.0/rad
                 var w = so.FindProperty("wingArea").floatValue * slope * lift.up.y * lift.up.y;
                 sum += w * (com.position + lift.rotation * so.FindProperty("centerOfLift").vector3Value).z;
                 weight += w;
             }
             var np = sum / weight;
-            b.Report.Add($"balance: empty CG at {cg} (station {OriginStation(b) - cg.z:F2} m from the radome tip), neutral point estimate station {OriginStation(b) - np:F2} m, static margin {cg.z - np:F2} m");
+            // Full internal fuel: each tank's fuel at its part's centre of mass, as UnitPart.ModifyMass adds it.
+            var fuelMoment = Vector3.zero;
+            var fuel = 0f;
+            foreach (var tank in b.Tanks)
+            {
+                var kg = b.Blockout.Parts[tank].Number("fuel_kg");
+                fuelMoment += kg * ((Transform)GetRef(b.Part(tank), "centerOfMass")).position;
+                fuel += kg;
+            }
+            var full = (cg * EmptyMass + fuelMoment) / (EmptyMass + fuel);
+            var low = (cg * EmptyMass + 0.2f * fuelMoment) / (EmptyMass + 0.2f * fuel);
+            string Margin(Vector3 at) => $"{at.z - np:F3} m ({(at.z - np) / WingMac:P1} MAC)";
+            b.Report.Add($"balance: CG station {Station(b, cg.z):F3} m empty, {Station(b, low.z):F3} m at 20% fuel, {Station(b, full.z):F3} m full ({fuel:0} kg); " +
+                $"neutral point estimate station {Station(b, np):F3} m; static margin {Margin(cg)} empty, {Margin(low)} at 20% fuel, {Margin(full)} full");
         }
 
-        // Prefab z of the radome tip, the generator's station 0.
-        private static float OriginStation(Build b) => b.Meshes.Keys.Where(b.Parts.ContainsKey).Max(n => b.Parts[n].GetComponent<MeshRenderer>() is MeshRenderer r ? r.bounds.max.z : float.MinValue);
+        // The generator's station (metres aft of the radome tip, art/blender/build_icarus.py) of a prefab z: its station 0
+        // sits S0 = 8 m ahead of the Blender origin.
+        private const float GeneratorS0 = 8f;
+        private static float Station(Build b, float z) => GeneratorS0 - (z + b.Blockout.Origin.z);
+
     }
 }

@@ -260,6 +260,7 @@ namespace Icarus.Editor
                 if (Prop(aircraft, field).objectReferenceValue == null) p.Add("Aircraft." + field + " is null");
             if (GetList(Prop(aircraft, "pilots")).Any(o => o == null)) p.Add("a null pilot");
             if (GetList(Prop(aircraft, "groundEquipment")).Any(o => o == null)) p.Add("dead ground equipment");
+            if (GetList(Prop(aircraft, "exteriorRenderers")).Any(o => o == null)) p.Add("a null exterior renderer");
             var so = new SerializedObject(parameters);
             if (Prop(so, "HUDExtras").objectReferenceValue != Load<GameObject>(DonorHudExtras)) p.Add("HUDExtras isn't the afterburner-and-airbrake HUD");
             var display = (GameObject)Prop(so, "StatusDisplay").objectReferenceValue;
@@ -289,9 +290,35 @@ namespace Icarus.Editor
                 if (part == null || !part.name.StartsWith("gear_leg_", StringComparison.Ordinal) || !g.transform.IsChildOf(part.transform)) p.Add(g.name + " isn't carried by a gear_leg part");
                 foreach (var field in new[] { "bumpStop", "unsprung", "axle", "gearCollider", "gearHinge", "tireNoiseSound", "tireSkidSound" })
                     if (Prop(so, field).objectReferenceValue == null) p.Add($"{g.name}.{field} is null");
-                if (GetList(Prop(so, "wheels")).Any(w => w == null)) p.Add(g.name + " has a null wheel");
-                if (Prop(so, "gearDoors").arraySize != 0) p.Add(g.name + " still lists gear doors");
+                var wheels = GetList(Prop(so, "wheels")).Cast<Transform>().ToArray();
+                if (wheels.Length == 0 || wheels.Any(w => w == null)) p.Add(g.name + " has no wheel or a null one");
+                var hinge = Prop(so, "gearHinge").objectReferenceValue as Transform;
+                if (part == null || hinge == null || wheels.Length == 0 || wheels[0] == null)
+                    continue;
+                var leg = Legs.FirstOrDefault(l => l.Leg == part.name);
+                if (hinge.parent != part.transform || Quaternion.Angle(hinge.localRotation, Quaternion.identity) > 0.01f)
+                    p.Add(g.name + "'s gear hinge isn't at rest on its gear_leg part");
+                if (leg.Doors == null || Prop(so, "gearDoors").arraySize != leg.Doors.Length) p.Add($"{g.name} lists {Prop(so, "gearDoors").arraySize} doors");
+                // Stowing must carry the wheel up into the airframe.
+                var down = wheels[0].position;
+                hinge.localRotation = Quaternion.Euler(Prop(so, "foldDegrees").floatValue, 0, 0);
+                var up = wheels[0].position;
+                hinge.localRotation = Quaternion.identity;
+                if (up.y - down.y < 0.2f) p.Add($"{g.name} stows its wheel {up.y - down.y:F2} m higher, not up into the airframe");
             }
+            // Each leg's ground cast, castPoint down suspensionTravel, must meet no collider of the aircraft.
+            Physics.SyncTransforms();
+            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
+            foreach (var g in gears)
+            {
+                var so = new SerializedObject(g);
+                var cast = Prop(so, "castPoint").objectReferenceValue as Transform ?? ((GameObject)Prop(so, "bumpStop").objectReferenceValue).transform;
+                var travel = Prop(so, "suspensionTravel").floatValue;
+                foreach (var c in airframe)
+                    if (c.Raycast(new Ray(cast.position, -cast.up), out var hit, travel))
+                        p.Add($"{g.name}'s ground cast meets {PathOf(c.transform, b.Root.transform)} {hit.distance:F2} m down");
+            }
+            if (Mathf.Abs(b.Size.y - F104Height) > 0.5f) p.Add($"stance {b.Size.y:F2} m tall on its gear, not near the F-104G's {F104Height}");
             var filter = b.Parts["cockpit_cell"].GetComponent(GameType("ControlsFilter"));
             var noseGear = gears.OrderByDescending(g => g.transform.position.z).FirstOrDefault();
             var links = new List<Object>();
@@ -301,7 +328,7 @@ namespace Icarus.Editor
                     links.Add(it.objectReferenceValue);
             if (links.Count == 0 || links.Any(l => l != noseGear)) p.Add("ControlsFilter's nose gear link isn't the nose LandingGear");
             var contacts = Contacts(b);
-            return $"{gears.Length} Revoker legs on gear_leg parts, nose steering linked; free contacts {string.Join(", ", contacts.Select(c => c.Name + " " + c.Contact.ToString("F2")))}";
+            return $"{gears.Length} Revoker LandingGears driving the Icarus gear_leg hinges, wheels stow upward, doors listed, nose steering linked, {b.Size.y:F2} m tall at rest; free contacts {string.Join(", ", contacts.Select(c => c.Name + " " + c.Contact.ToString("F2")))}";
         }
 
         private static string CheckEscape(Build b, List<string> p)
@@ -320,6 +347,10 @@ namespace Icarus.Editor
                 var so = new SerializedObject(canopy);
                 if (Prop(so, "attachedPart").objectReferenceValue != b.Part("canopy") || Prop(so, "ejectionTransform").objectReferenceValue != b.Parts["canopy"].transform) p.Add("the Canopy doesn't eject the canopy part");
                 if (GetList(Prop(so, "glassRenderers")).Any(r => r == null)) p.Add("a null canopy glass renderer");
+                var hinges = Prop(so, "canopyHinges");
+                var hood = hinges.arraySize == 1 ? hinges.GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue as Transform : null;
+                if (hood == null || hood.parent != b.Parts["canopy"].transform || hinges.GetArrayElementAtIndex(0).FindPropertyRelative("hingeAngle").floatValue == 0)
+                    p.Add("the canopy doesn't open its hood on the canopy hinge");
             }
             if (pilots.Length == 0)
                 return "no pilot";
@@ -393,7 +424,7 @@ namespace Icarus.Editor
                 while (it.Next(true) && !SerializedProperty.EqualContents(it, end))
                     if (it.propertyType == SerializedPropertyType.ObjectReference && it.objectReferenceValue == null && it.objectReferenceInstanceIDValue != 0) p.Add("a dead vapour emitter");
             }
-            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R",
+            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "light_formation_L", "light_formation_R",
                 "flareEjectorL", "flareEjectorR", "heat_haze", "afterburner_flame", "afterburner_nozzle_glow", "gearlight_F", "ladder" };
             foreach (var name in effects)
             {

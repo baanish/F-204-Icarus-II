@@ -208,12 +208,23 @@ namespace Icarus.Editor
                 var submeshes = Enumerable.Range(0, meshes.Render.subMeshCount).Select(i =>
                     (slots: i < meshes.Materials.Length && meshes.Materials[i] != null && slotOf.TryGetValue(meshes.Materials[i], out var s) ? s : new string[0],
                      tris: (int)meshes.Render.GetSubMesh(i).indexCount / 3)).ToArray();
-                // An unnamed export slot (a Blender slot with no material) matches whatever the FBX brought.
                 bool Matches((string[] slots, int tris) sub) => part.Materials.Select((name, i) => (name, i))
-                    .Any(e => (e.name == "" || sub.slots.Contains(e.name)) && sub.tris <= part.MaterialTris[e.i] && sub.tris >= 0.97f * part.MaterialTris[e.i]);
+                    .Any(e => sub.slots.Contains(e.name) && sub.tris <= part.MaterialTris[e.i] && sub.tris >= 0.97f * part.MaterialTris[e.i]);
+                bool matched;
                 if (part.Materials.Contains(""))
+                {
+                    // An unnamed export slot (a Blender slot with no material) comes in as whatever the FBX brought, merged
+                    // into a named slot's submesh or on its own: every named slot must arrive, every submesh on a known
+                    // material, and the triangles add up.
+                    var exported = part.MaterialTris.Sum();
+                    var imported = submeshes.Sum(m => m.tris);
+                    matched = submeshes.All(m => m.slots.Length > 0) && part.Materials.Where(n => n != "").All(n => submeshes.Any(m => m.slots.Contains(n)))
+                        && imported <= exported && imported >= 0.97f * exported;
                     Debug.Log($"[Icarus] note: {part.Name} has an unnamed material slot in blockout.json; it wears {string.Join(", ", meshes.Materials.Select(m => m == null ? "none" : m.name))}");
-                if (submeshes.Length != part.Materials.Length || !submeshes.All(Matches))
+                }
+                else
+                    matched = submeshes.Length == part.Materials.Length && submeshes.All(Matches);
+                if (!matched)
                     throw new InvalidDataException($"{part.Name}: imported submeshes [{string.Join(", ", submeshes.Select(m => string.Join("/", m.slots) + " " + m.tris))}] " +
                         $"don't match its slots [{string.Join(", ", part.Materials.Zip(part.MaterialTris, (s, n) => s + " " + n))}], or a slot has no material.");
                 var dropped = part.MaterialTris.Sum() - submeshes.Sum(m => m.tris);
@@ -304,6 +315,7 @@ namespace Icarus.Editor
             public readonly HashSet<Transform> Placed = new HashSet<Transform>(); // effects and markers moved off donor offsets
             public readonly List<string> Report = new List<string>();
             public DonorCapture Donor;
+            public Vector3 Size; // span, height on the gear at rest, length of the Icarus meshes
             public readonly List<PartSpec> Specs = new List<PartSpec>(); // R13's tree, then any extra fuel cells
             public readonly Dictionary<string, float> Mass = new Dictionary<string, float>(); // dry kg per part
             public readonly List<string> Tanks = new List<string>();

@@ -29,9 +29,9 @@ INTERNALS = {
     # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds.
     "design_fuel_kg": 2400,
     "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct
-    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.30, -9.0, 9.0)},
+    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.22, -9.0, 9.0)},
     "fuel_forward_main": {"tank": (5.95, 7.70, 0.04, 0.05, -9.0, 9.0)},
-    "fuel_aft_center": {"tank": (7.75, 9.30, 0.04, -0.32, -0.24, 0.24)},
+    "fuel_aft_center": {"tank": (7.75, 9.30, 0.04, -0.22, -0.24, 0.24)},
     "fuel_aft_L": {"tank": (7.75, 9.30, 0.04, -0.15, 0.26, 0.92)},  # outboard of 0.92 is the strake cell
     "fuel_aft_R": {"tank": (7.75, 9.30, 0.04, -0.15, -0.92, -0.26)},
     "strake_tank": {"x": (1.10, 1.88), "f": (0.06, 0.70)},  # each strake: span and chord fraction, ahead of the flap
@@ -191,6 +191,7 @@ def clip_to(obj, solid):
     obj.data = baked
     baked.name = obj.name
     bpy.data.meshes.remove(old)
+    drop_degenerate(obj)
     return obj
 
 
@@ -206,6 +207,23 @@ def subtract(obj, cutters):
     obj.data = baked
     baked.name = obj.name
     bpy.data.meshes.remove(old)
+    drop_degenerate(obj)
+
+
+def drop_degenerate(obj):
+    """Booleans leave zero-area slivers and empty material slots from the cutter; drop both so the export carries
+    neither. A boolean result here is one material."""
+    keep = next((m for m in obj.data.materials if m is not None), None)
+    obj.data.materials.clear()
+    if keep is not None:
+        obj.data.materials.append(keep)
+    for poly in obj.data.polygons:
+        poly.material_index = 0
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-5, edges=bm.edges)
+    bm.to_mesh(obj.data)
+    bm.free()
 
 
 def mesh_volume(obj):

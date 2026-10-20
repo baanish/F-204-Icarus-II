@@ -28,9 +28,14 @@ namespace Icarus.Editor
             ("Icarus_Int_Avionics", new Color32(124, 180, 149, 255), 0.1f, 0.4f),
             ("Icarus_Int_Cockpit", new Color32(155, 157, 160, 255), 0.2f, 0.4f),
             ("Icarus_Int_Bay", new Color32(89, 89, 92, 255), 0f, 0.2f),
+            ("Icarus_Frame", new Color32(124, 126, 129, 255), 0.6f, 0.5f),
+            ("Icarus_Strut", new Color32(219, 220, 221, 255), 1f, 0.75f),
+            ("Icarus_Tyre", new Color32(49, 49, 49, 255), 0f, 0.1f),
         };
-        // The blockout paint (sRGB), the flat grey of the review renders.
-        private static readonly Color32 GrayboxPaint = new Color32(158, 162, 166, 255);
+        // The blockout finish (sRGB): bare steel, the generator's Icarus_Body, fully metallic at smoothness 0.68 (the metal
+        // map holds metallic in R and smoothness in A).
+        private static readonly Color32 GrayboxPaint = new Color32(196, 198, 201, 255);
+        private static readonly Color32 SteelMetal = new Color32(255, 0, 0, 173);
 
         // The skin on the stock AircraftSkin shader with flat maps the mod owns, since the Revoker's maps follow its own UVs.
         private static Material AuthorSkin()
@@ -40,7 +45,7 @@ namespace Icarus.Editor
             var skin = new Material(Load<Shader>(Stock + "Shader/Shader Graphs_AircraftSkin_PLACEHOLDER.shader")) { name = "Icarus_skin" };
             skin.SetTexture("_Basecolor", albedo);
             skin.SetTexture("_Livery", albedo);
-            skin.SetTexture("_Metallic", AuthorFlatTexture(SkinFolder + "/icarus_graybox_m.png", new Color32(0, 0, 0, 102), true, false));
+            skin.SetTexture("_Metallic", AuthorFlatTexture(SkinFolder + "/icarus_graybox_m.png", SteelMetal, true, false));
             skin.SetTexture("_Normal", AuthorFlatTexture(SkinFolder + "/icarus_graybox_n.png", flatNormal, false, true));
             skin.SetTexture("_AO", AuthorFlatTexture(SkinFolder + "/icarus_graybox_ao.png", new Color32(255, 255, 255, 255), false, false));
             skin.SetTexture("_BasecolorDmg", AuthorFlatTexture(SkinFolder + "/icarus_graybox_dmg_b.png", new Color32(210, 208, 208, 165), true, false));
@@ -115,8 +120,9 @@ namespace Icarus.Editor
         // UnitPart.SetLivery sets as _Livery; LiveryData.Colors[0] is the paint the HUD and mounts read.
         private static List<LiveryEntry> AuthorLiveries(Texture2D skinLivery)
         {
+            AssetDatabase.DeleteAsset(LiveryFolder + "/icarus_pala_blockout.asset"); // the grey blockout livery it replaced
             var data = ScriptableObject.CreateInstance(GameType("LiveryData"));
-            data.name = "icarus_pala_blockout";
+            data.name = "icarus_pala_steel";
             var so = new SerializedObject(data);
             Prop(so, "Texture").objectReferenceValue = skinLivery;
             Prop(so, "Glossiness").floatValue = 0f;
@@ -129,7 +135,7 @@ namespace Icarus.Editor
             {
                 new LiveryEntry
                 {
-                    Name = "PALA Blockout Grey",
+                    Name = "PALA Bare Steel",
                     Faction = Load<Object>(Stock + "MonoBehaviour/Primeva_PLACEHOLDER.asset"),
                     Data = SaveAsset(data, LiveryFolder + "/" + data.name + ".asset"),
                 },

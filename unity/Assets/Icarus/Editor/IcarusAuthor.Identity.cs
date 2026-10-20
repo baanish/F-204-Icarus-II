@@ -75,14 +75,15 @@ namespace Icarus.Editor
             }).ToArray();
         }
 
-        // R7's sized curves (.internal research R7, icarus_authoring.json): keys as (alpha, value, in tangent, out tangent).
+        // The sized curves (.internal research R7, re-sized by R14 to a 4.0/rad wing slope): keys as (alpha, value, in
+        // tangent, out tangent).
         // The game's alpha is the airflow angle, negative for a nose-up body, so the wing's +0.12 camber lift sits at -0.12
         // on the curve at zero alpha.
         private static readonly float[][] WingLift =
         {
-            new[] { -3.141593f, 0f, 0f, 0f }, new[] { -1.570796f, 0f, 0f, -1.399854f }, new[] { -0.785f, -1.1f, -1.399854f, 0.597895f },
-            new[] { -0.31f, -0.816f, 0.597895f, -3.022222f }, new[] { -0.22f, -1.088f, -3.022222f, 4.4f }, new[] { 0f, -0.12f, 4.4f, 4.4f },
-            new[] { 0.22f, 0.848f, 4.4f, -2.355556f }, new[] { 0.31f, 0.636f, -2.355556f, 0.976842f }, new[] { 0.785f, 1.1f, 0.976842f, -1.399854f },
+            new[] { -3.141593f, 0f, 0f, 0f }, new[] { -1.570796f, 0f, 0f, -1.399854f }, new[] { -0.785f, -1.1f, -1.399854f, 0.736842f },
+            new[] { -0.31f, -0.75f, 0.736842f, -2.777778f }, new[] { -0.22f, -1.0f, -2.777778f, 4.0f }, new[] { 0f, -0.12f, 4.0f, 4.0f },
+            new[] { 0.22f, 0.76f, 4.0f, -2.111111f }, new[] { 0.31f, 0.57f, -2.111111f, 1.115789f }, new[] { 0.785f, 1.1f, 1.115789f, -1.399854f },
             new[] { 1.570796f, 0f, -1.399854f, 0f }, new[] { 3.141593f, 0f, 0f, 0f },
         };
         private static readonly float[][] WingDrag =

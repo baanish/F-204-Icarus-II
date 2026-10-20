@@ -17,6 +17,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Icarus_Frame
+    second: {fileID: 2100000, guid: 939ac0b6f913f844bb1ee43a52d52643, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Icarus_Glass
     second: {fileID: 2100000, guid: f68282079e2a22142b2abad952ae03a9, type: 2}
   - first:
@@ -64,6 +69,16 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Icarus_Seal
     second: {fileID: 2100000, guid: ac325601913e92f45a3d7d55305755d0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Icarus_Strut
+    second: {fileID: 2100000, guid: 3e2a7fe0163fa5945954c783b219bf30, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Icarus_Tyre
+    second: {fileID: 2100000, guid: b725f89ec2cc3bc449ccf14522cf4ad7, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

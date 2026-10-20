@@ -875,7 +875,7 @@ def _build(repo):
     out["damage_parts"] = len(tree)
     out.update(hull_count)
     tagged = [o for o in TARGET.all_objects if "mass_kg" in o]
-    out["fuel_kg"] = round(sum(o.get("fuel_kg", 0.0) for o in tagged if o.get("role") == "fuel_tank"), 1)
+    out["fuel_kg"] = round(sum(o.get("fuel_kg", 0.0) for o in TARGET.all_objects), 1)  # tanks and wing spars
     out["dry_mass_kg"] = round(sum(o["mass_kg"] for o in tagged), 1)
     out["references"] = refs
     return out

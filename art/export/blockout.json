@@ -1,6 +1,6 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "b975ac0cc894bab8d50fffd0521ec82d836e842d26fd3c164d27b58702d92ce6",
+ "source_sha256": "37e7dee330703185c13e159c5ef4b297bd724dcf26d3f502209c43a10ac573cb",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
  "parts": {
   "aileron_L": {
@@ -89,7 +89,7 @@
      0.00037
     ]
    ],
-   "sha256": "e6e76b2773f6007ff78f6d7405c3600f237f066fb96e67462486a842f705db64",
+   "sha256": "bf099619b09873b7df2cf5da9717c0f2ca81a959bbe3cbc49c6c81403b09038e",
    "bounds_blender": [
     [
      -0.0053,
@@ -218,7 +218,7 @@
      0.00037
     ]
    ],
-   "sha256": "2fe4f82021678a6b68453a334bd3f56b84b585ffec8e531f799d04581b650994",
+   "sha256": "db44a0275d8b4e8563f5cd3b45831b1579d8b4cbcb70e0f1f35ce0349ec3e863",
    "bounds_blender": [
     [
      -0.0053,
@@ -307,7 +307,7 @@
      0.13
     ]
    ],
-   "sha256": "0b7fd112fb70b637368afd3d7b75194d25b9a377807d23506fac4f4787942678",
+   "sha256": "35b6606574f3903f5b51387bb9bfcf9e65d31cffd1526b67ab77542b99b47258",
    "bounds_blender": [
     [
      -0.006,
@@ -396,7 +396,7 @@
      0.11
     ]
    ],
-   "sha256": "8fa0985972a3d8def757f406f882086471f81e5f9bf4e11a8e4a5a4e0b8527c7",
+   "sha256": "6d471b2c5cf8c32a94520a011b449528f8c0447e6777adbb160550a92f95c8d5",
    "bounds_blender": [
     [
      -0.006,
@@ -485,7 +485,7 @@
      0.15
     ]
    ],
-   "sha256": "5f6238858a76d2cefd002752cbc3ac566ea20db5dbaa9cc17be76ee61ae978c0",
+   "sha256": "67bdddcaeddeb9a276134d8b775a5c711c69df74267a6a4ec4d7b46060cd824d",
    "bounds_blender": [
     [
      -0.006,
@@ -575,7 +575,7 @@
      0.1
     ]
    ],
-   "sha256": "16150df48ff9b622d5a75792ee4dd6d8789dc50cca364f3c02c3e250e72e2227",
+   "sha256": "08a46b7a5b3158e502ab208efbc02051c6bac9a24c67c1292d7ea68db25c2fc4",
    "bounds_blender": [
     [
      -0.42,
@@ -591,7 +591,7 @@
    "tris": 124,
    "materials": [
     [
-     "",
+     "Icarus_Int_Avionics",
      124
     ]
    ],
@@ -705,7 +705,7 @@
      0.47165
     ]
    ],
-   "sha256": "7b4c865c10e009607966ce2826eb8fb417a53f7d58b42590dc0aa9d88a5fe9bc",
+   "sha256": "72be4682da483484a427077c5b8be3c1202a12fd1fcd69a883a59831037ddaae",
    "bounds_blender": [
     [
      -0.0,
@@ -795,7 +795,7 @@
      1.275
     ]
    ],
-   "sha256": "3b0f4c62e5d44c375e5fb3f3df3536028dc891cc4e7f5938dccf603c2b69a046",
+   "sha256": "eaa10c826155be43bfa043bd87f9b593bd9f4ef5e3c48fed35333a2ece018d66",
    "bounds_blender": [
     [
      -0.38,
@@ -811,7 +811,7 @@
    "tris": 3238,
    "materials": [
     [
-     "",
+     "Icarus_Int_Cockpit",
      3238
     ]
    ],
@@ -884,7 +884,7 @@
      3.70136
     ]
    ],
-   "sha256": "123224c6af15be9940eaf20a2c718522f22a06d90fc6388095686ae8347d8132",
+   "sha256": "66dffe43b5c2ff85828d9798b412bf9b725c0d6543a1092a13dd4139330487c4",
    "bounds_blender": [
     [
      -0.31231,
@@ -907,30 +907,47 @@
    "colliders": [
     {
      "name": "dorsal_cover_colmesh0",
-     "verts": 76,
-     "tris": 148,
+     "verts": 19,
+     "tris": 33,
      "bounds_unity": [
       [
-       -0.29514,
+       -0.29506,
        -0.10436,
-       2.77301
+       3.70136
       ],
       [
-       0.29514,
-       0.11873,
+       0.29506,
+       0.08569,
        3.70136
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh1",
-     "verts": 86,
-     "tris": 168,
+     "verts": 67,
+     "tris": 130,
+     "bounds_unity": [
+      [
+       -0.29515,
+       -0.10055,
+       2.77301
+      ],
+      [
+       0.29515,
+       0.1162,
+       3.56874
+      ]
+     ]
+    },
+    {
+     "name": "dorsal_cover_colmesh2",
+     "verts": 76,
+     "tris": 148,
      "bounds_unity": [
       [
        -0.29411,
        -0.08076,
-       1.49781
+       1.75496
       ],
       [
        0.29411,
@@ -940,7 +957,92 @@
      ]
     },
     {
-     "name": "dorsal_cover_colmesh2",
+     "name": "dorsal_cover_colmesh3",
+     "verts": 88,
+     "tris": 172,
+     "bounds_unity": [
+      [
+       -0.29144,
+       -0.0701,
+       0.79139
+      ],
+      [
+       0.29144,
+       0.121,
+       1.66924
+      ]
+     ]
+    },
+    {
+     "name": "dorsal_cover_colmesh4",
+     "verts": 90,
+     "tris": 176,
+     "bounds_unity": [
+      [
+       -0.30951,
+       -0.07948,
+       -0.21948
+      ],
+      [
+       0.30951,
+       0.12157,
+       0.67908
+      ]
+     ]
+    },
+    {
+     "name": "dorsal_cover_colmesh5",
+     "verts": 126,
+     "tris": 248,
+     "bounds_unity": [
+      [
+       -0.29814,
+       -0.09296,
+       -1.23035
+      ],
+      [
+       0.29814,
+       0.11047,
+       -0.33179
+      ]
+     ]
+    },
+    {
+     "name": "dorsal_cover_colmesh6",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.29772,
+       -0.12205,
+       -2.24121
+      ],
+      [
+       0.29772,
+       -0.11647,
+       -1.34266
+      ]
+     ]
+    },
+    {
+     "name": "dorsal_cover_colmesh7",
+     "verts": 56,
+     "tris": 108,
+     "bounds_unity": [
+      [
+       -0.27664,
+       -0.10131,
+       -2.24121
+      ],
+      [
+       0.27664,
+       0.07481,
+       -1.34266
+      ]
+     ]
+    },
+    {
+     "name": "dorsal_cover_colmesh8",
      "verts": 54,
      "tris": 104,
      "bounds_unity": [
@@ -952,29 +1054,12 @@
       [
        0.30104,
        0.1023,
-       -2.1289
+       -2.35353
       ]
      ]
     },
     {
-     "name": "dorsal_cover_colmesh3",
-     "verts": 5,
-     "tris": 6,
-     "bounds_unity": [
-      [
-       0.29014,
-       -0.12117,
-       -2.57817
-      ],
-      [
-       0.29225,
-       -0.11296,
-       -2.1289
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh4",
+     "name": "dorsal_cover_colmesh9",
      "verts": 92,
      "tris": 180,
      "bounds_unity": [
@@ -987,142 +1072,6 @@
        0.30573,
        0.12205,
        -3.3644
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh5",
-     "verts": 95,
-     "tris": 186,
-     "bounds_unity": [
-      [
-       -0.31019,
-       -0.08095,
-       0.34212
-      ],
-      [
-       0.31019,
-       0.1216,
-       1.4121
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh6",
-     "verts": 4,
-     "tris": 4,
-     "bounds_unity": [
-      [
-       -0.31231,
-       -0.08691,
-       0.67908
-      ],
-      [
-       -0.31068,
-       -0.08249,
-       1.01603
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh7",
-     "verts": 4,
-     "tris": 4,
-     "bounds_unity": [
-      [
-       0.31068,
-       -0.08691,
-       0.67908
-      ],
-      [
-       0.31231,
-       -0.08249,
-       1.01603
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh8",
-     "verts": 116,
-     "tris": 228,
-     "bounds_unity": [
-      [
-       -0.30744,
-       -0.08646,
-       -0.89339
-      ],
-      [
-       0.30744,
-       0.12106,
-       0.2298
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh9",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       -0.30477,
-       -0.12205,
-       -2.01658
-      ],
-      [
-       -0.29032,
-       -0.11055,
-       -1.00571
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh10",
-     "verts": 56,
-     "tris": 108,
-     "bounds_unity": [
-      [
-       -0.28325,
-       -0.10131,
-       -2.01658
-      ],
-      [
-       0.28325,
-       0.08685,
-       -1.00571
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh11",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       0.29032,
-       -0.12205,
-       -2.01658
-      ],
-      [
-       0.30477,
-       -0.11055,
-       -1.00571
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh12",
-     "verts": 5,
-     "tris": 6,
-     "bounds_unity": [
-      [
-       -0.29225,
-       -0.12117,
-       -2.57817
-      ],
-      [
-       -0.29014,
-       -0.11296,
-       -2.1289
       ]
      ]
     }
@@ -1177,7 +1126,7 @@
      2.65
     ]
    ],
-   "sha256": "ad2b78f103a88b8568989b3721dd376d983e90a220c88154b170144d48c26c21",
+   "sha256": "08e389348d3b94e9e4b7578b69e8957deb10cec1136fcef1aeb661181df67133",
    "bounds_blender": [
     [
      -0.46,
@@ -1266,7 +1215,7 @@
      1.65375
     ]
    ],
-   "sha256": "d01efc0788b58611def0e16f15fa27eb6c2e81172ba150d4be3ee0d0b9e03a41",
+   "sha256": "e2bcc71b2bdc10a0a42859369c88d56b088cb6cdfaf0c0ffa1396d10346e9ca0",
    "bounds_blender": [
     [
      -0.08344,
@@ -1389,7 +1338,7 @@
      0.81962
     ]
    ],
-   "sha256": "9859bbf749398ba829aae62c85aab8ac7d2e3c29eeaabf2661e482da8c46ef6c",
+   "sha256": "40e47a2ec4222e9f4cb545f4fd6e3642683b5a58765b9e323335298cb2b22410",
    "bounds_blender": [
     [
      -0.06681,
@@ -1518,7 +1467,7 @@
      0.00333
     ]
    ],
-   "sha256": "10d0bd2515949d2d81088922c15ed993db91eb598c282682974548d3267e8187",
+   "sha256": "f925641ad94f7859edb039732bf7b259600578717ef08ee8da8da590951a0a23",
    "bounds_blender": [
     [
      -0.00848,
@@ -1647,7 +1596,7 @@
      0.00333
     ]
    ],
-   "sha256": "f9777dbcd8e8e5d72e5628119d6c86f6111167728096e0c73644ca7c4631b331",
+   "sha256": "87d9502fc0de363e1044763ca3e96994ade096112d15903d042334cfdd16fac2",
    "bounds_blender": [
     [
      -0.00848,
@@ -1726,7 +1675,7 @@
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 20,
-    "fuel_kg": 171.2
+    "fuel_kg": 178.2
    },
    "bounds_unity": [
     [
@@ -1740,7 +1689,7 @@
      0.775
     ]
    ],
-   "sha256": "0c06e9d030a28e61d8bbd142f08a5e55045f27738168721592be28d525d4b971",
+   "sha256": "227141bcdf86c9f5fe1950c80aa319659ee528fae90bc01588f144f0d06f82d3",
    "bounds_blender": [
     [
      -0.33,
@@ -1819,7 +1768,7 @@
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 20,
-    "fuel_kg": 171.1
+    "fuel_kg": 178.1
    },
    "bounds_unity": [
     [
@@ -1833,7 +1782,7 @@
      0.775
     ]
    ],
-   "sha256": "cb8b081a5236dbd511cfad5573f7631bbf34ab5fbd813c79feb15fe82defe7e1",
+   "sha256": "af8235c9609990e99c86c9eddf4106b82f18baa379ec8b9a3691a36ae0c556b8",
    "bounds_blender": [
     [
      -0.33,
@@ -1882,11 +1831,11 @@
    "pivot_blender": [
     0.0,
     0.525,
-    0.34032
+    0.39032
    ],
    "pivot_unity": [
     -0.0,
-    0.34032,
+    0.39032,
     -0.525
    ],
    "axes_unity": {
@@ -1907,66 +1856,66 @@
     ]
    },
    "props": {
-    "volume_m3": 0.645,
-    "volume_holds_kg": 515.8,
+    "volume_m3": 0.571,
+    "volume_holds_kg": 456.8,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 30,
-    "fuel_kg": 491.6
+    "fuel_kg": 453.2
    },
    "bounds_unity": [
     [
      -0.24,
-     -0.66032,
+     -0.61032,
      -0.775
     ],
     [
      0.24,
-     0.66032,
+     0.61032,
      0.775
     ]
    ],
-   "sha256": "ee1cd605c90d22214edf6425a18db989e7d2520424c3cd48196837563bf0d696",
+   "sha256": "ccd94f47ae6a0573fcf36993853a7204602691ccd2730a57806ee81de268c934",
    "bounds_blender": [
     [
      -0.24,
      -0.775,
-     -0.66032
+     -0.61032
     ],
     [
      0.24,
      0.775,
-     0.66032
+     0.61032
     ]
    ],
-   "tris": 2316,
+   "tris": 2254,
    "materials": [
     [
      "Icarus_Int_Fuel",
-     2316
+     2254
     ]
    ],
    "colliders": [
     {
      "name": "fuel_aft_center_colmesh0",
-     "verts": 58,
-     "tris": 112,
+     "verts": 51,
+     "tris": 98,
      "bounds_unity": [
       [
        -0.24,
-       -0.66032,
+       -0.61032,
        -0.775
       ],
       [
        0.24,
-       0.6597,
+       0.6097,
        0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 112
+    "tris": 98
    }
   },
   "fuel_aux": {
@@ -1975,11 +1924,11 @@
    "pivot_blender": [
     0.0,
     -2.45,
-    0.34872
+    0.38872
    ],
    "pivot_unity": [
     -0.0,
-    0.34872,
+    0.38872,
     2.45
    ],
    "axes_unity": {
@@ -2000,36 +1949,36 @@
     ]
    },
    "props": {
-    "volume_m3": 0.804,
-    "volume_holds_kg": 642.9,
+    "volume_m3": 0.754,
+    "volume_holds_kg": 603.0,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 15,
-    "fuel_kg": 612.8
+    "fuel_kg": 598.3
    },
    "bounds_unity": [
     [
-     -0.59533,
-     -0.64872,
+     -0.59571,
+     -0.60872,
      -0.35
     ],
     [
-     0.59533,
-     0.64872,
+     0.59571,
+     0.60872,
      0.35
     ]
    ],
-   "sha256": "0a621ccd4bf44228efb2737350ff395ee81a36c375c09c55ad018d65928c7e0e",
+   "sha256": "39e5291a86d26391400f0eeff2fcecaa786d9497c80ea2e4f4c97d6266530430",
    "bounds_blender": [
     [
-     -0.59533,
+     -0.59571,
      -0.35,
-     -0.64872
+     -0.60872
     ],
     [
-     0.59533,
+     0.59571,
      0.35,
-     0.64872
+     0.60872
     ]
    ],
    "tris": 1020,
@@ -2042,24 +1991,24 @@
    "colliders": [
     {
      "name": "fuel_aux_colmesh0",
-     "verts": 104,
-     "tris": 204,
+     "verts": 106,
+     "tris": 208,
      "bounds_unity": [
       [
-       -0.57864,
-       -0.64872,
+       -0.5835,
+       -0.60872,
        -0.35
       ],
       [
-       0.57864,
-       0.64872,
+       0.5835,
+       0.60872,
        0.35
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 204
+    "tris": 208
    }
   },
   "fuel_forward_main": {
@@ -2098,7 +2047,7 @@
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 35,
-    "fuel_kg": 638.0
+    "fuel_kg": 664.0
    },
    "bounds_unity": [
     [
@@ -2112,7 +2061,7 @@
      0.875
     ]
    ],
-   "sha256": "6fb71486eb035921163ed503c3dbb562ca2b618cf6817b41394ccc888075237e",
+   "sha256": "071367076ed4d36ab8e63b564bcbb83b2f8c3ce79b9d824ceaade5eb86cf03f7",
    "bounds_blender": [
     [
      -0.94828,
@@ -2153,378 +2102,6 @@
    ],
    "lod1": {
     "tris": 110
-   }
-  },
-  "fuel_strake_L": {
-   "fbx": "fuel_strake_L.fbx",
-   "blender_parent": "wing_spar_L",
-   "pivot_blender": [
-    1.49,
-    1.46803,
-    0.0538
-   ],
-   "pivot_unity": [
-    -1.49,
-    0.0538,
-    -1.46803
-   ],
-   "axes_unity": {
-    "right": [
-     1.0,
-     0.0,
-     -0.0
-    ],
-    "up": [
-     -0.0,
-     1.0,
-     -0.0
-    ],
-    "forward": [
-     -0.0,
-     0.0,
-     1.0
-    ]
-   },
-   "props": {
-    "volume_m3": 0.146,
-    "volume_holds_kg": 116.8,
-    "role": "fuel_tank",
-    "owner": "wing_L",
-    "mass_kg": 0,
-    "fuel_kg": 111.3
-   },
-   "bounds_unity": [
-    [
-     -0.39,
-     -0.12021,
-     -1.71503
-    ],
-    [
-     0.39,
-     0.12021,
-     1.71503
-    ]
-   ],
-   "sha256": "1b13935090ed221f25248e9c0c50b7f0394e48eef8e5cab8471ae8a257cc38dd",
-   "bounds_blender": [
-    [
-     -0.39,
-     -1.71503,
-     -0.12021
-    ],
-    [
-     0.39,
-     1.71503,
-     0.12021
-    ]
-   ],
-   "tris": 668,
-   "materials": [
-    [
-     "Icarus_Int_Fuel",
-     668
-    ]
-   ],
-   "colliders": [
-    {
-     "name": "fuel_strake_L_colmesh0",
-     "verts": 50,
-     "tris": 96,
-     "bounds_unity": [
-      [
-       -0.39,
-       -0.12013,
-       -1.71503
-      ],
-      [
-       0.39,
-       0.12021,
-       1.71503
-      ]
-     ]
-    }
-   ],
-   "lod1": {
-    "tris": 96
-   }
-  },
-  "fuel_strake_R": {
-   "fbx": "fuel_strake_R.fbx",
-   "blender_parent": "wing_spar_R",
-   "pivot_blender": [
-    -1.49,
-    1.46803,
-    0.0538
-   ],
-   "pivot_unity": [
-    1.49,
-    0.0538,
-    -1.46803
-   ],
-   "axes_unity": {
-    "right": [
-     1.0,
-     0.0,
-     -0.0
-    ],
-    "up": [
-     -0.0,
-     1.0,
-     -0.0
-    ],
-    "forward": [
-     -0.0,
-     0.0,
-     1.0
-    ]
-   },
-   "props": {
-    "volume_m3": 0.146,
-    "volume_holds_kg": 116.8,
-    "role": "fuel_tank",
-    "owner": "wing_R",
-    "mass_kg": 0,
-    "fuel_kg": 111.3
-   },
-   "bounds_unity": [
-    [
-     -0.39,
-     -0.12021,
-     -1.71503
-    ],
-    [
-     0.39,
-     0.12021,
-     1.71503
-    ]
-   ],
-   "sha256": "4474473c53e652d249356770bdf1b9030d2747ab68693b1cb235cfdfc50529ef",
-   "bounds_blender": [
-    [
-     -0.39,
-     -1.71503,
-     -0.12021
-    ],
-    [
-     0.39,
-     1.71503,
-     0.12021
-    ]
-   ],
-   "tris": 668,
-   "materials": [
-    [
-     "Icarus_Int_Fuel",
-     668
-    ]
-   ],
-   "colliders": [
-    {
-     "name": "fuel_strake_R_colmesh0",
-     "verts": 50,
-     "tris": 96,
-     "bounds_unity": [
-      [
-       -0.39,
-       -0.12013,
-       -1.71503
-      ],
-      [
-       0.39,
-       0.12021,
-       1.71503
-      ]
-     ]
-    }
-   ],
-   "lod1": {
-    "tris": 96
-   }
-  },
-  "fuel_wing_L": {
-   "fbx": "fuel_wing_L.fbx",
-   "blender_parent": "wing_spar_L",
-   "pivot_blender": [
-    2.5,
-    2.58801,
-    -0.13206
-   ],
-   "pivot_unity": [
-    -2.5,
-    -0.13206,
-    -2.58801
-   ],
-   "axes_unity": {
-    "right": [
-     1.0,
-     0.0,
-     -0.0
-    ],
-    "up": [
-     -0.0,
-     1.0,
-     -0.0
-    ],
-    "forward": [
-     -0.0,
-     0.0,
-     1.0
-    ]
-   },
-   "props": {
-    "volume_m3": 0.061,
-    "volume_holds_kg": 48.6,
-    "role": "fuel_tank",
-    "owner": "wing_L",
-    "mass_kg": 0,
-    "fuel_kg": 46.3
-   },
-   "bounds_unity": [
-    [
-     -0.55,
-     -0.12637,
-     -0.70218
-    ],
-    [
-     0.55,
-     0.12637,
-     0.70218
-    ]
-   ],
-   "sha256": "df013096b92b2e2a45f407062efbef857a7f6df19162840313116962e6538e6b",
-   "bounds_blender": [
-    [
-     -0.55,
-     -0.70218,
-     -0.12637
-    ],
-    [
-     0.55,
-     0.70218,
-     0.12637
-    ]
-   ],
-   "tris": 668,
-   "materials": [
-    [
-     "Icarus_Int_Fuel",
-     668
-    ]
-   ],
-   "colliders": [
-    {
-     "name": "fuel_wing_L_colmesh0",
-     "verts": 79,
-     "tris": 154,
-     "bounds_unity": [
-      [
-       -0.55,
-       -0.12633,
-       -0.70218
-      ],
-      [
-       0.55,
-       0.12637,
-       0.70218
-      ]
-     ]
-    }
-   ],
-   "lod1": {
-    "tris": 154
-   }
-  },
-  "fuel_wing_R": {
-   "fbx": "fuel_wing_R.fbx",
-   "blender_parent": "wing_spar_R",
-   "pivot_blender": [
-    -2.5,
-    2.58801,
-    -0.13206
-   ],
-   "pivot_unity": [
-    2.5,
-    -0.13206,
-    -2.58801
-   ],
-   "axes_unity": {
-    "right": [
-     1.0,
-     0.0,
-     -0.0
-    ],
-    "up": [
-     -0.0,
-     1.0,
-     -0.0
-    ],
-    "forward": [
-     -0.0,
-     0.0,
-     1.0
-    ]
-   },
-   "props": {
-    "volume_m3": 0.061,
-    "volume_holds_kg": 48.6,
-    "role": "fuel_tank",
-    "owner": "wing_R",
-    "mass_kg": 0,
-    "fuel_kg": 46.3
-   },
-   "bounds_unity": [
-    [
-     -0.55,
-     -0.12637,
-     -0.70218
-    ],
-    [
-     0.55,
-     0.12637,
-     0.70218
-    ]
-   ],
-   "sha256": "2e7bb9b7fa3955aba1f37be33f345a6bc2efde4a100aff25f44c10f4a5a0ab95",
-   "bounds_blender": [
-    [
-     -0.55,
-     -0.70218,
-     -0.12637
-    ],
-    [
-     0.55,
-     0.70218,
-     0.12637
-    ]
-   ],
-   "tris": 668,
-   "materials": [
-    [
-     "Icarus_Int_Fuel",
-     668
-    ]
-   ],
-   "colliders": [
-    {
-     "name": "fuel_wing_R_colmesh0",
-     "verts": 79,
-     "tris": 154,
-     "bounds_unity": [
-      [
-       -0.55,
-       -0.12633,
-       -0.70218
-      ],
-      [
-       0.55,
-       0.12637,
-       0.70218
-      ]
-     ]
-    }
-   ],
-   "lod1": {
-    "tris": 154
    }
   },
   "fuselage_aft": {
@@ -2573,7 +2150,7 @@
      2.0
     ]
    ],
-   "sha256": "024246f94f67ca898c25dec4495515444c4be1e703b455ed7929587f6ce85710",
+   "sha256": "90e8d732fa3c25b0e059399ebaba1539a11d920ab6d796476cbeb14e95a0e682",
    "bounds_blender": [
     [
      -0.84307,
@@ -2596,18 +2173,18 @@
    "colliders": [
     {
      "name": "fuselage_aft_colmesh0",
-     "verts": 53,
-     "tris": 102,
+     "verts": 47,
+     "tris": 90,
      "bounds_unity": [
       [
-       -0.05942,
-       -0.66981,
-       -2.0
+       -0.05356,
+       -0.67038,
+       -1.225
       ],
       [
-       0.05854,
-       0.66421,
-       2.0
+       0.05267,
+       -0.43852,
+       1.8
       ]
      ]
     }
@@ -2662,7 +2239,7 @@
      2.0
     ]
    ],
-   "sha256": "a478c61179b1674f36be0f706f5d968e7075f3a72f39207be53eaf5d86eeb5ca",
+   "sha256": "e943764bf1146aa72e2448e958946f5d9ef7358e43455fd2427ad8516654bfa2",
    "bounds_blender": [
     [
      -0.58812,
@@ -2682,24 +2259,24 @@
      8076
     ],
     [
-     "",
+     "Icarus_Int_Bay",
      952
     ]
    ],
    "colliders": [
     {
      "name": "fuselage_forward_colmesh0",
-     "verts": 68,
-     "tris": 132,
+     "verts": 73,
+     "tris": 142,
      "bounds_unity": [
       [
-       -0.05945,
+       -0.05963,
        -0.73246,
        -2.0
       ],
       [
        0.05963,
-       0.72473,
+       -0.48889,
        2.0
       ]
      ]
@@ -2755,7 +2332,7 @@
      2.775
     ]
    ],
-   "sha256": "468193c14e1a4c20e02e19b72686dd2dadad3bccf7d9d1f4342af99e80551143",
+   "sha256": "586eb504e3128810090dfb825ee041e47ac412f413b7b28fec30d029f7ff34b8",
    "bounds_blender": [
     [
      -1.04205,
@@ -2775,24 +2352,24 @@
      10380
     ],
     [
-     "",
+     "Icarus_Int_Bay",
      2736
     ]
    ],
    "colliders": [
     {
      "name": "fuselage_mid_colmesh0",
-     "verts": 40,
-     "tris": 76,
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
-       -0.05819,
-       -0.74465,
+       -0.05416,
+       -0.74522,
        -2.625
       ],
       [
-       0.05819,
-       0.73726,
+       0.05416,
+       -0.53087,
        2.775
       ]
      ]
@@ -2889,7 +2466,7 @@
      0.03332
     ]
    ],
-   "sha256": "b180a98ec496730a1a2e27dbeaa7ebdf0bf15c81a44ab77486abc721bf52f2bf",
+   "sha256": "0c263964e1dd518968200a00144aad3c6e411d0a44a7f110948f46262e9efcc5",
    "bounds_blender": [
     [
      -0.0,
@@ -3019,7 +2596,7 @@
      0.03332
     ]
    ],
-   "sha256": "86399d19cf83e8987044b43637c22d9fe1c36692d0710d2e93af9e7aa5ced546",
+   "sha256": "aa20c78259a6c9a987c5fc3d9cb202560a04fc60921d686f2b02ed939f5e3081",
    "bounds_blender": [
     [
      -0.00132,
@@ -3149,7 +2726,7 @@
      0.20718
     ]
    ],
-   "sha256": "d00349aa3a8d3d0430c84eceae1e832de1803865f201b881a37b9c4fbe431f95",
+   "sha256": "5b6ccff3d9773a682983ab84b8185eaa7780434d886d29be2a3db81af68abf68",
    "bounds_blender": [
     [
      -0.01152,
@@ -3279,7 +2856,7 @@
      0.20718
     ]
    ],
-   "sha256": "57ce71259aea59598c94fb6ba881b67caa4207488d624beab78fd8e5b2ad6910",
+   "sha256": "c43206e27da15062e069e85ec17d19d9aecca946122fcb46d29ed2bcbe9dc5e5",
    "bounds_blender": [
     [
      0.0,
@@ -3409,7 +2986,7 @@
      0.8981
     ]
    ],
-   "sha256": "40de61bea2b4eb0cba2cf32d749f7c8f19751da00a9714aa1b78491a371da971",
+   "sha256": "d8f5c213544abf37ba2a5b9f4fea6d97a9eeae7b436451d281a0cc63da270dcc",
    "bounds_blender": [
     [
      -0.12785,
@@ -3539,7 +3116,7 @@
      0.03263
     ]
    ],
-   "sha256": "2b5f5bdd2669f8e0bb0d6207c9ba9f16b50a16a7c69db8718d0af9306f7c063d",
+   "sha256": "b5b8163b8179e788d92ec77f841ed8d2e6cfbb02457230f2c7c40b896956bf7b",
    "bounds_blender": [
     [
      -0.03498,
@@ -3669,7 +3246,7 @@
      0.89803
     ]
    ],
-   "sha256": "05f4807719a739e44e215c7624fb48ed031323261dff17d721483110857bb388",
+   "sha256": "d01169e99a4c4cbb83c53bb4c8e5113e0aaaad7dcb0698bde48b80a1d9f8a98a",
    "bounds_blender": [
     [
      -0.04979,
@@ -3796,7 +3373,7 @@
      0.33973
     ]
    ],
-   "sha256": "a7a57efff1846f22f2258419620fcfb8963ae1ed989aee97f5142d514d33f3e9",
+   "sha256": "a3756e9da1148cb7de0a86b8a004a04b31b42109274dfcccc3c56ceb9da18028",
    "bounds_blender": [
     [
      -0.32509,
@@ -3923,7 +3500,7 @@
      0.23937
     ]
    ],
-   "sha256": "4dede5aa3a0590bcfe8ebdd1f50166815870458e1e92fe1a4c44bbc365c44a3e",
+   "sha256": "fdc969c93a9c3204ba454a7ce98245163ffbc1796a9afd2f9978c6e05a048299",
    "bounds_blender": [
     [
      -0.23937,
@@ -4050,7 +3627,7 @@
      0.33973
     ]
    ],
-   "sha256": "7c7e9a16048336fea8a10e5706bf52d4b2accaec3607d076bf2d07e1943170fb",
+   "sha256": "1aa2d80e3536c857b46d4e27dd4c791ce5bbd48ad4f5842d6ed141d54b5c20d0",
    "bounds_blender": [
     [
      -0.32509,
@@ -4139,7 +3716,7 @@
      1.725
     ]
    ],
-   "sha256": "6c5b1c23578c564337c0bcc9ced8a45b8be971201a7c02c8573cae0097880c3d",
+   "sha256": "4c63e84724878ac0e61472fac2c3e64234d165be5fca0bd0bf478ae01a41b6bb",
    "bounds_blender": [
     [
      -0.4505,
@@ -4166,18 +3743,137 @@
    "colliders": [
     {
      "name": "intake_duct_L_colmesh0",
-     "verts": 32,
-     "tris": 60,
+     "verts": 97,
+     "tris": 190,
+     "bounds_unity": [
+      [
+       -0.19544,
+       -0.06823,
+       1.35
+      ],
+      [
+       -0.06356,
+       0.06365,
+       1.725
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh1",
+     "verts": 112,
+     "tris": 220,
      "bounds_unity": [
       [
        -0.4505,
-       -0.33658,
+       -0.38829,
+       0.875
+      ],
+      [
+       0.3215,
+       0.38371,
+       1.225
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh2",
+     "verts": 49,
+     "tris": 94,
+     "bounds_unity": [
+      [
+       -0.43925,
+       -0.37839,
+       0.467
+      ],
+      [
+       0.33415,
+       0.37144,
+       0.875
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh3",
+     "verts": 96,
+     "tris": 188,
+     "bounds_unity": [
+      [
+       -0.40576,
+       -0.36197,
+       0.10167
+      ],
+      [
+       0.34948,
+       0.38761,
+       0.28433
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh4",
+     "verts": 129,
+     "tris": 254,
+     "bounds_unity": [
+      [
+       -0.37417,
+       -0.34292,
+       -0.44633
+      ],
+      [
+       0.37438,
+       0.38829,
+       -0.081
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh5",
+     "verts": 105,
+     "tris": 206,
+     "bounds_unity": [
+      [
+       -0.32744,
+       -0.31364,
+       -0.81167
+      ],
+      [
+       0.39415,
+       0.38818,
+       -0.44633
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh6",
+     "verts": 96,
+     "tris": 188,
+     "bounds_unity": [
+      [
+       -0.25019,
+       -0.26695,
+       -1.177
+      ],
+      [
+       0.41551,
+       0.38771,
+       -0.99433
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_L_colmesh7",
+     "verts": 125,
+     "tris": 246,
+     "bounds_unity": [
+      [
+       -0.20009,
+       -0.23948,
        -1.725
       ],
       [
-       0.3005,
-       0.34752,
-       1.725
+       0.4505,
+       0.38771,
+       -1.35967
       ]
      ]
     }
@@ -4232,7 +3928,7 @@
      1.725
     ]
    ],
-   "sha256": "70ca31ac5f6cc24ff2837d8babf89e155d2c1095228ef0f8c80a57d026378fda",
+   "sha256": "a938bd71e8f034c4a624c16894c485b69ab234c193952a4430b84ee2fc30963e",
    "bounds_blender": [
     [
      -0.4505,
@@ -4259,18 +3955,137 @@
    "colliders": [
     {
      "name": "intake_duct_R_colmesh0",
-     "verts": 32,
-     "tris": 60,
+     "verts": 97,
+     "tris": 190,
      "bounds_unity": [
       [
-       -0.3005,
-       -0.33658,
-       -1.725
+       0.06356,
+       -0.06823,
+       1.35
+      ],
+      [
+       0.19544,
+       0.06365,
+       1.725
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh1",
+     "verts": 112,
+     "tris": 220,
+     "bounds_unity": [
+      [
+       -0.3215,
+       -0.38829,
+       0.875
       ],
       [
        0.4505,
-       0.34752,
-       1.725
+       0.38371,
+       1.225
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh2",
+     "verts": 49,
+     "tris": 94,
+     "bounds_unity": [
+      [
+       -0.33415,
+       -0.37839,
+       0.467
+      ],
+      [
+       0.43925,
+       0.37144,
+       0.875
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh3",
+     "verts": 96,
+     "tris": 188,
+     "bounds_unity": [
+      [
+       -0.34948,
+       -0.36197,
+       0.10167
+      ],
+      [
+       0.40576,
+       0.38761,
+       0.28433
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh4",
+     "verts": 129,
+     "tris": 254,
+     "bounds_unity": [
+      [
+       -0.37438,
+       -0.34292,
+       -0.44633
+      ],
+      [
+       0.37417,
+       0.38829,
+       -0.081
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh5",
+     "verts": 105,
+     "tris": 206,
+     "bounds_unity": [
+      [
+       -0.39415,
+       -0.31364,
+       -0.81167
+      ],
+      [
+       0.32744,
+       0.38818,
+       -0.44633
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh6",
+     "verts": 96,
+     "tris": 188,
+     "bounds_unity": [
+      [
+       -0.41551,
+       -0.26695,
+       -1.177
+      ],
+      [
+       0.25019,
+       0.38771,
+       -0.99433
+      ]
+     ]
+    },
+    {
+     "name": "intake_duct_R_colmesh7",
+     "verts": 125,
+     "tris": 246,
+     "bounds_unity": [
+      [
+       -0.4505,
+       -0.23948,
+       -1.725
+      ],
+      [
+       0.20009,
+       0.38771,
+       -1.35967
       ]
      ]
     }
@@ -4365,7 +4180,7 @@
      0.33515
     ]
    ],
-   "sha256": "5ed0ecf27297bea15762149b8094e89094aba8a80b4920a883c0b333afb91334",
+   "sha256": "ce22985ee9d04591697dbac45cd67ee78753e99f3852ded0d849079c3f6bf134",
    "bounds_blender": [
     [
      -0.1832,
@@ -4494,7 +4309,7 @@
      0.33515
     ]
    ],
-   "sha256": "3b997461a71690c8a0f9f6dbdd51eafe45d0eb9688b36d1645466d1396966fbe",
+   "sha256": "daacfb63db411c60366a11cc9dd09f5bae0881fa08071b9bfc160d64e1507137",
    "bounds_blender": [
     [
      -0.1832,
@@ -4849,7 +4664,7 @@
      0.15
     ]
    ],
-   "sha256": "25ae0c95b7e4f3a454aea14d56e6915634d9d667d6549902bcb60cef403477bb",
+   "sha256": "ca5b21ce7db98d9c5a5d85fe73f360d3f2a54998985292c5f12d1baad2642991",
    "bounds_blender": [
     [
      -0.385,
@@ -4979,7 +4794,7 @@
      -0.0
     ]
    ],
-   "sha256": "b11429e7f219b6eac8ee7051e976f64bc8bfebfb69bbc44338e747b278bf0819",
+   "sha256": "8bd61954a272e18261ca46be44e9f43850891640b210bfa609538f1085f52d0a",
    "bounds_blender": [
     [
      -0.0705,
@@ -5085,7 +4900,7 @@
      -0.0
     ]
    ],
-   "sha256": "10623212d954c575c4882f9586101601dda4af8c205f1f6477beaa9336bc1557",
+   "sha256": "0d3316be327a3b4ea6d033e1f3c5fcaa532608b18f30e09c07b16cb2088e1d5b",
    "bounds_blender": [
     [
      -0.0705,
@@ -5191,7 +5006,7 @@
      -0.0
     ]
    ],
-   "sha256": "65b374774ebd6bdc2c4aa8c8e108bce3409671b2ba63d8f2dc0da0f78052f023",
+   "sha256": "e3c5ef069ec4d3133eed7175bb9a1bca3568d3a3931dbd09ea8d03034791a023",
    "bounds_blender": [
     [
      -0.0705,
@@ -5297,7 +5112,7 @@
      -0.0
     ]
    ],
-   "sha256": "fe73a79ab30a835977e7c4316c283f40566b56feb4da5cdc8fe2d7c91b87ee1b",
+   "sha256": "3a7ce78e54bb950f7b7f8bca237dcc3b2998d1cd12253f3289aa9aa69d094db4",
    "bounds_blender": [
     [
      -0.0705,
@@ -5403,7 +5218,7 @@
      -0.0
     ]
    ],
-   "sha256": "768ea7335e98571e6f1915351356909f622837d2602c66adf7f0682f7d048966",
+   "sha256": "466d59af50f4061eff265647f188beb3075bd15f7f45421261f107334522aa7c",
    "bounds_blender": [
     [
      -0.0705,
@@ -5509,7 +5324,7 @@
      -0.0
     ]
    ],
-   "sha256": "3c612f160899ac8735c0b4dfdf181f5a7de879c8a8540650523e04ed67bfe1a2",
+   "sha256": "6b33717e77a6cec348d6ac04855e42c898079fdcebd5b5e7f3cb148319c797f4",
    "bounds_blender": [
     [
      -0.0705,
@@ -5615,7 +5430,7 @@
      -0.0
     ]
    ],
-   "sha256": "fab592020013fbbb115ad34115e937f8c99e438a514a0171569323c5ba680772",
+   "sha256": "26ee965cdf0d5604ecdc8b00c277f7f6fb0bf21fafd71f733809b007723b20da",
    "bounds_blender": [
     [
      -0.0705,
@@ -5721,7 +5536,7 @@
      -0.0
     ]
    ],
-   "sha256": "5361f15d156e349d70ccc4770d6d35315bcae559988a64550c504bf813eff048",
+   "sha256": "bdb8b4a4c2cfcfaa406a3a1a870273496825a0ba8574351cccc708a7bfb8e5d7",
    "bounds_blender": [
     [
      -0.0705,
@@ -5827,7 +5642,7 @@
      -0.0
     ]
    ],
-   "sha256": "63810bd8e1809e9e4a64f1e131972661d0182064fca81f166631a196e3b0b335",
+   "sha256": "ef90c2330ae5b092bab94dfbcbf16e8954641bba918f4de65c94f3b537934cbd",
    "bounds_blender": [
     [
      -0.0705,
@@ -5933,7 +5748,7 @@
      -0.0
     ]
    ],
-   "sha256": "8f94c1cde809559c1e481953286c4a0f3b3e1ba1d79ce20e5b5e25e5718dd8ab",
+   "sha256": "59708e7b5d988176d92e10c44dfd8781fd03cb2df13a0afaaf4d27e46081cb76",
    "bounds_blender": [
     [
      -0.0705,
@@ -6039,7 +5854,7 @@
      -0.0
     ]
    ],
-   "sha256": "434a2735872c9100bb0f2c5c070dc24f8e2eda23e42d9057215dce747d234c9a",
+   "sha256": "d91c04b8863b2bd705779e785b39d7bccba25ce3c1f88bbe79777efb9e305925",
    "bounds_blender": [
     [
      -0.0705,
@@ -6145,7 +5960,7 @@
      -0.0
     ]
    ],
-   "sha256": "ed1d8a352fc0885764cf1e18eebfd78ccd9dde560bfa1963056b64a0ae18f0fc",
+   "sha256": "d23f55f4d3e7e532ac3fc6b3adfb369a38fdb84395dee095bdb2ec534bb08dc0",
    "bounds_blender": [
     [
      -0.0705,
@@ -6251,7 +6066,7 @@
      -0.0
     ]
    ],
-   "sha256": "3d58ebe3b486446e02af549cddc915e9c5d4a00b1619a4742408cdca867a387a",
+   "sha256": "589b6a2a4a6d6a129348a86483a4a81c6672f7c194c6c00a0e5364470ce51863",
    "bounds_blender": [
     [
      -0.0705,
@@ -6357,7 +6172,7 @@
      -0.0
     ]
    ],
-   "sha256": "e12c10fd17932603d747ada6e8cb289caf7e60ce1ba89bde2855bc7e2f9d46d2",
+   "sha256": "85e9bcda1fafd991cf03ea4dbc01f06da71295360320a1b0a620ba56f8336445",
    "bounds_blender": [
     [
      -0.0705,
@@ -6463,7 +6278,7 @@
      -0.0
     ]
    ],
-   "sha256": "9b9f949ca7cceae902fc32f2d07cacfac3e5eabdcdcacce47bfd47bf7b60d020",
+   "sha256": "4ca9cb4b00c513f62112694589f23c57db7abf7b9c387c9cf64cf188551413d8",
    "bounds_blender": [
     [
      -0.0705,
@@ -6569,7 +6384,7 @@
      -0.0
     ]
    ],
-   "sha256": "bd095aecfe82ea96ed1278a16db97e0d63ff7d910e2dae207648a871aaaeb0d7",
+   "sha256": "fdde57d6ce72a4a3c931b84ef1c01b3a51c449ed3270d000035e7c63767c4f71",
    "bounds_blender": [
     [
      -0.0705,
@@ -6675,7 +6490,7 @@
      -0.0
     ]
    ],
-   "sha256": "867d75a42ed6a9e4051621ca39373daf00c5bd90603348f02b3501ae60215c98",
+   "sha256": "cf99d5bd6a294452ebbdb7ec19b9d13e1b890fea43375a94f7ce3ef4eb899c43",
    "bounds_blender": [
     [
      -0.04935,
@@ -6781,7 +6596,7 @@
      -0.0
     ]
    ],
-   "sha256": "533e45972cc9798e570bc2f55e16713eedf058bdf13074ba2a69d22ee0a0fdfd",
+   "sha256": "e6e16163bcff1cdc4b68c68f6f74802552048ed1d5a95daa814626ec949ee16a",
    "bounds_blender": [
     [
      -0.04935,
@@ -6887,7 +6702,7 @@
      -0.0
     ]
    ],
-   "sha256": "5714f4a1a9b8d3dfa20781efb435c099d05c35eb3cc691e07fde4d5fd286086e",
+   "sha256": "80b72eb93038ac7e2436ab2f61d000217985765175a09702c9f5f260230c7d87",
    "bounds_blender": [
     [
      -0.04935,
@@ -6993,7 +6808,7 @@
      -0.0
     ]
    ],
-   "sha256": "fc293835cd6620e082935307476a4ffbd35a482616cc015f689b7caa016fa263",
+   "sha256": "7fc0f5d3551115fba6314c882f80784068db1a2adbdc1a8626e57e2165d388a6",
    "bounds_blender": [
     [
      -0.04935,
@@ -7099,7 +6914,7 @@
      -0.0
     ]
    ],
-   "sha256": "f8ac87a0c1079a633f392cd992b94dfba2c648e5066f8230784d5e1f5a5d3785",
+   "sha256": "695b97a8fe5268b62b92cd962658d177c7fece56bb4959f572945a2528de3e2e",
    "bounds_blender": [
     [
      -0.04935,
@@ -7205,7 +7020,7 @@
      -0.0
     ]
    ],
-   "sha256": "77d5f8f6578956afa6f63bdd4e8226c26b2f5e5607e7433b084b343773bce894",
+   "sha256": "36781f2c701e8003d50203d9ca62a00863579692b0587ca46f25a39d8e9f4ff4",
    "bounds_blender": [
     [
      -0.04935,
@@ -7311,7 +7126,7 @@
      -0.0
     ]
    ],
-   "sha256": "48e0322628e793d6577a86e7de181fdf36a3b42321ae18d64ec33892861ee468",
+   "sha256": "fbd39be19a2ca2ef0d4065e68d3387e53556df54fd8e14a37f3c2568b1f466ee",
    "bounds_blender": [
     [
      -0.04935,
@@ -7417,7 +7232,7 @@
      -0.0
     ]
    ],
-   "sha256": "007248cb9a27f76dc06bcad1641cc94f2d35bdfda63bc49c9f0daca38c88b9a7",
+   "sha256": "4d445b73a4818006de0feab78642d779a9ef3dd65705532e23d5bea48889dcde",
    "bounds_blender": [
     [
      -0.04935,
@@ -7523,7 +7338,7 @@
      -0.0
     ]
    ],
-   "sha256": "7d2a197ffd2c48f497febd5d99fc6c219d4b534e6cd86ed10b7dec51872b6130",
+   "sha256": "777c020f0d83137c6635e57f24bd9b340b6313cc58a8e849690ccc507ceda1ed",
    "bounds_blender": [
     [
      -0.04935,
@@ -7629,7 +7444,7 @@
      -0.0
     ]
    ],
-   "sha256": "8611a4646664dcfaeb2a949a9d39e231646c0c28b4a4f638ed1dfefbe9d7e3bd",
+   "sha256": "f9cb1914001ad5cc79cf680d3d4410fb8adcdb7b2d1530cb2dd26a84e24704fb",
    "bounds_blender": [
     [
      -0.04935,
@@ -7735,7 +7550,7 @@
      -0.0
     ]
    ],
-   "sha256": "9d3237a0eab80c331e48d67d76aa1481fe23c9a25b52ebbb9326ff62772cb176",
+   "sha256": "b029a45a30eb543b7fb82695e712e90b71402bb114dec499b394514bc472df74",
    "bounds_blender": [
     [
      -0.04935,
@@ -7841,7 +7656,7 @@
      -0.0
     ]
    ],
-   "sha256": "1267f75ff10718b86c9fc65c1365fadaeb45ad5de0a1008f9850c75ec59c9409",
+   "sha256": "d15fdb596a7884e470345cbf0f7296883668ada59a98d0526bf8ff614ad902ba",
    "bounds_blender": [
     [
      -0.04935,
@@ -7947,7 +7762,7 @@
      -0.0
     ]
    ],
-   "sha256": "8f7aa95e3c7d719b1f95aa4155e0d1ef17089b7279e65526cc3ac8670ee0d05d",
+   "sha256": "fd693b3e6dcc6d24938d770f8e43c3712a2e10d34d5cc58ba4139ebcd92c1c07",
    "bounds_blender": [
     [
      -0.04935,
@@ -8053,7 +7868,7 @@
      -0.0
     ]
    ],
-   "sha256": "e7229b9da31d2931cebaec8ed2fc411fed1fd7347b83f6afabec12b73f9864b1",
+   "sha256": "8538fc8b6a6a49fdb40dbfe73a5e6c23150837d9969b90c068522c5c857230c1",
    "bounds_blender": [
     [
      -0.04935,
@@ -8159,7 +7974,7 @@
      -0.0
     ]
    ],
-   "sha256": "699742896fcd7c9f7d91ba76b7118107cbb0228c23d194fb43ba7cb8c9c0bbf3",
+   "sha256": "372d9284e2e01df7e184a6c3688f1ccc453f25f25b0c0cdc9333edccaca5e403",
    "bounds_blender": [
     [
      -0.04935,
@@ -8265,7 +8080,7 @@
      -0.0
     ]
    ],
-   "sha256": "c20733e549f15d07bcc7147a755342953b0000384d19f816dfaf45258a637ec9",
+   "sha256": "0a8c0e3e0ccc77eb76dfab6c0d070fbb411ee55376d7e08f8b04bb0391123c22",
    "bounds_blender": [
     [
      -0.04935,
@@ -8367,7 +8182,7 @@
      0.675
     ]
    ],
-   "sha256": "0607d278a828e2cdbbbf49ec868213cf25e0ece7cccf6daa07933d7ee8c546c6",
+   "sha256": "c942d4979143328d32e0a1c588e5ac469ab754912716de93c7f2553c3ef10234",
    "bounds_blender": [
     [
      -0.3,
@@ -8383,7 +8198,7 @@
    "tris": 1690,
    "materials": [
     [
-     "",
+     "Icarus_Int_Avionics",
      1690
     ]
    ],
@@ -8456,7 +8271,7 @@
      1.38792
     ]
    ],
-   "sha256": "15719e8dfb0bc3fadac58a248f09291a3ad64e5e03ee44cf29b91a827a1e33d2",
+   "sha256": "2957ae4b5fc72775f95a5bbc0680b1c89aa09ecbd40a3f6c1f2b2fa6fa75f479",
    "bounds_blender": [
     [
      -0.35123,
@@ -8483,18 +8298,239 @@
    "colliders": [
     {
      "name": "radome_colmesh0",
-     "verts": 21,
-     "tris": 38,
+     "verts": 103,
+     "tris": 202,
      "bounds_unity": [
       [
-       -0.3509,
-       -0.41435,
+       -0.11826,
+       -0.16864,
+       -0.12572
+      ],
+      [
+       0.11815,
+       0.04713,
+       0.19604
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh1",
+     "verts": 73,
+     "tris": 142,
+     "bounds_unity": [
+      [
+       -0.21441,
+       -0.13045,
+       -0.53655
+      ],
+      [
+       0.21424,
+       0.17561,
+       -0.31313
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh2",
+     "verts": 14,
+     "tris": 23,
+     "bounds_unity": [
+      [
+       -0.28306,
+       0.21961,
        -1.38792
       ],
       [
-       0.35105,
-       0.41384,
-       1.36792
+       0.28306,
+       0.31247,
+       -1.38792
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh3",
+     "verts": 12,
+     "tris": 19,
+     "bounds_unity": [
+      [
+       -0.20308,
+       0.32666,
+       -1.38792
+      ],
+      [
+       0.20308,
+       0.38573,
+       -1.38792
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh4",
+     "verts": 11,
+     "tris": 17,
+     "bounds_unity": [
+      [
+       -0.10148,
+       0.39429,
+       -1.38792
+      ],
+      [
+       0.10148,
+       0.41468,
+       -1.38792
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh5",
+     "verts": 44,
+     "tris": 84,
+     "bounds_unity": [
+      [
+       -0.035,
+       -0.09463,
+       0.31792
+      ],
+      [
+       0.035,
+       -0.02702,
+       0.61792
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh6",
+     "verts": 69,
+     "tris": 134,
+     "bounds_unity": [
+      [
+       -0.19432,
+       -0.27132,
+       -0.53655
+      ],
+      [
+       0.19809,
+       0.1764,
+       -0.31313
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh7",
+     "verts": 88,
+     "tris": 172,
+     "bounds_unity": [
+      [
+       -0.30759,
+       -0.22775,
+       -1.07789
+      ],
+      [
+       0.30759,
+       0.06409,
+       -0.79272
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh8",
+     "verts": 54,
+     "tris": 104,
+     "bounds_unity": [
+      [
+       -0.29591,
+       0.04522,
+       -1.07789
+      ],
+      [
+       0.29591,
+       0.20607,
+       -0.79272
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh9",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       -0.21577,
+       0.21252,
+       -1.07789
+      ],
+      [
+       0.21577,
+       0.28595,
+       -0.79272
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh10",
+     "verts": 16,
+     "tris": 28,
+     "bounds_unity": [
+      [
+       -0.13013,
+       0.2454,
+       -1.07789
+      ],
+      [
+       0.13013,
+       0.32236,
+       -0.79272
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh11",
+     "verts": 92,
+     "tris": 180,
+     "bounds_unity": [
+      [
+       -0.25196,
+       -0.36978,
+       -1.07789
+      ],
+      [
+       0.25196,
+       -0.19179,
+       -0.79272
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh12",
+     "verts": 38,
+     "tris": 71,
+     "bounds_unity": [
+      [
+       -0.35123,
+       -0.26491,
+       -1.38792
+      ],
+      [
+       0.35123,
+       -0.00203,
+       -1.38792
+      ]
+     ]
+    },
+    {
+     "name": "radome_colmesh13",
+     "verts": 26,
+     "tris": 47,
+     "bounds_unity": [
+      [
+       -0.34666,
+       0.0134,
+       -1.38792
+      ],
+      [
+       0.34666,
+       0.20354,
+       -1.38792
       ]
      ]
     }
@@ -8589,7 +8625,7 @@
      -0.0
     ]
    ],
-   "sha256": "de2636247d5586c7b2e2d6d84e9375bcf23fa49543d13e2db8c2180613f200da",
+   "sha256": "0b997027b15c32406632623853ad78aa22464c29c6739716eedf03b0b1588dda",
    "bounds_blender": [
     [
      0.0,
@@ -8678,7 +8714,7 @@
      2.0779
     ]
    ],
-   "sha256": "96c10e20108ae1b41bba3549b1e722a39a722c2f7c562381120a86c01c345530",
+   "sha256": "b93c3323a06964036159f823f06de64a99bfeb213b4274a416c55524f345589f",
    "bounds_blender": [
     [
      -0.44922,
@@ -8701,16 +8737,16 @@
    "colliders": [
     {
      "name": "skin_aft_L_colmesh0",
-     "verts": 55,
-     "tris": 106,
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
        -0.44922,
-       -0.6032,
+       -0.39733,
        1.17935
       ],
       [
-       0.12578,
+       -0.18118,
        -0.05361,
        2.0779
       ]
@@ -8718,12 +8754,199 @@
     },
     {
      "name": "skin_aft_L_colmesh1",
-     "verts": 33,
-     "tris": 62,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
        -0.3748,
        -0.02575,
+       1.17935
+      ],
+      [
+       -0.07648,
+       0.2487,
+       2.0779
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh2",
+     "verts": 106,
+     "tris": 208,
+     "bounds_unity": [
+      [
+       0.1309,
+       -0.70145,
+       0.16848
+      ],
+      [
+       0.42236,
+       -0.5901,
+       1.06703
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh3",
+     "verts": 111,
+     "tris": 218,
+     "bounds_unity": [
+      [
+       -0.15915,
+       -0.60498,
+       0.16848
+      ],
+      [
+       0.1301,
+       -0.37342,
+       1.06703
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh4",
+     "verts": 105,
+     "tris": 206,
+     "bounds_unity": [
+      [
+       -0.1947,
+       -0.03956,
+       -0.84239
+      ],
+      [
+       -0.08986,
+       0.27474,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh5",
+     "verts": 115,
+     "tris": 226,
+     "bounds_unity": [
+      [
+       -0.0957,
+       0.27774,
+       -0.84239
+      ],
+      [
+       0.12785,
+       0.52147,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh6",
+     "verts": 124,
+     "tris": 244,
+     "bounds_unity": [
+      [
+       0.1258,
+       0.50472,
+       -0.84239
+      ],
+      [
+       0.44922,
+       0.68608,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh7",
+     "verts": 9,
+     "tris": 13,
+     "bounds_unity": [
+      [
+       0.44922,
+       -0.65187,
+       -0.84239
+      ],
+      [
+       0.44922,
+       -0.5551,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh8",
+     "verts": 91,
+     "tris": 178,
+     "bounds_unity": [
+      [
+       0.15392,
+       -0.65126,
+       -0.84239
+      ],
+      [
+       0.42253,
+       -0.49776,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh9",
+     "verts": 93,
+     "tris": 182,
+     "bounds_unity": [
+      [
+       -0.09428,
+       -0.56619,
+       -0.84239
+      ],
+      [
+       0.16662,
+       -0.3277,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh10",
+     "verts": 64,
+     "tris": 124,
+     "bounds_unity": [
+      [
+       -0.19533,
+       -0.34584,
+       -0.84239
+      ],
+      [
+       -0.03634,
+       -0.04048,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh11",
+     "verts": 112,
+     "tris": 220,
+     "bounds_unity": [
+      [
+       -0.15558,
+       -0.03961,
+       -1.85326
+      ],
+      [
+       0.01588,
+       0.26771,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh12",
+     "verts": 66,
+     "tris": 128,
+     "bounds_unity": [
+      [
+       -0.05958,
+       0.25843,
        1.17935
       ],
       [
@@ -8734,184 +8957,269 @@
      ]
     },
     {
-     "name": "skin_aft_L_colmesh2",
-     "verts": 108,
-     "tris": 212,
+     "name": "skin_aft_L_colmesh13",
+     "verts": 122,
+     "tris": 240,
      "bounds_unity": [
       [
-       0.15461,
-       -0.63094,
-       -1.17935
+       -0.08286,
+       0.207,
+       -1.85326
+      ],
+      [
+       0.19255,
+       0.48837,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh14",
+     "verts": 117,
+     "tris": 230,
+     "bounds_unity": [
+      [
+       0.14466,
+       0.38702,
+       -1.85326
       ],
       [
        0.44922,
-       -0.45843,
-       -0.16848
+       0.58993,
+       -0.95471
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh3",
-     "verts": 113,
-     "tris": 222,
+     "name": "skin_aft_L_colmesh15",
+     "verts": 57,
+     "tris": 110,
      "bounds_unity": [
       [
-       -0.18639,
-       -0.54546,
-       -1.17935
+       0.21777,
+       -0.53882,
+       -1.85326
       ],
       [
-       0.18038,
-       -0.04098,
-       -0.16848
+       0.42931,
+       -0.3488,
+       -0.95471
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh4",
-     "verts": 105,
-     "tris": 206,
+     "name": "skin_aft_L_colmesh16",
+     "verts": 72,
+     "tris": 140,
      "bounds_unity": [
       [
-       -0.11841,
+       -0.01408,
+       -0.48273,
+       -1.85326
+      ],
+      [
+       0.25633,
+       -0.23547,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh17",
+     "verts": 96,
+     "tris": 188,
+     "bounds_unity": [
+      [
+       -0.14124,
+       -0.30277,
+       -1.85326
+      ],
+      [
+       0.09958,
+       -0.04186,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh18",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       0.02446,
        -0.03809,
        -2.0779
       ],
       [
-       0.2118,
-       0.45398,
-       -1.29167
+       0.08274,
+       0.18002,
+       -1.96558
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh5",
-     "verts": 54,
-     "tris": 104,
+     "name": "skin_aft_L_colmesh19",
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       0.15796,
+       0.05631,
+       0.1789,
+       -2.0779
+      ],
+      [
+       0.2118,
+       0.3651,
+       -1.96558
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh20",
+     "verts": 30,
+     "tris": 56,
+     "bounds_unity": [
+      [
+       0.22527,
        0.34913,
        -2.0779
       ],
       [
        0.44922,
-       0.53984,
-       -1.29167
+       0.43024,
+       -1.96558
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh6",
-     "verts": 29,
-     "tris": 54,
+     "name": "skin_aft_L_colmesh21",
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       0.232,
-       -0.483,
-       -2.0779
-      ],
-      [
-       0.44922,
-       -0.33065,
-       -1.29167
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_L_colmesh7",
-     "verts": 100,
-     "tris": 196,
-     "bounds_unity": [
-      [
-       -0.09907,
-       -0.42982,
+       0.13605,
+       -0.33113,
        -2.0779
       ],
       [
        0.2844,
-       -0.04186,
-       -1.29167
+       -0.22103,
+       -1.96558
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh8",
-     "verts": 37,
-     "tris": 70,
+     "name": "skin_aft_L_colmesh22",
+     "verts": 22,
+     "tris": 40,
+     "bounds_unity": [
+      [
+       0.03893,
+       -0.21919,
+       -2.0779
+      ],
+      [
+       0.13981,
+       -0.05475,
+       -1.96558
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh23",
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
        0.12745,
-       -0.69757,
+       -0.69699,
        1.17935
       ],
       [
-       0.44922,
+       0.42364,
        -0.59626,
        2.0779
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh9",
-     "verts": 6,
-     "tris": 8,
+     "name": "skin_aft_L_colmesh24",
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       0.14818,
-       0.46907,
+       -0.16641,
+       -0.6032,
        1.17935
       ],
       [
-       0.15583,
-       0.49209,
-       1.74094
+       0.12578,
+       -0.40291,
+       2.0779
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh10",
-     "verts": 104,
-     "tris": 204,
+     "name": "skin_aft_L_colmesh25",
+     "verts": 93,
+     "tris": 182,
      "bounds_unity": [
       [
        -0.29832,
-       -0.60479,
-       -0.05616
+       -0.38798,
+       0.16848
       ],
       [
-       0.1301,
+       -0.11749,
        -0.04048,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh11",
-     "verts": 76,
-     "tris": 148,
+     "name": "skin_aft_L_colmesh26",
+     "verts": 50,
+     "tris": 96,
      "bounds_unity": [
       [
        -0.27939,
        -0.03412,
-       -0.05616
+       0.16848
       ],
       [
-       0.12591,
-       0.51831,
+       -0.07326,
+       0.26147,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh12",
-     "verts": 103,
-     "tris": 202,
+     "name": "skin_aft_L_colmesh27",
+     "verts": 45,
+     "tris": 86,
+     "bounds_unity": [
+      [
+       -0.07825,
+       0.26725,
+       0.16848
+      ],
+      [
+       0.12591,
+       0.51538,
+       1.06703
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh28",
+     "verts": 77,
+     "tris": 150,
      "bounds_unity": [
       [
        0.12826,
        0.49755,
-       -0.05616
+       0.16848
       ],
       [
        0.44922,
@@ -8921,53 +9229,19 @@
      ]
     },
     {
-     "name": "skin_aft_L_colmesh13",
-     "verts": 69,
-     "tris": 134,
+     "name": "skin_aft_L_colmesh29",
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
-       0.1309,
+       0.44922,
        -0.70205,
-       -0.05616
+       0.16848
       ],
       [
        0.44922,
-       -0.56918,
+       -0.66233,
        1.06703
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_L_colmesh14",
-     "verts": 127,
-     "tris": 250,
-     "bounds_unity": [
-      [
-       -0.18881,
-       -0.03961,
-       -1.17935
-      ],
-      [
-       0.12728,
-       0.50911,
-       -0.16848
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_L_colmesh15",
-     "verts": 72,
-     "tris": 140,
-     "bounds_unity": [
-      [
-       0.14264,
-       0.48446,
-       -1.17935
-      ],
-      [
-       0.44922,
-       0.67282,
-       -0.16848
       ]
      ]
     }
@@ -9022,7 +9296,7 @@
      2.0779
     ]
    ],
-   "sha256": "cd75f6bae563b19ed6b05942d460f6429c2fe6b3510fe07d05b0d620588de5c2",
+   "sha256": "eecfc92cd16affe0328aaede7de2fbeacce817e166c0e95e402b9662e68dc4cb",
    "bounds_blender": [
     [
      -0.44981,
@@ -9045,16 +9319,16 @@
    "colliders": [
     {
      "name": "skin_aft_R_colmesh0",
-     "verts": 33,
-     "tris": 62,
+     "verts": 66,
+     "tris": 128,
      "bounds_unity": [
       [
        -0.15915,
-       -0.02575,
+       0.25843,
        1.17935
       ],
       [
-       0.37421,
+       0.059,
        0.47074,
        2.0779
       ]
@@ -9062,12 +9336,199 @@
     },
     {
      "name": "skin_aft_R_colmesh1",
-     "verts": 54,
-     "tris": 104,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -0.12637,
-       -0.6032,
+       0.07589,
+       -0.02575,
+       1.17935
+      ],
+      [
+       0.37421,
+       0.2487,
+       2.0779
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh2",
+     "verts": 106,
+     "tris": 208,
+     "bounds_unity": [
+      [
+       -0.42295,
+       -0.70145,
+       0.16848
+      ],
+      [
+       -0.13149,
+       -0.5901,
+       1.06703
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh3",
+     "verts": 9,
+     "tris": 13,
+     "bounds_unity": [
+      [
+       -0.44981,
+       -0.70205,
+       0.16848
+      ],
+      [
+       -0.44981,
+       -0.66233,
+       1.06703
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh4",
+     "verts": 124,
+     "tris": 244,
+     "bounds_unity": [
+      [
+       -0.44981,
+       0.50472,
+       -0.84239
+      ],
+      [
+       -0.12638,
+       0.68608,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh5",
+     "verts": 115,
+     "tris": 226,
+     "bounds_unity": [
+      [
+       -0.12843,
+       0.27774,
+       -0.84239
+      ],
+      [
+       0.09511,
+       0.52147,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh6",
+     "verts": 105,
+     "tris": 206,
+     "bounds_unity": [
+      [
+       0.08927,
+       -0.03956,
+       -0.84239
+      ],
+      [
+       0.19412,
+       0.27474,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh7",
+     "verts": 64,
+     "tris": 124,
+     "bounds_unity": [
+      [
+       0.03575,
+       -0.34584,
+       -0.84239
+      ],
+      [
+       0.19474,
+       -0.04048,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh8",
+     "verts": 93,
+     "tris": 182,
+     "bounds_unity": [
+      [
+       -0.1672,
+       -0.56619,
+       -0.84239
+      ],
+      [
+       0.09369,
+       -0.3277,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh9",
+     "verts": 91,
+     "tris": 178,
+     "bounds_unity": [
+      [
+       -0.42311,
+       -0.65126,
+       -0.84239
+      ],
+      [
+       -0.1545,
+       -0.49776,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh10",
+     "verts": 9,
+     "tris": 13,
+     "bounds_unity": [
+      [
+       -0.44981,
+       -0.65187,
+       -0.84239
+      ],
+      [
+       -0.44981,
+       -0.5551,
+       0.05616
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh11",
+     "verts": 117,
+     "tris": 230,
+     "bounds_unity": [
+      [
+       -0.44981,
+       0.38702,
+       -1.85326
+      ],
+      [
+       -0.14525,
+       0.58993,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh12",
+     "verts": 33,
+     "tris": 62,
+     "bounds_unity": [
+      [
+       0.18059,
+       -0.39733,
        1.17935
       ],
       [
@@ -9078,43 +9539,94 @@
      ]
     },
     {
-     "name": "skin_aft_R_colmesh2",
-     "verts": 113,
-     "tris": 222,
+     "name": "skin_aft_R_colmesh13",
+     "verts": 122,
+     "tris": 240,
      "bounds_unity": [
       [
-       -0.20374,
-       -0.54546,
-       -1.17935
+       -0.19314,
+       0.207,
+       -1.85326
       ],
       [
-       0.1858,
-       -0.04098,
-       -0.16848
+       0.08227,
+       0.48837,
+       -0.95471
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh3",
-     "verts": 108,
-     "tris": 212,
+     "name": "skin_aft_R_colmesh14",
+     "verts": 112,
+     "tris": 220,
      "bounds_unity": [
       [
-       -0.44981,
-       -0.63094,
-       -1.17935
+       -0.01647,
+       -0.03961,
+       -1.85326
       ],
       [
-       -0.1552,
-       -0.45843,
-       -0.16848
+       0.15499,
+       0.26771,
+       -0.95471
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh4",
-     "verts": 54,
-     "tris": 104,
+     "name": "skin_aft_R_colmesh15",
+     "verts": 96,
+     "tris": 188,
+     "bounds_unity": [
+      [
+       -0.10016,
+       -0.30277,
+       -1.85326
+      ],
+      [
+       0.14066,
+       -0.04186,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh16",
+     "verts": 72,
+     "tris": 140,
+     "bounds_unity": [
+      [
+       -0.25691,
+       -0.48273,
+       -1.85326
+      ],
+      [
+       0.0135,
+       -0.23547,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh17",
+     "verts": 57,
+     "tris": 110,
+     "bounds_unity": [
+      [
+       -0.4299,
+       -0.53882,
+       -1.85326
+      ],
+      [
+       -0.21836,
+       -0.3488,
+       -0.95471
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh18",
+     "verts": 30,
+     "tris": 56,
      "bounds_unity": [
       [
        -0.44981,
@@ -9122,71 +9634,105 @@
        -2.0779
       ],
       [
-       -0.15855,
-       0.53984,
-       -1.29167
+       -0.22586,
+       0.43024,
+       -1.96558
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh5",
-     "verts": 104,
-     "tris": 204,
+     "name": "skin_aft_R_colmesh19",
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       -0.21097,
+       -0.21239,
+       0.1789,
+       -2.0779
+      ],
+      [
+       -0.05689,
+       0.3651,
+       -1.96558
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh20",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       -0.08333,
        -0.03809,
        -2.0779
       ],
       [
-       0.11782,
-       0.45398,
-       -1.29167
+       -0.02504,
+       0.18002,
+       -1.96558
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh6",
-     "verts": 100,
-     "tris": 196,
+     "name": "skin_aft_R_colmesh21",
+     "verts": 22,
+     "tris": 40,
+     "bounds_unity": [
+      [
+       -0.1404,
+       -0.21919,
+       -2.0779
+      ],
+      [
+       -0.03951,
+       -0.05475,
+       -1.96558
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh22",
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
        -0.28499,
-       -0.42982,
+       -0.33113,
        -2.0779
       ],
       [
-       0.09848,
-       -0.04186,
-       -1.29167
+       -0.13664,
+       -0.22103,
+       -1.96558
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh7",
-     "verts": 29,
-     "tris": 54,
+     "name": "skin_aft_R_colmesh23",
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       -0.44981,
-       -0.483,
-       -2.0779
+       -0.12637,
+       -0.6032,
+       1.17935
       ],
       [
-       -0.23259,
-       -0.33065,
-       -1.29167
+       0.16582,
+       -0.40291,
+       2.0779
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh8",
-     "verts": 37,
-     "tris": 70,
+     "name": "skin_aft_R_colmesh24",
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -0.44981,
-       -0.69757,
+       -0.42423,
+       -0.69699,
        1.17935
       ],
       [
@@ -9197,31 +9743,14 @@
      ]
     },
     {
-     "name": "skin_aft_R_colmesh9",
-     "verts": 6,
-     "tris": 8,
-     "bounds_unity": [
-      [
-       -0.15642,
-       0.46907,
-       1.17935
-      ],
-      [
-       -0.14877,
-       0.49209,
-       1.74094
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_R_colmesh10",
-     "verts": 103,
-     "tris": 202,
+     "name": "skin_aft_R_colmesh25",
+     "verts": 77,
+     "tris": 150,
      "bounds_unity": [
       [
        -0.44981,
        0.49755,
-       -0.05616
+       0.16848
       ],
       [
        -0.12885,
@@ -9231,31 +9760,48 @@
      ]
     },
     {
-     "name": "skin_aft_R_colmesh11",
-     "verts": 76,
-     "tris": 148,
+     "name": "skin_aft_R_colmesh26",
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
        -0.1265,
-       -0.03412,
-       -0.05616
+       0.26725,
+       0.16848
       ],
       [
-       0.27881,
-       0.51831,
+       0.07767,
+       0.51538,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh12",
-     "verts": 104,
-     "tris": 204,
+     "name": "skin_aft_R_colmesh27",
+     "verts": 50,
+     "tris": 96,
      "bounds_unity": [
       [
-       -0.1302,
-       -0.60479,
-       -0.05616
+       0.07268,
+       -0.03412,
+       0.16848
+      ],
+      [
+       0.27881,
+       0.26147,
+       1.06703
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh28",
+     "verts": 93,
+     "tris": 182,
+     "bounds_unity": [
+      [
+       0.1169,
+       -0.38798,
+       0.16848
       ],
       [
        0.29773,
@@ -9265,53 +9811,19 @@
      ]
     },
     {
-     "name": "skin_aft_R_colmesh13",
-     "verts": 68,
-     "tris": 132,
+     "name": "skin_aft_R_colmesh29",
+     "verts": 111,
+     "tris": 218,
      "bounds_unity": [
       [
-       -0.44981,
-       -0.70205,
-       -0.05616
+       -0.13069,
+       -0.60498,
+       0.16848
       ],
       [
-       -0.13149,
-       -0.58151,
+       0.15857,
+       -0.37342,
        1.06703
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_R_colmesh14",
-     "verts": 72,
-     "tris": 140,
-     "bounds_unity": [
-      [
-       -0.44981,
-       0.48446,
-       -1.17935
-      ],
-      [
-       -0.12638,
-       0.67282,
-       -0.16848
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_R_colmesh15",
-     "verts": 127,
-     "tris": 250,
-     "bounds_unity": [
-      [
-       -0.14696,
-       -0.03213,
-       -1.17935
-      ],
-      [
-       0.18762,
-       0.52147,
-       -0.16848
       ]
      ]
     }
@@ -9366,7 +9878,7 @@
      2.02329
     ]
    ],
-   "sha256": "aba0cf87b7f0fd63de7aba90a2a8dafc9c825e9d3f16a7043e723b892145e419",
+   "sha256": "5a3244c0cd4d40a8fa4dea2a168aa9734ad8f3850c96ece76cf2733d772e7f60",
    "bounds_blender": [
     [
      -0.3151,
@@ -9389,93 +9901,501 @@
    "colliders": [
     {
      "name": "skin_forward_L_colmesh0",
-     "verts": 93,
-     "tris": 182,
+     "verts": 37,
+     "tris": 70,
      "bounds_unity": [
       [
-       -0.11599,
-       -0.48974,
-       1.34707
+       -0.07739,
+       -0.45713,
+       1.69294
       ],
       [
        0.02739,
-       0.04702,
+       -0.15855,
        2.02329
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh1",
-     "verts": 43,
-     "tris": 82,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       -0.0697,
-       0.0568,
-       1.34707
+       -0.07567,
+       -0.16675,
+       1.69294
       ],
       [
-       0.19474,
-       0.33498,
+       0.02373,
+       0.04702,
        2.02329
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh2",
-     "verts": 36,
-     "tris": 68,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       0.04745,
-       0.47948,
-       -1.09495
+       0.16498,
+       0.34761,
+       1.34707
       ],
       [
        0.3151,
-       0.73668,
-       -0.03398
+       0.38502,
+       1.34707
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh3",
-     "verts": 95,
-     "tris": 186,
+     "verts": 19,
+     "tris": 33,
      "bounds_unity": [
       [
-       -0.07027,
-       -0.74666,
-       -1.09495
+       -0.00273,
+       -0.64332,
+       1.34707
       ],
       [
-       0.3151,
-       -0.61487,
-       -0.03398
+       0.2963,
+       -0.50388,
+       1.34707
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh4",
-     "verts": 103,
-     "tris": 202,
+     "verts": 13,
+     "tris": 21,
      "bounds_unity": [
       [
-       -0.3151,
-       -0.61488,
-       -2.02329
+       -0.15132,
+       -0.2055,
+       0.99073
       ],
       [
-       -0.07631,
-       0.05137,
-       -1.22757
+       -0.11419,
+       0.04235,
+       0.99073
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh5",
-     "verts": 102,
-     "tris": 200,
+     "verts": 8,
+     "tris": 11,
+     "bounds_unity": [
+      [
+       0.1314,
+       0.37713,
+       0.99073
+      ],
+      [
+       0.3151,
+       0.42836,
+       0.99073
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh6",
+     "verts": 18,
+     "tris": 31,
+     "bounds_unity": [
+      [
+       -0.01471,
+       -0.67148,
+       0.99073
+      ],
+      [
+       0.29476,
+       -0.53531,
+       0.99073
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh7",
+     "verts": 17,
+     "tris": 29,
+     "bounds_unity": [
+      [
+       -0.15088,
+       -0.52061,
+       0.99073
+      ],
+      [
+       -0.02878,
+       -0.22584,
+       0.99073
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh8",
+     "verts": 36,
+     "tris": 68,
+     "bounds_unity": [
+      [
+       -0.22386,
+       -0.23913,
+       0.23126
+      ],
+      [
+       -0.15097,
+       0.04687,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh9",
+     "verts": 38,
+     "tris": 72,
+     "bounds_unity": [
+      [
+       -0.18418,
+       0.05405,
+       0.23126
+      ],
+      [
+       -0.05851,
+       0.27327,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh10",
+     "verts": 33,
+     "tris": 62,
+     "bounds_unity": [
+      [
+       -0.08261,
+       0.26978,
+       0.23126
+      ],
+      [
+       0.09592,
+       0.45146,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh11",
+     "verts": 28,
+     "tris": 52,
+     "bounds_unity": [
+      [
+       0.10798,
+       0.41983,
+       0.23126
+      ],
+      [
+       0.3151,
+       0.52689,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh12",
+     "verts": 15,
+     "tris": 26,
+     "bounds_unity": [
+      [
+       -0.02154,
+       0.0631,
+       1.69294
+      ],
+      [
+       0.09806,
+       0.19186,
+       2.02329
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh13",
+     "verts": 38,
+     "tris": 72,
+     "bounds_unity": [
+      [
+       -0.04901,
+       -0.72766,
+       0.23126
+      ],
+      [
+       0.29329,
+       -0.56598,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh14",
+     "verts": 35,
+     "tris": 66,
+     "bounds_unity": [
+      [
+       -0.21925,
+       -0.57031,
+       0.23126
+      ],
+      [
+       -0.03845,
+       -0.24092,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh15",
+     "verts": 53,
+     "tris": 102,
+     "bounds_unity": [
+      [
+       -0.26653,
+       -0.27616,
+       -0.29922
+      ],
+      [
+       -0.20803,
+       0.05127,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh16",
+     "verts": 40,
+     "tris": 76,
+     "bounds_unity": [
+      [
+       -0.22402,
+       0.0544,
+       -0.29922
+      ],
+      [
+       -0.10486,
+       0.29995,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh17",
+     "verts": 32,
+     "tris": 60,
+     "bounds_unity": [
+      [
+       -0.10414,
+       0.29552,
+       -0.29922
+      ],
+      [
+       0.05251,
+       0.48598,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh18",
+     "verts": 29,
+     "tris": 54,
+     "bounds_unity": [
+      [
+       0.0671,
+       0.46571,
+       -0.29922
+      ],
+      [
+       0.3151,
+       0.60214,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh19",
+     "verts": 53,
+     "tris": 102,
+     "bounds_unity": [
+      [
+       -0.05876,
+       -0.74613,
+       -0.29922
+      ],
+      [
+       0.29104,
+       -0.59317,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh20",
+     "verts": 62,
+     "tris": 120,
+     "bounds_unity": [
+      [
+       -0.25274,
+       -0.60398,
+       -0.29922
+      ],
+      [
+       -0.06548,
+       -0.27923,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh21",
+     "verts": 71,
+     "tris": 138,
+     "bounds_unity": [
+      [
+       -0.29722,
+       -0.28509,
+       -1.36019
+      ],
+      [
+       -0.24285,
+       0.05226,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh22",
+     "verts": 74,
+     "tris": 144,
+     "bounds_unity": [
+      [
+       -0.25886,
+       0.05596,
+       -1.36019
+      ],
+      [
+       -0.13863,
+       0.32166,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh23",
+     "verts": 12,
+     "tris": 20,
+     "bounds_unity": [
+      [
+       0.06839,
+       0.17014,
+       1.69294
+      ],
+      [
+       0.19474,
+       0.28444,
+       2.02329
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh24",
+     "verts": 70,
+     "tris": 136,
+     "bounds_unity": [
+      [
+       -0.13687,
+       0.30874,
+       -1.36019
+      ],
+      [
+       0.03812,
+       0.55712,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh25",
+     "verts": 58,
+     "tris": 112,
+     "bounds_unity": [
+      [
+       0.02004,
+       0.5198,
+       -1.36019
+      ],
+      [
+       0.3151,
+       0.75734,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh26",
+     "verts": 53,
+     "tris": 102,
+     "bounds_unity": [
+      [
+       -0.07027,
+       -0.7366,
+       -1.36019
+      ],
+      [
+       0.1575,
+       -0.61708,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh27",
+     "verts": 80,
+     "tris": 156,
+     "bounds_unity": [
+      [
+       -0.27635,
+       -0.61634,
+       -1.36019
+      ],
+      [
+       -0.07231,
+       -0.28757,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh28",
+     "verts": 61,
+     "tris": 118,
+     "bounds_unity": [
+      [
+       -0.3151,
+       -0.29275,
+       -2.02329
+      ],
+      [
+       -0.26847,
+       0.05137,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh29",
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
        -0.27745,
@@ -9483,179 +10403,162 @@
        -2.02329
       ],
       [
-       -0.00379,
-       0.55673,
-       -1.22757
+       -0.16603,
+       0.31552,
+       -1.49281
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh6",
-     "verts": 25,
-     "tris": 46,
+     "name": "skin_forward_L_colmesh30",
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
-       0.01995,
-       0.56324,
+       -0.15351,
+       0.32571,
        -2.02329
       ],
       [
-       0.3151,
-       0.75734,
-       -1.22757
+       -0.00379,
+       0.55673,
+       -1.49281
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh7",
-     "verts": 53,
-     "tris": 102,
+     "name": "skin_forward_L_colmesh31",
+     "verts": 56,
+     "tris": 108,
      "bounds_unity": [
       [
        -0.06854,
-       -0.75734,
+       -0.75676,
        -2.02329
       ],
       [
-       0.3151,
+       0.28824,
        -0.62712,
-       -1.22757
+       -1.49281
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh8",
-     "verts": 20,
-     "tris": 36,
+     "name": "skin_forward_L_colmesh32",
+     "verts": 64,
+     "tris": 124,
      "bounds_unity": [
       [
-       0.16498,
+       -0.28692,
+       -0.61325,
+       -2.02329
+      ],
+      [
+       -0.08079,
+       -0.2954,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh33",
+     "verts": 13,
+     "tris": 22,
+     "bounds_unity": [
+      [
+       0.17726,
        0.23777,
-       1.34707
+       1.69294
       ],
       [
        0.3151,
-       0.38502,
+       0.33122,
        2.02329
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh9",
-     "verts": 63,
-     "tris": 122,
+     "name": "skin_forward_L_colmesh34",
+     "verts": 41,
+     "tris": 78,
      "bounds_unity": [
       [
-       -0.00273,
-       -0.64373,
-       1.34707
+       0.01443,
+       -0.61031,
+       1.69294
       ],
       [
-       0.3151,
+       0.29978,
        -0.43378,
        2.02329
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh10",
-     "verts": 77,
-     "tris": 150,
+     "name": "skin_forward_L_colmesh35",
+     "verts": 17,
+     "tris": 29,
      "bounds_unity": [
       [
-       -0.23654,
-       -0.57653,
-       0.09864
+       -0.11599,
+       -0.48974,
+       1.34707
       ],
       [
-       -0.02878,
-       0.04687,
-       0.99073
+       -0.01513,
+       -0.21264,
+       1.34707
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh11",
-     "verts": 90,
-     "tris": 176,
+     "name": "skin_forward_L_colmesh36",
+     "verts": 13,
+     "tris": 21,
      "bounds_unity": [
       [
-       -0.20142,
-       0.05405,
-       0.09864
+       -0.11578,
+       -0.19383,
+       1.34707
       ],
       [
-       0.10831,
-       0.45146,
-       0.99073
+       -0.07661,
+       0.03691,
+       1.34707
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh12",
-     "verts": 26,
-     "tris": 48,
+     "name": "skin_forward_L_colmesh37",
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
-       0.07773,
-       0.37713,
-       0.09864
+       -0.0697,
+       0.0568,
+       1.34707
       ],
       [
-       0.3151,
-       0.54533,
-       0.99073
+       0.01483,
+       0.21619,
+       1.34707
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh13",
-     "verts": 39,
-     "tris": 74,
+     "name": "skin_forward_L_colmesh38",
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       -0.05758,
-       -0.7381,
-       0.09864
+       0.02972,
+       0.23531,
+       1.34707
       ],
       [
-       0.3151,
-       -0.53531,
-       0.99073
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_L_colmesh14",
-     "verts": 128,
-     "tris": 252,
-     "bounds_unity": [
-      [
-       -0.29067,
-       -0.61634,
-       -1.09495
-      ],
-      [
-       -0.06548,
-       0.04424,
-       -0.03398
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_L_colmesh15",
-     "verts": 82,
-     "tris": 160,
-     "bounds_unity": [
-      [
-       -0.24752,
-       0.05829,
-       -1.09495
-      ],
-      [
-       0.03812,
-       0.55712,
-       -0.03398
+       0.14244,
+       0.33498,
+       1.34707
       ]
      ]
     }
@@ -9710,7 +10613,7 @@
      2.02329
     ]
    ],
-   "sha256": "c62f5da36dc6ac8ab0e4eee5998090c115b8110c13523a3f2c155f28c29a3a91",
+   "sha256": "98e26577606ea2c912ecf63e1b7554378906df6331e4861d0101a41103d23f97",
    "bounds_blender": [
     [
      -0.3151,
@@ -9733,273 +10636,664 @@
    "colliders": [
     {
      "name": "skin_forward_R_colmesh0",
-     "verts": 20,
-     "tris": 36,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
        -0.3151,
        0.23777,
-       1.34707
+       1.69294
       ],
       [
-       -0.16498,
-       0.38502,
+       -0.17726,
+       0.33122,
        2.02329
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh1",
-     "verts": 43,
-     "tris": 82,
+     "verts": 12,
+     "tris": 20,
      "bounds_unity": [
       [
        -0.19474,
-       0.0568,
-       1.34707
+       0.17014,
+       1.69294
       ],
       [
-       0.0697,
-       0.33498,
+       -0.06839,
+       0.28444,
        2.02329
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh2",
-     "verts": 128,
-     "tris": 252,
+     "verts": 17,
+     "tris": 29,
      "bounds_unity": [
       [
-       0.06548,
-       -0.60398,
-       -1.09495
-      ],
-      [
-       0.29009,
-       0.05127,
-       -0.03398
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh3",
-     "verts": 95,
-     "tris": 186,
-     "bounds_unity": [
-      [
-       -0.3151,
-       -0.74666,
-       -1.09495
-      ],
-      [
-       0.07027,
-       -0.61487,
-       -0.03398
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh4",
-     "verts": 25,
-     "tris": 46,
-     "bounds_unity": [
-      [
-       -0.3151,
-       0.56324,
-       -2.02329
-      ],
-      [
-       -0.01995,
-       0.75734,
-       -1.22757
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh5",
-     "verts": 102,
-     "tris": 200,
-     "bounds_unity": [
-      [
-       0.00379,
-       0.05565,
-       -2.02329
-      ],
-      [
-       0.27745,
-       0.55673,
-       -1.22757
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh6",
-     "verts": 103,
-     "tris": 202,
-     "bounds_unity": [
-      [
-       0.07631,
-       -0.61488,
-       -2.02329
-      ],
-      [
-       0.3151,
-       0.05137,
-       -1.22757
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh7",
-     "verts": 53,
-     "tris": 102,
-     "bounds_unity": [
-      [
-       -0.3151,
-       -0.75734,
-       -2.02329
-      ],
-      [
-       0.06854,
-       -0.62712,
-       -1.22757
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh8",
-     "verts": 93,
-     "tris": 182,
-     "bounds_unity": [
-      [
-       -0.02739,
+       0.01513,
        -0.48974,
        1.34707
       ],
       [
        0.11599,
-       0.04702,
-       2.02329
+       -0.21264,
+       1.34707
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh9",
-     "verts": 63,
-     "tris": 122,
+     "name": "skin_forward_R_colmesh3",
+     "verts": 19,
+     "tris": 33,
      "bounds_unity": [
       [
-       -0.3151,
-       -0.64373,
+       -0.2963,
+       -0.64332,
        1.34707
       ],
       [
        0.00273,
-       -0.43378,
-       2.02329
+       -0.50388,
+       1.34707
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh10",
-     "verts": 26,
-     "tris": 48,
+     "name": "skin_forward_R_colmesh4",
+     "verts": 8,
+     "tris": 11,
      "bounds_unity": [
       [
        -0.3151,
        0.37713,
-       0.09864
+       0.99073
       ],
       [
-       -0.07773,
-       0.54533,
+       -0.1314,
+       0.42836,
        0.99073
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh11",
-     "verts": 90,
-     "tris": 176,
+     "name": "skin_forward_R_colmesh5",
+     "verts": 13,
+     "tris": 21,
      "bounds_unity": [
       [
-       -0.10831,
-       0.05405,
-       0.09864
+       0.11419,
+       -0.2055,
+       0.99073
       ],
       [
-       0.20142,
-       0.45146,
+       0.15132,
+       0.04235,
        0.99073
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh12",
-     "verts": 77,
-     "tris": 150,
+     "name": "skin_forward_R_colmesh6",
+     "verts": 17,
+     "tris": 29,
      "bounds_unity": [
       [
        0.02878,
-       -0.57653,
-       0.09864
+       -0.52061,
+       0.99073
       ],
       [
-       0.23654,
-       0.04687,
+       0.15088,
+       -0.22584,
        0.99073
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh13",
-     "verts": 39,
-     "tris": 74,
+     "name": "skin_forward_R_colmesh7",
+     "verts": 18,
+     "tris": 31,
      "bounds_unity": [
       [
-       -0.3151,
-       -0.7381,
-       0.09864
+       -0.29476,
+       -0.67148,
+       0.99073
       ],
       [
-       0.05758,
+       0.01471,
        -0.53531,
        0.99073
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh14",
+     "name": "skin_forward_R_colmesh8",
+     "verts": 28,
+     "tris": 52,
+     "bounds_unity": [
+      [
+       -0.3151,
+       0.41983,
+       0.23126
+      ],
+      [
+       -0.10798,
+       0.52689,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh9",
+     "verts": 33,
+     "tris": 62,
+     "bounds_unity": [
+      [
+       -0.09592,
+       0.26978,
+       0.23126
+      ],
+      [
+       0.08261,
+       0.45146,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh10",
+     "verts": 38,
+     "tris": 72,
+     "bounds_unity": [
+      [
+       0.05851,
+       0.05405,
+       0.23126
+      ],
+      [
+       0.18418,
+       0.27327,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh11",
      "verts": 36,
      "tris": 68,
      "bounds_unity": [
       [
-       -0.3151,
-       0.47948,
-       -1.09495
+       0.15097,
+       -0.23913,
+       0.23126
       ],
       [
-       -0.04745,
-       0.73668,
-       -0.03398
+       0.22386,
+       0.04687,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh12",
+     "verts": 15,
+     "tris": 26,
+     "bounds_unity": [
+      [
+       -0.09806,
+       0.0631,
+       1.69294
+      ],
+      [
+       0.02154,
+       0.19186,
+       2.02329
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh13",
+     "verts": 35,
+     "tris": 66,
+     "bounds_unity": [
+      [
+       0.03845,
+       -0.57031,
+       0.23126
+      ],
+      [
+       0.21925,
+       -0.24092,
+       0.62912
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh14",
+     "verts": 38,
+     "tris": 72,
+     "bounds_unity": [
+      [
+       -0.29329,
+       -0.72766,
+       0.23126
+      ],
+      [
+       0.04901,
+       -0.56598,
+       0.62912
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh15",
+     "verts": 29,
+     "tris": 54,
+     "bounds_unity": [
+      [
+       -0.3151,
+       0.46571,
+       -0.29922
+      ],
+      [
+       -0.0671,
+       0.60214,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh16",
+     "verts": 32,
+     "tris": 60,
+     "bounds_unity": [
+      [
+       -0.05251,
+       0.29552,
+       -0.29922
+      ],
+      [
+       0.10414,
+       0.48598,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh17",
+     "verts": 40,
+     "tris": 76,
+     "bounds_unity": [
+      [
+       0.10486,
+       0.0544,
+       -0.29922
+      ],
+      [
+       0.22402,
+       0.29995,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh18",
+     "verts": 53,
+     "tris": 102,
+     "bounds_unity": [
+      [
+       0.20803,
+       -0.27616,
+       -0.29922
+      ],
+      [
+       0.26653,
+       0.05127,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh19",
+     "verts": 62,
+     "tris": 120,
+     "bounds_unity": [
+      [
+       0.06548,
+       -0.60398,
+       -0.29922
+      ],
+      [
+       0.25274,
+       -0.27923,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh20",
+     "verts": 53,
+     "tris": 102,
+     "bounds_unity": [
+      [
+       -0.29104,
+       -0.74613,
+       -0.29922
+      ],
+      [
+       0.05876,
+       -0.59317,
+       0.09864
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh21",
+     "verts": 58,
+     "tris": 112,
+     "bounds_unity": [
+      [
+       -0.3151,
+       0.5198,
+       -1.36019
+      ],
+      [
+       -0.02004,
+       0.75734,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh22",
+     "verts": 70,
+     "tris": 136,
+     "bounds_unity": [
+      [
+       -0.03812,
+       0.30874,
+       -1.36019
+      ],
+      [
+       0.13687,
+       0.55712,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh23",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       -0.02373,
+       -0.16675,
+       1.69294
+      ],
+      [
+       0.07567,
+       0.04702,
+       2.02329
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh24",
+     "verts": 74,
+     "tris": 144,
+     "bounds_unity": [
+      [
+       0.13863,
+       0.05596,
+       -1.36019
+      ],
+      [
+       0.25886,
+       0.32166,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh25",
+     "verts": 71,
+     "tris": 138,
+     "bounds_unity": [
+      [
+       0.24285,
+       -0.28509,
+       -1.36019
+      ],
+      [
+       0.29722,
+       0.05226,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh26",
      "verts": 80,
      "tris": 156,
      "bounds_unity": [
       [
-       -0.04836,
-       0.05596,
-       -1.09495
+       0.07231,
+       -0.61634,
+       -1.36019
       ],
       [
-       0.25509,
-       0.54857,
-       -0.03398
+       0.27635,
+       -0.28757,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh27",
+     "verts": 53,
+     "tris": 102,
+     "bounds_unity": [
+      [
+       -0.1575,
+       -0.7366,
+       -1.36019
+      ],
+      [
+       0.07027,
+       -0.61708,
+       -0.43184
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh28",
+     "verts": 45,
+     "tris": 86,
+     "bounds_unity": [
+      [
+       0.00379,
+       0.32571,
+       -2.02329
+      ],
+      [
+       0.15351,
+       0.55673,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh29",
+     "verts": 52,
+     "tris": 100,
+     "bounds_unity": [
+      [
+       0.16603,
+       0.05565,
+       -2.02329
+      ],
+      [
+       0.27745,
+       0.31552,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh30",
+     "verts": 61,
+     "tris": 118,
+     "bounds_unity": [
+      [
+       0.26847,
+       -0.29275,
+       -2.02329
+      ],
+      [
+       0.3151,
+       0.05137,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh31",
+     "verts": 64,
+     "tris": 124,
+     "bounds_unity": [
+      [
+       0.08079,
+       -0.61325,
+       -2.02329
+      ],
+      [
+       0.28692,
+       -0.2954,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh32",
+     "verts": 56,
+     "tris": 108,
+     "bounds_unity": [
+      [
+       -0.28824,
+       -0.75676,
+       -2.02329
+      ],
+      [
+       0.06854,
+       -0.62712,
+       -1.49281
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh33",
+     "verts": 37,
+     "tris": 70,
+     "bounds_unity": [
+      [
+       -0.02739,
+       -0.45713,
+       1.69294
+      ],
+      [
+       0.07739,
+       -0.15855,
+       2.02329
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh34",
+     "verts": 41,
+     "tris": 78,
+     "bounds_unity": [
+      [
+       -0.29978,
+       -0.61031,
+       1.69294
+      ],
+      [
+       -0.01443,
+       -0.43378,
+       2.02329
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh35",
+     "verts": 7,
+     "tris": 9,
+     "bounds_unity": [
+      [
+       -0.3151,
+       0.34761,
+       1.34707
+      ],
+      [
+       -0.16498,
+       0.38502,
+       1.34707
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh36",
+     "verts": 7,
+     "tris": 9,
+     "bounds_unity": [
+      [
+       -0.14244,
+       0.23531,
+       1.34707
+      ],
+      [
+       -0.02972,
+       0.33498,
+       1.34707
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh37",
+     "verts": 9,
+     "tris": 13,
+     "bounds_unity": [
+      [
+       -0.01483,
+       0.0568,
+       1.34707
+      ],
+      [
+       0.0697,
+       0.21619,
+       1.34707
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh38",
+     "verts": 13,
+     "tris": 21,
+     "bounds_unity": [
+      [
+       0.07661,
+       -0.19383,
+       1.34707
+      ],
+      [
+       0.11578,
+       0.03691,
+       1.34707
       ]
      ]
     }
@@ -10054,7 +11348,7 @@
      2.69589
     ]
    ],
-   "sha256": "6c9f0d2a10de1f10c8e6c8fc78450698e3bfd525cffc184a4ffbfa223f79f5cb",
+   "sha256": "6a8272c49743fc94bc0b0e31b8a43adff7e1e079257e8f7a4582460cfc99aa1c",
    "bounds_blender": [
     [
      -0.54084,
@@ -10077,16 +11371,16 @@
    "colliders": [
     {
      "name": "skin_mid_L_colmesh0",
-     "verts": 81,
-     "tris": 158,
+     "verts": 39,
+     "tris": 74,
      "bounds_unity": [
       [
        -0.09514,
-       -0.5363,
+       -0.21665,
        2.43065
       ],
       [
-       0.13575,
+       -0.05949,
        0.11417,
        2.69589
       ]
@@ -10094,12 +11388,199 @@
     },
     {
      "name": "skin_mid_L_colmesh1",
-     "verts": 60,
-     "tris": 116,
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
        -0.05538,
        0.13329,
+       2.43065
+      ],
+      [
+       0.05776,
+       0.39563,
+       2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh2",
+     "verts": 118,
+     "tris": 232,
+     "bounds_unity": [
+      [
+       -0.44907,
+       -0.31172,
+       0.44903
+      ],
+      [
+       -0.23744,
+       0.12343,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh3",
+     "verts": 118,
+     "tris": 232,
+     "bounds_unity": [
+      [
+       -0.43409,
+       0.13981,
+       0.44903
+      ],
+      [
+       -0.09164,
+       0.47936,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh4",
+     "verts": 35,
+     "tris": 66,
+     "bounds_unity": [
+      [
+       -0.06308,
+       0.4783,
+       0.44903
+      ],
+      [
+       0.22976,
+       0.66115,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh5",
+     "verts": 101,
+     "tris": 198,
+     "bounds_unity": [
+      [
+       0.16644,
+       -0.67443,
+       0.44903
+      ],
+      [
+       0.51264,
+       -0.54066,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh6",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       -0.23383,
+       -0.54143,
+       0.44903
+      ],
+      [
+       0.14722,
+       -0.32684,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh7",
+     "verts": 92,
+     "tris": 180,
+     "bounds_unity": [
+      [
+       -0.54084,
+       -0.32385,
+       -0.56184
+      ],
+      [
+       -0.23676,
+       0.11398,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh8",
+     "verts": 104,
+     "tris": 204,
+     "bounds_unity": [
+      [
+       -0.4906,
+       0.12667,
+       -0.56184
+      ],
+      [
+       -0.07693,
+       0.483,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh9",
+     "verts": 28,
+     "tris": 52,
+     "bounds_unity": [
+      [
+       -0.07143,
+       0.47814,
+       -0.56184
+      ],
+      [
+       0.23016,
+       0.66277,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh10",
+     "verts": 9,
+     "tris": 13,
+     "bounds_unity": [
+      [
+       0.54084,
+       -0.65349,
+       -0.56184
+      ],
+      [
+       0.54084,
+       -0.61502,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh11",
+     "verts": 122,
+     "tris": 240,
+     "bounds_unity": [
+      [
+       0.16411,
+       -0.65287,
+       -0.56184
+      ],
+      [
+       0.51298,
+       -0.51941,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh12",
+     "verts": 27,
+     "tris": 50,
+     "bounds_unity": [
+      [
+       0.07165,
+       0.41508,
        2.43065
       ],
       [
@@ -10110,325 +11591,393 @@
      ]
     },
     {
-     "name": "skin_mid_L_colmesh2",
-     "verts": 100,
-     "tris": 196,
+     "name": "skin_mid_L_colmesh13",
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       0.16411,
-       -0.66986,
-       -0.00024
+       -0.23685,
+       -0.52666,
+       -0.56184
       ],
       [
-       0.54084,
-       -0.53265,
-       1.06974
+       0.16927,
+       -0.3222,
+       0.33671
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh3",
-     "verts": 101,
-     "tris": 198,
+     "name": "skin_mid_L_colmesh14",
+     "verts": 69,
+     "tris": 134,
      "bounds_unity": [
       [
-       -0.54084,
-       -0.51878,
-       -1.23575
+       -0.51751,
+       -0.29291,
+       -1.57271
       ],
       [
-       0.17751,
-       0.12267,
-       -0.11256
+       -0.15284,
+       0.12528,
+       -0.67416
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh4",
-     "verts": 114,
-     "tris": 224,
+     "name": "skin_mid_L_colmesh15",
+     "verts": 64,
+     "tris": 124,
      "bounds_unity": [
       [
-       -0.48788,
+       -0.44899,
        0.12771,
-       -1.23575
+       -1.57271
       ],
       [
-       0.23345,
-       0.64576,
-       -0.11256
+       -0.01103,
+       0.46138,
+       -0.67416
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh5",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       0.2334,
-       0.66083,
-       -1.12343
-      ],
-      [
-       0.25261,
-       0.66863,
-       -0.11256
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh6",
-     "verts": 120,
-     "tris": 236,
-     "bounds_unity": [
-      [
-       0.16465,
-       -0.63977,
-       -1.23575
-      ],
-      [
-       0.54084,
-       -0.49167,
-       -0.11256
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh7",
-     "verts": 40,
-     "tris": 76,
-     "bounds_unity": [
-      [
-       -0.45521,
-       -0.36989,
-       -2.35894
-      ],
-      [
-       -0.00456,
-       0.10429,
-       -1.34807
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh8",
-     "verts": 82,
-     "tris": 160,
-     "bounds_unity": [
-      [
-       -0.40429,
-       0.13193,
-       -2.35894
-      ],
-      [
-       0.25052,
-       0.63471,
-       -1.34807
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh9",
-     "verts": 30,
-     "tris": 56,
-     "bounds_unity": [
-      [
-       0.383,
-       -0.56062,
-       -2.35894
-      ],
-      [
-       0.54084,
-       -0.49958,
-       -1.34807
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh10",
+     "name": "skin_mid_L_colmesh16",
      "verts": 33,
      "tris": 62,
      "bounds_unity": [
       [
-       -0.37673,
-       -0.29476,
-       -2.69589
+       -0.0437,
+       0.45635,
+       -1.57271
       ],
       [
-       -0.02237,
-       0.1062,
-       -2.47126
+       0.24094,
+       0.6441,
+       -0.67416
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh11",
-     "verts": 31,
-     "tris": 58,
+     "name": "skin_mid_L_colmesh17",
+     "verts": 41,
+     "tris": 78,
      "bounds_unity": [
       [
-       -0.30102,
-       0.14039,
-       -2.69589
+       0.19655,
+       -0.60697,
+       -1.57271
+      ],
+      [
+       0.5146,
+       -0.49167,
+       -0.67416
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh18",
+     "verts": 35,
+     "tris": 66,
+     "bounds_unity": [
+      [
+       -0.19774,
+       -0.50044,
+       -1.57271
+      ],
+      [
+       0.17751,
+       -0.28629,
+       -0.67416
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh19",
+     "verts": 36,
+     "tris": 68,
+     "bounds_unity": [
+      [
+       -0.42646,
+       -0.26366,
+       -2.58358
+      ],
+      [
+       -0.1048,
+       0.10569,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh20",
+     "verts": 32,
+     "tris": 60,
+     "bounds_unity": [
+      [
+       -0.36802,
+       0.13639,
+       -2.58358
+      ],
+      [
+       0.00764,
+       0.43856,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh21",
+     "verts": 99,
+     "tris": 194,
+     "bounds_unity": [
+      [
+       0.01276,
+       0.42537,
+       -2.58358
       ],
       [
        0.2507,
-       0.62712,
-       -2.47126
+       0.62879,
+       -1.68502
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh12",
-     "verts": 46,
-     "tris": 88,
+     "name": "skin_mid_L_colmesh22",
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
-       0.15368,
-       -0.68374,
-       2.43065
+       0.54084,
+       -0.5411,
+       -2.58358
       ],
       [
        0.54084,
+       -0.51766,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh23",
+     "verts": 43,
+     "tris": 82,
+     "bounds_unity": [
+      [
+       0.15368,
+       -0.68314,
+       2.43065
+      ],
+      [
+       0.51335,
        -0.55232,
        2.69589
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh13",
-     "verts": 16,
-     "tris": 28,
+     "name": "skin_mid_L_colmesh24",
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       0.38907,
-       -0.51827,
-       -2.69589
+       0.38607,
+       -0.54053,
+       -2.58358
       ],
       [
-       0.54084,
-       -0.49766,
-       -2.47126
+       0.51532,
+       -0.49771,
+       -1.68502
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh14",
-     "verts": 82,
-     "tris": 160,
+     "name": "skin_mid_L_colmesh25",
+     "verts": 19,
+     "tris": 34,
      "bounds_unity": [
       [
-       -0.43387,
-       -0.5501,
-       1.15545
+       -0.11568,
+       -0.33807,
+       -2.58358
       ],
       [
-       0.14988,
+       -0.00456,
+       -0.25422,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh26",
+     "verts": 10,
+     "tris": 15,
+     "bounds_unity": [
+      [
+       -0.3576,
+       -0.23072,
+       -2.69589
+      ],
+      [
+       -0.10141,
+       0.1062,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh27",
+     "verts": 10,
+     "tris": 15,
+     "bounds_unity": [
+      [
+       -0.28318,
+       0.14086,
+       -2.69589
+      ],
+      [
+       0.00836,
+       0.40799,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh28",
+     "verts": 10,
+     "tris": 15,
+     "bounds_unity": [
+      [
+       0.03204,
+       0.42503,
+       -2.69589
+      ],
+      [
+       0.25018,
+       0.62712,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh29",
+     "verts": 6,
+     "tris": 7,
+     "bounds_unity": [
+      [
+       0.38907,
+       -0.51708,
+       -2.69589
+      ],
+      [
+       0.51526,
+       -0.49766,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh30",
+     "verts": 42,
+     "tris": 80,
+     "bounds_unity": [
+      [
+       -0.06571,
+       -0.5363,
+       2.43065
+      ],
+      [
+       0.13575,
+       -0.239,
+       2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_L_colmesh31",
+     "verts": 30,
+     "tris": 56,
+     "bounds_unity": [
+      [
+       -0.39958,
+       -0.30422,
+       1.41259
+      ],
+      [
+       -0.06509,
        0.12515,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh15",
-     "verts": 61,
-     "tris": 118,
+     "name": "skin_mid_L_colmesh32",
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       -0.42246,
+       -0.3904,
        0.12658,
-       1.15545
+       1.41259
       ],
       [
-       0.22587,
-       0.65141,
+       0.05659,
+       0.46169,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh16",
-     "verts": 12,
-     "tris": 20,
+     "name": "skin_mid_L_colmesh33",
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.24673,
-       0.6645,
-       1.15545
+       -0.00177,
+       0.40913,
+       1.41259
       ],
       [
-       0.25026,
-       0.67748,
+       0.22462,
+       0.64758,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh17",
-     "verts": 92,
-     "tris": 180,
+     "name": "skin_mid_L_colmesh34",
+     "verts": 123,
+     "tris": 242,
      "bounds_unity": [
       [
-       0.16938,
-       -0.68374,
-       1.15545
+       0.15059,
+       -0.68313,
+       1.41259
       ],
       [
-       0.54084,
-       -0.55454,
+       0.513,
+       -0.55106,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_L_colmesh18",
-     "verts": 82,
-     "tris": 160,
+     "name": "skin_mid_L_colmesh35",
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       -0.53922,
-       -0.53594,
-       -0.00024
+       -0.17697,
+       -0.5501,
+       1.41259
       ],
       [
-       0.14632,
-       0.12343,
-       1.06974
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh19",
-     "verts": 88,
-     "tris": 172,
-     "bounds_unity": [
-      [
-       -0.4906,
-       0.12667,
-       -0.00024
-      ],
-      [
-       0.23016,
-       0.66277,
-       1.06974
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh20",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       0.23065,
-       0.66431,
-       -0.00024
-      ],
-      [
-       0.2529,
-       0.68374,
-       1.06974
+       0.14988,
+       -0.22941,
+       2.29803
       ]
      ]
     }
@@ -10483,7 +12032,7 @@
      2.69589
     ]
    ],
-   "sha256": "a6ea01414e89a18cf1f0b43593e947d94d0725abf454c343e78fa61728e01071",
+   "sha256": "04a8a6e5a348aefd856ba24a96010486215d6a2f459fd6158989f3400138edfd",
    "bounds_blender": [
     [
      -0.54084,
@@ -10506,16 +12055,16 @@
    "colliders": [
     {
      "name": "skin_mid_R_colmesh0",
-     "verts": 60,
-     "tris": 116,
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
        -0.22234,
-       0.13329,
+       0.41508,
        2.43065
       ],
       [
-       0.05538,
+       -0.07165,
        0.63526,
        2.69589
       ]
@@ -10523,12 +12072,199 @@
     },
     {
      "name": "skin_mid_R_colmesh1",
-     "verts": 81,
-     "tris": 158,
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       -0.13575,
-       -0.5363,
+       -0.05776,
+       0.13329,
+       2.43065
+      ],
+      [
+       0.05538,
+       0.39563,
+       2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh2",
+     "verts": 35,
+     "tris": 66,
+     "bounds_unity": [
+      [
+       -0.22976,
+       0.4783,
+       0.44903
+      ],
+      [
+       0.06308,
+       0.66115,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh3",
+     "verts": 118,
+     "tris": 232,
+     "bounds_unity": [
+      [
+       0.09164,
+       0.13981,
+       0.44903
+      ],
+      [
+       0.43409,
+       0.47936,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh4",
+     "verts": 118,
+     "tris": 232,
+     "bounds_unity": [
+      [
+       0.23744,
+       -0.31172,
+       0.44903
+      ],
+      [
+       0.44907,
+       0.12343,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh5",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       -0.14722,
+       -0.54143,
+       0.44903
+      ],
+      [
+       0.23383,
+       -0.32684,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh6",
+     "verts": 101,
+     "tris": 198,
+     "bounds_unity": [
+      [
+       -0.51264,
+       -0.67443,
+       0.44903
+      ],
+      [
+       -0.16644,
+       -0.54066,
+       1.32688
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh7",
+     "verts": 28,
+     "tris": 52,
+     "bounds_unity": [
+      [
+       -0.23016,
+       0.47814,
+       -0.56184
+      ],
+      [
+       0.07143,
+       0.66277,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh8",
+     "verts": 104,
+     "tris": 204,
+     "bounds_unity": [
+      [
+       0.07693,
+       0.12667,
+       -0.56184
+      ],
+      [
+       0.4906,
+       0.483,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh9",
+     "verts": 92,
+     "tris": 180,
+     "bounds_unity": [
+      [
+       0.23676,
+       -0.32385,
+       -0.56184
+      ],
+      [
+       0.54084,
+       0.11398,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh10",
+     "verts": 49,
+     "tris": 94,
+     "bounds_unity": [
+      [
+       -0.16927,
+       -0.52666,
+       -0.56184
+      ],
+      [
+       0.23685,
+       -0.3222,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh11",
+     "verts": 122,
+     "tris": 240,
+     "bounds_unity": [
+      [
+       -0.51298,
+       -0.65287,
+       -0.56184
+      ],
+      [
+       -0.16411,
+       -0.51941,
+       0.33671
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh12",
+     "verts": 39,
+     "tris": 74,
+     "bounds_unity": [
+      [
+       0.05949,
+       -0.21665,
        2.43065
       ],
       [
@@ -10539,183 +12275,302 @@
      ]
     },
     {
-     "name": "skin_mid_R_colmesh2",
-     "verts": 100,
-     "tris": 196,
+     "name": "skin_mid_R_colmesh13",
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
        -0.54084,
-       -0.66986,
-       -0.00024
+       -0.65349,
+       -0.56184
       ],
-      [
-       -0.16411,
-       -0.53265,
-       1.06974
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh3",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       -0.25261,
-       0.66083,
-       -1.12343
-      ],
-      [
-       -0.2334,
-       0.66863,
-       -0.11256
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh4",
-     "verts": 114,
-     "tris": 224,
-     "bounds_unity": [
-      [
-       -0.23345,
-       0.12771,
-       -1.23575
-      ],
-      [
-       0.48788,
-       0.64576,
-       -0.11256
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh5",
-     "verts": 102,
-     "tris": 200,
-     "bounds_unity": [
-      [
-       -0.17522,
-       -0.52399,
-       -1.23575
-      ],
-      [
-       0.54084,
-       0.12267,
-       -0.11256
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh6",
-     "verts": 120,
-     "tris": 236,
-     "bounds_unity": [
       [
        -0.54084,
-       -0.63977,
-       -1.23575
-      ],
-      [
-       -0.16465,
-       -0.49167,
-       -0.11256
+       -0.61502,
+       0.33671
       ]
      ]
     },
     {
-     "name": "skin_mid_R_colmesh7",
-     "verts": 82,
-     "tris": 160,
-     "bounds_unity": [
-      [
-       -0.25052,
-       0.13193,
-       -2.35894
-      ],
-      [
-       0.40429,
-       0.63471,
-       -1.34807
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh8",
-     "verts": 40,
-     "tris": 76,
-     "bounds_unity": [
-      [
-       0.00456,
-       -0.36989,
-       -2.35894
-      ],
-      [
-       0.45521,
-       0.10429,
-       -1.34807
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh9",
-     "verts": 30,
-     "tris": 56,
-     "bounds_unity": [
-      [
-       -0.54084,
-       -0.56062,
-       -2.35894
-      ],
-      [
-       -0.383,
-       -0.49958,
-       -1.34807
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh10",
-     "verts": 31,
-     "tris": 58,
-     "bounds_unity": [
-      [
-       -0.2507,
-       0.14039,
-       -2.69589
-      ],
-      [
-       0.30102,
-       0.62712,
-       -2.47126
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh11",
+     "name": "skin_mid_R_colmesh14",
      "verts": 33,
      "tris": 62,
      "bounds_unity": [
       [
-       0.02237,
-       -0.29476,
-       -2.69589
+       -0.24094,
+       0.45635,
+       -1.57271
       ],
       [
-       0.37771,
-       0.10621,
-       -2.47126
+       0.0437,
+       0.6441,
+       -0.67416
       ]
      ]
     },
     {
-     "name": "skin_mid_R_colmesh12",
-     "verts": 46,
-     "tris": 88,
+     "name": "skin_mid_R_colmesh15",
+     "verts": 64,
+     "tris": 124,
+     "bounds_unity": [
+      [
+       0.01103,
+       0.12771,
+       -1.57271
+      ],
+      [
+       0.44899,
+       0.46138,
+       -0.67416
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh16",
+     "verts": 69,
+     "tris": 134,
+     "bounds_unity": [
+      [
+       0.15284,
+       -0.29291,
+       -1.57271
+      ],
+      [
+       0.51751,
+       0.12528,
+       -0.67416
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh17",
+     "verts": 35,
+     "tris": 66,
+     "bounds_unity": [
+      [
+       -0.17751,
+       -0.50044,
+       -1.57271
+      ],
+      [
+       0.19774,
+       -0.28629,
+       -0.67416
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh18",
+     "verts": 41,
+     "tris": 78,
+     "bounds_unity": [
+      [
+       -0.5146,
+       -0.60697,
+       -1.57271
+      ],
+      [
+       -0.19655,
+       -0.49167,
+       -0.67416
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh19",
+     "verts": 99,
+     "tris": 194,
+     "bounds_unity": [
+      [
+       -0.2507,
+       0.42537,
+       -2.58358
+      ],
+      [
+       -0.01276,
+       0.62879,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh20",
+     "verts": 32,
+     "tris": 60,
+     "bounds_unity": [
+      [
+       -0.00764,
+       0.13639,
+       -2.58358
+      ],
+      [
+       0.36802,
+       0.43856,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh21",
+     "verts": 36,
+     "tris": 68,
+     "bounds_unity": [
+      [
+       0.1048,
+       -0.26366,
+       -2.58358
+      ],
+      [
+       0.42654,
+       0.10569,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh22",
+     "verts": 19,
+     "tris": 34,
+     "bounds_unity": [
+      [
+       0.00456,
+       -0.33807,
+       -2.58358
+      ],
+      [
+       0.11568,
+       -0.25422,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh23",
+     "verts": 42,
+     "tris": 80,
+     "bounds_unity": [
+      [
+       -0.13575,
+       -0.5363,
+       2.43065
+      ],
+      [
+       0.06571,
+       -0.239,
+       2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh24",
+     "verts": 26,
+     "tris": 48,
+     "bounds_unity": [
+      [
+       -0.51532,
+       -0.54053,
+       -2.58358
+      ],
+      [
+       -0.38607,
+       -0.49771,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh25",
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
        -0.54084,
-       -0.68374,
+       -0.5411,
+       -2.58358
+      ],
+      [
+       -0.54084,
+       -0.51766,
+       -1.68502
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh26",
+     "verts": 10,
+     "tris": 15,
+     "bounds_unity": [
+      [
+       -0.25018,
+       0.42503,
+       -2.69589
+      ],
+      [
+       -0.03204,
+       0.62712,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh27",
+     "verts": 10,
+     "tris": 15,
+     "bounds_unity": [
+      [
+       -0.00836,
+       0.14086,
+       -2.69589
+      ],
+      [
+       0.28318,
+       0.40799,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh28",
+     "verts": 10,
+     "tris": 15,
+     "bounds_unity": [
+      [
+       0.10141,
+       -0.23072,
+       -2.69589
+      ],
+      [
+       0.35877,
+       0.10621,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh29",
+     "verts": 6,
+     "tris": 7,
+     "bounds_unity": [
+      [
+       -0.51526,
+       -0.51708,
+       -2.69589
+      ],
+      [
+       -0.38907,
+       -0.49766,
+       -2.69589
+      ]
+     ]
+    },
+    {
+     "name": "skin_mid_R_colmesh30",
+     "verts": 43,
+     "tris": 82,
+     "bounds_unity": [
+      [
+       -0.51335,
+       -0.68314,
        2.43065
       ],
       [
@@ -10726,138 +12581,87 @@
      ]
     },
     {
-     "name": "skin_mid_R_colmesh13",
-     "verts": 16,
-     "tris": 28,
+     "name": "skin_mid_R_colmesh31",
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.54084,
-       -0.51827,
-       -2.69589
+       -0.22462,
+       0.40913,
+       1.41259
       ],
       [
-       -0.38907,
-       -0.49766,
-       -2.47126
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh14",
-     "verts": 12,
-     "tris": 20,
-     "bounds_unity": [
-      [
-       -0.25026,
-       0.6645,
-       1.15545
-      ],
-      [
-       -0.24673,
-       0.67748,
+       0.00177,
+       0.64758,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_R_colmesh15",
-     "verts": 61,
-     "tris": 118,
+     "name": "skin_mid_R_colmesh32",
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       -0.22587,
+       -0.05659,
        0.12658,
-       1.15545
+       1.41259
       ],
       [
-       0.42246,
-       0.65141,
+       0.3904,
+       0.46169,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_R_colmesh16",
-     "verts": 82,
-     "tris": 160,
+     "name": "skin_mid_R_colmesh33",
+     "verts": 30,
+     "tris": 56,
      "bounds_unity": [
       [
-       -0.14988,
-       -0.5501,
-       1.15545
+       0.06509,
+       -0.30422,
+       1.41259
       ],
       [
-       0.43387,
+       0.39958,
        0.12515,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_R_colmesh17",
-     "verts": 92,
-     "tris": 180,
+     "name": "skin_mid_R_colmesh34",
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       -0.54084,
-       -0.68313,
-       1.15545
+       -0.14988,
+       -0.5501,
+       1.41259
       ],
       [
-       -0.15059,
-       -0.55106,
+       0.17697,
+       -0.22941,
        2.29803
       ]
      ]
     },
     {
-     "name": "skin_mid_R_colmesh18",
-     "verts": 8,
-     "tris": 12,
+     "name": "skin_mid_R_colmesh35",
+     "verts": 123,
+     "tris": 242,
      "bounds_unity": [
       [
-       -0.2529,
-       0.66431,
-       -0.00024
+       -0.513,
+       -0.68313,
+       1.41259
       ],
       [
-       -0.23065,
-       0.68374,
-       1.06974
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh19",
-     "verts": 88,
-     "tris": 172,
-     "bounds_unity": [
-      [
-       -0.23016,
-       0.12667,
-       -0.00024
-      ],
-      [
-       0.4906,
-       0.66277,
-       1.06974
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh20",
-     "verts": 82,
-     "tris": 160,
-     "bounds_unity": [
-      [
-       -0.14632,
-       -0.53594,
-       -0.00024
-      ],
-      [
-       0.53922,
-       0.12343,
-       1.06974
+       -0.15059,
+       -0.55106,
+       2.29803
       ]
      ]
     }
@@ -10952,7 +12756,7 @@
      -0.0
     ]
    ],
-   "sha256": "12cf3ce5edff7b9ca8d472451c31e5b7ddb9dda48e23df2a086b5fc4b48a3f6a",
+   "sha256": "3525ffa445603ecf2eab7176f2e26895a74ba16270a22be196ff642c724cc29c",
    "bounds_blender": [
     [
      -0.04512,
@@ -11081,7 +12885,7 @@
      -0.0
     ]
    ],
-   "sha256": "17c2f931766411b0e692f7bca36ed9c2b65727fc6756a72c507c00b5d5c72903",
+   "sha256": "a5e9813c8167d5d3e06230f8e1569efc716bacfc0587b9a75ce5cdd975b490c2",
    "bounds_blender": [
     [
      -0.04512,
@@ -11210,7 +13014,7 @@
      0.67
     ]
    ],
-   "sha256": "9d9b15f767669cabae3f0a90e0dc4deefe008c520c7df18dfbb442c46ec5cc6f",
+   "sha256": "c9ad84ecea7dd4a66adf9cd1ef667200fc41ad55a428b46fcbd54231c6053f64",
    "bounds_blender": [
     [
      0.0,
@@ -11339,7 +13143,7 @@
      0.67
     ]
    ],
-   "sha256": "3a8ece89b8f82e769265c1508d2dd19b37151104a1c25b27f330dd07073ee80b",
+   "sha256": "78dff99a4f743969fcaa3984c20333571b5e23332e49944e63cb096e23b909bc",
    "bounds_blender": [
     [
      0.0,
@@ -11428,7 +13232,7 @@
      1.125
     ]
    ],
-   "sha256": "270b7e13febf4e2b2757a2e99397f8b751ba92d14657a2c7401301418df996b7",
+   "sha256": "a639424a3d8690485cfe6ef4bfcadbb5e3803dbdd75e7a6e518c94369cb0e463",
    "bounds_blender": [
     [
      -0.05599,
@@ -11517,7 +13321,7 @@
      0.30217
     ]
    ],
-   "sha256": "339f6897d34157a0f20da7168700cb60b2503d7766a9d29d5ccdb639f575965e",
+   "sha256": "81cb9fe2587244b8ca6f18edc79a76a23c9d066f30db98c08bc571ad662db6d3",
    "bounds_blender": [
     [
      -0.3636,
@@ -11606,7 +13410,7 @@
      0.04
     ]
    ],
-   "sha256": "eeb232de8c08eb2345d2e13c2d5a8e4d04e0c8235e332192ab71e84f74e47874",
+   "sha256": "200cb8c9ff8e398f595e770f89f61bcd6afadf10fad8506d3e3faab5ffc64c5f",
    "bounds_blender": [
     [
      -0.38033,
@@ -11695,7 +13499,7 @@
      2.46088
     ]
    ],
-   "sha256": "13c26a74c690a1bb12f1435ad42fffcfa779dae0c19eb1e1d70f7bae4cac4828",
+   "sha256": "2d91a0e6ba42df4cf87765575a0f2fe41a403f299489ca3eb0b77ba066545cd4",
    "bounds_blender": [
     [
      -1.41,
@@ -11835,7 +13639,7 @@
      2.46088
     ]
    ],
-   "sha256": "823bd7af2a908040da27dd12c5872247175f043bad22570745cb2f72171b4535",
+   "sha256": "6b779b73e5357ca4ad2b4086b61905c14373d7d166f3ca75c2c10d02dc011d24",
    "bounds_blender": [
     [
      -1.41,
@@ -11934,13 +13738,13 @@
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
     1.98,
-    1.57897,
+    1.55728,
     -0.02543
    ],
    "pivot_unity": [
     -1.98,
     -0.02543,
-    -1.57897
+    -1.55728
    ],
    "axes_unity": {
     "right": [
@@ -11960,6 +13764,7 @@
     ]
    },
    "props": {
+    "fuel_kg": 164.1,
     "role": "structure",
     "mass_kg": 230
    },
@@ -11967,55 +13772,59 @@
     [
      -1.366,
      -0.28284,
-     -1.7826
+     -1.80428
     ],
     [
      1.366,
      0.28284,
-     1.7826
+     1.80428
     ]
    ],
-   "sha256": "cb14ce3be1c8b37a89060a48234243daa1e8f048eb0f9afbf5fe042d3c974ae3",
+   "sha256": "1a9ab7c460a9b00528a9c2ec57fb6c1ad49f1653dc505831d6cea2fe33384579",
    "bounds_blender": [
     [
      -1.366,
-     -1.7826,
+     -1.80428,
      -0.28284
     ],
     [
      1.366,
-     1.7826,
+     1.80428,
      0.28284
     ]
    ],
-   "tris": 3420,
+   "tris": 4756,
    "materials": [
     [
      "Icarus_Int_Structure",
      3420
+    ],
+    [
+     "Icarus_Int_Fuel",
+     1336
     ]
    ],
    "colliders": [
     {
      "name": "wing_spar_L_colmesh0",
-     "verts": 57,
-     "tris": 110,
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
        -1.366,
        -0.28181,
-       -1.78252
+       -1.80361
       ],
       [
        1.366,
-       0.28284,
-       1.78149
+       0.27582,
+       1.75424
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 110
+    "tris": 86
    }
   },
   "wing_spar_R": {
@@ -12023,13 +13832,13 @@
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
     -1.98,
-    1.57897,
+    1.55728,
     -0.02543
    ],
    "pivot_unity": [
     1.98,
     -0.02543,
-    -1.57897
+    -1.55728
    ],
    "axes_unity": {
     "right": [
@@ -12049,6 +13858,7 @@
     ]
    },
    "props": {
+    "fuel_kg": 164.1,
     "role": "structure",
     "mass_kg": 230
    },
@@ -12056,55 +13866,59 @@
     [
      -1.366,
      -0.28284,
-     -1.7826
+     -1.80428
     ],
     [
      1.366,
      0.28284,
-     1.7826
+     1.80428
     ]
    ],
-   "sha256": "a42628a5d95192e6ed99f085d434b001e71cdfdff0d4130e43436f32652bd1aa",
+   "sha256": "18834741eed7fceaf339191ccdb578ac075b85627a5c658541592a5d7bee6bdb",
    "bounds_blender": [
     [
      -1.366,
-     -1.7826,
+     -1.80428,
      -0.28284
     ],
     [
      1.366,
-     1.7826,
+     1.80428,
      0.28284
     ]
    ],
-   "tris": 3420,
+   "tris": 4756,
    "materials": [
     [
      "Icarus_Int_Structure",
      3420
+    ],
+    [
+     "Icarus_Int_Fuel",
+     1336
     ]
    ],
    "colliders": [
     {
      "name": "wing_spar_R_colmesh0",
-     "verts": 57,
-     "tris": 110,
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
        -1.366,
        -0.28181,
-       -1.78252
+       -1.80361
       ],
       [
        1.366,
-       0.28284,
-       1.78149
+       0.27582,
+       1.75424
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 110
+    "tris": 86
    }
   }
  }

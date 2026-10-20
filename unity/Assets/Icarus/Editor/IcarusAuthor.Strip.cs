@@ -20,6 +20,8 @@ namespace Icarus.Editor
             public Vector3 Eye;
             public float GroundY; // the Revoker's ground line under its root, from its definition's spawnOffset
             public float NoseZ; // the Revoker's nose tip ahead of its root
+            public Material FormationLit; // the Revoker's formation strips' lit material and switching
+            public int FormationState;
         }
 
         // Revoker parts the Icarus parts take their armour from (R13: "use Revoker armor classes").
@@ -65,6 +67,11 @@ namespace Icarus.Editor
             capture.DeviceTemplate = Template(b.Find("fuselage/wing1a_L/wing2_L/flap_L").GetComponent(GameType("HighLiftDevice")), "device_template");
             capture.CanopyTemplate = Template(b.Find("fuselage/cockpit/canopyHingea/canopyHingeb/canopyFrame").GetComponent(GameType("Canopy")), "canopy_template");
 
+            var navLights = Prop(new SerializedObject(b.Root.GetComponent(GameType("NavLights"))), "navLights");
+            var strip = Enumerable.Range(0, navLights.arraySize).Select(navLights.GetArrayElementAtIndex)
+                .First(e => e.FindPropertyRelative("renderer").objectReferenceValue is Component r && r.name.StartsWith("slimelights", StringComparison.Ordinal));
+            capture.FormationLit = (Material)strip.FindPropertyRelative("litMaterial").objectReferenceValue;
+            capture.FormationState = strip.FindPropertyRelative("controlState").intValue;
             CalibrateSurfaceSigns(b, capture);
             capture.Eye = ((Transform)GetRef(b.Aircraft, "cockpitViewPoint")).position;
             capture.GroundY = -Prop(new SerializedObject(Load<Object>(DonorDefinition)), "spawnOffset").vector3Value.y;

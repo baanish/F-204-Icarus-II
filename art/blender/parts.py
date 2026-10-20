@@ -50,10 +50,6 @@ TREE = {
     "fuel_aft_center": ("fuselage_mid", 30),
     "fuel_aft_L": ("fuselage_mid", 20),
     "fuel_aft_R": ("fuselage_mid", 20),
-    "fuel_strake_L": ("wing_spar_L", 0),  # cells beyond the 41-part plan; their dry mass is in their hosts
-    "fuel_strake_R": ("wing_spar_R", 0),
-    "fuel_wing_L": ("wing_spar_L", 0),
-    "fuel_wing_R": ("wing_spar_R", 0),
     "skin_forward_L": ("fuselage_forward", 35),
     "skin_forward_R": ("fuselage_forward", 35),
     "skin_mid_L": ("fuselage_mid", 45),
@@ -128,9 +124,9 @@ def join(name, objs):
         bm.faces.ensure_lookup_table()
         remap = []
         for mat in m.materials:
-            if mat not in mats:
+            if mat is not None and mat not in mats:  # empty slots would export as unnamed materials
                 mats.append(mat)
-            remap.append(mats.index(mat))
+            remap.append(mats.index(mat) if mat is not None else 0)
         for f in bm.faces[before:]:
             f.material_index = remap[f.material_index] if remap else 0
         bpy.data.meshes.remove(m)
@@ -223,7 +219,12 @@ def _organise(p, icarus, internals, structure_mat):
         join("intake_duct_" + sd, [O["duct_" + sd], O["shock_cone_" + sd], O["shock_cone_%s_bleed" % sd]])
         spar = [o for o in icarus.objects if o.name.startswith(("spar_front_" + sd, "spar_rear_" + sd))
                 or (o.name.startswith("rib_") and o.name.endswith("_" + sd))]
-        join("wing_spar_" + sd, spar)
+        # The wing is too thin for separate tank parts: a skin or spar hull would swallow them. As on stock
+        # aircraft, the wing's fuel belongs to the wing part itself, the spar, with the bladders as its meshes.
+        bladders = [O["fuel_strake_" + sd], O["fuel_wing_" + sd]]
+        wing_fuel = sum(o["fuel_kg"] for o in bladders)
+        spar_obj = join("wing_spar_" + sd, spar + bladders)
+        spar_obj["fuel_kg"] = round(wing_fuel, 1)
         rename(O["wing_" + sd], "wing_skin_" + sd)
     rename(O["fin"], "fin_skin")
     fin = p["fin"]["sections"]
