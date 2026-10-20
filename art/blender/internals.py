@@ -21,7 +21,7 @@ INTERNALS = {
     "radar": {"s": (0.30, 1.55), "dish_s": 0.95, "dish_r": 0.30, "mass_kg": 120},
     "avionics_nose": {"box": (1.55, 2.30, 0.30, -0.25, 0.42), "mass_kg": 90},  # s0, s1, half width, z0, z1
     "cockpit_tub": {"box": (2.35, 4.90, 0.38, -0.05, 0.78), "mass_kg": 260},
-    "avionics_aft": {"box": (4.95, 5.15, 0.42, -0.30, 0.70), "mass_kg": 140},  # a shelf; the gun bay holds fuel
+    "avionics_aft": {"box": (4.95, 5.15, 0.42, 0.00, 0.70), "mass_kg": 140},  # above the nose gear bay  # a shelf; the gun bay holds fuel
     # Fuel, after the F-104S layout: an auxiliary cell in the old gun bay (as on the gunless F-104), the forward
     # main tank, three connected aft cells (the centre one between the intake ducts, the side ones wrapping round
     # them), and cells in the strakes and outboard wings. No fuel over or around the engine: a leak there is a fire. Each fuselage row: (s0, s1,
@@ -40,7 +40,7 @@ INTERNALS = {
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "mass_kg_each": 9},
     "spars": {"front_f": 0.15, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
-    "nose_gear_bay": {"box": (2.55, 4.05, 0.17, -0.48, -0.06), "mass_kg": 0},
+    "nose_gear_bay": {"box": (3.70, 5.15, 0.17, -0.48, -0.06), "mass_kg": 0},  # the nose leg folds forward into it
     "main_gear_bay": {"box": (9.35, 11.15, 0.20, -0.42, -0.04), "x": 0.36, "mass_kg": 0},
 }
 

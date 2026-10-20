@@ -830,12 +830,21 @@ def _build(repo):
     duct = material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8)
     metal = material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35)
     p = PARAMS
-    parts = [build_fuselage(p, body, duct), build_canopy(p, glass), build_probe(p, metal)]
+    import gear
+
+    fuselage = build_fuselage(p, body, duct)
+    parts = [fuselage, build_probe(p, metal)]
+    parts += gear.cut_doors(fuselage)
+    frame = material("Icarus_Frame", (0.20, 0.21, 0.22, 1.0), 0.6, 0.5)
+    parts += gear.hinge_canopy(p, build_canopy(p, glass), frame)
     parts += build_nozzle(p, metal, duct)
     parts += build_shock_cones(p, body, duct)
     parts += build_ducts(p, duct)
     parts += build_surfaces(p, body)
     parts += build_speed_brakes(p, body)
+    parts += gear.build_gear({"strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
+                              "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9)})
+    parts += gear.lights_and_antennas(p, {"antenna": body})
     import internals  # imports this module back for its helpers, so it loads after them
 
     inner_mats = {

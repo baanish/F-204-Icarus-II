@@ -60,6 +60,22 @@ TREE = {
     "skin_mid_R": ("fuselage_mid", 45),
     "skin_aft_L": ("fuselage_aft", 45),
     "skin_aft_R": ("fuselage_aft", 45),
+    "windscreen": ("cockpit_cell", 0),
+    "windscreen_frame": ("cockpit_cell", 0),
+    "gear_door_N_L": ("fuselage_forward", 0),
+    "gear_door_N_R": ("fuselage_forward", 0),
+    "gear_door_main_L": ("fuselage_mid", 0),
+    "gear_door_main_R": ("fuselage_mid", 0),
+    "light_nav_L": ("wing_skin_L", 0),
+    "light_nav_R": ("wing_skin_R", 0),
+    "light_beacon_top": ("fin_skin", 0),
+    "light_beacon_belly": ("fuselage_mid", 0),
+    "light_formation_L": ("skin_mid_L", 0),
+    "light_formation_R": ("skin_mid_R", 0),
+    "light_landing": ("gear_leg_N", 0),
+    "antenna_uhf_top": ("dorsal_cover", 0),
+    "antenna_iff_belly": ("skin_mid_L", 0),
+    "antenna_datalink_top": ("dorsal_cover", 0),
     "dorsal_cover": ("fuselage_mid", 40),
     # Not in the 41: small parts the plan folds into their parents' budgets.
     "speed_brake_L": ("fuselage_aft", 0),
@@ -69,7 +85,7 @@ TREE = {
 
 ROLE = {"fuel_": "fuel_tank", "skin_": "skin", "dorsal": "skin", "wing_skin": "skin", "fin_skin": "skin",
         "radome": "skin", "engine": "engine", "nozzle": "engine", "gear_": "gear", "cockpit": "cockpit",
-        "canopy": "canopy", "radar": "radar", "avionics": "avionics", "intake": "intake"}
+        "canopy": "canopy", "windscreen": "canopy", "radar": "radar", "light_": "light", "antenna_": "antenna", "avionics": "avionics", "intake": "intake"}
 
 # Fuselage skin panels by station: radome ahead of RADOME_END, then forward, mid and aft panels per side; the
 # dorsal cover is the spine strip between DORSAL s range above DORSAL_Z.
@@ -193,6 +209,9 @@ def _organise(p, icarus, internals, structure_mat):
         frames = [o for o in icarus.objects if o.name.startswith("frame_")]  # joined frames are gone
         members = [f for f in frames if a <= station(f.matrix_world @ f.data.vertices[0].co) < b]
         members.append(keel(name + "_keel", max(a, 1.7), min(b, 15.0), p, structure_mat))
+        # gear wells belong to the structure they are cut into
+        members += [o for o in icarus.objects if o.name.startswith(("nose_gear_bay", "main_gear_bay"))
+                    and a <= station(o.matrix_world @ o.data.vertices[0].co) < b]
         join(name, members)
 
     rename(O["cockpit_tub"], "cockpit_cell")
@@ -206,9 +225,6 @@ def _organise(p, icarus, internals, structure_mat):
                 or (o.name.startswith("rib_") and o.name.endswith("_" + sd))]
         join("wing_spar_" + sd, spar)
         rename(O["wing_" + sd], "wing_skin_" + sd)
-    rename(O["nose_gear_bay"], "gear_leg_N")
-    rename(O["main_gear_bay_L"], "gear_leg_L")
-    rename(O["main_gear_bay_R"], "gear_leg_R")
     rename(O["fin"], "fin_skin")
     fin = p["fin"]["sections"]
     spar_stations = [(fin[0][2] + 0.25 + (fin[-1][2] - fin[0][2] - 0.35) * i / 8, 0.30, 0.34) for i in range(9)]
@@ -221,9 +237,11 @@ def _organise(p, icarus, internals, structure_mat):
         interior.subtract(interior.outward(obj), [body])
     bpy.data.objects.remove(body, do_unlink=True)
     # The canopy's lower edge dips into the fuselage; keep the cockpit cell clear of it.
-    canopy_cut = interior.grown(O["canopy"], 0.01)
+    solid = bi.build_canopy(p, structure_mat)  # the closed canopy shape; the built hood and windscreen are open
+    canopy_cut = interior.grown(solid, 0.01)
     interior.subtract(interior.outward(O["cockpit_cell"]), [canopy_cut])
-    bpy.data.objects.remove(canopy_cut, do_unlink=True)
+    for o in (solid, canopy_cut):
+        bpy.data.objects.remove(o, do_unlink=True)
 
     parts = {}
     for name, (parent, mass) in TREE.items():
@@ -237,7 +255,7 @@ def _organise(p, icarus, internals, structure_mat):
     for name, (parent, mass) in TREE.items():
         obj = parts[name]
         role = next((r for k, r in ROLE.items() if name.startswith(k)), "structure")
-        target = obj if obj.type == "MESH" else O[name + "_visible"]
+        target = O.get(name + "_visible", obj) if obj.type == "EMPTY" else obj  # lights are bare empties
         target["role"] = role
         target["mass_kg"] = mass
         if parent:
