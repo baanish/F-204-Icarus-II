@@ -27,6 +27,7 @@
     <Reference Include="Mirage" HintPath="$(Managed)\Mirage.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath="$(Managed)\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(Managed)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.PhysicsModule" HintPath="$(Managed)\UnityEngine.PhysicsModule.dll" Private="false" />
   </ItemGroup>
 
   <Target Name="ValidateGameDir" BeforeTargets="ResolveReferences">

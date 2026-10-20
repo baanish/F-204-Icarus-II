@@ -100,7 +100,7 @@ namespace Icarus.Editor
                 b.Placed.UnionWith(new[] { nav, vortex, vapour });
             }
             var landingLight = root.Find("gearlight_F") ?? throw new MissingReferenceException("rescued gearlight_F");
-            landingLight.SetParent(b.Parts["gear_leg_N"].transform.Find("gear_leg_N_hinge"), true);
+            landingLight.SetParent(FindDeep(b.Parts["gear_leg_N"].transform, "gear_leg_N_hinge"), true);
             landingLight.SetPositionAndRotation(b.Blockout.Local("light_landing"), Quaternion.LookRotation(new Vector3(0f, -0.07f, 1f), Vector3.up));
             var gearLightEntry = Enumerable.Range(0, Prop(navLights, "navLights").arraySize).Select(Prop(navLights, "navLights").GetArrayElementAtIndex)
                 .Single(e => e.FindPropertyRelative("gear").objectReferenceValue != null);

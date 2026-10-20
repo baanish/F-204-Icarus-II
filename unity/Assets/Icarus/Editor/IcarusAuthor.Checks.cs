@@ -261,6 +261,32 @@ namespace Icarus.Editor
             if (GetList(Prop(aircraft, "pilots")).Any(o => o == null)) p.Add("a null pilot");
             if (GetList(Prop(aircraft, "groundEquipment")).Any(o => o == null)) p.Add("dead ground equipment");
             if (GetList(Prop(aircraft, "exteriorRenderers")).Any(o => o == null)) p.Add("a null exterior renderer");
+            // The tac screen: one pylon set per HardpointIndex (PylonIndicator indexes them directly), and every engine
+            // gauge named for a damageable that carries the engine.
+            var cockpitUi = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
+            var screen = GetRef(cockpitUi, "tacScreenUIPrefab") as GameObject;
+            var manager = new SerializedObject(b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager")));
+            var stationSets = Prop(manager, "hardpointSets");
+            var stations = Enumerable.Range(0, stationSets.arraySize).SelectMany(i =>
+            {
+                var hardpoints = stationSets.GetArrayElementAtIndex(i).FindPropertyRelative("hardpoints");
+                return Enumerable.Range(0, hardpoints.arraySize).Select(j => hardpoints.GetArrayElementAtIndex(j).FindPropertyRelative("HardpointIndex").intValue);
+            }).ToArray();
+            var pylonSets = 0;
+            if (screen == null || !AssetDatabase.GetAssetPath(screen).StartsWith(ModFolder, StringComparison.Ordinal))
+                p.Add("the cockpit's tac screen isn't the Icarus copy");
+            else
+            {
+                var pylons = Prop(new SerializedObject(screen.GetComponentsInChildren(GameType("PylonIndicator"), true).Single()), "pylonElementSets");
+                pylonSets = pylons.arraySize;
+                if (pylonSets <= stations.Max()) p.Add($"the tac screen has {pylonSets} pylon sets for HardpointIndex up to {stations.Max()}");
+                foreach (var telemetry in screen.GetComponentsInChildren(GameType("EngineTelemetry"), true))
+                {
+                    var engineName = Prop(new SerializedObject(telemetry), "engineName").stringValue;
+                    var carriers = b.Root.GetComponentsInChildren(GameType("Turbojet"), true).Where(t => t.gameObject.name == engineName && t.GetComponent(GameType("AeroPart")) != null).ToArray();
+                    if (carriers.Length != 1) p.Add($"tac screen engine gauge names {engineName}, which {carriers.Length} engine parts carry");
+                }
+            }
             var so = new SerializedObject(parameters);
             if (Prop(so, "HUDExtras").objectReferenceValue != Load<GameObject>(DonorHudExtras)) p.Add("HUDExtras isn't the afterburner-and-airbrake HUD");
             var display = (GameObject)Prop(so, "StatusDisplay").objectReferenceValue;
@@ -276,7 +302,7 @@ namespace Icarus.Editor
                 foreach (var camera in cameras)
                     minimum = Mathf.Min(minimum, Vector3.Distance(camera.position, r.bounds.ClosestPoint(camera.position)));
             if (minimum < CameraClearance - 0.01f) p.Add($"a target camera is {minimum:F2} m from the airframe, under {CameraClearance}");
-            return $"aircraft links set, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts, target cameras {minimum:F2} m clear";
+            return $"aircraft links set, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts, target cameras {minimum:F2} m clear";
         }
 
         private static string CheckGear(Build b, List<string> p)
@@ -296,8 +322,15 @@ namespace Icarus.Editor
                 if (part == null || hinge == null || wheels.Length == 0 || wheels[0] == null)
                     continue;
                 var leg = Legs.FirstOrDefault(l => l.Leg == part.name);
-                if (hinge.parent != part.transform || Quaternion.Angle(hinge.localRotation, Quaternion.identity) > 0.01f)
+                if (!hinge.IsChildOf(part.transform) || Quaternion.Angle(hinge.localRotation, Quaternion.identity) > 0.01f)
                     p.Add(g.name + "'s gear hinge isn't at rest on its gear_leg part");
+                // A negative fold reads back near 360 through localEulerAngles.x as the leg locks down, which LandingGear
+                // takes for a broken wheel above 10 degrees.
+                if (Prop(so, "foldDegrees").floatValue <= 0f) p.Add($"{g.name} folds {Prop(so, "foldDegrees").floatValue} deg; stowing must be a positive turn");
+                // BreakWheel takes the leg's mass from its carrier's Rigidbody.
+                var carrier = GetFloat(part, "mass");
+                if (Prop(so, "mass").floatValue <= 0f || Prop(so, "mass").floatValue >= carrier)
+                    p.Add($"{g.name} breaks off with {Prop(so, "mass").floatValue} kg of its {carrier} kg carrier");
                 if (leg.Doors == null || Prop(so, "gearDoors").arraySize != leg.Doors.Length) p.Add($"{g.name} lists {Prop(so, "gearDoors").arraySize} doors");
                 // Stowing must carry the wheel up into the airframe.
                 var down = wheels[0].position;
@@ -351,6 +384,11 @@ namespace Icarus.Editor
                 var hood = hinges.arraySize == 1 ? hinges.GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue as Transform : null;
                 if (hood == null || hood.parent != b.Parts["canopy"].transform || hinges.GetArrayElementAtIndex(0).FindPropertyRelative("hingeAngle").floatValue == 0)
                     p.Add("the canopy doesn't open its hood on the canopy hinge");
+                // Canopy pushes along its part's forward x ejectionForce.z plus up x ejectionForce.y.
+                var force = Prop(so, "ejectionForce").vector3Value;
+                var push = b.Parts["canopy"].transform.forward * force.z + b.Parts["canopy"].transform.up * force.y;
+                if (push.sqrMagnitude < 1f || Vector3.Dot(push.normalized, Vector3.up) < 0.9f)
+                    p.Add($"the canopy ejects along {push.normalized}, not up out of the aircraft");
             }
             if (pilots.Length == 0)
                 return "no pilot";

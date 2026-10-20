@@ -77,7 +77,6 @@ static class Tuning
     static FileSystemWatcher? watcher;
     static volatile bool fileChanged;
     static bool pending, locked;
-    static float nextLockCheck;
     static string lastSummary = "";
 
     public static void Install(ConfigFile file, IcarusLog logger)
@@ -134,8 +133,8 @@ static class Tuning
     public static void Track(Aircraft aircraft)
     {
         if (records.Any(r => r.Aircraft == aircraft)) return;
-        Turbojet? engine = aircraft.GetComponentInChildren<Turbojet>(true);
-        JetNozzle? nozzle = aircraft.GetComponentInChildren<JetNozzle>(true);
+        Turbojet? engine = IcarusSystems.Engine(aircraft);
+        JetNozzle? nozzle = engine == null ? null : IcarusSystems.Nozzle(engine);
         if (engine == null || nozzle == null)
         {
             log.Error($"tuning: {aircraft.name} has no Turbojet or JetNozzle; not tuned");
@@ -157,8 +156,9 @@ static class Tuning
             record.Shipped["ab" + i + ".fuel"] = (float)AfterburnerField(record.Afterburners[i], "fuelConsumption").GetValue(record.Afterburners[i]);
         }
 
-        var devices = aircraft.GetComponentsInChildren<HighLiftDevice>(true).ToDictionary(d => (AeroPart)HldPart.GetValue(d));
-        foreach (AeroPart part in aircraft.GetComponentsInChildren<AeroPart>(true))
+        AeroPart[] parts = IcarusSystems.Parts(aircraft);
+        var devices = parts.SelectMany(p => p.GetComponents<HighLiftDevice>()).ToDictionary(d => (AeroPart)HldPart.GetValue(d));
+        foreach (AeroPart part in parts)
         {
             devices.TryGetValue(part, out HighLiftDevice? device);
             record.Parts.Add(new Part
@@ -205,17 +205,8 @@ static class Tuning
             }
         }
 
-        if (Time.unscaledTime >= nextLockCheck)
-        {
-            nextLockCheck = Time.unscaledTime + 1f;
-            bool remote = RemotePeerConnected();
-            if (remote != locked)
-            {
-                locked = remote;
-                pending = true;
-                log.Info(locked ? "tuning: a remote peer is connected; every knob reads its shipped value" : "tuning: no remote peer; the tuning file applies again");
-            }
-        }
+        // Every frame, so a peer that connects is under shipped values within the frame, before its scene load and spawns.
+        RefreshLock();
 
         records.RemoveAll(r => r.Aircraft == null || r.Engine == null || r.Nozzle == null);
         bool fresh = records.Any(r => !r.Applied && Time.frameCount > r.SeenFrame + 1);
@@ -233,6 +224,15 @@ static class Tuning
                 log.Error($"tuning: apply to {record.Aircraft.name} failed: {e}");
             }
         }
+    }
+
+    static void RefreshLock()
+    {
+        bool remote = RemotePeerConnected();
+        if (remote == locked) return;
+        locked = remote;
+        pending = true;
+        log.Info(locked ? "tuning: a remote peer is connected; every knob reads its shipped value" : "tuning: no remote peer; the tuning file applies again");
     }
 
     /// <summary>Hosting with any client in, or a client connecting or connected to anyone.</summary>
@@ -260,6 +260,7 @@ static class Tuning
 
     static void Apply(Record r)
     {
+        RefreshLock();
         Turbojet engine = r.Engine;
         SetField(engine, "maxThrust", Value("MaxThrust", r.Shipped["maxThrust"]));
         SetField(engine, "maxSpeed", Value("MaxSpeed", r.Shipped["maxSpeed"]));

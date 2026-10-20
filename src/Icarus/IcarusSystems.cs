@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -31,4 +32,15 @@ static class IcarusSystems
         IcarusPlugin.Log.Stage("spawn", $"Icarus {__instance.persistentID} seen, local sim {localSim}");
         Tuning.Track(__instance);
     }
+
+    // Complex physics (the local player's and the host's AI aircraft) unparents every part but the root when SetLocalSim
+    // runs (Aircraft.SetComplexPhysics, AeroPart.CreateRB), so the root's descendants no longer hold the airframe:
+    // parts come from the aircraft's part list and the engine's own references.
+    internal static AeroPart[] Parts(Aircraft aircraft) => aircraft.GetAllParts().OfType<AeroPart>().ToArray();
+
+    internal static Turbojet? Engine(Aircraft aircraft) =>
+        aircraft.GetComponent<Turbojet>() ?? Parts(aircraft).Select(p => p.GetComponent<Turbojet>()).FirstOrDefault(t => t != null);
+
+    internal static JetNozzle? Nozzle(Turbojet engine) =>
+        ((JetNozzle[])AccessTools.Field(typeof(Turbojet), "nozzles").GetValue(engine)).FirstOrDefault(n => n != null);
 }

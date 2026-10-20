@@ -14,6 +14,9 @@ namespace Icarus.Editor
         // tyre, plus hinged doors. The Revoker's LandingGear keeps its suspension, brakes, steering, audio and chocks and
         // drives the Icarus hinges. The bump stop sits GearStroke above the free wheel's centre, straight up.
         private const float GearStroke = 0.3f, GearMaxCompression = 0.5f, GearHingeBox = 0.15f;
+        // The share of a leg's carrier mass that leaves with it when the wheel breaks off: LandingGear.BreakWheel takes
+        // LandingGear.mass from the carrier's Rigidbody and gives it to the falling leg, so it must stay under the carrier's.
+        private const float GearBreakShare = 0.5f;
         // Gear-down drag as LandingGear writes it onto the leg part: about the F-104's 0.02 rise in CD0 on 18.2 m2, or
         // 0.36 m2 of CdA, which the game counts as twice that in dragArea.
         private static readonly Dictionary<string, float> GearExtendedDrag = new Dictionary<string, float>
@@ -31,7 +34,8 @@ namespace Icarus.Editor
 
         // An export hinge as the game drives one: the frame at the hinge's pose (local X along the hinge, the part itself
         // when the hinge is a part), a "<name>_hinge" child at identity that turns about local X, and the _visible mesh.
-        private static (Transform Frame, Transform Hinge, MeshRenderer Visible) HingeRig(Build b, string name, Transform parent, Transform frame = null)
+        // flip puts the hinge under a "<name>_axis" frame turned 180 degrees about Y, so it turns about the reversed axis.
+        private static (Transform Frame, Transform Hinge, MeshRenderer Visible) HingeRig(Build b, string name, Transform parent, Transform frame = null, bool flip = false)
         {
             if (frame == null)
             {
@@ -40,8 +44,15 @@ namespace Icarus.Editor
                 frame.SetPositionAndRotation(b.Blockout.Local(name), b.Blockout.Rotation(name));
                 b.Visuals[name] = frame;
             }
+            var axis = frame;
+            if (flip)
+            {
+                axis = new GameObject(name + "_axis") { layer = frame.gameObject.layer }.transform;
+                axis.SetParent(frame, false);
+                axis.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            }
             var hinge = new GameObject(name + "_hinge") { layer = frame.gameObject.layer }.transform;
-            hinge.SetParent(frame, false);
+            hinge.SetParent(axis, false);
             var visible = MeshVisual(b, name + "_visible", hinge);
             return (frame, hinge, visible);
         }
@@ -136,20 +147,23 @@ namespace Icarus.Editor
             foreach (var (leg, rigName, leftovers, wheelName, doorNames) in Legs)
             {
                 var part = b.Parts[leg].transform;
-                var (_, hinge, strut) = HingeRig(b, leg, null, part);
+                var tyreName = wheelName + "_visible";
+                var probe = new GameObject("wheel_probe").transform;
+                probe.SetPositionAndRotation(b.Blockout.Local(tyreName), b.Blockout.Rotation(tyreName));
+                var (centre, axle, radius) = WheelOf(probe, b.Meshes[tyreName].Render);
+                Object.DestroyImmediate(probe.gameObject);
+                var (fold, foldKept) = Travel(b, part, centre, leg, p => p.y); // stowed is up
+                // LandingGear reads the hinge back through localEulerAngles.x and breaks the wheel above 10 degrees
+                // (LandingGear.cs:620), so a negative fold, read as about 359 near full extension, would break a leg
+                // touching down just before it locks: a leg that stows the other way turns about its reversed axis.
+                var (_, hinge, strut) = HingeRig(b, leg, null, part, flip: fold < 0);
+                fold = Mathf.Abs(fold);
                 // LandingGear finds the ground with a linecast that also sees the aircraft's own colliders (layer 14), so
                 // a strut collider over the wheel would read as full compression and lock the leg. The part keeps a small
                 // box at its hinge in the well; the strut's export pieces go unused.
                 foreach (var piece in part.GetComponents<MeshCollider>())
                     Object.DestroyImmediate(piece);
                 part.gameObject.AddComponent<BoxCollider>().size = Vector3.one * GearHingeBox;
-                var tyreName = wheelName + "_visible";
-                var tyrePose = (Position: b.Blockout.Local(tyreName), Rotation: b.Blockout.Rotation(tyreName));
-                var probe = new GameObject("wheel_probe").transform;
-                probe.SetPositionAndRotation(tyrePose.Position, tyrePose.Rotation);
-                var (centre, axle, radius) = WheelOf(probe, b.Meshes[tyreName].Render);
-                Object.DestroyImmediate(probe.gameObject);
-                var (fold, foldKept) = Travel(b, part, centre, leg, p => p.y); // stowed is up
 
                 var rig = b.Root.transform.Find(rigName) ?? throw new MissingReferenceException("rescued gear rig " + rigName);
                 var gear = rig.GetComponentInChildren(gearType, true);
@@ -248,6 +262,7 @@ namespace Icarus.Editor
                 Prop(so, "wheelRadius").floatValue = radius;
                 Prop(so, "maxCompression").floatValue = GearMaxCompression;
                 Prop(so, "extendedDrag").floatValue = GearExtendedDrag[leg];
+                Prop(so, "mass").floatValue = GearBreakShare * b.Mass[leg];
                 var moving = Prop(so, "movingParts");
                 moving.arraySize = wheelTravel != 0 ? 1 : 0;
                 if (wheelTravel != 0)
@@ -267,7 +282,7 @@ namespace Icarus.Editor
                     entry.FindPropertyRelative("openAngle").vector3Value = new Vector3(doors[i].Open, 0, 0);
                 }
                 so.ApplyModifiedPropertiesWithoutUndo();
-                lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg ({(foldKept ? "export sign" : "export sign flipped")}), wheel fold {wheelTravel}, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], drag down {GearExtendedDrag[leg]}");
+                lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg about {(foldKept ? "the export's axis" : "the reversed axis")}, breaks off with {GearBreakShare * b.Mass[leg]:0} of its {b.Mass[leg]:0} kg, wheel fold {wheelTravel}, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], drag down {GearExtendedDrag[leg]}");
             }
             b.Report.Add("gear: the Icarus hinges on the Revoker's LandingGear; " + string.Join("; ", lines));
         }
@@ -309,6 +324,10 @@ namespace Icarus.Editor
             hinges.GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue = hood;
             hinges.GetArrayElementAtIndex(0).FindPropertyRelative("hingeAngle").floatValue = open;
             SetList(Prop(so, "glassRenderers"), new Object[] { glass, windscreen });
+            // Canopy pushes along its part's own forward and up (Canopy.cs FixedUpdate); the hood's hinge frame has up
+            // pointing down into the cockpit, so the Revoker's push is re-expressed in that frame to point up out of it.
+            var push = Vector3.up * Prop(so, "ejectionForce").vector3Value.magnitude;
+            Prop(so, "ejectionForce").vector3Value = new Vector3(0f, Vector3.Dot(push, canopy.up), Vector3.Dot(push, canopy.forward));
             so.ApplyModifiedPropertiesWithoutUndo();
 
             var aircraft = new SerializedObject(b.Aircraft);

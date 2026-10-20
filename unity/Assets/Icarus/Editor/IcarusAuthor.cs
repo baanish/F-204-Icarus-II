@@ -347,6 +347,7 @@ namespace Icarus.Editor
                 BuildCockpit(b);
                 PlaceSystems(b);
                 BuildStations(b);
+                BuildTacScreen(b);
                 AttachLeftovers(b);
                 SetRestPose(b, definition);
                 AddLods(b);

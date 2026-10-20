@@ -27,9 +27,12 @@ sealed class NozzleDriver : MonoBehaviour
 
     void Start()
     {
-        ring = Find(transform, "nozzle_vector");
-        thrust = Find(transform, "thrust_vector");
-        nozzle = thrust != null ? thrust.GetComponent<JetNozzle>() : null;
+        // The JetNozzle sits on thrust_vector and nozzle_vector beside it, both under the nozzle part, which complex
+        // physics has unparented from the aircraft, so they are found from the engine's own reference.
+        Turbojet? engine = IcarusSystems.Engine(GetComponent<Aircraft>());
+        nozzle = engine == null ? null : IcarusSystems.Nozzle(engine);
+        thrust = nozzle != null ? nozzle.transform : null;
+        ring = thrust != null && thrust.parent != null ? thrust.parent.Find("nozzle_vector") : null;
         if (ring == null || thrust == null || nozzle == null)
         {
             IcarusPlugin.Log.Error($"nozzle driver: missing {(ring == null ? "nozzle_vector " : "")}{(thrust == null ? "thrust_vector " : "")}{(nozzle == null ? "JetNozzle" : "")}; petals stay at their dry pose");
@@ -78,15 +81,5 @@ sealed class NozzleDriver : MonoBehaviour
             float angle = open + Vector2.Dot(petal.Radial, deflection);
             petal.Hinge.localRotation = petal.Rest * Quaternion.AngleAxis(petal.OpenSign * angle, Vector3.right);
         }
-    }
-
-    static Transform? Find(Transform root, string name)
-    {
-        foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
-        {
-            if (t.name == name) return t;
-        }
-
-        return null;
     }
 }
