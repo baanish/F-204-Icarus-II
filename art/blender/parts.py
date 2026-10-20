@@ -94,6 +94,22 @@ def station(v):
     return v.y + bi.S0
 
 
+def drop_inside(obj, solid):
+    """Delete obj's faces whose centres lie inside the closed, outward-facing solid."""
+    to_solid = solid.matrix_world.inverted() @ obj.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    drop = []
+    for f in bm.faces:
+        c = to_solid @ f.calc_center_median()
+        found, at, normal, _ = solid.closest_point_on_mesh(c)
+        if found and (c - at).dot(normal) < 0:
+            drop.append(f)
+    bmesh.ops.delete(bm, geom=drop, context="FACES")
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
 def subset(name, source, keep_face):
     """A new object holding the faces of source for which keep_face(center) is true."""
     me = source.data.copy()
@@ -188,6 +204,11 @@ def _organise(p, icarus, internals, structure_mat):
         icarus.objects.link(o)
 
     fus = O["fuselage"]
+    # The canopy is its own loft on top of the body, so the body's top skin ran on under it as a floor across the
+    # cockpit. The cockpit opening is the body skin inside the canopy's closed shape.
+    canopy_solid = interior.outward(bi.build_canopy(p, structure_mat))
+    drop_inside(fus, canopy_solid)
+    bpy.data.objects.remove(canopy_solid, do_unlink=True)
     side = lambda c: "L" if c.x >= 0 else "R"
     dorsal = lambda c: DORSAL[0] <= station(c) <= DORSAL[1] and c.z > DORSAL_Z and abs(c.x) < DORSAL_HALF_WIDTH
     radome = subset("radome_skin", fus, lambda c: station(c) < RADOME_END)
