@@ -4,7 +4,7 @@ Built into the "Internals" collection by build_icarus.build(). Each object carri
 reads: role (fuel_tank, engine, structure, avionics, radar, cockpit, gear_bay), owner (the external part it sits in),
 mass_kg (dry), and for tanks volume_m3. The layout follows the F-104's: radar in the nose, the cockpit, bladder tanks
 in the fuselage above the intake ducts, the engine from the duct exit to the nozzle, gear retracting into the
-fuselage, no gun in this variant (its bay holds avionics). The strake tanks are the Icarus's own.
+fuselage, no gun in this variant (its bay holds avionics).
 """
 import math
 
@@ -20,12 +20,15 @@ INTERNALS = {
     "avionics_nose": {"box": (1.55, 2.30, 0.30, -0.25, 0.42), "mass_kg": 90},  # s0, s1, half width, z0, z1
     "cockpit_tub": {"box": (2.35, 4.90, 0.38, -0.05, 0.78), "mass_kg": 260},
     "avionics_aft": {"box": (4.95, 5.60, 0.42, -0.30, 0.70), "mass_kg": 140},  # the F-104's gun bay
-    # Fuel: (s0, s1, inset from the skin, z floor). A tank fills the skin section above its floor.
-    "fuel_fwd": {"tank": (5.65, 6.80, 0.05, -0.38)},
-    "fuel_mid": {"tank": (6.85, 8.40, 0.05, 0.40)},  # wraps down around the tops of the ducts
-    "fuel_aft": {"tank": (8.45, 9.55, 0.05, 0.40)},
-    "fuel_saddle": {"tank": (9.60, 12.40, 0.05, 0.80)},  # over the engine, under the spine
-    "strake_tank": {"x": (1.00, 1.88), "f": (0.06, 0.80)},  # in each strake: span and chord fraction range
+    # Fuel, after the F-104S layout: an auxiliary cell, the forward main tank, and three connected aft cells, the
+    # centre one between the intake ducts and the side ones wrapping over them. Each row: (s0, s1, inset from the
+    # skin, z floor, x from, x to, capacity kg). A tank fills the skin section above its floor between its x
+    # limits; capacity is the design fuel load, and the drawn volume is checked against it.
+    "fuel_aux": {"tank": (5.65, 5.90, 0.05, -0.30, -9.0, 9.0, 200)},
+    "fuel_forward_main": {"tank": (5.95, 7.70, 0.05, 0.30, -9.0, 9.0, 800)},
+    "fuel_aft_center": {"tank": (7.75, 9.55, 0.05, -0.30, -0.24, 0.24, 600)},
+    "fuel_aft_L": {"tank": (7.75, 9.55, 0.05, 0.05, 0.26, 9.0, 400)},
+    "fuel_aft_R": {"tank": (7.75, 9.55, 0.05, 0.05, -9.0, -0.26, 400)},
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.40, "end_s": 15.00,
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "mass_kg_each": 9},
@@ -42,8 +45,8 @@ def box(name, s0, s1, hw, z0, z1, x=0.0):
     return bi.mesh_object(name, v, faces)
 
 
-def ring_at(p, s, inset, floor=None):
-    """The skin section at s pulled inward by inset, optionally cut flat at z = floor."""
+def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None):
+    """The skin section at s pulled inward by inset, optionally cut flat at z = floor and between x_lo and x_hi."""
     ring = bi.blended_ring(p, s)
     cx = 0.0
     cz = sum(v.z for v in ring) / len(ring)
@@ -53,6 +56,8 @@ def ring_at(p, s, inset, floor=None):
         w = v - d.normalized() * inset if d.length > inset else Vector((cx, v.y, cz))
         if floor is not None and w.z < floor:
             w = Vector((w.x, w.y, floor))
+        if x_lo is not None:
+            w = Vector((min(max(w.x, x_lo), x_hi), w.y, w.z))
         out.append(w)
     return out
 
@@ -65,14 +70,15 @@ def section_area(ring):
     return abs(a) / 2
 
 
-def tank(p, name, s0, s1, inset, floor, mat):
+def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, capacity_kg, mat):
     stations = [s0 + (s1 - s0) * i / 8 for i in range(9)]
-    rings = [ring_at(p, s, inset, floor) for s in stations]
+    rings = [ring_at(p, s, inset, floor, x_lo, x_hi) for s in stations]
     vol = sum(0.5 * (section_area(a) + section_area(b)) * (sb - sa)
               for a, b, sa, sb in zip(rings, rings[1:], stations, stations[1:]))
     obj = bi.finish(bi.loft(name, rings, cap_back=True, cap_front=True), mat, smooth=False)
     obj["volume_m3"] = round(vol, 3)
-    obj["fuel_kg"] = round(vol * 1000 * FUEL_DENSITY, 1)
+    obj["fuel_kg"] = capacity_kg
+    obj["volume_holds_kg"] = round(vol * 1000 * FUEL_DENSITY, 1)
     return obj
 
 
@@ -119,30 +125,11 @@ def _build(p, mats):
         obj = bi.finish(box("main_gear_bay" + suffix, s0, s1, hw, z0, z1, x=side * mg["x"]), mats["gear_bay"], smooth=False)
         parts.append(tag(obj, "gear_bay", "fuselage"))
 
-    for name in ("fuel_fwd", "fuel_mid", "fuel_aft", "fuel_saddle"):
-        s0, s1, inset, floor = I[name]["tank"]
-        obj = tank(p, name, s0, s1, inset, floor, mats["fuel_tank"])
+    for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R"):
+        s0, s1, inset, floor, x_lo, x_hi, capacity = I[name]["tank"]
+        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, capacity, mats["fuel_tank"])
         parts.append(tag(obj, "fuel_tank", "fuselage"))
-    st = I["strake_tank"]
     wing = bi.wing_sections(p["wing"])
-    for side, suffix in ((1, "_L"), (-1, "_R")):
-        stations = [(st["x"][0] + (st["x"][1] - st["x"][0]) * i / 6, st["f"][0], st["f"][1]) for i in range(7)]
-        obj = bi.strip("strake_tank" + suffix, wing, stations, p["wing"]["thickness"] * 0.85, "x")
-        if side < 0:
-            obj.data.transform(bi.Matrix.Scale(-1, 4, (1, 0, 0)))
-            obj.data.flip_normals()
-        bi.finish(obj, mats["fuel_tank"], smooth=False)
-        # volume: chord span strip of a biconvex section, 0.85 of the skin thickness, between the fractions
-        vol = 0.0
-        for (u0, _, _), (u1, _, _) in zip(stations, stations[1:]):
-            c = bi.section_at(wing, 0.5 * (u0 + u1), "x")[3]
-            f0, f1 = st["f"]
-            # integral of 2 * 2t(1-t) * thickness * chord over t in [f0, f1], times chord, times span
-            integ = 4 * ((f1 ** 2 / 2 - f1 ** 3 / 3) - (f0 ** 2 / 2 - f0 ** 3 / 3))
-            vol += integ * p["wing"]["thickness"] * 0.85 * c * c * (u1 - u0)
-        obj["volume_m3"] = round(vol, 3)
-        obj["fuel_kg"] = round(vol * 1000 * FUEL_DENSITY, 1)
-        parts.append(tag(obj, "fuel_tank", "wing" + suffix))
 
     e = I["engine"]
     core = cylinder_loft("engine_core", [(e["face_s"], 0.0, e["z0"], e["radius"] * 0.92), (e["face_s"] + 0.15, 0.0, e["z0"], e["radius"]),

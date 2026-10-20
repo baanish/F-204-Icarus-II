@@ -3,7 +3,13 @@
 The exporter (tools/export_blockout.py) takes meshes in the "Colliders" collection as convex pieces of their parent
 part, and one mesh per part in "LOD1" as its far-distance stand-in. Each sits at an identity transform under its part,
 so its vertices are in the part's own space. Unity caps a convex collider at 255 vertices.
+
+A hit lands on the part whose collider it touches, so colliders follow what the part is: curved skin panels get many
+thin patches (a single hull of a curved panel would be a solid block hiding everything under it), the structure cores
+only a thin keel strip, and compact parts one hull.
 """
+import math
+
 import bmesh
 import bpy
 
@@ -11,11 +17,11 @@ import build_icarus as bi
 
 MAX_HULL = 255
 LOD_GREY = (0.14, 0.14, 0.14, 1.0)  # the colour the Unity author checks LOD1 meshes for
-
-# Parts with no collider or LOD: animated petals and seals, the probe, and the ducts inside the fuselage.
-SKIP = ("nozzle_petal_", "nozzle_seal_", "probe", "duct_", "shock_cone_")
-# Long parts get several hulls: axis index in part space (0 = x, 1 = y) and chunk length in metres.
-CHUNKED = {"fuselage": (1, 1.6), "wing_L": (0, 0.7), "wing_R": (0, 0.7)}
+SKIP = ("nozzle_petal_", "nozzle_seal_")  # animated petals and seals: no collider or LOD
+SKIN_PATCH = (1.2, math.radians(60))  # station length and angle around the body axis of one skin patch
+WING_CHUNK = 0.7  # span of one wing or fin skin hull
+STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft")
+BODY_AXIS_Z = 0.3  # height of the axis skin patch angles are measured around
 
 
 def hull_mesh(name, points):
@@ -52,28 +58,43 @@ def lod_material():
     return mat
 
 
+def groups(owner):
+    """Point groups, in the owner's space, that each become one convex collider."""
+    local = [v.co.copy() for v in owner.data.vertices]
+    world = [owner.matrix_world @ c for c in local]
+    name = owner.name
+    if name in STRUCTURE_CORES:
+        return [[c for c, w in zip(local, world) if abs(w.x) <= 0.06]]
+    if name.startswith(("skin_", "dorsal")):
+        length, sector = SKIN_PATCH
+        cells = {}
+        for c, w in zip(local, world):
+            key = (math.floor((w.y + bi.S0) / length), math.floor(math.atan2(w.z - BODY_AXIS_Z, w.x) / sector))
+            cells.setdefault(key, []).append(c)
+        return [pts for pts in cells.values() if len(pts) >= 4]
+    if name in ("wing_skin_L", "wing_skin_R", "fin_skin"):
+        axis = 2 if name == "fin_skin" else 0
+        lo, hi = min(w[axis] for w in world), max(w[axis] for w in world)
+        n = max(1, round((hi - lo) / WING_CHUNK))
+        out = []
+        for i in range(n):
+            a = lo + (hi - lo) * i / n - 0.05
+            b = lo + (hi - lo) * (i + 1) / n + 0.05
+            out.append([c for c, w in zip(local, world) if a <= w[axis] <= b])
+        return [g for g in out if len(g) >= 4]
+    return [local]
+
+
 def build(icarus):
     colliders = bi.collection("Colliders")
     lods = bi.collection("LOD1")
     lod_mat = lod_material()
     count = {"colliders": 0, "lods": 0}
-    for owner in [o for o in icarus.objects if o.type == "MESH" and not o.name.startswith(SKIP)]:
-        pts = [v.co.copy() for v in owner.data.vertices]
-        if owner.name in CHUNKED:
-            axis, length = CHUNKED[owner.name]
-            lo, hi = min(p[axis] for p in pts), max(p[axis] for p in pts)
-            n = max(1, round((hi - lo) / length))
-            for i in range(n):
-                a = lo + (hi - lo) * i / n - 0.05
-                b = lo + (hi - lo) * (i + 1) / n + 0.05
-                chunk = [p for p in pts if a <= p[axis] <= b]
-                if len(chunk) >= 4:
-                    attach("%s_col%d" % (owner.name, i), hull_mesh("%s_col%d" % (owner.name, i), chunk), owner, colliders)
-                    count["colliders"] += 1
-        else:
-            attach(owner.name + "_col0", hull_mesh(owner.name + "_col0", pts), owner, colliders)
+    for owner in [o for o in icarus.all_objects if o.type == "MESH" and not o.name.startswith(SKIP)]:
+        for i, pts in enumerate(groups(owner)):
+            attach("%s_col%d" % (owner.name, i), hull_mesh("%s_col%d" % (owner.name, i), pts), owner, colliders)
             count["colliders"] += 1
-        lod = hull_mesh(owner.name + "_lod1", pts)
+        lod = hull_mesh(owner.name + "_lod1", [v.co.copy() for v in owner.data.vertices])
         lod.materials.append(lod_mat)
         attr = lod.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
         for d in attr.data:

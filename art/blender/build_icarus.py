@@ -848,7 +848,10 @@ def _build(repo):
         "cockpit": material("Icarus_Int_Cockpit", (0.32, 0.33, 0.35, 1.0), 0.2, 0.6),
         "gear_bay": material("Icarus_Int_Bay", (0.10, 0.10, 0.11, 1.0), 0.0, 0.8),
     }
-    inner = internals.build(p, collection("Internals"), inner_mats)
+    internals.build(p, collection("Internals"), inner_mats)
+    import parts as part_tree
+
+    tree = part_tree.organise(p, TARGET, bpy.data.collections["Internals"], inner_mats["structure"])
     bpy.context.view_layer.update()
     import hulls
 
@@ -857,10 +860,11 @@ def _build(repo):
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])
     out["parts"] = len(TARGET.objects)
-    out["internal_parts"] = len(inner)
+    out["damage_parts"] = len(tree)
     out.update(hull_count)
-    out["fuel_kg"] = round(sum(o.get("fuel_kg", 0.0) for o in inner), 1)
-    out["internal_mass_kg"] = round(sum(o.get("mass_kg", 0.0) for o in inner), 1)
+    tagged = [o for o in TARGET.all_objects if "mass_kg" in o]
+    out["fuel_kg"] = round(sum(o.get("fuel_kg", 0.0) for o in tagged if o.get("role") == "fuel_tank"), 1)
+    out["dry_mass_kg"] = round(sum(o["mass_kg"] for o in tagged), 1)
     out["references"] = refs
     return out
 
