@@ -1,4 +1,4 @@
-# F-240 Icarus II
+# F-204 Icarus II
 
 A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): a Primeva interceptor that runs past Mach 2.5 on a modern afterburning turbojet, built by AI agents with a person reviewing every iteration.
 

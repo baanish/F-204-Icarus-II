@@ -1,6 +1,6 @@
-# F-240 Icarus II: vision
+# F-204 Icarus II: vision
 
-The F-240 Icarus II is a flyable aircraft mod for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): the F-104 Starfighter, rebuilt for the game's near future. It keeps the Starfighter's shape and its reason to exist, a manned missile that climbs and runs faster than anything it chases, and gives it newer materials, a modern afterburning turbojet, and the sensors and datalink every aircraft in the game carries.
+The F-204 Icarus II is a flyable aircraft mod for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): the F-104 Starfighter, rebuilt for the game's near future. It keeps the Starfighter's shape and its reason to exist, a manned missile that climbs and runs faster than anything it chases, and gives it newer materials, a modern afterburning turbojet, and the sensors and datalink every aircraft in the game carries.
 
 The game has no Starfighter. This fills that slot.
 

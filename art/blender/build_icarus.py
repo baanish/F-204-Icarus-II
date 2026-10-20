@@ -1,4 +1,4 @@
-"""F-240 Icarus II exterior generator.
+"""F-204 Icarus II exterior generator.
 
 Rebuilds the aircraft from PARAMS into the `Icarus` collection. Run it inside a live Blender session
 (exec the file) or headless:

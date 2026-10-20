@@ -1,4 +1,4 @@
-"""Internal parts of the F-240 Icarus II: what a Full Fidelity damage model reveals under the skin.
+"""Internal parts of the F-204 Icarus II: what a Full Fidelity damage model reveals under the skin.
 
 Built into the "Internals" collection by build_icarus.build(). Each object carries custom properties the Unity author
 reads: role (fuel_tank, engine, structure, avionics, radar, cockpit, gear_bay), owner (the external part it sits in),

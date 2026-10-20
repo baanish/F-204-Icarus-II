@@ -9,10 +9,10 @@ using UnityEngine;
 namespace Icarus;
 
 /// <summary>
-/// The F-240 Icarus II plugin: config (BepInEx/config/baanish.icarus.cfg), the "[Icarus]" logger, the Harmony install,
+/// The F-204 Icarus II plugin: config (BepInEx/config/baanish.icarus.cfg), the "[Icarus]" logger, the Harmony install,
 /// the startup hold and AI supply repair, the iris nozzle driver and the live tuning knobs.
 /// </summary>
-[BepInPlugin(Guid, "F-240 Icarus II", Version)]
+[BepInPlugin(Guid, "F-204 Icarus II", Version)]
 public sealed class IcarusPlugin : BaseUnityPlugin
 {
     public const string Guid = "baanish.icarus";
@@ -43,7 +43,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
             "Log each stage the mod crosses (spawn, nozzle, tuning file), at most one line per key per second");
         Log.StageEnabled = stageLogging.Value;
         stageLogging.SettingChanged += (_, _) => Log.StageEnabled = stageLogging.Value;
-        Log.Info($"F-240 Icarus II {Version} ({Guid}); Diagnostics.StageLogging={stageLogging.Value}");
+        Log.Info($"F-204 Icarus II {Version} ({Guid}); Diagnostics.StageLogging={stageLogging.Value}");
         Tuning.Install(Config, Log);
         harmony = new Harmony(Guid);
         FeaturesOff = PatchTarget.InstallAll(harmony, PatchTargets, Log);

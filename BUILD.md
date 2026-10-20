@@ -1,4 +1,4 @@
-# Building the F-240 Icarus II
+# Building the F-204 Icarus II
 
 The mod is two files that work only as a pair: `Icarus.dll`, the BepInEx plugin built from `src/Icarus`, and `icarus_<version>.nobp`, the Blueprinter bundle built by the Unity project in `unity/`. The bundle is authored from the mesh exports in `art/export`, so you don't need Blender unless you change the model.
 
@@ -38,7 +38,7 @@ The build rewrites the authored assets under `unity/Assets/Blueprinter/Mods/icar
 
 ## Install your build
 
-Close the game, then copy `build/Icarus.dll` and `build/icarus_<version>.nobp` into `BepInEx/plugins/baanish.icarus/` in the game folder. Blueprinter 2.0.1 or later must be installed and enabled. `BepInEx/LogOutput.log` names the version on load: `F-240 Icarus II <version> (baanish.icarus)`.
+Close the game, then copy `build/Icarus.dll` and `build/icarus_<version>.nobp` into `BepInEx/plugins/baanish.icarus/` in the game folder. Blueprinter 2.0.1 or later must be installed and enabled. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II <version> (baanish.icarus)`.
 
 The flight-model knobs live in `BepInEx/config/baanish.icarus.cfg` under `[Tuning.*]`. A value below 0 is the shipped value; saving the file applies the rest to every Icarus in flight. While another player is connected, every knob reads its shipped value.
 

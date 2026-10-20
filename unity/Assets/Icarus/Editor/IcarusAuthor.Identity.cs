@@ -212,8 +212,8 @@ namespace Icarus.Editor
             definition.name = Path.GetFileNameWithoutExtension(DefinitionPath);
             var so = new SerializedObject(definition);
             Prop(so, "jsonKey").stringValue = JsonKey;
-            Prop(so, "unitName").stringValue = "F-240 Icarus II";
-            Prop(so, "code").stringValue = "F-240";
+            Prop(so, "unitName").stringValue = "F-204 Icarus II";
+            Prop(so, "code").stringValue = "F-204";
             Prop(so, "description").stringValue = "A modernized Starfighter: a single-turbojet interceptor on a cranked-arrow wing with leading-edge flaps and a vectoring iris nozzle. Fast and quick to climb, it bleeds energy in a turn. Eight stations carry missiles and light strike stores.";
             Num(so, "roleIdentity.antiAir", 1f);
             Num(so, "roleIdentity.antiSurface", 0.3f);

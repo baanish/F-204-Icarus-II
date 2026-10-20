@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 
 namespace Icarus.Editor
 {
-    // Authors the F-240 Icarus II blockout into the mod folder from two inputs: the FS-12 Revoker (Fighter1), whose
+    // Authors the F-204 Icarus II blockout into the mod folder from two inputs: the FS-12 Revoker (Fighter1), whose
     // systems are kept, and the export of tools/export_blockout.py (art/export), which replaces its airframe, aero tree,
     // damage structure, engine rig and stations. Rerunnable: every asset is rewritten in place at a fixed path, so GUIDs
     // survive a rerun. Game types live in the imported Assembly-CSharp, which an asmdef can't reference, so their fields
