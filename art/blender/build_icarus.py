@@ -18,9 +18,9 @@ from mathutils import Matrix, Vector
 S0 = 8.0
 
 PARAMS = {
-    # Fuselage body without intakes or canopy: (s, half width, z top, z bottom, top exponent).
-    # Lower half is a half ellipse whose vertical radius equals the half width; the top exponent below 2 pinches the
-    # upper half into the dorsal spine.
+    # Fuselage body: (s, half width, z top, z bottom, top exponent). Lower half is a half ellipse whose vertical
+    # radius equals the half width; a top exponent below 2 pinches the upper half into the dorsal spine. Intake
+    # fairings and root fillets are blended into these sections (see "blend"), so the outer skin is one surface.
     "fuselage": [
         (0.00, 0.000, 0.03, 0.03, 2.0),
         (0.35, 0.120, 0.14, -0.08, 2.0),
@@ -35,8 +35,8 @@ PARAMS = {
         (12.2, 0.650, 1.07, -0.39, 1.5),
         (13.2, 0.640, 1.02, -0.30, 1.6),
         (14.2, 0.620, 0.92, -0.20, 1.8),
-        (15.2, 0.540, 0.80, -0.03, 2.0),
-        (15.62, 0.420, 0.75, 0.00, 2.0),
+        (15.0, 0.560, 0.82, -0.05, 2.0),
+        (15.45, 0.450, 0.76, -0.01, 2.0),
     ],
     "canopy": [  # (s, half width, z top, z bottom)
         (2.32, 0.30, 0.64, 0.50),
@@ -47,7 +47,8 @@ PARAMS = {
         (4.70, 0.37, 1.07, 0.75),
         (5.10, 0.30, 1.03, 0.85),
     ],
-    # Intake pods: (s, outer half width, z centre, half height). Inner face sits inside the body at intake_inner_x.
+    # Intake fairings: (s, outer half width, z centre, half height). Each is a rounded lobe whose inner edge sits at
+    # intake_inner_x inside the body; the first row is the lip, where the lobe starts and the duct face is drawn.
     "intake": [
         (6.85, 1.06, 0.22, 0.42),
         (7.60, 1.12, 0.22, 0.42),
@@ -55,9 +56,15 @@ PARAMS = {
         (10.0, 1.04, 0.22, 0.36),
         (11.4, 0.90, 0.22, 0.30),
         (12.6, 0.70, 0.22, 0.22),
+        (14.2, 0.46, 0.22, 0.12),  # fully inside the body, so the fairing fades out without a step
     ],
-    "intake_inner_x": 0.58,
-    "shock_cone": {"apex_s": 6.38, "base_s": 7.30, "radius": 0.24},
+    "intake_inner_x": 0.40,
+    "intake_lip_round": 0.15,  # metres over which the lip grows from 90% to full size
+    "blend": 0.24,  # smooth-union radius between body, intakes and fillets
+    "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
+    "fin_fillet": {"half_width": 0.06, "rise": 0.20},  # above the spine, along the fin root
+    "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
+    "shock_cone": {"apex_s": 6.38, "base_s": 7.30, "radius": 0.26, "x": 0.63},
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     "wing": {
         "sections": [(8.55, 0.58, 0.20, 3.58), (9.95, 3.345, 0.20 - 2.765 * math.tan(math.radians(10)), 1.46)],
@@ -71,7 +78,11 @@ PARAMS = {
         "sections": [(14.78, 0.0, 2.82, 1.91), (15.41, 1.815, 2.82, 0.59)],
         "thickness": 0.045,
     },
-    "nozzle": {"s_start": 15.25, "s_end": 15.85, "z": 0.37, "radius": 0.37, "lip": 0.025},
+    "ventral_fin": {
+        "sections": [(10.85, 0.0, -0.36, 2.25), (10.95, 0.0, -0.62, 2.05)],
+        "thickness": 0.05,
+    },
+    "nozzle": {"s_start": 15.05, "s_end": 15.55, "z": 0.37, "radius": 0.37, "lip": 0.025},
     # Reference drawings shown as image empties: file, px per metre, pixel of the radome tip, plane.
     "references": {
         "dir": ".cache/reference",
@@ -81,7 +92,7 @@ PARAMS = {
     },
 }
 
-RING = 48  # vertices around a fuselage section
+RING = 72  # vertices around a fuselage section
 CHORD = 24  # points along each airfoil surface
 
 
@@ -253,11 +264,110 @@ def finish(obj, mat, smooth=True):
 
 # --- parts ---------------------------------------------------------------------------------------------------------
 
-def build_fuselage(p, mat):
+def smin(a, b, k):
+    """Polynomial smooth minimum: a union of two fields with a fillet of radius about k."""
+    h = max(k - abs(a - b), 0.0) / k
+    return min(a, b) - h * h * k * 0.25
+
+
+def lobe(dx, dz, a, b_top, b_bot, e_top=2.0, e_bot=2.0):
+    """Approximate signed distance to a superellipse with separate upper and lower halves."""
+    b, e = (b_top, e_top) if dz >= 0 else (b_bot, e_bot)
+    q = (abs(dx) / a) ** e + (abs(dz) / b) ** e
+    return (q ** (1.0 / e) - 1.0) * min(a, b)
+
+
+def ramp(s, s0, s1, s2, s3):
+    """0 before s0, rising to 1 by s1, falling back to 0 between s2 and s3."""
+    if s <= s0 or s >= s3:
+        return 0.0
+    if s < s1:
+        return math.sin(0.5 * math.pi * (s - s0) / (s1 - s0)) ** 2
+    if s > s2:
+        return math.cos(0.5 * math.pi * (s - s2) / (s3 - s2)) ** 2
+    return 1.0
+
+
+def fuselage_shapes(p, s):
+    """The lobes whose smooth union is the outer skin at station s, as (field function, centre z)."""
+    hw, top, bot, e_top = [pchip([r[0] for r in p["fuselage"]], [r[i] for r in p["fuselage"]], s) for i in (1, 2, 3, 4)]
+    zmid = min(bot + hw, top)
+    shapes = [lambda x, z: lobe(x, z - zmid, hw, top - zmid, zmid - bot, e_top)]
+    intake = p["intake"]
+    if intake[0][0] <= s <= intake[-1][0]:
+        _, xo, zc, hh = resample(intake, [s])[0]
+        grow = 0.9 + 0.1 * min(1.0, (s - intake[0][0]) / p["intake_lip_round"])
+        xi = p["intake_inner_x"]
+        a, cx = (xo - xi) / 2 * grow, xi + (xo - xi) / 2
+        for side in (1, -1):
+            shapes.append(lambda x, z, side=side, a=a, cx=cx, zc=zc, b=hh * grow: lobe(x - side * cx, z - zc, a, b, b))
+    (le0, x0, z0, c0), (le1, x1, _, c1) = p["wing"]["sections"][:2]
+    le_at = le0 + (le1 - le0) * (hw - x0) / (x1 - x0)
+    te_at = le0 + c0 + (le1 + c1 - le0 - c0) * (hw - x0) / (x1 - x0)
+    f = ramp(s, le_at - 0.1, le_at + 0.6, te_at - 0.8, te_at + 0.05)
+    if f > 0:
+        wf = p["wing_fillet"]
+        a, b = 0.05 + wf["reach"] * f, 0.02 + wf["half_thickness"] * f
+        for side in (1, -1):
+            shapes.append(lambda x, z, side=side, a=a, b=b, cx=hw - 0.05: lobe(x - side * cx, z - z0, a, b, b))
+    fs = p["fin"]["sections"][0]
+    f = ramp(s, fs[0] - 0.2, fs[0] + 1.4, p["fuselage"][-1][0] - 0.6, p["fuselage"][-1][0])
+    if f > 0:
+        ff = p["fin_fillet"]
+        rise = 0.05 + ff["rise"] * f
+        shapes.append(lambda x, z, b=rise, zt=top - 0.05: lobe(x, z - zt, ff["half_width"], b, 0.05))
+    return shapes, zmid
+
+
+def blended_ring(p, s):
+    shapes, zc = fuselage_shapes(p, s)
+    k = p["blend"]
+
+    def field(x, z):
+        d = shapes[0](x, z)
+        for f in shapes[1:]:
+            d = smin(d, f(x, z), k)
+        return d
+
+    ring = []
+    for i in range(RING):
+        a = 2 * math.pi * i / RING
+        c, sn = math.cos(a), math.sin(a)
+        r_out, step, r = 0.0, 0.02, 0.0
+        inside = field(0.0, zc) < 0
+        while r < 3.0:  # keep the outermost inside-to-outside crossing, so concave fillets resolve
+            r_next = r + step
+            now = field(r_next * c, zc + r_next * sn) < 0
+            if inside and not now:
+                lo, hi = r, r_next
+                for _ in range(20):
+                    mid = 0.5 * (lo + hi)
+                    if field(mid * c, zc + mid * sn) < 0:
+                        lo = mid
+                    else:
+                        hi = mid
+                r_out = 0.5 * (lo + hi)
+            inside, r = now, r_next
+        ring.append(P(s, r_out * c, zc + r_out * sn))
+    return ring
+
+
+def build_fuselage(p, mat, duct_mat):
     table = p["fuselage"]
-    stations = spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, table[-1][0], 60)[1:]
-    rings = [body_ring(s, hw, top, bot, e) for s, hw, top, bot, e in resample(table, stations)]
-    return finish(loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2])), mat)
+    lip = p["intake"][0][0]
+    stations = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 30)[1:]
+                + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, table[-1][0], 70)[1:])
+    rings = [blended_ring(p, s) for s in stations]
+    obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]))
+    finish(obj, mat)
+    obj.data.materials.append(duct_mat)
+    # The faces between the last ring ahead of the lip and the lip itself are the intake openings.
+    j = stations.index(lip) - 1
+    for k in range(RING):
+        a, b = rings[j][k], rings[j + 1][k]
+        if (Vector((b.x, b.z)) - Vector((a.x, a.z))).length > 0.03:
+            obj.data.polygons[RING + j * RING + k].material_index = 1
+    return obj
 
 
 def build_canopy(p, mat):
@@ -266,32 +376,28 @@ def build_canopy(p, mat):
     return finish(loft("canopy", rings, cap_back=True), mat)
 
 
-def build_intakes(p, mat, duct_mat):
-    xi = p["intake_inner_x"]
-    rows = resample(p["intake"], spaced(p["intake"][0][0], p["intake"][-1][0], 30))
-    rings = []
-    for s, xo, zc, hh in rows:
-        hw = (xo - xi) / 2
-        rings.append(body_ring(s, hw, zc + hh, zc - hh, 2.6, e_bot=2.6, xc=xi + hw, zmid=zc))
-    left = finish(loft("intake_L", rings), mat)
-    lip = finish(loft("intake_L_duct", [[v + Vector((0, 0.06, 0)) for v in rings[0]]], cap_back=True), duct_mat, smooth=False)
+def build_probe(p, mat):
+    pr = p["probe"]
+    z = p["fuselage"][0][2]
+    profile = [(-pr["length"], 0.008), (-pr["length"] + 0.05, pr["radius"]), (-pr["base_length"], pr["radius"]),
+               (-0.1, pr["base_radius"] * 0.5), (0.05, pr["base_radius"]), (0.30, pr["base_radius"])]
+    rings = [[P(s, r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / 24 for k in range(24)]]
+             for s, r in profile]
+    return finish(loft("probe", rings, tip_front=P(-pr["length"] - 0.02, 0.0, z)), mat)
+
+
+def build_shock_cones(p, mat):
     sc = p["shock_cone"]
-    cone_rings = []
-    for i in range(1, 12):
-        s = sc["apex_s"] + (sc["base_s"] - sc["apex_s"]) * i / 11
-        r = sc["radius"] * i / 11
-        zc = rows[0][2]
-        cone_rings.append([P(s, xi + 0.04 + r * max(0.0, math.cos(a)), zc + r * math.sin(a))
-                           for a in [2 * math.pi * k / RING for k in range(RING)]])
-    cone = finish(loft("shock_cone_L", cone_rings, tip_front=P(sc["apex_s"], xi + 0.04, rows[0][2])), mat)
-    parts = [left, lip, cone]
-    for obj in parts:
-        twin = obj.copy()
-        twin.data = obj.data.copy()
-        twin.name = obj.name.replace("_L", "_R")
-        twin.data.name = twin.name
-        TARGET.objects.link(twin)
-        mirror_x(twin)
+    zc = p["intake"][0][2]
+    parts = []
+    for side, name in ((1, "shock_cone_L"), (-1, "shock_cone_R")):
+        rings = []
+        for i in range(1, 12):
+            s = sc["apex_s"] + (sc["base_s"] - sc["apex_s"]) * i / 11
+            r = sc["radius"] * i / 11
+            rings.append([P(s, side * (sc["x"] + r * max(0.0, math.cos(a))), zc + r * math.sin(a))
+                          for a in [2 * math.pi * k / RING for k in range(RING)]])
+        parts.append(finish(loft(name, rings, tip_front=P(sc["apex_s"], side * sc["x"], zc)), mat))
     return parts
 
 
@@ -299,10 +405,11 @@ def build_surfaces(p, mat):
     wing = finish(lifting_surface("wing_L", p["wing"]["sections"], p["wing"]["thickness"], "z"), mat)
     wing_r = finish(mirror_x(lifting_surface("wing_R", p["wing"]["sections"], p["wing"]["thickness"], "z")), mat)
     fin = finish(lifting_surface("fin", p["fin"]["sections"], p["fin"]["thickness"], "x"), mat)
+    ventral = finish(lifting_surface("ventral_fin", p["ventral_fin"]["sections"], p["ventral_fin"]["thickness"], "x"), mat)
     st = p["stabilator"]["sections"]
     stab_l = finish(lifting_surface("stabilator_L", st, p["stabilator"]["thickness"], "z"), mat)
     stab_r = finish(mirror_x(lifting_surface("stabilator_R", st, p["stabilator"]["thickness"], "z")), mat)
-    return [wing, wing_r, fin, stab_l, stab_r]
+    return [wing, wing_r, fin, ventral, stab_l, stab_r]
 
 
 def build_nozzle(p, mat):
@@ -387,8 +494,8 @@ def build(repo=None):
     duct = material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8)
     metal = material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35)
     p = PARAMS
-    parts = [build_fuselage(p, body), build_canopy(p, glass), build_nozzle(p, metal)]
-    parts += build_intakes(p, body, duct)
+    parts = [build_fuselage(p, body, duct), build_canopy(p, glass), build_nozzle(p, metal), build_probe(p, metal)]
+    parts += build_shock_cones(p, body)
     parts += build_surfaces(p, body)
     refs = build_references(p, repo)
     out = metrics([o for o in TARGET.objects])
