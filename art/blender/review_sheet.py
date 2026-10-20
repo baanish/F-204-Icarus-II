@@ -90,6 +90,23 @@ def three_quarter(scene, out_dir):
     render_view(scene, cam, os.path.join(out_dir, "three_quarter.png"), (1600, 900))
 
 
+# Close-ups for details a full view hides: name -> (camera location, look-at point), Blender axes.
+CLOSEUPS = {
+    "intake": (Vector((3.2, -6.6, 1.0)), Vector((0.8, -1.2, 0.2))),
+    "tail": (Vector((4.5, 4.0, 5.5)), Vector((0.0, 7.8, 2.4))),
+}
+
+
+def closeups(scene, out_dir):
+    for name, (loc, target) in CLOSEUPS.items():
+        cam = camera("ReviewCam_" + name)
+        cam.data.type = "PERSP"
+        cam.data.lens = 50
+        cam.location = loc
+        cam.rotation_euler = (target - loc).to_track_quat("-Z", "Y").to_euler()
+        render_view(scene, cam, os.path.join(out_dir, name + ".png"), (1200, 800))
+
+
 def render(out_dir, repo=None):
     repo = repo or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     os.makedirs(out_dir, exist_ok=True)
@@ -98,6 +115,7 @@ def render(out_dir, repo=None):
     for view in ("top", "side", "front"):
         ortho(scene, out_dir, view, refs[view], repo)
     three_quarter(scene, out_dir)
+    closeups(scene, out_dir)
     return {"out": out_dir, "files": sorted(os.listdir(out_dir))}
 
 

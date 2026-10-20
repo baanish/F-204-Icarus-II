@@ -63,7 +63,7 @@ PARAMS = {
     "blend": 0.24,  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
-    "shock_cone": {"apex_s": 6.38, "base_s": 7.30, "radius": 0.26, "x": 0.63},
+    "shock_cone": {"apex_s": 6.20, "base_s": 7.45, "radius": 0.34, "x": 0.63},
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
     # crank, and a 37 degree outboard panel; trailing edge nearly unswept. The first row is buried in the fairing
@@ -82,8 +82,9 @@ PARAMS = {
                      (14.68, 0.0, 2.88, 1.00)],
         "thickness": 0.05,
     },
+    # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V.
     "stabilator": {
-        "sections": [(14.78, 0.0, 2.82, 1.91), (15.41, 1.815, 2.82, 0.59)],
+        "sections": [(14.78, 0.0, 2.82, 1.91), (15.41, 1.815, 2.82, 1.28)],
         "thickness": 0.045,
     },
     "ventral_fin": {
@@ -330,7 +331,9 @@ def fuselage_shapes(p, s):
 
 def blended_ring(p, s):
     shapes, zc = fuselage_shapes(p, s)
-    k = p["blend"]
+    # The lip is a sharp union, so the intake face is a clean outline; the fillet fades in behind it.
+    behind_lip = s - p["intake"][0][0]
+    k = p["blend"] * (0.05 + 0.95 * min(1.0, behind_lip / 0.45)) if behind_lip >= 0 else p["blend"]
 
     def field(x, z):
         d = shapes[0](x, z)
@@ -372,9 +375,9 @@ def build_fuselage(p, mat, duct_mat):
     obj.data.materials.append(duct_mat)
     # The faces between the last ring ahead of the lip and the lip itself are the intake openings.
     j = stations.index(lip) - 1
+    step = [(Vector((b.x, b.z)) - Vector((a.x, a.z))).length for a, b in zip(rings[j], rings[j + 1])]
     for k in range(RING):
-        a, b = rings[j][k], rings[j + 1][k]
-        if (Vector((b.x, b.z)) - Vector((a.x, a.z))).length > 0.03:
+        if max(step[k], step[(k + 1) % RING]) > 0.005:  # a quad spans vertices k and k+1
             obj.data.polygons[RING + j * RING + k].material_index = 1
     return obj
 
