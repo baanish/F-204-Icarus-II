@@ -124,6 +124,8 @@ namespace Icarus.Editor
                     || Quaternion.Angle(entry.Rotation, b.Blockout.Rotation(spec.Name)) > 0.01f))
                     throw new InvalidDataException($"{spec.Name}: its _visible mesh doesn't sit at its hinge, so its colliders can't sit on the part.");
                 SetColliders(b, go, entry.Name);
+                if (Array.IndexOf(StructureCores, spec.Name) >= 0)
+                    AddSectionInertia(go, b.Meshes[spec.Name].Render.bounds);
                 if (!b.Blockout.Parts[spec.Name].IsHinge)
                 {
                     Ensure<MeshFilter>(go).sharedMesh = b.Meshes[spec.Name].Render;
@@ -216,6 +218,22 @@ namespace Icarus.Editor
             Debug.Log($"[Icarus] check R13 tree PASS: {Tree.Length} R13 parts and {b.Specs.Count - Tree.Length} extra fuel cells [{string.Join(", ", b.Specs.Skip(Tree.Length).Select(s => s.Name + " on " + s.Parent))}], {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
         }
 
+        // The fuselage cores carry only a keel-strip hull (art/blender/hulls.py), and Unity takes a Rigidbody's inertia from
+        // its colliders, so a core spun on its keel: the main tyres' side force, a metre and a half below the root, flipped
+        // the root's roll every physics step and the jet reared up on the runway. A box over the core's whole section, on
+        // the game's IgnoreCollisions layer (no hits, no ground cast, no contacts), gives it a fuselage section's inertia.
+        private static readonly string[] StructureCores = { RootPart, "fuselage_forward", "fuselage_aft" };
+        internal const int IgnoreCollisionsLayer = 15; // PhysicsLayers.IgnoreCollisions
+
+        private static void AddSectionInertia(GameObject part, Bounds section)
+        {
+            var box = new GameObject(part.name + "_inertia") { layer = IgnoreCollisionsLayer };
+            box.transform.SetParent(part.transform, false);
+            var collider = box.AddComponent<BoxCollider>();
+            collider.center = section.center;
+            collider.size = section.size;
+        }
+
         // The export's convex pieces, in the part's own frame (the part sits where its mesh does).
         private static void SetColliders(Build b, GameObject go, string meshName)
         {
@@ -286,7 +304,7 @@ namespace Icarus.Editor
             if (probe == null || !Physics.ComputePenetration(probe, probe.transform.position, probe.transform.rotation, probe, probe.transform.position + Vector3.up * 0.05f, probe.transform.rotation, out _, out _))
                 throw new InvalidDataException("A12: the overlap check can't see a hull overlapping a copy of itself; it would miss real overlaps.");
             var colliders = b.Root.GetComponentsInChildren<Collider>(true)
-                .Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null))
+                .Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null))
                 .Select(c => (collider: c, part: c.GetComponentInParent(aeroType, true))).Where(c => c.part != null).ToArray();
             var name = b.Parts.ToDictionary(p => (Object)p.Value.GetComponent(aeroType), p => p.Key);
             bool Linked(string x, string y) => b.Joints.TryGetValue(x, out var a) && a.Contains(y) || b.Joints.TryGetValue(y, out var c) && c.Contains(x);
@@ -368,7 +386,7 @@ namespace Icarus.Editor
         // Where two parts meet: the middle of their colliders' common bounds, or of the gap between them.
         private static Transform JointAnchor(GameObject part, GameObject other)
         {
-            Bounds Hull(GameObject go) => go.GetComponents<Collider>().Where(c => !(c is MeshCollider m && m.sharedMesh == null)).Select(c => c.bounds).Aggregate((a, c) => { a.Encapsulate(c); return a; });
+            Bounds Hull(GameObject go) => go.GetComponents<Collider>().Where(c => c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null)).Select(c => c.bounds).Aggregate((a, c) => { a.Encapsulate(c); return a; });
             var a = Hull(part);
             var o = Hull(other);
             var lo = Vector3.Max(a.min, o.min);

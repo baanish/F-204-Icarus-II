@@ -24,7 +24,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Seconds between a mission starting and the supply repair, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 

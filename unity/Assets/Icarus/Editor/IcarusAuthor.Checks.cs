@@ -312,12 +312,13 @@ namespace Icarus.Editor
             foreach (var g in gears)
             {
                 var so = new SerializedObject(g);
-                // The gear rides its gear_leg part and pushes on the part that leg hangs on.
-                var leg = Legs.FirstOrDefault(l => g.transform.IsChildOf(b.Parts[l.Leg].transform));
-                var part = leg.Leg == null ? null : b.Parts[leg.Leg].transform;
+                // The gear rides its leg's mount on the part that leg hangs on, and pushes on that part.
+                Transform Mount(string l) => b.Parts[b.Specs.First(s => s.Name == l).Parent].transform.Find(l + "_mount");
+                var leg = Legs.FirstOrDefault(l => Mount(l.Leg) != null && g.transform.IsChildOf(Mount(l.Leg)));
+                var part = leg.Leg == null ? null : Mount(leg.Leg);
                 var carrierPart = Prop(so, "attachedPart").objectReferenceValue as Component;
-                if (part == null) p.Add(g.name + " isn't on a gear_leg part");
-                else if (carrierPart == null || carrierPart.gameObject != b.Parts[b.Specs.First(s => s.Name == leg.Leg).Parent]) p.Add(g.name + " doesn't push on the part its leg hangs on");
+                if (part == null) p.Add(g.name + " isn't on a gear leg mount");
+                else if (carrierPart == null || carrierPart.transform != part.parent) p.Add(g.name + " doesn't push on the part its rig rides");
                 foreach (var field in new[] { "bumpStop", "unsprung", "axle", "gearCollider", "gearHinge", "tireNoiseSound", "tireSkidSound" })
                     if (Prop(so, field).objectReferenceValue == null) p.Add($"{g.name}.{field} is null");
                 var wheels = GetList(Prop(so, "wheels")).Cast<Transform>().ToArray();
@@ -326,7 +327,7 @@ namespace Icarus.Editor
                 if (part == null || carrierPart == null || hinge == null || wheels.Length == 0 || wheels[0] == null)
                     continue;
                 if (!hinge.IsChildOf(part.transform) || Quaternion.Angle(hinge.localRotation, Quaternion.identity) > 0.01f)
-                    p.Add(g.name + "'s gear hinge isn't at rest on its gear_leg part");
+                    p.Add(g.name + "'s gear hinge isn't at rest on its leg mount");
                 // A negative fold reads back near 360 through localEulerAngles.x as the leg locks down, which LandingGear
                 // takes for a broken wheel above 10 degrees.
                 if (Prop(so, "foldDegrees").floatValue <= 0f) p.Add($"{g.name} folds {Prop(so, "foldDegrees").floatValue} deg; stowing must be a positive turn");
@@ -344,7 +345,7 @@ namespace Icarus.Editor
             }
             // Each leg's ground cast, castPoint down suspensionTravel, must meet no collider of the aircraft.
             Physics.SyncTransforms();
-            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
+            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
             foreach (var g in gears)
             {
                 var so = new SerializedObject(g);
@@ -398,7 +399,7 @@ namespace Icarus.Editor
             // The seat rides its rail out after the canopy goes; the capsule must clear every other airframe collider.
             var crew = new HashSet<Collider>(pilots.SelectMany(x => x.GetComponentsInChildren<Collider>(true)));
             var airframe = b.Root.GetComponentsInChildren<Collider>(true)
-                .Where(c => c.enabled && !c.isTrigger && !crew.Contains(c) && !c.transform.IsChildOf(b.Parts["canopy"].transform) && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
+                .Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !crew.Contains(c) && !c.transform.IsChildOf(b.Parts["canopy"].transform) && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
             var probe = new GameObject("escape_probe").AddComponent<CapsuleCollider>();
             try
             {
@@ -541,7 +542,7 @@ namespace Icarus.Editor
                 }
             }
             Physics.SyncTransforms();
-            var colliders = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null))
+            var colliders = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null))
                 .Select(c => (collider: c, part: (Object)c.GetComponentInParent(aeroType, true))).ToArray();
             var overlaps = 0;
             for (var i = 0; i < colliders.Length; i++)

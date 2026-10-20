@@ -156,7 +156,14 @@ namespace Icarus.Editor
                 // LandingGear reads the hinge back through localEulerAngles.x and breaks the wheel above 10 degrees
                 // (LandingGear.cs:620), so a negative fold, read as about 359 near full extension, would break a leg
                 // touching down just before it locks: a leg that stows the other way turns about its reversed axis.
-                var (_, hinge, strut) = HingeRig(b, leg, null, part, flip: fold < 0);
+                // The rig (hinge, bump stop, ground cast, wheel) rides the part the suspension pushes on, as the Centurion's
+                // and the Revoker's do. Under the leg part, a body of its own on a joint, the cast swung with the leg while
+                // the force went to the host, and the jet reared up as soon as it rolled.
+                var carrier = b.Specs.First(s => s.Name == leg).Parent;
+                var mount = new GameObject(leg + "_mount") { layer = part.gameObject.layer }.transform;
+                mount.SetParent(b.Parts[carrier].transform, false);
+                mount.SetPositionAndRotation(part.position, part.rotation);
+                var (_, hinge, strut) = HingeRig(b, leg, null, mount, flip: fold < 0);
                 fold = Mathf.Abs(fold);
                 // LandingGear finds the ground with a linecast that also sees the aircraft's own colliders (layer 14), so
                 // a strut collider over the wheel would read as full compression and lock the leg. The part keeps a small
@@ -253,7 +260,6 @@ namespace Icarus.Editor
                 // LandingGear pushes its suspension on attachedPart alone, so as on the Revoker (mains on a 300 kg wing root,
                 // nose on the 350 kg cockpit) that is the heavy part the leg hangs on, not the light leg part: on the leg,
                 // the Revoker's dampers flung it on its joint until the joint broke. The leg part stays a damageable part.
-                var carrier = b.Specs.First(s => s.Name == leg).Parent;
                 so = new SerializedObject(gear);
                 Prop(so, "attachedPart").objectReferenceValue = b.Part(carrier);
                 Prop(so, "gearHinge").objectReferenceValue = hinge;
