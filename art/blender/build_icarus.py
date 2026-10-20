@@ -65,8 +65,15 @@ PARAMS = {
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
     "shock_cone": {"apex_s": 6.38, "base_s": 7.30, "radius": 0.26, "x": 0.63},
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
+    # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
+    # crank, and a 37 degree outboard panel; trailing edge nearly unswept. The first row is buried in the fairing
+    # so the wing meets the body without a gap; rows are (s of leading edge, x, trailing edge s) here and expanded
+    # with the anhedral below.
     "wing": {
-        "sections": [(8.55, 0.58, 0.20, 3.58), (9.95, 3.345, 0.20 - 2.765 * math.tan(math.radians(10)), 1.46)],
+        "planform": [(8.00, 0.58, 12.05), (7.10, 1.06, 12.03), (7.55, 1.20, 12.02), (8.15, 1.40, 12.00),
+                     (8.75, 1.60, 11.98), (9.20, 1.75, 11.97), (9.45, 1.93, 11.95), (10.45, 3.40, 11.75)],
+        "anhedral_deg": 10.0,
+        "root_z": 0.20,
         "thickness": 0.034,
     },
     # The root rows curve the leading edge concavely down into the spine, which is the fin's fillet.
@@ -92,6 +99,13 @@ PARAMS = {
         "front": {"file": "front.png", "px_per_m": 46.5, "centre_px": (159.5, 152)},
     },
 }
+
+def wing_sections(w):
+    """Planform rows (s_le, x, s_te) to lifting-surface sections (s_le, x, z, chord) with the anhedral applied."""
+    x0 = w["planform"][0][1]
+    t = math.tan(math.radians(w["anhedral_deg"]))
+    return [(le, x, w["root_z"] - (x - x0) * t, te - le) for le, x, te in w["planform"]]
+
 
 RING = 72  # vertices around a fuselage section
 CHORD = 24  # points along each airfoil surface
@@ -302,7 +316,7 @@ def fuselage_shapes(p, s):
         a, cx = (xo - xi) / 2 * grow, xi + (xo - xi) / 2
         for side in (1, -1):
             shapes.append(lambda x, z, side=side, a=a, cx=cx, zc=zc, b=hh * grow: lobe(x - side * cx, z - zc, a, b, b))
-    (le0, x0, z0, c0), (le1, x1, _, c1) = p["wing"]["sections"][:2]
+    (le0, x0, z0, c0), (le1, x1, _, c1) = wing_sections(p["wing"])[:2]
     le_at = le0 + (le1 - le0) * (hw - x0) / (x1 - x0)
     te_at = le0 + c0 + (le1 + c1 - le0 - c0) * (hw - x0) / (x1 - x0)
     f = ramp(s, le_at - 0.1, le_at + 0.6, te_at - 0.8, te_at + 0.05)
@@ -397,8 +411,8 @@ def build_shock_cones(p, mat):
 
 
 def build_surfaces(p, mat):
-    wing = finish(lifting_surface("wing_L", p["wing"]["sections"], p["wing"]["thickness"], "z"), mat)
-    wing_r = finish(mirror_x(lifting_surface("wing_R", p["wing"]["sections"], p["wing"]["thickness"], "z")), mat)
+    wing = finish(lifting_surface("wing_L", wing_sections(p["wing"]), p["wing"]["thickness"], "z"), mat)
+    wing_r = finish(mirror_x(lifting_surface("wing_R", wing_sections(p["wing"]), p["wing"]["thickness"], "z")), mat)
     fin = finish(lifting_surface("fin", p["fin"]["sections"], p["fin"]["thickness"], "x"), mat)
     ventral = finish(lifting_surface("ventral_fin", p["ventral_fin"]["sections"], p["ventral_fin"]["thickness"], "x"), mat)
     st = p["stabilator"]["sections"]
@@ -465,22 +479,35 @@ def metrics(objs):
             w = o.matrix_world @ v.co
             lo = Vector(map(min, lo, w))
             hi = Vector(map(max, hi, w))
-    wing = PARAMS["wing"]["sections"]
-    # Reference area: trapezoid extended to the centreline along the leading and trailing edges.
-    (s0, x0, _, c0), (s1, x1, _, c1) = wing
-    le_slope = (s1 - s0) / (x1 - x0)
-    te_slope = ((s1 + c1) - (s0 + c0)) / (x1 - x0)
-    root_c = (s0 + c0 - te_slope * x0) - (s0 - le_slope * x0)
-    area = (root_c + c1) * x1
+    wing = wing_sections(PARAMS["wing"])
+    # Reference area: the exposed panels plus the root chord carried in to the centreline, both sides.
+    area = wing[0][3] * wing[0][1]
+    for (_, xa, _, ca), (_, xb, _, cb) in zip(wing, wing[1:]):
+        area += (ca + cb) / 2 * (xb - xa)
+    area *= 2
+    sweeps = [round(math.degrees(math.atan2(b[0] - a[0], b[1] - a[1])), 1) for a, b in zip(wing, wing[1:])]
     return {
         "length_m": round(hi.y - lo.y, 3),
         "span_m": round(hi.x - lo.x, 3),
         "height_above_nose_m": round(hi.z, 3),
         "wing_ref_area_m2": round(area, 2),
+        "wing_le_sweep_deg": sweeps,
     }
 
 
-def build(repo=None):
+def build(repo=None, overrides=None):
+    """Rebuild the aircraft. overrides replaces top-level PARAMS entries for this build only (variant renders)."""
+    global TARGET, PARAMS
+    base = PARAMS
+    if overrides:
+        PARAMS = dict(base, **overrides)
+    try:
+        return _build(repo)
+    finally:
+        PARAMS = base
+
+
+def _build(repo):
     global TARGET
     repo = repo or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     TARGET = collection("Icarus")
