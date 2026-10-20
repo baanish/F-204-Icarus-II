@@ -270,4 +270,18 @@ def _organise(p, icarus, internals, structure_mat):
     leftover = [o.name for o in icarus.objects if o.parent is None and o.name not in TREE]
     if leftover:
         raise ValueError("objects outside the part tree: %s" % ", ".join(sorted(leftover)))
+    for obj in icarus.objects:
+        if obj.type == "MESH" and not obj.name.startswith("intake_duct"):
+            face_outward(obj)
     return parts
+
+
+def face_outward(obj):
+    """Point every face of a render mesh out of its surface. The game culls back faces, and most lofts come out wound
+    inward (the fin's rows happen to run the other way), so the skins drew inside out in game. The intake ducts keep
+    their inward faces: they are seen from inside."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(obj.data)
+    bm.free()
