@@ -97,7 +97,12 @@ PARAMS = {
         "sections": [(10.85, 0.0, -0.36, 2.25), (10.95, 0.0, -0.62, 2.05)],
         "thickness": 0.05,
     },
-    "nozzle": {"s_start": 15.0, "s_end": 15.6, "z": 0.37, "radius": 0.37, "lip": 0.025},
+    # Iris nozzle: a fixed shroud, then a ring of hinged petals with seals between them. Each petal hangs on its own
+    # hinge empty (local X along the hinge) under one gimbal empty, so the plugin can open the iris with afterburner
+    # and deflect it for thrust vectoring. The built pose is dry thrust: petals angled inward.
+    "nozzle": {"z": 0.37, "shroud_start": 15.0, "ring_s": 15.30, "ring_r": 0.375, "duct_r": 0.33,
+               "petals": 16, "petal_length": 0.48, "petal_root_w": 0.150, "petal_tip_w": 0.118,
+               "petal_thickness": 0.012, "dry_angle_deg": -9.0, "seal_inset": 0.012},
     # Reference drawings shown as image empties: file, px per metre, pixel of the radome tip, plane.
     "references": {
         "dir": ".cache/reference",
@@ -432,14 +437,82 @@ def build_surfaces(p, mat):
     return [wing, wing_r, fin, ventral, stab_l, stab_r]
 
 
-def build_nozzle(p, mat):
+def ring_points(s, r, z, n=RING):
+    return [P(s, r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / n for k in range(n)]]
+
+
+def plate(name, root_w, tip_w, length, thickness):
+    """A tapered plate in hinge space: X along the hinge, Y aft, Z outward; the hinge line is the root edge."""
+    hw0, hw1, t = root_w / 2, tip_w / 2, thickness
+    verts = [(-hw0, 0, 0), (hw0, 0, 0), (hw1, length, 0), (-hw1, length, 0),
+             (-hw0, 0, -t), (hw0, 0, -t), (hw1, length, -t), (-hw1, length, -t)]
+    faces = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(verts, [], faces)
+    me.validate()
+    obj = bpy.data.objects.new(name, me)
+    TARGET.objects.link(obj)
+    return obj
+
+
+def empty(name, matrix, parent=None):
+    obj = bpy.data.objects.new(name, None)
+    obj.empty_display_type = "ARROWS"
+    obj.empty_display_size = 0.12
+    TARGET.objects.link(obj)
+    obj.parent = parent
+    obj.matrix_world = matrix
+    return obj
+
+
+def nozzle_hinge_matrix(p, kind, i, open_deg=0.0, pitch_deg=0.0, yaw_deg=0.0):
+    """World matrix of one petal or seal hinge. Opening adds to every petal; vectoring tilts the exit: a petal at
+    ring angle phi gains -pitch*sin(phi) - yaw*cos(phi), so a positive pitch points the exit down (nose-up moment)."""
     n = p["nozzle"]
-    rings = []
-    for s, r in [(n["s_start"], n["radius"]), (n["s_end"], n["radius"] * 1.02),
-                 (n["s_end"], n["radius"] - n["lip"]), (n["s_end"] - 0.3, n["radius"] - n["lip"] * 2)]:
-        rings.append([P(s, r * math.cos(a), n["z"] + r * math.sin(a))
-                      for a in [2 * math.pi * k / RING for k in range(RING)]])
-    return finish(loft("nozzle", rings, cap_back=True), mat)  # the cap is the engine face seen up the nozzle
+    count = n["petals"]
+    phi = 2 * math.pi * i / count + (math.pi / count if kind == "seal" else 0.0)
+    radial = Vector((math.cos(phi), 0.0, math.sin(phi)))
+    tangent = Vector((-math.sin(phi), 0.0, math.cos(phi)))
+    basis = Matrix((tangent, Vector((0.0, 1.0, 0.0)), radial)).transposed().to_4x4()
+    inset = n["seal_inset"] if kind == "seal" else 0.0
+    hinge_at = P(n["ring_s"], 0.0, n["z"]) + radial * (n["ring_r"] - inset)
+    angle = n["dry_angle_deg"] + open_deg - pitch_deg * math.sin(phi) - yaw_deg * math.cos(phi)
+    return Matrix.Translation(hinge_at) @ basis @ Matrix.Rotation(math.radians(angle), 4, "X")
+
+
+def pose_nozzle(open_deg=0.0, pitch_deg=0.0, yaw_deg=0.0):
+    """Pose the built nozzle, the way the plugin will drive it in game."""
+    for kind in ("petal", "seal"):
+        for i in range(PARAMS["nozzle"]["petals"]):
+            hinge = bpy.data.objects["nozzle_%s_%02d" % (kind, i)]
+            hinge.matrix_world = nozzle_hinge_matrix(PARAMS, kind, i, open_deg, pitch_deg, yaw_deg)
+
+
+def build_nozzle(p, mat, duct_mat):
+    n = p["nozzle"]
+    z, s_ring, r = n["z"], n["ring_s"], n["ring_r"]
+    petal_mat = material("Icarus_Petal", (0.46, 0.44, 0.42, 1.0), 0.85, 0.3)
+    seal_mat = material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4)
+    shroud = loft("nozzle_shroud", [ring_points(n["shroud_start"], r + 0.012, z), ring_points(s_ring, r + 0.012, z),
+                                   ring_points(s_ring, n["duct_r"], z), ring_points(n["shroud_start"], n["duct_r"], z)],
+                  cap_back=True)
+    finish(shroud, mat)
+    shroud.data.materials.append(duct_mat)
+    shroud.data.polygons[-1].material_index = 1  # engine face up the duct
+    gimbal = empty("nozzle_vector", Matrix.Translation(P(s_ring, 0.0, z)))
+    parts = [shroud, gimbal]
+    count = n["petals"]
+    for kind, w0, w1 in (("petal", n["petal_root_w"], n["petal_tip_w"]),
+                         ("seal", n["petal_root_w"] * 0.7, n["petal_tip_w"] * 0.7)):
+        for i in range(count):
+            name = "nozzle_%s_%02d" % (kind, i)
+            hinge = empty(name, nozzle_hinge_matrix(p, kind, i), parent=gimbal)
+            hinge["hinge_axis"] = "X"
+            vis = plate(name + "_visible", w0, w1, n["petal_length"], n["petal_thickness"])
+            vis.parent = hinge
+            vis.data.materials.append(petal_mat if kind == "petal" else seal_mat)
+            parts += [hinge, vis]
+    return parts
 
 
 def build_references(p, repo):
@@ -486,6 +559,8 @@ def metrics(objs):
     lo = Vector((1e9, 1e9, 1e9))
     hi = -lo
     for o in objs:
+        if o.type != "MESH":
+            continue
         for v in o.data.vertices:
             w = o.matrix_world @ v.co
             lo = Vector(map(min, lo, w))
@@ -527,7 +602,8 @@ def _build(repo):
     duct = material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8)
     metal = material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35)
     p = PARAMS
-    parts = [build_fuselage(p, body, duct), build_canopy(p, glass), build_nozzle(p, metal), build_probe(p, metal)]
+    parts = [build_fuselage(p, body, duct), build_canopy(p, glass), build_probe(p, metal)]
+    parts += build_nozzle(p, metal, duct)
     parts += build_shock_cones(p, body)
     parts += build_surfaces(p, body)
     refs = build_references(p, repo)
