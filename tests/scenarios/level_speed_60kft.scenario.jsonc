@@ -1,0 +1,40 @@
+// Level top speed at 60,000 ft (18,288 m), full afterburner, measured only: R14 predicts no figure this high, and the
+// thrust curve falls to 0.3 of sea level by 19 km. The Icarus starts over Ignus at 18,288 m, heading east at 700 m/s with
+// full fuel; a hold keeps 18,288 m at throttle 1. Records Mach and TAS at half fuel and again at 40% fuel, about 30 s
+// later: the two agree within 0.01 Mach once the speed has settled. The verdict is MEASURED with the records. The airframe
+// must be intact 5 s after spawn, else FAIL.
+// From the repo root: no-agentic run tests/scenarios/level_speed_60kft.scenario.jsonc
+{
+  "mission": "icarus_ignus_60kft.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 2,
+  "timeout": 420,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 17800 } ] },
+      "label": "the Icarus airborne at 60,000 ft" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s after spawn" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "fly": { "mode": "hold", "alt_msl_m": 18288, "hdg_deg": 90, "throttle": 1 } },
+    { "time": { "scale": 4 } },
+    { "wait": { "path": "own.fuel_frac", "lt": 0.5 }, "timeout": 240, "label": "half fuel, about 7,000 kg" },
+    { "record": { "path": "own.mach" }, "label": "Mach at half fuel" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at half fuel, m/s" },
+    { "record": { "path": "own.alt_msl_m" }, "label": "altitude at half fuel, m" },
+    { "record": { "path": "own.engines.0.thrust_n" }, "label": "thrust at half fuel, N" },
+    { "wait": { "path": "own.fuel_frac", "lt": 0.4 }, "timeout": 60, "label": "40% fuel" },
+    { "record": { "path": "own.mach" }, "label": "Mach at 40% fuel (settled if within 0.01 of half fuel's)" },
+    { "record": { "path": "own.alt_msl_m" }, "label": "altitude at 40% fuel, m" },
+    { "record": { "path": "own.pos.x" }, "label": "x at 40% fuel, m (map edge 81,920)" },
+    { "time": { "scale": 1 } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.alt_msl_m", "near": 18288, "tol": 500 } ] },
+      "label": "alive and within 500 m of 60,000 ft at the end" },
+  ],
+}

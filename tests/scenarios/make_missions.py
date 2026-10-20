@@ -72,6 +72,7 @@ save(m, "icarus_sandrift_final_19km", "the player's Icarus for Primeva at 1,200 
 for name, alt, speed, fuel, what in [
     ("icarus_ignus_10km", 10000.0, 650.0, 1.0, "full fuel, for the 10 km top speed and full-afterburner endurance"),
     ("icarus_ignus_15km", 15000.0, 700.0, 1.0, "full fuel, for the 15 km top speed"),
+    ("icarus_ignus_60kft", 18288.0, 700.0, 1.0, "full fuel, for the 60,000 ft top speed"),
     ("icarus_ignus_10km_half", 10000.0, 400.0, 0.5, "half fuel, for the sustained turn"),
 ]:
     m = template("airborne")
