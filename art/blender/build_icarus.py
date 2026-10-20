@@ -51,36 +51,40 @@ PARAMS = {
     # Intake fairings: (s, outer half width, z centre, half height). Each is an elliptical lobe whose inner edge sits at
     # intake_inner_x inside the body; the first row is the lip, where the lobe starts and the duct face is drawn.
     "intake": [
-        (6.85, 1.00, 0.22, 0.34),
-        (7.60, 1.04, 0.22, 0.34),
-        (8.60, 1.04, 0.22, 0.33),
-        (10.0, 0.98, 0.22, 0.31),
-        (11.4, 0.86, 0.22, 0.27),
-        (12.6, 0.70, 0.22, 0.20),
-        (13.6, 0.33, 0.22, 0.01),  # shrinks to a point inside the body, so the fairing fades with no bulge
+        (6.85, 0.955, 0.22, 0.44),
+        (7.60, 0.990, 0.22, 0.44),
+        (8.60, 0.990, 0.22, 0.43),
+        (10.0, 0.940, 0.22, 0.40),
+        (11.4, 0.830, 0.22, 0.35),
+        (12.6, 0.680, 0.22, 0.26),
+        (13.6, 0.090, 0.22, 0.01),  # shrinks to a point inside the body, so the fairing fades with no bulge
     ],
-    "intake_inner_x": 0.32,  # with the rows above, a near-circular lobe whose centre sits just outside the body
+    # With the rows above, a 0.44 m circle at the lip whose centre is buried in the body: it stands 0.31 m proud,
+    # a slim profile with the same opening area as a smaller, more protruding intake.
+    "intake_inner_x": 0.075,
     "intake_lip_round": 0.15,  # metres over which the lip grows from 90% to full size
     "blend": 0.24,  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
-    "shock_cone": {"apex_s": 6.25, "base_s": 7.40, "radius": 0.30, "x": 0.63},
+    "shock_cone": {"apex_s": 6.15, "base_s": 7.40, "radius": 0.30, "x": 0.63},
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
-    # crank, and a 37 degree outboard panel; trailing edge nearly unswept. The first row is buried in the fairing
+    # crank, and a 35 degree outboard panel; trailing edge nearly unswept. The first two rows are buried in the fairing
     # so the wing meets the body without a gap; rows are (s of leading edge, x, trailing edge s) here and expanded
     # with the anhedral below.
     "wing": {
-        "planform": [(8.00, 0.58, 12.05), (7.10, 1.06, 12.03), (7.55, 1.20, 12.02), (8.15, 1.40, 12.00),
-                     (8.75, 1.60, 11.98), (9.20, 1.75, 11.97), (9.45, 1.93, 11.95), (10.45, 3.40, 11.75)],
+        "planform": [(8.00, 0.58, 12.05), (7.00, 0.92, 12.04), (7.48, 1.10, 12.03), (8.27, 1.40, 12.00),
+                     (8.80, 1.60, 11.98), (9.20, 1.75, 11.97), (9.45, 1.93, 11.95), (10.45, 3.40, 11.75)],
         "anhedral_deg": 10.0,
         "root_z": 0.20,
         "thickness": 0.034,
     },
-    # The root rows curve the leading edge concavely down into the spine, which is the fin's fillet.
+    # The root rows curve the leading edge concavely down into the spine, which is the fin's fillet. The lowest
+    # row sits under the tapering tail's top line and ends where the body does, so no gap opens under the fin;
+    # the trailing edge ends above the nozzle exit.
     "fin": {
-        "sections": [(12.25, 0.0, 0.98, 3.75), (12.90, 0.0, 1.30, 3.10), (13.30, 0.0, 1.60, 2.70),
-                     (14.68, 0.0, 2.88, 1.00)],
+        "sections": [(12.00, 0.0, 0.70, 3.20), (12.25, 0.0, 0.98, 3.40), (12.90, 0.0, 1.30, 2.75),
+                     (13.30, 0.0, 1.60, 2.35), (14.68, 0.0, 2.88, 1.00)],
         "thickness": 0.05,
     },
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,

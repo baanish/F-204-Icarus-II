@@ -25,6 +25,7 @@ def camera(name):
     if cam is None:
         cam = bpy.data.objects.new(name, bpy.data.cameras.new(name))
         bpy.context.scene.collection.objects.link(cam)
+        cam.hide_viewport = True  # renders still use it; the owner's viewport stays clean
     return cam
 
 
