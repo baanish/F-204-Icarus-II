@@ -313,7 +313,7 @@ namespace Icarus.Editor
             var points = WorldVertices(glass.transform, b.Meshes["canopy_visible"].Render);
             var topY = points.Max(p => p.y);
             var crown = points.Where(p => p.y > topY - 0.01f).ToArray();
-            var eye = new Vector3(0f, topY - EyeBelowCanopyTop, crown.Average(p => p.z));
+            var eye = new Vector3(0f, topY - EyeBelowCanopyTop, crown.Average(p => p.z) - EyeAftOfCrown);
             var helmet = (Transform)GetRef(b.Aircraft, "cockpitViewPoint");
             var delta = eye - helmet.position;
             foreach (var name in new[] { "cockpit_interior", "cockpit_interior_simple", "targetScreen", "pilot", "joystick", "throttle" })

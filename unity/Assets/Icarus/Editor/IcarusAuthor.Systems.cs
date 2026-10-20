@@ -12,6 +12,10 @@ namespace Icarus.Editor
     {
         // The pilot's eye sits this far under the canopy's highest point, below it.
         private const float EyeBelowCanopyTop = 0.20f;
+        // ...and this far behind the crown's middle. Under the crown itself the Revoker's instrument panel landed aft of
+        // the windscreen frame, which then crossed the cockpit in front of the pilot; the F-104's eye sits about a metre
+        // behind its windscreen bow.
+        private const float EyeAftOfCrown = 0.50f;
         // TargetCam renders from 2 m out: its mounts sit 2.5 m clear of every mesh (Centurion's measured margin).
         private const float CameraClearance = 2.5f;
 
