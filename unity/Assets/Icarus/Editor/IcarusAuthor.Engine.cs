@@ -1,0 +1,116 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+namespace Icarus.Editor
+{
+    public static partial class IcarusAuthor
+    {
+        // R7's first-cut engine: a 65 kN core plus 45 kN of afterburner, maxSpeed raised past the stock 522 m/s cap, and its
+        // fuel rates (kg per roughly one-second check).
+        private const float MaxThrust = 65000f, EngineMaxSpeed = 760f, MinDensity = 0.10f, FuelMin = 0.45f, FuelMax = 2.5f;
+        private const float AfterburnerThrust = 45000f, AfterburnerFuel = 5.5f, AfterburnerStart = 0.90f, AfterburnerEnd = 1.00f, AfterburnerSmoothing = 2f;
+        private static readonly Vector2 ThrottleRemap = new Vector2(0f, 0.88f);
+        private const float MinRpm = 1000f, MaxRpm = 3000f, SpoolRate = 1500f, StartupRate = 200f;
+        // R7's altitudeThrust keys (altitude, factor, in and out tangent): linear between 0, 10, 15 and 19 km.
+        private static readonly float[][] AltitudeThrust =
+        {
+            new[] { 0f, 1.0f, -2e-5f, -2e-5f }, new[] { 10000f, 0.8f, -2e-5f, -5e-5f },
+            new[] { 15000f, 0.55f, -5e-5f, -6.25e-5f }, new[] { 19000f, 0.3f, -6.25e-5f, -6.25e-5f },
+        };
+        // R12: stock vectoring kept at 4 degrees in pitch and yaw, no roll mixing, and the Revoker's 250 m/s cutoff.
+        private static readonly Vector3 ThrustVectoring = new Vector3(4f, 4f, 0f);
+        private const float VectoringMaxAirspeed = 250f;
+        // R13: the engine fails from its core and nozzle, at the Revoker's threshold.
+        private const float EngineDamageThreshold = 50f;
+
+        // The Revoker's Turbojet stays on the root. Its JetNozzle's GameObject becomes thrust_vector, an identity pivot at
+        // the petal ring's centre under the Icarus nozzle part that the Turbojet turns for vectoring; the thrust axis, flame
+        // and glow ride on it. The petals and seals hang from nozzle_vector, which stays still: NozzleDriver (src/Icarus)
+        // opens them with afterburner and deflects them to follow thrust_vector.
+        private static void BuildEngine(Build b)
+        {
+            var nozzlePart = b.Parts["nozzle"].transform;
+            var ring = new GameObject("nozzle_vector") { layer = nozzlePart.gameObject.layer }.transform;
+            ring.SetParent(nozzlePart, false);
+            ring.SetPositionAndRotation(b.Blockout.Local("nozzle_vector"), b.Blockout.Rotation("nozzle_vector"));
+            b.Visuals["nozzle_vector"] = ring;
+            var petals = 0;
+            float petalLength = 0;
+            foreach (var hingeName in b.Blockout.Parts.Values.Where(p => p.BlenderParent == "nozzle_vector").Select(p => p.Name).OrderBy(n => n, System.StringComparer.Ordinal))
+            {
+                if (!b.Blockout.Parts[hingeName].IsHinge || !b.Blockout.HasMesh(hingeName + "_visible"))
+                    throw new InvalidDataException(hingeName + " under nozzle_vector isn't a hinge with a _visible mesh");
+                var hinge = new GameObject(hingeName) { layer = ring.gameObject.layer }.transform;
+                hinge.SetParent(ring, false);
+                hinge.SetPositionAndRotation(b.Blockout.Local(hingeName), b.Blockout.Rotation(hingeName));
+                var visible = new GameObject(hingeName + "_visible") { layer = ring.gameObject.layer };
+                visible.transform.SetParent(hinge, false);
+                visible.transform.SetPositionAndRotation(b.Blockout.Local(hingeName + "_visible"), b.Blockout.Rotation(hingeName + "_visible"));
+                visible.AddComponent<MeshFilter>().sharedMesh = b.Meshes[hingeName + "_visible"].Render;
+                visible.AddComponent<MeshRenderer>().sharedMaterials = b.Meshes[hingeName + "_visible"].Materials;
+                b.Visuals[hingeName] = hinge;
+                b.Visuals[hingeName + "_visible"] = visible.transform;
+                petalLength = Mathf.Max(petalLength, b.Meshes[hingeName + "_visible"].Render.bounds.size.z);
+                petals++;
+            }
+
+            var thrust = b.Parts["fuselage_aft"].transform.Find("thrust_vector") ?? throw new MissingReferenceException("fuselage_aft/thrust_vector");
+            var jet = thrust.GetComponent(GameType("JetNozzle"));
+            var heatHaze = b.Parts["fuselage_aft"].transform.Find("heat_haze") ?? throw new MissingReferenceException("fuselage_aft/heat_haze");
+            thrust.SetParent(nozzlePart, true);
+            thrust.SetPositionAndRotation(ring.position, nozzlePart.rotation);
+            // The flame, glow and haze start at the petals' exit, a petal's length behind the ring.
+            var exit = ring.position + Vector3.back * petalLength * 0.95f;
+            var flame = thrust.Find("afterburner_flame");
+            var glow = thrust.Find("afterburner_nozzle_glow");
+            foreach (var t in new[] { flame, glow })
+                t.position = exit;
+            heatHaze.SetParent(thrust, false);
+            heatHaze.position = exit;
+            b.Placed.UnionWith(new[] { thrust, flame, glow, heatHaze, thrust.Find("thrustTransform") });
+
+            var so = new SerializedObject(jet);
+            Prop(so, "part").objectReferenceValue = b.Part("nozzle");
+            Prop(so, "vectorTransforms").arraySize = 0;
+            var afterburners = Prop(so, "afterburners");
+            if (afterburners.arraySize != 1)
+                throw new InvalidDataException($"A2: the Revoker's nozzle has {afterburners.arraySize} afterburners, expected one");
+            var ab = afterburners.GetArrayElementAtIndex(0);
+            ab.FindPropertyRelative("thrust").floatValue = AfterburnerThrust;
+            ab.FindPropertyRelative("fuelConsumption").floatValue = AfterburnerFuel;
+            ab.FindPropertyRelative("throttleStart").floatValue = AfterburnerStart;
+            ab.FindPropertyRelative("throttleEnd").floatValue = AfterburnerEnd;
+            ab.FindPropertyRelative("smoothing").floatValue = AfterburnerSmoothing;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            var engine = b.Root.GetComponent(GameType("Turbojet"));
+            var te = new SerializedObject(engine);
+            Prop(te, "maxThrust").floatValue = MaxThrust;
+            Prop(te, "maxSpeed").floatValue = EngineMaxSpeed;
+            Prop(te, "minDensity").floatValue = MinDensity;
+            Prop(te, "fuelConsumptionMin").floatValue = FuelMin;
+            Prop(te, "fuelConsumptionMax").floatValue = FuelMax;
+            Prop(te, "throttleRemap").vector2Value = ThrottleRemap;
+            Prop(te, "minRPM").floatValue = MinRpm;
+            Prop(te, "maxRPM").floatValue = MaxRpm;
+            Prop(te, "spoolRate").floatValue = SpoolRate;
+            Prop(te, "startupRate").floatValue = StartupRate;
+            Prop(te, "altitudeThrust").animationCurveValue = Curve(AltitudeThrust);
+            Prop(te, "thrustVectoring").vector3Value = ThrustVectoring;
+            var gain = Prop(te, "thrustVectoringGain").vector3Value;
+            Prop(te, "thrustVectoringGain").vector3Value = new Vector3(gain.x, gain.y, 0f);
+            Prop(te, "thrustVectoringMaxAirspeed").floatValue = VectoringMaxAirspeed;
+            Prop(te, "damageThreshold").floatValue = EngineDamageThreshold;
+            SetList(Prop(te, "vectoringTransforms"), new Object[] { thrust });
+            SetList(Prop(te, "criticalParts"), new Object[] { b.Part("engine_core"), b.Part("nozzle") });
+            SetList(Prop(te, "nozzles"), new Object[] { jet });
+            te.ApplyModifiedPropertiesWithoutUndo();
+            b.Report.Add($"engine: {MaxThrust / 1000:0} kN core + {AfterburnerThrust / 1000:0} kN afterburner, maxSpeed {EngineMaxSpeed}, fuel {FuelMin}..{FuelMax} + {AfterburnerFuel}, " +
+                $"vectoring {ThrustVectoring} below {VectoringMaxAirspeed} m/s on thrust_vector at {thrust.position}; {petals} petals and seals under nozzle_vector, exit at {exit}");
+        }
+    }
+}

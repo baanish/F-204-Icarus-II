@@ -1,0 +1,935 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1987264249, guid: 06dd3d5416bf43ea368cc39ff96e6d5a, type: 3}
+  m_Name: Icarus_Parameters
+  m_EditorClassIdentifier: 
+  aircraftName: baanish_icarus
+  rankRequired: 3
+  airfoils:
+  - name: Icarus_wing
+    liftCoef:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -3.141593
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -1.570796
+        value: 0
+        inSlope: 0
+        outSlope: -1.399854
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.785
+        value: -1.1
+        inSlope: -1.399854
+        outSlope: 0.597895
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.31
+        value: -0.816
+        inSlope: 0.597895
+        outSlope: -3.022222
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.22
+        value: -1.088
+        inSlope: -3.022222
+        outSlope: 4.4
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0
+        value: -0.12
+        inSlope: 4.4
+        outSlope: 4.4
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.22
+        value: 0.848
+        inSlope: 4.4
+        outSlope: -2.355556
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.31
+        value: 0.636
+        inSlope: -2.355556
+        outSlope: 0.976842
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.785
+        value: 1.1
+        inSlope: 0.976842
+        outSlope: -1.399854
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.570796
+        value: 0
+        inSlope: -1.399854
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 3.141593
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    dragCoef:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -3.1416
+        value: 0.02
+        inSlope: 0.400865
+        outSlope: 0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -1.57
+        value: 0.65
+        inSlope: 0.400865
+        outSlope: -0.063694
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.785
+        value: 0.6
+        inSlope: -0.063694
+        outSlope: -0.774737
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.31
+        value: 0.232
+        inSlope: -0.774737
+        outSlope: -1.090909
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.2
+        value: 0.112
+        inSlope: -1.090909
+        outSlope: -0.875
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.15
+        value: 0.06825
+        inSlope: -0.875
+        outSlope: -0.625
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.1
+        value: 0.037
+        inSlope: -0.625
+        outSlope: -0.375
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.05
+        value: 0.01825
+        inSlope: -0.375
+        outSlope: -0.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0
+        value: 0.012
+        inSlope: -0.125
+        outSlope: 0.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.05
+        value: 0.01825
+        inSlope: 0.125
+        outSlope: 0.375
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.1
+        value: 0.037
+        inSlope: 0.375
+        outSlope: 0.625
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.15
+        value: 0.06825
+        inSlope: 0.625
+        outSlope: 0.875
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.2
+        value: 0.112
+        inSlope: 0.875
+        outSlope: 1.090909
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.31
+        value: 0.232
+        inSlope: 1.090909
+        outSlope: 0.774737
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.785
+        value: 0.6
+        inSlope: 0.774737
+        outSlope: 0.063694
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.57
+        value: 0.65
+        inSlope: 0.063694
+        outSlope: -0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 3.1416
+        value: 0.02
+        inSlope: -0.400865
+        outSlope: -0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - name: Icarus_tail
+    liftCoef:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -3.141593
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -1.570796
+        value: 0
+        inSlope: 0
+        outSlope: -1.399854
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.785
+        value: -1.1
+        inSlope: -1.399854
+        outSlope: 0.735632
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.35
+        value: -0.78
+        inSlope: 0.735632
+        outSlope: -2.888889
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.26
+        value: -1.04
+        inSlope: -2.888889
+        outSlope: 4
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 4
+        outSlope: 4
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.26
+        value: 1.04
+        inSlope: 4
+        outSlope: -2.888889
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.35
+        value: 0.78
+        inSlope: -2.888889
+        outSlope: 0.735632
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.785
+        value: 1.1
+        inSlope: 0.735632
+        outSlope: -1.399854
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.570796
+        value: 0
+        inSlope: -1.399854
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 3.141593
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    dragCoef:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -3.1416
+        value: 0.02
+        inSlope: 0.400865
+        outSlope: 0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -1.57
+        value: 0.65
+        inSlope: 0.400865
+        outSlope: -0.063694
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.785
+        value: 0.6
+        inSlope: -0.063694
+        outSlope: -0.716667
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.35
+        value: 0.28825
+        inSlope: -0.716667
+        outSlope: -1.2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.25
+        value: 0.16825
+        inSlope: -1.2
+        outSlope: -1.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.2
+        value: 0.112
+        inSlope: -1.125
+        outSlope: -0.875
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.15
+        value: 0.06825
+        inSlope: -0.875
+        outSlope: -0.625
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.1
+        value: 0.037
+        inSlope: -0.625
+        outSlope: -0.375
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.05
+        value: 0.01825
+        inSlope: -0.375
+        outSlope: -0.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0
+        value: 0.012
+        inSlope: -0.125
+        outSlope: 0.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.05
+        value: 0.01825
+        inSlope: 0.125
+        outSlope: 0.375
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.1
+        value: 0.037
+        inSlope: 0.375
+        outSlope: 0.625
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.15
+        value: 0.06825
+        inSlope: 0.625
+        outSlope: 0.875
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.2
+        value: 0.112
+        inSlope: 0.875
+        outSlope: 1.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.25
+        value: 0.16825
+        inSlope: 1.125
+        outSlope: 1.2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.35
+        value: 0.28825
+        inSlope: 1.2
+        outSlope: 0.716667
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.785
+        value: 0.6
+        inSlope: 0.716667
+        outSlope: 0.063694
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.57
+        value: 0.65
+        inSlope: 0.063694
+        outSlope: -0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 3.1416
+        value: 0.02
+        inSlope: -0.400865
+        outSlope: -0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - name: Icarus_body
+    liftCoef:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -3.141593
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -1.570796
+        value: 0
+        inSlope: 0
+        outSlope: -1.399854
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.785
+        value: -1.1
+        inSlope: -1.399854
+        outSlope: 1.408046
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.35
+        value: -0.4875
+        inSlope: 1.408046
+        outSlope: -1.805556
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.26
+        value: -0.65
+        inSlope: -1.805556
+        outSlope: 2.5
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2.5
+        outSlope: 2.5
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.26
+        value: 0.65
+        inSlope: 2.5
+        outSlope: -1.805556
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.35
+        value: 0.4875
+        inSlope: -1.805556
+        outSlope: 1.408046
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.785
+        value: 1.1
+        inSlope: 1.408046
+        outSlope: -1.399854
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.570796
+        value: 0
+        inSlope: -1.399854
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 3.141593
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    dragCoef:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: -3.1416
+        value: 0.02
+        inSlope: 0.400865
+        outSlope: 0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -1.57
+        value: 0.65
+        inSlope: 0.400865
+        outSlope: -0.063694
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.785
+        value: 0.6
+        inSlope: -0.063694
+        outSlope: -0.716667
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.35
+        value: 0.28825
+        inSlope: -0.716667
+        outSlope: -1.2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.25
+        value: 0.16825
+        inSlope: -1.2
+        outSlope: -1.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.2
+        value: 0.112
+        inSlope: -1.125
+        outSlope: -0.875
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.15
+        value: 0.06825
+        inSlope: -0.875
+        outSlope: -0.625
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.1
+        value: 0.037
+        inSlope: -0.625
+        outSlope: -0.375
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: -0.05
+        value: 0.01825
+        inSlope: -0.375
+        outSlope: -0.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0
+        value: 0.012
+        inSlope: -0.125
+        outSlope: 0.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.05
+        value: 0.01825
+        inSlope: 0.125
+        outSlope: 0.375
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.1
+        value: 0.037
+        inSlope: 0.375
+        outSlope: 0.625
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.15
+        value: 0.06825
+        inSlope: 0.625
+        outSlope: 0.875
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.2
+        value: 0.112
+        inSlope: 0.875
+        outSlope: 1.125
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.25
+        value: 0.16825
+        inSlope: 1.125
+        outSlope: 1.2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.35
+        value: 0.28825
+        inSlope: 1.2
+        outSlope: 0.716667
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.785
+        value: 0.6
+        inSlope: 0.716667
+        outSlope: 0.063694
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.57
+        value: 0.65
+        inSlope: 0.063694
+        outSlope: -0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 3.1416
+        value: 0.02
+        inSlope: -0.400865
+        outSlope: -0.400865
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  loadouts:
+  - weapons:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+  - weapons:
+    - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
+    - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
+    - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+    - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+  StandardLoadouts:
+  - disabled: 0
+    Name: Interceptor
+    loadout:
+      weapons:
+      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
+      - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
+      - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+      - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+    FuelRatio: 1
+  - disabled: 0
+    Name: Air Superiority
+    loadout:
+      weapons:
+      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
+      - {fileID: 11400000, guid: 69b5e66560c97414da73449d867e708a, type: 2}
+      - {fileID: 11400000, guid: f3f2cc8ddfdccf5409fe2af25651bfee, type: 2}
+      - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+    FuelRatio: 1
+  - disabled: 0
+    Name: Strike
+    loadout:
+      weapons:
+      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
+      - {fileID: 11400000, guid: 5bc769201eee23f4bb7308f851746cbc, type: 2}
+      - {fileID: 11400000, guid: 0c2cc046e6d0fce4ab6dbcbefc89824d, type: 2}
+      - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+    FuelRatio: 1
+  - disabled: 0
+    Name: SEAD
+    loadout:
+      weapons:
+      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
+      - {fileID: 11400000, guid: 261c6aab4e5e98e4da6c60d80fa21e95, type: 2}
+      - {fileID: 11400000, guid: 54ef8a806ec911a459fb41b2da805223, type: 2}
+      - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+    FuelRatio: 1
+  DefaultFuelLevel: 1
+  liveries:
+  - name: PALA Blockout Grey
+    faction: {fileID: 11400000, guid: 781c80aa02e6c3c43810c5793ae051ea, type: 2}
+    assetReference:
+      m_AssetGUID: f1e88130a50e090429a923937bcb7d1c
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  StatusDisplay: {fileID: 6924495073706621936, guid: 8ede1fec56a24134d889d46b0c7476d2,
+    type: 3}
+  HUDExtras: {fileID: 1709254077376921, guid: 05a9924a9a348c24c9a319f97f56e2e5, type: 3}
+  takeoffMusic: {fileID: 0}
+  AoAEffects:
+    AudioClip: {fileID: 8300000, guid: 538a618131d43e94d80579ec26f888da, type: 3}
+    OnsetSpeed: 30
+    FullVolumeSpeed: 200
+    OnsetAlpha: 5
+    FullVolumeAlpha: 45
+    ShakeFactor: 0.1
+  aircraftGLimit: 7.33
+  PIDReferenceAirspeed: 180
+  maxSpeed: 800
+  takeoffSpeed: 95
+  takeoffDistance: 1500
+  verticalLanding: 0
+  turningRadius: 2500
+  cornerSpeed: 250
+  approachSpeed: 85
+  landingSpeed: 95.58319
+  shortLandingSpeed: 75
+  cruiseThrottle: 0.85
+  minimumRadarAlt: 50
+  levelBias: 0.15
+  hoverTiltFactor: 1
+  collectivePID: {x: 0, y: 0, z: 0}
+  hoverPID: {x: 0, y: 0, z: 0}
+  tiltPID: {x: 0, y: 0, z: 0}
+  groundTurningRadius: 12

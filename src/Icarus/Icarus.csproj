@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <!-- The Unity authoring project references prefab components by assembly name, so this must stay "Icarus". -->
+    <AssemblyName>Icarus</AssemblyName>
+    <RootNamespace>Icarus</RootNamespace>
+    <!-- Must match unity/Assets/Blueprinter/Mods/icarus/modinfo.json; tools/Build-Icarus.ps1 checks it. -->
+    <Version>0.0.1</Version>
+    <Authors>baanish</Authors>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Assembly-CSharp transitively references a newer compression facade that this plugin never uses. -->
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <GameDir Condition="'$(GameDir)' == '' and '$(NUCLEAR_OPTION_DIR)' != ''">$(NUCLEAR_OPTION_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option</GameDir>
+    <Managed>$(GameDir)\NuclearOption_Data\Managed</Managed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx" HintPath="$(GameDir)\BepInEx\core\BepInEx.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="$(GameDir)\BepInEx\core\0Harmony.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath="$(Managed)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="Mirage" HintPath="$(Managed)\Mirage.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="$(Managed)\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(Managed)\UnityEngine.CoreModule.dll" Private="false" />
+  </ItemGroup>
+
+  <Target Name="ValidateGameDir" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(Managed)\Assembly-CSharp.dll')" Text="Nuclear Option not found at GameDir '$(GameDir)'. Pass -p:GameDir=... or set NUCLEAR_OPTION_DIR." />
+    <Error Condition="!Exists('$(GameDir)\BepInEx\core\BepInEx.dll')" Text="BepInEx 5 is not installed in '$(GameDir)'." />
+  </Target>
+</Project>

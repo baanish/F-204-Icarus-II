@@ -1,0 +1,344 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Blueprinter;
+using UnityEditor;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+namespace Icarus.Editor
+{
+    public static partial class IcarusAuthor
+    {
+        // The hardpoint set order is an API: loadouts, exclusions and Blueprinter registrations address sets by position.
+        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Outer Wing", "Conformal" };
+
+        // The stock mounts each set offers, taken from the Revoker's own sets (R5): its wingtip rails for the wingtips, its
+        // wing pylons for both underwing stations, and its wingtip rails' missiles for the semi-recessed conformal stations.
+        private sealed class Stations
+        {
+            public readonly List<Object>[] Options = new List<Object>[4];
+            public readonly Dictionary<string, Object> ByKey = new Dictionary<string, Object>();
+        }
+
+        // Standard loadouts by mount jsonKey, one per set in SetNames order. loadouts[1], the default, is the first.
+        private static readonly (string Name, string[] Keys)[] StandardLoadouts =
+        {
+            ("Interceptor", new[] { "AAM1_single", "AAM4_single", "AAM2_single", "AAM2_single" }),
+            ("Air Superiority", new[] { "AAM1_single", "AAM2_double", "AAM1_double", "AAM2_single" }),
+            ("Strike", new[] { "AAM1_single", "bomb_500_single", "AGM_heavy_single", "AAM2_single" }),
+            ("SEAD", new[] { "AAM1_single", "ARM1_single", "ARM2_single", "AAM2_single" }),
+        };
+
+        private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
+
+        private static Stations ReadDonorStations(GameObject donor)
+        {
+            var manager = donor.transform.Find("fuselage/cockpit").GetComponent(GameType("WeaponManager"));
+            var sets = Prop(new SerializedObject(manager), "hardpointSets");
+            List<Object> OptionsOf(string setName)
+            {
+                for (var i = 0; i < sets.arraySize; i++)
+                {
+                    var set = sets.GetArrayElementAtIndex(i);
+                    if (set.FindPropertyRelative("name").stringValue == setName)
+                        return GetList(set.FindPropertyRelative("weaponOptions")).Where(o => o != null).ToList();
+                }
+                throw new InvalidDataException("The Revoker has no hardpoint set " + setName);
+            }
+            var stations = new Stations();
+            var tips = OptionsOf("Wingtip Pylons");
+            var pylons = OptionsOf("Wing Pylons");
+            stations.Options[0] = tips;
+            stations.Options[1] = pylons;
+            stations.Options[2] = pylons;
+            stations.Options[3] = tips.Where(m => KeyOf(m).StartsWith("AAM", StringComparison.Ordinal)).ToList();
+            foreach (var mount in tips.Concat(pylons))
+                stations.ByKey[KeyOf(mount)] = mount;
+            for (var i = 0; i < SetNames.Length; i++)
+                Debug.Log($"[Icarus] stage: set {i} {SetNames[i]} offers {string.Join(", ", stations.Options[i].Select(KeyOf))}");
+            return stations;
+        }
+
+        private static Object[] LoadoutMounts(Stations stations, string name, string[] keys)
+        {
+            if (keys.Length != SetNames.Length)
+                throw new InvalidDataException($"loadout {name} has {keys.Length} entries for {SetNames.Length} hardpoint sets");
+            return keys.Select((key, set) =>
+            {
+                if (key == null)
+                    return null;
+                if (!stations.ByKey.TryGetValue(key, out var mount) || !stations.Options[set].Contains(mount))
+                    throw new InvalidDataException($"loadout {name}: {key} isn't offered on set {set} {SetNames[set]}");
+                return mount;
+            }).ToArray();
+        }
+
+        // R7's sized curves (.internal research R7, icarus_authoring.json): keys as (alpha, value, in tangent, out tangent).
+        // The game's alpha is the airflow angle, negative for a nose-up body, so the wing's +0.12 camber lift sits at -0.12
+        // on the curve at zero alpha.
+        private static readonly float[][] WingLift =
+        {
+            new[] { -3.141593f, 0f, 0f, 0f }, new[] { -1.570796f, 0f, 0f, -1.399854f }, new[] { -0.785f, -1.1f, -1.399854f, 0.597895f },
+            new[] { -0.31f, -0.816f, 0.597895f, -3.022222f }, new[] { -0.22f, -1.088f, -3.022222f, 4.4f }, new[] { 0f, -0.12f, 4.4f, 4.4f },
+            new[] { 0.22f, 0.848f, 4.4f, -2.355556f }, new[] { 0.31f, 0.636f, -2.355556f, 0.976842f }, new[] { 0.785f, 1.1f, 0.976842f, -1.399854f },
+            new[] { 1.570796f, 0f, -1.399854f, 0f }, new[] { 3.141593f, 0f, 0f, 0f },
+        };
+        private static readonly float[][] WingDrag =
+        {
+            new[] { -3.1416f, 0.02f, 0.400865f, 0.400865f }, new[] { -1.57f, 0.65f, 0.400865f, -0.063694f }, new[] { -0.785f, 0.6f, -0.063694f, -0.774737f },
+            new[] { -0.31f, 0.232f, -0.774737f, -1.090909f }, new[] { -0.2f, 0.112f, -1.090909f, -0.875f }, new[] { -0.15f, 0.06825f, -0.875f, -0.625f },
+            new[] { -0.1f, 0.037f, -0.625f, -0.375f }, new[] { -0.05f, 0.01825f, -0.375f, -0.125f }, new[] { 0f, 0.012f, -0.125f, 0.125f },
+            new[] { 0.05f, 0.01825f, 0.125f, 0.375f }, new[] { 0.1f, 0.037f, 0.375f, 0.625f }, new[] { 0.15f, 0.06825f, 0.625f, 0.875f },
+            new[] { 0.2f, 0.112f, 0.875f, 1.090909f }, new[] { 0.31f, 0.232f, 1.090909f, 0.774737f }, new[] { 0.785f, 0.6f, 0.774737f, 0.063694f },
+            new[] { 1.57f, 0.65f, 0.063694f, -0.400865f }, new[] { 3.1416f, 0.02f, -0.400865f, -0.400865f },
+        };
+        private static readonly float[][] TailLift =
+        {
+            new[] { -3.141593f, 0f, 0f, 0f }, new[] { -1.570796f, 0f, 0f, -1.399854f }, new[] { -0.785f, -1.1f, -1.399854f, 0.735632f },
+            new[] { -0.35f, -0.78f, 0.735632f, -2.888889f }, new[] { -0.26f, -1.04f, -2.888889f, 4f }, new[] { 0f, 0f, 4f, 4f },
+            new[] { 0.26f, 1.04f, 4f, -2.888889f }, new[] { 0.35f, 0.78f, -2.888889f, 0.735632f }, new[] { 0.785f, 1.1f, 0.735632f, -1.399854f },
+            new[] { 1.570796f, 0f, -1.399854f, 0f }, new[] { 3.141593f, 0f, 0f, 0f },
+        };
+        private static readonly float[][] BodyLift =
+        {
+            new[] { -3.141593f, 0f, 0f, 0f }, new[] { -1.570796f, 0f, 0f, -1.399854f }, new[] { -0.785f, -1.1f, -1.399854f, 1.408046f },
+            new[] { -0.35f, -0.4875f, 1.408046f, -1.805556f }, new[] { -0.26f, -0.65f, -1.805556f, 2.5f }, new[] { 0f, 0f, 2.5f, 2.5f },
+            new[] { 0.26f, 0.65f, 2.5f, -1.805556f }, new[] { 0.35f, 0.4875f, -1.805556f, 1.408046f }, new[] { 0.785f, 1.1f, 1.408046f, -1.399854f },
+            new[] { 1.570796f, 0f, -1.399854f, 0f }, new[] { 3.141593f, 0f, 0f, 0f },
+        };
+        // The tail and body share one drag curve.
+        private static readonly float[][] TailDrag =
+        {
+            new[] { -3.1416f, 0.02f, 0.400865f, 0.400865f }, new[] { -1.57f, 0.65f, 0.400865f, -0.063694f }, new[] { -0.785f, 0.6f, -0.063694f, -0.716667f },
+            new[] { -0.35f, 0.28825f, -0.716667f, -1.2f }, new[] { -0.25f, 0.16825f, -1.2f, -1.125f }, new[] { -0.2f, 0.112f, -1.125f, -0.875f },
+            new[] { -0.15f, 0.06825f, -0.875f, -0.625f }, new[] { -0.1f, 0.037f, -0.625f, -0.375f }, new[] { -0.05f, 0.01825f, -0.375f, -0.125f },
+            new[] { 0f, 0.012f, -0.125f, 0.125f }, new[] { 0.05f, 0.01825f, 0.125f, 0.375f }, new[] { 0.1f, 0.037f, 0.375f, 0.625f },
+            new[] { 0.15f, 0.06825f, 0.625f, 0.875f }, new[] { 0.2f, 0.112f, 0.875f, 1.125f }, new[] { 0.25f, 0.16825f, 1.125f, 1.2f },
+            new[] { 0.35f, 0.28825f, 1.2f, 0.716667f }, new[] { 0.785f, 0.6f, 0.716667f, 0.063694f }, new[] { 1.57f, 0.65f, 0.063694f, -0.400865f },
+            new[] { 3.1416f, 0.02f, -0.400865f, -0.400865f },
+        };
+
+        // Airfoil indices into AircraftParameters.airfoils; the Revoker's canard curve (its index 0) is gone, so every part
+        // index is authored fresh rather than shifted.
+        private const int WingAirfoil = 0, TailAirfoil = 1, BodyAirfoil = 2;
+        private static readonly (string Name, float[][] Lift, float[][] Drag)[] Airfoils =
+        {
+            ("Icarus_wing", WingLift, WingDrag), ("Icarus_tail", TailLift, TailDrag), ("Icarus_body", BodyLift, TailDrag),
+        };
+
+        private static AnimationCurve Curve(float[][] keys) =>
+            new AnimationCurve(keys.Select(k => new Keyframe(k[0], k[1], k[2], k[3])).ToArray()) { preWrapMode = WrapMode.ClampForever, postWrapMode = WrapMode.ClampForever };
+
+        // AI numbers. The landing AI flies landingSpeed x sqrt(mass / maxWeight) (AIPilotLandingState.cs:96), so the
+        // field is the speed at MaxWeight that gives R7's 75 m/s approach at 20% fuel (LowFuelLandingMass).
+        private const float MaxWeight = EmptyMass + FuelMass + 2000f; // 2 t of stores
+        private const float LowFuelLandingMass = EmptyMass + 0.2f * FuelMass;
+        private const float ApproachAtLowFuel = 75f;
+        private static float LandingSpeedField => ApproachAtLowFuel * Mathf.Sqrt(MaxWeight / LowFuelLandingMass);
+
+        private static Object AuthorParameters(Stations stations, List<LiveryEntry> liveries, GameObject statusDisplay)
+        {
+            var parameters = Object.Instantiate(Load<Object>(DonorParameters));
+            parameters.name = Path.GetFileNameWithoutExtension(ParametersPath);
+            var so = new SerializedObject(parameters);
+            Prop(so, "aircraftName").stringValue = JsonKey;
+
+            var airfoils = Prop(so, "airfoils");
+            airfoils.arraySize = Airfoils.Length;
+            for (var i = 0; i < Airfoils.Length; i++)
+            {
+                var airfoil = airfoils.GetArrayElementAtIndex(i);
+                airfoil.FindPropertyRelative("name").stringValue = Airfoils[i].Name;
+                airfoil.FindPropertyRelative("liftCoef").animationCurveValue = Curve(Airfoils[i].Lift);
+                airfoil.FindPropertyRelative("dragCoef").animationCurveValue = Curve(Airfoils[i].Drag);
+            }
+
+            var loadouts = Prop(so, "loadouts");
+            loadouts.arraySize = 2;
+            SetList(loadouts.GetArrayElementAtIndex(0).FindPropertyRelative("weapons"), new Object[SetNames.Length]);
+            SetList(loadouts.GetArrayElementAtIndex(1).FindPropertyRelative("weapons"), LoadoutMounts(stations, StandardLoadouts[0].Name, StandardLoadouts[0].Keys));
+            var standard = Prop(so, "StandardLoadouts");
+            standard.arraySize = StandardLoadouts.Length;
+            for (var i = 0; i < StandardLoadouts.Length; i++)
+            {
+                var entry = standard.GetArrayElementAtIndex(i);
+                entry.FindPropertyRelative("disabled").boolValue = false;
+                entry.FindPropertyRelative("Name").stringValue = StandardLoadouts[i].Name;
+                entry.FindPropertyRelative("FuelRatio").floatValue = 1f;
+                SetList(entry.FindPropertyRelative("loadout").FindPropertyRelative("weapons"), LoadoutMounts(stations, StandardLoadouts[i].Name, StandardLoadouts[i].Keys));
+            }
+            Num(so, "DefaultFuelLevel", 1f);
+            // The Revoker's takeoff music is its own theme.
+            Prop(so, "takeoffMusic").objectReferenceValue = null;
+
+            var liveriesProp = Prop(so, "liveries");
+            liveriesProp.arraySize = liveries.Count;
+            for (var i = 0; i < liveries.Count; i++)
+            {
+                var entry = liveriesProp.GetArrayElementAtIndex(i);
+                entry.FindPropertyRelative("name").stringValue = liveries[i].Name;
+                entry.FindPropertyRelative("faction").objectReferenceValue = liveries[i].Faction;
+                var reference = entry.FindPropertyRelative("assetReference");
+                reference.FindPropertyRelative("m_AssetGUID").stringValue = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(liveries[i].Data));
+                reference.FindPropertyRelative("m_SubObjectName").stringValue = string.Empty;
+            }
+            Prop(so, "StatusDisplay").objectReferenceValue = statusDisplay;
+            // The Revoker's HUD extras flag an afterburner and an airbrake, both of which the Icarus has.
+            Prop(so, "HUDExtras").objectReferenceValue = Load<GameObject>(DonorHudExtras);
+
+            // First-cut AI numbers (R4/R7): an interceptor that bleeds energy in turns and lands fast.
+            Num(so, "aircraftGLimit", 7.33f); // the F-104's limit
+            Num(so, "maxSpeed", 800f);
+            Num(so, "takeoffSpeed", 95f); // R7: 87 m/s approach at full fuel
+            Num(so, "takeoffDistance", 1500f);
+            Num(so, "turningRadius", 2500f);
+            Num(so, "cornerSpeed", 250f);
+            Num(so, "approachSpeed", 85f);
+            Num(so, "landingSpeed", LandingSpeedField);
+            Num(so, "shortLandingSpeed", ApproachAtLowFuel);
+            // Full dry: throttleRemap ends at 0.88 and the afterburner starts at 0.9 (R7).
+            Num(so, "cruiseThrottle", 0.85f);
+            so.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log($"[Icarus] stage: parameters {Airfoils.Length} airfoils, {StandardLoadouts.Length} standard loadouts, landingSpeed {LandingSpeedField:F1} (75 m/s at {LowFuelLandingMass:0} kg of {MaxWeight:0})");
+            return SaveAsset(parameters, ParametersPath);
+        }
+
+        private static Object AuthorDefinition(Object parameters)
+        {
+            var definition = Object.Instantiate(Load<Object>(DonorDefinition));
+            definition.name = Path.GetFileNameWithoutExtension(DefinitionPath);
+            var so = new SerializedObject(definition);
+            Prop(so, "jsonKey").stringValue = JsonKey;
+            Prop(so, "unitName").stringValue = "F-240 Icarus II";
+            Prop(so, "code").stringValue = "F-240";
+            Prop(so, "description").stringValue = "A modernized Starfighter: a single-turbojet interceptor on a cranked-arrow wing with leading-edge flaps and a vectoring iris nozzle. Fast and quick to climb, it bleeds energy in a turn. Eight stations carry missiles and light strike stores.";
+            Num(so, "roleIdentity.antiAir", 1f);
+            Num(so, "roleIdentity.antiSurface", 0.3f);
+            Num(so, "roleIdentity.antiRadar", 0.3f);
+            // No internal bays and a conventional airframe: a larger return than the Revoker's 0.08.
+            Num(so, "radarSize", 0.25f);
+            Num(so, "value", 45f);
+            Num(so, "mass", EmptyMass);
+            Num(so, "manpower", 1);
+            Prop(so, "aircraftParameters").objectReferenceValue = parameters;
+            var info = Prop(so, "aircraftInfo");
+            Num(info.FindPropertyRelative("emptyWeight"), EmptyMass);
+            Num(info.FindPropertyRelative("maxWeight"), MaxWeight);
+            Num(info.FindPropertyRelative("maxSpeed"), 2750f); // km/h: R7's Mach 2.58 at 10 km
+            Num(info.FindPropertyRelative("stallSpeed"), 230f); // km/h
+            Num(info.FindPropertyRelative("maneuverability"), 6f);
+            // length, width, height, spawnOffset and restRotation come from the authored prefab (SetRestPose).
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return SaveAsset(definition, DefinitionPath);
+        }
+
+        // The Revoker's damage diagram with each part image renamed to the Icarus part that stands where it did; images
+        // with no Icarus counterpart (canards, bays) go. The silhouette is still the Revoker's until the cockpit stage.
+        // The root part's GameObject carries the prefab's name, as the Revoker's carries "Fighter1".
+        private static readonly Dictionary<string, string> DiagramNames = new Dictionary<string, string>
+        {
+            { "Fighter1", PrefabName }, { "fuselage", "fuselage_forward" }, { "tail", "fuselage_aft" }, { "cockpit", "cockpit_cell" },
+            { "nose", "radome" }, { "cheek_L", "skin_forward_L" }, { "cheek_R", "skin_forward_R" },
+            { "wing1a_L", "wing_spar_L" }, { "wing1a_R", "wing_spar_R" }, { "wing2_L", "wing_skin_L" }, { "wing2_R", "wing_skin_R" },
+            { "aileron_L", "aileron_L" }, { "aileron_R", "aileron_R" }, { "flap_L", "flap_L" }, { "flap_R", "flap_R" },
+            { "intake_L", "intake_duct_L" }, { "intake_R", "intake_duct_R" }, { "wing1b_L", "skin_mid_L" }, { "wing1b_R", "skin_mid_R" },
+            { "vstab1", "fin_spar" }, { "vstab2", "fin_skin" }, { "rudder", "rudder" },
+        };
+
+        private static GameObject AuthorStatusDisplay()
+        {
+            var instance = (GameObject)Object.Instantiate(Load<GameObject>(DonorStatusDisplay));
+            try
+            {
+                instance.name = Path.GetFileNameWithoutExtension(StatusDisplayPath);
+                var display = instance.GetComponent(GameType("StatusDisplay"));
+                var so = new SerializedObject(display);
+                var entries = Prop(so, "statusDisplays");
+                var renamed = new List<string>();
+                var removed = new List<string>();
+                for (var i = entries.arraySize - 1; i >= 0; i--)
+                {
+                    var image = (Component)entries.GetArrayElementAtIndex(i).FindPropertyRelative("partImage").objectReferenceValue;
+                    if (image != null && DiagramNames.TryGetValue(image.gameObject.name, out var icarus))
+                    {
+                        renamed.Add(image.gameObject.name + "->" + icarus);
+                        image.gameObject.name = icarus;
+                        continue;
+                    }
+                    // Hidden rather than destroyed: an image may parent another entry's.
+                    removed.Add(image == null ? "null" : image.gameObject.name);
+                    if (image != null)
+                        image.gameObject.SetActive(false);
+                    entries.DeleteArrayElementAtIndex(i);
+                }
+                so.ApplyModifiedPropertiesWithoutUndo();
+                Debug.Log($"[Icarus] stage: damage diagram renamed [{string.Join(", ", renamed)}], removed [{string.Join(", ", removed)}]");
+                return SavePrefab(instance, StatusDisplayPath);
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        // The hangars the Revoker uses, and every stock mount on the sets that offer it.
+        private static readonly string[] HangarUnitKeys = { "hangar_med", "shelter1" };
+
+        private static void AuthorOps(Stations stations)
+        {
+            var index = OpReferenceIndex.Load();
+            if (index == null || !index.Aircraft.Exists(a => a.jsonKey == JsonKey))
+                throw new InvalidDataException("OpReferenceIndex doesn't list " + JsonKey + " after Refresh.");
+            var sets = index.Aircraft.Find(a => a.jsonKey == JsonKey).hardpointNames;
+            if (!sets.SequenceEqual(SetNames))
+                throw new InvalidDataException($"A5: {JsonKey} indexes hardpoint sets [{string.Join(", ", sets)}], expected [{string.Join(", ", SetNames)}].");
+
+            var hangarOp = ScriptableObject.CreateInstance<OpAddAircraftToHangars>();
+            hangarOp.name = "OpAddAircraftToHangars_icarus";
+            hangarOp.aircraftJsonKey = JsonKey;
+            foreach (var key in HangarUnitKeys)
+            {
+                var hangar = index.HangarUnits.Find(h => h.jsonKey == key) ?? throw new InvalidDataException("OpReferenceIndex has no hangar unit " + key + ".");
+                hangarOp.hangars.Add(new OpAddAircraftToHangars.HangarTarget { hangarUnitJsonKey = hangar.jsonKey, hangarNames = new List<string>(hangar.hangarNames) });
+            }
+            SaveAsset(hangarOp, ModFolder + "/" + hangarOp.name + ".asset");
+
+            var offered = new Dictionary<string, List<int>>();
+            for (var set = 0; set < SetNames.Length; set++)
+                foreach (var mount in stations.Options[set])
+                {
+                    var key = KeyOf(mount);
+                    if (!offered.TryGetValue(key, out var list))
+                        offered[key] = list = new List<int>();
+                    list.Add(set);
+                }
+            // A mount the index doesn't know can't be registered; a standard loadout must not need one.
+            var unknown = offered.Keys.Where(k => !index.Weapons.Contains(k)).OrderBy(k => k, StringComparer.Ordinal).ToArray();
+            var needed = unknown.Where(k => StandardLoadouts.Any(l => l.Keys.Contains(k))).ToArray();
+            if (needed.Length > 0)
+                throw new InvalidDataException("A5: OpReferenceIndex has no weapon " + string.Join(", ", needed) + ", which a standard loadout carries.");
+            foreach (var key in unknown)
+                offered.Remove(key);
+            if (unknown.Length > 0)
+                Debug.Log("[Icarus] note: not registered, unknown to OpReferenceIndex: " + string.Join(", ", unknown));
+            foreach (var path in Directory.GetFiles(ModFolder, "OpAddWeaponToHardpoint_*.asset"))
+                if (!offered.ContainsKey(Path.GetFileNameWithoutExtension(path).Substring("OpAddWeaponToHardpoint_".Length)))
+                    if (!AssetDatabase.DeleteAsset(path.Replace('\\', '/')))
+                        throw new IOException("Could not remove retired hardpoint operation " + path);
+            foreach (var entry in offered.OrderBy(e => e.Key, StringComparer.Ordinal))
+            {
+                if (entry.Value.Any(set => set < 0 || set >= sets.Count))
+                    throw new InvalidDataException($"A5: {entry.Key} registers on sets [{string.Join(", ", entry.Value)}] outside 0..{sets.Count - 1}.");
+                var op = ScriptableObject.CreateInstance<OpAddWeaponToHardpoint>();
+                op.name = "OpAddWeaponToHardpoint_" + entry.Key;
+                op.weaponJsonKey = entry.Key;
+                op.aircraft.Add(new OpAddWeaponToHardpoint.AircraftTarget { aircraftJsonKey = JsonKey, hardpointIndices = new List<int>(entry.Value) });
+                SaveAsset(op, ModFolder + "/" + op.name + ".asset");
+            }
+            Debug.Log($"[Icarus] check A5 registration PASS: sets [{string.Join(", ", sets)}]; hangars [{string.Join(", ", HangarUnitKeys)}]; {offered.Count} stock mounts: " +
+                string.Join("; ", offered.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => e.Key + " on " + string.Join("/", e.Value))));
+        }
+    }
+}

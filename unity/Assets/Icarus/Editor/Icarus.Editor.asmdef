@@ -1,0 +1,6 @@
+{
+    "name": "Icarus.Editor",
+    "rootNamespace": "Icarus.Editor",
+    "references": ["Blueprinter.Editor"],
+    "includePlatforms": ["Editor"]
+}
