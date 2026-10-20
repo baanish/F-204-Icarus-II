@@ -1,0 +1,29 @@
+// Spawn on the runway: the Icarus parked on Sandrift's runway at full fuel stands on its own gear. The build's rest pose puts
+// the origin 1.49 m above the ground (spawnOffset.y) for a stance of 4.11 m, the F-104G's 4.12; the runway surface under the
+// spot is 136.93 m, so own.pos.y reads 138.42 at rest. Pass: own.pos.y within 0.15 m of that (stance 4.11 +- 0.15 m), level
+// within 1 degree, at rest, no part detached, no damage, for 30 s.
+// From the repo root: no-agentic run tests/scenarios/spawn_on_runway.scenario.jsonc
+{
+  "mission": "icarus_runway.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "mark": { "label": "parked" } },
+    { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
+    { "record": { "path": "own.pos.y" }, "label": "origin height MSL at rest, m (runway 136.93)" },
+    { "record": { "path": "own.alt_agl_m" }, "label": "alt_agl at rest, m" },
+    { "record": { "path": "own.pitch_deg" }, "label": "pitch at rest, deg" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.gear", "eq": "down" },
+                          { "path": "own.pos.y", "near": 138.42, "tol": 0.15 },
+                          { "path": "own.pitch_deg", "near": 0.2, "tol": 1 }, { "path": "own.roll_deg", "near": 0, "tol": 1 },
+                          { "path": "own.gs_mps", "lt": 0.3 }, { "path": "own.hp_frac", "eq": 1 },
+                          { "not": { "event": "part_detached", "since": "parked" } }, { "not": { "event": "damage", "since": "parked" } } ] },
+      "for": 30, "label": "stands on its gear for 30 s: stance 4.11 +- 0.15 m, level, at rest, nothing detached or damaged" },
+  ],
+}

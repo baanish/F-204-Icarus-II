@@ -1,0 +1,56 @@
+// Approach speed at 20% fuel: the game's landing AI flies AircraftParameters.landingSpeed scaled by the square root of mass over
+// maxWeight (the build logs "landingSpeed 95.6 (75 m/s at 6280 kg of 10200)"), so at 20% fuel, 6,280 kg, it targets 75 m/s,
+// R14's 75.35 m/s (1.2 times the minimum speed). This checks the Icarus flies that approach stably: on its glideslope with the
+// gear down, not stalling, and touches down undamaged. The Icarus starts 19 km out on Sandrift's runway centreline at 1,200 m,
+// 23% fuel, which is about 20% on final.
+// Pass: TAS on final (gear down, 150 m and 30 m above the ground) within 10% of 75.35 m/s (67.8 to 82.9), fuel 15 to 25%
+// there, AoA under 15 deg, touchdown under 3 m/s sink, no damage; the airframe intact 5 s after spawn, else FAIL.
+// From the repo root: no-agentic run tests/scenarios/approach_speed.scenario.jsonc
+{
+  "mission": "icarus_sandrift_final_19km.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "timeout": 420,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "gt": 800 } ] },
+      "label": "the Icarus airborne 19 km out" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s after spawn" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "mark": { "label": "land" } },
+    { "fly": { "mode": "land" } },
+    { "check": { "path": "fly.mode", "eq": "land" }, "within": 1, "label": "the game's landing AI has the jet" },
+    { "wait": { "any": [ { "all": [ { "path": "own.gear", "eq": "down" }, { "path": "own.alt_agl_m", "lt": 150 } ] },
+                         { "event": "part_detached", "since": "land" }, { "event": "destroyed", "since": "land" } ] }, "timeout": 240,
+      "label": "on final: gear down, 150 m up (or the airframe breaks up first)" },
+    { "check": { "all": [ { "not": { "event": "part_detached", "since": "land" } }, { "not": { "event": "destroyed", "since": "land" } } ] },
+      "label": "the airframe holds together through the landing AI's pattern" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at 150 m on final, m/s (target 75.35)" },
+    { "record": { "path": "own.aoa_deg" }, "label": "AoA at 150 m, deg" },
+    { "record": { "path": "own.vs_mps" }, "label": "vertical speed at 150 m, m/s" },
+    { "record": { "path": "own.fuel_frac" }, "label": "fuel at 150 m" },
+    { "check": { "all": [ { "path": "own.tas_mps", "between": [67.8, 82.9] }, { "path": "own.fuel_frac", "between": [0.15, 0.25] },
+                          { "path": "own.aoa_deg", "lt": 15 } ] },
+      "label": "at 150 m: within 10% of 75.35 m/s, fuel 15 to 25%, AoA under 15 deg" },
+    { "wait": { "path": "own.alt_agl_m", "lt": 30 }, "timeout": 60, "label": "30 m on final" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at 30 m, m/s" },
+    { "record": { "path": "own.aoa_deg" }, "label": "AoA at 30 m, deg" },
+    { "check": { "all": [ { "path": "own.tas_mps", "between": [67.8, 82.9] }, { "path": "own.aoa_deg", "lt": 15 } ] },
+      "label": "at 30 m: within 10% of 75.35 m/s, AoA under 15 deg" },
+    { "wait": { "event": "touchdown", "since": "land" }, "timeout": 60, "label": "touchdown" },
+    { "record": { "event": "touchdown", "field": "gs_mps", "since": "land" }, "label": "ground speed at touchdown, m/s" },
+    { "record": { "event": "touchdown", "field": "vs_mps", "since": "land" }, "label": "sink at touchdown, m/s" },
+    { "check": { "event": "touchdown", "since": "land", "vs_mps": { "gt": -3 } }, "label": "touchdown under 3 m/s sink" },
+    { "wait": { "all": [ { "path": "fly.mode", "eq": "off" }, { "path": "own.gs_mps", "lt": 0.5 } ] }, "timeout": 60, "label": "stopped" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.alt_agl_m", "lt": 1 }, { "not": { "event": "damage", "since": "land" } },
+                          { "not": { "event": "part_detached", "since": "land" } } ] },
+      "label": "stopped on the runway, no damage, nothing detached" },
+  ],
+}

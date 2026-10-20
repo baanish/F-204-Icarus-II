@@ -1,0 +1,51 @@
+// Energy bleed in a hard turn: R14's recommended first cut predicts -1.155 m/s2 holding altitude in a 9 g turn at 10 km and
+// 400 m/s, full afterburner, half fuel (r14_turns.csv). The Icarus starts over Ignus at 10 km, heading east at 400 m/s, half fuel,
+// clean; a hold at throttle 1 is told to reverse onto 300, a left turn of 150 deg, and its autopilot pulls as hard as its
+// fly-by-wire lets it (5.75 g within 2.2 s in its first run). The runner can't command a load factor, so the run waits up to 8 s for 8 g and records
+// the load at each speed record; the bleed is (TAS 10 s in - TAS at the start) / 10.
+// Pass: the airframe intact 5 s after spawn and through the pull to 8 g, else FAIL; then the turn holds over 8 g (else INCONCLUSIVE: the hold didn't pull
+// it); TAS 10 s into the turn within 10 m/s of 388.5 (400 - 1.155 x 10, a 1 m/s2 band on the bleed), altitude within 500 m.
+// From the repo root: no-agentic run tests/scenarios/sustained_turn.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s after spawn" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
+    { "wait": { "path": "own.engines.0.rpm_frac", "gt": 0.99 }, "timeout": 10, "label": "the engine at full RPM" },
+    { "mark": { "label": "turn" } },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at the start of the turn, m/s" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 300, "throttle": 1 } },
+    { "wait": { "any": [ { "path": "own.load_g", "gt": 8 }, { "event": "part_detached", "since": "turn" } ] }, "timeout": 8,
+      "label": "the hold pulls the turn past 8 g (or a part comes off first)" },
+    { "check": { "all": [ { "not": { "event": "part_detached", "since": "turn" } }, { "path": "own.hp_frac", "eq": 1 } ] },
+      "label": "the airframe holds together on the way to 8 g" },
+    { "require": { "path": "own.load_g", "gt": 8 }, "label": "gate: the hold pulled past 8 g" },
+    { "record": { "path": "own.load_g" }, "label": "load once past 8 g" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS once past 8 g, m/s" },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 5, "label": "5 s on in the turn" },
+    { "record": { "path": "own.load_g" }, "label": "load 5 s on" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS 5 s on, m/s" },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 5, "label": "10 s on in the turn" },
+    { "record": { "path": "own.load_g" }, "label": "load 10 s on" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS 10 s on, m/s" },
+    { "record": { "path": "own.alt_msl_m" }, "label": "altitude 10 s on, m" },
+    { "record": { "path": "own.aoa_deg" }, "label": "AoA 10 s on, deg" },
+    { "check": { "all": [ { "path": "own.tas_mps", "near": 388.5, "tol": 10 }, { "path": "own.alt_msl_m", "near": 10000, "tol": 500 },
+                          { "not": { "event": "part_detached", "since": "turn" } } ] },
+      "label": "about 10 s into the turn: TAS within 10 m/s of 388.5 (bleed -1.155 +- 1 m/s2), altitude within 500 m, nothing detached" },
+  ],
+}

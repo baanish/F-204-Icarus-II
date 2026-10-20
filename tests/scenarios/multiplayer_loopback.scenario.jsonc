@@ -1,0 +1,75 @@
+// Multiplayer loopback: a host and a client on this PC, each flying an Icarus, both seeded with a tuning file that would cut
+// core thrust to 30 kN. With a remote peer connected every knob reads its shipped value (src/Icarus/Tuning.cs RefreshLock), so
+// both fly the shipped 65 kN core plus 45 kN afterburner (110 kN advertised), not the seeded 75 kN. The lock and its first
+// readback are logged as the client joins, before any step can place a mark, so the run tests the lock live instead: a config
+// step on each peer moves MaxThrust to 31 kN mid-session, and neither peer may apply it or unlock.
+// Pass: both peers in; on each, the Icarus intact 5 s in, max thrust 110 kN before and for 5 s after the config change, no
+// "tuning: applied" and no "no remote peer" line since the change, and after 30 s of the same hold (3,000 m, heading 000,
+// throttle 1) alive and within 150 m of 3,000 m. Each peer's TAS after the hold is recorded; the two agree within 5% when both
+// fly shipped values (they start at the same 220 m/s). The lock line and the "locked to shipped" hash are in each peer's
+// LogOutput.log under peers/<name>/: read them there and check the hash matches across peers.
+// From the repo root: no-agentic run tests/scenarios/multiplayer_loopback.scenario.jsonc
+{
+  "mission": "icarus_group.mission.json",
+  "peers": {
+    "host": {
+      "role": "host", "mods": "clean",
+      "plugins": [
+        "installed:com.nikkorap.blueprinter",
+        "../../.cache/build-staging/dotnet",
+        "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+      ],
+      "config": { "baanish.icarus": { "Tuning.Engine": { "MaxThrust": 30000 } } },
+    },
+    "client": {
+      "role": "client", "mods": "clean",
+      "plugins": [
+        "installed:com.nikkorap.blueprinter",
+        "../../.cache/build-staging/dotnet",
+        "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+      ],
+      "config": { "baanish.icarus": { "Tuning.Engine": { "MaxThrust": 30000 } } },
+    },
+  },
+  "measure": true,
+  "timeout": 360,
+  "steps": [
+    { "require": { "path": "net.players", "eq": 2 }, "within": 60, "label": "host and client both in" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the host flies an Icarus" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "on": "client", "label": "the client flies an Icarus" },
+    { "mark": { "label": "start" } },
+    { "mark": { "label": "start" }, "on": "client" },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the host's airframe is intact 5 s in" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "on": "client",
+      "label": "the client's airframe is intact" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "on": "client", "label": "gate: the steps after need an intact airframe" },
+    { "check": { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 }, "label": "the host flies 110 kN, not the seeded 75 kN" },
+    { "check": { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 }, "on": "client", "label": "the client flies 110 kN, not the seeded 75 kN" },
+
+    // The knob moves while connected; both stay on shipped values.
+    { "mark": { "label": "retune" } },
+    { "mark": { "label": "retune" }, "on": "client" },
+    { "config": { "guid": "baanish.icarus", "section": "Tuning.Engine", "key": "MaxThrust", "value": 31000 } },
+    { "config": { "guid": "baanish.icarus", "section": "Tuning.Engine", "key": "MaxThrust", "value": 31000 }, "on": "client" },
+    { "check": { "all": [ { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 },
+                          { "not": { "log": "tuning: applied on ", "source": "F-240 Icarus II", "since": "retune" } },
+                          { "not": { "log": "tuning: no remote peer", "source": "F-240 Icarus II", "since": "retune" } } ] },
+      "for": 5, "label": "the host ignores the retune: 110 kN, nothing applied, still locked" },
+    { "check": { "all": [ { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 },
+                          { "not": { "log": "tuning: applied on ", "source": "F-240 Icarus II", "since": "retune" } },
+                          { "not": { "log": "tuning: no remote peer", "source": "F-240 Icarus II", "since": "retune" } } ] }, "on": "client",
+      "for": 5, "label": "the client ignores the retune: 110 kN, nothing applied, still locked" },
+
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 0, "throttle": 1 } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 0, "throttle": 1 }, "on": "client" },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 32, "hold": 30, "label": "30 s of the same hold" },
+    { "record": { "path": "own.tas_mps" }, "label": "host TAS after 30 s, m/s" },
+    { "record": { "path": "own.tas_mps" }, "on": "client", "label": "client TAS after 30 s, m/s" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.alt_msl_m", "near": 3000, "tol": 150 } ] }, "label": "the host holds 3,000 m" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.alt_msl_m", "near": 3000, "tol": 150 } ] }, "on": "client",
+      "label": "the client holds 3,000 m" },
+    { "check": { "path": "net.players", "eq": 2 }, "label": "both still in" },
+  ],
+}

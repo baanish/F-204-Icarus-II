@@ -1,0 +1,45 @@
+// Takeoff: the game's takeoff AI runs the Icarus off Sandrift's runway at full fuel (8,200 kg), clean. It holds full throttle
+// (full afterburner) on the roll and stops steering along the runway, pitching for the climb, once airspeed passes 0.7 times
+// AircraftParameters.takeoffSpeed (AIPilotTakeoffState.cs:97,137): 0.7 x 95 = 66.5 m/s. Liftoff is the game's own test,
+// radar altitude above 1 m (AIPilotTakeoffState.cs:105), here own.alt_agl_m, which reads 0 at rest. R14 puts the full-fuel
+// minimum speed at 71.75 m/s (its 86.1 m/s approach is 1.2 times it).
+// Pass: rotation (pitch past +2.5 deg, rest is +0.2) between 66.5 and 85 m/s; liftoff between 72 and 95 m/s (R14's full-fuel
+// minimum speed, and the takeoffSpeed knob); the hold takes over by 75 m up with the gear coming up within 10 s; the airframe
+// intact and nothing detached throughout. Rotation and liftoff speeds are recorded; the verdict is MEASURED or FAIL.
+// From the repo root: no-agentic run tests/scenarios/takeoff.scenario.jsonc
+{
+  "mission": "icarus_runway.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "timeout": 240,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "lt": 1 },
+                            { "path": "own.gear", "eq": "down" } ] }, "label": "the Icarus parked on the runway, gear down" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s after spawn" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "mark": { "label": "takeoff" } },
+    { "fly": { "mode": "takeoff", "alt_msl_m": 1200, "hdg_deg": 4, "throttle": 0.85 } },
+    { "wait": { "any": [ { "path": "own.pitch_deg", "gt": 2.5 }, { "path": "own.alt_agl_m", "gt": 1 } ] }, "timeout": 60, "label": "rotation: pitch past +2.5 deg" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at rotation, m/s (the AI pitches up from 66.5)" },
+    { "check": { "path": "own.tas_mps", "between": [66.5, 85] }, "label": "rotation between 66.5 and 85 m/s" },
+    { "wait": { "path": "own.alt_agl_m", "gt": 1 }, "timeout": 40, "label": "liftoff: radar altitude above 1 m" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at liftoff, m/s (target 72 to 95)" },
+    { "record": { "path": "own.pitch_deg" }, "label": "pitch at liftoff, deg" },
+    { "record": { "path": "own.aoa_deg" }, "label": "AoA at liftoff, deg" },
+    { "check": { "path": "own.tas_mps", "between": [72, 95] }, "label": "liftoff between 72 and 95 m/s" },
+    { "wait": { "path": "fly.mode", "eq": "hold" }, "timeout": 60, "label": "the takeoff hands over to the hold at 75 m" },
+    { "check": { "all": [ { "event": "gear", "state": "up", "since": "takeoff" }, { "path": "own.gear", "eq": "up" } ] }, "within": 10,
+      "label": "the gear comes up within 10 s of the hand-over" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } },
+                          { "not": { "event": "damage", "since": "takeoff" } } ] },
+      "label": "airborne with the airframe intact, nothing detached, no damage" },
+  ],
+}
