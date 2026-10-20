@@ -1,6 +1,6 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "cc7d7160d8e9fde7d0113b93890152e984ae40dd0ac9773b6fed39122850bc3f",
+ "source_sha256": "dc703f76f29bb93ffdda46366de65a7942bb4fea18c69c154b360bcb35ce97c6",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
  "parts": {
   "aileron_L": {
@@ -89,7 +89,7 @@
      0.00037
     ]
    ],
-   "sha256": "3fa229095ae59d1e45f1b9e5f5a1eb6c1ac1c619a70482f3db28242929e04a00",
+   "sha256": "f8e8f9e172fe8c7c63acfdc7ba8b5cabb3058e27b0f1588c5251e9e3a335f11e",
    "bounds_blender": [
     [
      -0.0053,
@@ -218,7 +218,7 @@
      0.00037
     ]
    ],
-   "sha256": "67957ec47914dc01c2bc52d95316d232e32b5420f5add86c5ce3ceb4d89c3b35",
+   "sha256": "a09bcffa5e9719f2ad34e2b778ecaaa0110feebb7253c60757cb6a03f7c57bdc",
    "bounds_blender": [
     [
      -0.0053,
@@ -308,7 +308,7 @@
      0.1
     ]
    ],
-   "sha256": "8568fcee39331de2de6975bc7cbd8002847c6b3a57074e4580db8fa3d5b32264",
+   "sha256": "ec058b8f346857de0ae5a91d36148fc4c7de5b4f3cbfe88d0a4b3467196f25b0",
    "bounds_blender": [
     [
      -0.42,
@@ -321,18 +321,18 @@
      0.5
     ]
    ],
-   "tris": 12,
+   "tris": 124,
    "materials": [
     [
-     "Icarus_Int_Avionics",
-     12
+     "",
+     124
     ]
    ],
    "colliders": [
     {
      "name": "avionics_tray_colmesh0",
-     "verts": 8,
-     "tris": 12,
+     "verts": 44,
+     "tris": 84,
      "bounds_unity": [
       [
        -0.42,
@@ -348,7 +348,7 @@
     }
    ],
    "lod1": {
-    "tris": 12
+    "tris": 84
    }
   },
   "canopy": {
@@ -397,7 +397,7 @@
      1.39
     ]
    ],
-   "sha256": "67f1bd725f11e1d02bc257aa78d8fce1dd02ed33697f28cb5dfac74b3eb57201",
+   "sha256": "53304a09c5e8089cc825ec69483278588c92959b8c9797b1bec3824aee420f28",
    "bounds_blender": [
     [
      -0.39,
@@ -410,11 +410,11 @@
      0.31477
     ]
    ],
-   "tris": 6766,
+   "tris": 6908,
    "materials": [
     [
      "Icarus_Glass",
-     6766
+     6908
     ]
    ],
    "colliders": [
@@ -487,7 +487,7 @@
      1.275
     ]
    ],
-   "sha256": "ae72516d14bb57b795d3073f1fd009a5286ff4f053d1724292d52d64819299dd",
+   "sha256": "51aed2741d7c8164a97bde376c892c73a5f94cd98cf814df2ea99d6763666d01",
    "bounds_blender": [
     [
      -0.38,
@@ -500,18 +500,18 @@
      0.415
     ]
    ],
-   "tris": 12,
+   "tris": 3238,
    "materials": [
     [
-     "Icarus_Int_Cockpit",
-     12
+     "",
+     3238
     ]
    ],
    "colliders": [
     {
      "name": "cockpit_cell_colmesh0",
-     "verts": 8,
-     "tris": 12,
+     "verts": 69,
+     "tris": 134,
      "bounds_unity": [
       [
        -0.38,
@@ -527,7 +527,7 @@
     }
    ],
    "lod1": {
-    "tris": 12
+    "tris": 134
    }
   },
   "dorsal_cover": {
@@ -576,7 +576,7 @@
      3.70136
     ]
    ],
-   "sha256": "798a1444e4c19260d6bdf52dc101910bbd6b85ee83d3ed6f3558b98842231cf3",
+   "sha256": "27ab656a7747841d85e9288c0b7dc0bd91ab872c5427a2ed2de40478a53e0b02",
    "bounds_blender": [
     [
      -0.31231,
@@ -869,7 +869,7 @@
      2.65
     ]
    ],
-   "sha256": "0bccc82d532e8d4f3d33249fd18c1e7a710e7c586d722acfdfe97f72ef9f2595",
+   "sha256": "8d7fbbf4c228943462c889dab19d9e7d69c1f6c76b6c12d0f3842f0103223fa0",
    "bounds_blender": [
     [
      -0.46,
@@ -917,13 +917,13 @@
    "blender_parent": "fin_spar",
    "pivot_blender": [
     0.0,
-    5.84,
-    1.79
+    6.02625,
+    1.8199
    ],
    "pivot_unity": [
     -0.0,
-    1.79,
-    -5.84
+    1.8199,
+    -6.02625
    ],
    "axes_unity": {
     "right": [
@@ -948,91 +948,91 @@
    },
    "bounds_unity": [
     [
-     -0.08357,
-     -1.09,
-     -1.84
+     -0.08344,
+     -1.0601,
+     -1.65375
     ],
     [
-     0.08357,
-     1.09,
-     1.84
+     0.08344,
+     1.0601,
+     1.65375
     ]
    ],
-   "sha256": "cf8c8d3b45686689a059e02d1578dcbebb292d51a813ec8a33ba8bc55478c523",
+   "sha256": "acd5e8c770d5332b38c6fea7f3dfeb4550584cbececeb2746cde478b620518ed",
    "bounds_blender": [
     [
-     -0.08357,
-     -1.84,
-     -1.09
+     -0.08344,
+     -1.65375,
+     -1.0601
     ],
     [
-     0.08357,
-     1.84,
-     1.09
+     0.08344,
+     1.65375,
+     1.0601
     ]
    ],
-   "tris": 2108,
+   "tris": 2776,
    "materials": [
     [
      "Icarus_Body",
-     2108
+     2776
     ]
    ],
    "colliders": [
     {
      "name": "fin_skin_colmesh0",
-     "verts": 112,
-     "tris": 220,
+     "verts": 83,
+     "tris": 162,
      "bounds_unity": [
       [
-       -0.08357,
-       -1.09,
-       -1.81
+       -0.08344,
+       -1.06003,
+       -1.62375
       ],
       [
-       0.08357,
-       -0.41067,
-       1.84
+       0.08326,
+       -0.3229,
+       1.65375
       ]
      ]
     },
     {
      "name": "fin_skin_colmesh1",
-     "verts": 50,
-     "tris": 96,
+     "verts": 48,
+     "tris": 92,
      "bounds_unity": [
       [
-       -0.06585,
-       -0.41067,
-       -1.26536
+       -0.06194,
+       -0.3229,
+       -1.07912
       ],
       [
-       0.06609,
-       0.413,
-       0.83422
+       0.06217,
+       0.3831,
+       0.86358
       ]
      ]
     },
     {
      "name": "fin_skin_colmesh2",
-     "verts": 104,
-     "tris": 204,
+     "verts": 112,
+     "tris": 220,
      "bounds_unity": [
       [
        -0.04268,
-       0.413,
-       -1.84
+       0.3831,
+       -1.65375
       ],
       [
        0.04284,
-       1.09,
-       -0.11011
+       1.0601,
+       0.07614
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 80
+    "tris": 102
    }
   },
   "fin_spar": {
@@ -1040,13 +1040,13 @@
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
     0.0,
-    6.09242,
-    1.865
+    6.12843,
+    1.88605
    ],
    "pivot_unity": [
     -0.0,
-    1.865,
-    -6.09242
+    1.88605,
+    -6.12843
    ],
    "axes_unity": {
     "right": [
@@ -1071,57 +1071,57 @@
    },
    "bounds_unity": [
     [
-     -0.06823,
-     -0.915,
-     -0.85563
+     -0.06681,
+     -0.89395,
+     -0.81962
     ],
     [
-     0.06823,
-     0.915,
-     0.85563
+     0.06681,
+     0.89395,
+     0.81962
     ]
    ],
-   "sha256": "58d45174d55acc14a3e9181a809c5e4c05486dd074bce5d5445e447275b3fdd2",
+   "sha256": "5ea4664d8d64a521cff5de85ab818363c6a105c335108f417e0ef795af3fc36b",
    "bounds_blender": [
     [
-     -0.06823,
-     -0.85563,
-     -0.915
+     -0.06681,
+     -0.81962,
+     -0.89395
     ],
     [
-     0.06823,
-     0.85563,
-     0.915
+     0.06681,
+     0.81962,
+     0.89395
     ]
    ],
-   "tris": 860,
+   "tris": 912,
    "materials": [
     [
      "Icarus_Int_Structure",
-     860
+     912
     ]
    ],
    "colliders": [
     {
      "name": "fin_spar_colmesh0",
-     "verts": 45,
-     "tris": 86,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       -0.06822,
-       -0.915,
-       -0.85563
+       -0.06679,
+       -0.8939,
+       -0.81962
       ],
       [
-       0.06823,
-       0.915,
-       0.85563
+       0.06681,
+       0.89395,
+       0.81956
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 86
+    "tris": 94
    }
   },
   "flap_L": {
@@ -1210,7 +1210,7 @@
      0.00333
     ]
    ],
-   "sha256": "0bd4ee1371b813e181aede935d9158ed5058681e1e1d3bbfbf87d7d90560cdd7",
+   "sha256": "4a6f6fabdb2b4242132495e9833c22bb94b6d9f7bfc98b8d9e22736554d3e805",
    "bounds_blender": [
     [
      -0.00848,
@@ -1339,7 +1339,7 @@
      0.00333
     ]
    ],
-   "sha256": "d4922d644719896c20a59389e2f21db05257cb63b1e6bf0e3b8887658ae9bd04",
+   "sha256": "d946ba1429b8790ebd2e574895a6a84d17f7d3b981cf447d31bbd3822ccfdfde",
    "bounds_blender": [
     [
      -0.00848,
@@ -1432,7 +1432,7 @@
      0.775
     ]
    ],
-   "sha256": "18ba22aeeebc20bd583865b2e70b6f0b6a8af0a326dd73329f0c679e15106f13",
+   "sha256": "41990819a13df3042eb4ed230b10bc63be5ac771fa7864af6dc10581bf09206d",
    "bounds_blender": [
     [
      -0.33,
@@ -1525,7 +1525,7 @@
      0.775
     ]
    ],
-   "sha256": "a395cd4252f5e9fce15b9aa3c3b7f436f4b3d9be3ca42e48da469529b0c1fe68",
+   "sha256": "61b21bc37916eff8d33f5f8fb2addf7c25a61859a5f672700e355746bf29d639",
    "bounds_blender": [
     [
      -0.33,
@@ -1618,7 +1618,7 @@
      0.775
     ]
    ],
-   "sha256": "6434ce6749c05c8c497b52b894436d9d0c004c7599a85357843c27fb605f2ef4",
+   "sha256": "8026a42c95e733719ee63c7f754e72f47c4a4894acf04ea9f07ce703291243c0",
    "bounds_blender": [
     [
      -0.24,
@@ -1711,7 +1711,7 @@
      0.35
     ]
    ],
-   "sha256": "607cb5800ae0422c2268bb0701f5f77557abd2a812fe37de1f42008063d65927",
+   "sha256": "d4979f9000db69052b7d43b122b18c2b67576a6d254531401db570a8c0024dd3",
    "bounds_blender": [
     [
      -0.59533,
@@ -1804,7 +1804,7 @@
      0.875
     ]
    ],
-   "sha256": "c6e34c9a6f84f5f933f1e226c4b7935e5e61e649280612b3b9ce7f54564aae00",
+   "sha256": "b29b09274c58b0bfcd07b497e23af70cdd772f0fe8dca455ec5498bf89aaea69",
    "bounds_blender": [
     [
      -0.94828,
@@ -1897,7 +1897,7 @@
      1.71503
     ]
    ],
-   "sha256": "dc6fc3f408aec4b080cc61200c670927a8db6b63a1fef7d58cca5f03827299b5",
+   "sha256": "3a04d1123a3b1d659d97361256742b539fa210f83bd5a71407526bc60ee084a4",
    "bounds_blender": [
     [
      -0.39,
@@ -1990,7 +1990,7 @@
      1.71503
     ]
    ],
-   "sha256": "f08c52da0642a17f5259d328c6b1e7b5c26188429935edc2c5cabefe6815f12b",
+   "sha256": "0d4792e3540eb3bdff6922a0537e385ec16660d135e60eb220eb7f7773d43674",
    "bounds_blender": [
     [
      -0.39,
@@ -2083,7 +2083,7 @@
      0.70218
     ]
    ],
-   "sha256": "20e04f16055b04d8674e7c1ecf1fde50dc1ad90ec9347d4515c12d87611cc078",
+   "sha256": "098c9f9ca68de9e34b1110fe43cc4613ba90f71bf7a532b929d3b0e181d48998",
    "bounds_blender": [
     [
      -0.55,
@@ -2176,7 +2176,7 @@
      0.70218
     ]
    ],
-   "sha256": "9b681835f3bd0de362a61ad64b9d15a9a7da41473b0faa1d189fca7f213ed3a4",
+   "sha256": "1f25ae1bd6617d448ec1ec9ec06d4ac2f13feb4aea71b36fb41e58673edc527c",
    "bounds_blender": [
     [
      -0.55,
@@ -2265,7 +2265,7 @@
      2.0
     ]
    ],
-   "sha256": "4e88f8678a9c6a383ff7f6971fbc21dea75e4f9f9bdfb0acc15590d0479cfa14",
+   "sha256": "4c387a5a23187b9e9862ec530a1c251e219e217797d69e1e23ae1a01218c6139",
    "bounds_blender": [
     [
      -0.84307,
@@ -2354,7 +2354,7 @@
      2.0
     ]
    ],
-   "sha256": "911cfa748eff018230c71bd5051d5c35c59fe4ca5be2804e184f7d72ea9f3a62",
+   "sha256": "beb4c7d2846acd55c1ba9b7c8dd98cf3e35742b8f537b8113598c6437e054523",
    "bounds_blender": [
     [
      -0.58812,
@@ -2443,7 +2443,7 @@
      2.7
     ]
    ],
-   "sha256": "56c2836f3d5bbfac5727e69470cafce2f3c765877e6f83495fb1ddc24b7feadd",
+   "sha256": "114c5f13889335858f1c3c72c30c5ebc80d25377ad3d93ce558aa2fba3cd3d3e",
    "bounds_blender": [
     [
      -1.04205,
@@ -2492,11 +2492,11 @@
    "pivot_blender": [
     0.36,
     2.25,
-    -0.23
+    -0.19935
    ],
    "pivot_unity": [
     -0.36,
-    -0.23,
+    -0.19935,
     -2.25
    ],
    "axes_unity": {
@@ -2524,56 +2524,56 @@
    "bounds_unity": [
     [
      -0.2,
-     -0.19,
+     -0.15935,
      -0.9
     ],
     [
      0.2,
-     0.19,
+     0.15935,
      0.9
     ]
    ],
-   "sha256": "f8d794af3f8a1910e2ee1b4d3f40258dbba68a554c4d4dad8d85b7af35976c62",
+   "sha256": "adab8ca681d7abb74fba08f6be25c0bae72b9f7607a9b7df3d14ef6983f56392",
    "bounds_blender": [
     [
      -0.2,
      -0.9,
-     -0.19
+     -0.15935
     ],
     [
      0.2,
      0.9,
-     0.19
+     0.15935
     ]
    ],
-   "tris": 12,
+   "tris": 1368,
    "materials": [
     [
-     "Icarus_Int_Bay",
-     12
+     "",
+     1368
     ]
    ],
    "colliders": [
     {
      "name": "gear_leg_L_colmesh0",
-     "verts": 8,
-     "tris": 12,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
        -0.2,
-       -0.19,
+       -0.15389,
        -0.9
       ],
       [
        0.2,
-       0.19,
+       0.15935,
        0.9
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 12
+    "tris": 40
    }
   },
   "gear_leg_N": {
@@ -2623,7 +2623,7 @@
      0.75
     ]
    ],
-   "sha256": "aa81eaf2450a122e62341576ce5dad24b015306fad996be4dae7c58c213984c4",
+   "sha256": "7712f2a8a3a0b823b5e1bd07e3ba116a6f7c36fe394f8902c922e1585397b77f",
    "bounds_blender": [
     [
      -0.17,
@@ -2636,22 +2636,22 @@
      0.21
     ]
    ],
-   "tris": 12,
+   "tris": 1142,
    "materials": [
     [
-     "Icarus_Int_Bay",
-     12
+     "",
+     1142
     ]
    ],
    "colliders": [
     {
      "name": "gear_leg_N_colmesh0",
-     "verts": 8,
-     "tris": 12,
+     "verts": 97,
+     "tris": 190,
      "bounds_unity": [
       [
        -0.17,
-       -0.21,
+       -0.20947,
        -0.75
       ],
       [
@@ -2663,7 +2663,7 @@
     }
    ],
    "lod1": {
-    "tris": 12
+    "tris": 190
    }
   },
   "gear_leg_R": {
@@ -2672,11 +2672,11 @@
    "pivot_blender": [
     -0.36,
     2.25,
-    -0.23
+    -0.19935
    ],
    "pivot_unity": [
     0.36,
-    -0.23,
+    -0.19935,
     -2.25
    ],
    "axes_unity": {
@@ -2704,56 +2704,56 @@
    "bounds_unity": [
     [
      -0.2,
-     -0.19,
+     -0.15935,
      -0.9
     ],
     [
      0.2,
-     0.19,
+     0.15935,
      0.9
     ]
    ],
-   "sha256": "c90fcb417539ac9dfce5c3d2dccfbe44b8d0b881fc05d2ee32fabea01c2fa45b",
+   "sha256": "fdbd0932a59d6095b8af967a7547ebead7f9f8e9a49a704ee5ff7dfec7a57b3a",
    "bounds_blender": [
     [
      -0.2,
      -0.9,
-     -0.19
+     -0.15935
     ],
     [
      0.2,
      0.9,
-     0.19
+     0.15935
     ]
    ],
-   "tris": 12,
+   "tris": 1368,
    "materials": [
     [
-     "Icarus_Int_Bay",
-     12
+     "",
+     1368
     ]
    ],
    "colliders": [
     {
      "name": "gear_leg_R_colmesh0",
-     "verts": 8,
-     "tris": 12,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
        -0.2,
-       -0.19,
+       -0.1485,
        -0.9
       ],
       [
        0.2,
-       0.19,
+       0.15935,
        0.9
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 12
+    "tris": 40
    }
   },
   "intake_duct_L": {
@@ -2802,7 +2802,7 @@
      1.725
     ]
    ],
-   "sha256": "090f23c434f9d41bc00e67fbccc60703a317fac9b6b9b8ed9573264ab5dd6c33",
+   "sha256": "1680d5c9e9236d31e7e38ff8d5c5566d3a32bf051b35cb0dd8c758ba2230cc89",
    "bounds_blender": [
     [
      -0.4505,
@@ -2895,7 +2895,7 @@
      1.725
     ]
    ],
-   "sha256": "bd45e755ca780fb7f05457fa6ddb228f6bb484f4c8fa3248758220beb34c3bdc",
+   "sha256": "3bb9350d88ebe5aab3151dfc3f751304a85620e036d373c90bdbc593a749cdfd",
    "bounds_blender": [
     [
      -0.4505,
@@ -3028,7 +3028,7 @@
      0.33515
     ]
    ],
-   "sha256": "22783a90593219fccd6411de5744735af12247430bc36866e78d372072273107",
+   "sha256": "7b15bb7332802b1a262f2e88389816e3f509329a163583adc39c3d7fd795620c",
    "bounds_blender": [
     [
      -0.1832,
@@ -3157,7 +3157,7 @@
      0.33515
     ]
    ],
-   "sha256": "eadfb6b9753f4160a976d26d850a853f01f0ac60b52a50e7f465689d0e5db269",
+   "sha256": "179a0fb547b3bfb9d17e154c97ee6eed0fa223f8c54bb4d9e12c2fd4a2b10db2",
    "bounds_blender": [
     [
      -0.1832,
@@ -3236,27 +3236,27 @@
    },
    "bounds_unity": [
     [
-     -0.387,
-     -0.387,
+     -0.385,
+     -0.385,
      -0.15
     ],
     [
-     0.387,
-     0.387,
+     0.385,
+     0.385,
      0.15
     ]
    ],
-   "sha256": "5f027a39a8a3e29607758297a0085e7de790fc39727b555edf66365091c2dbf8",
+   "sha256": "25c05ea4bef20a524f3d9240e849a93d5e77fa3e6395d6a24c666c85478a1eed",
    "bounds_blender": [
     [
-     -0.387,
+     -0.385,
      -0.15,
-     -0.387
+     -0.385
     ],
     [
-     0.387,
+     0.385,
      0.15,
-     0.387
+     0.385
     ]
    ],
    "tris": 1006,
@@ -3277,13 +3277,13 @@
      "tris": 188,
      "bounds_unity": [
       [
-       -0.387,
-       -0.387,
+       -0.385,
+       -0.385,
        -0.15
       ],
       [
-       0.387,
-       0.387,
+       0.385,
+       0.385,
        0.15
       ]
      ]
@@ -3297,12 +3297,12 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.375,
+    0.36,
     7.3,
     0.37
    ],
    "pivot_unity": [
-    -0.375,
+    -0.36,
     0.37,
     -7.3
    ],
@@ -3337,12 +3337,12 @@
    "fbx": "nozzle_petal_00_visible.fbx",
    "blender_parent": "nozzle_petal_00",
    "pivot_blender": [
-    0.375,
+    0.36,
     7.3,
     0.37
    ],
    "pivot_unity": [
-    -0.375,
+    -0.36,
     0.37,
     -7.3
    ],
@@ -3366,25 +3366,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "be9507eaa90aa62b31a735aa9d090d3b60922a466f92bdd9428c4f6649148ace",
+   "sha256": "e7084be6c48db7b3566abeb80cd0e09c9cce8f8af47410f3130fe0f18f472f29",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -3403,13 +3403,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.34645,
+    0.3326,
     7.3,
-    0.51351
+    0.50777
    ],
    "pivot_unity": [
-    -0.34645,
-    0.51351,
+    -0.3326,
+    0.50777,
     -7.3
    ],
    "axes_unity": {
@@ -3443,13 +3443,13 @@
    "fbx": "nozzle_petal_01_visible.fbx",
    "blender_parent": "nozzle_petal_01",
    "pivot_blender": [
-    0.34645,
+    0.3326,
     7.3,
-    0.51351
+    0.50777
    ],
    "pivot_unity": [
-    -0.34645,
-    0.51351,
+    -0.3326,
+    0.50777,
     -7.3
    ],
    "axes_unity": {
@@ -3472,25 +3472,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "e4be0d04b2c8e117e0ae54525c468928401da8a4b5a28cda901739302065aae1",
+   "sha256": "53d9d4d4ad2572a552c03d181f49a875b284e88641843451599554ca8a0d1d90",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -3509,13 +3509,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.26517,
+    0.25456,
     7.3,
-    0.63517
+    0.62456
    ],
    "pivot_unity": [
-    -0.26517,
-    0.63517,
+    -0.25456,
+    0.62456,
     -7.3
    ],
    "axes_unity": {
@@ -3549,13 +3549,13 @@
    "fbx": "nozzle_petal_02_visible.fbx",
    "blender_parent": "nozzle_petal_02",
    "pivot_blender": [
-    0.26517,
+    0.25456,
     7.3,
-    0.63517
+    0.62456
    ],
    "pivot_unity": [
-    -0.26517,
-    0.63517,
+    -0.25456,
+    0.62456,
     -7.3
    ],
    "axes_unity": {
@@ -3578,25 +3578,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "0c4fe4c132e1a13708283d88a7079f59d6d8857aed7b961ff75e3ff84e75ade2",
+   "sha256": "b057296e8a2e26ff940cf212218d414a9071c85f1e16fe99b1a58603842f2f30",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -3615,13 +3615,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.14351,
+    0.13777,
     7.3,
-    0.71645
+    0.7026
    ],
    "pivot_unity": [
-    -0.14351,
-    0.71645,
+    -0.13777,
+    0.7026,
     -7.3
    ],
    "axes_unity": {
@@ -3655,13 +3655,13 @@
    "fbx": "nozzle_petal_03_visible.fbx",
    "blender_parent": "nozzle_petal_03",
    "pivot_blender": [
-    0.14351,
+    0.13777,
     7.3,
-    0.71645
+    0.7026
    ],
    "pivot_unity": [
-    -0.14351,
-    0.71645,
+    -0.13777,
+    0.7026,
     -7.3
    ],
    "axes_unity": {
@@ -3684,25 +3684,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "2b0cbce0b701b51d61ef60f000f5a79efafee9005679f33d9f17a6ad416f8a6a",
+   "sha256": "ac375695acba295dd0bbf654237dc8e604e8376fe0cd622b09b44637185835b2",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -3723,11 +3723,11 @@
    "pivot_blender": [
     0.0,
     7.3,
-    0.745
+    0.73
    ],
    "pivot_unity": [
     -0.0,
-    0.745,
+    0.73,
     -7.3
    ],
    "axes_unity": {
@@ -3763,11 +3763,11 @@
    "pivot_blender": [
     0.0,
     7.3,
-    0.745
+    0.73
    ],
    "pivot_unity": [
     -0.0,
-    0.745,
+    0.73,
     -7.3
    ],
    "axes_unity": {
@@ -3790,25 +3790,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "507d13a6defa53db639a2ffe595d8327d5059f53848c71b6fd942652e898b200",
+   "sha256": "5eee379be6437d773f55ce3c778721de345e0fdd1b76d4c0a59dc4529bd5e93c",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -3827,13 +3827,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.14351,
+    -0.13777,
     7.3,
-    0.71645
+    0.7026
    ],
    "pivot_unity": [
-    0.14351,
-    0.71645,
+    0.13777,
+    0.7026,
     -7.3
    ],
    "axes_unity": {
@@ -3867,13 +3867,13 @@
    "fbx": "nozzle_petal_05_visible.fbx",
    "blender_parent": "nozzle_petal_05",
    "pivot_blender": [
-    -0.14351,
+    -0.13777,
     7.3,
-    0.71645
+    0.7026
    ],
    "pivot_unity": [
-    0.14351,
-    0.71645,
+    0.13777,
+    0.7026,
     -7.3
    ],
    "axes_unity": {
@@ -3896,25 +3896,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "43b506ea23b83d878170fa22d3d772343dbe6a835f1df94297a07c596bff2f8f",
+   "sha256": "d3a6ebfb901c1f4d1c46152f4b433b69ea0a6f782abb45d41d08ea4386c8740a",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -3933,13 +3933,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.26517,
+    -0.25456,
     7.3,
-    0.63517
+    0.62456
    ],
    "pivot_unity": [
-    0.26517,
-    0.63517,
+    0.25456,
+    0.62456,
     -7.3
    ],
    "axes_unity": {
@@ -3973,13 +3973,13 @@
    "fbx": "nozzle_petal_06_visible.fbx",
    "blender_parent": "nozzle_petal_06",
    "pivot_blender": [
-    -0.26517,
+    -0.25456,
     7.3,
-    0.63517
+    0.62456
    ],
    "pivot_unity": [
-    0.26517,
-    0.63517,
+    0.25456,
+    0.62456,
     -7.3
    ],
    "axes_unity": {
@@ -4002,25 +4002,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "afd2d65035d28f966af47ee3bd10a23679e93b311d440a6b3c42dda42e31c5e1",
+   "sha256": "4b9dc4ea6fb7af1b5506880c37d38cde4359a69cf7e2c649b9a463d0f4fb2a5d",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4039,13 +4039,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.34645,
+    -0.3326,
     7.3,
-    0.51351
+    0.50777
    ],
    "pivot_unity": [
-    0.34645,
-    0.51351,
+    0.3326,
+    0.50777,
     -7.3
    ],
    "axes_unity": {
@@ -4079,13 +4079,13 @@
    "fbx": "nozzle_petal_07_visible.fbx",
    "blender_parent": "nozzle_petal_07",
    "pivot_blender": [
-    -0.34645,
+    -0.3326,
     7.3,
-    0.51351
+    0.50777
    ],
    "pivot_unity": [
-    0.34645,
-    0.51351,
+    0.3326,
+    0.50777,
     -7.3
    ],
    "axes_unity": {
@@ -4108,25 +4108,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "4b8357374615cb95f0bb928142ee6c548b50bb78769d8ca19ec508f8aaa77ca1",
+   "sha256": "e8b425b36280955d3eed818d6897b016eb784eac104f435c284bd03f3f9511b1",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4145,12 +4145,12 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.375,
+    -0.36,
     7.3,
     0.37
    ],
    "pivot_unity": [
-    0.375,
+    0.36,
     0.37,
     -7.3
    ],
@@ -4185,12 +4185,12 @@
    "fbx": "nozzle_petal_08_visible.fbx",
    "blender_parent": "nozzle_petal_08",
    "pivot_blender": [
-    -0.375,
+    -0.36,
     7.3,
     0.37
    ],
    "pivot_unity": [
-    0.375,
+    0.36,
     0.37,
     -7.3
    ],
@@ -4214,25 +4214,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "23f8fcde3403d95318328a2558a60f8136835c09944073ede80b964ffd123d73",
+   "sha256": "ee34d0290d64583380a97f67dca5846fade7454b300baab72982f79a4b033974",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4251,13 +4251,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.34645,
+    -0.3326,
     7.3,
-    0.22649
+    0.23223
    ],
    "pivot_unity": [
-    0.34645,
-    0.22649,
+    0.3326,
+    0.23223,
     -7.3
    ],
    "axes_unity": {
@@ -4291,13 +4291,13 @@
    "fbx": "nozzle_petal_09_visible.fbx",
    "blender_parent": "nozzle_petal_09",
    "pivot_blender": [
-    -0.34645,
+    -0.3326,
     7.3,
-    0.22649
+    0.23223
    ],
    "pivot_unity": [
-    0.34645,
-    0.22649,
+    0.3326,
+    0.23223,
     -7.3
    ],
    "axes_unity": {
@@ -4320,25 +4320,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "58316081d4d17180873594fd29eededd9caa303d90af7b96c80b37742febe5bc",
+   "sha256": "580c4382f7a7a4aa316f83a855302fac4f544c13f09fb9175ab53b00441bc7c9",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4357,13 +4357,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.26517,
+    -0.25456,
     7.3,
-    0.10483
+    0.11544
    ],
    "pivot_unity": [
-    0.26517,
-    0.10483,
+    0.25456,
+    0.11544,
     -7.3
    ],
    "axes_unity": {
@@ -4397,13 +4397,13 @@
    "fbx": "nozzle_petal_10_visible.fbx",
    "blender_parent": "nozzle_petal_10",
    "pivot_blender": [
-    -0.26517,
+    -0.25456,
     7.3,
-    0.10483
+    0.11544
    ],
    "pivot_unity": [
-    0.26517,
-    0.10483,
+    0.25456,
+    0.11544,
     -7.3
    ],
    "axes_unity": {
@@ -4426,25 +4426,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "a6439d3587f0c3d911d34fdbb25eaca49bf56eec3a5607ab5342fd6e0c2af48a",
+   "sha256": "111ba307afedb9189f4722cdd6e595252748e71760d7fc641c4f0e40a459f6cd",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4463,13 +4463,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.14351,
+    -0.13777,
     7.3,
-    0.02355
+    0.0374
    ],
    "pivot_unity": [
-    0.14351,
-    0.02355,
+    0.13777,
+    0.0374,
     -7.3
    ],
    "axes_unity": {
@@ -4503,13 +4503,13 @@
    "fbx": "nozzle_petal_11_visible.fbx",
    "blender_parent": "nozzle_petal_11",
    "pivot_blender": [
-    -0.14351,
+    -0.13777,
     7.3,
-    0.02355
+    0.0374
    ],
    "pivot_unity": [
-    0.14351,
-    0.02355,
+    0.13777,
+    0.0374,
     -7.3
    ],
    "axes_unity": {
@@ -4532,25 +4532,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "a76c7b6123c60a56e2186384f85a6d6cb1bc42e1668d1363e0a2f28e8f9cd34c",
+   "sha256": "36a0afecc975cc6a2e6fb82c40727b983f5b34f5ef520d9c5885689c568ae841",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4571,11 +4571,11 @@
    "pivot_blender": [
     -0.0,
     7.3,
-    -0.005
+    0.01
    ],
    "pivot_unity": [
     0.0,
-    -0.005,
+    0.01,
     -7.3
    ],
    "axes_unity": {
@@ -4611,11 +4611,11 @@
    "pivot_blender": [
     -0.0,
     7.3,
-    -0.005
+    0.01
    ],
    "pivot_unity": [
     0.0,
-    -0.005,
+    0.01,
     -7.3
    ],
    "axes_unity": {
@@ -4638,25 +4638,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "7a027cd503249176b13202c69425a01c2906abcfd9626129883ed894f999eb19",
+   "sha256": "369873969cfa0f1bfc48e74a67a213b925233d4ee757bfe4d674fe110f6aba10",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4675,13 +4675,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.14351,
+    0.13777,
     7.3,
-    0.02355
+    0.0374
    ],
    "pivot_unity": [
-    -0.14351,
-    0.02355,
+    -0.13777,
+    0.0374,
     -7.3
    ],
    "axes_unity": {
@@ -4715,13 +4715,13 @@
    "fbx": "nozzle_petal_13_visible.fbx",
    "blender_parent": "nozzle_petal_13",
    "pivot_blender": [
-    0.14351,
+    0.13777,
     7.3,
-    0.02355
+    0.0374
    ],
    "pivot_unity": [
-    -0.14351,
-    0.02355,
+    -0.13777,
+    0.0374,
     -7.3
    ],
    "axes_unity": {
@@ -4744,25 +4744,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "120881260d2d8ee48605af119a6346e9a9d2c2ca14072232e6667de9852b7248",
+   "sha256": "a98d61b14cd31c7f52c179da338ab75d7a1d91a359eeea73326a7b4e0fc4a9d4",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4781,13 +4781,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.26517,
+    0.25456,
     7.3,
-    0.10483
+    0.11544
    ],
    "pivot_unity": [
-    -0.26517,
-    0.10483,
+    -0.25456,
+    0.11544,
     -7.3
    ],
    "axes_unity": {
@@ -4821,13 +4821,13 @@
    "fbx": "nozzle_petal_14_visible.fbx",
    "blender_parent": "nozzle_petal_14",
    "pivot_blender": [
-    0.26517,
+    0.25456,
     7.3,
-    0.10483
+    0.11544
    ],
    "pivot_unity": [
-    -0.26517,
-    0.10483,
+    -0.25456,
+    0.11544,
     -7.3
    ],
    "axes_unity": {
@@ -4850,25 +4850,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "70f80c8a9b4e548e7b729a6add0b5adbd497bdfcbcde1521c23a7acc956a659b",
+   "sha256": "c3a85fa0e9f42c1371f54c9971c9c6f8aa6cad1f85d7bb0953fa434789de7b7a",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4887,13 +4887,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.34645,
+    0.3326,
     7.3,
-    0.22649
+    0.23223
    ],
    "pivot_unity": [
-    -0.34645,
-    0.22649,
+    -0.3326,
+    0.23223,
     -7.3
    ],
    "axes_unity": {
@@ -4927,13 +4927,13 @@
    "fbx": "nozzle_petal_15_visible.fbx",
    "blender_parent": "nozzle_petal_15",
    "pivot_blender": [
-    0.34645,
+    0.3326,
     7.3,
-    0.22649
+    0.23223
    ],
    "pivot_unity": [
-    -0.34645,
-    0.22649,
+    -0.3326,
+    0.23223,
     -7.3
    ],
    "axes_unity": {
@@ -4956,25 +4956,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.075,
+     -0.0705,
      -0.012,
      -0.48
     ],
     [
-     0.075,
+     0.0705,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "d0d12d059d4c66842819fe1e076720cb532e6575957ef98c36e3ba1e463e3350",
+   "sha256": "58d940f393f2b77fe39a7800e37dd4817638301a09e3f2d0bfd21f011340811a",
    "bounds_blender": [
     [
-     -0.075,
+     -0.0705,
      0.0,
      -0.012
     ],
     [
-     0.075,
+     0.0705,
      0.48,
      0.0
     ]
@@ -4993,13 +4993,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.35603,
+    0.34131,
     7.3,
-    0.44082
+    0.43789
    ],
    "pivot_unity": [
-    -0.35603,
-    0.44082,
+    -0.34131,
+    0.43789,
     -7.3
    ],
    "axes_unity": {
@@ -5033,13 +5033,13 @@
    "fbx": "nozzle_seal_00_visible.fbx",
    "blender_parent": "nozzle_seal_00",
    "pivot_blender": [
-    0.35603,
+    0.34131,
     7.3,
-    0.44082
+    0.43789
    ],
    "pivot_unity": [
-    -0.35603,
-    0.44082,
+    -0.34131,
+    0.43789,
     -7.3
    ],
    "axes_unity": {
@@ -5062,25 +5062,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "fc5741fd89f6d11d905e37037a2515e744a2697f0180fa3d85b3094b0059dbee",
+   "sha256": "9ec44ed8c7537601839a7716a92fc50eeb7f9c9426c3ca855aafa4c437c11ef9",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5099,13 +5099,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.30182,
+    0.28935,
     7.3,
-    0.57167
+    0.56334
    ],
    "pivot_unity": [
-    -0.30182,
-    0.57167,
+    -0.28935,
+    0.56334,
     -7.3
    ],
    "axes_unity": {
@@ -5139,13 +5139,13 @@
    "fbx": "nozzle_seal_01_visible.fbx",
    "blender_parent": "nozzle_seal_01",
    "pivot_blender": [
-    0.30182,
+    0.28935,
     7.3,
-    0.57167
+    0.56334
    ],
    "pivot_unity": [
-    -0.30182,
-    0.57167,
+    -0.28935,
+    0.56334,
     -7.3
    ],
    "axes_unity": {
@@ -5168,25 +5168,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "648af5bf450adcc8072e0ba169056d7e9f954c4d60d150223a6230d7c8c4e834",
+   "sha256": "c9ca50cd07a8a8963229e587938fde256ca38f3f2abbaf38de857196bfdb9bca",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5205,13 +5205,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.20167,
+    0.19334,
     7.3,
-    0.67182
+    0.65935
    ],
    "pivot_unity": [
-    -0.20167,
-    0.67182,
+    -0.19334,
+    0.65935,
     -7.3
    ],
    "axes_unity": {
@@ -5245,13 +5245,13 @@
    "fbx": "nozzle_seal_02_visible.fbx",
    "blender_parent": "nozzle_seal_02",
    "pivot_blender": [
-    0.20167,
+    0.19334,
     7.3,
-    0.67182
+    0.65935
    ],
    "pivot_unity": [
-    -0.20167,
-    0.67182,
+    -0.19334,
+    0.65935,
     -7.3
    ],
    "axes_unity": {
@@ -5274,25 +5274,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "a04dbb8f4808df8d060084361d7b10e1d68ebc0bd415dd0fa11225da0249c9ef",
+   "sha256": "bd49ebbb88a79be1df670e1d66e1e0356301649c32b0d27efae54e42cafc955c",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5311,13 +5311,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.07082,
+    0.06789,
     7.3,
-    0.72603
+    0.71131
    ],
    "pivot_unity": [
-    -0.07082,
-    0.72603,
+    -0.06789,
+    0.71131,
     -7.3
    ],
    "axes_unity": {
@@ -5351,13 +5351,13 @@
    "fbx": "nozzle_seal_03_visible.fbx",
    "blender_parent": "nozzle_seal_03",
    "pivot_blender": [
-    0.07082,
+    0.06789,
     7.3,
-    0.72603
+    0.71131
    ],
    "pivot_unity": [
-    -0.07082,
-    0.72603,
+    -0.06789,
+    0.71131,
     -7.3
    ],
    "axes_unity": {
@@ -5380,25 +5380,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "1617b33829e08c87537d4176e7af1265ec05990b8a2877c501f8564e8185584f",
+   "sha256": "00cb49ccc2659af4be6ae2d1a769b48fbbb23b17d92f52bdc8a7a4ee12a2e5bf",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5417,13 +5417,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.07082,
+    -0.06789,
     7.3,
-    0.72603
+    0.71131
    ],
    "pivot_unity": [
-    0.07082,
-    0.72603,
+    0.06789,
+    0.71131,
     -7.3
    ],
    "axes_unity": {
@@ -5457,13 +5457,13 @@
    "fbx": "nozzle_seal_04_visible.fbx",
    "blender_parent": "nozzle_seal_04",
    "pivot_blender": [
-    -0.07082,
+    -0.06789,
     7.3,
-    0.72603
+    0.71131
    ],
    "pivot_unity": [
-    0.07082,
-    0.72603,
+    0.06789,
+    0.71131,
     -7.3
    ],
    "axes_unity": {
@@ -5486,25 +5486,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "538b57604cf7aa3d396e9e11d450548671c52f3bde81da03ad4fb998a18fc991",
+   "sha256": "dc3f94a0719bb76518dab090105c3ba5ef74ddb39bcd10b94c835faec019b61a",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5523,13 +5523,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.20167,
+    -0.19334,
     7.3,
-    0.67182
+    0.65935
    ],
    "pivot_unity": [
-    0.20167,
-    0.67182,
+    0.19334,
+    0.65935,
     -7.3
    ],
    "axes_unity": {
@@ -5563,13 +5563,13 @@
    "fbx": "nozzle_seal_05_visible.fbx",
    "blender_parent": "nozzle_seal_05",
    "pivot_blender": [
-    -0.20167,
+    -0.19334,
     7.3,
-    0.67182
+    0.65935
    ],
    "pivot_unity": [
-    0.20167,
-    0.67182,
+    0.19334,
+    0.65935,
     -7.3
    ],
    "axes_unity": {
@@ -5592,25 +5592,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "5d9c8900a28b7a0d374793a92a0648f774af82cbee99c962eca50bf977990198",
+   "sha256": "c6f21c60a35ced0d4d53bb183ae1fda150781ad429ac5250cb7dfa1d89926055",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5629,13 +5629,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.30182,
+    -0.28935,
     7.3,
-    0.57167
+    0.56334
    ],
    "pivot_unity": [
-    0.30182,
-    0.57167,
+    0.28935,
+    0.56334,
     -7.3
    ],
    "axes_unity": {
@@ -5669,13 +5669,13 @@
    "fbx": "nozzle_seal_06_visible.fbx",
    "blender_parent": "nozzle_seal_06",
    "pivot_blender": [
-    -0.30182,
+    -0.28935,
     7.3,
-    0.57167
+    0.56334
    ],
    "pivot_unity": [
-    0.30182,
-    0.57167,
+    0.28935,
+    0.56334,
     -7.3
    ],
    "axes_unity": {
@@ -5698,25 +5698,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "7bd552df70b428c96aa931ef33e7ab569892cd04b3511e81aa9dd796355f01a5",
+   "sha256": "f8ebd54381ef2cf163c9e867b7a1fb91710ab20067d50307e1a395f80ad4e6b2",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5735,13 +5735,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.35603,
+    -0.34131,
     7.3,
-    0.44082
+    0.43789
    ],
    "pivot_unity": [
-    0.35603,
-    0.44082,
+    0.34131,
+    0.43789,
     -7.3
    ],
    "axes_unity": {
@@ -5775,13 +5775,13 @@
    "fbx": "nozzle_seal_07_visible.fbx",
    "blender_parent": "nozzle_seal_07",
    "pivot_blender": [
-    -0.35603,
+    -0.34131,
     7.3,
-    0.44082
+    0.43789
    ],
    "pivot_unity": [
-    0.35603,
-    0.44082,
+    0.34131,
+    0.43789,
     -7.3
    ],
    "axes_unity": {
@@ -5804,25 +5804,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "bd690f96084a40fe6b4b978fc06434d346b7a350bfff6a38ba4bb1414d0c50ba",
+   "sha256": "2d9913ec5d81e40d1874d7ddf60fc411b6622a2ab073ce282322bcc9c848603b",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5841,13 +5841,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.35603,
+    -0.34131,
     7.3,
-    0.29918
+    0.30211
    ],
    "pivot_unity": [
-    0.35603,
-    0.29918,
+    0.34131,
+    0.30211,
     -7.3
    ],
    "axes_unity": {
@@ -5881,13 +5881,13 @@
    "fbx": "nozzle_seal_08_visible.fbx",
    "blender_parent": "nozzle_seal_08",
    "pivot_blender": [
-    -0.35603,
+    -0.34131,
     7.3,
-    0.29918
+    0.30211
    ],
    "pivot_unity": [
-    0.35603,
-    0.29918,
+    0.34131,
+    0.30211,
     -7.3
    ],
    "axes_unity": {
@@ -5910,25 +5910,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "1ab4a935e49f3e6af5913f414c1941977d06cb431a7e16ad0af14632e712cb01",
+   "sha256": "fc9da7ab4d45efc0bc37758b2cbb806110ef9aefc151a1cf80a8bba3b54751fe",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -5947,13 +5947,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.30182,
+    -0.28935,
     7.3,
-    0.16833
+    0.17666
    ],
    "pivot_unity": [
-    0.30182,
-    0.16833,
+    0.28935,
+    0.17666,
     -7.3
    ],
    "axes_unity": {
@@ -5987,13 +5987,13 @@
    "fbx": "nozzle_seal_09_visible.fbx",
    "blender_parent": "nozzle_seal_09",
    "pivot_blender": [
-    -0.30182,
+    -0.28935,
     7.3,
-    0.16833
+    0.17666
    ],
    "pivot_unity": [
-    0.30182,
-    0.16833,
+    0.28935,
+    0.17666,
     -7.3
    ],
    "axes_unity": {
@@ -6016,25 +6016,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "8588fa94095bf76c8689caa61362c6ae055b190435d934c8911999ccafd9a57c",
+   "sha256": "fff8cbaceedefa686f8b02c7b10bd57ccaddd916f38ee2ef72046ec7e1ef9803",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6053,13 +6053,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.20167,
+    -0.19334,
     7.3,
-    0.06818
+    0.08065
    ],
    "pivot_unity": [
-    0.20167,
-    0.06818,
+    0.19334,
+    0.08065,
     -7.3
    ],
    "axes_unity": {
@@ -6093,13 +6093,13 @@
    "fbx": "nozzle_seal_10_visible.fbx",
    "blender_parent": "nozzle_seal_10",
    "pivot_blender": [
-    -0.20167,
+    -0.19334,
     7.3,
-    0.06818
+    0.08065
    ],
    "pivot_unity": [
-    0.20167,
-    0.06818,
+    0.19334,
+    0.08065,
     -7.3
    ],
    "axes_unity": {
@@ -6122,25 +6122,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "30226e7d3cdf97db2470089f2eeaaf5e6bde1d85ee98c6f87a8a95e3a7bfc634",
+   "sha256": "fb75162712ef5a741fb23cc07fd587d72b7ec0efe0ff909cb52568d0e03b2c9c",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6159,13 +6159,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    -0.07082,
+    -0.06789,
     7.3,
-    0.01397
+    0.02869
    ],
    "pivot_unity": [
-    0.07082,
-    0.01397,
+    0.06789,
+    0.02869,
     -7.3
    ],
    "axes_unity": {
@@ -6199,13 +6199,13 @@
    "fbx": "nozzle_seal_11_visible.fbx",
    "blender_parent": "nozzle_seal_11",
    "pivot_blender": [
-    -0.07082,
+    -0.06789,
     7.3,
-    0.01397
+    0.02869
    ],
    "pivot_unity": [
-    0.07082,
-    0.01397,
+    0.06789,
+    0.02869,
     -7.3
    ],
    "axes_unity": {
@@ -6228,25 +6228,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "ab26081815473237e16152cdafa9cb371e988aa99e9a7833525878032bb810cc",
+   "sha256": "521c211c365e09f1539e8f87c2430b0359b9e29e7065c98fd3ae7e2696c6c6f5",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6265,13 +6265,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.07082,
+    0.06789,
     7.3,
-    0.01397
+    0.02869
    ],
    "pivot_unity": [
-    -0.07082,
-    0.01397,
+    -0.06789,
+    0.02869,
     -7.3
    ],
    "axes_unity": {
@@ -6305,13 +6305,13 @@
    "fbx": "nozzle_seal_12_visible.fbx",
    "blender_parent": "nozzle_seal_12",
    "pivot_blender": [
-    0.07082,
+    0.06789,
     7.3,
-    0.01397
+    0.02869
    ],
    "pivot_unity": [
-    -0.07082,
-    0.01397,
+    -0.06789,
+    0.02869,
     -7.3
    ],
    "axes_unity": {
@@ -6334,25 +6334,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "4dc3925ad6ba87b5470bc09dad4d911a098cd94e25253d4ab82aaaa4f12f20c6",
+   "sha256": "b5e9706b5d04898cb70945f008138fc1689148c8ac2181bef7e3ea73141343ef",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6371,13 +6371,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.20167,
+    0.19334,
     7.3,
-    0.06818
+    0.08065
    ],
    "pivot_unity": [
-    -0.20167,
-    0.06818,
+    -0.19334,
+    0.08065,
     -7.3
    ],
    "axes_unity": {
@@ -6411,13 +6411,13 @@
    "fbx": "nozzle_seal_13_visible.fbx",
    "blender_parent": "nozzle_seal_13",
    "pivot_blender": [
-    0.20167,
+    0.19334,
     7.3,
-    0.06818
+    0.08065
    ],
    "pivot_unity": [
-    -0.20167,
-    0.06818,
+    -0.19334,
+    0.08065,
     -7.3
    ],
    "axes_unity": {
@@ -6440,25 +6440,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "2f5225677e066f5d059024eadec0dc95451476217c4bb745b13b5f9a42338147",
+   "sha256": "dd14171e8a91fd12a6e4cffd42634adb331fdd26cf067d09f5416b8c0aa8b046",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6477,13 +6477,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.30182,
+    0.28935,
     7.3,
-    0.16833
+    0.17666
    ],
    "pivot_unity": [
-    -0.30182,
-    0.16833,
+    -0.28935,
+    0.17666,
     -7.3
    ],
    "axes_unity": {
@@ -6517,13 +6517,13 @@
    "fbx": "nozzle_seal_14_visible.fbx",
    "blender_parent": "nozzle_seal_14",
    "pivot_blender": [
-    0.30182,
+    0.28935,
     7.3,
-    0.16833
+    0.17666
    ],
    "pivot_unity": [
-    -0.30182,
-    0.16833,
+    -0.28935,
+    0.17666,
     -7.3
    ],
    "axes_unity": {
@@ -6546,25 +6546,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "37b63619a650cd3658e9471e49f3aa82046098039554af62ddb34c917e422a6e",
+   "sha256": "219476cfdc8d10025d07baf7a73e224563ac0069fb45971d6f95fc957c034f98",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6583,13 +6583,13 @@
    "fbx": null,
    "blender_parent": "nozzle_vector",
    "pivot_blender": [
-    0.35603,
+    0.34131,
     7.3,
-    0.29918
+    0.30211
    ],
    "pivot_unity": [
-    -0.35603,
-    0.29918,
+    -0.34131,
+    0.30211,
     -7.3
    ],
    "axes_unity": {
@@ -6623,13 +6623,13 @@
    "fbx": "nozzle_seal_15_visible.fbx",
    "blender_parent": "nozzle_seal_15",
    "pivot_blender": [
-    0.35603,
+    0.34131,
     7.3,
-    0.29918
+    0.30211
    ],
    "pivot_unity": [
-    -0.35603,
-    0.29918,
+    -0.34131,
+    0.30211,
     -7.3
    ],
    "axes_unity": {
@@ -6652,25 +6652,25 @@
    "props": {},
    "bounds_unity": [
     [
-     -0.0525,
+     -0.04935,
      -0.012,
      -0.48
     ],
     [
-     0.0525,
+     0.04935,
      0.0,
      -0.0
     ]
    ],
-   "sha256": "695129b5240c659789d9ac36de13f4efa74a9911ea678054a4bce3ee4b3245ce",
+   "sha256": "57516a8e64643fde80b86dbb982ed7f18e5edea4fa23530f4b081d196025753c",
    "bounds_blender": [
     [
-     -0.0525,
+     -0.04935,
      0.0,
      -0.012
     ],
     [
-     0.0525,
+     0.04935,
      0.48,
      0.0
     ]
@@ -6724,11 +6724,11 @@
    "pivot_blender": [
     0.0,
     -6.375,
-    0.075
+    0.085
    ],
    "pivot_unity": [
     -0.0,
-    0.075,
+    0.085,
     6.375
    ],
    "axes_unity": {
@@ -6755,56 +6755,56 @@
    "bounds_unity": [
     [
      -0.3,
-     -0.345,
+     -0.335,
      -0.675
     ],
     [
      0.3,
-     0.345,
+     0.335,
      0.675
     ]
    ],
-   "sha256": "dbdcfeea055a1177ca27959011d2019ae80b3a962ff778c7c92495cbf14203bf",
+   "sha256": "dea0231143ae6554cc5b26a6dbdc6f99cc03bbdae5d3b3730fe529551ec01740",
    "bounds_blender": [
     [
      -0.3,
      -0.675,
-     -0.345
+     -0.335
     ],
     [
      0.3,
      0.675,
-     0.345
+     0.335
     ]
    ],
-   "tris": 118,
+   "tris": 1690,
    "materials": [
     [
-     "Icarus_Int_Avionics",
-     118
+     "",
+     1690
     ]
    ],
    "colliders": [
     {
      "name": "radar_tray_colmesh0",
-     "verts": 41,
-     "tris": 78,
+     "verts": 123,
+     "tris": 242,
      "bounds_unity": [
       [
        -0.3,
-       -0.345,
+       -0.335,
        -0.675
       ],
       [
        0.3,
-       0.345,
+       0.335,
        0.675
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 78
+    "tris": 242
    }
   },
   "radome": {
@@ -6853,7 +6853,7 @@
      1.38792
     ]
    ],
-   "sha256": "afbafad52e19d10ba74473b75734d3f504fa09989fbaa6efc6aa91dc08a68f77",
+   "sha256": "3ef38c42488d83dca5e130756156f5816a4e4dbf61baed0b4be5558a7d36d9d2",
    "bounds_blender": [
     [
      -0.35123,
@@ -6986,7 +6986,7 @@
      -0.0
     ]
    ],
-   "sha256": "f64342dbba8eb8551eb0f3c40aede0a01e367a344c7b24031fde1d1480c1b23e",
+   "sha256": "d87fa43ddf306386831e92bee74ffbcfdf4aa7a0c8e01b7605f515376c8ad561",
    "bounds_blender": [
     [
      0.0,
@@ -7075,7 +7075,7 @@
      2.0779
     ]
    ],
-   "sha256": "69cf90b0f6b1e641cb9d1333a36dcb75c55248f773be42401ca7a3a2a8ff89b7",
+   "sha256": "77ce9023b527dbe3ba2b6be99c7d7ed42b63e4dace38e5f32aca465d42398b2c",
    "bounds_blender": [
     [
      -0.44922,
@@ -7377,12 +7377,12 @@
    "fbx": "skin_aft_R.fbx",
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
-    -0.25481,
+    -0.44981,
     5.1221,
     0.34034
    ],
    "pivot_unity": [
-    0.25481,
+    0.44981,
     0.34034,
     -5.1221
    ],
@@ -7409,38 +7409,34 @@
    },
    "bounds_unity": [
     [
-     -0.64481,
+     -0.44981,
      -0.70205,
      -2.0779
     ],
     [
-     0.64481,
+     0.44981,
      0.70205,
      2.0779
     ]
    ],
-   "sha256": "60edb1b47c57c20b81ceee40ec7f5a1da3131e7b1b3e1befc594683f245e0f9e",
+   "sha256": "0e70099b030e426d2711b791fd333a44264be8ff862d45c47d9f76ca29d3b748",
    "bounds_blender": [
     [
-     -0.64481,
+     -0.44981,
      -2.0779,
      -0.70205
     ],
     [
-     0.64481,
+     0.44981,
      2.0779,
      0.70205
     ]
    ],
-   "tris": 5206,
+   "tris": 5064,
    "materials": [
     [
      "Icarus_Body",
      5064
-    ],
-    [
-     "Icarus_Duct",
-     142
     ]
    ],
    "colliders": [
@@ -7450,12 +7446,12 @@
      "tris": 62,
      "bounds_unity": [
       [
-       0.03585,
+       -0.15915,
        -0.02575,
        1.17935
       ],
       [
-       0.56921,
+       0.37421,
        0.47074,
        2.0779
       ]
@@ -7467,12 +7463,12 @@
      "tris": 104,
      "bounds_unity": [
       [
-       0.06863,
+       -0.12637,
        -0.6032,
        1.17935
       ],
       [
-       0.64481,
+       0.44981,
        -0.05361,
        2.0779
       ]
@@ -7484,12 +7480,12 @@
      "tris": 222,
      "bounds_unity": [
       [
-       -0.00874,
+       -0.20374,
        -0.54546,
        -1.17935
       ],
       [
-       0.3808,
+       0.1858,
        -0.04098,
        -0.16848
       ]
@@ -7501,12 +7497,12 @@
      "tris": 212,
      "bounds_unity": [
       [
-       -0.25481,
+       -0.44981,
        -0.63094,
        -1.17935
       ],
       [
-       0.0398,
+       -0.1552,
        -0.45843,
        -0.16848
       ]
@@ -7514,16 +7510,16 @@
     },
     {
      "name": "skin_aft_R_colmesh4",
-     "verts": 65,
-     "tris": 126,
+     "verts": 54,
+     "tris": 104,
      "bounds_unity": [
       [
-       -0.4785,
+       -0.44981,
        0.34913,
        -2.0779
       ],
       [
-       0.03645,
+       -0.15855,
        0.53984,
        -1.29167
       ]
@@ -7535,12 +7531,12 @@
      "tris": 204,
      "bounds_unity": [
       [
-       -0.01597,
+       -0.21097,
        -0.03809,
        -2.0779
       ],
       [
-       0.31282,
+       0.11782,
        0.45398,
        -1.29167
       ]
@@ -7552,12 +7548,12 @@
      "tris": 196,
      "bounds_unity": [
       [
-       -0.08999,
+       -0.28499,
        -0.42982,
        -2.0779
       ],
       [
-       0.29348,
+       0.09848,
        -0.04186,
        -1.29167
       ]
@@ -7565,16 +7561,16 @@
     },
     {
      "name": "skin_aft_R_colmesh7",
-     "verts": 35,
-     "tris": 66,
+     "verts": 29,
+     "tris": 54,
      "bounds_unity": [
       [
-       -0.40405,
+       -0.44981,
        -0.483,
        -2.0779
       ],
       [
-       -0.03759,
+       -0.23259,
        -0.33065,
        -1.29167
       ]
@@ -7582,169 +7578,135 @@
     },
     {
      "name": "skin_aft_R_colmesh8",
-     "verts": 26,
-     "tris": 47,
-     "bounds_unity": [
-      [
-       -0.64481,
-       -0.03806,
-       -2.0779
-      ],
-      [
-       -0.49222,
-       0.33907,
-       -2.0779
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_R_colmesh9",
-     "verts": 22,
-     "tris": 39,
-     "bounds_unity": [
-      [
-       -0.63556,
-       -0.3238,
-       -2.0779
-      ],
-      [
-       -0.41963,
-       -0.05475,
-       -2.0779
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_R_colmesh10",
      "verts": 37,
      "tris": 70,
      "bounds_unity": [
       [
-       -0.25481,
+       -0.44981,
        -0.69757,
        1.17935
       ],
       [
-       0.06697,
+       -0.12803,
        -0.59626,
        2.0779
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh11",
+     "name": "skin_aft_R_colmesh9",
      "verts": 6,
      "tris": 8,
      "bounds_unity": [
       [
-       0.03858,
+       -0.15642,
        0.46907,
        1.17935
       ],
       [
-       0.04623,
+       -0.14877,
        0.49209,
        1.74094
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh12",
+     "name": "skin_aft_R_colmesh10",
      "verts": 103,
      "tris": 202,
      "bounds_unity": [
       [
-       -0.25481,
+       -0.44981,
        0.49755,
        -0.05616
       ],
       [
-       0.06615,
+       -0.12885,
        0.70205,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh13",
+     "name": "skin_aft_R_colmesh11",
      "verts": 76,
      "tris": 148,
      "bounds_unity": [
       [
-       0.0685,
+       -0.1265,
        -0.03412,
        -0.05616
       ],
       [
-       0.47381,
+       0.27881,
        0.51831,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh14",
+     "name": "skin_aft_R_colmesh12",
      "verts": 104,
      "tris": 204,
      "bounds_unity": [
       [
-       0.0648,
+       -0.1302,
        -0.60479,
        -0.05616
       ],
       [
-       0.49273,
+       0.29773,
        -0.04048,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh15",
+     "name": "skin_aft_R_colmesh13",
      "verts": 68,
      "tris": 132,
      "bounds_unity": [
       [
-       -0.25481,
+       -0.44981,
        -0.70205,
        -0.05616
       ],
       [
-       0.06351,
+       -0.13149,
        -0.58151,
        1.06703
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh16",
+     "name": "skin_aft_R_colmesh14",
      "verts": 72,
      "tris": 140,
      "bounds_unity": [
       [
-       -0.25481,
+       -0.44981,
        0.48446,
        -1.17935
       ],
       [
-       0.06862,
+       -0.12638,
        0.67282,
        -0.16848
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh17",
+     "name": "skin_aft_R_colmesh15",
      "verts": 127,
      "tris": 250,
      "bounds_unity": [
       [
-       0.04804,
+       -0.14696,
        -0.03213,
        -1.17935
       ],
       [
-       0.38262,
+       0.18762,
        0.52147,
        -0.16848
       ]
@@ -7752,7 +7714,7 @@
     }
    ],
    "lod1": {
-    "tris": 254
+    "tris": 246
    }
   },
   "skin_forward_L": {
@@ -7801,7 +7763,7 @@
      2.02329
     ]
    ],
-   "sha256": "180fcd2f5f1800b705da504ad20830d788b10a8cd2cb8262d0505847e47b0fa1",
+   "sha256": "87a5dc77596b0eab74644b62a2ac7e2d3ee294bebff669e46104cdc7a6863aac",
    "bounds_blender": [
     [
      -0.3151,
@@ -8145,7 +8107,7 @@
      2.02329
     ]
    ],
-   "sha256": "ff19e83f5befd983eee0ff0ad3d03fc882e5d00a8c63c8b8d12841346e1635d7",
+   "sha256": "1f944fcc187eaad6191785bb0f6d723567d0d313ec487dcfcd376bbf3b97c9a4",
    "bounds_blender": [
     [
      -0.3151,
@@ -8489,7 +8451,7 @@
      2.69589
     ]
    ],
-   "sha256": "a90d48e2cdba8e31114d096f350a76010bc6982f9c51e82dd3cfc568f85652e0",
+   "sha256": "0f69c3afe14adeea49d64c8f769dc7c03eab9ac2fba69dcd536d64d9933e5cc2",
    "bounds_blender": [
     [
      -0.54084,
@@ -8918,7 +8880,7 @@
      2.69589
     ]
    ],
-   "sha256": "eb937964fe1bcca0f5a845459ccb0f5a6db2ed61ecba25176276b51eb390debc",
+   "sha256": "41d8b9052b2b642ddc75d3fd769dae780cc94ef0f23adedf834b08eb1ccc412c",
    "bounds_blender": [
     [
      -0.54084,
@@ -9387,7 +9349,7 @@
      -0.0
     ]
    ],
-   "sha256": "d23446d537c5b9aa222e22613d7977caf3c629df5a1c8452a4e9e81f11b8a392",
+   "sha256": "c2303bc0edc24dac2b0305bd113187de9adbfb31791246d483f052b5752a965a",
    "bounds_blender": [
     [
      -0.04512,
@@ -9516,7 +9478,7 @@
      -0.0
     ]
    ],
-   "sha256": "9994f9c789b022340ff50c1495d9dccd1929eea0398bfccf529e49cabd153a72",
+   "sha256": "94e7b4045fcaafec8b11c493b787da90d131f5b4a37e81852fc1b573eeecc902",
    "bounds_blender": [
     [
      -0.04512,
@@ -9645,7 +9607,7 @@
      0.67
     ]
    ],
-   "sha256": "df536ca6b9019b47f210d76e1b144735a6a2d2a43d9f964fad5954db983ca7d5",
+   "sha256": "2b01e6a6b58932a4e939467cd7e812ae1a93568928990e2ac929f402a4e9f06c",
    "bounds_blender": [
     [
      0.0,
@@ -9774,7 +9736,7 @@
      0.67
     ]
    ],
-   "sha256": "5b2a3df538106cd22d9cb530448e13f16fc1d3cc2d5604d60469a5bec705708e",
+   "sha256": "0f4f1dc03020d831442ac77f1904f8aa25124465f0626a4c04d8604ddc07de9b",
    "bounds_blender": [
     [
      0.0,
@@ -9863,7 +9825,7 @@
      1.125
     ]
    ],
-   "sha256": "b81b66182c1007a67054455606543d9ed692a4e43cb3dc288ef27cbe357792df",
+   "sha256": "e7221d92c7295b1909fe39ce8d274b4eae8c7e39e95c8f142e29df3390740676",
    "bounds_blender": [
     [
      -0.05599,
@@ -9952,7 +9914,7 @@
      2.46088
     ]
    ],
-   "sha256": "03e7a56c9b254bdc75d4efe35b28507f6fe0318f01b57fdbb662579a84547f6d",
+   "sha256": "545cb8d8cc9b476f7d3eb065df2a929706ba0884189e1702c9aed997183b4302",
    "bounds_blender": [
     [
      -1.41,
@@ -10092,7 +10054,7 @@
      2.46088
     ]
    ],
-   "sha256": "dcdabd99a18b018770a5af3f1c3a6e26a8849b32b050b45437d4b41e830d3278",
+   "sha256": "555339dc9ccd7078079b49741879ba10dbb48de432906f8d30a0af3973eb81dd",
    "bounds_blender": [
     [
      -1.41,
@@ -10232,7 +10194,7 @@
      1.7826
     ]
    ],
-   "sha256": "026d16dea908530faf73d921f5e8f004bf87c1bf5f23f3756261e16f635f7a57",
+   "sha256": "ecbdf2a0cf5e7dd3bc4ce1aadd6d8f85296104c8fe32aade23a9252e951c9e17",
    "bounds_blender": [
     [
      -1.366,
@@ -10321,7 +10283,7 @@
      1.7826
     ]
    ],
-   "sha256": "0b9e6a6e6419efefbd28cbef2147289ae14dbc83d01b7f0a20ac31fc29a91991",
+   "sha256": "f9ea7a46f8a36258ae1f15a7757e2fde31a5d10af4f879e3c1276336992ba142",
    "bounds_blender": [
     [
      -1.366,

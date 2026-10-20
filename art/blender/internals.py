@@ -17,6 +17,7 @@ import build_icarus as bi
 FUEL_DENSITY = 0.80  # kg per litre, JP-8
 
 INTERNALS = {
+    "compartment_inset": 0.03,  # how far inside the skin every compartment stays
     "radar": {"s": (0.30, 1.55), "dish_s": 0.95, "dish_r": 0.30, "mass_kg": 120},
     "avionics_nose": {"box": (1.55, 2.30, 0.30, -0.25, 0.42), "mass_kg": 90},  # s0, s1, half width, z0, z1
     "cockpit_tub": {"box": (2.35, 4.90, 0.38, -0.05, 0.78), "mass_kg": 260},
@@ -35,7 +36,7 @@ INTERNALS = {
     "fuel_aft_R": {"tank": (7.75, 9.30, 0.04, -0.15, -0.92, -0.26)},
     "strake_tank": {"x": (1.10, 1.88), "f": (0.06, 0.70)},  # each strake: span and chord fraction, ahead of the flap
     "wing_tank": {"x": (1.95, 3.05), "f": (0.17, 0.68)},  # the box between the spars, outboard of the crank
-    "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.40, "end_s": 15.00,
+    "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "mass_kg_each": 9},
     "spars": {"front_f": 0.15, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
@@ -171,6 +172,28 @@ def grown(obj, by):
     return cutter
 
 
+def inner_solid(p, inset, s0=0.25, s1=15.15):
+    """A closed solid just inside the fuselage skin, to clip compartments to."""
+    n = int(round((s1 - s0) / 0.05)) + 1
+    rings = [ring_at(p, s0 + (s1 - s0) * i / (n - 1), inset) for i in range(n)]
+    return outward(bi.loft("inner_solid", rings, cap_back=True, cap_front=True))
+
+
+def clip_to(obj, solid):
+    """Bake obj intersected with solid into obj's own mesh, so a box compartment follows the round skin."""
+    outward(obj)
+    mod = obj.modifiers.new("clip", "BOOLEAN")
+    mod.operation, mod.solver, mod.object = "INTERSECT", "EXACT", solid
+    bpy.context.view_layer.update()
+    baked = bpy.data.meshes.new_from_object(obj.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    old = obj.data
+    obj.modifiers.clear()
+    obj.data = baked
+    baked.name = obj.name
+    bpy.data.meshes.remove(old)
+    return obj
+
+
 def subtract(obj, cutters):
     """Bake obj minus the cutters into obj's own mesh."""
     for c in cutters:
@@ -235,22 +258,28 @@ def build(p, col, mats):
 def _build(p, mats):
     I = INTERNALS
     parts = []
+    # Compartments are boxes clipped to a solid just inside the skin, so none can show through it.
+    inner = inner_solid(p, I["compartment_inset"])
     r = I["radar"]
-    dish = cylinder_loft("radar_dish", [(r["dish_s"], 0.0, 0.03, r["dish_r"]), (r["dish_s"] + 0.04, 0.0, 0.03, r["dish_r"])])
-    parts.append(tag(bi.finish(dish, mats["avionics"], smooth=False), "radar", "fuselage", r["mass_kg"] * 0.4))
+    nose = bi.blended_ring(p, r["dish_s"])
+    cz = (max(v.z for v in nose) + min(v.z for v in nose)) / 2
+    dish_r = min(r["dish_r"], min((v - bi.P(r["dish_s"], 0.0, cz)).length for v in nose) - I["compartment_inset"] - 0.02)
+    dish = cylinder_loft("radar_dish", [(r["dish_s"], 0.0, cz, dish_r), (r["dish_s"] + 0.04, 0.0, cz, dish_r)])
+    parts.append(tag(bi.finish(clip_to(dish, inner), mats["avionics"], smooth=False), "radar", "fuselage", r["mass_kg"] * 0.4))
     unit = box("radar_unit", r["dish_s"] + 0.08, r["s"][1], 0.20, -0.15, 0.22)
-    parts.append(tag(bi.finish(unit, mats["avionics"], smooth=False), "radar", "fuselage", r["mass_kg"] * 0.6))
+    parts.append(tag(bi.finish(clip_to(unit, inner), mats["avionics"], smooth=False), "radar", "fuselage", r["mass_kg"] * 0.6))
 
     for name, role in (("avionics_nose", "avionics"), ("cockpit_tub", "cockpit"), ("avionics_aft", "avionics"),
                        ("nose_gear_bay", "gear_bay")):
         s0, s1, hw, z0, z1 = I[name]["box"]
-        obj = bi.finish(box(name, s0, s1, hw, z0, z1), mats[role], smooth=False)
+        obj = bi.finish(clip_to(box(name, s0, s1, hw, z0, z1), inner), mats[role], smooth=False)
         parts.append(tag(obj, role, "fuselage", I[name]["mass_kg"]))
     mg = I["main_gear_bay"]
     for side, suffix in ((1, "_L"), (-1, "_R")):
         s0, s1, hw, z0, z1 = mg["box"]
-        obj = bi.finish(box("main_gear_bay" + suffix, s0, s1, hw, z0, z1, x=side * mg["x"]), mats["gear_bay"], smooth=False)
-        parts.append(tag(obj, "gear_bay", "fuselage"))
+        obj = clip_to(box("main_gear_bay" + suffix, s0, s1, hw, z0, z1, x=side * mg["x"]), inner)
+        parts.append(tag(bi.finish(obj, mats["gear_bay"], smooth=False), "gear_bay", "fuselage"))
+    bpy.data.objects.remove(inner, do_unlink=True)
 
     cutters = duct_cutter(p, I["duct_clearance"])
     wing_cut = [grown(bpy.data.objects[n], 0.015) for n in ("wing_L", "wing_R")]  # wing roots buried in the body

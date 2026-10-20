@@ -11,6 +11,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 import build_icarus as bi
+import internals as interior
 
 # part name -> (parent, dry mass kg). Hinged surfaces are listed by their hinge name.
 TREE = {
@@ -213,6 +214,16 @@ def _organise(p, icarus, internals, structure_mat):
     spar_stations = [(fin[0][2] + 0.25 + (fin[-1][2] - fin[0][2] - 0.35) * i / 8, 0.30, 0.34) for i in range(9)]
     fin_spar = bi.strip("fin_spar", fin, spar_stations, p["fin"]["thickness"] * 0.9, "z")
     fin_spar.data.materials.append(structure_mat)
+    # The fin sits on the fuselage: trim its buried root to the skin, so it clears the engine and nozzle in the
+    # tight tail cone, and its root follows the body's top line.
+    body = interior.inner_solid(p, 0.0, 11.5, 15.4)
+    for obj in (O["fin_skin"], fin_spar):
+        interior.subtract(interior.outward(obj), [body])
+    bpy.data.objects.remove(body, do_unlink=True)
+    # The canopy's lower edge dips into the fuselage; keep the cockpit cell clear of it.
+    canopy_cut = interior.grown(O["canopy"], 0.01)
+    interior.subtract(interior.outward(O["cockpit_cell"]), [canopy_cut])
+    bpy.data.objects.remove(canopy_cut, do_unlink=True)
 
     parts = {}
     for name, (parent, mass) in TREE.items():

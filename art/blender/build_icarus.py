@@ -130,8 +130,8 @@ PARAMS = {
     # Iris nozzle: a fixed shroud, then a ring of hinged petals with seals between them. Each petal hangs on its own
     # hinge empty (local X along the hinge) under one gimbal empty, so the plugin can open the iris with afterburner
     # and deflect it for thrust vectoring. The built pose is dry thrust: petals angled inward.
-    "nozzle": {"z": 0.37, "shroud_start": 15.0, "ring_s": 15.30, "ring_r": 0.375, "duct_r": 0.33,
-               "petals": 16, "petal_length": 0.48, "petal_root_w": 0.150, "petal_tip_w": 0.118,
+    "nozzle": {"z": 0.37, "shroud_start": 15.0, "ring_s": 15.30, "ring_r": 0.36, "shroud_r": 0.385, "duct_r": 0.33,
+               "petals": 16, "petal_length": 0.48, "petal_root_w": 0.141, "petal_tip_w": 0.113,
                "petal_thickness": 0.012, "dry_angle_deg": -9.0, "seal_inset": 0.012},
     # Reference drawings shown as image empties: file, px per metre, pixel of the radome tip, plane.
     "references": {
@@ -414,10 +414,9 @@ def build_fuselage(p, mat, duct_mat):
     stations = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 30)[1:]
                 + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, table[-1][0], 70)[1:])
     rings = [blended_ring(p, s) for s in stations]
-    obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]), cap_back=True)
+    obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]))  # open at the tail: the nozzle shroud fills it
     finish(obj, mat)
     obj.data.materials.append(duct_mat)
-    obj.data.polygons[-1].material_index = 1  # end cap, behind the nozzle
     # The faces between the last ring ahead of the lip and the lip itself would close the intakes; delete them so
     # the openings look into the ducts.
     j = stations.index(lip) - 1
@@ -455,7 +454,7 @@ def build_ducts(p, duct_mat):
 def build_canopy(p, mat):
     rows = resample(p["canopy"], spaced(p["canopy"][0][0], p["canopy"][-1][0], 24))
     rings = [body_ring(s, hw, top, bot, 2.0, e_bot=4.0, zmid=bot + 0.02) for s, hw, top, bot in rows]
-    return finish(loft("canopy", rings, cap_back=True), mat)
+    return finish(loft("canopy", rings, cap_back=True, cap_front=True), mat)
 
 
 def build_probe(p, mat):
@@ -722,7 +721,7 @@ def build_nozzle(p, mat, duct_mat):
     z, s_ring, r = n["z"], n["ring_s"], n["ring_r"]
     petal_mat = material("Icarus_Petal", (0.46, 0.44, 0.42, 1.0), 0.85, 0.3)
     seal_mat = material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4)
-    shroud = loft("nozzle_shroud", [ring_points(n["shroud_start"], r + 0.012, z), ring_points(s_ring, r + 0.012, z),
+    shroud = loft("nozzle_shroud", [ring_points(n["shroud_start"], n["shroud_r"], z), ring_points(s_ring, n["shroud_r"], z),
                                    ring_points(s_ring, n["duct_r"], z), ring_points(n["shroud_start"], n["duct_r"], z)],
                   cap_back=True)
     finish(shroud, mat)
@@ -859,6 +858,7 @@ def _build(repo):
     import checks
 
     checks.fuel_cell_clearance(TARGET)
+    checks.internals_inside_skin(TARGET)
     refs = build_references(p, repo)
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])
