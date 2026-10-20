@@ -68,7 +68,7 @@ PARAMS = {
     # Area-rule waist: the whole cross-section (body, fairings, spine and belly) scales radially by up to depth,
     # a cosine-squared dip over centre_s +/- half_length, so it pinches in plan and in profile. A look only: the
     # game's drag has no cross-section term.
-    "area_rule": {"centre_s": 10.8, "half_length": 2.6, "depth": 0.07},  # smooth-union radius between body, intakes and fillets
+    "area_rule": {"centre_s": 10.8, "half_length": 2.6, "depth": 0.10},  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
     # Two cone angles, like the F-104's "double-shock" centre body: a fine tip, then a steeper base. A full cone
