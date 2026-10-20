@@ -1,0 +1,7 @@
+# Internal progress tracking, research notes and reviews: never published.
+.internal/
+.cache/
+.agentic/
+.claude/worktrees/
+*.blend1
+__pycache__/
