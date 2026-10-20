@@ -31,13 +31,11 @@ PARAMS = {
         (4.00, 0.585, 0.86, -0.51, 1.8),
         (4.90, 0.610, 1.00, -0.51, 1.6),
         (6.20, 0.640, 1.04, -0.51, 1.5),
-        (8.00, 0.645, 1.04, -0.48, 1.5),
-        (9.20, 0.620, 1.05, -0.45, 1.5),  # area-rule waist: body and intake fairings pinch in along the wing
-        (10.6, 0.590, 1.06, -0.41, 1.5),  # and the tail swells again behind it. A look only: the game has no
-        (11.6, 0.570, 1.07, -0.40, 1.5),  # cross-section drag term
-        (12.4, 0.590, 1.07, -0.38, 1.5),
-        (13.5, 0.665, 1.00, -0.28, 1.6),
-        (14.1, 0.650, 0.93, -0.20, 1.8),  # the boat tail steepens progressively to the nozzle
+        (8.00, 0.650, 1.04, -0.48, 1.5),
+        (10.0, 0.650, 1.06, -0.42, 1.5),
+        (12.2, 0.650, 1.07, -0.39, 1.5),
+        (13.2, 0.640, 1.02, -0.30, 1.6),
+        (14.0, 0.610, 0.94, -0.21, 1.8),  # the boat tail steepens progressively to the nozzle
         (14.6, 0.540, 0.85, -0.11, 1.9),
         (15.0, 0.450, 0.78, -0.04, 2.0),
         (15.2, 0.390, 0.76, -0.02, 2.0),  # a circle just over the nozzle, closed by an end cap
@@ -57,17 +55,21 @@ PARAMS = {
         (6.85, 0.955, 0.22, 0.44),
         (7.60, 0.990, 0.22, 0.44),
         (8.60, 0.990, 0.22, 0.43),
-        (10.0, 0.900, 0.22, 0.40),
-        (11.4, 0.760, 0.22, 0.35),
-        (12.6, 0.600, 0.22, 0.26),
+        (10.0, 0.940, 0.22, 0.40),
+        (11.4, 0.830, 0.22, 0.35),
+        (12.6, 0.680, 0.22, 0.26),
         (13.6, 0.090, 0.22, 0.01),  # shrinks to a point inside the body, so the fairing fades with no bulge
     ],
     # With the rows above, a 0.44 m circle at the lip whose centre is buried in the body: it stands 0.31 m proud,
     # a slim profile with the same opening area as a smaller, more protruding intake.
     "intake_inner_x": 0.075,
     "intake_lip_round": 0.15,  # metres over which the lip grows from 90% to full size
-    "blend": 0.24,  # smooth-union radius between body, intakes and fillets
-    "wing_fillet": {"reach": 0.25, "half_thickness": 0.07},  # beyond the body side, along the wing root
+    "blend": 0.24,
+    # Area-rule waist: the whole cross-section (body, fairings, spine and belly) scales radially by up to depth,
+    # a cosine-squared dip over centre_s +/- half_length, so it pinches in plan and in profile. A look only: the
+    # game's drag has no cross-section term.
+    "area_rule": {"centre_s": 10.8, "half_length": 2.6, "depth": 0.07},  # smooth-union radius between body, intakes and fillets
+    "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
     # Two cone angles, like the F-104's "double-shock" centre body: a fine tip, then a steeper base. A full cone
     # sunk into the body side, with a dark bleed slot ring near its base.
@@ -369,6 +371,9 @@ def blended_ring(p, s):
             d = smin(d, f(x, z), k)
         return d
 
+    ar = p["area_rule"]
+    u = (s - ar["centre_s"]) / ar["half_length"]
+    squeeze = 1.0 - ar["depth"] * math.cos(0.5 * math.pi * u) ** 2 if abs(u) < 1 else 1.0
     ring = []
     for i in range(RING):
         a = 2 * math.pi * i / RING
@@ -388,7 +393,7 @@ def blended_ring(p, s):
                         hi = mid
                 r_out = 0.5 * (lo + hi)
             inside, r = now, r_next
-        ring.append(P(s, r_out * c, zc + r_out * sn))
+        ring.append(P(s, r_out * c * squeeze, zc + r_out * sn * squeeze))
     return ring
 
 
