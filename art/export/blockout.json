@@ -89,7 +89,7 @@
      0.00037
     ]
    ],
-   "sha256": "cea962603702d4d25ccaf53d0e96104a28132e4822b4ec7868741d4251b653ff",
+   "sha256": "f5abb04be83012f9b781ba1270ff82e86e559dd040a211b56d1ed5b3d80b356a",
    "bounds_blender": [
     [
      -0.0053,
@@ -218,7 +218,7 @@
      0.00037
     ]
    ],
-   "sha256": "5f4a8b7b6209bd4e8033ed151c3c02a8e655039bfb4d719a8752d63ad676f59d",
+   "sha256": "3c7d4e91029c7b5d0070955ea5ba868538583b5ad7991a1e69dbafa77a6c992f",
    "bounds_blender": [
     [
      -0.0053,
@@ -266,13 +266,13 @@
    "blender_parent": "fuselage_forward",
    "pivot_blender": [
     0.0,
-    -2.725,
+    -2.95,
     0.2
    ],
    "pivot_unity": [
     -0.0,
     0.2,
-    2.725
+    2.95
    ],
    "axes_unity": {
     "right": [
@@ -300,24 +300,24 @@
     [
      -0.42,
      -0.5,
-     -0.325
+     -0.1
     ],
     [
      0.42,
      0.5,
-     0.325
+     0.1
     ]
    ],
-   "sha256": "25f7e70ea4b9fbd03cab3217d98f94d6ed6f0642715f0d9e47a75b4f4ce71626",
+   "sha256": "e16c32df7e99a1b9c3bc616da8188fa71487fb20662152c3f7be01048f5ee9ae",
    "bounds_blender": [
     [
      -0.42,
-     -0.325,
+     -0.1,
      -0.5
     ],
     [
      0.42,
-     0.325,
+     0.1,
      0.5
     ]
    ],
@@ -337,12 +337,12 @@
       [
        -0.42,
        -0.5,
-       -0.325
+       -0.1
       ],
       [
        0.42,
        0.5,
-       0.325
+       0.1
       ]
      ]
     }
@@ -397,7 +397,7 @@
      1.39
     ]
    ],
-   "sha256": "6d7b5f2294e5a21e67d19eacde0b3d8ed9594c1c468c3a38a9180eba0a938ec6",
+   "sha256": "51d3ddf8cce86eedb476e181c9f881fbae5ccbec77a26526d0521ffc1841692d",
    "bounds_blender": [
     [
      -0.39,
@@ -487,7 +487,7 @@
      1.275
     ]
    ],
-   "sha256": "e85d3502777a27479fc3c5b3ee11cb261b23ec5f6dbab4c1c1399aef75a29f03",
+   "sha256": "87d60d67be72ef6a2726ea4334effc6a838550bcd7b95954bbd38c60bb47de8c",
    "bounds_blender": [
     [
      -0.38,
@@ -576,7 +576,7 @@
      3.70136
     ]
    ],
-   "sha256": "8b53dceb73b1d48ed8ed2d183e4f39c03fb231b08542ed0b370dc4ba2a4171b9",
+   "sha256": "835f99a33114d6e9c7029e8bc8ff56edcbe58479d7fc4364291ab0725df13d42",
    "bounds_blender": [
     [
      -0.31231,
@@ -869,7 +869,7 @@
      2.65
     ]
    ],
-   "sha256": "3ab7b5bebbf3c860faf4f679deb6ba03eb01f1a0f5d74ca7da1bd0e5b990f59b",
+   "sha256": "79431d5e224490385ccc19d767618f3b84188ab97d57961f588be4ccc8883b39",
    "bounds_blender": [
     [
      -0.46,
@@ -958,7 +958,7 @@
      1.84
     ]
    ],
-   "sha256": "1fa0ab13ea33892e69ad33f9305571f4764acb30a87102dd3e7ecb37a0b7b0d7",
+   "sha256": "c9c2293412a491ffd84316522747d3feb65590c63663aeddec67f7f127117af2",
    "bounds_blender": [
     [
      -0.08357,
@@ -1081,7 +1081,7 @@
      0.85563
     ]
    ],
-   "sha256": "c78f7e8fb936f8716430e92d132a5c3e90117e6b9c3f24aee278c77f0ee5d9a6",
+   "sha256": "84633f46cd0850cfda435860c7d5d1f97044aae88a36fc25e1b3d28ef128f500",
    "bounds_blender": [
     [
      -0.06823,
@@ -1210,7 +1210,7 @@
      0.00333
     ]
    ],
-   "sha256": "f221577a29e7139ba25daa712dd2f730316e0407de0c9356285f6d61fe46061d",
+   "sha256": "0dff9a0bcfd1921a4675e7844f3ef0e4b43909c8459379b520144d4b2ab98011",
    "bounds_blender": [
     [
      -0.00848,
@@ -1339,7 +1339,7 @@
      0.00333
     ]
    ],
-   "sha256": "c1e87ce6cd069fa432bb8c6e83fcdbe98270ad821209e58318f7b91a9b26edcc",
+   "sha256": "99ebfa110e4dbe046660b8e9eb08e360e7bdfad8e211d490e28259a4d81a3530",
    "bounds_blender": [
     [
      -0.00848,
@@ -1386,14 +1386,14 @@
    "fbx": "fuel_aft_L.fbx",
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    0.64603,
-    0.65,
-    0.52022
+    0.59,
+    0.525,
+    0.35132
    ],
    "pivot_unity": [
-    -0.64603,
-    0.52022,
-    -0.65
+    -0.59,
+    0.35132,
+    -0.525
    ],
    "axes_unity": {
     "right": [
@@ -1413,80 +1413,80 @@
     ]
    },
    "props": {
-    "volume_m3": 0.68,
-    "fuel_kg": 400,
-    "volume_holds_kg": 543.8,
+    "volume_m3": 0.288,
+    "volume_holds_kg": 230.1,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 20
+    "mass_kg": 20,
+    "fuel_kg": 190.8
    },
    "bounds_unity": [
     [
-     -0.38603,
-     -0.47022,
-     -0.9
+     -0.33,
+     -0.50132,
+     -0.775
     ],
     [
-     0.38603,
-     0.47022,
-     0.9
+     0.33,
+     0.50132,
+     0.775
     ]
    ],
-   "sha256": "a419e038a4ba76f706a4a93e4f9b0e3f9f529fcff3e55a51e0c5186e4386c146",
+   "sha256": "253d27a0872a571722d3d45a0d999eb1285efea3f4f46139b2a3f7b89fe9d7ac",
    "bounds_blender": [
     [
-     -0.38603,
-     -0.9,
-     -0.47022
+     -0.33,
+     -0.775,
+     -0.50132
     ],
     [
-     0.38603,
-     0.9,
-     0.47022
+     0.33,
+     0.775,
+     0.50132
     ]
    ],
-   "tris": 2588,
+   "tris": 1644,
    "materials": [
     [
      "Icarus_Int_Fuel",
-     2588
+     1644
     ]
    ],
    "colliders": [
     {
      "name": "fuel_aft_L_colmesh0",
-     "verts": 35,
-     "tris": 66,
+     "verts": 43,
+     "tris": 82,
      "bounds_unity": [
       [
-       -0.38603,
-       -0.47022,
-       -0.9
+       -0.33,
+       -0.50132,
+       -0.775
       ],
       [
-       0.38603,
-       0.41181,
-       0.9
+       0.33,
+       0.48592,
+       0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 66
+    "tris": 82
    }
   },
   "fuel_aft_R": {
    "fbx": "fuel_aft_R.fbx",
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    -0.64603,
-    0.65,
-    0.52022
+    -0.59,
+    0.525,
+    0.35104
    ],
    "pivot_unity": [
-    0.64603,
-    0.52022,
-    -0.65
+    0.59,
+    0.35104,
+    -0.525
    ],
    "axes_unity": {
     "right": [
@@ -1506,66 +1506,66 @@
     ]
    },
    "props": {
-    "volume_m3": 0.68,
-    "fuel_kg": 400,
-    "volume_holds_kg": 543.8,
+    "volume_m3": 0.287,
+    "volume_holds_kg": 229.9,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 20
+    "mass_kg": 20,
+    "fuel_kg": 190.6
    },
    "bounds_unity": [
     [
-     -0.38603,
-     -0.47022,
-     -0.9
+     -0.33,
+     -0.50104,
+     -0.775
     ],
     [
-     0.38603,
-     0.47022,
-     0.9
+     0.33,
+     0.50104,
+     0.775
     ]
    ],
-   "sha256": "7a770ed4fdd25f5a00763ca5f35c663ae2aac669466de8e4b5e7440c2e3a1780",
+   "sha256": "ce775e79c51e450761a3c4ec5a6bea2a854ecea5d5a4506e70040ef27c9b2b12",
    "bounds_blender": [
     [
-     -0.38603,
-     -0.9,
-     -0.47022
+     -0.33,
+     -0.775,
+     -0.50104
     ],
     [
-     0.38603,
-     0.9,
-     0.47022
+     0.33,
+     0.775,
+     0.50104
     ]
    ],
-   "tris": 2588,
+   "tris": 1652,
    "materials": [
     [
      "Icarus_Int_Fuel",
-     2588
+     1652
     ]
    ],
    "colliders": [
     {
      "name": "fuel_aft_R_colmesh0",
-     "verts": 35,
-     "tris": 66,
+     "verts": 51,
+     "tris": 98,
      "bounds_unity": [
       [
-       -0.38603,
-       -0.47022,
-       -0.9
+       -0.33,
+       -0.50104,
+       -0.775
       ],
       [
-       0.38603,
-       0.41181,
-       0.9
+       0.33,
+       0.50104,
+       0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 66
+    "tris": 98
    }
   },
   "fuel_aft_center": {
@@ -1573,13 +1573,13 @@
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
     0.0,
-    0.65,
-    0.34522
+    0.525,
+    0.34511
    ],
    "pivot_unity": [
     -0.0,
-    0.34522,
-    -0.65
+    0.34511,
+    -0.525
    ],
    "axes_unity": {
     "right": [
@@ -1599,80 +1599,80 @@
     ]
    },
    "props": {
-    "volume_m3": 1.058,
-    "fuel_kg": 600,
-    "volume_holds_kg": 846.5,
+    "volume_m3": 0.658,
+    "volume_holds_kg": 526.4,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 30
+    "mass_kg": 30,
+    "fuel_kg": 436.5
    },
    "bounds_unity": [
     [
      -0.24,
-     -0.64522,
-     -0.9
+     -0.66511,
+     -0.775
     ],
     [
      0.24,
-     0.64522,
-     0.9
+     0.66511,
+     0.775
     ]
    ],
-   "sha256": "7ec52880e7fdeb6a01d9c7fdc5238a0b48947872a29370ea14b10d4e758e8510",
+   "sha256": "a05969ba5fb158749cd1d7ac32b83363c728489b2502c1a51e165f7486c6755a",
    "bounds_blender": [
     [
      -0.24,
-     -0.9,
-     -0.64522
+     -0.775,
+     -0.66511
     ],
     [
      0.24,
-     0.9,
-     0.64522
+     0.775,
+     0.66511
     ]
    ],
-   "tris": 2588,
+   "tris": 1626,
    "materials": [
     [
      "Icarus_Int_Fuel",
-     2588
+     1626
     ]
    ],
    "colliders": [
     {
      "name": "fuel_aft_center_colmesh0",
-     "verts": 44,
-     "tris": 84,
+     "verts": 28,
+     "tris": 52,
      "bounds_unity": [
       [
        -0.24,
-       -0.64522,
-       -0.9
+       -0.66511,
+       -0.775
       ],
       [
        0.24,
-       0.58681,
-       0.9
+       0.6645,
+       0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 84
+    "tris": 52
    }
   },
   "fuel_aux": {
    "fbx": "fuel_aux.fbx",
    "blender_parent": "fuselage_forward",
    "pivot_blender": [
-    0.0,
-    -2.225,
-    0.34372
+    -0.0007,
+    -2.45,
+    0.35386
    ],
    "pivot_unity": [
-    -0.0,
-    0.34372,
-    2.225
+    0.0007,
+    0.35386,
+    2.45
    ],
    "axes_unity": {
     "right": [
@@ -1692,79 +1692,79 @@
     ]
    },
    "props": {
-    "volume_m3": 0.283,
-    "fuel_kg": 200,
-    "volume_holds_kg": 226.5,
+    "volume_m3": 0.836,
+    "volume_holds_kg": 668.5,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 15
+    "mass_kg": 15,
+    "fuel_kg": 554.4
    },
    "bounds_unity": [
     [
-     -0.58572,
-     -0.64372,
-     -0.125
+     -0.60998,
+     -0.65386,
+     -0.35
     ],
     [
-     0.58572,
-     0.64372,
-     0.125
+     0.60998,
+     0.65386,
+     0.35
     ]
    ],
-   "sha256": "edbb7042141d80b654eee1deee7f5bd8830d51eefcee4ae3d418afa7737fc0fe",
+   "sha256": "0d6de7e26ffd798fb6407f79eba93e12c4c40fc8e61e43b4c6c451dcc5377c02",
    "bounds_blender": [
     [
-     -0.58572,
-     -0.125,
-     -0.64372
+     -0.60998,
+     -0.35,
+     -0.65386
     ],
     [
-     0.58572,
-     0.125,
-     0.64372
+     0.60998,
+     0.35,
+     0.65386
     ]
    ],
-   "tris": 2588,
+   "tris": 1148,
    "materials": [
     [
      "Icarus_Int_Fuel",
-     2588
+     1148
     ]
    ],
    "colliders": [
     {
      "name": "fuel_aux_colmesh0",
-     "verts": 74,
-     "tris": 144,
+     "verts": 103,
+     "tris": 202,
      "bounds_unity": [
       [
-       -0.58572,
-       -0.64372,
-       -0.125
+       -0.60998,
+       -0.65386,
+       -0.35
       ],
       [
-       0.58572,
-       0.57554,
-       0.125
+       0.60998,
+       0.61968,
+       0.35
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 144
+    "tris": 202
    }
   },
   "fuel_forward_main": {
    "fbx": "fuel_forward_main.fbx",
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    0.0,
+    -0.00021,
     -1.175,
-    0.645
+    0.53129
    ],
    "pivot_unity": [
-    -0.0,
-    0.645,
+    0.00021,
+    0.53129,
     1.175
    ],
    "axes_unity": {
@@ -1785,66 +1785,531 @@
     ]
    },
    "props": {
-    "volume_m3": 1.042,
-    "fuel_kg": 800,
-    "volume_holds_kg": 833.4,
+    "volume_m3": 0.889,
+    "volume_holds_kg": 711.5,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 35
+    "mass_kg": 35,
+    "fuel_kg": 590.0
    },
    "bounds_unity": [
     [
-     -0.93978,
-     -0.345,
+     -0.96457,
+     -0.48129,
      -0.875
     ],
     [
-     0.93978,
-     0.345,
+     0.96457,
+     0.48129,
      0.875
     ]
    ],
-   "sha256": "b6920ab945423cfd4580a984f7374f36cf2865bf7d3bb5a2be522b91c8735b9f",
+   "sha256": "80eedc3743f5c75155e92c8693469ca2d480f9f89771f2db20f5bd99e6f3cf80",
    "bounds_blender": [
     [
-     -0.93978,
+     -0.96457,
      -0.875,
-     -0.345
+     -0.48129
     ],
     [
-     0.93978,
+     0.96457,
      0.875,
-     0.345
+     0.48129
     ]
    ],
-   "tris": 2588,
+   "tris": 2056,
    "materials": [
     [
      "Icarus_Int_Fuel",
-     2588
+     2056
     ]
    ],
    "colliders": [
     {
      "name": "fuel_forward_main_colmesh0",
-     "verts": 32,
-     "tris": 60,
+     "verts": 51,
+     "tris": 98,
      "bounds_unity": [
       [
-       -0.93617,
-       -0.345,
+       -0.96297,
+       -0.48129,
        -0.875
       ],
       [
-       0.93617,
-       0.28389,
+       0.95461,
+       0.47558,
        0.875
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 60
+    "tris": 98
+   }
+  },
+  "fuel_saddle": {
+   "fbx": "fuel_saddle.fbx",
+   "blender_parent": "fuselage_aft",
+   "pivot_blender": [
+    -0.00027,
+    3.075,
+    0.91714
+   ],
+   "pivot_unity": [
+    0.00027,
+    0.91714,
+    -3.075
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "volume_m3": 0.129,
+    "volume_holds_kg": 102.9,
+    "role": "fuel_tank",
+    "owner": "fuselage",
+    "mass_kg": 0,
+    "fuel_kg": 85.3
+   },
+   "bounds_unity": [
+    [
+     -0.30753,
+     -0.09714,
+     -1.325
+    ],
+    [
+     0.30753,
+     0.09714,
+     1.325
+    ]
+   ],
+   "sha256": "96bc105746861e2cd2c67b647c8c92e88a273cc7510edd2396bf958d37de536d",
+   "bounds_blender": [
+    [
+     -0.30753,
+     -1.325,
+     -0.09714
+    ],
+    [
+     0.30753,
+     1.325,
+     0.09714
+    ]
+   ],
+   "tris": 1148,
+   "materials": [
+    [
+     "Icarus_Int_Fuel",
+     1148
+    ]
+   ],
+   "colliders": [
+    {
+     "name": "fuel_saddle_colmesh0",
+     "verts": 29,
+     "tris": 54,
+     "bounds_unity": [
+      [
+       -0.28692,
+       -0.09714,
+       -1.325
+      ],
+      [
+       0.28632,
+       0.09703,
+       1.325
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 54
+   }
+  },
+  "fuel_strake_L": {
+   "fbx": "fuel_strake_L.fbx",
+   "blender_parent": "wing_spar_L",
+   "pivot_blender": [
+    1.44,
+    1.47161,
+    0.06459
+   ],
+   "pivot_unity": [
+    -1.44,
+    0.06459,
+    -1.47161
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "volume_m3": 0.205,
+    "volume_holds_kg": 163.8,
+    "role": "fuel_tank",
+    "owner": "wing_L",
+    "mass_kg": 0,
+    "fuel_kg": 135.8
+   },
+   "bounds_unity": [
+    [
+     -0.44,
+     -0.13102,
+     -1.96894
+    ],
+    [
+     0.44,
+     0.13102,
+     1.96894
+    ]
+   ],
+   "sha256": "256a14b069ebe15a150b1e3d9d21be9c56ff87503ffb742052c390d2aaf033dd",
+   "bounds_blender": [
+    [
+     -0.44,
+     -1.96894,
+     -0.13102
+    ],
+    [
+     0.44,
+     1.96894,
+     0.13102
+    ]
+   ],
+   "tris": 668,
+   "materials": [
+    [
+     "Icarus_Int_Fuel",
+     668
+    ]
+   ],
+   "colliders": [
+    {
+     "name": "fuel_strake_L_colmesh0",
+     "verts": 55,
+     "tris": 106,
+     "bounds_unity": [
+      [
+       -0.44,
+       -0.13102,
+       -1.96894
+      ],
+      [
+       0.44,
+       0.13047,
+       1.96894
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 106
+   }
+  },
+  "fuel_strake_R": {
+   "fbx": "fuel_strake_R.fbx",
+   "blender_parent": "wing_spar_R",
+   "pivot_blender": [
+    -1.44,
+    1.47161,
+    0.06459
+   ],
+   "pivot_unity": [
+    1.44,
+    0.06459,
+    -1.47161
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "volume_m3": 0.205,
+    "volume_holds_kg": 163.8,
+    "role": "fuel_tank",
+    "owner": "wing_R",
+    "mass_kg": 0,
+    "fuel_kg": 135.8
+   },
+   "bounds_unity": [
+    [
+     -0.44,
+     -0.13102,
+     -1.96894
+    ],
+    [
+     0.44,
+     0.13102,
+     1.96894
+    ]
+   ],
+   "sha256": "8c02ad1880fcee3e4d0ecb0e460d35c2fae23a0a22be636baaa6bda11cdd1b4c",
+   "bounds_blender": [
+    [
+     -0.44,
+     -1.96894,
+     -0.13102
+    ],
+    [
+     0.44,
+     1.96894,
+     0.13102
+    ]
+   ],
+   "tris": 668,
+   "materials": [
+    [
+     "Icarus_Int_Fuel",
+     668
+    ]
+   ],
+   "colliders": [
+    {
+     "name": "fuel_strake_R_colmesh0",
+     "verts": 55,
+     "tris": 106,
+     "bounds_unity": [
+      [
+       -0.44,
+       -0.13102,
+       -1.96894
+      ],
+      [
+       0.44,
+       0.13047,
+       1.96894
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 106
+   }
+  },
+  "fuel_wing_L": {
+   "fbx": "fuel_wing_L.fbx",
+   "blender_parent": "wing_spar_L",
+   "pivot_blender": [
+    2.5,
+    2.58801,
+    -0.13206
+   ],
+   "pivot_unity": [
+    -2.5,
+    -0.13206,
+    -2.58801
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "volume_m3": 0.061,
+    "volume_holds_kg": 48.6,
+    "role": "fuel_tank",
+    "owner": "wing_L",
+    "mass_kg": 0,
+    "fuel_kg": 40.3
+   },
+   "bounds_unity": [
+    [
+     -0.55,
+     -0.12637,
+     -0.70218
+    ],
+    [
+     0.55,
+     0.12637,
+     0.70218
+    ]
+   ],
+   "sha256": "7225c3259598650fbb3acaa90e82850563f8e3320905614912ca54aae1d559f9",
+   "bounds_blender": [
+    [
+     -0.55,
+     -0.70218,
+     -0.12637
+    ],
+    [
+     0.55,
+     0.70218,
+     0.12637
+    ]
+   ],
+   "tris": 668,
+   "materials": [
+    [
+     "Icarus_Int_Fuel",
+     668
+    ]
+   ],
+   "colliders": [
+    {
+     "name": "fuel_wing_L_colmesh0",
+     "verts": 79,
+     "tris": 154,
+     "bounds_unity": [
+      [
+       -0.55,
+       -0.12633,
+       -0.70218
+      ],
+      [
+       0.55,
+       0.12637,
+       0.70218
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 154
+   }
+  },
+  "fuel_wing_R": {
+   "fbx": "fuel_wing_R.fbx",
+   "blender_parent": "wing_spar_R",
+   "pivot_blender": [
+    -2.5,
+    2.58801,
+    -0.13206
+   ],
+   "pivot_unity": [
+    2.5,
+    -0.13206,
+    -2.58801
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "volume_m3": 0.061,
+    "volume_holds_kg": 48.6,
+    "role": "fuel_tank",
+    "owner": "wing_R",
+    "mass_kg": 0,
+    "fuel_kg": 40.3
+   },
+   "bounds_unity": [
+    [
+     -0.55,
+     -0.12637,
+     -0.70218
+    ],
+    [
+     0.55,
+     0.12637,
+     0.70218
+    ]
+   ],
+   "sha256": "9e7b066553ed0fcc5b93d857e701a278d731e0b7da9c8a50217822bfe64894c8",
+   "bounds_blender": [
+    [
+     -0.55,
+     -0.70218,
+     -0.12637
+    ],
+    [
+     0.55,
+     0.70218,
+     0.12637
+    ]
+   ],
+   "tris": 668,
+   "materials": [
+    [
+     "Icarus_Int_Fuel",
+     668
+    ]
+   ],
+   "colliders": [
+    {
+     "name": "fuel_wing_R_colmesh0",
+     "verts": 79,
+     "tris": 154,
+     "bounds_unity": [
+      [
+       -0.55,
+       -0.12633,
+       -0.70218
+      ],
+      [
+       0.55,
+       0.12637,
+       0.70218
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 154
    }
   },
   "fuselage_aft": {
@@ -1893,7 +2358,7 @@
      2.0
     ]
    ],
-   "sha256": "9bc469ec83cbc14560d41ec36f828daf81cfee3ffafc52c6d6ce634afb962afe",
+   "sha256": "fb5b0e32bf48000a3196bd290819c397b48c0dc1c71f3f7e13b67381d319ced0",
    "bounds_blender": [
     [
      -0.84307,
@@ -1982,7 +2447,7 @@
      2.0
     ]
    ],
-   "sha256": "fa15e284c8ac964ad2033eb59d27642c5df847cab6715289930f6130383d8460",
+   "sha256": "bd3dd456c3335928da5d33d335d810bf963878cda272934a1f2806c1cc30fce8",
    "bounds_blender": [
     [
      -0.58812,
@@ -2071,7 +2536,7 @@
      2.7
     ]
    ],
-   "sha256": "7eeac09458d0de5354169c47bfcd39f0ae6bde28b928c40ca3171405a6f93edf",
+   "sha256": "60cf8754f500e2cfacd362270e0a4b3248de50b2b754e94741731362f287ca93",
    "bounds_blender": [
     [
      -1.04205,
@@ -2161,7 +2626,7 @@
      0.9
     ]
    ],
-   "sha256": "3b6291791ce4cc93b2e40056308282a14016e64fb640047b923eb3849a580f98",
+   "sha256": "d593435830e7df79675e9c46224e49ab4f7168c44685469ece4b373763404189",
    "bounds_blender": [
     [
      -0.2,
@@ -2251,7 +2716,7 @@
      0.75
     ]
    ],
-   "sha256": "d8dfa02258f1375736602cf13a9aac8abfb05c02d08114934c1d46e61171dca7",
+   "sha256": "c09e0fdea916d2bd363121631a3af8024179d0cfbacd46162ab77ad50361c3b4",
    "bounds_blender": [
     [
      -0.17,
@@ -2341,7 +2806,7 @@
      0.9
     ]
    ],
-   "sha256": "d0cdb31be3bd5a72697ea9537b1f14d8bef42293039256d074e70aa0d705e014",
+   "sha256": "5db30c74434f5c7174b25c67eb6e2cd418af20fc7cf381500bd542bfb14f9ab0",
    "bounds_blender": [
     [
      -0.2,
@@ -2430,7 +2895,7 @@
      1.725
     ]
    ],
-   "sha256": "42c0ebfd1fd85160135259211bcd5da078d4c43b83ae08cf741a2b9902a55080",
+   "sha256": "fe6e81494a2f139babf790e14228abb78f5557a2c092c7b509b5129c350ae018",
    "bounds_blender": [
     [
      -0.4505,
@@ -2523,7 +2988,7 @@
      1.725
     ]
    ],
-   "sha256": "cc37cb60a45254ae66d5b049859c797dd18c61b7810e22a6bf076229940956a6",
+   "sha256": "bd1ee7a9c047dbe15665ccde4a5873b49b30733376e621165d58fc391fb543cd",
    "bounds_blender": [
     [
      -0.4505,
@@ -2656,7 +3121,7 @@
      0.33515
     ]
    ],
-   "sha256": "d6ec76edacf342657153c8ae1fed5cbf489a6569c28396deeb4fe2f920144923",
+   "sha256": "0bda5ffd86a7b8b0eac9bfef2012c6817c8775eceaf12151141b26ec2e7bc062",
    "bounds_blender": [
     [
      -0.1832,
@@ -2785,7 +3250,7 @@
      0.33515
     ]
    ],
-   "sha256": "5cf31fae36bed7ae6fedbecb9564db5573c0fe0363fa9fb9d7b1f78be86ea4d9",
+   "sha256": "8b9067a2540b182f7be3308abe1ef78d45a5c551743ebd4042c37bc9647412ba",
    "bounds_blender": [
     [
      -0.1832,
@@ -2874,7 +3339,7 @@
      0.15
     ]
    ],
-   "sha256": "34c0819b57110bbf610a2b50a0e42e5376efdc981a326e8b2cc4990a78fe5859",
+   "sha256": "eee03665135e47bc457e810159b186e9674a47e5f54831d409690feb05afaf16",
    "bounds_blender": [
     [
      -0.387,
@@ -3004,7 +3469,7 @@
      -0.0
     ]
    ],
-   "sha256": "378e02c29eb03f6dffdf7a586e586ad55a83b8b76d19dcfc9d4e35508c3df66a",
+   "sha256": "f4c43e9bbe0cfb1346e0f2486a39f200114d22878cb3e8addad5c7059d9bca13",
    "bounds_blender": [
     [
      -0.075,
@@ -3110,7 +3575,7 @@
      -0.0
     ]
    ],
-   "sha256": "c5cb30805b7e5b91f1d1a8b4f028b72010cafb247e05dde0d3a7b86ab897a4be",
+   "sha256": "7476c8e585944de235c3321ce5613584bf13dc530faa0a74e5183690ca09312c",
    "bounds_blender": [
     [
      -0.075,
@@ -3216,7 +3681,7 @@
      -0.0
     ]
    ],
-   "sha256": "96358dd295e3000978ff7c765484fda22eb8735c002e99324c030742b0f62d92",
+   "sha256": "ad4a3a741d2657688647169ef9a094ff5c1fea8296022ff40745f783142d1c01",
    "bounds_blender": [
     [
      -0.075,
@@ -3322,7 +3787,7 @@
      -0.0
     ]
    ],
-   "sha256": "af85a6bf70804f170fb7118b45ed93db982ec14ce31e8bd51f960cbe71630cbc",
+   "sha256": "1acb3958b9865478b96ff792a7f2da6e823e8582c68915f2d022fe00d8afdf62",
    "bounds_blender": [
     [
      -0.075,
@@ -3428,7 +3893,7 @@
      -0.0
     ]
    ],
-   "sha256": "db660a47f67b2142aa7544aaa00115d61556edc38b005d92cc98027e2e16665e",
+   "sha256": "651b37f74ad0dc0352a8b01112fda94fbddf6484b9a6582ae37675685799a334",
    "bounds_blender": [
     [
      -0.075,
@@ -3534,7 +3999,7 @@
      -0.0
     ]
    ],
-   "sha256": "6c77b91fd2b2d902e76f4b352db1cdf3f0f43a1de127a169e24da735c12760d7",
+   "sha256": "a44f99d8d6249377be225b817d57573d71c648a7866223d71d56bcfa4577535e",
    "bounds_blender": [
     [
      -0.075,
@@ -3640,7 +4105,7 @@
      -0.0
     ]
    ],
-   "sha256": "71f855d4e5f44b765a9e4bc660a14d9ad2abb327c8a923083c744441773f50c5",
+   "sha256": "159fe9ab3e117971005f4e95b620e94c550f265ea5c851c4def7747d56a368d7",
    "bounds_blender": [
     [
      -0.075,
@@ -3746,7 +4211,7 @@
      -0.0
     ]
    ],
-   "sha256": "57f2d4412c33cd5b04a5ffb3ff9d8239eaf96a1f4e43bd381903c9853f9c0e5e",
+   "sha256": "9ae19c484628ceda88d529879e4d71a2032f6ba2e0f0b7be91835efa2bf2b0f4",
    "bounds_blender": [
     [
      -0.075,
@@ -3852,7 +4317,7 @@
      -0.0
     ]
    ],
-   "sha256": "fa893f9f275aba5fce090eb568e176807a9419f8a984a71a0654d92e04c06639",
+   "sha256": "c920fbae8be9626b7eaecc8af1dbd9dad3684d09a08765bfb409861b7c76b91b",
    "bounds_blender": [
     [
      -0.075,
@@ -3958,7 +4423,7 @@
      -0.0
     ]
    ],
-   "sha256": "c4b7027a8b1818bc6a1750205da50472056ff6862961c71a5952e66a1935481a",
+   "sha256": "2b0583624a21ba8b51f935e217cb02a3982fd517a6b28c080622be38c7710c46",
    "bounds_blender": [
     [
      -0.075,
@@ -4064,7 +4529,7 @@
      -0.0
     ]
    ],
-   "sha256": "851a0bddf1b165efcb862546642661de606b24c04096165b31f59d1d68ee668b",
+   "sha256": "b0e1cc0559f5766a6f3deccd581d8a486dc826660e1580b2d193b6756b8aa55d",
    "bounds_blender": [
     [
      -0.075,
@@ -4170,7 +4635,7 @@
      -0.0
     ]
    ],
-   "sha256": "a94241d86c969f8f2d8a9bb09c3ab0c43acfdd90999c6f677fb2d43cd9d59c33",
+   "sha256": "3c173cd2a5a441f9e555b7aee3e446314d4f11d8ac7ca06ff3207b687949dd05",
    "bounds_blender": [
     [
      -0.075,
@@ -4276,7 +4741,7 @@
      -0.0
     ]
    ],
-   "sha256": "2f73b94f485f8b8c89a0baee5b62a449cd4dfbd9f206e4ec53b7d50a9904511a",
+   "sha256": "8791a481bbae9097f3f5b9f6e1bbf1d80f99e79dff2ccdc5dc40f37fccb073cb",
    "bounds_blender": [
     [
      -0.075,
@@ -4382,7 +4847,7 @@
      -0.0
     ]
    ],
-   "sha256": "49d9138b2dbfd92aaf16b2a928a0dc19e2fd6cce5b7bbd93af5166689ac9b880",
+   "sha256": "b84f45dc1ab3ddae1e105e639fed686171fd5b43320071b118af392cc28dd257",
    "bounds_blender": [
     [
      -0.075,
@@ -4488,7 +4953,7 @@
      -0.0
     ]
    ],
-   "sha256": "4438ca3e7679bd5a7b540ae6b9c843e779ccae558921ff896e78c6f650759567",
+   "sha256": "790478085326cdda23489514f4621ec41bbd5505f86122d6fd2f6aa3cb0c943f",
    "bounds_blender": [
     [
      -0.075,
@@ -4594,7 +5059,7 @@
      -0.0
     ]
    ],
-   "sha256": "76563bf82557da167628eff5b96e37a9e9ae0b0559c54b41eb61b818dd2be579",
+   "sha256": "e612f1b4444c8922ebbc329aafbd727b4bde63bf807c64ac81d6b553b770ea2f",
    "bounds_blender": [
     [
      -0.075,
@@ -4700,7 +5165,7 @@
      -0.0
     ]
    ],
-   "sha256": "533a86ea639e0e389c789772504dc3d405a71353aa111a179df6c9109fb5f948",
+   "sha256": "6aa1819d3a86f70d52522f3e58b7160e1ddc4c856ad781c71910e9ef8760bbc9",
    "bounds_blender": [
     [
      -0.0525,
@@ -4806,7 +5271,7 @@
      -0.0
     ]
    ],
-   "sha256": "b3289e20603f868cad476960f25b8b749adfcf1e3d40429846b8c217b35ff518",
+   "sha256": "0bb7d94c1a5cad8e7602d9d3a4f78ac620e2c8f7ae51720ee8a7d2cf02f26299",
    "bounds_blender": [
     [
      -0.0525,
@@ -4912,7 +5377,7 @@
      -0.0
     ]
    ],
-   "sha256": "2b82742fa4c3017e31b7cbe77419dc10fddd3cbb62dd03c0f3288d23df4db02c",
+   "sha256": "82aa18c4f552173b0ee11bcef31aa2b5971e2fa2c5eeab8898184dd09b23a92a",
    "bounds_blender": [
     [
      -0.0525,
@@ -5018,7 +5483,7 @@
      -0.0
     ]
    ],
-   "sha256": "75d466390813e37d3f80fdc08081c89619519177692b78d74b0c23c6d60871eb",
+   "sha256": "c09c40c369f89c325d9d3b2986893863d99ca7fdfb844d53b6a27b5a1c3b29a0",
    "bounds_blender": [
     [
      -0.0525,
@@ -5124,7 +5589,7 @@
      -0.0
     ]
    ],
-   "sha256": "eb815b686c7b376f8177c6ebe0293e8608e3947f86bf63db3d1282bb2cc3728b",
+   "sha256": "73d1158b47d566ecf6d96a6184846d81b913d85e9e4ba0385fc24c112d75c713",
    "bounds_blender": [
     [
      -0.0525,
@@ -5230,7 +5695,7 @@
      -0.0
     ]
    ],
-   "sha256": "b9f4ccb7bb4e54aedaec6075ed0160831dd8c4cc891b157be7caf9911f85e1dc",
+   "sha256": "b9f8e37e70e328945481a1af1e8e46a18a62106f5083cd70d672861125358c13",
    "bounds_blender": [
     [
      -0.0525,
@@ -5336,7 +5801,7 @@
      -0.0
     ]
    ],
-   "sha256": "b95853172ef9ff14cf10329ff7bb6010637bd9795e55386bd435a6234466927c",
+   "sha256": "93f2d88bc1d1d32d8ab1d661679c6f7869cdd68cb16c8bba1f6ab93caf326beb",
    "bounds_blender": [
     [
      -0.0525,
@@ -5442,7 +5907,7 @@
      -0.0
     ]
    ],
-   "sha256": "251a27461157e874c3502e060f75069925ef792200df9daf828c1c835e7be557",
+   "sha256": "4782a47add399924981cac2ad35659fc684250ce4a452edeedee8e9a4d714de6",
    "bounds_blender": [
     [
      -0.0525,
@@ -5548,7 +6013,7 @@
      -0.0
     ]
    ],
-   "sha256": "91cb1d2f85640b9ea7e665c8e521e8a759c10110dbaa6a09026b38296e37c5b3",
+   "sha256": "015e94b55e695128f023c7395028f07d7a7f435d5a1271b54b0b165914120330",
    "bounds_blender": [
     [
      -0.0525,
@@ -5654,7 +6119,7 @@
      -0.0
     ]
    ],
-   "sha256": "922b8d55ed90443a6208996dcfb065590c77ef1bffe1fbe47594ad88ef1c1175",
+   "sha256": "9eb856c4da93a45d6275426b62d5a779cd7248a44bf441ad059515f7c709680f",
    "bounds_blender": [
     [
      -0.0525,
@@ -5760,7 +6225,7 @@
      -0.0
     ]
    ],
-   "sha256": "ffd304dd2f016ebae335023b5434191b6874a7013863fab94f655ee11bd96aff",
+   "sha256": "0a7d3e369fff4df893543efe4961b7ee4cc419f04e360263f253e0be0f661b68",
    "bounds_blender": [
     [
      -0.0525,
@@ -5866,7 +6331,7 @@
      -0.0
     ]
    ],
-   "sha256": "b5bdd1a6276ae272da82bd169fd4326fc042fd5dd413eb89b1a4ee73cf96b886",
+   "sha256": "6fd3d38beeb4cd847a27c8b88bb2aff16da0a0516d23465afefba4c435006935",
    "bounds_blender": [
     [
      -0.0525,
@@ -5972,7 +6437,7 @@
      -0.0
     ]
    ],
-   "sha256": "50a5882facb27e584277fcf852debadb833efd3214ca100970e945775ff5fe07",
+   "sha256": "cfd915e5d6b4208fa648253c919e6a46d246ceca7de2d867e77cd7d0b1d8bf8a",
    "bounds_blender": [
     [
      -0.0525,
@@ -6078,7 +6543,7 @@
      -0.0
     ]
    ],
-   "sha256": "c1ca07aff65fcb2b74241ec49e39e932854ad9326bc48343163a9ac2ef1ecfb6",
+   "sha256": "03a406e05e49731949b45c257e9592a5f9dd70214ef2c2a068d5ee7f5f5e8291",
    "bounds_blender": [
     [
      -0.0525,
@@ -6184,7 +6649,7 @@
      -0.0
     ]
    ],
-   "sha256": "00af420cf02c655e46b837f68224852c139d893b68c9c1833079773d85a86499",
+   "sha256": "ccee1cf194710d662d7fcf9a3ff9a2e76f358cb43369b2d7e296a4708a2b5582",
    "bounds_blender": [
     [
      -0.0525,
@@ -6290,7 +6755,7 @@
      -0.0
     ]
    ],
-   "sha256": "54288ec1ae7d3df9f48e8cb847e0ebc558d43294f5233c92b33e2502b7958e42",
+   "sha256": "7fe4394fb49c287289ee641d8474c3da2e5a28ff70aec7c37fe7af6e014163f7",
    "bounds_blender": [
     [
      -0.0525,
@@ -6392,7 +6857,7 @@
      0.675
     ]
    ],
-   "sha256": "7d1e6f815fdc053bf3c74461b1c64898516bfa61bbf513a2a0844479b03cd310",
+   "sha256": "1f9284a81b79e2895cd1613e1c949680f7f76b24893bd093c6fcdc640314f463",
    "bounds_blender": [
     [
      -0.3,
@@ -6481,7 +6946,7 @@
      1.38792
     ]
    ],
-   "sha256": "0195809104c84625873e5f0cf0cc1ef43a5a46fbaf87ab785c19eb9afab413d8",
+   "sha256": "26df7b62cdd347642a7936cb4b9efcbe9d3db199a9d7dd16414f4cbd438ad0f1",
    "bounds_blender": [
     [
      -0.35123,
@@ -6614,7 +7079,7 @@
      -0.0
     ]
    ],
-   "sha256": "43a4cf507ec6971d10d06ce3159abc51ad1177eb908e82c27b4f11dd255334a7",
+   "sha256": "14505ffedfd70a682a0f1d7d77f7a17fceb2cf3590c43be1fccad35d5aba977d",
    "bounds_blender": [
     [
      0.0,
@@ -6703,7 +7168,7 @@
      2.0779
     ]
    ],
-   "sha256": "fe66fde21744da9b957cb9185ab1e62fea64f2a65aba46c98f36c129b3f976c4",
+   "sha256": "7e3e5b1061614ea4eaef3c5d9ea78ca01acd7723eb389a131733ebda1bde332c",
    "bounds_blender": [
     [
      -0.44922,
@@ -7047,7 +7512,7 @@
      2.0779
     ]
    ],
-   "sha256": "8ed9fdc1f25b42eba4671cbab0e55614e19a1dd24e4b7db1c6f601cbebb7d660",
+   "sha256": "ac3797b3989ee012388711c4947fe208d1b5be226c0b16a264db842d8be64cec",
    "bounds_blender": [
     [
      -0.64481,
@@ -7429,7 +7894,7 @@
      2.02329
     ]
    ],
-   "sha256": "0fcbbc5d009e4f53685725e1c6c12fe5c36f6de2a625d0d5338b3976055ef5c7",
+   "sha256": "c2fb27af9df2a77ae73b7567e25fda07733e7372c755a25c7fce0fb01b28e255",
    "bounds_blender": [
     [
      -0.3151,
@@ -7773,7 +8238,7 @@
      2.02329
     ]
    ],
-   "sha256": "fea03d76842228289b8648a218d022221bb41a20b05f74a86189b49be7602361",
+   "sha256": "2f2ef6d894b233401b87b98d3a3e36977703b2e1e954795a23be6d3b61eb6fe9",
    "bounds_blender": [
     [
      -0.3151,
@@ -8117,7 +8582,7 @@
      2.69589
     ]
    ],
-   "sha256": "c3b5a7a64e527cd4bd2fafd95970967c479327983b8ec7f21f3cb9122137fbf3",
+   "sha256": "155b25aacf32e61852deed3db51b13e0b0e18452567a1d099bfdfd341ceaea9c",
    "bounds_blender": [
     [
      -0.54084,
@@ -8546,7 +9011,7 @@
      2.69589
     ]
    ],
-   "sha256": "8cdc5068b89b0eb35188014a0739b8a526bcb22190370582bbcca5592032ca8b",
+   "sha256": "fab4eeae2d2750e78185f45c46f4493f2d4cd3fc240a02615268f4c2ccfeca11",
    "bounds_blender": [
     [
      -0.54084,
@@ -9015,7 +9480,7 @@
      -0.0
     ]
    ],
-   "sha256": "7d6b736986cb9e32ed0fd8f96db941dcb4443b54c7b133d3acd247c7afb8fc43",
+   "sha256": "85b8388b87eea42df5acc0bbbbd585bb453fd5c461efd320bad944318365f27c",
    "bounds_blender": [
     [
      -0.04512,
@@ -9144,7 +9609,7 @@
      -0.0
     ]
    ],
-   "sha256": "8b89c16bee25dab287ae3e7f3694c64119e01eac2388bfa054f20abc853afc95",
+   "sha256": "b9135a29b6ec07fa1bbf1fc46f567444468ee1a02bb16877e5dcbc988537a878",
    "bounds_blender": [
     [
      -0.04512,
@@ -9273,7 +9738,7 @@
      0.67
     ]
    ],
-   "sha256": "033974000d14a4eda26dead7f783b5767691c4e04fdd0cdb3fe3e48c5c884ecd",
+   "sha256": "85464d0b183cdd985397d80b0a4671301df39e8fa9e155db69072d2b2a511ad2",
    "bounds_blender": [
     [
      0.0,
@@ -9402,7 +9867,7 @@
      0.67
     ]
    ],
-   "sha256": "369545e1e13f254af24b4ea06eb5ed0b4ce1cb523a9b620a3595831d74dbcad4",
+   "sha256": "cf8114f36106854a569ce68d4bcd4ca7376e737eebd89cde5975749da2d434c9",
    "bounds_blender": [
     [
      0.0,
@@ -9491,7 +9956,7 @@
      1.125
     ]
    ],
-   "sha256": "81c22fe86341468df320fb9719d64aa75e8a090cda396773aaf5da3549963ecb",
+   "sha256": "a8a9df81e334ade8ac9fc07adae5b06a83f96b289357a3728f9825125ee1160a",
    "bounds_blender": [
     [
      -0.05599,
@@ -9580,7 +10045,7 @@
      2.46088
     ]
    ],
-   "sha256": "c5fddd391b530a3c7f3f0aac838e15f6f780352cbfd5b56774ccf6c2bc080f3b",
+   "sha256": "b260b6da42de3b6b52e3eb4097f58135f7bcbb51296768e1e51f9c9a84074d0d",
    "bounds_blender": [
     [
      -1.41,
@@ -9720,7 +10185,7 @@
      2.46088
     ]
    ],
-   "sha256": "7267a2b427409ddec845ad8529f50e0bc47be5857f45bdbf3c4484a7bcc88811",
+   "sha256": "67c22fbfaa7fd2cc04886e7f280c59f116fda96a01203525aa3a9f83d6166293",
    "bounds_blender": [
     [
      -1.41,
@@ -9860,7 +10325,7 @@
      1.7826
     ]
    ],
-   "sha256": "7cb5a674d580c057e879970a4f05d1c07db3f2d0bbe8309e4670d3b27a48a0f9",
+   "sha256": "3b06d94de6a0430266f9dd012bcfaffc52ce410cfdb01c4c0fb5e18f46c0e472",
    "bounds_blender": [
     [
      -1.366,
@@ -9949,7 +10414,7 @@
      1.7826
     ]
    ],
-   "sha256": "5d1a0f190bcb434fb1316e14fc2e6cd1514f52f20b54fc95e77b4cf5c9f5ebd2",
+   "sha256": "b86712cedd71639ceb3fd054fcfbd938315620fc3fc70aa17d8bcd609d0fd61f",
    "bounds_blender": [
     [
      -1.366,

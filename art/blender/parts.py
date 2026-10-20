@@ -49,6 +49,11 @@ TREE = {
     "fuel_aft_center": ("fuselage_mid", 30),
     "fuel_aft_L": ("fuselage_mid", 20),
     "fuel_aft_R": ("fuselage_mid", 20),
+    "fuel_saddle": ("fuselage_aft", 0),  # cells beyond the 41-part plan; their dry mass is in their hosts
+    "fuel_strake_L": ("wing_spar_L", 0),
+    "fuel_strake_R": ("wing_spar_R", 0),
+    "fuel_wing_L": ("wing_spar_L", 0),
+    "fuel_wing_R": ("wing_spar_R", 0),
     "skin_forward_L": ("fuselage_forward", 35),
     "skin_forward_R": ("fuselage_forward", 35),
     "skin_mid_L": ("fuselage_mid", 45),

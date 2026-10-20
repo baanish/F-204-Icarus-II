@@ -8,6 +8,7 @@ fuselage, no gun in this variant (its bay holds avionics).
 """
 import math
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -19,16 +20,22 @@ INTERNALS = {
     "radar": {"s": (0.30, 1.55), "dish_s": 0.95, "dish_r": 0.30, "mass_kg": 120},
     "avionics_nose": {"box": (1.55, 2.30, 0.30, -0.25, 0.42), "mass_kg": 90},  # s0, s1, half width, z0, z1
     "cockpit_tub": {"box": (2.35, 4.90, 0.38, -0.05, 0.78), "mass_kg": 260},
-    "avionics_aft": {"box": (4.95, 5.60, 0.42, -0.30, 0.70), "mass_kg": 140},  # the F-104's gun bay
-    # Fuel, after the F-104S layout: an auxiliary cell, the forward main tank, and three connected aft cells, the
-    # centre one between the intake ducts and the side ones wrapping over them. Each row: (s0, s1, inset from the
-    # skin, z floor, x from, x to, capacity kg). A tank fills the skin section above its floor between its x
-    # limits; capacity is the design fuel load, and the drawn volume is checked against it.
-    "fuel_aux": {"tank": (5.65, 5.90, 0.05, -0.30, -9.0, 9.0, 200)},
-    "fuel_forward_main": {"tank": (5.95, 7.70, 0.05, 0.30, -9.0, 9.0, 800)},
-    "fuel_aft_center": {"tank": (7.75, 9.55, 0.05, -0.30, -0.24, 0.24, 600)},
-    "fuel_aft_L": {"tank": (7.75, 9.55, 0.05, 0.05, 0.26, 9.0, 400)},
-    "fuel_aft_R": {"tank": (7.75, 9.55, 0.05, 0.05, -9.0, -0.26, 400)},
+    "avionics_aft": {"box": (4.95, 5.15, 0.42, -0.30, 0.70), "mass_kg": 140},  # a shelf; the gun bay holds fuel
+    # Fuel, after the F-104S layout: an auxiliary cell in the old gun bay (as on the gunless F-104), the forward
+    # main tank, three connected aft cells (the centre one between the intake ducts, the side ones wrapping round
+    # them), a saddle cell over the engine, and cells in the strakes and outboard wings. Each fuselage row: (s0, s1,
+    # inset from the skin, z floor, x from, x to). A cell fills the skin section above its floor between its x
+    # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds.
+    "design_fuel_kg": 2400,
+    "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct
+    "fuel_aux": {"tank": (5.20, 5.90, 0.025, -0.30, -9.0, 9.0)},
+    "fuel_forward_main": {"tank": (5.95, 7.70, 0.025, 0.05, -9.0, 9.0)},
+    "fuel_aft_center": {"tank": (7.75, 9.30, 0.025, -0.32, -0.24, 0.24)},
+    "fuel_aft_L": {"tank": (7.75, 9.30, 0.025, -0.15, 0.26, 0.92)},  # outboard of 0.92 is the strake cell
+    "fuel_aft_R": {"tank": (7.75, 9.30, 0.025, -0.15, -0.92, -0.26)},
+    "fuel_saddle": {"tank": (9.75, 12.40, 0.025, 0.82, -9.0, 9.0)},  # over the engine, under the spine
+    "strake_tank": {"x": (1.00, 1.88), "f": (0.06, 0.80)},  # each strake: span and chord fraction range
+    "wing_tank": {"x": (1.95, 3.05), "f": (0.17, 0.68)},  # the box between the spars, outboard of the crank
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.40, "end_s": 15.00,
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "mass_kg_each": 9},
@@ -45,39 +52,124 @@ def box(name, s0, s1, hw, z0, z1, x=0.0):
     return bi.mesh_object(name, v, faces)
 
 
-def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None):
-    """The skin section at s pulled inward by inset, optionally cut flat at z = floor and between x_lo and x_hi."""
+def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None, count=None):
+    """The skin section at s pulled inward by inset. With floor or x limits, the section is clipped to z >= floor
+    and x_lo <= x <= x_hi (a true polygon cut, so the result never leaves the skin) and resampled to count points
+    evenly round its outline, so neighbouring sections loft cleanly."""
     ring = bi.blended_ring(p, s)
-    cx = 0.0
     cz = sum(v.z for v in ring) / len(ring)
     out = []
     for v in ring:
-        d = Vector((v.x - cx, 0.0, v.z - cz))
-        w = v - d.normalized() * inset if d.length > inset else Vector((cx, v.y, cz))
-        if floor is not None and w.z < floor:
-            w = Vector((w.x, w.y, floor))
-        if x_lo is not None:
-            w = Vector((min(max(w.x, x_lo), x_hi), w.y, w.z))
-        out.append(w)
+        d = Vector((v.x, 0.0, v.z - cz))
+        out.append(v - d.normalized() * inset if d.length > inset else Vector((0.0, v.y, cz)))
+    if floor is None and x_lo is None:
+        return out
+    y = out[0].y
+    pts = [(v.x, v.z) for v in out]
+    if floor is not None:
+        pts = clip(pts, lambda q: q[1] - floor)
+    if x_lo is not None:
+        pts = clip(pts, lambda q: q[0] - x_lo)
+        pts = clip(pts, lambda q: x_hi - q[0])
+    return [Vector((x, y, z)) for x, z in resample_outline(pts, count or len(ring) // 2)]
+
+
+def clip(poly, inside):
+    """Sutherland-Hodgman: keep the part of a closed polygon where inside(point) >= 0."""
+    out = []
+    for i, cur in enumerate(poly):
+        prev = poly[i - 1]
+        a, b = inside(prev), inside(cur)
+        if b >= 0:
+            if a < 0:
+                t = a / (a - b)
+                out.append((prev[0] + (cur[0] - prev[0]) * t, prev[1] + (cur[1] - prev[1]) * t))
+            out.append(cur)
+        elif a >= 0:
+            t = a / (a - b)
+            out.append((prev[0] + (cur[0] - prev[0]) * t, prev[1] + (cur[1] - prev[1]) * t))
     return out
 
 
-def section_area(ring):
-    """Area of a ring's polygon in the x-z plane (shoelace)."""
-    a = 0.0
-    for p0, p1 in zip(ring, ring[1:] + ring[:1]):
-        a += p0.x * p1.z - p1.x * p0.z
-    return abs(a) / 2
+def resample_outline(poly, n):
+    """n points evenly spaced round a closed polygon, starting from its lowest-x, lowest-z corner."""
+    start = min(range(len(poly)), key=lambda i: (round(poly[i][0], 4), poly[i][1]))
+    poly = poly[start:] + poly[:start]
+    seg = [((poly[(i + 1) % len(poly)][0] - poly[i][0]) ** 2 + (poly[(i + 1) % len(poly)][1] - poly[i][1]) ** 2) ** 0.5
+           for i in range(len(poly))]
+    total = sum(seg)
+    out, i, acc = [], 0, 0.0
+    for k in range(n):
+        target = total * k / n
+        while acc + seg[i] < target:
+            acc += seg[i]
+            i += 1
+        t = (target - acc) / seg[i] if seg[i] else 0.0
+        a, b = poly[i], poly[(i + 1) % len(poly)]
+        out.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+    return out
 
 
-def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, capacity_kg, mat):
+def duct_cutter(p, clearance):
+    """Closed solids around each intake duct and its shock cone, grown by clearance, to cut out of the fuel cells."""
+    rows = bi.resample(p["duct"], bi.spaced(p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 20))
+    cutters = []
+    for side in (1, -1):
+        rings = [[bi.P(s, side * (cx + (r + clearance) * math.cos(a)), cz + (r + clearance) * math.sin(a))
+                  for a in [2 * math.pi * k / 48 for k in range(48)]] for s, cx, cz, r in rows]
+        cutter = bi.loft("duct_cutter_%d" % side, rings, cap_back=True, cap_front=True)
+        bm = bmesh.new()
+        bm.from_mesh(cutter.data)
+        inverted = bm.calc_volume(signed=True) < 0  # mirroring flips the winding; a boolean needs outward faces
+        bm.free()
+        if inverted:
+            cutter.data.flip_normals()
+        cutters.append(cutter)
+        sc = p["shock_cone"]
+        zc = p["intake"][0][2]
+        r = sc["radius"] + clearance
+        cone = bi.loft("cone_cutter_%d" % side,
+                       [[bi.P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
+                         for a in [2 * math.pi * k / 32 for k in range(32)]] for s in (sc["apex_s"] - 0.05, sc["base_s"] + 0.05)],
+                       cap_back=True, cap_front=True)
+        bm = bmesh.new()
+        bm.from_mesh(cone.data)
+        if bm.calc_volume(signed=True) < 0:
+            cone.data.flip_normals()
+        bm.free()
+        cutters.append(cone)
+    return cutters
+
+
+def subtract(obj, cutters):
+    """Bake obj minus the cutters into obj's own mesh."""
+    for c in cutters:
+        mod = obj.modifiers.new("cut_" + c.name, "BOOLEAN")
+        mod.operation, mod.solver, mod.object = "DIFFERENCE", "EXACT", c
+    bpy.context.view_layer.update()
+    baked = bpy.data.meshes.new_from_object(obj.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    old = obj.data
+    obj.modifiers.clear()
+    obj.data = baked
+    baked.name = obj.name
+    bpy.data.meshes.remove(old)
+
+
+def mesh_volume(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    v = abs(bm.calc_volume())
+    bm.free()
+    return v
+
+
+def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
     stations = [s0 + (s1 - s0) * i / 8 for i in range(9)]
-    rings = [ring_at(p, s, inset, floor, x_lo, x_hi) for s in stations]
-    vol = sum(0.5 * (section_area(a) + section_area(b)) * (sb - sa)
-              for a, b, sa, sb in zip(rings, rings[1:], stations, stations[1:]))
+    rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=64) for s in stations]
     obj = bi.finish(bi.loft(name, rings, cap_back=True, cap_front=True), mat, smooth=False)
+    subtract(obj, cutters)  # the cells are separate from the intake ducts, with clearance for the duct walls
+    vol = mesh_volume(obj)
     obj["volume_m3"] = round(vol, 3)
-    obj["fuel_kg"] = capacity_kg
     obj["volume_holds_kg"] = round(vol * 1000 * FUEL_DENSITY, 1)
     return obj
 
@@ -125,10 +217,33 @@ def _build(p, mats):
         obj = bi.finish(box("main_gear_bay" + suffix, s0, s1, hw, z0, z1, x=side * mg["x"]), mats["gear_bay"], smooth=False)
         parts.append(tag(obj, "gear_bay", "fuselage"))
 
-    for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R"):
-        s0, s1, inset, floor, x_lo, x_hi, capacity = I[name]["tank"]
-        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, capacity, mats["fuel_tank"])
+    cutters = duct_cutter(p, I["duct_clearance"])
+    for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R", "fuel_saddle"):
+        s0, s1, inset, floor, x_lo, x_hi = I[name]["tank"]
+        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mats["fuel_tank"], cutters)
         parts.append(tag(obj, "fuel_tank", "fuselage"))
+    for c in cutters:
+        bpy.data.objects.remove(c, do_unlink=True)
+    st = I["strake_tank"]
+    wing_rows = bi.wing_sections(p["wing"])
+    cells = [("fuel_strake", st), ("fuel_wing", I["wing_tank"])]
+    for (cell, st), (side, suffix) in [(c, s) for c in cells for s in ((1, "_L"), (-1, "_R"))]:
+        stations = [(st["x"][0] + (st["x"][1] - st["x"][0]) * i / 6, st["f"][0], st["f"][1]) for i in range(7)]
+        obj = bi.strip(cell + suffix, wing_rows, stations, p["wing"]["thickness"] * 0.85, "x")
+        if side < 0:
+            obj.data.transform(bi.Matrix.Scale(-1, 4, (1, 0, 0)))
+            obj.data.flip_normals()
+        bi.finish(obj, mats["fuel_tank"], smooth=False)
+        vol = mesh_volume(obj)
+        obj["volume_m3"] = round(vol, 3)
+        obj["volume_holds_kg"] = round(vol * 1000 * FUEL_DENSITY, 1)
+        parts.append(tag(obj, "fuel_tank", "wing" + suffix))
+    cells = [o for o in parts if o["role"] == "fuel_tank"]
+    holds = sum(o["volume_holds_kg"] for o in cells)
+    if holds < I["design_fuel_kg"]:
+        raise ValueError("fuel cells hold %.0f kg, less than the %d kg design load" % (holds, I["design_fuel_kg"]))
+    for o in cells:
+        o["fuel_kg"] = round(I["design_fuel_kg"] * o["volume_holds_kg"] / holds, 1)
     wing = bi.wing_sections(p["wing"])
 
     e = I["engine"]
