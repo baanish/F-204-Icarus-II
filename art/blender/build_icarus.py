@@ -34,9 +34,10 @@ PARAMS = {
         (10.0, 0.650, 1.06, -0.42, 1.5),
         (12.2, 0.650, 1.07, -0.39, 1.5),
         (13.2, 0.640, 1.02, -0.30, 1.6),
-        (14.2, 0.620, 0.92, -0.20, 1.8),
-        (15.0, 0.560, 0.82, -0.05, 2.0),
-        (15.45, 0.450, 0.76, -0.01, 2.0),
+        (14.0, 0.610, 0.94, -0.21, 1.8),  # the boat tail steepens progressively to the nozzle
+        (14.6, 0.540, 0.85, -0.11, 1.9),
+        (15.0, 0.450, 0.78, -0.04, 2.0),
+        (15.2, 0.390, 0.76, -0.02, 2.0),  # a circle just over the nozzle, closed by an end cap
     ],
     "canopy": [  # (s, half width, z top, z bottom)
         (2.32, 0.30, 0.64, 0.50),
@@ -47,23 +48,23 @@ PARAMS = {
         (4.70, 0.37, 1.07, 0.75),
         (5.10, 0.30, 1.03, 0.85),
     ],
-    # Intake fairings: (s, outer half width, z centre, half height). Each is a rounded lobe whose inner edge sits at
+    # Intake fairings: (s, outer half width, z centre, half height). Each is an elliptical lobe whose inner edge sits at
     # intake_inner_x inside the body; the first row is the lip, where the lobe starts and the duct face is drawn.
     "intake": [
-        (6.85, 1.06, 0.22, 0.38),
-        (7.60, 1.12, 0.22, 0.38),
-        (8.60, 1.12, 0.22, 0.37),
-        (10.0, 1.04, 0.22, 0.36),
-        (11.4, 0.90, 0.22, 0.30),
-        (12.6, 0.70, 0.22, 0.22),
-        (14.2, 0.46, 0.22, 0.12),  # fully inside the body, so the fairing fades out without a step
+        (6.85, 1.00, 0.22, 0.34),
+        (7.60, 1.04, 0.22, 0.34),
+        (8.60, 1.04, 0.22, 0.33),
+        (10.0, 0.98, 0.22, 0.31),
+        (11.4, 0.86, 0.22, 0.27),
+        (12.6, 0.70, 0.22, 0.20),
+        (13.6, 0.33, 0.22, 0.01),  # shrinks to a point inside the body, so the fairing fades with no bulge
     ],
-    "intake_inner_x": 0.40,
+    "intake_inner_x": 0.32,  # with the rows above, a near-circular lobe whose centre sits just outside the body
     "intake_lip_round": 0.15,  # metres over which the lip grows from 90% to full size
     "blend": 0.24,  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
-    "shock_cone": {"apex_s": 6.20, "base_s": 7.45, "radius": 0.34, "x": 0.63},
+    "shock_cone": {"apex_s": 6.25, "base_s": 7.40, "radius": 0.30, "x": 0.63},
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
     # crank, and a 37 degree outboard panel; trailing edge nearly unswept. The first row is buried in the fairing
@@ -83,17 +84,16 @@ PARAMS = {
         "thickness": 0.05,
     },
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
-    # with the tip corners raked off.
+    # with a small 45 degree cut at the tip's trailing corner.
     "stabilator": {
-        "sections": [(14.78, 0.0, 2.82, 1.91), (15.33, 1.58, 2.82, 1.36), (15.43, 1.73, 2.82, 1.16),
-                     (15.50, 1.815, 2.82, 0.90)],
+        "sections": [(14.78, 0.0, 2.82, 1.91), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
         "thickness": 0.045,
     },
     "ventral_fin": {
         "sections": [(10.85, 0.0, -0.36, 2.25), (10.95, 0.0, -0.62, 2.05)],
         "thickness": 0.05,
     },
-    "nozzle": {"s_start": 15.05, "s_end": 15.55, "z": 0.37, "radius": 0.37, "lip": 0.025},
+    "nozzle": {"s_start": 15.0, "s_end": 15.6, "z": 0.37, "radius": 0.37, "lip": 0.025},
     # Reference drawings shown as image empties: file, px per metre, pixel of the radome tip, plane.
     "references": {
         "dir": ".cache/reference",
@@ -322,7 +322,7 @@ def fuselage_shapes(p, s):
     (le0, x0, z0, c0), (le1, x1, _, c1) = wing_sections(p["wing"])[:2]
     le_at = le0 + (le1 - le0) * (hw - x0) / (x1 - x0)
     te_at = le0 + c0 + (le1 + c1 - le0 - c0) * (hw - x0) / (x1 - x0)
-    f = ramp(s, le_at - 0.1, le_at + 0.6, te_at - 0.8, te_at + 0.05)
+    f = ramp(s, le_at - 0.1, le_at + 0.6, te_at - 1.2, te_at + 0.4)
     if f > 0:
         wf = p["wing_fillet"]
         a, b = 0.05 + wf["reach"] * f, 0.02 + wf["half_thickness"] * f
@@ -333,9 +333,10 @@ def fuselage_shapes(p, s):
 
 def blended_ring(p, s):
     shapes, zc = fuselage_shapes(p, s)
-    # The lip keeps a small fillet, which rounds the corners of the intake face; the full fillet fades in behind it.
+    # At the lip the intake meets the body almost sharply, so it reads as a slice of a circle; the fillet fades in
+    # behind it.
     behind_lip = s - p["intake"][0][0]
-    k = p["blend"] * (0.4 + 0.6 * min(1.0, behind_lip / 1.2)) if behind_lip >= 0 else p["blend"]
+    k = p["blend"] * (0.12 + 0.88 * min(1.0, behind_lip / 1.2)) if behind_lip >= 0 else p["blend"]
 
     def field(x, z):
         d = shapes[0](x, z)
@@ -372,9 +373,10 @@ def build_fuselage(p, mat, duct_mat):
     stations = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 30)[1:]
                 + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, table[-1][0], 70)[1:])
     rings = [blended_ring(p, s) for s in stations]
-    obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]))
+    obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]), cap_back=True)
     finish(obj, mat)
     obj.data.materials.append(duct_mat)
+    obj.data.polygons[-1].material_index = 1  # end cap, behind the nozzle
     # The faces between the last ring ahead of the lip and the lip itself are the intake openings.
     j = stations.index(lip) - 1
     step = [(Vector((b.x, b.z)) - Vector((a.x, a.z))).length for a, b in zip(rings[j], rings[j + 1])]
@@ -430,10 +432,10 @@ def build_nozzle(p, mat):
     n = p["nozzle"]
     rings = []
     for s, r in [(n["s_start"], n["radius"]), (n["s_end"], n["radius"] * 1.02),
-                 (n["s_end"], n["radius"] - n["lip"]), (n["s_start"] + 0.2, n["radius"] - n["lip"] * 2)]:
+                 (n["s_end"], n["radius"] - n["lip"]), (n["s_end"] - 0.3, n["radius"] - n["lip"] * 2)]:
         rings.append([P(s, r * math.cos(a), n["z"] + r * math.sin(a))
                       for a in [2 * math.pi * k / RING for k in range(RING)]])
-    return finish(loft("nozzle", rings, cap_back=True), mat)
+    return finish(loft("nozzle", rings, cap_back=True), mat)  # the cap is the engine face seen up the nozzle
 
 
 def build_references(p, repo):
