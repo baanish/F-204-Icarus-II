@@ -1,0 +1,13 @@
+// A hand-flown session at 60,000 ft (18,288 m) over Ignus, heading east at 700 m/s with full fuel, on the owner's own
+// installed mod stack (mirror) with this build swapped in. No steps: launch it with input on and fly.
+// From the repo root: no-agentic launch tests/scenarios/manual_60kft.scenario.jsonc --input --monitor 2560x1440
+{
+  "mission": "icarus_ignus_60kft.mission.json",
+  "mods": "mirror",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "steps": [],
+}

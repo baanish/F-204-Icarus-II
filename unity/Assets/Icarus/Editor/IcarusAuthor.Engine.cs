@@ -26,6 +26,8 @@ namespace Icarus.Editor
         private const float VectoringMaxAirspeed = 250f;
         // R13: the engine fails from its core and nozzle, at the Revoker's threshold.
         private const float EngineDamageThreshold = 50f;
+        // fighter1_afterburner_nozzle's bounds: the glow cylinder the Revoker's nozzle is sized to.
+        private const float RevokerGlowRadius = 0.517f, RevokerGlowLength = 0.6f;
 
         // The Revoker's Turbojet stays on the root. Its JetNozzle's GameObject becomes thrust_vector, an identity pivot at
         // the petal ring's centre under the Icarus nozzle part that the Turbojet turns for vectoring; the thrust axis, flame
@@ -63,14 +65,20 @@ namespace Icarus.Editor
             var heatHaze = b.Parts["fuselage_aft"].transform.Find("heat_haze") ?? throw new MissingReferenceException("fuselage_aft/heat_haze");
             thrust.SetParent(nozzlePart, true);
             thrust.SetPositionAndRotation(ring.position, nozzlePart.rotation);
-            // The flame, glow and haze start at the petals' exit, a petal's length behind the ring.
+            // The Revoker's flame and glow meshes are built to hang from its nozzle pivot at the throat: the glow a cylinder
+            // of radius 0.517 m, 0.6 m long, just behind it; the flame from 0.8 m behind it. They hang from the Icarus ring
+            // the same way, scaled to its radius across and to the petals' length along, as does the haze.
             var exit = ring.position + Vector3.back * petalLength * 0.95f;
+            var ringRadius = ring.Cast<Transform>().Max(h => new Vector2(h.localPosition.x, h.localPosition.y).magnitude);
+            var effectScale = new Vector3(ringRadius / RevokerGlowRadius, ringRadius / RevokerGlowRadius, petalLength / RevokerGlowLength);
             var flame = thrust.Find("afterburner_flame");
             var glow = thrust.Find("afterburner_nozzle_glow");
-            foreach (var t in new[] { flame, glow })
-                t.position = exit;
             heatHaze.SetParent(thrust, false);
-            heatHaze.position = exit;
+            foreach (var t in new[] { flame, glow, heatHaze })
+            {
+                t.localPosition = Vector3.zero;
+                t.localScale = effectScale;
+            }
             b.Placed.UnionWith(new[] { thrust, flame, glow, heatHaze, thrust.Find("thrustTransform") });
 
             var so = new SerializedObject(jet);
