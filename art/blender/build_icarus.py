@@ -11,6 +11,7 @@ given as station `s` (metres aft of the radome tip), lateral `x` and height `z` 
 import math
 import os
 
+import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
@@ -67,7 +68,13 @@ PARAMS = {
     "blend": 0.24,  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
-    "shock_cone": {"apex_s": 6.15, "base_s": 7.40, "radius": 0.30, "x": 0.58},  # a full cone sunk into the body side
+    # Two cone angles, like the F-104's "double-shock" centre body: a fine tip, then a steeper base. A full cone
+    # sunk into the body side, with a dark bleed slot ring near its base.
+    "shock_cone": {"apex_s": 6.15, "break_s": 6.90, "break_r": 0.132, "base_s": 7.40, "radius": 0.30, "x": 0.58,
+                   "bleed_s": 7.22},
+    # The duct runs from just inside the lip to the engine face, narrowing and turning toward the centreline:
+    # (s, centre x, centre z, radius).
+    "duct": [(6.86, 0.515, 0.22, 0.386), (7.80, 0.47, 0.24, 0.37), (8.80, 0.38, 0.28, 0.33), (9.60, 0.30, 0.31, 0.30)],
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
     # crank, and a 35 degree outboard panel; trailing edge nearly unswept. The first two rows are buried in the fairing
@@ -394,13 +401,38 @@ def build_fuselage(p, mat, duct_mat):
     finish(obj, mat)
     obj.data.materials.append(duct_mat)
     obj.data.polygons[-1].material_index = 1  # end cap, behind the nozzle
-    # The faces between the last ring ahead of the lip and the lip itself are the intake openings.
+    # The faces between the last ring ahead of the lip and the lip itself would close the intakes; delete them so
+    # the openings look into the ducts.
     j = stations.index(lip) - 1
     step = [(Vector((b.x, b.z)) - Vector((a.x, a.z))).length for a, b in zip(rings[j], rings[j + 1])]
-    for k in range(RING):
-        if max(step[k], step[(k + 1) % RING]) > 0.005:  # a quad spans vertices k and k+1
-            obj.data.polygons[RING + j * RING + k].material_index = 1
+    opening = [RING + j * RING + k for k in range(RING) if max(step[k], step[(k + 1) % RING]) > 0.005]
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[i] for i in opening], context="FACES_ONLY")
+    bm.to_mesh(obj.data)
+    bm.free()
     return obj
+
+
+def inward_fix(obj, axis_point):
+    """Flip the mesh if its first wall face points away from axis_point, so the inside is the visible side."""
+    poly = obj.data.polygons[0]
+    if poly.normal.dot(axis_point - poly.center) < 0:
+        obj.data.flip_normals()
+
+
+def build_ducts(p, duct_mat):
+    """Intake ducts, faces pointing inward, from just inside the lip to a capped engine face."""
+    rows = resample(p["duct"], spaced(p["duct"][0][0], p["duct"][-1][0], 16))
+    parts = []
+    for side, name in ((1, "duct_L"), (-1, "duct_R")):
+        rings = [[P(s, side * (cx + r * math.cos(a)), cz + r * math.sin(a))
+                  for a in [2 * math.pi * k / 48 for k in range(48)]] for s, cx, cz, r in rows]
+        obj = loft(name, rings, cap_back=True)
+        inward_fix(obj, Vector((side * rows[0][1], rows[0][0] - S0, rows[0][2])))
+        parts.append(finish(obj, duct_mat))
+    return parts
 
 
 def build_canopy(p, mat):
@@ -419,18 +451,29 @@ def build_probe(p, mat):
     return finish(loft("probe", rings, tip_front=P(-pr["length"] - 0.02, 0.0, z)), mat)
 
 
-def build_shock_cones(p, mat):
+def build_shock_cones(p, mat, duct_mat):
     sc = p["shock_cone"]
     zc = p["intake"][0][2]
     parts = []
     for side, name in ((1, "shock_cone_L"), (-1, "shock_cone_R")):
-        rings = []
-        for i in range(1, 12):
-            s = sc["apex_s"] + (sc["base_s"] - sc["apex_s"]) * i / 11
-            r = sc["radius"] * i / 11
-            rings.append([P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
-                          for a in [2 * math.pi * k / RING for k in range(RING)]])
-        parts.append(finish(loft(name, rings, tip_front=P(sc["apex_s"], side * sc["x"], zc)), mat))
+        profile = [(sc["apex_s"] + (sc["break_s"] - sc["apex_s"]) * i / 6, sc["break_r"] * i / 6) for i in range(1, 7)]
+        profile += [(sc["break_s"] + (sc["base_s"] - sc["break_s"]) * i / 5,
+                     sc["break_r"] + (sc["radius"] - sc["break_r"]) * i / 5) for i in range(1, 6)]
+        rings = [[P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
+                  for a in [2 * math.pi * k / RING for k in range(RING)]] for s, r in profile]
+        cone = finish(loft(name, rings, tip_front=P(sc["apex_s"], side * sc["x"], zc), cap_back=True), mat)
+        parts.append(cone)
+        # Bleed slot: a dark band just proud of the cone surface near its base.
+        r0 = sc["break_r"] + (sc["radius"] - sc["break_r"]) * (sc["bleed_s"] - sc["break_s"]) / (sc["base_s"] - sc["break_s"])
+        band = []
+        for ds in (0.0, 0.035):
+            r = r0 + (sc["radius"] - sc["break_r"]) * ds / (sc["base_s"] - sc["break_s"]) + 0.003
+            band.append([P(sc["bleed_s"] + ds, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
+                         for a in [2 * math.pi * k / RING for k in range(RING)]])
+        slot = loft(name + "_bleed", band)
+        if side < 0:
+            slot.data.flip_normals()
+        parts.append(finish(slot, duct_mat))
     return parts
 
 
@@ -771,7 +814,8 @@ def _build(repo):
     p = PARAMS
     parts = [build_fuselage(p, body, duct), build_canopy(p, glass), build_probe(p, metal)]
     parts += build_nozzle(p, metal, duct)
-    parts += build_shock_cones(p, body)
+    parts += build_shock_cones(p, body, duct)
+    parts += build_ducts(p, duct)
     parts += build_surfaces(p, body)
     parts += build_speed_brakes(p, body)
     refs = build_references(p, repo)
