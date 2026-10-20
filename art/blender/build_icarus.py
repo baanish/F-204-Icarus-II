@@ -50,9 +50,9 @@ PARAMS = {
     # Intake fairings: (s, outer half width, z centre, half height). Each is a rounded lobe whose inner edge sits at
     # intake_inner_x inside the body; the first row is the lip, where the lobe starts and the duct face is drawn.
     "intake": [
-        (6.85, 1.06, 0.22, 0.42),
-        (7.60, 1.12, 0.22, 0.42),
-        (8.60, 1.12, 0.22, 0.40),
+        (6.85, 1.06, 0.22, 0.38),
+        (7.60, 1.12, 0.22, 0.38),
+        (8.60, 1.12, 0.22, 0.37),
         (10.0, 1.04, 0.22, 0.36),
         (11.4, 0.90, 0.22, 0.30),
         (12.6, 0.70, 0.22, 0.22),
@@ -82,9 +82,11 @@ PARAMS = {
                      (14.68, 0.0, 2.88, 1.00)],
         "thickness": 0.05,
     },
-    # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V.
+    # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
+    # with the tip corners raked off.
     "stabilator": {
-        "sections": [(14.78, 0.0, 2.82, 1.91), (15.41, 1.815, 2.82, 1.28)],
+        "sections": [(14.78, 0.0, 2.82, 1.91), (15.33, 1.58, 2.82, 1.36), (15.43, 1.73, 2.82, 1.16),
+                     (15.50, 1.815, 2.82, 0.90)],
         "thickness": 0.045,
     },
     "ventral_fin": {
@@ -108,7 +110,7 @@ def wing_sections(w):
     return [(le, x, w["root_z"] - (x - x0) * t, te - le) for le, x, te in w["planform"]]
 
 
-RING = 72  # vertices around a fuselage section
+RING = 144  # vertices around a fuselage section; the intakes span only a fraction of each ring
 CHORD = 24  # points along each airfoil surface
 
 
@@ -331,9 +333,9 @@ def fuselage_shapes(p, s):
 
 def blended_ring(p, s):
     shapes, zc = fuselage_shapes(p, s)
-    # The lip is a sharp union, so the intake face is a clean outline; the fillet fades in behind it.
+    # The lip keeps a small fillet, which rounds the corners of the intake face; the full fillet fades in behind it.
     behind_lip = s - p["intake"][0][0]
-    k = p["blend"] * (0.05 + 0.95 * min(1.0, behind_lip / 0.45)) if behind_lip >= 0 else p["blend"]
+    k = p["blend"] * (0.4 + 0.6 * min(1.0, behind_lip / 1.2)) if behind_lip >= 0 else p["blend"]
 
     def field(x, z):
         d = shapes[0](x, z)

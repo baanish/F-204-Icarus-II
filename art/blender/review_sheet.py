@@ -94,6 +94,7 @@ def three_quarter(scene, out_dir):
 CLOSEUPS = {
     "intake": (Vector((3.2, -6.6, 1.0)), Vector((0.8, -1.2, 0.2))),
     "tail": (Vector((4.5, 4.0, 5.5)), Vector((0.0, 7.8, 2.4))),
+    "intake_head_on": (Vector((0.8, -16.0, 0.22)), Vector((0.8, -1.0, 0.22))),
 }
 
 
@@ -101,7 +102,7 @@ def closeups(scene, out_dir):
     for name, (loc, target) in CLOSEUPS.items():
         cam = camera("ReviewCam_" + name)
         cam.data.type = "PERSP"
-        cam.data.lens = 50
+        cam.data.lens = 200 if name.endswith("head_on") else 50
         cam.location = loc
         cam.rotation_euler = (target - loc).to_track_quat("-Z", "Y").to_euler()
         render_view(scene, cam, os.path.join(out_dir, name + ".png"), (1200, 800))
