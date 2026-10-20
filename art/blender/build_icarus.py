@@ -66,7 +66,7 @@ PARAMS = {
     "blend": 0.24,  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
-    "shock_cone": {"apex_s": 6.15, "base_s": 7.40, "radius": 0.30, "x": 0.63},
+    "shock_cone": {"apex_s": 6.15, "base_s": 7.40, "radius": 0.30, "x": 0.58},  # a full cone sunk into the body side
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     # Cranked arrow: a strake rising from the intake fairing just behind the lip (about 72 degrees), a rounded
     # crank, and a 35 degree outboard panel; trailing edge nearly unswept. The first two rows are buried in the fairing
@@ -415,7 +415,7 @@ def build_shock_cones(p, mat):
         for i in range(1, 12):
             s = sc["apex_s"] + (sc["base_s"] - sc["apex_s"]) * i / 11
             r = sc["radius"] * i / 11
-            rings.append([P(s, side * (sc["x"] + r * max(0.0, math.cos(a))), zc + r * math.sin(a))
+            rings.append([P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
                           for a in [2 * math.pi * k / RING for k in range(RING)]])
         parts.append(finish(loft(name, rings, tip_front=P(sc["apex_s"], side * sc["x"], zc)), mat))
     return parts
