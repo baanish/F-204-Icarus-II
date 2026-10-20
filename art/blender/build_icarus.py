@@ -115,7 +115,7 @@ PARAMS = {
         "thickness": 0.045,
     },
     "ventral_fin": {
-        "sections": [(10.85, 0.0, -0.36, 2.25), (10.95, 0.0, -0.62, 2.05)],
+        "sections": [(10.85, 0.0, -0.22, 2.25), (10.95, 0.0, -0.62, 2.05)],  # root buried above the rising belly
         "thickness": 0.05,
     },
     # Iris nozzle: a fixed shroud, then a ring of hinged petals with seals between them. Each petal hangs on its own
