@@ -856,6 +856,9 @@ def _build(repo):
     import hulls
 
     hull_count = hulls.build(TARGET)
+    import checks
+
+    checks.fuel_cell_clearance(TARGET)
     refs = build_references(p, repo)
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])

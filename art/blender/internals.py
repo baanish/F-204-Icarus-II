@@ -23,18 +23,17 @@ INTERNALS = {
     "avionics_aft": {"box": (4.95, 5.15, 0.42, -0.30, 0.70), "mass_kg": 140},  # a shelf; the gun bay holds fuel
     # Fuel, after the F-104S layout: an auxiliary cell in the old gun bay (as on the gunless F-104), the forward
     # main tank, three connected aft cells (the centre one between the intake ducts, the side ones wrapping round
-    # them), a saddle cell over the engine, and cells in the strakes and outboard wings. Each fuselage row: (s0, s1,
+    # them), and cells in the strakes and outboard wings. No fuel over or around the engine: a leak there is a fire. Each fuselage row: (s0, s1,
     # inset from the skin, z floor, x from, x to). A cell fills the skin section above its floor between its x
     # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds.
     "design_fuel_kg": 2400,
     "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct
-    "fuel_aux": {"tank": (5.20, 5.90, 0.025, -0.30, -9.0, 9.0)},
-    "fuel_forward_main": {"tank": (5.95, 7.70, 0.025, 0.05, -9.0, 9.0)},
-    "fuel_aft_center": {"tank": (7.75, 9.30, 0.025, -0.32, -0.24, 0.24)},
-    "fuel_aft_L": {"tank": (7.75, 9.30, 0.025, -0.15, 0.26, 0.92)},  # outboard of 0.92 is the strake cell
-    "fuel_aft_R": {"tank": (7.75, 9.30, 0.025, -0.15, -0.92, -0.26)},
-    "fuel_saddle": {"tank": (9.75, 12.40, 0.025, 0.82, -9.0, 9.0)},  # over the engine, under the spine
-    "strake_tank": {"x": (1.00, 1.88), "f": (0.06, 0.80)},  # each strake: span and chord fraction range
+    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.30, -9.0, 9.0)},
+    "fuel_forward_main": {"tank": (5.95, 7.70, 0.04, 0.05, -9.0, 9.0)},
+    "fuel_aft_center": {"tank": (7.75, 9.30, 0.04, -0.32, -0.24, 0.24)},
+    "fuel_aft_L": {"tank": (7.75, 9.30, 0.04, -0.15, 0.26, 0.92)},  # outboard of 0.92 is the strake cell
+    "fuel_aft_R": {"tank": (7.75, 9.30, 0.04, -0.15, -0.92, -0.26)},
+    "strake_tank": {"x": (1.10, 1.88), "f": (0.06, 0.70)},  # each strake: span and chord fraction, ahead of the flap
     "wing_tank": {"x": (1.95, 3.05), "f": (0.17, 0.68)},  # the box between the spars, outboard of the crank
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.40, "end_s": 15.00,
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
@@ -92,9 +91,22 @@ def clip(poly, inside):
 
 
 def resample_outline(poly, n):
-    """n points evenly spaced round a closed polygon, starting from its lowest-x, lowest-z corner."""
-    start = min(range(len(poly)), key=lambda i: (round(poly[i][0], 4), poly[i][1]))
-    poly = poly[start:] + poly[:start]
+    """n points evenly spaced round a closed polygon, starting straight below its centroid, so that sections of
+    different shapes still line up when lofted (starting from a corner lets the start jump between sections)."""
+    cx = sum(q[0] for q in poly) / len(poly)
+    cz = sum(q[1] for q in poly) / len(poly)
+    # Insert the point where the outline crosses the vertical through the centroid, below it, and start there:
+    # the nearest vertex would jump between the two corners of a flat floor.
+    best = None
+    for i, a in enumerate(poly):
+        b = poly[(i + 1) % len(poly)]
+        if (a[0] - cx) * (b[0] - cx) <= 0 and a[0] != b[0]:
+            t = (cx - a[0]) / (b[0] - a[0])
+            z = a[1] + (b[1] - a[1]) * t
+            if z < cz and (best is None or z < best[1]):
+                best = (i, z)
+    i, z = best
+    poly = [(cx, z)] + poly[i + 1:] + poly[:i + 1]
     seg = [((poly[(i + 1) % len(poly)][0] - poly[i][0]) ** 2 + (poly[(i + 1) % len(poly)][1] - poly[i][1]) ** 2) ** 0.5
            for i in range(len(poly))]
     total = sum(seg)
@@ -117,14 +129,7 @@ def duct_cutter(p, clearance):
     for side in (1, -1):
         rings = [[bi.P(s, side * (cx + (r + clearance) * math.cos(a)), cz + (r + clearance) * math.sin(a))
                   for a in [2 * math.pi * k / 48 for k in range(48)]] for s, cx, cz, r in rows]
-        cutter = bi.loft("duct_cutter_%d" % side, rings, cap_back=True, cap_front=True)
-        bm = bmesh.new()
-        bm.from_mesh(cutter.data)
-        inverted = bm.calc_volume(signed=True) < 0  # mirroring flips the winding; a boolean needs outward faces
-        bm.free()
-        if inverted:
-            cutter.data.flip_normals()
-        cutters.append(cutter)
+        cutters.append(outward(bi.loft("duct_cutter_%d" % side, rings, cap_back=True, cap_front=True)))
         sc = p["shock_cone"]
         zc = p["intake"][0][2]
         r = sc["radius"] + clearance
@@ -132,13 +137,38 @@ def duct_cutter(p, clearance):
                        [[bi.P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
                          for a in [2 * math.pi * k / 32 for k in range(32)]] for s in (sc["apex_s"] - 0.05, sc["base_s"] + 0.05)],
                        cap_back=True, cap_front=True)
-        bm = bmesh.new()
-        bm.from_mesh(cone.data)
-        if bm.calc_volume(signed=True) < 0:
-            cone.data.flip_normals()
-        bm.free()
-        cutters.append(cone)
+        cutters.append(outward(cone))
     return cutters
+
+
+def outward(obj):
+    """Make a closed mesh's faces point outward; lofts and mirrored copies can come out inside-out, which the
+    exact boolean reads as an inverted solid."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    inverted = bm.calc_volume(signed=True) < 0
+    bm.free()
+    if inverted:
+        obj.data.flip_normals()
+    return obj
+
+
+def grown(obj, by):
+    """A copy of a closed mesh pushed out along its normals, to cut with clearance instead of a shared face."""
+    me = obj.data.copy()
+    me.transform(obj.matrix_world)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    if bm.calc_volume(signed=True) < 0:
+        bmesh.ops.reverse_faces(bm, faces=bm.faces)
+    bm.normal_update()
+    for v in bm.verts:
+        v.co += v.normal * by
+    bm.to_mesh(me)
+    bm.free()
+    cutter = bpy.data.objects.new(obj.name + "_cutter", me)
+    bi.TARGET.objects.link(cutter)
+    return cutter
 
 
 def subtract(obj, cutters):
@@ -164,9 +194,14 @@ def mesh_volume(obj):
 
 
 def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
-    stations = [s0 + (s1 - s0) * i / 8 for i in range(9)]
+    # Stations every 0.1 m, plus either side of the intake lip, where the skin changes fastest: a coarser cell
+    # bridges straight across a quick change in the skin and pokes through it.
+    n = max(2, int(round((s1 - s0) / 0.1)) + 1)
+    lip = p["intake"][0][0]
+    stations = sorted({round(s0 + (s1 - s0) * i / (n - 1), 4) for i in range(n)}
+                      | {x for x in (lip - 0.02, lip + 0.06) if s0 < x < s1})  # clear of the skin's step at the lip
     rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=64) for s in stations]
-    obj = bi.finish(bi.loft(name, rings, cap_back=True, cap_front=True), mat, smooth=False)
+    obj = bi.finish(outward(bi.loft(name, rings, cap_back=True, cap_front=True)), mat, smooth=False)
     subtract(obj, cutters)  # the cells are separate from the intake ducts, with clearance for the duct walls
     vol = mesh_volume(obj)
     obj["volume_m3"] = round(vol, 3)
@@ -218,11 +253,12 @@ def _build(p, mats):
         parts.append(tag(obj, "gear_bay", "fuselage"))
 
     cutters = duct_cutter(p, I["duct_clearance"])
-    for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R", "fuel_saddle"):
+    wing_cut = [grown(bpy.data.objects[n], 0.015) for n in ("wing_L", "wing_R")]  # wing roots buried in the body
+    for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R"):
         s0, s1, inset, floor, x_lo, x_hi = I[name]["tank"]
-        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mats["fuel_tank"], cutters)
+        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mats["fuel_tank"], cutters + wing_cut)
         parts.append(tag(obj, "fuel_tank", "fuselage"))
-    for c in cutters:
+    for c in cutters + wing_cut:
         bpy.data.objects.remove(c, do_unlink=True)
     st = I["strake_tank"]
     wing_rows = bi.wing_sections(p["wing"])
