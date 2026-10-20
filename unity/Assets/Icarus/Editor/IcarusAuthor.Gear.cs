@@ -17,7 +17,7 @@ namespace Icarus.Editor
         // The share of a leg's carrier mass that leaves with it when the wheel breaks off: LandingGear.BreakWheel takes
         // LandingGear.mass from the carrier's Rigidbody and gives it to the falling leg, so it must stay under the carrier's.
         private const float GearBreakShare = 0.5f;
-        // Gear-down drag as LandingGear writes it onto the leg part: about the F-104's 0.02 rise in CD0 on 18.2 m2, or
+        // Each leg's gear-down drag, which LandingGear adds through its host part: about the F-104's 0.02 rise in CD0 on 18.2 m2, or
         // 0.36 m2 of CdA, which the game counts as twice that in dragArea.
         private static readonly Dictionary<string, float> GearExtendedDrag = new Dictionary<string, float>
         {
@@ -250,8 +250,12 @@ namespace Icarus.Editor
                 }
                 var wheelTravel = b.Blockout.Parts[wheelName].Number("travel_deg") * (foldKept ? 1f : -1f);
 
+                // LandingGear pushes its suspension on attachedPart alone, so as on the Revoker (mains on a 300 kg wing root,
+                // nose on the 350 kg cockpit) that is the heavy part the leg hangs on, not the light leg part: on the leg,
+                // the Revoker's dampers flung it on its joint until the joint broke. The leg part stays a damageable part.
+                var carrier = b.Specs.First(s => s.Name == leg).Parent;
                 so = new SerializedObject(gear);
-                Prop(so, "attachedPart").objectReferenceValue = b.Part(leg);
+                Prop(so, "attachedPart").objectReferenceValue = b.Part(carrier);
                 Prop(so, "gearHinge").objectReferenceValue = hinge;
                 Prop(so, "hingeFoldMotion").vector3Value = Vector3.zero;
                 Prop(so, "foldDegrees").floatValue = fold;
@@ -261,7 +265,11 @@ namespace Icarus.Editor
                 Prop(so, "suspensionTravel").floatValue = travel;
                 Prop(so, "wheelRadius").floatValue = radius;
                 Prop(so, "maxCompression").floatValue = GearMaxCompression;
-                Prop(so, "extendedDrag").floatValue = GearExtendedDrag[leg];
+                // LandingGear writes extendedDrag over the host's whole dragArea, so it carries the host's own share and the
+                // drag of every leg on that host (both mains write the same value onto the root).
+                var extendedDrag = (DragAreas.TryGetValue(carrier, out var carrierDrag) ? carrierDrag : 0f)
+                    + Legs.Where(l => b.Specs.First(s => s.Name == l.Leg).Parent == carrier).Sum(l => GearExtendedDrag[l.Leg]);
+                Prop(so, "extendedDrag").floatValue = extendedDrag;
                 Prop(so, "mass").floatValue = GearBreakShare * b.Mass[leg];
                 var moving = Prop(so, "movingParts");
                 moving.arraySize = wheelTravel != 0 ? 1 : 0;
@@ -282,7 +290,7 @@ namespace Icarus.Editor
                     entry.FindPropertyRelative("openAngle").vector3Value = new Vector3(doors[i].Open, 0, 0);
                 }
                 so.ApplyModifiedPropertiesWithoutUndo();
-                lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg about {(foldKept ? "the export's axis" : "the reversed axis")}, breaks off with {GearBreakShare * b.Mass[leg]:0} of its {b.Mass[leg]:0} kg, wheel fold {wheelTravel}, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], drag down {GearExtendedDrag[leg]}");
+                lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg about {(foldKept ? "the export's axis" : "the reversed axis")}, breaks off with {GearBreakShare * b.Mass[leg]:0} of its {b.Mass[leg]:0} kg, wheel fold {wheelTravel}, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], pushes on {carrier}, its drag down {extendedDrag}");
             }
             b.Report.Add("gear: the Icarus hinges on the Revoker's LandingGear; " + string.Join("; ", lines));
         }

@@ -24,12 +24,12 @@ MonoBehaviour:
     antiMissile: 0
     antiRadar: 0.3
   jsonKey: baanish_icarus
-  unitName: F-240 Icarus II
+  unitName: F-204 Icarus II
   bogeyName: 
   description: 'A modernized Starfighter: a single-turbojet interceptor on a cranked-arrow
     wing with leading-edge flaps and a vectoring iris nozzle. Fast and quick to climb,
     it bleeds energy in a turn. Eight stations carry missiles and light strike stores.'
-  code: F-240
+  code: F-204
   visibleRange: 3000
   iconRange: 100000
   radarSize: 0.25

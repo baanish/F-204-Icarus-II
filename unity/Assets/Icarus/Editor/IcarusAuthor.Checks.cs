@@ -312,23 +312,26 @@ namespace Icarus.Editor
             foreach (var g in gears)
             {
                 var so = new SerializedObject(g);
-                var part = Prop(so, "attachedPart").objectReferenceValue as Component;
-                if (part == null || !part.name.StartsWith("gear_leg_", StringComparison.Ordinal) || !g.transform.IsChildOf(part.transform)) p.Add(g.name + " isn't carried by a gear_leg part");
+                // The gear rides its gear_leg part and pushes on the part that leg hangs on.
+                var leg = Legs.FirstOrDefault(l => g.transform.IsChildOf(b.Parts[l.Leg].transform));
+                var part = leg.Leg == null ? null : b.Parts[leg.Leg].transform;
+                var carrierPart = Prop(so, "attachedPart").objectReferenceValue as Component;
+                if (part == null) p.Add(g.name + " isn't on a gear_leg part");
+                else if (carrierPart == null || carrierPart.gameObject != b.Parts[b.Specs.First(s => s.Name == leg.Leg).Parent]) p.Add(g.name + " doesn't push on the part its leg hangs on");
                 foreach (var field in new[] { "bumpStop", "unsprung", "axle", "gearCollider", "gearHinge", "tireNoiseSound", "tireSkidSound" })
                     if (Prop(so, field).objectReferenceValue == null) p.Add($"{g.name}.{field} is null");
                 var wheels = GetList(Prop(so, "wheels")).Cast<Transform>().ToArray();
                 if (wheels.Length == 0 || wheels.Any(w => w == null)) p.Add(g.name + " has no wheel or a null one");
                 var hinge = Prop(so, "gearHinge").objectReferenceValue as Transform;
-                if (part == null || hinge == null || wheels.Length == 0 || wheels[0] == null)
+                if (part == null || carrierPart == null || hinge == null || wheels.Length == 0 || wheels[0] == null)
                     continue;
-                var leg = Legs.FirstOrDefault(l => l.Leg == part.name);
                 if (!hinge.IsChildOf(part.transform) || Quaternion.Angle(hinge.localRotation, Quaternion.identity) > 0.01f)
                     p.Add(g.name + "'s gear hinge isn't at rest on its gear_leg part");
                 // A negative fold reads back near 360 through localEulerAngles.x as the leg locks down, which LandingGear
                 // takes for a broken wheel above 10 degrees.
                 if (Prop(so, "foldDegrees").floatValue <= 0f) p.Add($"{g.name} folds {Prop(so, "foldDegrees").floatValue} deg; stowing must be a positive turn");
                 // BreakWheel takes the leg's mass from its carrier's Rigidbody.
-                var carrier = GetFloat(part, "mass");
+                var carrier = GetFloat(carrierPart, "mass");
                 if (Prop(so, "mass").floatValue <= 0f || Prop(so, "mass").floatValue >= carrier)
                     p.Add($"{g.name} breaks off with {Prop(so, "mass").floatValue} kg of its {carrier} kg carrier");
                 if (leg.Doors == null || Prop(so, "gearDoors").arraySize != leg.Doors.Length) p.Add($"{g.name} lists {Prop(so, "gearDoors").arraySize} doors");
