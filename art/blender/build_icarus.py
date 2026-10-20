@@ -825,7 +825,7 @@ def _build(repo):
     global TARGET
     repo = repo or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     TARGET = collection("Icarus")
-    body = material("Icarus_Body", (0.62, 0.64, 0.66, 1.0), 0.3, 0.45)
+    body = material("Icarus_Body", (0.56, 0.57, 0.59, 1.0), 1.0, 0.32)  # bare steel for the blockout
     glass = material("Icarus_Glass", (0.10, 0.16, 0.22, 0.6), 0.0, 0.05)
     duct = material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8)
     metal = material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35)
