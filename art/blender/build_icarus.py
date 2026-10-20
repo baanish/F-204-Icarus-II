@@ -20,7 +20,7 @@ S0 = 8.0
 PARAMS = {
     # Fuselage body: (s, half width, z top, z bottom, top exponent). Lower half is a half ellipse whose vertical
     # radius equals the half width; a top exponent below 2 pinches the upper half into the dorsal spine. Intake
-    # fairings and root fillets are blended into these sections (see "blend"), so the outer skin is one surface.
+    # fairings and the wing-root fillet are blended into these sections (see "blend"), so the outer skin is one surface.
     "fuselage": [
         (0.00, 0.000, 0.03, 0.03, 2.0),
         (0.35, 0.120, 0.14, -0.08, 2.0),
@@ -62,7 +62,6 @@ PARAMS = {
     "intake_lip_round": 0.15,  # metres over which the lip grows from 90% to full size
     "blend": 0.24,  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
-    "fin_fillet": {"half_width": 0.06, "rise": 0.20},  # above the spine, along the fin root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
     "shock_cone": {"apex_s": 6.38, "base_s": 7.30, "radius": 0.26, "x": 0.63},
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
@@ -70,8 +69,10 @@ PARAMS = {
         "sections": [(8.55, 0.58, 0.20, 3.58), (9.95, 3.345, 0.20 - 2.765 * math.tan(math.radians(10)), 1.46)],
         "thickness": 0.034,
     },
+    # The root rows curve the leading edge concavely down into the spine, which is the fin's fillet.
     "fin": {
-        "sections": [(12.40, 0.0, 1.00, 3.60), (14.70, 0.0, 2.80, 1.00)],
+        "sections": [(12.25, 0.0, 0.98, 3.75), (12.90, 0.0, 1.30, 3.10), (13.30, 0.0, 1.60, 2.70),
+                     (14.68, 0.0, 2.88, 1.00)],
         "thickness": 0.05,
     },
     "stabilator": {
@@ -310,12 +311,6 @@ def fuselage_shapes(p, s):
         a, b = 0.05 + wf["reach"] * f, 0.02 + wf["half_thickness"] * f
         for side in (1, -1):
             shapes.append(lambda x, z, side=side, a=a, b=b, cx=hw - 0.05: lobe(x - side * cx, z - z0, a, b, b))
-    fs = p["fin"]["sections"][0]
-    f = ramp(s, fs[0] - 0.2, fs[0] + 1.4, p["fuselage"][-1][0] - 0.6, p["fuselage"][-1][0])
-    if f > 0:
-        ff = p["fin_fillet"]
-        rise = 0.05 + ff["rise"] * f
-        shapes.append(lambda x, z, b=rise, zt=top - 0.05: lobe(x, z - zt, ff["half_width"], b, 0.05))
     return shapes, zmid
 
 
