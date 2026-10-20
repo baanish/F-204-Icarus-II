@@ -354,7 +354,10 @@ def fuselage_shapes(p, s):
         wf = p["wing_fillet"]
         a, b = 0.05 + wf["reach"] * f, 0.02 + wf["half_thickness"] * f
         for side in (1, -1):
-            shapes.append(lambda x, z, side=side, a=a, b=b, cx=hw - 0.05: lobe(x - side * cx, z - z0, a, b, b))
+            # As the fillet fades it also sinks into the body, so the smooth union stops inflating the skin
+            # before the lobe is dropped (a lobe resting on the skin would leave a step where it ends).
+            cx = hw - 0.05 - 0.5 * (1.0 - f)
+            shapes.append(lambda x, z, side=side, a=a, b=b, cx=cx: lobe(x - side * cx, z - z0, a, b, b))
     return shapes, zmid
 
 
