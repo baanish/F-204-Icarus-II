@@ -26,7 +26,7 @@ static class Tuning
     /// <summary>Degrees each petal opens at full afterburner; visual only, so it isn't locked to the shipped value.</summary>
     internal static float NozzleOpenDegrees => nozzleOpen == null ? DefaultNozzleOpen : nozzleOpen.Value;
 
-    const float DefaultNozzleOpen = 12f;
+    const float DefaultNozzleOpen = 15f;
     // The main wing's AeroParts whose area WingArea scales; the leading-edge and trailing-edge flaps have their area held
     // by a HighLiftDevice, which WingArea rescales through its cached endpoints.
     static readonly string[] MainWing = { "wing_spar_L", "wing_spar_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" };
