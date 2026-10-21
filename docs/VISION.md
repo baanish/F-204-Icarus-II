@@ -13,7 +13,7 @@ The mod is also a demonstration of building game content with AI agents. Claude 
 | Faction | Primeva (PALA) |
 | Role | Interceptor first; light strike as a secondary loadout |
 | Gun | None |
-| Stations | 6: per side, a wingtip rail, one underwing pylon (a single store, or a twin rack of air-to-air missiles), one conformal fuselage station. Stock game weapons only, and none of the advanced ones: no long-range or anti-radiation missiles, bunker busters or anti-ship missiles |
+| Stations | 6: per side, a wingtip rail, one underwing pylon (a single store, or a twin rack of air-to-air missiles), one conformal fuselage station. Stock game weapons only, and few advanced ones: the AAM-36 long-range missile and the AGM-68 against armour, but no anti-radiation or anti-ship missiles |
 | Fidelity | Full: working cockpit with displays, breakable parts, internal structure |
 
 ### Performance
