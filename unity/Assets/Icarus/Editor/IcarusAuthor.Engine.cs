@@ -21,9 +21,10 @@ namespace Icarus.Editor
             new[] { 0f, 1.0f, -2e-5f, -2e-5f }, new[] { 10000f, 0.8f, -2e-5f, -5e-5f },
             new[] { 15000f, 0.55f, -5e-5f, -6.25e-5f }, new[] { 19000f, 0.3f, -6.25e-5f, -6.25e-5f },
         };
-        // R12: stock vectoring kept at 4 degrees in pitch and yaw, no roll mixing, and the Revoker's 250 m/s cutoff.
+        // R12: stock vectoring kept at 4 degrees in pitch and yaw, no roll mixing. The cutoff sits above the top speed
+        // (912 m/s, where the thrust taper ends): the Revoker's 250 m/s left the Icarus, rarely that slow, without it.
         private static readonly Vector3 ThrustVectoring = new Vector3(4f, 4f, 0f);
-        private const float VectoringMaxAirspeed = 250f;
+        private const float VectoringMaxAirspeed = 1000f;
         // R13: the engine fails from its core and nozzle, at the Revoker's threshold.
         private const float EngineDamageThreshold = 50f;
         // fighter1_afterburner_nozzle's bounds: the glow cylinder the Revoker's nozzle is sized to.
