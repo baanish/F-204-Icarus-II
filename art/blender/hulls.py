@@ -58,7 +58,7 @@ def hull_mesh(name, points):
         res = bmesh.ops.convex_hull(bm, input=list(bm.verts))
         loose = {e for e in res["geom_interior"] + res["geom_unused"] if isinstance(e, bmesh.types.BMVert)}
         bmesh.ops.delete(bm, geom=list(loose), context="VERTS")
-        if bm.calc_volume() < 1e-4:  # flat: no use as a collider
+        if len(bm.faces) < 4 or bm.calc_volume() < 1e-4:  # flat (coplanar points hull to two faces): no use as a collider
             bm.free()
             return None
         if len(bm.verts) <= MAX_HULL - 5 and sum(len(f.verts) - 2 for f in bm.faces) <= MAX_HULL:

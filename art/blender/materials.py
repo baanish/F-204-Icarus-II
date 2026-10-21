@@ -50,12 +50,14 @@ def build():
         "seal": material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4),
         "strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
         "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9),
-        # the internals keep flat review colours, so a part torn away reads as tank, engine or structure
-        "fuel_tank": material("Icarus_Int_Fuel", (0.85, 0.55, 0.12, 1.0), 0.0, 0.6),
-        "engine": material("Icarus_Int_Engine", (0.30, 0.28, 0.26, 1.0), 0.9, 0.4),
-        "structure": material("Icarus_Int_Structure", (0.70, 0.72, 0.74, 1.0), 0.6, 0.5),
-        "avionics": material("Icarus_Int_Avionics", (0.20, 0.45, 0.30, 1.0), 0.1, 0.6),
-        "radar": material("Icarus_Int_Avionics", (0.20, 0.45, 0.30, 1.0), 0.1, 0.6),
-        "cockpit": material("Icarus_Int_Cockpit", (0.32, 0.33, 0.35, 1.0), 0.2, 0.6),
-        "gear_bay": material("Icarus_Int_Bay", (0.10, 0.10, 0.11, 1.0), 0.0, 0.8),
+        # Hidden structure on the stock trims (Exterior rule 4): frames, keels, spars and ribs on aircraft_structure;
+        # equipment, tanks, bays and the coves of moving surfaces on jet_mechanical.
+        "structure": stock("aircraft_structure"),
+        "mechanical": stock("jet_mechanical"),
+        "fuel_tank": stock("jet_mechanical"),
+        "engine": stock("jet_mechanical"),
+        "avionics": stock("jet_mechanical"),
+        "radar": stock("jet_mechanical"),
+        "cockpit": stock("jet_mechanical"),
+        "gear_bay": stock("jet_mechanical"),
     }

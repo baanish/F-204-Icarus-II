@@ -1,6 +1,6 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "a87226020dd6af331ca1837f583b681d4cba8bdb1c6137aff8d72fbb50d80d9e",
+ "source_sha256": "299e8b1bb401d6300310da4fb1bf8f51ff89cd6f87692e5009a6ed9184c24053",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
  "design_eye": {
   "blender": [
@@ -46,7 +46,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 20
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -101,7 +102,7 @@
      0.00037
     ]
    ],
-   "sha256": "8ea9a6743f63099f6ecde699c04e2d1b4ac8d2edfb504edd87b0573991641d2a",
+   "sha256": "93d7ec7afa26ffbc6f103e6486c0e33ba0c3323fb7a07aac5c19b4eb3a7b21bc",
    "bounds_blender": [
     [
      -0.0053,
@@ -114,35 +115,39 @@
      0.03011
     ]
    ],
-   "tris": 860,
+   "tris": 92,
    "materials": [
     [
      "Icarus_Body",
-     860
+     66
+    ],
+    [
+     "jet_mechanical",
+     26
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "aileron_L_visible_colmesh0",
-     "verts": 58,
-     "tris": 112,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
        -1.23451,
-       -0.03001,
-       -0.60116
+       -0.03011,
+       -0.60119
       ],
       [
        0.0053,
        0.03011,
-       -0.00022
+       0.00037
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 112
+    "tris": 48
    }
   },
   "aileron_R": {
@@ -176,7 +181,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 20
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -231,7 +237,7 @@
      0.00037
     ]
    ],
-   "sha256": "f05f5e8428528f353a95515db8f5c2f620a2c2eee2dd7cec2404edc25046f65e",
+   "sha256": "0c95d4c6b6198a559d06e7340bdc388192d59be3da663107a3f69452a21830d1",
    "bounds_blender": [
     [
      -0.0053,
@@ -244,35 +250,39 @@
      0.03011
     ]
    ],
-   "tris": 860,
+   "tris": 92,
    "materials": [
     [
      "Icarus_Body",
-     860
+     66
+    ],
+    [
+     "jet_mechanical",
+     26
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "aileron_R_visible_colmesh0",
-     "verts": 58,
-     "tris": 112,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
        -1.23451,
        -0.03011,
-       -0.60116
+       -0.60119
       ],
       [
        0.0053,
-       0.03001,
-       -0.00022
+       0.03011,
+       0.00037
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 112
+    "tris": 48
    }
   },
   "antenna_datalink_top": {
@@ -321,7 +331,7 @@
      0.13
     ]
    ],
-   "sha256": "334e1ff771eccbcfcbea9f93717276df75972107721323a469f609596ad828f5",
+   "sha256": "26abc8474bb27e680fc5f2adbb9beb82b6bc33b16d7e9186970abf493d59d0a9",
    "bounds_blender": [
     [
      -0.006,
@@ -411,7 +421,7 @@
      0.11
     ]
    ],
-   "sha256": "2de9f41c17f766c880865aca01a43a496712ae09ab450ad228ed3f1e84a32b97",
+   "sha256": "a0b05aa0c844ed6031dc16e153da82404bfe33b9974d4b5e9d402cfdef9471b5",
    "bounds_blender": [
     [
      -0.006,
@@ -501,7 +511,7 @@
      0.15
     ]
    ],
-   "sha256": "86d9e189e2527a7d3d21c27e3531921b051799ce4fd6389d70ef8da6f85047d3",
+   "sha256": "f8657b8c4102d8cc490234cea40adddefd0e210938573937e0bc01008f40cc1e",
    "bounds_blender": [
     [
      -0.006,
@@ -592,7 +602,7 @@
      0.1
     ]
    ],
-   "sha256": "9da4467ef78c73f975eeac448bd62ca204bb3ad210afd4f4b7437bd10a3ac7e0",
+   "sha256": "ab4250e91992175f69eb0f1e7a751d6086b941d880f9b6d81bb7bcebb7840c23",
    "bounds_blender": [
     [
      -0.42,
@@ -605,19 +615,19 @@
      0.35
     ]
    ],
-   "tris": 124,
+   "tris": 40,
    "materials": [
     [
-     "Icarus_Int_Avionics",
-     124
+     "jet_mechanical",
+     40
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "avionics_tray_colmesh0",
-     "verts": 44,
-     "tris": 84,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
        -0.42,
@@ -633,7 +643,7 @@
     }
    ],
    "lod1": {
-    "tris": 84
+    "tris": 40
    }
   },
   "canopy": {
@@ -723,7 +733,7 @@
      0.47165
     ]
    ],
-   "sha256": "0c06d594a8a93ba0ddd24e20f9b3ac103b99cb71e1eedc4af8a9aae486a0f4d2",
+   "sha256": "57749fcdd2dc9ee9c33afd47a011c93107e651ff19392819aef1600d10e64a7e",
    "bounds_blender": [
     [
      -0.0,
@@ -814,7 +824,7 @@
      1.275
     ]
    ],
-   "sha256": "1ad39384ea38b3489b3fffddbf307b0d9003644dde564e55152bf210c69ed623",
+   "sha256": "02f0518ea4a06ed0532ba3649951c4f265c4280232971a86516fcfa2bb775a0e",
    "bounds_blender": [
     [
      -0.38,
@@ -827,19 +837,19 @@
      0.415
     ]
    ],
-   "tris": 3238,
+   "tris": 446,
    "materials": [
     [
-     "Icarus_Int_Cockpit",
-     3238
+     "jet_mechanical",
+     446
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "cockpit_cell_colmesh0",
-     "verts": 69,
-     "tris": 134,
+     "verts": 113,
+     "tris": 222,
      "bounds_unity": [
       [
        -0.38,
@@ -855,7 +865,7 @@
     }
    ],
    "lod1": {
-    "tris": 134
+    "tris": 222
    }
   },
   "dorsal_cover": {
@@ -863,13 +873,13 @@
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
     0.0,
-    0.69067,
-    0.919
+    0.68864,
+    0.91256
    ],
    "pivot_unity": [
     -0.0,
-    0.919,
-    -0.69067
+    0.91256,
+    -0.68864
    ],
    "axes_unity": {
     "right": [
@@ -894,211 +904,177 @@
    },
    "bounds_unity": [
     [
-     -0.31231,
-     -0.12205,
-     -3.70136
+     -0.31812,
+     -0.12803,
+     -3.66443
     ],
     [
-     0.31231,
-     0.12205,
-     3.70136
+     0.31812,
+     0.12803,
+     3.66443
     ]
    ],
-   "sha256": "489444852b85cfba8556540035ee113078f28cf1e8a3fbd96e5f5bc428a0a51f",
+   "sha256": "b90ae2653df7fc639b696a49a6c099b968448293c2ddb173c255c6e438f8a51c",
    "bounds_blender": [
     [
-     -0.31231,
-     -3.70136,
-     -0.12205
+     -0.31812,
+     -3.66443,
+     -0.12803
     ],
     [
-     0.31231,
-     3.70136,
-     0.12205
+     0.31812,
+     3.66443,
+     0.12803
     ]
    ],
-   "tris": 2616,
+   "tris": 1256,
    "materials": [
     [
      "Icarus_Body",
-     2616
+     1256
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "dorsal_cover_colmesh0",
-     "verts": 4,
-     "tris": 2,
+     "verts": 65,
+     "tris": 126,
      "bounds_unity": [
       [
-       -0.29506,
-       -0.10436,
-       3.70136
+       -0.29515,
+       -0.0969,
+       2.85474
       ],
       [
-       0.29506,
-       -0.07697,
-       3.70136
+       0.29515,
+       0.12368,
+       3.66443
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh1",
-     "verts": 67,
-     "tris": 130,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       -0.29515,
-       -0.10055,
-       2.77301
+       -0.29413,
+       -0.07448,
+       1.75292
       ],
       [
-       0.29515,
-       0.1162,
-       3.56874
+       0.29413,
+       0.12744,
+       2.65232
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh2",
-     "verts": 76,
-     "tris": 148,
+     "verts": 90,
+     "tris": 176,
      "bounds_unity": [
       [
-       -0.29411,
-       -0.08076,
-       1.75496
+       -0.29144,
+       -0.06366,
+       0.76415
       ],
       [
-       0.29411,
-       0.121,
-       2.64039
+       0.29144,
+       0.12744,
+       1.66721
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh3",
-     "verts": 88,
-     "tris": 172,
+     "verts": 78,
+     "tris": 152,
      "bounds_unity": [
       [
-       -0.29144,
-       -0.0701,
-       0.79139
+       -0.2858,
+       -0.05072,
+       -0.18483
       ],
       [
-       0.29144,
-       0.121,
-       1.66924
+       0.2858,
+       0.12803,
+       0.60598
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh4",
-     "verts": 90,
-     "tris": 176,
+     "verts": 70,
+     "tris": 136,
      "bounds_unity": [
       [
-       -0.30951,
-       -0.07948,
-       -0.21948
+       -0.30219,
+       -0.09837,
+       -1.29198
       ],
       [
-       0.30951,
-       0.12157,
-       0.67908
+       0.30219,
+       0.11665,
+       -0.343
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh5",
-     "verts": 126,
-     "tris": 248,
+     "verts": 38,
+     "tris": 72,
      "bounds_unity": [
       [
-       -0.29814,
-       -0.09296,
-       -1.23035
+       -0.28553,
+       -0.10523,
+       -2.24096
       ],
       [
-       0.29814,
-       0.11047,
-       -0.33179
+       0.28553,
+       0.07801,
+       -1.45014
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh6",
-     "verts": 18,
-     "tris": 32,
+     "verts": 38,
+     "tris": 72,
      "bounds_unity": [
       [
-       -0.29772,
-       -0.12205,
-       -2.24121
+       -0.28952,
+       -0.10049,
+       -3.18994
       ],
       [
-       0.29772,
-       -0.11647,
-       -1.34266
+       0.28952,
+       0.10548,
+       -2.39912
       ]
      ]
     },
     {
      "name": "dorsal_cover_colmesh7",
-     "verts": 56,
-     "tris": 108,
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
-       -0.27664,
-       -0.10131,
-       -2.24121
+       -0.29483,
+       -0.06492,
+       -3.66443
       ],
       [
-       0.27664,
-       0.07481,
-       -1.34266
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh8",
-     "verts": 54,
-     "tris": 104,
-     "bounds_unity": [
-      [
-       -0.30104,
-       -0.10959,
-       -3.25208
-      ],
-      [
-       0.30104,
-       0.1023,
-       -2.35353
-      ]
-     ]
-    },
-    {
-     "name": "dorsal_cover_colmesh9",
-     "verts": 92,
-     "tris": 180,
-     "bounds_unity": [
-      [
-       -0.30573,
-       -0.08111,
-       -3.70136
-      ],
-      [
-       0.30573,
-       0.12205,
-       -3.3644
+       0.29483,
+       0.1276,
+       -3.3481
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 176
+    "tris": 162
    }
   },
   "engine_core": {
@@ -1147,7 +1123,7 @@
      2.65
     ]
    ],
-   "sha256": "fdc147dd7361f48263a231bf1894adc1d1864a08388596c75e9f30a1cbed6141",
+   "sha256": "5989191893d49a5843736fbe178be6e2e79d33ddbf84c4f32500240762546827",
    "bounds_blender": [
     [
      -0.46,
@@ -1163,7 +1139,7 @@
    "tris": 252,
    "materials": [
     [
-     "Icarus_Int_Engine",
+     "jet_mechanical",
      252
     ]
    ],
@@ -1196,13 +1172,13 @@
    "blender_parent": "fin_spar",
    "pivot_blender": [
     0.0,
-    6.02625,
-    1.8199
+    6.02594,
+    1.81993
    ],
    "pivot_unity": [
     -0.0,
-    1.8199,
-    -6.02625
+    1.81993,
+    -6.02594
    ],
    "axes_unity": {
     "right": [
@@ -1222,97 +1198,102 @@
     ]
    },
    "props": {
+    "side_area_m2": 3.0958,
     "role": "skin",
     "mass_kg": 35
    },
    "bounds_unity": [
     [
-     -0.08344,
-     -1.0601,
-     -1.65375
+     -0.08453,
+     -1.06007,
+     -1.72406
     ],
     [
-     0.08344,
-     1.0601,
-     1.65375
+     0.08453,
+     1.07007,
+     1.65406
     ]
    ],
-   "sha256": "fabedba95fb0fe33829dbac167a3966da711838539966404cab1763fbcf427f9",
+   "sha256": "3dff53f78c5c140b9066f69f452de472a7966e5c441c5c9268aed703881cc321",
    "bounds_blender": [
     [
-     -0.08344,
-     -1.65375,
-     -1.0601
+     -0.08453,
+     -1.65406,
+     -1.06007
     ],
     [
-     0.08344,
-     1.65375,
-     1.0601
+     0.08453,
+     1.72406,
+     1.07007
     ]
    ],
-   "tris": 2776,
+   "tris": 1414,
    "materials": [
     [
      "Icarus_Body",
-     2776
+     1238
+    ],
+    [
+     "jet_mechanical",
+     176
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fin_skin_colmesh0",
-     "verts": 83,
-     "tris": 162,
+     "verts": 111,
+     "tris": 218,
      "bounds_unity": [
       [
-       -0.08344,
-       -1.06003,
-       -1.62375
+       -0.08453,
+       -1.05998,
+       -1.62406
       ],
       [
-       0.08326,
-       -0.3229,
-       1.65375
+       0.08453,
+       -0.51993,
+       1.65406
       ]
      ]
     },
     {
      "name": "fin_skin_colmesh1",
-     "verts": 48,
-     "tris": 92,
+     "verts": 70,
+     "tris": 136,
      "bounds_unity": [
       [
-       -0.06194,
-       -0.3229,
-       -1.07912
+       -0.05874,
+       -0.21993,
+       -0.97744
       ],
       [
-       0.06217,
-       0.3831,
-       0.86358
+       0.05874,
+       0.10541,
+       0.72594
       ]
      ]
     },
     {
      "name": "fin_skin_colmesh2",
-     "verts": 112,
-     "tris": 220,
+     "verts": 110,
+     "tris": 216,
      "bounds_unity": [
       [
-       -0.04268,
-       0.3831,
-       -1.65375
+       -0.06,
+       0.43074,
+       -1.72406
       ],
       [
-       0.04284,
-       1.0601,
-       0.07614
+       0.06,
+       1.07007,
+       0.02444
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 102
+    "tris": 128
    }
   },
   "fin_spar": {
@@ -1320,13 +1301,13 @@
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
     0.0,
-    6.12843,
-    1.88605
+    6.12811,
+    1.88585
    ],
    "pivot_unity": [
     -0.0,
-    1.88605,
-    -6.12843
+    1.88585,
+    -6.12811
    ],
    "axes_unity": {
     "right": [
@@ -1351,58 +1332,58 @@
    },
    "bounds_unity": [
     [
-     -0.06681,
-     -0.89395,
-     -0.81962
+     -0.06682,
+     -0.89415,
+     -0.81993
     ],
     [
-     0.06681,
-     0.89395,
-     0.81962
+     0.06682,
+     0.89415,
+     0.81993
     ]
    ],
-   "sha256": "ba3d63ece43fd5f4da333a89a95f03b98068812e6740e8071c02df0cb63c836c",
+   "sha256": "61b794978eff50ff982a087fa369aedd085c3741f533544836f5ec192756d057",
    "bounds_blender": [
     [
-     -0.06681,
-     -0.81962,
-     -0.89395
+     -0.06682,
+     -0.81993,
+     -0.89415
     ],
     [
-     0.06681,
-     0.81962,
-     0.89395
+     0.06682,
+     0.81993,
+     0.89415
     ]
    ],
-   "tris": 912,
+   "tris": 236,
    "materials": [
     [
-     "Icarus_Int_Structure",
-     912
+     "aircraft_structure",
+     236
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fin_spar_colmesh0",
-     "verts": 49,
-     "tris": 94,
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       -0.06679,
-       -0.8939,
-       -0.81962
+       -0.06682,
+       -0.89415,
+       -0.81993
       ],
       [
-       0.06681,
-       0.89395,
-       0.81956
+       0.06682,
+       0.89415,
+       0.81993
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 94
+    "tris": 64
    }
   },
   "flap_L": {
@@ -1436,7 +1417,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 25
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -1491,7 +1473,7 @@
      0.00333
     ]
    ],
-   "sha256": "03f0487436b66331d9fac082e89a3ad76248dd83f4af1da4ab1684e002e8a3fa",
+   "sha256": "2978d90c372ca71114e0276df4448032ffdb541cd47888337fa7958e58b94099",
    "bounds_blender": [
     [
      -0.00848,
@@ -1504,35 +1486,39 @@
      0.05168
     ]
    ],
-   "tris": 860,
+   "tris": 164,
    "materials": [
     [
      "Icarus_Body",
-     860
+     132
+    ],
+    [
+     "jet_mechanical",
+     32
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "flap_L_visible_colmesh0",
-     "verts": 49,
-     "tris": 94,
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
        -1.20222,
-       -0.05151,
-       -0.91406
+       -0.05168,
+       -0.91425
       ],
       [
        0.00848,
        0.05168,
-       -0.0005
+       0.00333
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 94
+    "tris": 80
    }
   },
   "flap_R": {
@@ -1566,7 +1552,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 25
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -1621,7 +1608,7 @@
      0.00333
     ]
    ],
-   "sha256": "7ac000781b19d4363681baff50f539a1835ec05a59ac33aafe772e694c08292c",
+   "sha256": "0e56a7b13027379f1bc443ccd6658ac83ce02078eb402a32166f46f8487f9775",
    "bounds_blender": [
     [
      -0.00848,
@@ -1634,35 +1621,39 @@
      0.05168
     ]
    ],
-   "tris": 860,
+   "tris": 164,
    "materials": [
     [
      "Icarus_Body",
-     860
+     132
+    ],
+    [
+     "jet_mechanical",
+     32
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "flap_R_visible_colmesh0",
-     "verts": 49,
-     "tris": 94,
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
        -1.20222,
        -0.05168,
-       -0.91406
+       -0.91425
       ],
       [
        0.00848,
-       0.05151,
-       -0.0005
+       0.05168,
+       0.00333
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 94
+    "tris": 80
    }
   },
   "fuel_aft_L": {
@@ -1671,11 +1662,11 @@
    "pivot_blender": [
     0.59,
     0.525,
-    0.34084
+    0.33981
    ],
    "pivot_unity": [
     -0.59,
-    0.34084,
+    0.33981,
     -0.525
    ],
    "axes_unity": {
@@ -1697,66 +1688,66 @@
    },
    "props": {
     "volume_m3": 0.224,
-    "volume_holds_kg": 179.6,
+    "volume_holds_kg": 179.3,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 20,
-    "fuel_kg": 178.2
+    "fuel_kg": 178.8
    },
    "bounds_unity": [
     [
      -0.33,
-     -0.49084,
+     -0.48981,
      -0.775
     ],
     [
      0.33,
-     0.49084,
+     0.48981,
      0.775
     ]
    ],
-   "sha256": "9fd5b596b948d2aacd0e25daee5fb94522ac4362acd28a0a3258e49d4e7e5844",
+   "sha256": "fb770ec5ecae83e5af2e9622f9c3b7cdf426ddadf2813225613fac0ad632dd0c",
    "bounds_blender": [
     [
      -0.33,
      -0.775,
-     -0.49084
+     -0.48981
     ],
     [
      0.33,
      0.775,
-     0.49084
+     0.48981
     ]
    ],
-   "tris": 2506,
+   "tris": 890,
    "materials": [
     [
-     "Icarus_Int_Fuel",
-     2506
+     "jet_mechanical",
+     890
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aft_L_colmesh0",
-     "verts": 66,
-     "tris": 128,
+     "verts": 61,
+     "tris": 118,
      "bounds_unity": [
       [
        -0.33,
-       -0.49084,
+       -0.48981,
        -0.775
       ],
       [
        0.33,
-       0.48985,
+       0.48965,
        0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 128
+    "tris": 118
    }
   },
   "fuel_aft_R": {
@@ -1765,11 +1756,11 @@
    "pivot_blender": [
     -0.59,
     0.525,
-    0.34084
+    0.33981
    ],
    "pivot_unity": [
     0.59,
-    0.34084,
+    0.33981,
     -0.525
    ],
    "axes_unity": {
@@ -1791,66 +1782,66 @@
    },
    "props": {
     "volume_m3": 0.224,
-    "volume_holds_kg": 179.5,
+    "volume_holds_kg": 179.2,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 20,
-    "fuel_kg": 178.1
+    "fuel_kg": 178.7
    },
    "bounds_unity": [
     [
      -0.33,
-     -0.49084,
+     -0.48981,
      -0.775
     ],
     [
      0.33,
-     0.49084,
+     0.48981,
      0.775
     ]
    ],
-   "sha256": "0f5f37f78a7129020dfda6b23b644f5b4fe91990116c5d03c9e56bef5d054d2c",
+   "sha256": "41dc7fcdfa15c44e99f1c61144ab0666978180a85229012d5d0b694f8fa932fe",
    "bounds_blender": [
     [
      -0.33,
      -0.775,
-     -0.49084
+     -0.48981
     ],
     [
      0.33,
      0.775,
-     0.49084
+     0.48981
     ]
    ],
-   "tris": 2502,
+   "tris": 890,
    "materials": [
     [
-     "Icarus_Int_Fuel",
-     2502
+     "jet_mechanical",
+     890
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aft_R_colmesh0",
-     "verts": 65,
-     "tris": 126,
+     "verts": 62,
+     "tris": 120,
      "bounds_unity": [
       [
        -0.33,
-       -0.49084,
+       -0.48981,
        -0.775
       ],
       [
        0.33,
-       0.4887,
+       0.48804,
        0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 126
+    "tris": 120
    }
   },
   "fuel_aft_center": {
@@ -1859,11 +1850,11 @@
    "pivot_blender": [
     0.0,
     0.525,
-    0.39032
+    0.3903
    ],
    "pivot_unity": [
     -0.0,
-    0.39032,
+    0.3903,
     -0.525
    ],
    "axes_unity": {
@@ -1884,67 +1875,67 @@
     ]
    },
    "props": {
-    "volume_m3": 0.571,
-    "volume_holds_kg": 456.8,
+    "volume_m3": 0.567,
+    "volume_holds_kg": 453.8,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 30,
-    "fuel_kg": 453.2
+    "fuel_kg": 452.6
    },
    "bounds_unity": [
     [
      -0.24,
-     -0.61032,
+     -0.6103,
      -0.775
     ],
     [
      0.24,
-     0.61032,
+     0.6103,
      0.775
     ]
    ],
-   "sha256": "feccc23182afcf23981cadbe03f5959e4eab954fe468d53e1914621b9def6cd4",
+   "sha256": "f1609098dabd7beadb0db66d536d59d231fac5249c930c26c94036676c399a7e",
    "bounds_blender": [
     [
      -0.24,
      -0.775,
-     -0.61032
+     -0.6103
     ],
     [
      0.24,
      0.775,
-     0.61032
+     0.6103
     ]
    ],
-   "tris": 2254,
+   "tris": 842,
    "materials": [
     [
-     "Icarus_Int_Fuel",
-     2254
+     "jet_mechanical",
+     842
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aft_center_colmesh0",
-     "verts": 51,
-     "tris": 98,
+     "verts": 41,
+     "tris": 78,
      "bounds_unity": [
       [
        -0.24,
-       -0.61032,
+       -0.6103,
        -0.775
       ],
       [
        0.24,
-       0.6097,
+       0.60894,
        0.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 98
+    "tris": 78
    }
   },
   "fuel_aux": {
@@ -1978,59 +1969,59 @@
     ]
    },
    "props": {
-    "volume_m3": 0.754,
-    "volume_holds_kg": 603.0,
+    "volume_m3": 0.751,
+    "volume_holds_kg": 600.7,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 15,
-    "fuel_kg": 598.3
+    "fuel_kg": 599.1
    },
    "bounds_unity": [
     [
-     -0.59571,
+     -0.5957,
      -0.60872,
      -0.35
     ],
     [
-     0.59571,
+     0.5957,
      0.60872,
      0.35
     ]
    ],
-   "sha256": "8a47ab94ebe9441e23e9f864a5f75947230967aa69d96ed0d07a33d7cf4f12c7",
+   "sha256": "06b346b546e660584417b934d688d9dd28fb6bf98a4ddb2d3f4e07500bf16680",
    "bounds_blender": [
     [
-     -0.59571,
+     -0.5957,
      -0.35,
      -0.60872
     ],
     [
-     0.59571,
+     0.5957,
      0.35,
      0.60872
     ]
    ],
-   "tris": 1020,
+   "tris": 316,
    "materials": [
     [
-     "Icarus_Int_Fuel",
-     1020
+     "jet_mechanical",
+     316
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aux_colmesh0",
-     "verts": 106,
-     "tris": 208,
+     "verts": 75,
+     "tris": 146,
      "bounds_unity": [
       [
-       -0.5835,
+       -0.58347,
        -0.60872,
        -0.35
       ],
       [
-       0.5835,
+       0.58347,
        0.60872,
        0.35
       ]
@@ -2038,7 +2029,7 @@
     }
    ],
    "lod1": {
-    "tris": 208
+    "tris": 146
    }
   },
   "fuel_forward_main": {
@@ -2072,59 +2063,59 @@
     ]
    },
    "props": {
-    "volume_m3": 0.837,
-    "volume_holds_kg": 669.3,
+    "volume_m3": 0.829,
+    "volume_holds_kg": 663.4,
     "role": "fuel_tank",
     "owner": "fuselage",
     "mass_kg": 35,
-    "fuel_kg": 664.0
+    "fuel_kg": 661.6
    },
    "bounds_unity": [
     [
-     -0.94828,
+     -0.94658,
      -0.475,
      -0.875
     ],
     [
-     0.94828,
+     0.94658,
      0.475,
      0.875
     ]
    ],
-   "sha256": "6b21b031c0a6bef44361cc53374c7d95e90b78776cf68bdee1827e4e4b5bd7b4",
+   "sha256": "cfd49fa6bd3c6edd0ac63a0743e013caba097367f3a4a7053b8bd2bc86289efd",
    "bounds_blender": [
     [
-     -0.94828,
+     -0.94658,
      -0.875,
      -0.475
     ],
     [
-     0.94828,
+     0.94658,
      0.875,
      0.475
     ]
    ],
-   "tris": 3256,
+   "tris": 1742,
    "materials": [
     [
-     "Icarus_Int_Fuel",
-     3256
+     "jet_mechanical",
+     1742
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_forward_main_colmesh0",
-     "verts": 57,
-     "tris": 110,
+     "verts": 51,
+     "tris": 98,
      "bounds_unity": [
       [
-       -0.94749,
+       -0.93098,
        -0.475,
        -0.875
       ],
       [
-       0.94514,
+       0.93579,
        0.475,
        0.875
       ]
@@ -2132,19 +2123,19 @@
     }
    ],
    "lod1": {
-    "tris": 110
+    "tris": 98
    }
   },
   "fuselage_aft": {
    "fbx": "fuselage_aft.fbx",
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    -0.00044,
+    -0.00025,
     5.0,
     0.34083
    ],
    "pivot_unity": [
-    0.00044,
+    0.00025,
     0.34083,
     -5.0
    ],
@@ -2171,58 +2162,58 @@
    },
    "bounds_unity": [
     [
-     -0.84307,
+     -0.83408,
      -0.67038,
      -2.0
     ],
     [
-     0.84307,
+     0.83408,
      0.67038,
      2.0
     ]
    ],
-   "sha256": "0f0e1c559b1e218938ccc54a5ad6aecc287fb35da267327c838051724270980b",
+   "sha256": "acaecb06964389fc5ca036b524c51f6e5e39b5f64deae1dde3f16dcdacae7cd4",
    "bounds_blender": [
     [
-     -0.84307,
+     -0.83408,
      -2.0,
      -0.67038
     ],
     [
-     0.84307,
+     0.83408,
      2.0,
      0.67038
     ]
    ],
-   "tris": 8076,
+   "tris": 2772,
    "materials": [
     [
-     "Icarus_Int_Structure",
-     8076
+     "aircraft_structure",
+     2772
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_aft_colmesh0",
-     "verts": 47,
-     "tris": 90,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       -0.05356,
+       -0.05025,
        -0.67038,
        -1.225
       ],
       [
-       0.05267,
-       -0.43852,
-       1.8
+       0.04975,
+       -0.43638,
+       2.0
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 176
+    "tris": 168
    }
   },
   "fuselage_forward": {
@@ -2261,62 +2252,62 @@
    },
    "bounds_unity": [
     [
-     -0.58812,
+     -0.58761,
      -0.73246,
      -2.0
     ],
     [
-     0.58812,
+     0.58761,
      0.73246,
      2.0
     ]
    ],
-   "sha256": "6e6a60e4374dacc60de61de955cece7e99e0199a7af4f9f8e869e9387d073ae3",
+   "sha256": "2973ca79e3720cc76034a3975d64f7dba5bfd3404ad40721d3cd43c9567315b7",
    "bounds_blender": [
     [
-     -0.58812,
+     -0.58761,
      -2.0,
      -0.73246
     ],
     [
-     0.58812,
+     0.58761,
      2.0,
      0.73246
     ]
    ],
-   "tris": 8284,
+   "tris": 2444,
    "materials": [
     [
-     "Icarus_Int_Structure",
-     7332
+     "aircraft_structure",
+     2392
     ],
     [
-     "Icarus_Int_Bay",
-     952
+     "jet_mechanical",
+     52
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_forward_colmesh0",
-     "verts": 73,
-     "tris": 142,
+     "verts": 30,
+     "tris": 56,
      "bounds_unity": [
       [
-       -0.05963,
+       -0.05813,
        -0.73246,
        -2.0
       ],
       [
-       0.05963,
-       -0.48889,
+       0.05813,
+       -0.49137,
        2.0
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 216
+    "tris": 196
    }
   },
   "fuselage_mid": {
@@ -2355,92 +2346,92 @@
    },
    "bounds_unity": [
     [
-     -1.04205,
+     -1.02786,
      -0.74522,
      -2.775
     ],
     [
-     1.04205,
+     1.02786,
      0.74522,
      2.775
     ]
    ],
-   "sha256": "d796b6f367d7862daa95367e2121718fe35d4bb26bf7b74dd066021b1811ead6",
+   "sha256": "c90a138ff55be046ce8e14680d304cd168f3712187ba8bae8ee7416685618fd8",
    "bounds_blender": [
     [
-     -1.04205,
+     -1.02786,
      -2.775,
      -0.74522
     ],
     [
-     1.04205,
+     1.02786,
      2.775,
      0.74522
     ]
    ],
-   "tris": 13116,
+   "tris": 3532,
    "materials": [
     [
-     "Icarus_Int_Structure",
-     10380
+     "aircraft_structure",
+     3388
     ],
     [
-     "Icarus_Int_Bay",
-     2736
+     "jet_mechanical",
+     144
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_mid_colmesh0",
-     "verts": 52,
-     "tris": 100,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       -0.05416,
+       -0.05,
        -0.74522,
        -2.625
       ],
       [
-       0.05416,
-       -0.53087,
+       0.05,
+       -0.49853,
        2.775
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 118
+    "tris": 166
    }
   },
   "gear_door_N_L": {
    "fbx": null,
    "blender_parent": "fuselage_forward",
    "pivot_blender": [
-    0.1694,
-    -4.3369,
-    -0.47325
+    0.17954,
+    -4.39274,
+    -0.46629
    ],
    "pivot_unity": [
-    -0.1694,
-    -0.47325,
-    4.3369
+    -0.17954,
+    -0.46629,
+    4.39274
    ],
    "axes_unity": {
     "right": [
-     -0.00685,
-     0.01081,
-     0.99992
+     -0.01197,
+     0.01397,
+     0.99983
     ],
     "up": [
-     -0.99998,
+     -0.99993,
      -0.0,
-     -0.00685
+     -0.01197
     ],
     "forward": [
-     -7e-05,
-     -0.99994,
-     0.01081
+     -0.00017,
+     -0.9999,
+     0.01397
     ]
    },
    "props": {
@@ -2449,39 +2440,39 @@
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
-    0.00685,
-    -0.01081,
-    -0.99992
+    0.01197,
+    -0.01397,
+    -0.99983
    ]
   },
   "gear_door_N_L_visible": {
    "fbx": "gear_door_N_L_visible.fbx",
    "blender_parent": "gear_door_N_L",
    "pivot_blender": [
-    0.1694,
-    -4.3369,
-    -0.47325
+    0.17954,
+    -4.39274,
+    -0.46629
    ],
    "pivot_unity": [
-    -0.1694,
-    -0.47325,
-    4.3369
+    -0.17954,
+    -0.46629,
+    4.39274
    ],
    "axes_unity": {
     "right": [
-     -0.00685,
-     0.01081,
-     0.99992
+     -0.01197,
+     0.01397,
+     0.99983
     ],
     "up": [
-     -0.99998,
+     -0.99993,
      -0.0,
-     -0.00685
+     -0.01197
     ],
     "forward": [
-     -7e-05,
-     -0.99994,
-     0.01081
+     -0.00017,
+     -0.9999,
+     0.01397
     ]
    },
    "props": {
@@ -2490,88 +2481,88 @@
    },
    "bounds_unity": [
     [
-     -1.46026,
-     -0.16939,
-     -0.00433
+     -1.62185,
+     -0.17953,
+     -0.0
     ],
-    [
-     0.0,
-     0.02188,
-     0.03332
-    ]
-   ],
-   "sha256": "ed8925ae1dc9323cd3f09e4643322f24f53ee73854c9aa137fbe80d0619682cc",
-   "bounds_blender": [
     [
      -0.0,
-     -0.03332,
-     -0.16939
-    ],
-    [
-     1.46026,
-     0.00433,
-     0.02188
+     0.0135,
+     0.03802
     ]
    ],
-   "tris": 150,
+   "sha256": "e203bc111f48591a6e1ef94196448884bc27191eca2e82778922ebc052213b82",
+   "bounds_blender": [
+    [
+     0.0,
+     -0.03802,
+     -0.17953
+    ],
+    [
+     1.62185,
+     0.0,
+     0.0135
+    ]
+   ],
+   "tris": 68,
    "materials": [
     [
      "Icarus_Body",
-     150
+     68
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_N_L_visible_colmesh0",
-     "verts": 65,
-     "tris": 126,
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       -1.46026,
-       -0.16939,
-       -0.00433
+       -1.62185,
+       -0.17953,
+       -0.0
       ],
       [
-       0.0,
-       0.02188,
-       0.03332
+       -0.0,
+       0.0135,
+       0.03802
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 126
+    "tris": 64
    }
   },
   "gear_door_N_R": {
    "fbx": null,
    "blender_parent": "fuselage_forward",
    "pivot_blender": [
-    -0.15941,
-    -2.87807,
-    -0.48901
+    -0.16016,
+    -2.77337,
+    -0.48891
    ],
    "pivot_unity": [
-    0.15941,
-    -0.48901,
-    2.87807
+    0.16016,
+    -0.48891,
+    2.77337
    ],
    "axes_unity": {
     "right": [
-     -0.00685,
-     -0.01081,
-     -0.99992
+     -0.01197,
+     -0.01397,
+     -0.99983
     ],
     "up": [
-     0.99998,
+     0.99993,
      -0.0,
-     -0.00685
+     -0.01197
     ],
     "forward": [
-     7e-05,
-     -0.99994,
-     0.01081
+     0.00017,
+     -0.9999,
+     0.01397
     ]
    },
    "props": {
@@ -2580,39 +2571,39 @@
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
-    0.00685,
-    0.01081,
-    0.99992
+    0.01197,
+    0.01397,
+    0.99983
    ]
   },
   "gear_door_N_R_visible": {
    "fbx": "gear_door_N_R_visible.fbx",
    "blender_parent": "gear_door_N_R",
    "pivot_blender": [
-    -0.15941,
-    -2.87807,
-    -0.48901
+    -0.16016,
+    -2.77337,
+    -0.48891
    ],
    "pivot_unity": [
-    0.15941,
-    -0.48901,
-    2.87807
+    0.16016,
+    -0.48891,
+    2.77337
    ],
    "axes_unity": {
     "right": [
-     -0.00685,
-     -0.01081,
-     -0.99992
+     -0.01197,
+     -0.01397,
+     -0.99983
     ],
     "up": [
-     0.99998,
+     0.99993,
      -0.0,
-     -0.00685
+     -0.01197
     ],
     "forward": [
-     7e-05,
-     -0.99994,
-     0.01081
+     0.00017,
+     -0.9999,
+     0.01397
     ]
    },
    "props": {
@@ -2621,88 +2612,88 @@
    },
    "bounds_unity": [
     [
-     -1.45895,
-     -0.16939,
-     -0.00433
+     -1.61964,
+     -0.17953,
+     -0.0
     ],
     [
-     0.00132,
-     0.02188,
-     0.03332
+     0.00221,
+     0.0135,
+     0.03802
     ]
    ],
-   "sha256": "8330a7194f84540ae0820641818f1e1e9efbffe6504f22df9a188fd8fd2a2ae9",
+   "sha256": "a1cb1943d2eccf16b30e64815a63040b5a2ffd1275eaf9a1bf2a4a28d7a5a65f",
    "bounds_blender": [
     [
-     -0.00132,
-     -0.03332,
-     -0.16939
+     -0.00221,
+     -0.03802,
+     -0.17953
     ],
     [
-     1.45895,
-     0.00433,
-     0.02188
+     1.61964,
+     0.0,
+     0.0135
     ]
    ],
-   "tris": 150,
+   "tris": 68,
    "materials": [
     [
      "Icarus_Body",
-     150
+     68
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_N_R_visible_colmesh0",
-     "verts": 65,
-     "tris": 126,
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       -1.45895,
-       -0.16939,
-       -0.00433
+       -1.61964,
+       -0.17953,
+       -0.0
       ],
       [
-       0.00132,
-       0.02188,
-       0.03332
+       0.00221,
+       0.0135,
+       0.03802
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 126
+    "tris": 64
    }
   },
   "gear_door_main_L": {
    "fbx": null,
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    0.55745,
-    1.35942,
-    -0.21488
+    0.5578,
+    1.34796,
+    -0.21552
    ],
    "pivot_unity": [
-    -0.55745,
-    -0.21488,
-    -1.35942
+    -0.5578,
+    -0.21552,
+    -1.34796
    ],
    "axes_unity": {
     "right": [
-     0.00341,
-     -0.05841,
-     0.99829
+     -0.00379,
+     -0.05574,
+     0.99844
     ],
     "up": [
      -0.99999,
      -0.0,
-     0.00342
+     -0.0038
     ],
     "forward": [
-     -0.0002,
-     -0.99829,
-     -0.05841
+     0.00021,
+     -0.99845,
+     -0.05574
     ]
    },
    "props": {
@@ -2711,39 +2702,39 @@
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
-    -0.00341,
-    0.05841,
-    -0.99829
+    0.00379,
+    0.05574,
+    -0.99844
    ]
   },
   "gear_door_main_L_visible": {
    "fbx": "gear_door_main_L_visible.fbx",
    "blender_parent": "gear_door_main_L",
    "pivot_blender": [
-    0.55745,
-    1.35942,
-    -0.21488
+    0.5578,
+    1.34796,
+    -0.21552
    ],
    "pivot_unity": [
-    -0.55745,
-    -0.21488,
-    -1.35942
+    -0.5578,
+    -0.21552,
+    -1.34796
    ],
    "axes_unity": {
     "right": [
-     0.00341,
-     -0.05841,
-     0.99829
+     -0.00379,
+     -0.05574,
+     0.99844
     ],
     "up": [
      -0.99999,
      -0.0,
-     0.00342
+     -0.0038
     ],
     "forward": [
-     -0.0002,
-     -0.99829,
-     -0.05841
+     0.00021,
+     -0.99845,
+     -0.05574
     ]
    },
    "props": {
@@ -2752,88 +2743,88 @@
    },
    "bounds_unity": [
     [
-     -1.68767,
-     -0.41143,
-     -0.01554
+     -1.74219,
+     -0.40146,
+     -0.02138
     ],
     [
-     0.01152,
-     0.01848,
-     0.20718
+     0.00821,
+     0.02591,
+     0.20542
     ]
    ],
-   "sha256": "e931db1d4e51d0ea66f2e79af64d8a5ad9e8ca5d886ecf37c83a0746763b874e",
+   "sha256": "3f6420647e470e3761c2efa71f26b0cb202f9ef1be240cdf9243205faf7ab715",
    "bounds_blender": [
     [
-     -0.01152,
-     -0.20718,
-     -0.41143
+     -0.00821,
+     -0.20542,
+     -0.40146
     ],
     [
-     1.68767,
-     0.01554,
-     0.01848
+     1.74219,
+     0.02138,
+     0.02591
     ]
    ],
-   "tris": 482,
+   "tris": 234,
    "materials": [
     [
      "Icarus_Body",
-     482
+     234
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_main_L_visible_colmesh0",
-     "verts": 52,
-     "tris": 100,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -1.68767,
-       -0.41143,
-       -0.01554
+       -1.74219,
+       -0.40146,
+       -0.02138
       ],
       [
-       0.01152,
-       0.01848,
-       0.20718
+       0.00821,
+       0.02591,
+       0.20542
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 100
+    "tris": 68
    }
   },
   "gear_door_main_R": {
    "fbx": null,
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    -0.56321,
-    3.0442,
-    -0.1163
+    -0.55179,
+    2.92959,
+    -0.12722
    ],
    "pivot_unity": [
-    0.56321,
-    -0.1163,
-    -3.0442
+    0.55179,
+    -0.12722,
+    -2.92959
    ],
    "axes_unity": {
     "right": [
-     0.00341,
-     0.05841,
-     -0.99829
+     -0.00379,
+     0.05574,
+     -0.99844
     ],
     "up": [
      0.99999,
      -0.0,
-     0.00342
+     -0.0038
     ],
     "forward": [
-     0.0002,
-     -0.99829,
-     -0.05841
+     -0.00021,
+     -0.99845,
+     -0.05574
     ]
    },
    "props": {
@@ -2842,39 +2833,39 @@
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
-    -0.00341,
-    -0.05841,
-    0.99829
+    0.00379,
+    -0.05574,
+    0.99844
    ]
   },
   "gear_door_main_R_visible": {
    "fbx": "gear_door_main_R_visible.fbx",
    "blender_parent": "gear_door_main_R",
    "pivot_blender": [
-    -0.56321,
-    3.0442,
-    -0.1163
+    -0.55179,
+    2.92959,
+    -0.12722
    ],
    "pivot_unity": [
-    0.56321,
-    -0.1163,
-    -3.0442
+    0.55179,
+    -0.12722,
+    -2.92959
    ],
    "axes_unity": {
     "right": [
-     0.00341,
-     0.05841,
-     -0.99829
+     -0.00379,
+     0.05574,
+     -0.99844
     ],
     "up": [
      0.99999,
      -0.0,
-     0.00342
+     -0.0038
     ],
     "forward": [
-     0.0002,
-     -0.99829,
-     -0.05841
+     -0.00021,
+     -0.99845,
+     -0.05574
     ]
    },
    "props": {
@@ -2883,58 +2874,58 @@
    },
    "bounds_unity": [
     [
-     -1.69919,
-     -0.41143,
-     -0.01554
+     -1.59231,
+     -0.40146,
+     -0.02138
     ],
     [
-     -0.0,
-     0.01848,
-     0.20718
+     0.15809,
+     0.02591,
+     0.20542
     ]
    ],
-   "sha256": "3c903cebed604ba8f1e447a86cec65ee2d16d51afecd8439b96f439b3d6144a8",
+   "sha256": "ca8a470508002fcc9a79822b334f0b56c27d4a594c4a2957465f3371ad8fdd4c",
    "bounds_blender": [
     [
-     0.0,
-     -0.20718,
-     -0.41143
+     -0.15809,
+     -0.20542,
+     -0.40146
     ],
     [
-     1.69919,
-     0.01554,
-     0.01848
+     1.59231,
+     0.02138,
+     0.02591
     ]
    ],
-   "tris": 482,
+   "tris": 234,
    "materials": [
     [
      "Icarus_Body",
-     482
+     234
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_main_R_visible_colmesh0",
-     "verts": 52,
-     "tris": 100,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -1.69919,
-       -0.41143,
-       -0.01554
+       -1.59231,
+       -0.40146,
+       -0.02138
       ],
       [
-       -0.0,
-       0.01848,
-       0.20718
+       0.15809,
+       0.02591,
+       0.20542
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 100
+    "tris": 68
    }
   },
   "gear_leg_L": {
@@ -3024,7 +3015,7 @@
      0.8981
     ]
    ],
-   "sha256": "6bcd3de4d7db1658cd5a5e7236f7b31ccc27860deebfa32e549c81f92ac12af8",
+   "sha256": "a477f6c7118e834600d51c98c97c48aa6217da2476ad64814259137c3de76d41",
    "bounds_blender": [
     [
      -0.12785,
@@ -3155,7 +3146,7 @@
      0.03263
     ]
    ],
-   "sha256": "89a1e915dedf63cdceab1ff43fb7c2c1742258d07a61371cf321ade1e43bcfdd",
+   "sha256": "5104af8cfda29dfbd5d2919a24acae9ff1b81f297c51a481b60e249cfe7fb627",
    "bounds_blender": [
     [
      -0.03498,
@@ -3286,7 +3277,7 @@
      0.89803
     ]
    ],
-   "sha256": "48aad0e30e5b1be2311e6d6a8c30d29dd148cd7940f473573acc5aba41036d51",
+   "sha256": "bf281a3df9c37f9a896cebcd547e5b662f02c556ee635b5287367e2cbbf904b3",
    "bounds_blender": [
     [
      -0.04979,
@@ -3414,7 +3405,7 @@
      0.33973
     ]
    ],
-   "sha256": "162537b1ff2e83db3c8c6f7ad44650f2b6e21eab8499bddb48bf17fb1ddf75b5",
+   "sha256": "366c115a202c424321e8a8ac3025ef90446c0f65db0d7e5a7c184c2bb9690657",
    "bounds_blender": [
     [
      -0.32509,
@@ -3542,7 +3533,7 @@
      0.23937
     ]
    ],
-   "sha256": "61e59b8268b4c4a049f56cb52aa161cea69414f43cf08fa7bde214f52bd62213",
+   "sha256": "4415138a8408f323568b0f3bd53bf3127a27376fc877b0af9b92ed03b9c4e01b",
    "bounds_blender": [
     [
      -0.23937,
@@ -3670,7 +3661,7 @@
      0.33973
     ]
    ],
-   "sha256": "865d2f8ca3b4515a6d2d3e398f539d076a84dee75b24ed23f3861a6e5d31b6af",
+   "sha256": "1e897894fe2ec48e6de47733dac81756e3b00124ea804951232e47e45f3272e9",
    "bounds_blender": [
     [
      -0.32509,
@@ -3760,7 +3751,7 @@
      1.725
     ]
    ],
-   "sha256": "7af39acdf36fb0763f1c2138a8b13be0adf5d0952bc4151ed2102aa590e1997a",
+   "sha256": "6027ce8c3e2c7e804bc24497566c4d6753c583327025db73eab2d37b680e3602",
    "bounds_blender": [
     [
      -0.4505,
@@ -3773,40 +3764,40 @@
      0.38829
     ]
    ],
-   "tris": 4940,
+   "tris": 3788,
    "materials": [
     [
      "Icarus_Duct",
-     1774
+     1678
     ],
     [
      "Icarus_Body",
-     3166
+     2110
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "intake_duct_L_colmesh0",
-     "verts": 97,
-     "tris": 190,
+     "verts": 73,
+     "tris": 142,
      "bounds_unity": [
       [
-       -0.19544,
-       -0.06823,
+       -0.19536,
+       -0.06815,
        1.35
       ],
       [
-       -0.06356,
-       0.06365,
+       -0.06364,
+       0.06357,
        1.725
       ]
      ]
     },
     {
      "name": "intake_duct_L_colmesh1",
-     "verts": 112,
-     "tris": 220,
+     "verts": 120,
+     "tris": 236,
      "bounds_unity": [
       [
        -0.4505,
@@ -3822,8 +3813,8 @@
     },
     {
      "name": "intake_duct_L_colmesh2",
-     "verts": 49,
-     "tris": 94,
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
        -0.43925,
@@ -3831,8 +3822,8 @@
        0.467
       ],
       [
-       0.33415,
-       0.37144,
+       0.33738,
+       0.3853,
        0.875
       ]
      ]
@@ -3924,7 +3915,7 @@
     }
    ],
    "lod1": {
-    "tris": 60
+    "tris": 62
    }
   },
   "intake_duct_R": {
@@ -3973,7 +3964,7 @@
      1.725
     ]
    ],
-   "sha256": "b7c0e2f123d4421a2e383a0174ce30e5a0671014186d97d831966b35e953b76c",
+   "sha256": "e7c59ef44a9b78b42afa5ae214cff88498c62e3f6e8947a1cb90cf138fcb902a",
    "bounds_blender": [
     [
      -0.4505,
@@ -3986,40 +3977,40 @@
      0.38829
     ]
    ],
-   "tris": 4940,
+   "tris": 3788,
    "materials": [
     [
      "Icarus_Duct",
-     1774
+     1678
     ],
     [
      "Icarus_Body",
-     3166
+     2110
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "intake_duct_R_colmesh0",
-     "verts": 97,
-     "tris": 190,
+     "verts": 73,
+     "tris": 142,
      "bounds_unity": [
       [
-       0.06356,
-       -0.06823,
+       0.06364,
+       -0.06815,
        1.35
       ],
       [
-       0.19544,
-       0.06365,
+       0.19536,
+       0.06357,
        1.725
       ]
      ]
     },
     {
      "name": "intake_duct_R_colmesh1",
-     "verts": 112,
-     "tris": 220,
+     "verts": 120,
+     "tris": 236,
      "bounds_unity": [
       [
        -0.3215,
@@ -4035,17 +4026,17 @@
     },
     {
      "name": "intake_duct_R_colmesh2",
-     "verts": 49,
-     "tris": 94,
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
-       -0.33415,
+       -0.33738,
        -0.37839,
        0.467
       ],
       [
        0.43925,
-       0.37144,
+       0.3853,
        0.875
       ]
      ]
@@ -4137,7 +4128,7 @@
     }
    ],
    "lod1": {
-    "tris": 60
+    "tris": 62
    }
   },
   "lef_L": {
@@ -4171,7 +4162,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 20
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -4226,7 +4218,7 @@
      0.33515
     ]
    ],
-   "sha256": "6ab35c9381d7db9dab86edf9ea06b4cccff324a0f25f27d72f1e6b4f82052811",
+   "sha256": "152ac1e93af2ad2e88abe66ac9125bdf10ebd0733348ef830874f93ffd2e0ba5",
    "bounds_blender": [
     [
      -0.1832,
@@ -4239,35 +4231,39 @@
      0.02163
     ]
    ],
-   "tris": 860,
+   "tris": 116,
    "materials": [
     [
      "Icarus_Body",
-     860
+     88
+    ],
+    [
+     "jet_mechanical",
+     28
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "lef_L_visible_colmesh0",
-     "verts": 43,
-     "tris": 82,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
        -1.52681,
        -0.02163,
-       -0.00026
+       -0.00183
       ],
       [
        0.1832,
-       0.02154,
-       0.3349
+       0.02163,
+       0.33515
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 82
+    "tris": 42
    }
   },
   "lef_R": {
@@ -4301,7 +4297,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 20
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -4356,7 +4353,7 @@
      0.33515
     ]
    ],
-   "sha256": "cbb5ccb7e743554c0aa7cab26304485ee6219ffcdf8879030aa17801cf2b2fc1",
+   "sha256": "6ecba6baba9b3b71a81647c268bae3a76100dba6eb03c8d657065bdbebaee8c4",
    "bounds_blender": [
     [
      -0.1832,
@@ -4369,35 +4366,39 @@
      0.02163
     ]
    ],
-   "tris": 860,
+   "tris": 116,
    "materials": [
     [
      "Icarus_Body",
-     860
+     88
+    ],
+    [
+     "jet_mechanical",
+     28
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "lef_R_visible_colmesh0",
-     "verts": 42,
-     "tris": 80,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
        -1.52681,
-       -0.02154,
-       -0.00026
+       -0.02163,
+       -0.00183
       ],
       [
        0.1832,
        0.02163,
-       0.3349
+       0.33515
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 80
+    "tris": 42
    }
   },
   "light_beacon_belly": {
@@ -4712,7 +4713,7 @@
      0.15
     ]
    ],
-   "sha256": "8259eed94f3d8a901700fbca2b2b54a7e627ad6106e4054b2d11c932dd62b650",
+   "sha256": "11393bf8d56d48e6b459ae735c16c070d2f1376de17cb386216552242017b38b",
    "bounds_blender": [
     [
      -0.385,
@@ -4725,15 +4726,15 @@
      0.385
     ]
    ],
-   "tris": 1006,
+   "tris": 670,
    "materials": [
     [
      "Icarus_Nozzle",
-     864
+     576
     ],
     [
      "Icarus_Duct",
-     142
+     94
     ]
    ],
    "uv_layers": [],
@@ -4843,7 +4844,7 @@
      -0.0
     ]
    ],
-   "sha256": "be8f27ddf9fa9a7fd938fce3ea992fef14d99287976f48a39ebe35846015c50c",
+   "sha256": "c87a1eb929f1b25dfb019f748f8c86a3438115f63dd44c62e8a484480ef8ebbc",
    "bounds_blender": [
     [
      -0.0705,
@@ -4950,7 +4951,7 @@
      -0.0
     ]
    ],
-   "sha256": "7e1e4fa0229272faa46c35c0fc26be7e437482977e2f1cb8c604e0881b72bf8e",
+   "sha256": "080c6bf13c87d131ee8443d42cd58dba2c14fe2822e785003710202136f82d9c",
    "bounds_blender": [
     [
      -0.0705,
@@ -5057,7 +5058,7 @@
      -0.0
     ]
    ],
-   "sha256": "96617b248e34a6ef7fadb7f1d06d7de2680bdaaf82d7f2baaf729b85f7a7160c",
+   "sha256": "0fc315a88f71f278b372a916b757210141fa470999af7d21c40d4f8f06cfa7b3",
    "bounds_blender": [
     [
      -0.0705,
@@ -5164,7 +5165,7 @@
      -0.0
     ]
    ],
-   "sha256": "cdbd27024e6d232367a5d8ad867a8c0f7b622ede3caaf186d97d21dc22b68a27",
+   "sha256": "600b8e70ec42f33251a74cfa57828c619e16a5bf3effd2174c692a773da6cc15",
    "bounds_blender": [
     [
      -0.0705,
@@ -5271,7 +5272,7 @@
      -0.0
     ]
    ],
-   "sha256": "ae830456863e803e61619f79cc1edc488a01c3a2e65d5df3c5c69415a4af8706",
+   "sha256": "cc73c6dd0ae846764ac2b55cc87d874ae4486549de0ce77a67bb20cb987bc918",
    "bounds_blender": [
     [
      -0.0705,
@@ -5378,7 +5379,7 @@
      -0.0
     ]
    ],
-   "sha256": "6cd17b72507bef08f60a4032689baa8d77f2c877b99e84f75d9eaebe404883ce",
+   "sha256": "3356aa4e807f85fc9aa8896c574017d1f1f5eee361363f5982885ed046fab1b0",
    "bounds_blender": [
     [
      -0.0705,
@@ -5485,7 +5486,7 @@
      -0.0
     ]
    ],
-   "sha256": "5db736f2a1dd6e028aedb8dcfc206abfc65c0e15e60071bd3713fabf5f1a3ec3",
+   "sha256": "4c9dd793f985d20023f3e410cdc767328cd4cd36ec089ea7a057c24ec24031a2",
    "bounds_blender": [
     [
      -0.0705,
@@ -5592,7 +5593,7 @@
      -0.0
     ]
    ],
-   "sha256": "61b4333ff3b30030ac372e450657fc7942deb2e7fbbdd1199c66de1ecfe407dd",
+   "sha256": "8575d8b17041bdda0149ff224dec0ebf8784ca746e1350109bea8e7157564d23",
    "bounds_blender": [
     [
      -0.0705,
@@ -5699,7 +5700,7 @@
      -0.0
     ]
    ],
-   "sha256": "0de5ba98367c39085f3e090fa1bdd253e3c36b3553e5f76a4ba491b7768eb7de",
+   "sha256": "89b7f789b2ed369e354944e97bc70a65b65b90772b20f087833a7e0d3aaa5a49",
    "bounds_blender": [
     [
      -0.0705,
@@ -5806,7 +5807,7 @@
      -0.0
     ]
    ],
-   "sha256": "4ec154f26791a494c6764f697b67f0550c6f532f41eae2f44213043504d4b8e8",
+   "sha256": "24b3a45dd4d724e7d696e80911a67658afb34e1c744f949877363bb4fd97711b",
    "bounds_blender": [
     [
      -0.0705,
@@ -5913,7 +5914,7 @@
      -0.0
     ]
    ],
-   "sha256": "953e3edff7ff719a1ecf557cfb30d5e840902ee09de8410b851fc89508cbc97a",
+   "sha256": "e587bea4166b463743f4aae4109e66c6f092093c30053929932efa242fd6ccfc",
    "bounds_blender": [
     [
      -0.0705,
@@ -6020,7 +6021,7 @@
      -0.0
     ]
    ],
-   "sha256": "eec80d3c951ffa32236b14fa79c65294c9e78c09e214a451f72c243777ab9b89",
+   "sha256": "2162b43ee9473f3e1717a0296bb32e379634b0692b2c11bf39718e98f992c1f1",
    "bounds_blender": [
     [
      -0.0705,
@@ -6127,7 +6128,7 @@
      -0.0
     ]
    ],
-   "sha256": "e2927912b6e70e39cb7887746c717893e411ef1eab7f801302c169aad8f324f8",
+   "sha256": "f47230d7548ad4dfeb11526a7a8f9eac9c2cb7eefda3fdeb616720ede6a52ed8",
    "bounds_blender": [
     [
      -0.0705,
@@ -6234,7 +6235,7 @@
      -0.0
     ]
    ],
-   "sha256": "dfce759d509372c0d2085154d2d8b18dc3cd5592d664dac8a5fe1879a4691504",
+   "sha256": "7ab26754fe688f368616437e73767d5233e67a86f692208b6bed827e9dc483f2",
    "bounds_blender": [
     [
      -0.0705,
@@ -6341,7 +6342,7 @@
      -0.0
     ]
    ],
-   "sha256": "efc31dfb955e5ccacafa0838b30daa708e9dd1c37f49f2e8436da41a4705f820",
+   "sha256": "171164f2919e635bb6c361ed79428afdcd961b49da5616c6ace3f36cb246785e",
    "bounds_blender": [
     [
      -0.0705,
@@ -6448,7 +6449,7 @@
      -0.0
     ]
    ],
-   "sha256": "50966b8f19892afbf2e06d2de898b145ed5cdfebd4567eba911c349d65ba261b",
+   "sha256": "232d1fb05cdbbf6b1b292cf6a25c0cef74bb98b3b9b3abfb93dda5780410750a",
    "bounds_blender": [
     [
      -0.0705,
@@ -6555,7 +6556,7 @@
      -0.0
     ]
    ],
-   "sha256": "862b105fc1a955797126f7063f5df96e7b9600a44e70bb6a16d8f5e464dd2fe1",
+   "sha256": "c3e40023798dbac5dfa2e26986389ef374adc0d79e623b412a19b21b55b23415",
    "bounds_blender": [
     [
      -0.04935,
@@ -6662,7 +6663,7 @@
      -0.0
     ]
    ],
-   "sha256": "e6f34c678b98449638ce3544b6c3486f1b94f0c6002af3350404efb6bd929f5a",
+   "sha256": "9c928fe5a5f22ecef22742463e00057626d9a1b0760ae15baf6903c54e50915e",
    "bounds_blender": [
     [
      -0.04935,
@@ -6769,7 +6770,7 @@
      -0.0
     ]
    ],
-   "sha256": "2cae2fa2d747f76c51a0e69d392c046d3744c086250765d695f0b603748d87ae",
+   "sha256": "de569211cdcb6b7872292ac9b8c7c52d934e33a910950ab32fee8288b88515ce",
    "bounds_blender": [
     [
      -0.04935,
@@ -6876,7 +6877,7 @@
      -0.0
     ]
    ],
-   "sha256": "f0122fb1542c92e70a951e58df549d3a33ccc45af8c571659a1b71074deafb95",
+   "sha256": "20f42503c63f3991e2c33edb29a00c7577d67c9518f89c9c64cde7099bf2c55a",
    "bounds_blender": [
     [
      -0.04935,
@@ -6983,7 +6984,7 @@
      -0.0
     ]
    ],
-   "sha256": "4649d036c7a85480772385bbbfdffb8b16456269def8c1404929477698218092",
+   "sha256": "87ac387dde8d4106fb82f28bd3de9136dcf4b06d721674bf1725fcb1808e2734",
    "bounds_blender": [
     [
      -0.04935,
@@ -7090,7 +7091,7 @@
      -0.0
     ]
    ],
-   "sha256": "6463dd736b8f72bbf0e684417c242b3566c99a0dc504c8c2afb3b6ed72999d54",
+   "sha256": "46a8ee1b0e381a837751c1a25ab1f61318f8622af291b5d83655aad48e193cb6",
    "bounds_blender": [
     [
      -0.04935,
@@ -7197,7 +7198,7 @@
      -0.0
     ]
    ],
-   "sha256": "c4f91257674f4d977eaaa48b66bc6010e615fb5b0763b8a8a829cd0d319083f0",
+   "sha256": "afea91d6d8b14f7f7eb232723c9b101d38b1e971168de59ab73a88879278d86f",
    "bounds_blender": [
     [
      -0.04935,
@@ -7304,7 +7305,7 @@
      -0.0
     ]
    ],
-   "sha256": "bca3d6c74cb7ca43db160898fa01784fd84969574d0dc18cdf622562f50b6bf2",
+   "sha256": "7809e314de79da339f07afce5abbb9dcb367c8f9ee26da54ba3e0f32e37d7324",
    "bounds_blender": [
     [
      -0.04935,
@@ -7411,7 +7412,7 @@
      -0.0
     ]
    ],
-   "sha256": "997dbc93d4fac6318fab687466aececf68163aeecf5189497e0076b04ca4a3a8",
+   "sha256": "787d02d776f21ad8faf95a9a96cfaacd06e9bde1253920da8d16384181a05b63",
    "bounds_blender": [
     [
      -0.04935,
@@ -7518,7 +7519,7 @@
      -0.0
     ]
    ],
-   "sha256": "476e1df2b7ef0aee966cf052460967dd720ecd07cc9dadf8fddd5e637cd52e5b",
+   "sha256": "b732e3913abc125ebcf515d21a78d49939f1fc1c83bb3b60194139c4386864d3",
    "bounds_blender": [
     [
      -0.04935,
@@ -7625,7 +7626,7 @@
      -0.0
     ]
    ],
-   "sha256": "bc635c91f86c6d9e89ebcdf0b65c06e1399ae04a820b74f73f80ad45c64f4adc",
+   "sha256": "d438f10ddb60863de6f299257fcf3606554f04b260cafd52e23584f0f8cac9a7",
    "bounds_blender": [
     [
      -0.04935,
@@ -7732,7 +7733,7 @@
      -0.0
     ]
    ],
-   "sha256": "1f5f062bea674710fbe820dd3564ac0670eef76c359f778ca689462194378d30",
+   "sha256": "3c9c66cd0ff9c41c30df4226255f36b9626eb419677fb1fbfc157e7ead3d5586",
    "bounds_blender": [
     [
      -0.04935,
@@ -7839,7 +7840,7 @@
      -0.0
     ]
    ],
-   "sha256": "4c81e2f4716ef00f0c4bd750584ce0eec6b5524b160962dac28bb82db97cc459",
+   "sha256": "a0a50ceed8833f62b2c95a9fc3aa020d9c7b1ecd7748ab4c67481dbb472e5944",
    "bounds_blender": [
     [
      -0.04935,
@@ -7946,7 +7947,7 @@
      -0.0
     ]
    ],
-   "sha256": "6f2c8074a293ddc88a0aea54637a83623f46139c6bc6b4dd507c91b9325b7722",
+   "sha256": "a9a1187d8fefe9685fd75d1afa59d5281c2c12cd81e4cca48d5af91686740a35",
    "bounds_blender": [
     [
      -0.04935,
@@ -8053,7 +8054,7 @@
      -0.0
     ]
    ],
-   "sha256": "20563fbc6d144e79c3d8d7f82536ded1a4231534907fb34f0a8c2cc003a638fd",
+   "sha256": "46b2fa767bd5d3e7d623f492a75a0e4a622b79e6c65960e6107faa4e427dd4ec",
    "bounds_blender": [
     [
      -0.04935,
@@ -8160,7 +8161,7 @@
      -0.0
     ]
    ],
-   "sha256": "703ac1c3be434dcc36685501990872fed767d6f2c5fdf26dcd3d2c2dd551afc9",
+   "sha256": "b56d1e20854233d2ed0ffadbf01025259163a1b7a2fca8ddb3679f1d6b933416",
    "bounds_blender": [
     [
      -0.04935,
@@ -8263,7 +8264,7 @@
      0.75
     ]
    ],
-   "sha256": "29f647906f589582e592ef307b7076b3f1e0abecc0bb2b0dab437dc97c34840a",
+   "sha256": "2ded1e98580d699d38fba445b41ff12c34d5e81893e59d604314b3124417775c",
    "bounds_blender": [
     [
      -0.05,
@@ -8333,7 +8334,7 @@
      0.75
     ]
    ],
-   "sha256": "2ce8255a8e26a5c25b4cb3027008ac323d796c43c2c30e122f6957527cff3c01",
+   "sha256": "0abc8f1d1e4d0b2ec57205f443d1691288a19023abf38fa6d7a4f7bc90d86970",
    "bounds_blender": [
     [
      -0.05,
@@ -8403,7 +8404,7 @@
      0.75
     ]
    ],
-   "sha256": "c1538718ef46453cfca87f1e25677e4744cf5b646efc1463d59538071336765d",
+   "sha256": "2db6f7394e782693f1285010df8896f94292cbf13f159ad4d2a16b0fae0ee4e2",
    "bounds_blender": [
     [
      -0.05,
@@ -8473,7 +8474,7 @@
      0.75
     ]
    ],
-   "sha256": "c0a59e13bb46ee1625a25534fefc0bcc98b2a890c556576b26fba837129858dc",
+   "sha256": "39c23f2c68321e6ab8f95aebc965ad7d8a23edc281190cdda0871bd08e56bce8",
    "bounds_blender": [
     [
      -0.05,
@@ -8543,7 +8544,7 @@
      0.675
     ]
    ],
-   "sha256": "3cd110cdc4e3401d1db10d9717966e1f8e2810944ae4d2b5be523131fd035061",
+   "sha256": "5a7876a7c397a34c204f6b29db745c92e7c172f862fee7abb7d33b4fc574c5d7",
    "bounds_blender": [
     [
      -0.3,
@@ -8556,19 +8557,19 @@
      0.335
     ]
    ],
-   "tris": 1690,
+   "tris": 392,
    "materials": [
     [
-     "Icarus_Int_Avionics",
-     1690
+     "jet_mechanical",
+     392
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "radar_tray_colmesh0",
-     "verts": 123,
-     "tris": 242,
+     "verts": 90,
+     "tris": 176,
      "bounds_unity": [
       [
        -0.3,
@@ -8584,7 +8585,7 @@
     }
    ],
    "lod1": {
-    "tris": 242
+    "tris": 176
    }
   },
   "radome": {
@@ -8633,7 +8634,7 @@
      1.38792
     ]
    ],
-   "sha256": "e7cc6ebad57e7d515427032b253b6f87d3339841d4c5ffbe1d10879be317197b",
+   "sha256": "483e99e3167bb5dee27fed2d26e6ed558a85e1d764f68155db88a630451a79ff",
    "bounds_blender": [
     [
      -0.35123,
@@ -8646,57 +8647,53 @@
      0.41468
     ]
    ],
-   "tris": 2712,
+   "tris": 1896,
    "materials": [
     [
      "Icarus_Body",
-     2448
-    ],
-    [
-     "Icarus_Nozzle",
-     264
+     1896
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "radome_colmesh0",
-     "verts": 103,
-     "tris": 202,
+     "verts": 105,
+     "tris": 206,
      "bounds_unity": [
       [
        -0.11826,
-       -0.16864,
+       -0.16884,
        -0.12572
       ],
       [
-       0.11815,
-       0.04713,
+       0.11801,
+       0.04705,
        0.19604
       ]
      ]
     },
     {
      "name": "radome_colmesh1",
-     "verts": 73,
-     "tris": 142,
+     "verts": 96,
+     "tris": 188,
      "bounds_unity": [
       [
        -0.21441,
-       -0.13045,
+       -0.12603,
        -0.53655
       ],
       [
-       0.21424,
-       0.17561,
+       0.21441,
+       0.1743,
        -0.31313
       ]
      ]
     },
     {
      "name": "radome_colmesh2",
-     "verts": 14,
-     "tris": 23,
+     "verts": 10,
+     "tris": 15,
      "bounds_unity": [
       [
        -0.28306,
@@ -8712,16 +8709,16 @@
     },
     {
      "name": "radome_colmesh3",
-     "verts": 12,
-     "tris": 19,
+     "verts": 8,
+     "tris": 11,
      "bounds_unity": [
       [
-       -0.20308,
-       0.32666,
+       -0.19577,
+       0.33352,
        -1.38792
       ],
       [
-       0.20308,
+       0.19577,
        0.38573,
        -1.38792
       ]
@@ -8729,16 +8726,16 @@
     },
     {
      "name": "radome_colmesh4",
-     "verts": 11,
-     "tris": 17,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       -0.10148,
-       0.39429,
+       -0.0918,
+       0.39806,
        -1.38792
       ],
       [
-       0.10148,
+       0.0918,
        0.41468,
        -1.38792
       ]
@@ -8763,63 +8760,63 @@
     },
     {
      "name": "radome_colmesh6",
-     "verts": 69,
-     "tris": 134,
+     "verts": 92,
+     "tris": 180,
      "bounds_unity": [
       [
-       -0.19432,
-       -0.27132,
+       -0.19809,
+       -0.27106,
        -0.53655
       ],
       [
        0.19809,
-       0.1764,
+       0.17607,
        -0.31313
       ]
      ]
     },
     {
      "name": "radome_colmesh7",
-     "verts": 88,
-     "tris": 172,
+     "verts": 58,
+     "tris": 112,
      "bounds_unity": [
       [
        -0.30759,
-       -0.22775,
+       -0.23337,
        -1.07789
       ],
       [
        0.30759,
-       0.06409,
+       0.05848,
        -0.79272
       ]
      ]
     },
     {
      "name": "radome_colmesh8",
-     "verts": 54,
-     "tris": 104,
+     "verts": 38,
+     "tris": 72,
      "bounds_unity": [
       [
-       -0.29591,
-       0.04522,
+       -0.29735,
+       0.03845,
        -1.07789
       ],
       [
-       0.29591,
-       0.20607,
+       0.29735,
+       0.20876,
        -0.79272
       ]
      ]
     },
     {
      "name": "radome_colmesh9",
-     "verts": 26,
-     "tris": 48,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        -0.21577,
-       0.21252,
+       0.21871,
        -1.07789
       ],
       [
@@ -8831,33 +8828,33 @@
     },
     {
      "name": "radome_colmesh10",
-     "verts": 16,
-     "tris": 28,
+     "verts": 8,
+     "tris": 12,
      "bounds_unity": [
       [
-       -0.13013,
-       0.2454,
+       -0.1228,
+       0.24833,
        -1.07789
       ],
       [
-       0.13013,
-       0.32236,
+       0.1228,
+       0.31983,
        -0.79272
       ]
      ]
     },
     {
      "name": "radome_colmesh11",
-     "verts": 92,
-     "tris": 180,
+     "verts": 60,
+     "tris": 116,
      "bounds_unity": [
       [
-       -0.25196,
-       -0.36978,
+       -0.24402,
+       -0.36941,
        -1.07789
       ],
       [
-       0.25196,
+       0.24402,
        -0.19179,
        -0.79272
       ]
@@ -8865,41 +8862,41 @@
     },
     {
      "name": "radome_colmesh12",
-     "verts": 38,
-     "tris": 71,
+     "verts": 26,
+     "tris": 47,
      "bounds_unity": [
       [
        -0.35123,
-       -0.26491,
+       -0.25858,
        -1.38792
       ],
       [
        0.35123,
-       -0.00203,
+       0.00568,
        -1.38792
       ]
      ]
     },
     {
      "name": "radome_colmesh13",
-     "verts": 26,
-     "tris": 47,
+     "verts": 16,
+     "tris": 27,
      "bounds_unity": [
       [
-       -0.34666,
-       0.0134,
+       -0.34462,
+       0.02889,
        -1.38792
       ],
       [
-       0.34666,
-       0.20354,
+       0.34462,
+       0.19549,
        -1.38792
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 38
+    "tris": 44
    }
   },
   "rudder": {
@@ -8933,7 +8930,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 25
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -8988,7 +8986,7 @@
      -0.0
     ]
    ],
-   "sha256": "88e2524de031357d72dbac2a0d61d770716f28041bce1a0e41d0a38e286cd18f",
+   "sha256": "a70151364556f83fdeb03138e53d38b68b697932689a421bc25d389ac9790b8d",
    "bounds_blender": [
     [
      0.0,
@@ -9001,19 +8999,23 @@
      0.06554
     ]
    ],
-   "tris": 860,
+   "tris": 164,
    "materials": [
     [
      "Icarus_Body",
-     860
+     130
+    ],
+    [
+     "jet_mechanical",
+     34
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "rudder_visible_colmesh0",
-     "verts": 40,
-     "tris": 76,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
        -1.65101,
@@ -9022,28 +9024,28 @@
       ],
       [
        -0.0,
-       0.06537,
+       0.06554,
        -0.0
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 76
+    "tris": 48
    }
   },
   "skin_aft_L": {
    "fbx": "skin_aft_L.fbx",
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
-    0.44922,
-    5.1221,
-    0.34034
+    0.45319,
+    5.0648,
+    0.34053
    ],
    "pivot_unity": [
-    -0.44922,
-    0.34034,
-    -5.1221
+    -0.45319,
+    0.34053,
+    -5.0648
    ],
    "axes_unity": {
     "right": [
@@ -9068,565 +9070,616 @@
    },
    "bounds_unity": [
     [
-     -0.44922,
-     -0.70205,
-     -2.0779
+     -0.45319,
+     -0.70188,
+     -2.1352
     ],
     [
-     0.44922,
-     0.70205,
-     2.0779
+     0.45319,
+     0.70188,
+     2.1352
     ]
    ],
-   "sha256": "9475c642d16a9fcd30d5f614d9f80a46f6774d2f28e4042690e048dd19cf7082",
+   "sha256": "ac510416ad97096059a57607bea6aeae49162ac2f907ff35f0468f224db4fb16",
    "bounds_blender": [
     [
-     -0.44922,
-     -2.0779,
-     -0.70205
+     -0.45319,
+     -2.1352,
+     -0.70188
     ],
     [
-     0.44922,
-     2.0779,
-     0.70205
+     0.45319,
+     2.1352,
+     0.70188
     ]
    ],
-   "tris": 5064,
+   "tris": 2440,
    "materials": [
     [
      "Icarus_Body",
-     5064
+     2440
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "skin_aft_L_colmesh0",
-     "verts": 34,
-     "tris": 64,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       -0.44922,
-       -0.39733,
-       1.17935
+       -0.45319,
+       -0.37797,
+       2.1352
       ],
       [
-       -0.18118,
-       -0.05361,
-       2.0779
+       -0.22015,
+       -0.04325,
+       2.1352
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh1",
-     "verts": 36,
-     "tris": 68,
+     "verts": 8,
+     "tris": 11,
      "bounds_unity": [
       [
-       -0.3748,
-       -0.02575,
-       1.17935
+       -0.34824,
+       0.00645,
+       2.1352
       ],
       [
-       -0.07648,
-       0.2487,
-       2.0779
+       -0.06956,
+       0.25024,
+       2.1352
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh2",
-     "verts": 106,
-     "tris": 208,
+     "verts": 29,
+     "tris": 54,
      "bounds_unity": [
       [
-       0.1309,
-       -0.70145,
-       0.16848
+       -0.07458,
+       0.26007,
+       0.07908
       ],
       [
-       0.42236,
-       -0.5901,
-       1.06703
+       0.13017,
+       0.51156,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh3",
-     "verts": 111,
-     "tris": 218,
+     "verts": 44,
+     "tris": 84,
      "bounds_unity": [
       [
-       -0.15915,
-       -0.60498,
-       0.16848
+       0.13189,
+       0.5071,
+       0.07908
       ],
       [
-       0.1301,
-       -0.37342,
-       1.06703
+       0.45319,
+       0.70188,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh4",
-     "verts": 105,
-     "tris": 206,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       -0.1947,
-       -0.03956,
-       -0.84239
+       0.45319,
+       -0.70188,
+       0.07908
       ],
       [
-       -0.08986,
-       0.27474,
-       0.05616
+       0.45319,
+       -0.65955,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh5",
-     "verts": 115,
-     "tris": 226,
+     "verts": 54,
+     "tris": 104,
      "bounds_unity": [
       [
-       -0.0957,
-       0.27774,
-       -0.84239
+       0.13543,
+       -0.70055,
+       0.07908
       ],
       [
-       0.12785,
-       0.52147,
-       0.05616
+       0.41297,
+       -0.59362,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh6",
-     "verts": 124,
-     "tris": 244,
+     "verts": 56,
+     "tris": 108,
      "bounds_unity": [
       [
-       0.1258,
-       0.50472,
-       -0.84239
+       -0.13307,
+       -0.59838,
+       0.07908
       ],
       [
-       0.44922,
-       0.68608,
-       0.05616
+       0.13415,
+       -0.38056,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh7",
-     "verts": 9,
-     "tris": 13,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       0.44922,
-       -0.65187,
-       -0.84239
+       -0.18652,
+       -0.03831,
+       -0.8699
       ],
       [
-       0.44922,
-       -0.5551,
-       0.05616
+       -0.09182,
+       0.27049,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh8",
-     "verts": 91,
-     "tris": 178,
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
-       0.15392,
-       -0.65126,
-       -0.84239
+       -0.08954,
+       0.27546,
+       -0.8699
       ],
       [
-       0.42253,
-       -0.49776,
-       0.05616
+       0.12888,
+       0.51684,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh9",
-     "verts": 93,
-     "tris": 182,
+     "verts": 56,
+     "tris": 108,
      "bounds_unity": [
       [
-       -0.09428,
-       -0.56619,
-       -0.84239
+       0.1374,
+       0.51169,
+       -0.8699
       ],
       [
-       0.16662,
-       -0.3277,
-       0.05616
+       0.45319,
+       0.68166,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh10",
-     "verts": 64,
-     "tris": 124,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.19533,
-       -0.34584,
-       -0.84239
+       0.45319,
+       -0.64477,
+       -0.8699
       ],
       [
-       -0.03634,
-       -0.04048,
-       0.05616
+       0.45319,
+       -0.55921,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh11",
-     "verts": 112,
-     "tris": 220,
+     "verts": 40,
+     "tris": 76,
      "bounds_unity": [
       [
-       -0.15558,
-       -0.03961,
-       -1.85326
+       0.1704,
+       -0.6434,
+       -0.8699
       ],
       [
-       0.01588,
-       0.26771,
-       -0.95471
+       0.41306,
+       -0.51249,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh12",
-     "verts": 66,
-     "tris": 128,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       -0.05958,
-       0.25843,
-       1.17935
+       -0.03436,
+       0.27505,
+       2.1352
       ],
       [
-       0.15856,
-       0.47074,
-       2.0779
+       0.14328,
+       0.43772,
+       2.1352
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh13",
-     "verts": 122,
-     "tris": 240,
+     "verts": 44,
+     "tris": 84,
      "bounds_unity": [
       [
-       -0.08286,
-       0.207,
-       -1.85326
+       -0.0793,
+       -0.55911,
+       -0.8699
       ],
       [
-       0.19255,
-       0.48837,
-       -0.95471
+       0.18176,
+       -0.33564,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh14",
-     "verts": 117,
-     "tris": 230,
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
-       0.14466,
-       0.38702,
-       -1.85326
+       -0.18578,
+       -0.34655,
+       -0.8699
       ],
       [
-       0.44922,
-       0.58993,
-       -0.95471
+       -0.03368,
+       -0.04728,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh15",
-     "verts": 57,
-     "tris": 110,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       0.21777,
-       -0.53882,
-       -1.85326
+       -0.15034,
+       -0.0382,
+       -1.81888
       ],
       [
-       0.42931,
-       -0.3488,
-       -0.95471
+       -0.0002,
+       0.25801,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh16",
-     "verts": 72,
-     "tris": 140,
+     "verts": 55,
+     "tris": 106,
      "bounds_unity": [
       [
-       -0.01408,
-       -0.48273,
-       -1.85326
+       -0.07754,
+       0.23113,
+       -1.81888
       ],
       [
-       0.25633,
-       -0.23547,
-       -0.95471
+       0.1825,
+       0.48747,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh17",
-     "verts": 96,
-     "tris": 188,
+     "verts": 63,
+     "tris": 122,
      "bounds_unity": [
       [
-       -0.14124,
-       -0.30277,
-       -1.85326
+       0.1601,
+       0.40295,
+       -1.81888
       ],
       [
-       0.09958,
-       -0.04186,
-       -0.95471
+       0.45319,
+       0.5876,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh18",
-     "verts": 26,
-     "tris": 48,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       0.02446,
-       -0.03809,
-       -2.0779
+       0.22223,
+       -0.53588,
+       -1.81888
       ],
       [
-       0.08274,
-       0.18002,
-       -1.96558
+       0.4218,
+       -0.36144,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh19",
-     "verts": 27,
-     "tris": 50,
+     "verts": 39,
+     "tris": 74,
      "bounds_unity": [
       [
-       0.05631,
-       0.1789,
-       -2.0779
+       -0.00057,
+       -0.47493,
+       -1.81888
       ],
       [
-       0.2118,
-       0.3651,
-       -1.96558
+       0.24093,
+       -0.25741,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh20",
-     "verts": 30,
-     "tris": 56,
+     "verts": 46,
+     "tris": 88,
      "bounds_unity": [
       [
-       0.22527,
-       0.34913,
-       -2.0779
+       -0.13875,
+       -0.30104,
+       -1.81888
       ],
       [
-       0.44922,
-       0.43024,
-       -1.96558
+       0.09236,
+       -0.04226,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh21",
-     "verts": 21,
-     "tris": 38,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       0.13605,
-       -0.33113,
-       -2.0779
+       0.01473,
+       -0.02281,
+       -2.1352
       ],
       [
-       0.2844,
-       -0.22103,
-       -1.96558
+       0.08389,
+       0.17476,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh22",
-     "verts": 22,
-     "tris": 40,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.03893,
-       -0.21919,
-       -2.0779
+       0.04611,
+       0.17872,
+       -2.1352
       ],
       [
-       0.13981,
-       -0.05475,
-       -1.96558
+       0.21578,
+       0.36115,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh23",
-     "verts": 36,
-     "tris": 68,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       0.12745,
-       -0.69699,
-       1.17935
+       -0.43502,
+       -0.39838,
+       1.18622
       ],
       [
-       0.42364,
-       -0.59626,
-       2.0779
+       -0.16635,
+       -0.04165,
+       1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh24",
-     "verts": 34,
-     "tris": 64,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.16641,
-       -0.6032,
-       1.17935
+       0.214,
+       0.35374,
+       -2.1352
       ],
       [
-       0.12578,
-       -0.40291,
-       2.0779
+       0.45319,
+       0.43467,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh25",
-     "verts": 93,
-     "tris": 182,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
-       -0.29832,
-       -0.38798,
-       0.16848
+       0.14315,
+       -0.33051,
+       -2.1352
       ],
       [
-       -0.11749,
-       -0.04048,
-       1.06703
+       0.2807,
+       -0.22768,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh26",
-     "verts": 50,
-     "tris": 96,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       -0.27939,
-       -0.03412,
-       0.16848
+       0.02967,
+       -0.22637,
+       -2.1352
       ],
       [
-       -0.07326,
-       0.26147,
-       1.06703
+       0.14378,
+       -0.04662,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh27",
-     "verts": 45,
-     "tris": 86,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
-       -0.07825,
-       0.26725,
-       0.16848
+       -0.33567,
+       -0.04049,
+       1.18622
       ],
       [
-       0.12591,
-       0.51538,
-       1.06703
+       -0.06242,
+       0.25691,
+       1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh28",
-     "verts": 77,
-     "tris": 150,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       0.12826,
-       0.49755,
-       0.16848
+       -0.0327,
+       0.275,
+       1.18622
       ],
       [
-       0.44922,
-       0.70205,
-       1.06703
+       0.14259,
+       0.46755,
+       1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_L_colmesh29",
-     "verts": 9,
-     "tris": 13,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       0.44922,
-       -0.70205,
-       0.16848
+       0.14843,
+       -0.69523,
+       1.18622
       ],
       [
-       0.44922,
-       -0.66233,
-       1.06703
+       0.4148,
+       -0.60788,
+       1.97704
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh30",
+     "verts": 23,
+     "tris": 42,
+     "bounds_unity": [
+      [
+       -0.17459,
+       -0.59617,
+       1.18622
+      ],
+      [
+       0.12384,
+       -0.40105,
+       1.97704
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh31",
+     "verts": 52,
+     "tris": 100,
+     "bounds_unity": [
+      [
+       -0.29551,
+       -0.38987,
+       0.07908
+      ],
+      [
+       -0.11118,
+       -0.05061,
+       1.02806
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_L_colmesh32",
+     "verts": 31,
+     "tris": 58,
+     "bounds_unity": [
+      [
+       -0.28193,
+       -0.03626,
+       0.07908
+      ],
+      [
+       -0.07951,
+       0.25695,
+       1.02806
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 230
+    "tris": 220
    }
   },
   "skin_aft_R": {
    "fbx": "skin_aft_R.fbx",
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
-    -0.44981,
-    5.1221,
-    0.34034
+    -0.45371,
+    5.0648,
+    0.34053
    ],
    "pivot_unity": [
-    0.44981,
-    0.34034,
-    -5.1221
+    0.45371,
+    0.34053,
+    -5.0648
    ],
    "axes_unity": {
     "right": [
@@ -9651,565 +9704,616 @@
    },
    "bounds_unity": [
     [
-     -0.44981,
-     -0.70205,
-     -2.0779
+     -0.45371,
+     -0.70188,
+     -2.1352
     ],
     [
-     0.44981,
-     0.70205,
-     2.0779
+     0.45371,
+     0.70188,
+     2.1352
     ]
    ],
-   "sha256": "e54756d615164de1cf7480a49ac32de34362c0cabbed8953c1d9650269559074",
+   "sha256": "cfb17b7bb66b6ce6624e84346a6240d5b8bf3435de47a514295504be71f791f8",
    "bounds_blender": [
     [
-     -0.44981,
-     -2.0779,
-     -0.70205
+     -0.45371,
+     -2.1352,
+     -0.70188
     ],
     [
-     0.44981,
-     2.0779,
-     0.70205
+     0.45371,
+     2.1352,
+     0.70188
     ]
    ],
-   "tris": 5064,
+   "tris": 2440,
    "materials": [
     [
      "Icarus_Body",
-     5064
+     2440
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "skin_aft_R_colmesh0",
-     "verts": 66,
-     "tris": 128,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       -0.15915,
-       0.25843,
-       1.17935
+       -0.1438,
+       0.27505,
+       2.1352
       ],
       [
-       0.059,
-       0.47074,
-       2.0779
+       0.03385,
+       0.43772,
+       2.1352
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh1",
-     "verts": 36,
-     "tris": 68,
+     "verts": 8,
+     "tris": 11,
      "bounds_unity": [
       [
-       0.07589,
-       -0.02575,
-       1.17935
+       0.06905,
+       0.00645,
+       2.1352
       ],
       [
-       0.37421,
-       0.2487,
-       2.0779
+       0.34772,
+       0.25024,
+       2.1352
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh2",
-     "verts": 106,
-     "tris": 208,
+     "verts": 31,
+     "tris": 58,
      "bounds_unity": [
       [
-       -0.42295,
-       -0.70145,
-       0.16848
+       0.079,
+       -0.03626,
+       0.07908
       ],
       [
-       -0.13149,
-       -0.5901,
-       1.06703
+       0.28141,
+       0.25695,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh3",
-     "verts": 9,
-     "tris": 13,
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
-       -0.44981,
-       -0.70205,
-       0.16848
+       0.11067,
+       -0.38987,
+       0.07908
       ],
       [
-       -0.44981,
-       -0.66233,
-       1.06703
+       0.29499,
+       -0.05061,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh4",
-     "verts": 124,
-     "tris": 244,
+     "verts": 56,
+     "tris": 108,
      "bounds_unity": [
       [
-       -0.44981,
-       0.50472,
-       -0.84239
+       -0.13467,
+       -0.59838,
+       0.07908
       ],
       [
-       -0.12638,
-       0.68608,
-       0.05616
+       0.13256,
+       -0.38056,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh5",
-     "verts": 115,
-     "tris": 226,
+     "verts": 54,
+     "tris": 104,
      "bounds_unity": [
       [
-       -0.12843,
-       0.27774,
-       -0.84239
+       -0.41348,
+       -0.70055,
+       0.07908
       ],
       [
-       0.09511,
-       0.52147,
-       0.05616
+       -0.13594,
+       -0.59362,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh6",
-     "verts": 105,
-     "tris": 206,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       0.08927,
-       -0.03956,
-       -0.84239
+       -0.45371,
+       -0.70188,
+       0.07908
       ],
       [
-       0.19412,
-       0.27474,
-       0.05616
+       -0.45371,
+       -0.65955,
+       1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh7",
-     "verts": 64,
-     "tris": 124,
+     "verts": 56,
+     "tris": 108,
      "bounds_unity": [
       [
-       0.03575,
-       -0.34584,
-       -0.84239
+       -0.45371,
+       0.51169,
+       -0.8699
       ],
       [
-       0.19474,
-       -0.04048,
-       0.05616
+       -0.13792,
+       0.68166,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh8",
-     "verts": 93,
-     "tris": 182,
+     "verts": 52,
+     "tris": 100,
      "bounds_unity": [
       [
-       -0.1672,
-       -0.56619,
-       -0.84239
+       -0.1294,
+       0.27546,
+       -0.8699
       ],
       [
-       0.09369,
-       -0.3277,
-       0.05616
+       0.08903,
+       0.51684,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh9",
-     "verts": 91,
-     "tris": 178,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       -0.42311,
-       -0.65126,
-       -0.84239
+       0.0913,
+       -0.03831,
+       -0.8699
       ],
       [
-       -0.1545,
-       -0.49776,
-       0.05616
+       0.18601,
+       0.27049,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh10",
-     "verts": 9,
-     "tris": 13,
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
-       -0.44981,
-       -0.65187,
-       -0.84239
+       0.03317,
+       -0.34655,
+       -0.8699
       ],
       [
-       -0.44981,
-       -0.5551,
-       0.05616
+       0.18527,
+       -0.04728,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh11",
-     "verts": 117,
-     "tris": 230,
+     "verts": 44,
+     "tris": 84,
      "bounds_unity": [
       [
-       -0.44981,
-       0.38702,
-       -1.85326
+       -0.18228,
+       -0.55911,
+       -0.8699
       ],
       [
-       -0.14525,
-       0.58993,
-       -0.95471
+       0.07879,
+       -0.33564,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh12",
-     "verts": 33,
-     "tris": 62,
+     "verts": 7,
+     "tris": 9,
      "bounds_unity": [
       [
-       0.18059,
-       -0.39733,
-       1.17935
+       0.21964,
+       -0.37797,
+       2.1352
       ],
       [
-       0.44981,
-       -0.05361,
-       2.0779
+       0.45371,
+       -0.04325,
+       2.1352
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh13",
-     "verts": 122,
-     "tris": 240,
+     "verts": 40,
+     "tris": 76,
      "bounds_unity": [
       [
-       -0.19314,
-       0.207,
-       -1.85326
+       -0.41357,
+       -0.6434,
+       -0.8699
       ],
       [
-       0.08227,
-       0.48837,
-       -0.95471
+       -0.17092,
+       -0.51249,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh14",
-     "verts": 112,
-     "tris": 220,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.01647,
-       -0.03961,
-       -1.85326
+       -0.45371,
+       -0.64477,
+       -0.8699
       ],
       [
-       0.15499,
-       0.26771,
-       -0.95471
+       -0.45371,
+       -0.55921,
+       -0.07908
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh15",
-     "verts": 96,
-     "tris": 188,
+     "verts": 63,
+     "tris": 122,
      "bounds_unity": [
       [
-       -0.10016,
-       -0.30277,
-       -1.85326
+       -0.45371,
+       0.40295,
+       -1.81888
       ],
       [
-       0.14066,
-       -0.04186,
-       -0.95471
+       -0.16062,
+       0.5876,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh16",
-     "verts": 72,
-     "tris": 140,
+     "verts": 55,
+     "tris": 106,
      "bounds_unity": [
       [
-       -0.25691,
-       -0.48273,
-       -1.85326
+       -0.18301,
+       0.23113,
+       -1.81888
       ],
       [
-       0.0135,
-       -0.23547,
-       -0.95471
+       0.07703,
+       0.48747,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh17",
-     "verts": 57,
-     "tris": 110,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       -0.4299,
-       -0.53882,
-       -1.85326
+       -0.00031,
+       -0.0382,
+       -1.81888
       ],
       [
-       -0.21836,
-       -0.3488,
-       -0.95471
+       0.14983,
+       0.25801,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh18",
-     "verts": 30,
-     "tris": 56,
+     "verts": 46,
+     "tris": 88,
      "bounds_unity": [
       [
-       -0.44981,
-       0.34913,
-       -2.0779
+       -0.09288,
+       -0.30104,
+       -1.81888
       ],
       [
-       -0.22586,
-       0.43024,
-       -1.96558
+       0.13823,
+       -0.04226,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh19",
-     "verts": 27,
-     "tris": 50,
+     "verts": 39,
+     "tris": 74,
      "bounds_unity": [
       [
-       -0.21239,
-       0.1789,
-       -2.0779
+       -0.24144,
+       -0.47493,
+       -1.81888
       ],
       [
-       -0.05689,
-       0.3651,
-       -1.96558
+       6e-05,
+       -0.25741,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh20",
-     "verts": 26,
-     "tris": 48,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -0.08333,
-       -0.03809,
-       -2.0779
+       -0.42232,
+       -0.53588,
+       -1.81888
       ],
       [
-       -0.02504,
-       0.18002,
-       -1.96558
+       -0.22274,
+       -0.36144,
+       -1.02806
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh21",
-     "verts": 22,
-     "tris": 40,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.1404,
-       -0.21919,
-       -2.0779
+       -0.45371,
+       0.35374,
+       -2.1352
       ],
       [
-       -0.03951,
-       -0.05475,
-       -1.96558
+       -0.21451,
+       0.43467,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh22",
-     "verts": 21,
-     "tris": 38,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.28499,
-       -0.33113,
-       -2.0779
+       -0.21629,
+       0.17872,
+       -2.1352
       ],
       [
-       -0.13664,
-       -0.22103,
-       -1.96558
+       -0.04663,
+       0.36115,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh23",
-     "verts": 34,
-     "tris": 64,
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -0.12637,
-       -0.6032,
-       1.17935
+       -0.14311,
+       0.275,
+       1.18622
       ],
       [
-       0.16582,
-       -0.40291,
-       2.0779
+       0.03219,
+       0.46755,
+       1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh24",
-     "verts": 36,
-     "tris": 68,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       -0.42423,
-       -0.69699,
-       1.17935
+       -0.0844,
+       -0.02281,
+       -2.1352
       ],
       [
-       -0.12803,
-       -0.59626,
-       2.0779
+       -0.01524,
+       0.17476,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh25",
-     "verts": 77,
-     "tris": 150,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       -0.44981,
-       0.49755,
-       0.16848
+       -0.1443,
+       -0.22637,
+       -2.1352
       ],
       [
-       -0.12885,
-       0.70205,
-       1.06703
+       -0.03018,
+       -0.04662,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh26",
-     "verts": 45,
-     "tris": 86,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
-       -0.1265,
-       0.26725,
-       0.16848
+       -0.28121,
+       -0.33051,
+       -2.1352
       ],
       [
-       0.07767,
-       0.51538,
-       1.06703
+       -0.14367,
+       -0.22768,
+       -1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh27",
-     "verts": 50,
-     "tris": 96,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
-       0.07268,
-       -0.03412,
-       0.16848
+       0.06191,
+       -0.04049,
+       1.18622
       ],
       [
-       0.27881,
-       0.26147,
-       1.06703
+       0.33516,
+       0.25691,
+       1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh28",
-     "verts": 93,
-     "tris": 182,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       0.1169,
-       -0.38798,
-       0.16848
+       0.16583,
+       -0.39838,
+       1.18622
       ],
       [
-       0.29773,
-       -0.04048,
-       1.06703
+       0.43552,
+       -0.04165,
+       1.97704
       ]
      ]
     },
     {
      "name": "skin_aft_R_colmesh29",
-     "verts": 111,
-     "tris": 218,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
-       -0.13069,
-       -0.60498,
-       0.16848
+       -0.12435,
+       -0.59617,
+       1.18622
       ],
       [
-       0.15857,
-       -0.37342,
-       1.06703
+       0.17408,
+       -0.40105,
+       1.97704
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh30",
+     "verts": 24,
+     "tris": 44,
+     "bounds_unity": [
+      [
+       -0.41532,
+       -0.69523,
+       1.18622
+      ],
+      [
+       -0.14894,
+       -0.60788,
+       1.97704
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh31",
+     "verts": 44,
+     "tris": 84,
+     "bounds_unity": [
+      [
+       -0.45371,
+       0.5071,
+       0.07908
+      ],
+      [
+       -0.13241,
+       0.70188,
+       1.02806
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_R_colmesh32",
+     "verts": 29,
+     "tris": 54,
+     "bounds_unity": [
+      [
+       -0.13068,
+       0.26007,
+       0.07908
+      ],
+      [
+       0.07407,
+       0.51156,
+       1.02806
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 246
+    "tris": 216
    }
   },
   "skin_forward_L": {
    "fbx": "skin_forward_L.fbx",
    "blender_parent": "fuselage_forward",
    "pivot_blender": [
-    0.3151,
-    -4.37088,
-    0.16085
+    0.31484,
+    -4.38135,
+    0.16063
    ],
    "pivot_unity": [
-    -0.3151,
-    0.16085,
-    4.37088
+    -0.31484,
+    0.16063,
+    4.38135
    ],
    "axes_unity": {
     "right": [
@@ -10234,616 +10338,616 @@
    },
    "bounds_unity": [
     [
-     -0.3151,
-     -0.67085,
-     -2.02329
+     -0.31484,
+     -0.67063,
+     -2.01282
     ],
     [
-     0.3151,
-     0.67085,
-     2.02329
+     0.31484,
+     0.67063,
+     2.01282
     ]
    ],
-   "sha256": "9d2ab51fdb489eb20c7a8ce0f03525bd17348ad2a9ca353c849c3dfe368eb4d5",
+   "sha256": "d26e56b0d09d987fe3b1969978200a26b3f915d513776ce484e35a40f895b22b",
    "bounds_blender": [
     [
-     -0.3151,
-     -2.02329,
-     -0.67085
+     -0.31484,
+     -2.01282,
+     -0.67063
     ],
     [
-     0.3151,
-     2.02329,
-     0.67085
+     0.31484,
+     2.01282,
+     0.67063
     ]
    ],
-   "tris": 2768,
+   "tris": 1314,
    "materials": [
     [
      "Icarus_Body",
-     2768
+     1314
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "skin_forward_L_colmesh0",
-     "verts": 37,
-     "tris": 70,
+     "verts": 25,
+     "tris": 46,
      "bounds_unity": [
       [
-       -0.07739,
-       -0.37063,
-       1.69294
+       -0.07765,
+       -0.37041,
+       1.68247
       ],
       [
-       0.02739,
-       -0.07205,
-       2.02329
+       0.02281,
+       -0.06412,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh1",
-     "verts": 26,
-     "tris": 48,
+     "verts": 17,
+     "tris": 30,
      "bounds_unity": [
       [
-       -0.07567,
-       -0.08025,
-       1.69294
+       -0.07593,
+       -0.08003,
+       1.68247
       ],
       [
-       0.02373,
-       0.13352,
-       2.02329
+       0.01958,
+       0.13262,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh2",
-     "verts": 7,
-     "tris": 9,
+     "verts": 12,
+     "tris": 19,
      "bounds_unity": [
       [
-       0.16498,
-       0.4341,
-       1.34707
+       0.01002,
+       -0.55609,
+       1.3366
       ],
       [
-       0.3151,
-       0.47151,
-       1.34707
+       0.28665,
+       -0.43075,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh3",
-     "verts": 19,
-     "tris": 33,
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
-       -0.00273,
-       -0.55683,
-       1.34707
+       -0.15158,
+       -0.11878,
+       0.98026
       ],
       [
-       0.2963,
-       -0.41739,
-       1.34707
+       -0.11445,
+       0.12907,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh4",
-     "verts": 13,
-     "tris": 21,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.15132,
-       -0.119,
-       0.99073
+       -0.10372,
+       0.1609,
+       0.98026
       ],
       [
-       -0.11419,
-       0.12885,
-       0.99073
+       -0.0218,
+       0.31994,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh5",
-     "verts": 18,
-     "tris": 31,
+     "verts": 12,
+     "tris": 19,
      "bounds_unity": [
       [
-       -0.01471,
-       -0.58498,
-       0.99073
+       -0.01497,
+       -0.58421,
+       0.98026
       ],
       [
-       0.29476,
-       -0.44881,
-       0.99073
+       0.28434,
+       -0.44859,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh6",
-     "verts": 17,
-     "tris": 29,
+     "verts": 11,
+     "tris": 17,
      "bounds_unity": [
       [
-       -0.15088,
-       -0.43411,
-       0.99073
+       -0.15058,
+       -0.42632,
+       0.98026
       ],
       [
-       -0.02878,
-       -0.13934,
-       0.99073
+       -0.03583,
+       -0.14929,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh7",
-     "verts": 36,
-     "tris": 68,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
-       -0.22386,
-       -0.15263,
-       0.23126
+       -0.2248,
+       -0.14333,
+       0.21381
       ],
       [
-       -0.15097,
-       0.13337,
-       0.62912
+       -0.15439,
+       0.13366,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh8",
-     "verts": 38,
-     "tris": 72,
+     "verts": 19,
+     "tris": 34,
      "bounds_unity": [
       [
-       -0.18418,
-       0.14055,
-       0.23126
+       -0.18859,
+       0.14591,
+       0.21381
       ],
       [
-       -0.05851,
-       0.35977,
-       0.62912
+       -0.06595,
+       0.36041,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh9",
-     "verts": 38,
-     "tris": 72,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       -0.04901,
-       -0.64116,
-       0.23126
+       -0.04097,
+       -0.64085,
+       0.21381
       ],
       [
-       0.29329,
-       -0.47949,
-       0.62912
+       0.28214,
+       -0.48655,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh10",
-     "verts": 35,
-     "tris": 66,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       -0.21925,
-       -0.48382,
-       0.23126
+       -0.22018,
+       -0.48394,
+       0.21381
       ],
       [
-       -0.03845,
-       -0.15443,
-       0.62912
+       -0.03871,
+       -0.1728,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh11",
-     "verts": 53,
-     "tris": 102,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.26653,
-       -0.18966,
-       -0.29922
+       -0.25961,
+       -0.1709,
+       -0.19103
       ],
       [
-       -0.20803,
-       0.13777,
-       0.09864
+       -0.21392,
+       0.1317,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh12",
-     "verts": 15,
-     "tris": 26,
+     "verts": 10,
+     "tris": 16,
      "bounds_unity": [
       [
-       -0.02154,
-       0.14959,
-       1.69294
+       -0.01777,
+       0.14981,
+       1.68247
       ],
       [
-       0.09806,
-       0.27835,
-       2.02329
+       0.09781,
+       0.26978,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh13",
-     "verts": 40,
-     "tris": 76,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
-       -0.22402,
-       0.1409,
-       -0.29922
+       -0.21515,
+       0.15758,
+       -0.19103
       ],
       [
-       -0.10486,
-       0.38645,
-       0.09864
+       -0.10107,
+       0.37626,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh14",
-     "verts": 53,
-     "tris": 102,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.05876,
-       -0.65963,
-       -0.29922
+       -0.06392,
+       -0.65536,
+       -0.19103
       ],
       [
-       0.29104,
-       -0.50668,
-       0.09864
+       0.27831,
+       -0.51794,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh15",
-     "verts": 62,
-     "tris": 120,
+     "verts": 20,
+     "tris": 36,
      "bounds_unity": [
       [
-       -0.25274,
-       -0.51749,
-       -0.29922
+       -0.24857,
+       -0.49869,
+       -0.19103
       ],
       [
-       -0.06548,
-       -0.19273,
-       0.09864
+       -0.08012,
+       -0.20456,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh16",
-     "verts": 71,
-     "tris": 138,
+     "verts": 44,
+     "tris": 84,
      "bounds_unity": [
       [
-       -0.29722,
-       -0.19859,
-       -1.36019
+       -0.29323,
+       -0.19351,
+       -1.20314
       ],
       [
-       -0.24285,
-       0.13875,
-       -0.43184
+       -0.24484,
+       0.13266,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh17",
-     "verts": 74,
-     "tris": 144,
+     "verts": 35,
+     "tris": 66,
      "bounds_unity": [
       [
-       -0.25886,
-       0.14245,
-       -1.36019
+       -0.24897,
+       0.14249,
+       -1.20314
       ],
       [
-       -0.13863,
-       0.40815,
-       -0.43184
+       -0.13774,
+       0.40342,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh18",
-     "verts": 53,
-     "tris": 102,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.13687,
-       0.39524,
-       -1.36019
+       -0.12886,
+       0.40463,
+       -1.20314
       ],
       [
-       -0.00275,
-       0.62616,
-       -0.43184
+       0.02027,
+       0.6486,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh19",
-     "verts": 53,
-     "tris": 102,
+     "verts": 35,
+     "tris": 66,
      "bounds_unity": [
       [
-       -0.07027,
-       -0.6501,
-       -1.36019
+       -0.05533,
+       -0.65068,
+       -1.20314
       ],
       [
-       0.1575,
-       -0.53058,
-       -0.43184
+       0.1633,
+       -0.54497,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh20",
-     "verts": 80,
-     "tris": 156,
+     "verts": 51,
+     "tris": 98,
      "bounds_unity": [
       [
-       -0.27635,
-       -0.52984,
-       -1.36019
+       -0.27251,
+       -0.52533,
+       -1.20314
       ],
       [
-       -0.07231,
-       -0.20107,
-       -0.43184
+       -0.0712,
+       -0.19936,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh21",
-     "verts": 61,
-     "tris": 118,
+     "verts": 28,
+     "tris": 52,
      "bounds_unity": [
       [
-       -0.3151,
-       -0.20626,
-       -2.02329
+       -0.31484,
+       -0.20784,
+       -2.01282
       ],
       [
-       -0.26847,
-       0.13787,
-       -1.49281
+       -0.26342,
+       0.13891,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh22",
-     "verts": 52,
-     "tris": 100,
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       -0.27745,
-       0.14214,
-       -2.02329
+       -0.2733,
+       0.14561,
+       -2.01282
       ],
       [
-       -0.16603,
-       0.40201,
-       -1.49281
+       -0.1725,
+       0.38874,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh23",
-     "verts": 12,
-     "tris": 20,
+     "verts": 8,
+     "tris": 12,
      "bounds_unity": [
       [
-       0.06839,
-       0.25664,
-       1.69294
+       0.06813,
+       0.26372,
+       1.68247
       ],
       [
-       0.19474,
-       0.37094,
-       2.02329
+       0.19449,
+       0.36477,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh24",
-     "verts": 45,
-     "tris": 86,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       -0.15351,
-       0.41221,
-       -2.02329
+       -0.15372,
+       0.40943,
+       -2.01282
       ],
       [
-       -0.00379,
-       0.64323,
-       -1.49281
+       -0.01563,
+       0.62919,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh25",
-     "verts": 56,
-     "tris": 108,
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       -0.06854,
-       -0.67026,
-       -2.02329
+       -0.06849,
+       -0.6693,
+       -2.01282
       ],
       [
-       0.28824,
-       -0.54062,
-       -1.49281
+       0.27437,
+       -0.54051,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh26",
-     "verts": 64,
-     "tris": 124,
+     "verts": 32,
+     "tris": 60,
      "bounds_unity": [
       [
-       -0.28692,
-       -0.52675,
-       -2.02329
+       -0.28288,
+       -0.51845,
+       -2.01282
       ],
       [
-       -0.08079,
-       -0.2089,
-       -1.49281
+       -0.0895,
+       -0.21198,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh27",
-     "verts": 13,
-     "tris": 22,
+     "verts": 9,
+     "tris": 14,
      "bounds_unity": [
       [
-       0.17726,
-       0.32427,
-       1.69294
+       0.177,
+       0.32826,
+       1.68247
       ],
       [
-       0.3151,
-       0.41772,
-       2.02329
+       0.31484,
+       0.41794,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh28",
-     "verts": 41,
-     "tris": 78,
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       0.01443,
-       -0.52382,
-       1.69294
+       0.01975,
+       -0.52313,
+       1.68247
       ],
       [
-       0.29978,
-       -0.34729,
-       2.02329
+       0.29187,
+       -0.34707,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh29",
-     "verts": 17,
-     "tris": 29,
+     "verts": 12,
+     "tris": 19,
      "bounds_unity": [
       [
-       -0.11599,
-       -0.40325,
-       1.34707
+       -0.11625,
+       -0.41016,
+       1.3366
       ],
       [
-       -0.01513,
-       -0.12615,
-       1.34707
+       -0.00927,
+       -0.12593,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh30",
-     "verts": 13,
-     "tris": 21,
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
-       -0.11578,
-       -0.10733,
-       1.34707
+       -0.11577,
+       -0.0977,
+       1.3366
       ],
       [
-       -0.07661,
-       0.1234,
-       1.34707
+       -0.0735,
+       0.13356,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh31",
-     "verts": 9,
-     "tris": 13,
+     "verts": 5,
+     "tris": 5,
      "bounds_unity": [
       [
-       -0.0697,
-       0.14329,
-       1.34707
+       0.02188,
+       0.31252,
+       1.3366
       ],
       [
-       0.01483,
-       0.30269,
-       1.34707
+       0.13128,
+       0.41484,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh32",
-     "verts": 7,
-     "tris": 9,
+     "verts": 5,
+     "tris": 5,
      "bounds_unity": [
       [
-       0.02972,
-       0.32181,
-       1.34707
+       0.16472,
+       0.43432,
+       1.3366
       ],
       [
-       0.14244,
-       0.42148,
-       1.34707
+       0.31484,
+       0.47173,
+       1.3366
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 252
+    "tris": 226
    }
   },
   "skin_forward_R": {
    "fbx": "skin_forward_R.fbx",
    "blender_parent": "fuselage_forward",
    "pivot_blender": [
-    -0.3151,
-    -4.37088,
-    0.16085
+    -0.31484,
+    -4.38135,
+    0.16063
    ],
    "pivot_unity": [
-    0.3151,
-    0.16085,
-    4.37088
+    0.31484,
+    0.16063,
+    4.38135
    ],
    "axes_unity": {
     "right": [
@@ -10868,562 +10972,562 @@
    },
    "bounds_unity": [
     [
-     -0.3151,
-     -0.67085,
-     -2.02329
+     -0.31484,
+     -0.67063,
+     -2.01282
     ],
     [
-     0.3151,
-     0.67085,
-     2.02329
+     0.31484,
+     0.67063,
+     2.01282
     ]
    ],
-   "sha256": "73b18afd241088002dd3b447af31ab7f32be55258739b3488906f77c409c9004",
+   "sha256": "79e9b0ce772a8a3673c70220f05a5a6fa4e145264449ae3851cff24b7fcd12e9",
    "bounds_blender": [
     [
-     -0.3151,
-     -2.02329,
-     -0.67085
+     -0.31484,
+     -2.01282,
+     -0.67063
     ],
     [
-     0.3151,
-     2.02329,
-     0.67085
+     0.31484,
+     2.01282,
+     0.67063
     ]
    ],
-   "tris": 2768,
+   "tris": 1314,
    "materials": [
     [
      "Icarus_Body",
-     2768
+     1314
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "skin_forward_R_colmesh0",
-     "verts": 13,
-     "tris": 22,
+     "verts": 9,
+     "tris": 14,
      "bounds_unity": [
       [
-       -0.3151,
-       0.32427,
-       1.69294
+       -0.31484,
+       0.32826,
+       1.68247
       ],
       [
-       -0.17726,
-       0.41772,
-       2.02329
+       -0.177,
+       0.41794,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh1",
-     "verts": 12,
-     "tris": 20,
+     "verts": 8,
+     "tris": 12,
      "bounds_unity": [
       [
-       -0.19474,
-       0.25664,
-       1.69294
+       -0.19449,
+       0.26372,
+       1.68247
       ],
       [
-       -0.06839,
-       0.37094,
-       2.02329
+       -0.06813,
+       0.36477,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh2",
-     "verts": 17,
-     "tris": 29,
+     "verts": 12,
+     "tris": 19,
      "bounds_unity": [
       [
-       0.01513,
-       -0.40325,
-       1.34707
+       -0.28665,
+       -0.55609,
+       1.3366
       ],
       [
-       0.11599,
-       -0.12615,
-       1.34707
+       -0.01002,
+       -0.43075,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh3",
-     "verts": 19,
-     "tris": 33,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.2963,
-       -0.55683,
-       1.34707
+       0.0218,
+       0.1609,
+       0.98026
       ],
       [
-       0.00273,
-       -0.41739,
-       1.34707
+       0.10372,
+       0.31994,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh4",
-     "verts": 13,
-     "tris": 21,
+     "verts": 9,
+     "tris": 13,
      "bounds_unity": [
       [
-       0.11419,
-       -0.119,
-       0.99073
+       0.11445,
+       -0.11878,
+       0.98026
       ],
       [
-       0.15132,
-       0.12885,
-       0.99073
+       0.15158,
+       0.12907,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh5",
-     "verts": 17,
-     "tris": 29,
+     "verts": 11,
+     "tris": 17,
      "bounds_unity": [
       [
-       0.02878,
-       -0.43411,
-       0.99073
+       0.03583,
+       -0.42632,
+       0.98026
       ],
       [
-       0.15088,
-       -0.13934,
-       0.99073
+       0.15058,
+       -0.14929,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh6",
-     "verts": 18,
-     "tris": 31,
+     "verts": 12,
+     "tris": 19,
      "bounds_unity": [
       [
-       -0.29476,
-       -0.58498,
-       0.99073
+       -0.28434,
+       -0.58421,
+       0.98026
       ],
       [
-       0.01471,
-       -0.44881,
-       0.99073
+       0.01497,
+       -0.44859,
+       0.98026
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh7",
-     "verts": 38,
-     "tris": 72,
+     "verts": 19,
+     "tris": 34,
      "bounds_unity": [
       [
-       0.05851,
-       0.14055,
-       0.23126
+       0.06595,
+       0.14591,
+       0.21381
       ],
       [
-       0.18418,
-       0.35977,
-       0.62912
+       0.18859,
+       0.36041,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh8",
-     "verts": 36,
-     "tris": 68,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
-       0.15097,
-       -0.15263,
-       0.23126
+       0.15439,
+       -0.14333,
+       0.21381
       ],
       [
-       0.22386,
-       0.13337,
-       0.62912
+       0.2248,
+       0.13366,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh9",
-     "verts": 35,
-     "tris": 66,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       0.03845,
-       -0.48382,
-       0.23126
+       0.03871,
+       -0.48394,
+       0.21381
       ],
       [
-       0.21925,
-       -0.15443,
-       0.62912
+       0.22018,
+       -0.1728,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh10",
-     "verts": 38,
-     "tris": 72,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       -0.29329,
-       -0.64116,
-       0.23126
+       -0.28214,
+       -0.64085,
+       0.21381
       ],
       [
-       0.04901,
-       -0.47949,
-       0.62912
+       0.04097,
+       -0.48655,
+       0.61865
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh11",
-     "verts": 40,
-     "tris": 76,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
-       0.10486,
-       0.1409,
-       -0.29922
+       0.10107,
+       0.15758,
+       -0.19103
       ],
       [
-       0.22402,
-       0.38645,
-       0.09864
+       0.21515,
+       0.37626,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh12",
-     "verts": 15,
-     "tris": 26,
+     "verts": 10,
+     "tris": 16,
      "bounds_unity": [
       [
-       -0.09806,
-       0.14959,
-       1.69294
+       -0.09781,
+       0.14981,
+       1.68247
       ],
       [
-       0.02154,
-       0.27835,
-       2.02329
+       0.01777,
+       0.26978,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh13",
-     "verts": 53,
-     "tris": 102,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.20803,
-       -0.18966,
-       -0.29922
+       0.21392,
+       -0.1709,
+       -0.19103
       ],
       [
-       0.26653,
-       0.13777,
-       0.09864
+       0.25961,
+       0.1317,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh14",
-     "verts": 62,
-     "tris": 120,
+     "verts": 20,
+     "tris": 36,
      "bounds_unity": [
       [
-       0.06548,
-       -0.51749,
-       -0.29922
+       0.08012,
+       -0.49869,
+       -0.19103
       ],
       [
-       0.25274,
-       -0.19273,
-       0.09864
+       0.24857,
+       -0.20456,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh15",
-     "verts": 53,
-     "tris": 102,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.29104,
-       -0.65963,
-       -0.29922
+       -0.27831,
+       -0.65536,
+       -0.19103
       ],
       [
-       0.05876,
-       -0.50668,
-       0.09864
+       0.06392,
+       -0.51794,
+       0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh16",
-     "verts": 53,
-     "tris": 102,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       0.00275,
-       0.39524,
-       -1.36019
+       -0.02027,
+       0.40463,
+       -1.20314
       ],
       [
-       0.13687,
-       0.62616,
-       -0.43184
+       0.12886,
+       0.6486,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh17",
-     "verts": 74,
-     "tris": 144,
+     "verts": 35,
+     "tris": 66,
      "bounds_unity": [
       [
-       0.13863,
-       0.14245,
-       -1.36019
+       0.13774,
+       0.14249,
+       -1.20314
       ],
       [
-       0.25886,
-       0.40815,
-       -0.43184
+       0.24897,
+       0.40342,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh18",
-     "verts": 71,
-     "tris": 138,
+     "verts": 44,
+     "tris": 84,
      "bounds_unity": [
       [
-       0.24285,
-       -0.19859,
-       -1.36019
+       0.24484,
+       -0.19351,
+       -1.20314
       ],
       [
-       0.29722,
-       0.13875,
-       -0.43184
+       0.29323,
+       0.13266,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh19",
-     "verts": 80,
-     "tris": 156,
+     "verts": 51,
+     "tris": 98,
      "bounds_unity": [
       [
-       0.07231,
-       -0.52984,
-       -1.36019
+       0.0712,
+       -0.52533,
+       -1.20314
       ],
       [
-       0.27635,
-       -0.20107,
-       -0.43184
+       0.27251,
+       -0.19936,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh20",
-     "verts": 53,
-     "tris": 102,
+     "verts": 35,
+     "tris": 66,
      "bounds_unity": [
       [
-       -0.1575,
-       -0.6501,
-       -1.36019
+       -0.1633,
+       -0.65068,
+       -1.20314
       ],
       [
-       0.07027,
-       -0.53058,
-       -0.43184
+       0.05533,
+       -0.54497,
+       -0.39345
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh21",
-     "verts": 45,
-     "tris": 86,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       0.00379,
-       0.41221,
-       -2.02329
+       0.01563,
+       0.40943,
+       -2.01282
       ],
       [
-       0.15351,
-       0.64323,
-       -1.49281
+       0.15372,
+       0.62919,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh22",
-     "verts": 52,
-     "tris": 100,
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       0.16603,
-       0.14214,
-       -2.02329
+       0.1725,
+       0.14561,
+       -2.01282
       ],
       [
-       0.27745,
-       0.40201,
-       -1.49281
+       0.2733,
+       0.38874,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh23",
-     "verts": 26,
-     "tris": 48,
+     "verts": 17,
+     "tris": 30,
      "bounds_unity": [
       [
-       -0.02373,
-       -0.08025,
-       1.69294
+       -0.01958,
+       -0.08003,
+       1.68247
       ],
       [
-       0.07567,
-       0.13352,
-       2.02329
+       0.07593,
+       0.13262,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh24",
-     "verts": 61,
-     "tris": 118,
+     "verts": 28,
+     "tris": 52,
      "bounds_unity": [
       [
-       0.26847,
-       -0.20626,
-       -2.02329
+       0.26342,
+       -0.20784,
+       -2.01282
       ],
       [
-       0.3151,
-       0.13787,
-       -1.49281
+       0.31484,
+       0.13891,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh25",
-     "verts": 64,
-     "tris": 124,
+     "verts": 32,
+     "tris": 60,
      "bounds_unity": [
       [
-       0.08079,
-       -0.52675,
-       -2.02329
+       0.0895,
+       -0.51845,
+       -2.01282
       ],
       [
-       0.28692,
-       -0.2089,
-       -1.49281
+       0.28288,
+       -0.21198,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh26",
-     "verts": 56,
-     "tris": 108,
+     "verts": 34,
+     "tris": 64,
      "bounds_unity": [
       [
-       -0.28824,
-       -0.67026,
-       -2.02329
+       -0.27437,
+       -0.6693,
+       -2.01282
       ],
       [
-       0.06854,
-       -0.54062,
-       -1.49281
+       0.06849,
+       -0.54051,
+       -1.40556
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh27",
-     "verts": 37,
-     "tris": 70,
+     "verts": 25,
+     "tris": 46,
      "bounds_unity": [
       [
-       -0.02739,
-       -0.37063,
-       1.69294
+       -0.02281,
+       -0.37041,
+       1.68247
       ],
       [
-       0.07739,
-       -0.07205,
-       2.02329
+       0.07765,
+       -0.06412,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh28",
-     "verts": 41,
-     "tris": 78,
+     "verts": 27,
+     "tris": 50,
      "bounds_unity": [
       [
-       -0.29978,
-       -0.52382,
-       1.69294
+       -0.29187,
+       -0.52313,
+       1.68247
       ],
       [
-       -0.01443,
-       -0.34729,
-       2.02329
+       -0.01975,
+       -0.34707,
+       2.01282
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh29",
-     "verts": 7,
-     "tris": 9,
+     "verts": 5,
+     "tris": 5,
      "bounds_unity": [
       [
-       -0.3151,
-       0.4341,
-       1.34707
+       -0.31484,
+       0.43432,
+       1.3366
       ],
       [
-       -0.16498,
-       0.47151,
-       1.34707
+       -0.16472,
+       0.47173,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh30",
-     "verts": 7,
-     "tris": 9,
+     "verts": 5,
+     "tris": 5,
      "bounds_unity": [
       [
-       -0.14244,
-       0.32181,
-       1.34707
+       -0.13128,
+       0.31252,
+       1.3366
       ],
       [
-       -0.02972,
-       0.42148,
-       1.34707
+       -0.02188,
+       0.41484,
+       1.3366
       ]
      ]
     },
@@ -11433,51 +11537,51 @@
      "tris": 13,
      "bounds_unity": [
       [
-       -0.01483,
-       0.14329,
-       1.34707
+       0.0735,
+       -0.0977,
+       1.3366
       ],
       [
-       0.0697,
-       0.30269,
-       1.34707
+       0.11577,
+       0.13356,
+       1.3366
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh32",
-     "verts": 13,
-     "tris": 21,
+     "verts": 12,
+     "tris": 19,
      "bounds_unity": [
       [
-       0.07661,
-       -0.10733,
-       1.34707
+       0.00927,
+       -0.41016,
+       1.3366
       ],
       [
-       0.11578,
-       0.1234,
-       1.34707
+       0.11625,
+       -0.12593,
+       1.3366
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 232
+    "tris": 220
    }
   },
   "skin_mid_L": {
    "fbx": "skin_mid_L.fbx",
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    0.54084,
-    0.34831,
-    0.17374
+    0.54111,
+    0.28053,
+    0.17815
    ],
    "pivot_unity": [
-    -0.54084,
-    0.17374,
-    -0.34831
+    -0.54111,
+    0.17815,
+    -0.28053
    ],
    "axes_unity": {
     "right": [
@@ -11502,667 +11606,616 @@
    },
    "bounds_unity": [
     [
-     -0.54084,
-     -0.68374,
-     -2.69589
+     -0.54111,
+     -0.68815,
+     -2.64906
     ],
     [
-     0.54084,
-     0.68374,
-     2.69589
+     0.54111,
+     0.68815,
+     2.64906
     ]
    ],
-   "sha256": "f8ac057e3823a7b098c1df28bf003cb02d12351ab55dda0cdb7edc885fa54042",
+   "sha256": "8af84d8eeb88504f455ce7439486326a60fbbee77de94dcaecfdad995a5623d7",
    "bounds_blender": [
     [
-     -0.54084,
-     -2.69589,
-     -0.68374
+     -0.54111,
+     -2.64906,
+     -0.68815
     ],
     [
-     0.54084,
-     2.69589,
-     0.68374
+     0.54111,
+     2.64906,
+     0.68815
     ]
    ],
-   "tris": 5542,
+   "tris": 2740,
    "materials": [
     [
      "Icarus_Body",
-     5542
+     2740
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "skin_mid_L_colmesh0",
-     "verts": 39,
-     "tris": 74,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.09514,
-       -0.21665,
-       2.43065
+       -0.09322,
+       -0.22144,
+       2.44664
       ],
       [
-       -0.05949,
-       0.11417,
-       2.69589
+       -0.05886,
+       0.1078,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh1",
-     "verts": 33,
-     "tris": 62,
+     "verts": 14,
+     "tris": 24,
      "bounds_unity": [
       [
-       -0.05538,
-       0.13329,
-       2.43065
+       -0.04982,
+       0.14118,
+       2.44664
       ],
       [
-       0.05776,
-       0.39563,
-       2.69589
+       0.05116,
+       0.37647,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh2",
-     "verts": 118,
-     "tris": 232,
+     "verts": 68,
+     "tris": 132,
      "bounds_unity": [
       [
-       -0.44907,
-       -0.31172,
-       0.44903
+       -0.44925,
+       -0.30302,
+       0.35604
       ],
       [
-       -0.23744,
-       0.12343,
-       1.32688
+       -0.25476,
+       0.11958,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh3",
-     "verts": 118,
-     "tris": 232,
+     "verts": 72,
+     "tris": 140,
      "bounds_unity": [
       [
-       -0.43409,
-       0.13981,
-       0.44903
+       -0.42739,
+       0.15595,
+       0.35604
       ],
       [
-       -0.09164,
-       0.47936,
-       1.32688
+       -0.09129,
+       0.47545,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh4",
-     "verts": 35,
-     "tris": 66,
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       -0.06308,
-       0.4783,
-       0.44903
+       -0.04086,
+       0.47751,
+       0.35604
       ],
       [
-       0.22976,
-       0.66115,
-       1.32688
+       0.21822,
+       0.64496,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh5",
-     "verts": 101,
-     "tris": 198,
+     "verts": 64,
+     "tris": 124,
      "bounds_unity": [
       [
-       0.16644,
-       -0.67443,
-       0.44903
+       0.17885,
+       -0.67807,
+       0.35604
       ],
       [
-       0.51264,
-       -0.54066,
-       1.32688
+       0.49882,
+       -0.55198,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh6",
-     "verts": 26,
-     "tris": 48,
+     "verts": 20,
+     "tris": 36,
      "bounds_unity": [
       [
-       -0.23383,
-       -0.54143,
-       0.44903
+       -0.23422,
+       -0.54584,
+       0.35604
       ],
       [
-       0.14722,
-       -0.32684,
-       1.32688
+       0.14749,
+       -0.33096,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh7",
-     "verts": 92,
-     "tris": 180,
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
-       -0.54084,
-       -0.32385,
-       -0.56184
+       -0.54111,
+       -0.32584,
+       -0.59294
       ],
       [
-       -0.23676,
-       0.11398,
-       0.33671
+       -0.23748,
+       0.08677,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh8",
-     "verts": 104,
-     "tris": 204,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       -0.4906,
-       0.12667,
-       -0.56184
+       -0.48991,
+       0.12516,
+       -0.59294
       ],
       [
-       -0.07693,
-       0.483,
-       0.33671
+       -0.07944,
+       0.47859,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh9",
-     "verts": 28,
-     "tris": 52,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.07143,
-       0.47814,
-       -0.56184
+       -0.07197,
+       0.4743,
+       -0.59294
       ],
       [
-       0.23016,
-       0.66277,
-       0.33671
+       0.22847,
+       0.65255,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh10",
-     "verts": 9,
-     "tris": 13,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       0.54084,
-       -0.65349,
-       -0.56184
+       0.54111,
+       -0.6563,
+       -0.59294
       ],
       [
-       0.54084,
-       -0.61502,
-       0.33671
+       0.54111,
+       -0.62178,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh11",
-     "verts": 122,
-     "tris": 240,
+     "verts": 54,
+     "tris": 104,
      "bounds_unity": [
       [
-       0.16411,
-       -0.65287,
-       -0.56184
+       0.1772,
+       -0.6549,
+       -0.59294
       ],
       [
-       0.51298,
-       -0.51941,
-       0.33671
+       0.49927,
+       -0.51969,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh12",
-     "verts": 27,
-     "tris": 50,
+     "verts": 12,
+     "tris": 20,
      "bounds_unity": [
       [
-       0.07165,
-       0.41508,
-       2.43065
+       0.0721,
+       0.4101,
+       2.44664
       ],
       [
-       0.22234,
-       0.63526,
-       2.69589
+       0.21094,
+       0.61571,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh13",
-     "verts": 49,
-     "tris": 94,
+     "verts": 25,
+     "tris": 46,
      "bounds_unity": [
       [
-       -0.23685,
-       -0.52666,
-       -0.56184
+       -0.23808,
+       -0.53056,
+       -0.59294
       ],
       [
-       0.16927,
-       -0.3222,
-       0.33671
+       0.14312,
+       -0.32905,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh14",
-     "verts": 69,
-     "tris": 134,
+     "verts": 37,
+     "tris": 70,
      "bounds_unity": [
       [
-       -0.51751,
-       -0.29291,
-       -1.57271
+       -0.51656,
+       -0.29687,
+       -1.70008
       ],
       [
-       -0.15284,
-       0.12528,
-       -0.67416
+       -0.18051,
+       0.11245,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh15",
-     "verts": 64,
-     "tris": 124,
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       -0.44899,
-       0.12771,
-       -1.57271
+       -0.44781,
+       0.15376,
+       -1.70008
       ],
       [
-       -0.01103,
-       0.46138,
-       -0.67416
+       -0.02166,
+       0.44903,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh16",
-     "verts": 33,
-     "tris": 62,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
-       -0.0437,
-       0.45635,
-       -1.57271
+       -0.04279,
+       0.45061,
+       -1.70008
       ],
       [
-       0.24094,
-       0.6441,
-       -0.67416
+       0.23527,
+       0.65089,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh17",
-     "verts": 41,
-     "tris": 78,
+     "verts": 5,
+     "tris": 5,
      "bounds_unity": [
       [
-       0.19655,
-       -0.60697,
-       -1.57271
+       0.54111,
+       -0.61136,
+       -1.70008
       ],
       [
-       0.5146,
-       -0.49167,
-       -0.67416
+       0.54111,
+       -0.54819,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh18",
-     "verts": 35,
-     "tris": 66,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       -0.19774,
-       -0.50044,
-       -1.57271
+       0.18426,
+       -0.61,
+       -1.70008
       ],
       [
-       0.17751,
-       -0.28629,
-       -0.67416
+       0.50189,
+       -0.49088,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh19",
-     "verts": 36,
-     "tris": 68,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.42646,
-       -0.26366,
-       -2.58358
+       -0.17933,
+       -0.49176,
+       -1.70008
       ],
       [
-       -0.1048,
-       0.10569,
-       -1.68502
+       0.15201,
+       -0.2813,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh20",
-     "verts": 32,
-     "tris": 60,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
-       -0.36802,
-       0.13639,
-       -2.58358
+       -0.41408,
+       -0.24076,
+       -2.64906
       ],
       [
-       0.00764,
-       0.43856,
-       -1.68502
+       -0.13223,
+       0.11913,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh21",
-     "verts": 99,
-     "tris": 194,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       0.01276,
-       0.42537,
-       -2.58358
+       -0.32554,
+       0.16837,
+       -2.64906
       ],
       [
-       0.2507,
-       0.62879,
-       -1.68502
+       0.01836,
+       0.424,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh22",
-     "verts": 9,
-     "tris": 13,
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
-       0.54084,
-       -0.5411,
-       -2.58358
+       0.02898,
+       0.43743,
+       -2.64906
       ],
       [
-       0.54084,
-       -0.51766,
-       -1.68502
+       0.23129,
+       0.60145,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh23",
-     "verts": 43,
-     "tris": 82,
+     "verts": 20,
+     "tris": 36,
      "bounds_unity": [
       [
-       0.15368,
-       -0.68314,
-       2.43065
+       0.15496,
+       -0.6868,
+       2.44664
       ],
       [
-       0.51335,
-       -0.55232,
-       2.69589
+       0.49993,
+       -0.55707,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh24",
-     "verts": 26,
-     "tris": 48,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       0.38607,
-       -0.54053,
-       -2.58358
+       0.54111,
+       -0.54056,
+       -2.64906
       ],
       [
-       0.51532,
-       -0.49771,
-       -1.68502
+       0.54111,
+       -0.52208,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh25",
-     "verts": 19,
-     "tris": 34,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       -0.11568,
-       -0.33807,
-       -2.58358
+       0.38716,
+       -0.53928,
+       -2.64906
       ],
       [
-       -0.00456,
-       -0.25422,
-       -1.68502
+       0.50285,
+       -0.50213,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh26",
-     "verts": 10,
-     "tris": 15,
+     "verts": 14,
+     "tris": 24,
      "bounds_unity": [
       [
-       -0.3576,
-       -0.23072,
-       -2.69589
+       -0.12523,
+       -0.32994,
+       -2.64906
       ],
       [
-       -0.10141,
-       0.1062,
-       -2.69589
+       -0.01068,
+       -0.24839,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh27",
-     "verts": 10,
-     "tris": 15,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.28318,
-       0.14086,
-       -2.69589
+       -0.05955,
+       -0.53189,
+       2.44664
       ],
       [
-       0.00836,
-       0.40799,
-       -2.69589
+       0.12593,
+       -0.25772,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh28",
-     "verts": 10,
-     "tris": 15,
+     "verts": 25,
+     "tris": 46,
      "bounds_unity": [
       [
-       0.03204,
-       0.42503,
-       -2.69589
+       -0.39906,
+       -0.29622,
+       1.34482
       ],
       [
-       0.25018,
-       0.62712,
-       -2.69589
+       -0.06466,
+       0.11808,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh29",
-     "verts": 6,
-     "tris": 7,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
-       0.38907,
-       -0.51708,
-       -2.69589
+       -0.38533,
+       0.12206,
+       1.34482
       ],
       [
-       0.51526,
-       -0.49766,
-       -2.69589
+       0.0498,
+       0.44794,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh30",
-     "verts": 42,
-     "tris": 80,
+     "verts": 17,
+     "tris": 30,
      "bounds_unity": [
       [
-       -0.06571,
-       -0.5363,
-       2.43065
+       -0.02367,
+       0.41929,
+       1.34482
       ],
       [
-       0.13575,
-       -0.239,
-       2.69589
+       0.21321,
+       0.62994,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh31",
-     "verts": 30,
-     "tris": 56,
+     "verts": 61,
+     "tris": 118,
      "bounds_unity": [
       [
-       -0.39958,
-       -0.30422,
-       1.41259
+       0.15129,
+       -0.68679,
+       1.34482
       ],
       [
-       -0.06509,
-       0.12515,
-       2.29803
+       0.49939,
+       -0.5558,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_L_colmesh32",
-     "verts": 33,
-     "tris": 62,
-     "bounds_unity": [
-      [
-       -0.3904,
-       0.12658,
-       1.41259
-      ],
-      [
-       0.05659,
-       0.46169,
-       2.29803
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh33",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
-       -0.00177,
-       0.40913,
-       1.41259
+       -0.17318,
+       -0.55458,
+       1.34482
       ],
       [
-       0.22462,
-       0.64758,
-       2.29803
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh34",
-     "verts": 123,
-     "tris": 242,
-     "bounds_unity": [
-      [
-       0.15059,
-       -0.68313,
-       1.41259
-      ],
-      [
-       0.513,
-       -0.55106,
-       2.29803
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_L_colmesh35",
-     "verts": 27,
-     "tris": 50,
-     "bounds_unity": [
-      [
-       -0.17697,
-       -0.5501,
-       1.41259
-      ],
-      [
-       0.14988,
-       -0.22941,
-       2.29803
+       0.15019,
+       -0.24456,
+       2.24422
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 144
+    "tris": 156
    }
   },
   "skin_mid_R": {
    "fbx": "skin_mid_R.fbx",
    "blender_parent": "fuselage_mid",
    "pivot_blender": [
-    -0.54084,
-    0.34831,
-    0.17374
+    -0.54111,
+    0.28053,
+    0.17815
    ],
    "pivot_unity": [
-    0.54084,
-    0.17374,
-    -0.34831
+    0.54111,
+    0.17815,
+    -0.28053
    ],
    "axes_unity": {
     "right": [
@@ -12187,562 +12240,562 @@
    },
    "bounds_unity": [
     [
-     -0.54084,
-     -0.68374,
-     -2.69589
+     -0.54111,
+     -0.68815,
+     -2.64906
     ],
     [
-     0.54084,
-     0.68374,
-     2.69589
+     0.54111,
+     0.68815,
+     2.64906
     ]
    ],
-   "sha256": "a13da3722f13cc7985238290e2db9b0cba901b1b2aca0c24a995485a828a7a09",
+   "sha256": "0ccafc15c8c18798552e92ed4c9ffed36df92704c924e97d3c18817dddaf514e",
    "bounds_blender": [
     [
-     -0.54084,
-     -2.69589,
-     -0.68374
+     -0.54111,
+     -2.64906,
+     -0.68815
     ],
     [
-     0.54084,
-     2.69589,
-     0.68374
+     0.54111,
+     2.64906,
+     0.68815
     ]
    ],
-   "tris": 5542,
+   "tris": 2740,
    "materials": [
     [
      "Icarus_Body",
-     5542
+     2740
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "skin_mid_R_colmesh0",
-     "verts": 27,
-     "tris": 50,
+     "verts": 12,
+     "tris": 20,
      "bounds_unity": [
       [
-       -0.22234,
-       0.41508,
-       2.43065
+       -0.21094,
+       0.4101,
+       2.44664
       ],
       [
-       -0.07165,
-       0.63526,
-       2.69589
+       -0.0721,
+       0.61571,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh1",
-     "verts": 33,
-     "tris": 62,
+     "verts": 14,
+     "tris": 24,
      "bounds_unity": [
       [
-       -0.05776,
-       0.13329,
-       2.43065
+       -0.05116,
+       0.14118,
+       2.44664
       ],
       [
-       0.05538,
-       0.39563,
-       2.69589
+       0.04982,
+       0.37647,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh2",
-     "verts": 35,
-     "tris": 66,
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       -0.22976,
-       0.4783,
-       0.44903
+       -0.21822,
+       0.47751,
+       0.35604
       ],
       [
-       0.06308,
-       0.66115,
-       1.32688
+       0.04086,
+       0.64496,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh3",
-     "verts": 118,
-     "tris": 232,
+     "verts": 72,
+     "tris": 140,
      "bounds_unity": [
       [
-       0.09164,
-       0.13981,
-       0.44903
+       0.09129,
+       0.15595,
+       0.35604
       ],
       [
-       0.43409,
-       0.47936,
-       1.32688
+       0.42739,
+       0.47545,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh4",
-     "verts": 118,
-     "tris": 232,
+     "verts": 68,
+     "tris": 132,
      "bounds_unity": [
       [
-       0.23744,
-       -0.31172,
-       0.44903
+       0.25476,
+       -0.30302,
+       0.35604
       ],
       [
-       0.44907,
-       0.12343,
-       1.32688
+       0.44925,
+       0.11958,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh5",
-     "verts": 26,
-     "tris": 48,
+     "verts": 20,
+     "tris": 36,
      "bounds_unity": [
       [
-       -0.14722,
-       -0.54143,
-       0.44903
+       -0.14749,
+       -0.54584,
+       0.35604
       ],
       [
-       0.23383,
-       -0.32684,
-       1.32688
+       0.23422,
+       -0.33096,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh6",
-     "verts": 101,
-     "tris": 198,
+     "verts": 64,
+     "tris": 124,
      "bounds_unity": [
       [
-       -0.51264,
-       -0.67443,
-       0.44903
+       -0.49882,
+       -0.67807,
+       0.35604
       ],
       [
-       -0.16644,
-       -0.54066,
-       1.32688
+       -0.17885,
+       -0.55198,
+       1.2591
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh7",
-     "verts": 28,
-     "tris": 52,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.23016,
-       0.47814,
-       -0.56184
+       -0.22847,
+       0.4743,
+       -0.59294
       ],
       [
-       0.07143,
-       0.66277,
-       0.33671
+       0.07197,
+       0.65255,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh8",
-     "verts": 104,
-     "tris": 204,
+     "verts": 49,
+     "tris": 94,
      "bounds_unity": [
       [
-       0.07693,
-       0.12667,
-       -0.56184
+       0.07944,
+       0.12516,
+       -0.59294
       ],
       [
-       0.4906,
-       0.483,
-       0.33671
+       0.48991,
+       0.47859,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh9",
-     "verts": 92,
-     "tris": 180,
+     "verts": 45,
+     "tris": 86,
      "bounds_unity": [
       [
-       0.23676,
-       -0.32385,
-       -0.56184
+       0.23748,
+       -0.32584,
+       -0.59294
       ],
       [
-       0.54084,
-       0.11398,
-       0.33671
+       0.54111,
+       0.08677,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh10",
-     "verts": 49,
-     "tris": 94,
+     "verts": 25,
+     "tris": 46,
      "bounds_unity": [
       [
-       -0.16927,
-       -0.52666,
-       -0.56184
+       -0.14312,
+       -0.53056,
+       -0.59294
       ],
       [
-       0.23685,
-       -0.3222,
-       0.33671
+       0.23808,
+       -0.32905,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh11",
-     "verts": 122,
-     "tris": 240,
+     "verts": 54,
+     "tris": 104,
      "bounds_unity": [
       [
-       -0.51298,
-       -0.65287,
-       -0.56184
+       -0.49927,
+       -0.6549,
+       -0.59294
       ],
       [
-       -0.16411,
-       -0.51941,
-       0.33671
+       -0.1772,
+       -0.51969,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh12",
-     "verts": 39,
-     "tris": 74,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.05949,
-       -0.21665,
-       2.43065
+       0.05886,
+       -0.22144,
+       2.44664
       ],
       [
-       0.09514,
-       0.11417,
-       2.69589
+       0.09322,
+       0.1078,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh13",
-     "verts": 9,
-     "tris": 13,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.54084,
-       -0.65349,
-       -0.56184
+       -0.54111,
+       -0.6563,
+       -0.59294
       ],
       [
-       -0.54084,
-       -0.61502,
-       0.33671
+       -0.54111,
+       -0.62178,
+       0.19788
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh14",
-     "verts": 33,
-     "tris": 62,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
-       -0.24094,
-       0.45635,
-       -1.57271
+       -0.23527,
+       0.45061,
+       -1.70008
       ],
       [
-       0.0437,
-       0.6441,
-       -0.67416
+       0.04279,
+       0.65089,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh15",
-     "verts": 64,
-     "tris": 124,
+     "verts": 33,
+     "tris": 62,
      "bounds_unity": [
       [
-       0.01103,
-       0.12771,
-       -1.57271
+       0.02166,
+       0.15376,
+       -1.70008
       ],
       [
-       0.44899,
-       0.46138,
-       -0.67416
+       0.44781,
+       0.44903,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh16",
-     "verts": 69,
-     "tris": 134,
+     "verts": 37,
+     "tris": 70,
      "bounds_unity": [
       [
-       0.15284,
-       -0.29291,
-       -1.57271
+       0.18051,
+       -0.29687,
+       -1.70008
       ],
       [
-       0.51751,
-       0.12528,
-       -0.67416
+       0.51656,
+       0.11245,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh17",
-     "verts": 35,
-     "tris": 66,
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
-       -0.17751,
-       -0.50044,
-       -1.57271
+       -0.15201,
+       -0.49176,
+       -1.70008
       ],
       [
-       0.19774,
-       -0.28629,
-       -0.67416
+       0.17933,
+       -0.2813,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh18",
-     "verts": 41,
-     "tris": 78,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       -0.5146,
-       -0.60697,
-       -1.57271
+       -0.50189,
+       -0.61,
+       -1.70008
       ],
       [
-       -0.19655,
-       -0.49167,
-       -0.67416
+       -0.18426,
+       -0.49088,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh19",
-     "verts": 99,
-     "tris": 194,
+     "verts": 5,
+     "tris": 5,
      "bounds_unity": [
       [
-       -0.2507,
-       0.42537,
-       -2.58358
+       -0.54111,
+       -0.61136,
+       -1.70008
       ],
       [
-       -0.01276,
-       0.62879,
-       -1.68502
+       -0.54111,
+       -0.54819,
+       -0.7511
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh20",
-     "verts": 32,
-     "tris": 60,
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
-       -0.00764,
-       0.13639,
-       -2.58358
+       -0.23129,
+       0.43743,
+       -2.64906
       ],
       [
-       0.36802,
-       0.43856,
-       -1.68502
+       -0.02898,
+       0.60145,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh21",
-     "verts": 36,
-     "tris": 68,
+     "verts": 24,
+     "tris": 44,
      "bounds_unity": [
       [
-       0.1048,
-       -0.26366,
-       -2.58358
+       -0.01836,
+       0.16837,
+       -2.64906
       ],
       [
-       0.42654,
-       0.10569,
-       -1.68502
+       0.32554,
+       0.424,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh22",
-     "verts": 19,
-     "tris": 34,
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
-       0.00456,
-       -0.33807,
-       -2.58358
+       0.13223,
+       -0.24076,
+       -2.64906
       ],
       [
-       0.11568,
-       -0.25422,
-       -1.68502
+       0.41413,
+       0.11913,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh23",
-     "verts": 42,
-     "tris": 80,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.13575,
-       -0.5363,
-       2.43065
+       -0.12593,
+       -0.53189,
+       2.44664
       ],
       [
-       0.06571,
-       -0.239,
-       2.69589
+       0.05955,
+       -0.25772,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh24",
-     "verts": 26,
-     "tris": 48,
+     "verts": 14,
+     "tris": 24,
      "bounds_unity": [
       [
-       -0.51532,
-       -0.54053,
-       -2.58358
+       0.01068,
+       -0.32994,
+       -2.64906
       ],
       [
-       -0.38607,
-       -0.49771,
-       -1.68502
+       0.12523,
+       -0.24839,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh25",
-     "verts": 9,
-     "tris": 13,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       -0.54084,
-       -0.5411,
-       -2.58358
+       -0.50285,
+       -0.53928,
+       -2.64906
       ],
       [
-       -0.54084,
-       -0.51766,
-       -1.68502
+       -0.38716,
+       -0.50213,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh26",
-     "verts": 10,
-     "tris": 15,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.25018,
-       0.42503,
-       -2.69589
+       -0.54111,
+       -0.54056,
+       -2.64906
       ],
       [
-       -0.03204,
-       0.62712,
-       -2.69589
+       -0.54111,
+       -0.52208,
+       -1.85824
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh27",
-     "verts": 10,
-     "tris": 15,
+     "verts": 20,
+     "tris": 36,
      "bounds_unity": [
       [
-       -0.00836,
-       0.14086,
-       -2.69589
+       -0.49993,
+       -0.6868,
+       2.44664
       ],
       [
-       0.28318,
-       0.40799,
-       -2.69589
+       -0.15496,
+       -0.55707,
+       2.64906
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh28",
-     "verts": 10,
-     "tris": 15,
+     "verts": 17,
+     "tris": 30,
      "bounds_unity": [
       [
-       0.10141,
-       -0.23072,
-       -2.69589
+       -0.21321,
+       0.41929,
+       1.34482
       ],
       [
-       0.35877,
-       0.10621,
-       -2.69589
+       0.02367,
+       0.62994,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh29",
-     "verts": 6,
-     "tris": 7,
+     "verts": 22,
+     "tris": 40,
      "bounds_unity": [
       [
-       -0.51526,
-       -0.51708,
-       -2.69589
+       -0.0498,
+       0.12206,
+       1.34482
       ],
       [
-       -0.38907,
-       -0.49766,
-       -2.69589
+       0.38533,
+       0.44794,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh30",
-     "verts": 43,
-     "tris": 82,
+     "verts": 25,
+     "tris": 46,
      "bounds_unity": [
       [
-       -0.51335,
-       -0.68314,
-       2.43065
+       0.06466,
+       -0.29622,
+       1.34482
       ],
       [
-       -0.15368,
-       -0.55232,
-       2.69589
+       0.39906,
+       0.11808,
+       2.24422
       ]
      ]
     },
@@ -12752,101 +12805,50 @@
      "tris": 32,
      "bounds_unity": [
       [
-       -0.22462,
-       0.40913,
-       1.41259
+       -0.15019,
+       -0.55458,
+       1.34482
       ],
       [
-       0.00177,
-       0.64758,
-       2.29803
+       0.17318,
+       -0.24456,
+       2.24422
       ]
      ]
     },
     {
      "name": "skin_mid_R_colmesh32",
-     "verts": 33,
-     "tris": 62,
+     "verts": 61,
+     "tris": 118,
      "bounds_unity": [
       [
-       -0.05659,
-       0.12658,
-       1.41259
+       -0.49939,
+       -0.68679,
+       1.34482
       ],
       [
-       0.3904,
-       0.46169,
-       2.29803
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh33",
-     "verts": 30,
-     "tris": 56,
-     "bounds_unity": [
-      [
-       0.06509,
-       -0.30422,
-       1.41259
-      ],
-      [
-       0.39958,
-       0.12515,
-       2.29803
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh34",
-     "verts": 27,
-     "tris": 50,
-     "bounds_unity": [
-      [
-       -0.14988,
-       -0.5501,
-       1.41259
-      ],
-      [
-       0.17697,
-       -0.22941,
-       2.29803
-      ]
-     ]
-    },
-    {
-     "name": "skin_mid_R_colmesh35",
-     "verts": 123,
-     "tris": 242,
-     "bounds_unity": [
-      [
-       -0.513,
-       -0.68313,
-       1.41259
-      ],
-      [
-       -0.15059,
-       -0.55106,
-       2.29803
+       -0.15129,
+       -0.5558,
+       2.24422
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 160
+    "tris": 164
    }
   },
   "speed_brake_L": {
    "fbx": null,
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
-    0.46121,
+    0.52424,
     4.55,
-    -0.17552
+    -0.21127
    ],
    "pivot_unity": [
-    -0.46121,
-    -0.17552,
+    -0.52424,
+    -0.21127,
     -4.55
    ],
    "axes_unity": {
@@ -12867,7 +12869,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 60
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -12880,13 +12883,13 @@
    "fbx": "speed_brake_L_visible.fbx",
    "blender_parent": "speed_brake_L",
    "pivot_blender": [
-    0.46121,
+    0.52424,
     4.55,
-    -0.17552
+    -0.21127
    ],
    "pivot_unity": [
-    -0.46121,
-    -0.17552,
+    -0.52424,
+    -0.21127,
     -4.55
    ],
    "axes_unity": {
@@ -12912,71 +12915,75 @@
    },
    "bounds_unity": [
     [
-     -0.5233,
-     -0.07242,
+     -0.5268,
+     0.0,
      -0.8
     ],
     [
-     0.04512,
-     0.09156,
+     0.05316,
+     0.16229,
      -0.0
     ]
    ],
-   "sha256": "cc0e93c627c2ddb01a52e07498293ce0f29948588b84cb5c88556df943df5cae",
+   "sha256": "3468d26086fe0688ae7db25415507bac89383c0945eae40a0ce212fffc927536",
    "bounds_blender": [
     [
-     -0.04512,
+     -0.05316,
      0.0,
-     -0.07242
+     0.0
     ],
     [
-     0.5233,
+     0.5268,
      0.8,
-     0.09156
+     0.16229
     ]
    ],
-   "tris": 360,
+   "tris": 240,
    "materials": [
     [
      "Icarus_Body",
-     360
+     120
+    ],
+    [
+     "jet_mechanical",
+     120
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "speed_brake_L_visible_colmesh0",
-     "verts": 69,
-     "tris": 134,
+     "verts": 50,
+     "tris": 96,
      "bounds_unity": [
       [
-       -0.5233,
-       -0.07242,
+       -0.5268,
+       0.0,
        -0.8
       ],
       [
-       0.04512,
-       0.09156,
+       0.05316,
+       0.16229,
        -0.0
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 134
+    "tris": 96
    }
   },
   "speed_brake_R": {
    "fbx": null,
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
-    -0.46121,
+    -0.52424,
     4.55,
-    -0.17552
+    -0.21127
    ],
    "pivot_unity": [
-    0.46121,
-    -0.17552,
+    0.52424,
+    -0.21127,
     -4.55
    ],
    "axes_unity": {
@@ -12997,7 +13004,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 60
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -13010,13 +13018,13 @@
    "fbx": "speed_brake_R_visible.fbx",
    "blender_parent": "speed_brake_R",
    "pivot_blender": [
-    -0.46121,
+    -0.52424,
     4.55,
-    -0.17552
+    -0.21127
    ],
    "pivot_unity": [
-    0.46121,
-    -0.17552,
+    0.52424,
+    -0.21127,
     -4.55
    ],
    "axes_unity": {
@@ -13042,58 +13050,62 @@
    },
    "bounds_unity": [
     [
-     -0.5233,
-     -0.09156,
+     -0.5268,
+     -0.16229,
      -0.8
     ],
     [
-     0.04512,
-     0.07242,
+     0.05316,
+     -0.0,
+     0.0
+    ]
+   ],
+   "sha256": "1da4ceaab34719238a977e1bb638233379a6426b266f2393cdec3a0ebf472383",
+   "bounds_blender": [
+    [
+     -0.05316,
+     -0.0,
+     -0.16229
+    ],
+    [
+     0.5268,
+     0.8,
      -0.0
     ]
    ],
-   "sha256": "e0ac0c257b09fd3b9d90ced91ca674b70a409a141eab3cc497f34c86b8969e0e",
-   "bounds_blender": [
-    [
-     -0.04512,
-     0.0,
-     -0.09156
-    ],
-    [
-     0.5233,
-     0.8,
-     0.07242
-    ]
-   ],
-   "tris": 360,
+   "tris": 240,
    "materials": [
     [
      "Icarus_Body",
-     360
+     120
+    ],
+    [
+     "jet_mechanical",
+     120
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "speed_brake_R_visible_colmesh0",
-     "verts": 69,
-     "tris": 134,
+     "verts": 50,
+     "tris": 96,
      "bounds_unity": [
       [
-       -0.5233,
-       -0.09156,
+       -0.5268,
+       -0.16229,
        -0.8
       ],
       [
-       0.04512,
-       0.07242,
-       -0.0
+       0.05316,
+       -0.0,
+       0.0
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 134
+    "tris": 96
    }
   },
   "stabilator_L": {
@@ -13127,7 +13139,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 15
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -13173,57 +13186,57 @@
    "bounds_unity": [
     [
      -1.815,
-     -0.04277,
+     -0.0422,
      -1.24
     ],
     [
-     -0.0,
-     0.04277,
-     0.67
+     -0.07,
+     0.0422,
+     0.646
     ]
    ],
-   "sha256": "9d9eba72eba760b2159a67fd9c181b1401004e26367a2783702dac1e7a9ea5cd",
+   "sha256": "73c8dd993b113e994792778ebf466414cdfa5d18ec1f23d1cffb71f7a6934c19",
    "bounds_blender": [
     [
-     0.0,
-     -0.67,
-     -0.04277
+     0.07,
+     -0.646,
+     -0.0422
     ],
     [
      1.815,
      1.24,
-     0.04277
+     0.0422
     ]
    ],
-   "tris": 272,
+   "tris": 248,
    "materials": [
     [
      "Icarus_Body",
-     272
+     248
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "stabilator_L_visible_colmesh0",
-     "verts": 69,
-     "tris": 134,
+     "verts": 126,
+     "tris": 248,
      "bounds_unity": [
       [
        -1.815,
-       -0.04277,
-       -1.23372
+       -0.0422,
+       -1.24
       ],
       [
-       -0.0,
-       0.04277,
-       0.67
+       -0.07,
+       0.0422,
+       0.646
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 134
+    "tris": 248
    }
   },
   "stabilator_R": {
@@ -13257,7 +13270,8 @@
     ]
    },
    "props": {
-    "hinge_axis": "X"
+    "hinge_axis": "X",
+    "deflection_deg": 15
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
@@ -13303,57 +13317,57 @@
    "bounds_unity": [
     [
      -1.815,
-     -0.04277,
+     -0.0422,
      -1.24
     ],
     [
-     -0.0,
-     0.04277,
-     0.67
+     -0.07,
+     0.0422,
+     0.646
     ]
    ],
-   "sha256": "56ee7bcaa1b35af28587af9c8f0567695c920f141dede7ee427bfef4922bbee3",
+   "sha256": "061b2e9bbe262b120668f6f5dab1c7cc17509fa5e96b879c2b0e9ea72b14bc6e",
    "bounds_blender": [
     [
-     0.0,
-     -0.67,
-     -0.04277
+     0.07,
+     -0.646,
+     -0.0422
     ],
     [
      1.815,
      1.24,
-     0.04277
+     0.0422
     ]
    ],
-   "tris": 272,
+   "tris": 248,
    "materials": [
     [
      "Icarus_Body",
-     272
+     248
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "stabilator_R_visible_colmesh0",
-     "verts": 69,
-     "tris": 134,
+     "verts": 126,
+     "tris": 248,
      "bounds_unity": [
       [
        -1.815,
-       -0.04277,
-       -1.23372
+       -0.0422,
+       -1.24
       ],
       [
-       -0.0,
-       0.04277,
-       0.67
+       -0.07,
+       0.0422,
+       0.646
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 134
+    "tris": 248
    }
   },
   "ventral_fin": {
@@ -13392,50 +13406,50 @@
    },
    "bounds_unity": [
     [
-     -0.05599,
+     -0.05594,
      -0.2,
      -1.125
     ],
     [
-     0.05599,
+     0.05594,
      0.2,
      1.125
     ]
    ],
-   "sha256": "d6e9291d9e8b9a4f320653b17dd5a390aa823d5a6a3555f90fa3a354ed904d7e",
+   "sha256": "822a104307c8307bf040ecf12c64be2b4abc235b11e78a8089f8e5424e603568",
    "bounds_blender": [
     [
-     -0.05599,
+     -0.05594,
      -1.125,
      -0.2
     ],
     [
-     0.05599,
+     0.05594,
      1.125,
      0.2
     ]
    ],
-   "tris": 180,
+   "tris": 164,
    "materials": [
     [
      "Icarus_Body",
-     180
+     164
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "ventral_fin_colmesh0",
-     "verts": 92,
-     "tris": 180,
+     "verts": 84,
+     "tris": 164,
      "bounds_unity": [
       [
-       -0.05599,
+       -0.05594,
        -0.2,
        -1.125
       ],
       [
-       0.05599,
+       0.05594,
        0.2,
        1.125
       ]
@@ -13443,7 +13457,7 @@
     }
    ],
    "lod1": {
-    "tris": 180
+    "tris": 164
    }
   },
   "windscreen": {
@@ -13492,7 +13506,7 @@
      0.30217
     ]
    ],
-   "sha256": "1e35cf2d1726992e95af32cf3359cde663630dcec4c0f1253df7d30afb30bcd2",
+   "sha256": "47a18d08fff5d34bae28697833fb6d94f7092736f4ed1c0aa24e0b98a8d2e5df",
    "bounds_blender": [
     [
      -0.3636,
@@ -13582,7 +13596,7 @@
      0.04
     ]
    ],
-   "sha256": "8996d0499c90b2d5c122f61930b636207b9b2e89ebefa38e7422a3ca98e737fa",
+   "sha256": "14e7680431efdd6472caa050200fe8d3660e8cb203c592cca45c6ee666fa1ab0",
    "bounds_blender": [
     [
      -0.38033,
@@ -13631,13 +13645,13 @@
    "blender_parent": "wing_spar_L",
    "pivot_blender": [
     1.99,
-    1.58912,
-    -0.02535
+    1.525,
+    -0.02538
    ],
    "pivot_unity": [
     -1.99,
-    -0.02535,
-    -1.58912
+    -0.02538,
+    -1.525
    ],
    "axes_unity": {
     "right": [
@@ -13663,108 +13677,112 @@
    "bounds_unity": [
     [
      -1.41,
-     -0.29388,
-     -2.46088
+     -0.29384,
+     -2.525
     ],
     [
      1.41,
-     0.29388,
-     2.46088
+     0.29384,
+     2.525
     ]
    ],
-   "sha256": "c5cb7dd3d72203fa2f24f941c139e1b76e7eda7151dafdbf4df67495fc1fadf8",
+   "sha256": "a094975a38399b1a37a0b1b345f86e3019a21f0840a85331c361d8f9aa87bfde",
    "bounds_blender": [
     [
      -1.41,
-     -2.46088,
-     -0.29388
+     -2.525,
+     -0.29384
     ],
     [
      1.41,
-     2.46088,
-     0.29388
+     2.525,
+     0.29384
     ]
    ],
-   "tris": 3164,
+   "tris": 1828,
    "materials": [
     [
      "Icarus_Body",
-     3164
+     1368
+    ],
+    [
+     "jet_mechanical",
+     460
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "wing_skin_L_colmesh0",
-     "verts": 107,
-     "tris": 210,
+     "verts": 99,
+     "tris": 194,
      "bounds_unity": [
       [
-       0.6985,
-       0.03152,
-       -2.46088
+       0.89,
+       0.05659,
+       -2.525
       ],
       [
        1.41,
-       0.29388,
-       2.46088
+       0.29384,
+       2.525
       ]
      ]
     },
     {
      "name": "wing_skin_L_colmesh1",
-     "verts": 47,
-     "tris": 90,
+     "verts": 96,
+     "tris": 188,
      "bounds_unity": [
       [
-       -0.036,
-       -0.07036,
-       -2.34782
+       0.06,
+       -0.05516,
+       -1.86
       ],
       [
-       0.6985,
-       0.16719,
-       1.60483
+       0.59,
+       0.14402,
+       1.255
       ]
      ]
     },
     {
      "name": "wing_skin_L_colmesh2",
-     "verts": 116,
-     "tris": 228,
+     "verts": 110,
+     "tris": 216,
      "bounds_unity": [
       [
-       -0.74509,
-       -0.18572,
-       -2.34782
+       -0.69,
+       -0.1769,
+       -2.40922
       ],
       [
-       0.046,
-       0.02714,
-       0.12959
+       -0.056,
+       0.00776,
+       -0.40319
       ]
      ]
     },
     {
      "name": "wing_skin_L_colmesh3",
-     "verts": 109,
-     "tris": 214,
+     "verts": 78,
+     "tris": 152,
      "bounds_unity": [
       [
        -1.41,
-       -0.29388,
-       -2.17639
+       -0.29384,
+       -2.23779
       ],
       [
-       -0.74509,
-       -0.12344,
-       -0.71447
+       -0.69,
+       -0.11284,
+       -0.74857
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 108
+    "tris": 104
    }
   },
   "wing_skin_R": {
@@ -13772,13 +13790,13 @@
    "blender_parent": "wing_spar_R",
    "pivot_blender": [
     -1.99,
-    1.58912,
-    -0.02535
+    1.525,
+    -0.02538
    ],
    "pivot_unity": [
     1.99,
-    -0.02535,
-    -1.58912
+    -0.02538,
+    -1.525
    ],
    "axes_unity": {
     "right": [
@@ -13804,108 +13822,112 @@
    "bounds_unity": [
     [
      -1.41,
-     -0.29388,
-     -2.46088
+     -0.29384,
+     -2.525
     ],
     [
      1.41,
-     0.29388,
-     2.46088
+     0.29384,
+     2.525
     ]
    ],
-   "sha256": "160100ec239e2f6555ea678a0a0b1b6c1b0b5ba22ce429943a4a198df81635c4",
+   "sha256": "a9159311126aa403673c753c53e74d890fc0506b2b7a1225f5eb7915df823d43",
    "bounds_blender": [
     [
      -1.41,
-     -2.46088,
-     -0.29388
+     -2.525,
+     -0.29384
     ],
     [
      1.41,
-     2.46088,
-     0.29388
+     2.525,
+     0.29384
     ]
    ],
-   "tris": 3164,
+   "tris": 1828,
    "materials": [
     [
      "Icarus_Body",
-     3164
+     1368
+    ],
+    [
+     "jet_mechanical",
+     460
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "wing_skin_R_colmesh0",
-     "verts": 109,
-     "tris": 214,
+     "verts": 78,
+     "tris": 152,
      "bounds_unity": [
       [
-       0.74509,
-       -0.29388,
-       -2.17639
+       0.69,
+       -0.29384,
+       -2.23779
       ],
       [
        1.41,
-       -0.12344,
-       -0.71447
+       -0.11284,
+       -0.74857
       ]
      ]
     },
     {
      "name": "wing_skin_R_colmesh1",
-     "verts": 116,
-     "tris": 228,
+     "verts": 110,
+     "tris": 216,
      "bounds_unity": [
       [
-       -0.046,
-       -0.18572,
-       -2.34782
+       0.056,
+       -0.1769,
+       -2.40922
       ],
       [
-       0.74509,
-       0.02714,
-       0.12959
+       0.69,
+       0.00776,
+       -0.40319
       ]
      ]
     },
     {
      "name": "wing_skin_R_colmesh2",
-     "verts": 47,
-     "tris": 90,
+     "verts": 96,
+     "tris": 188,
      "bounds_unity": [
       [
-       -0.6985,
-       -0.07036,
-       -2.34782
+       -0.59,
+       -0.05516,
+       -1.86
       ],
       [
-       0.036,
-       0.16719,
-       1.60483
+       -0.06,
+       0.14402,
+       1.255
       ]
      ]
     },
     {
      "name": "wing_skin_R_colmesh3",
-     "verts": 107,
-     "tris": 210,
+     "verts": 99,
+     "tris": 194,
      "bounds_unity": [
       [
        -1.41,
-       0.03152,
-       -2.46088
+       0.05659,
+       -2.525
       ],
       [
-       -0.6985,
-       0.29388,
-       2.46088
+       -0.89,
+       0.29384,
+       2.525
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 108
+    "tris": 104
    }
   },
   "wing_spar_L": {
@@ -13939,68 +13961,68 @@
     ]
    },
    "props": {
-    "fuel_kg": 164.1,
+    "fuel_kg": 164.7,
     "role": "structure",
     "mass_kg": 230
    },
    "bounds_unity": [
     [
      -1.366,
-     -0.28284,
+     -0.28283,
      -1.80428
     ],
     [
      1.366,
-     0.28284,
+     0.28283,
      1.80428
     ]
    ],
-   "sha256": "6f4fc77bbdc13c3365ee848d8aa0f4a2a5c03fef3bc80ea0f53b8b81a4f6cd44",
+   "sha256": "d943945213f272ba50412ac87c9ae00dc882923e2fef77c022d13359858129f8",
    "bounds_blender": [
     [
      -1.366,
      -1.80428,
-     -0.28284
+     -0.28283
     ],
     [
      1.366,
      1.80428,
-     0.28284
+     0.28283
     ]
    ],
-   "tris": 4756,
+   "tris": 1276,
    "materials": [
     [
-     "Icarus_Int_Structure",
-     3420
+     "aircraft_structure",
+     828
     ],
     [
-     "Icarus_Int_Fuel",
-     1336
+     "jet_mechanical",
+     448
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "wing_spar_L_colmesh0",
-     "verts": 45,
-     "tris": 86,
+     "verts": 39,
+     "tris": 74,
      "bounds_unity": [
       [
        -1.366,
-       -0.28181,
-       -1.80361
+       -0.28283,
+       -1.80274
       ],
       [
        1.366,
-       0.27582,
-       1.75424
+       0.27721,
+       1.80428
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 86
+    "tris": 74
    }
   },
   "wing_spar_R": {
@@ -14034,68 +14056,68 @@
     ]
    },
    "props": {
-    "fuel_kg": 164.1,
+    "fuel_kg": 164.7,
     "role": "structure",
     "mass_kg": 230
    },
    "bounds_unity": [
     [
      -1.366,
-     -0.28284,
+     -0.28283,
      -1.80428
     ],
     [
      1.366,
-     0.28284,
+     0.28283,
      1.80428
     ]
    ],
-   "sha256": "6dca2cb4ca20190c4b5736829218c48861f1cf118f16a3ba377d0fe452f2485d",
+   "sha256": "086878168b70a9eec7b7873d5a4e32115ca2818ad4dad26729eeb6e8a0ce897d",
    "bounds_blender": [
     [
      -1.366,
      -1.80428,
-     -0.28284
+     -0.28283
     ],
     [
      1.366,
      1.80428,
-     0.28284
+     0.28283
     ]
    ],
-   "tris": 4756,
+   "tris": 1276,
    "materials": [
     [
-     "Icarus_Int_Structure",
-     3420
+     "aircraft_structure",
+     828
     ],
     [
-     "Icarus_Int_Fuel",
-     1336
+     "jet_mechanical",
+     448
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "wing_spar_R_colmesh0",
-     "verts": 45,
-     "tris": 86,
+     "verts": 39,
+     "tris": 74,
      "bounds_unity": [
       [
        -1.366,
-       -0.28181,
-       -1.80361
+       -0.28283,
+       -1.80274
       ],
       [
        1.366,
-       0.27582,
-       1.75424
+       0.27721,
+       1.80428
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 86
+    "tris": 74
    }
   }
  }

@@ -113,16 +113,27 @@ PARAMS = {
         ("aileron_L", 2.08, 3.28, 0.74, 1.00),
     ],
     "fin_surfaces": [("rudder", 1.15, 2.55, 0.68, 1.00)],
-    "surface_gap": 0.012,  # metres between a surface and the box, spanwise and chordwise
+    "surface_gap": 0.012,  # metres between a surface and the box spanwise; a fraction of the local chord chordwise
+    # Metres the box's cut-out runs on past each end of its surface: a surface turning on a swept hinge in the
+    # drooped wing plane swings its end inboard, through the 6 mm spanwise gap.
+    "surface_cove": 0.02,
+    # Authored travel in degrees from the built pose, the one source IcarusAuthor.Aero.cs reads (blockout.json,
+    # each hinge's deflection_deg): ailerons, rudder and stabilators both ways; flaps and leading-edge flaps droop;
+    # the speed brakes open outward.
+    "surface_travel": {"aileron": 20, "rudder": 25, "stabilator": 15, "flap": 25, "lef": 20, "speed_brake": 60},
     "stabilator_pivot_s": 15.45,
     # Speed brakes on the aft fuselage sides: s range and the height band of skin they cover; hinged at the front.
     "speed_brake": {"s0": 12.55, "s1": 13.35, "z0": -0.18, "z1": 0.30},
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
-    # with a small 45 degree cut at the tip's trailing corner.
+    # with a small 45 degree cut at the tip's trailing corner. The root rib stands just outboard of the fin-tip
+    # fairing, so a half pivots clear of the fairing and of its twin.
     "stabilator": {
-        "sections": [(14.78, 0.0, 2.82, 1.91), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
+        "sections": [(14.804, 0.07, 2.82, 1.886), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
         "thickness": 0.045,
     },
+    # The fin-tip fairing round the stabilator pivot, as on the F-104: a body of revolution about a fore-aft axis at
+    # height z, from s0 to s1, hiding the fin tip.
+    "fin_fairing": {"z": 2.83, "s0": 14.62, "s1": 15.75, "radius": 0.06},
     "ventral_fin": {
         "sections": [(10.85, 0.0, -0.22, 2.25), (10.95, 0.0, -0.62, 2.05)],  # root buried above the rising belly
         "thickness": 0.05,
@@ -149,8 +160,9 @@ def wing_sections(w):
     return [(le, x, w["root_z"] - (x - x0) * t, te - le) for le, x, te in w["planform"]]
 
 
-RING = 144  # vertices around a fuselage section; the intakes span only a fraction of each ring
-CHORD = 24  # points along each airfoil surface
+RING = 96  # vertices around a fuselage section; the intakes span only a fraction of each ring
+CHORD = 22  # points along each airfoil surface over the full chord; a piece of the chord takes its share, at least 6
+SPAN_STEP = 0.4  # most metres between the span stations of a lifting-surface piece
 
 
 def P(s, x, z):
@@ -202,12 +214,13 @@ def superellipse(c, e):
     return math.copysign(abs(c) ** (2.0 / e), c)
 
 
-def body_ring(s, hw, top, bot, e_top, e_bot=2.0, xc=0.0, zmid=None):
+def body_ring(s, hw, top, bot, e_top, e_bot=2.0, xc=0.0, zmid=None, count=144):
+    """A superellipse section of count points (the canopy's)."""
     zmid = bot + hw if zmid is None else zmid
     zmid = min(zmid, top)
     ring = []
-    for k in range(RING):
-        a = 2 * math.pi * k / RING
+    for k in range(count):
+        a = 2 * math.pi * k / count
         c, sn = math.cos(a), math.sin(a)
         e = e_top if sn >= 0 else e_bot
         x = xc + hw * superellipse(c, e)
@@ -400,8 +413,8 @@ def blended_ring(p, s):
 def build_fuselage(p, mat, duct_mat):
     table = p["fuselage"]
     lip = p["intake"][0][0]
-    stations = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 30)[1:]
-                + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, table[-1][0], 70)[1:])
+    stations = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
+                + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, table[-1][0], 50)[1:])
     rings = [blended_ring(p, s) for s in stations]
     obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]))  # open at the tail: the nozzle shroud fills it
     finish(obj, mat)
@@ -447,14 +460,30 @@ def section_at(sections, u, axis):
     raise ValueError("span position %.3f outside the sections" % u)
 
 
-def strip(name, sections, stations, thickness, axis):
+def span_stations(sections, axis, u0, u1, breaks=()):
+    """Span positions from u0 to u1 (x on a wing, z on a fin): every section row and break between them, so the
+    planform's kinks stay exact, with the gaps subdivided to at most SPAN_STEP."""
+    key = 1 if axis == "x" else 2
+    marks = sorted({u0, u1} | {u for u in [s[key] for s in sections] + list(breaks) if u0 < u < u1})
+    out = [u0]
+    for a, b in zip(marks, marks[1:]):
+        n = max(1, math.ceil((b - a) / SPAN_STEP - 1e-9))
+        out += [a + (b - a) * i / n for i in range(1, n + 1)]
+    return out
+
+
+def strip(name, sections, stations, thickness, axis, mats=None, trim_caps=False, count=None):
     """A closed piece of a lifting surface. stations: (u, f0, f1) along the span; each ring spans chord fractions
-    f0..f1 of the full-chord airfoil, so neighbouring pieces share one airfoil. Two stations at the same u with
-    different fractions make the wall at a cutout's end."""
+    f0..f1 of the full-chord airfoil, so neighbouring pieces share one airfoil, with count points a side (by default
+    in proportion to the widest span of chord). Two stations at the same u with different fractions make the wall at
+    a cutout's end. mats = (skin, trim) finishes the piece: the walls a cut leaves (inside the chord, and at a
+    cutout's ends) go on the trim, and the end caps too with trim_caps, so the cove a moving surface opens shows trim,
+    not skin."""
+    count = count or max(6, round(CHORD * max(f1 - f0 for _, f0, f1 in stations)))
     rings = []
     for u, f0, f1 in stations:
         s_le, x, z, chord = section_at(sections, u, axis)
-        ts = [f0 + (f1 - f0) * 0.5 * (1 - math.cos(math.pi * i / (CHORD - 1))) for i in range(CHORD)]
+        ts = [f0 + (f1 - f0) * 0.5 * (1 - math.cos(math.pi * i / (count - 1))) for i in range(count)]
         upper, lower = [], []
         for t in ts:
             half = max(airfoil(t) * thickness * chord, 0.0015)
@@ -465,21 +494,43 @@ def strip(name, sections, stations, thickness, axis):
         rings.append(upper + lower[::-1])
     n = len(rings[0])
     verts = [v for r in rings for v in r]
-    faces = [(j * n + k, j * n + (k + 1) % n, (j + 1) * n + (k + 1) % n, (j + 1) * n + k)
-             for j in range(len(rings) - 1) for k in range(n)]
+    faces, walls = [], []
+    for j, ((u, f0, f1), (u_next, _, _)) in enumerate(zip(stations, stations[1:])):
+        for k in range(n):
+            faces.append((j * n + k, j * n + (k + 1) % n, (j + 1) * n + (k + 1) % n, (j + 1) * n + k))
+            # quad count - 1 is the wall across chord fraction f1, quad n - 1 the wall across f0
+            walls.append(u == u_next or (k == count - 1 and f1 < 1.0) or (k == n - 1 and f0 > 0.0))
     faces.append(tuple(range(n))[::-1])
     faces.append(tuple((len(rings) - 1) * n + k for k in range(n)))
-    return mesh_object(name, verts, faces)
+    walls += [trim_caps, trim_caps]
+    obj = mesh_object(name, verts, faces)
+    if mats is not None:
+        finish(obj, mats[0])
+        obj.data.materials.append(mats[1])
+        for poly, wall in zip(obj.data.polygons, walls):
+            poly.material_index = 1 if wall else 0
+    # Two rings at one u share the chord end their fractions have in common: weld those points, so the wall carries
+    # no zero-area faces (the importer drops them and the slot's triangles no longer match the export).
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
+    bm.to_mesh(obj.data)
+    bm.free()
+    return obj
 
 
-def box_stations(u0, u1, cuts, gap, step=0.12):
-    """Stations for the fixed box of a surface: full chord except where a control surface is cut out."""
-    edges = sorted({u0, u1} | {c for _, a, b, _, _ in cuts for c in (a - gap / 2, b + gap / 2) if u0 < c < u1})
+def box_stations(sections, axis, cuts, gap, cove):
+    """Stations for the fixed box of a surface: full chord except where a control surface is cut out, the cut-out
+    running cove past the surface's ends."""
+    key = 1 if axis == "x" else 2
+    u0, u1 = sections[0][key], sections[-1][key]
+    reach = gap / 2 + cove
+    edges = {c for _, a, b, _, _ in cuts for c in (a - reach, b + reach) if u0 < c < u1}
 
     def chord_range(u):
         f0, f1 = 0.0, 1.0
         for _, a, b, c0, c1 in cuts:
-            if a - gap / 2 <= u <= b + gap / 2:
+            if a - reach <= u <= b + reach:
                 if c0 == 0.0:
                     f0 = max(f0, c1 + gap / 2)
                 else:
@@ -487,10 +538,10 @@ def box_stations(u0, u1, cuts, gap, step=0.12):
         return f0, f1
 
     stations = []
-    for a, b in zip(edges, edges[1:]):
-        mid = chord_range(0.5 * (a + b))
-        count = max(2, int(math.ceil((b - a) / step)) + 1)
-        stations += [(a + (b - a) * i / (count - 1),) + mid for i in range(count)]
+    for u in span_stations(sections, axis, u0, u1, edges):
+        # at a cut edge the box steps from the chord range on one side to the other's: two rings at one u
+        for f in dict.fromkeys([chord_range(u - 1e-6), chord_range(u + 1e-6)]):
+            stations.append((u,) + f)
     return stations
 
 
@@ -517,19 +568,26 @@ def hinged(name, mesh_obj, frame, parent=None):
     return [hinge, mesh_obj]
 
 
-def control_surface(name, sections, cut, thickness, axis, gap, mat):
+def surface_travel(p, name):
+    """The authored travel of a hinged surface, by its name less the side suffix (PARAMS["surface_travel"])."""
+    return p["surface_travel"][name[:-2] if name.endswith(("_L", "_R")) else name]
+
+
+def control_surface(p, name, sections, cut, thickness, axis, gap, mats):
     _, u0, u1, f0, f1 = cut
     u0, u1 = u0 + gap / 2, u1 - gap / 2
     f0 = f0 + gap / 2 if f0 > 0 else f0
     f1 = f1 - gap / 2 if f1 < 1 else f1
-    stations = [(u0 + (u1 - u0) * i / 8, f0, f1) for i in range(9)]
-    obj = finish(strip(name, sections, stations, thickness, axis), mat)
+    stations = [(u, f0, f1) for u in span_stations(sections, axis, u0, u1)]
+    obj = strip(name, sections, stations, thickness, axis, (mats["body"], mats["mechanical"]), trim_caps=True)
     hinge_f = f1 if f0 == 0.0 else f0  # a leading-edge device hinges on its aft edge, the rest on their front edge
     ends = []
     for u in (u0, u1):
         s_le, x, z, chord = section_at(sections, u, axis)
         ends.append(P(s_le + hinge_f * chord, x, z))
-    return hinged(name, obj, hinge_frame(*ends))
+    parts = hinged(name, obj, hinge_frame(*ends))
+    parts[0]["deflection_deg"] = surface_travel(p, name)
+    return parts
 
 
 def mirror_part(parts):
@@ -542,7 +600,8 @@ def mirror_part(parts):
             a = obj.matrix_world.translation.copy()
             b = a + obj.matrix_world.col[0].xyz
             twin = empty(obj.name.replace("_L", "_R"), hinge_frame(flip @ a, flip @ b))
-            twin["hinge_axis"] = "X"
+            for key in obj.keys():  # hinge_axis, deflection_deg
+                twin[key] = obj[key]
             out.append(twin)
     for obj in parts:
         if obj.type != "MESH":
@@ -562,29 +621,58 @@ def mirror_part(parts):
     return out
 
 
-def build_surfaces(p, mat):
+def build_surfaces(p, mats):
     gap = p["surface_gap"]
     wing = wing_sections(p["wing"])
     cuts = p["wing_surfaces"]
     t = p["wing"]["thickness"]
-    left = [finish(strip("wing_L", wing, box_stations(wing[0][1], wing[-1][1], cuts, gap), t, "x"), mat)]
+    trimmed = (mats["body"], mats["mechanical"])
+    cove = p["surface_cove"]
+    left = [strip("wing_L", wing, box_stations(wing, "x", cuts, gap, cove), t, "x", trimmed)]
     for cut in cuts:
-        left += control_surface(cut[0], wing, cut, t, "x", gap, mat)
+        left += control_surface(p, cut[0], wing, cut, t, "x", gap, mats)
     parts = left + mirror_part(left)
     fin, ft = p["fin"]["sections"], p["fin"]["thickness"]
-    parts.append(finish(strip("fin", fin, box_stations(fin[0][2], fin[-1][2], p["fin_surfaces"], gap), ft, "z"), mat))
+    parts.append(strip("fin", fin, box_stations(fin, "z", p["fin_surfaces"], gap, cove), ft, "z", trimmed))
     for cut in p["fin_surfaces"]:
-        parts += control_surface(cut[0], fin, cut, ft, "z", gap, mat)
+        parts += control_surface(p, cut[0], fin, cut, ft, "z", gap, mats)
+    parts.append(build_fin_fairing(p, mats["body"]))
     vf = p["ventral_fin"]
-    parts.append(finish(lifting_surface("ventral_fin", vf["sections"], vf["thickness"], "x"), mat))
+    parts.append(finish(lifting_surface("ventral_fin", vf["sections"], vf["thickness"], "x"), mats["body"]))
     st = p["stabilator"]["sections"]
-    stab = finish(lifting_surface("stabilator_L", st, p["stabilator"]["thickness"], "z"), mat)
+    stab = finish(lifting_surface("stabilator_L", st, p["stabilator"]["thickness"], "z"), mats["body"])
     left = hinged("stabilator_L", stab, Matrix.Translation(P(p["stabilator_pivot_s"], 0.0, st[0][2])))
+    left[0]["deflection_deg"] = surface_travel(p, "stabilator_L")
     return parts + left + mirror_part(left)
 
 
-def build_speed_brakes(p, mat):
-    """Panels lifted 6 mm off the side skin, hinged on their front edge to open outward."""
+def build_fin_fairing(p, mat):
+    """The fin-tip fairing: a round-ended body of revolution round the stabilator pivot, covering the fin tip. It is
+    detail of the fin skin and joins that part's mesh (parts.merge_details)."""
+    f = p["fin_fairing"]
+    zc, r, s0, s1 = f["z"], f["radius"], f["s0"], f["s1"]
+    nose, tail = 0.10, 0.10
+    profile = [(s0 + nose * (1 - math.cos(math.radians(d))), 0.97 * r * math.sin(math.radians(d))) for d in (25, 50, 70, 90)]
+    profile += [(s0 + 0.38, 0.97 * r), (s0 + 0.53, r), (s1 - 0.25, r), (s1 - 0.13, 0.97 * r)]
+    profile += [(s1 - tail + tail * math.sin(math.radians(d)), 0.97 * r * math.cos(math.radians(d))) for d in (30, 55, 75)]
+    segments = 12
+    verts = [P(s0, 0.0, zc), P(s1, 0.0, zc)]
+    for s, rad in profile:
+        verts += [P(s, rad * math.cos(a), zc + rad * math.sin(a)) for a in [2 * math.pi * k / segments for k in range(segments)]]
+    ring = lambda j, k: 2 + j * segments + k % segments
+    faces = [(0, ring(0, k + 1), ring(0, k)) for k in range(segments)]
+    faces += [(ring(j, k), ring(j, k + 1), ring(j + 1, k + 1), ring(j + 1, k))
+              for j in range(len(profile) - 1) for k in range(segments)]
+    faces += [(1, ring(len(profile) - 1, k), ring(len(profile) - 1, k + 1)) for k in range(segments)]
+    obj = finish(mesh_object("fin_fairing", verts, faces), mat)
+    obj["merge_into"] = "fin_skin"
+    return obj
+
+
+def build_speed_brakes(p, mats):
+    """Panels lifted 6 mm off the side skin, 3 mm thick, so they clear it shut. Each opens outward on a hinge along
+    its front edge, set at the edge's outermost point: the edge follows the round side, and a hinge on its chord
+    would swing the middle of the edge into the skin ahead."""
     sb = p["speed_brake"]
     columns = []
     for i in range(6):
@@ -594,16 +682,23 @@ def build_speed_brakes(p, mat):
     n = min(len(c) for c in columns)
     columns = [c[:n] for c in columns]
     outer = [v for c in columns for v in c]
-    inner = [v - Vector((1.0, 0.0, 0.0)) * 0.012 for v in outer]
+    inner = [v - Vector((1.0, 0.0, 0.0)) * 0.003 for v in outer]
     m = len(outer)
     faces = []
     for j in range(len(columns) - 1):
         for k in range(n - 1):
             a, b, c, d = j * n + k, j * n + k + 1, (j + 1) * n + k + 1, (j + 1) * n + k
             faces += [(d, c, b, a), (a + m, b + m, c + m, d + m)]
-    obj = finish(mesh_object("speed_brake_L", outer + inner, faces), mat)
+    obj = finish(mesh_object("speed_brake_L", outer + inner, faces), mats["body"])
+    obj.data.materials.append(mats["mechanical"])  # the inner face, seen when open
+    for poly in obj.data.polygons:
+        poly.material_index = poly.index % 2
     front = columns[0]
-    left = hinged("speed_brake_L", obj, hinge_frame(front[0], front[-1]))
+    along = (front[-1] - front[0]).normalized()
+    out = (Vector((1.0, 0.0, 0.0)) - along * along.x).normalized()
+    lift = out * max((q - front[0]).dot(out) for q in front)
+    left = hinged("speed_brake_L", obj, hinge_frame(front[0] + lift, front[-1] + lift))
+    left[0]["deflection_deg"] = surface_travel(p, "speed_brake_L")
     return left + mirror_part(left)
 
 
@@ -722,12 +817,12 @@ def _build(repo):
     import stations
 
     fuselage = build_fuselage(p, mats["body"], mats["duct"])
-    parts = [fuselage, build_probe(p, mats["metal"])]
+    parts = [fuselage, build_probe(p, mats["body"])]  # the radome part is all skin, probe included
     parts += gear.cut_doors(fuselage)
     parts += canopy.build(p, mats)
     parts += propulsion.build(p, mats)
-    parts += build_surfaces(p, mats["body"])
-    parts += build_speed_brakes(p, mats["body"])
+    parts += build_surfaces(p, mats)
+    parts += build_speed_brakes(p, mats)
     parts += gear.build(p, mats)
     parts += lights.build(p, mats)
     parts += stations.build(p, mats)
@@ -743,6 +838,7 @@ def _build(repo):
     import hulls
 
     hull_count = hulls.build(TARGET)
+    part_tree.open_bays(TARGET)  # render meshes only, after the hulls
     import checks
 
     checks.fuel_cell_clearance(TARGET)

@@ -38,8 +38,9 @@ INTERNALS = {
     "wing_tank": {"x": (1.95, 3.05), "f": (0.17, 0.68)},  # the box between the spars, outboard of the crank
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
-    "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "mass_kg_each": 9},
-    "spars": {"front_f": 0.15, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
+    "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "points": 48, "mass_kg_each": 9},
+    # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
+    "spars": {"front_f": 0.175, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
     "nose_gear_bay": {"box": (3.70, 5.15, 0.17, -0.48, -0.06), "mass_kg": 0},  # the nose leg folds forward into it
     "main_gear_bay": {"box": (9.35, 11.15, 0.20, -0.42, -0.04), "x": 0.36, "mass_kg": 0},
 }
@@ -54,15 +55,15 @@ def box(name, s0, s1, hw, z0, z1, x=0.0):
 
 def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None, count=None):
     """The skin section at s pulled inward by inset. With floor or x limits, the section is clipped to z >= floor
-    and x_lo <= x <= x_hi (a true polygon cut, so the result never leaves the skin) and resampled to count points
-    evenly round its outline, so neighbouring sections loft cleanly."""
+    and x_lo <= x <= x_hi (a true polygon cut, so the result never leaves the skin); clipped or given a count, it is
+    resampled to count points evenly round its outline, so neighbouring sections loft cleanly."""
     ring = bi.blended_ring(p, s)
     cz = sum(v.z for v in ring) / len(ring)
     out = []
     for v in ring:
         d = Vector((v.x, 0.0, v.z - cz))
         out.append(v - d.normalized() * inset if d.length > inset else Vector((0.0, v.y, cz)))
-    if floor is None and x_lo is None:
+    if floor is None and x_lo is None and count is None:
         return out
     y = out[0].y
     pts = [(v.x, v.z) for v in out]
@@ -125,11 +126,11 @@ def resample_outline(poly, n):
 
 def duct_cutter(p, clearance):
     """Closed solids around each intake duct and its shock cone, grown by clearance, to cut out of the fuel cells."""
-    rows = bi.resample(p["duct"], bi.spaced(p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 20))
+    rows = bi.resample(p["duct"], bi.spaced(p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 14))
     cutters = []
     for side in (1, -1):
         rings = [[bi.P(s, side * (cx + (r + clearance) * math.cos(a)), cz + (r + clearance) * math.sin(a))
-                  for a in [2 * math.pi * k / 48 for k in range(48)]] for s, cx, cz, r in rows]
+                  for a in [2 * math.pi * k / 32 for k in range(32)]] for s, cx, cz, r in rows]
         cutters.append(outward(bi.loft("duct_cutter_%d" % side, rings, cap_back=True, cap_front=True)))
         sc = p["shock_cone"]
         zc = p["intake"][0][2]
@@ -172,10 +173,11 @@ def grown(obj, by):
     return cutter
 
 
-def inner_solid(p, inset, s0=0.25, s1=15.15):
-    """A closed solid just inside the fuselage skin, to clip compartments to."""
-    n = int(round((s1 - s0) / 0.05)) + 1
-    rings = [ring_at(p, s0 + (s1 - s0) * i / (n - 1), inset) for i in range(n)]
+def inner_solid(p, inset, s0=0.25, s1=15.15, step=0.05, count=None):
+    """A closed solid just inside the fuselage skin, to clip compartments to: sections every step metres, of count
+    points (the skin's own ring by default). A clipped compartment takes on its faceting."""
+    n = int(round((s1 - s0) / step)) + 1
+    rings = [ring_at(p, s0 + (s1 - s0) * i / (n - 1), inset, count=count) for i in range(n)]
     return outward(bi.loft("inner_solid", rings, cap_back=True, cap_front=True))
 
 
@@ -212,13 +214,16 @@ def subtract(obj, cutters):
 
 def drop_degenerate(obj):
     """Booleans leave zero-area slivers and empty material slots from the cutter; drop both so the export carries
-    neither. A boolean result here is one material."""
-    keep = next((m for m in obj.data.materials if m is not None), None)
-    obj.data.materials.clear()
-    if keep is not None:
-        obj.data.materials.append(keep)
-    for poly in obj.data.polygons:
-        poly.material_index = 0
+    neither. The faces keep their own materials (a fin keeps its rudder cove's trim); cut faces take the first."""
+    slots = list(obj.data.materials)
+    keep = [m for m in dict.fromkeys(slots) if m is not None]
+    remap = [keep.index(m) if m is not None else 0 for m in slots] or [0]
+    faces = [remap[min(poly.material_index, len(remap) - 1)] for poly in obj.data.polygons]
+    obj.data.materials.clear()  # resets every face's index
+    for m in keep:
+        obj.data.materials.append(m)
+    for poly, index in zip(obj.data.polygons, faces):
+        poly.material_index = index
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.dissolve_degenerate(bm, dist=1e-5, edges=bm.edges)
@@ -235,13 +240,15 @@ def mesh_volume(obj):
 
 
 def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
-    # Stations every 0.1 m, plus either side of the intake lip, where the skin changes fastest: a coarser cell
-    # bridges straight across a quick change in the skin and pokes through it.
-    n = max(2, int(round((s1 - s0) / 0.1)) + 1)
+    # Stations every 0.2 m, but every 0.1 m within 0.3 m of the intake lip and either side of it, where the skin
+    # changes fastest: a coarser cell bridges straight across a quick change in the skin and pokes through it.
     lip = p["intake"][0][0]
-    stations = sorted({round(s0 + (s1 - s0) * i / (n - 1), 4) for i in range(n)}
-                      | {x for x in (lip - 0.02, lip + 0.06) if s0 < x < s1})  # clear of the skin's step at the lip
-    rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=64) for s in stations]
+    stations, s = [s0], s0
+    while s < s1 - 1e-6:
+        s = min(s1, s + (0.1 if abs(s - lip) < 0.3 else 0.2))
+        stations.append(round(s, 4))
+    stations = sorted(set(stations) | {x for x in (lip - 0.02, lip + 0.06) if s0 < x < s1})  # clear of the lip's step
+    rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=32) for s in stations]
     obj = bi.finish(outward(bi.loft(name, rings, cap_back=True, cap_front=True)), mat, smooth=False)
     subtract(obj, cutters)  # the cells are separate from the intake ducts, with clearance for the duct walls
     vol = mesh_volume(obj)
@@ -276,8 +283,10 @@ def build(p, col, mats):
 def _build(p, mats):
     I = INTERNALS
     parts = []
-    # Compartments are boxes clipped to a solid just inside the skin, so none can show through it.
-    inner = inner_solid(p, I["compartment_inset"])
+    # Compartments are boxes clipped to a solid just inside the skin, so none can show through it. Ahead of the intakes
+    # the section is convex, so a coarse solid stays inside the skin; the main bays, by the intake fillets, clip to
+    # the skin's own ring.
+    inner = inner_solid(p, I["compartment_inset"], 0.25, 5.35, step=0.25, count=48)
     r = I["radar"]
     nose = bi.blended_ring(p, r["dish_s"])
     cz = (max(v.z for v in nose) + min(v.z for v in nose)) / 2
@@ -292,7 +301,9 @@ def _build(p, mats):
         s0, s1, hw, z0, z1 = I[name]["box"]
         obj = bi.finish(clip_to(box(name, s0, s1, hw, z0, z1), inner), mats[role], smooth=False)
         parts.append(tag(obj, role, "fuselage", I[name]["mass_kg"]))
+    bpy.data.objects.remove(inner, do_unlink=True)
     mg = I["main_gear_bay"]
+    inner = inner_solid(p, I["compartment_inset"], mg["box"][0] - 0.15, mg["box"][1] + 0.15, step=0.15)
     for side, suffix in ((1, "_L"), (-1, "_R")):
         s0, s1, hw, z0, z1 = mg["box"]
         obj = clip_to(box("main_gear_bay" + suffix, s0, s1, hw, z0, z1, x=side * mg["x"]), inner)
@@ -311,7 +322,7 @@ def _build(p, mats):
     wing_rows = bi.wing_sections(p["wing"])
     cells = [("fuel_strake", st), ("fuel_wing", I["wing_tank"])]
     for (cell, st), (side, suffix) in [(c, s) for c in cells for s in ((1, "_L"), (-1, "_R"))]:
-        stations = [(st["x"][0] + (st["x"][1] - st["x"][0]) * i / 6, st["f"][0], st["f"][1]) for i in range(7)]
+        stations = [(u, st["f"][0], st["f"][1]) for u in bi.span_stations(wing_rows, "x", *st["x"])]
         obj = bi.strip(cell + suffix, wing_rows, stations, p["wing"]["thickness"] * 0.85, "x")
         if side < 0:
             obj.data.transform(bi.Matrix.Scale(-1, 4, (1, 0, 0)))
@@ -341,8 +352,8 @@ def _build(p, mats):
     s = fr["s0"]
     k = 0
     while s <= fr["s1"] + 1e-9:
-        outer = ring_at(p, s, fr["inset"])
-        inner = ring_at(p, s, fr["inset"] + fr["depth"])
+        outer = ring_at(p, s, fr["inset"], count=fr["points"])
+        inner = ring_at(p, s, fr["inset"] + fr["depth"], count=fr["points"])
         aft = Vector((0, 0.025, 0))
         # outer band, aft face, inner band, front face: the fifth ring closes the frame's cross-section
         rings = [outer, [v + aft for v in outer], [v + aft for v in inner], inner, outer]
@@ -356,13 +367,14 @@ def _build(p, mats):
         pieces = []
         x0, x1 = 0.62, wing[-1][1] - 0.06
         for name, f in (("spar_front", sp["front_f"]), ("spar_rear", sp["rear_f"])):
-            stations = [(x0 + (x1 - x0) * i / 10, f - 0.006, f + 0.006) for i in range(11)]
+            stations = [(u, f - 0.006, f + 0.006) for u in bi.span_stations(wing, "x", x0, x1)]
             pieces.append(bi.strip(name + suffix, wing, stations, p["wing"]["thickness"] * 0.9, "x"))
         n_ribs = int((x1 - x0) / sp["rib_pitch"]) + 1
         for i in range(n_ribs):
             u = x0 + i * (x1 - x0) / (n_ribs - 1)
             stations = [(u - 0.006, sp["front_f"], sp["rear_f"]), (u + 0.006, sp["front_f"], sp["rear_f"])]
-            pieces.append(bi.strip("rib_%02d%s" % (i, suffix), wing, stations, p["wing"]["thickness"] * 0.9, "x"))
+            pieces.append(bi.strip("rib_%02d%s" % (i, suffix), wing, stations, p["wing"]["thickness"] * 0.9, "x",
+                                   count=6))  # a flat web between the spars
         for obj in pieces:
             if side < 0:
                 obj.data.transform(bi.Matrix.Scale(-1, 4, (1, 0, 0)))

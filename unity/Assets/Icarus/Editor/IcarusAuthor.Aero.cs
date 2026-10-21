@@ -18,14 +18,19 @@ namespace Icarus.Editor
             ("stabilator_L", SurfaceKind.Pitch), ("stabilator_R", SurfaceKind.Pitch),
             ("flap_L", SurfaceKind.Flap), ("flap_R", SurfaceKind.Flap), ("lef_L", SurfaceKind.LeadingEdge), ("lef_R", SurfaceKind.LeadingEdge),
         };
-        // Control ranges in degrees: the all-moving stabilator needs less throw than an elevator.
-        private const float AileronRange = 20f, RudderRange = 25f, StabilatorRange = 15f;
-        // Trailing-edge flaps as the Revoker's (R6): gear-independent, by speed, 25 degrees, no added area, their own lift
-        // normal turning with them. Leading-edge flaps (R6 structure, R7 numbers): 20 degrees of droop and 1.25 m2 more
-        // area a side below 100 m/s, gone above 160, on a lift normal that doesn't droop, so the device adds area as R7's
-        // replica sized it.
-        private const float FlapDroop = 25f, FlapSpeedDeployed = 90f, FlapSpeedRetracted = 150f;
-        private const float LefDroop = 20f, LefSpeedDeployed = 100f, LefSpeedRetracted = 160f, LefAddedArea = 1.25f;
+        // Control ranges, flap and leading-edge flap droop and the speed brakes' opening come from the generator's surface
+        // table (build_icarus.py PARAMS["surface_travel"]), the travel its surface sweep checks: each hinge's
+        // deflection_deg in blockout.json.
+        private static float Deflection(Build b, string name)
+        {
+            var deg = b.Blockout.Parts[name].Number("deflection_deg");
+            return deg > 0f ? deg : throw new InvalidDataException($"{name} has no deflection_deg in blockout.json");
+        }
+        // Trailing-edge flaps as the Revoker's (R6): gear-independent, by speed, no added area, their own lift normal
+        // turning with them. Leading-edge flaps (R6 structure, R7 numbers): 1.25 m2 more area a side below 100 m/s, gone
+        // above 160, on a lift normal that doesn't droop, so the device adds area as R7's replica sized it.
+        private const float FlapSpeedDeployed = 90f, FlapSpeedRetracted = 150f;
+        private const float LefSpeedDeployed = 100f, LefSpeedRetracted = 160f, LefAddedArea = 1.25f;
 
         // R14's areas: 20.8079 m2 of main wing, the gross planform with the root chord carried to the centreline (both sides,
         // surfaces included), 3.0 of horizontal tail (R7's, not the drawn 5.75), 2.0 of body; the fin and rudder carry
@@ -77,6 +82,7 @@ namespace Icarus.Editor
                     var centre = hinge.InverseTransformPoint(renderer.bounds.center);
                     var sign = (hinge.TransformPoint(Quaternion.AngleAxis(1f, Vector3.right) * centre).y < renderer.bounds.center.y) ? 1f : -1f;
                     var flap = kind == SurfaceKind.Flap;
+                    var droop = Deflection(b, name);
                     var device = part.AddComponent(GameType("HighLiftDevice"));
                     EditorUtility.CopySerialized(b.Donor.DeviceTemplate, device);
                     var so = new SerializedObject(device);
@@ -96,9 +102,9 @@ namespace Icarus.Editor
                     entry.FindPropertyRelative("positionRetracted").vector3Value = Vector3.zero;
                     entry.FindPropertyRelative("positionDeployed").vector3Value = Vector3.zero;
                     entry.FindPropertyRelative("anglesRetracted").vector3Value = Vector3.zero;
-                    entry.FindPropertyRelative("anglesDeployed").vector3Value = new Vector3(sign * (flap ? FlapDroop : LefDroop), 0, 0);
+                    entry.FindPropertyRelative("anglesDeployed").vector3Value = new Vector3(sign * droop, 0, 0);
                     so.ApplyModifiedPropertiesWithoutUndo();
-                    b.Report.Add($"surface {name}: HighLiftDevice {(flap ? FlapDroop : LefDroop) * sign:+0;-0} deg about {part.transform.right}, {(flap ? FlapSpeedDeployed : LefSpeedDeployed)} to {(flap ? FlapSpeedRetracted : LefSpeedRetracted)} m/s, +{(flap ? 0f : LefAddedArea)} m2");
+                    b.Report.Add($"surface {name}: HighLiftDevice {droop * sign:+0;-0} deg about {part.transform.right}, {(flap ? FlapSpeedDeployed : LefSpeedDeployed)} to {(flap ? FlapSpeedRetracted : LefSpeedRetracted)} m/s, +{(flap ? 0f : LefAddedArea)} m2");
                     continue;
                 }
 
@@ -106,11 +112,11 @@ namespace Icarus.Editor
                 var torque = Vector3.Cross(lift.position - cg, force);
                 float pitch = 0, roll = 0, yaw = 0;
                 if (kind == SurfaceKind.Roll)
-                    roll = b.Donor.RollSense * Mathf.Sign(torque.z) * AileronRange;
+                    roll = b.Donor.RollSense * Mathf.Sign(torque.z) * Deflection(b, name);
                 else if (kind == SurfaceKind.Yaw)
-                    yaw = b.Donor.YawSense * Mathf.Sign(torque.y) * RudderRange;
+                    yaw = b.Donor.YawSense * Mathf.Sign(torque.y) * Deflection(b, name);
                 else
-                    pitch = b.Donor.PitchSense * Mathf.Sign(torque.x) * StabilatorRange;
+                    pitch = b.Donor.PitchSense * Mathf.Sign(torque.x) * Deflection(b, name);
                 var surface = part.AddComponent(GameType("ControlSurface"));
                 EditorUtility.CopySerialized(b.Donor.SurfaceTemplate, surface);
                 var cs = new SerializedObject(surface);
@@ -164,6 +170,9 @@ namespace Icarus.Editor
             var so = new SerializedObject(airbrake);
             SetList(Prop(so, "transforms"), openers);
             Prop(so, "part").objectReferenceValue = b.Part("fuselage_aft");
+            if (Deflection(b, "speed_brake_L") != Deflection(b, "speed_brake_R"))
+                throw new InvalidDataException("the speed brakes open by different angles; the one Airbrake turns both alike");
+            Prop(so, "maxAngle").floatValue = Deflection(b, "speed_brake_L");
             so.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add($"speed brakes: {openers.Count} panels open {Prop(so, "maxAngle").floatValue} deg outward on fuselage_aft, drag {Prop(so, "dragAmount").floatValue}");
         }
@@ -218,8 +227,11 @@ namespace Icarus.Editor
                 aero["wing_spar_" + side] = (spar, WingAirfoil);
                 aero["stabilator_" + side] = (TailArea / 2, TailAirfoil);
             }
-            var finSkin = b.Parts["fin_skin"].transform;
-            aero["fin_spar"] = (SideArea(b.Meshes["fin_skin"].Render, finSkin), TailAirfoil);
+            // the fin's own side area, which the generator measures before the fin-tip fairing joins the fin skin
+            var finArea = b.Blockout.Parts["fin_skin"].Number("side_area_m2");
+            if (finArea <= 0)
+                throw new InvalidDataException("fin_skin has no side_area_m2 in blockout.json");
+            aero["fin_spar"] = (finArea, TailAirfoil);
             aero["rudder"] = (SideArea(b.Meshes["rudder_visible"].Render, b.Visuals["rudder_visible"]), TailAirfoil);
             aero[RootPart] = (BodyArea, BodyAirfoil);
             if (Mathf.Abs(DragAreas.Values.Sum() - DragAreaTotal) > 1e-4f)
@@ -261,11 +273,18 @@ namespace Icarus.Editor
             var chordPoints = skinPoints
                 .Concat(new[] { "flap_", "aileron_", "lef_" }.SelectMany(s => WorldVertices(b.Visuals[s + side + "_visible"], b.Meshes[s + side + "_visible"].Render))).ToArray();
             var centroid = AreaCentroid(skin, b.Meshes["wing_skin_" + side].Render);
-            var slab = chordPoints.Where(p => Mathf.Abs(p.x - centroid.x) < 0.12f).ToArray();
-            if (slab.Length < 4)
-                throw new InvalidDataException($"wing_skin_{side}: no chord at its centroid x {centroid.x:F2}");
-            var le = slab.Max(p => p.z);
-            var te = slab.Min(p => p.z);
+            // The edges at the centroid's span, interpolated between the span stations either side of it: the
+            // skin and its surfaces share their stations, so each station holds the leading and trailing edge.
+            var stations = chordPoints.GroupBy(p => Mathf.Round(Mathf.Abs(p.x) * 1000f))
+                .Select(g => (X: g.Key / 1000f, Le: g.Max(p => p.z), Te: g.Min(p => p.z))).OrderBy(s => s.X).ToArray();
+            var atX = Mathf.Abs(centroid.x);
+            var next = Array.FindIndex(stations, s => s.X >= atX);
+            if (next < 1)
+                throw new InvalidDataException($"wing_skin_{side}: no chord stations either side of its centroid x {centroid.x:F2}");
+            var (inboard, outboard) = (stations[next - 1], stations[next]);
+            var along = (atX - inboard.X) / (outboard.X - inboard.X);
+            var le = Mathf.Lerp(inboard.Le, outboard.Le, along);
+            var te = Mathf.Lerp(inboard.Te, outboard.Te, along);
             var quarter = new Vector3(centroid.x, centroid.y, le - 0.25f * (le - te));
             var minX = skinPoints.Min(p => Mathf.Abs(p.x));
             var maxX = skinPoints.Max(p => Mathf.Abs(p.x));

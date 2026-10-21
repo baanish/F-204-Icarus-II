@@ -9,12 +9,16 @@ plan in the project notes (41 parts, 5,800 kg dry); the stabilator is two pivoti
 Detail a package builds as its own object tagged merge_into = "<part>" joins that part's mesh (merge_details), so it
 takes the part's livery and damage without a renderer of its own.
 """
+import math
+
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
+from mathutils.bvhtree import BVHTree
 
 import build_icarus as bi
 import canopy
+import checks
 import internals as interior
 import lights
 import stations
@@ -38,7 +42,13 @@ BUDGET = {
     "engine": {"target": 1500, "cap": 1500, "objects": ("engine_core",)},
     "radar_avionics_cockpit": {"target": 1500, "cap": 1500, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
 }
-CLOSEUPS = {}
+# Review close-ups: name -> (camera location, look-at point), Blender axes.
+CLOSEUPS = {
+    "nose": (Vector((1.6, -10.6, 0.6)), Vector((0.0, -7.3, 0.05))),
+    "wing_box": (Vector((3.4, 0.4, 4.6)), Vector((2.1, 2.2, 0.0))),
+    "fin_tip_side": (Vector((4.0, 7.2, 3.0)), Vector((0.0, 7.2, 2.75))),
+    "fin_tip_rear": (Vector((1.2, 12.5, 3.4)), Vector((0.0, 7.3, 2.8))),
+}
 
 # part name -> (parent, dry mass kg). Hinged surfaces are listed by their hinge name. The canopy, light and station
 # modules list their own parts (organise merges their TREEs).
@@ -184,11 +194,14 @@ def rename(obj, name):
 
 
 def keel(name, s0, s1, p, mat):
-    """A thin keel member along the inside of the belly, so a structure core has something solid to hit."""
-    rows = [(s, bi.pchip([r[0] for r in p["fuselage"]], [r[3] for r in p["fuselage"]], s)) for s in (s0, s1)]
-    z0 = max(r[1] for r in rows) + 0.06
-    obj = bi.mesh_object(name, [bi.P(s, x, z) for s in (s0, s1) for x in (-0.05, 0.05) for z in (z0, z0 + 0.08)],
-                         [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)])
+    """A thin keel member along the inside of the belly, so a structure core has something solid to hit. It follows
+    the belly 6 cm above it, area-rule waist included, in ten straight pieces."""
+    rings = []
+    for i in range(11):
+        s = s0 + (s1 - s0) * i / 10
+        z0 = min(v.z for v in bi.blended_ring(p, s) if abs(v.x) < 0.06) + 0.06
+        rings.append([bi.P(s, x, z) for x, z in ((-0.05, z0), (0.05, z0), (0.05, z0 + 0.08), (-0.05, z0 + 0.08))])
+    obj = bi.loft(name, rings, cap_back=True, cap_front=True)
     obj.data.materials.append(mat)
     return obj
 
@@ -283,13 +296,19 @@ def _organise(p, icarus, internals, structure_mat):
     fin_spar.data.materials.append(structure_mat)
     # The fin sits on the fuselage: trim its buried root to the skin, so it clears the engine and nozzle in the
     # tight tail cone, and its root follows the body's top line.
-    body = interior.inner_solid(p, 0.0, 11.5, 15.4)
+    body = interior.inner_solid(p, 0.0, 11.5, 15.4, step=0.15)  # no finer than the skin's own stations
     for obj in (O["fin_skin"], fin_spar):
         interior.subtract(interior.outward(obj), [body])
     bpy.data.objects.remove(body, do_unlink=True)
+    # The fin's own side area, before the fin-tip fairing joins its mesh: IcarusAuthor.Aero.cs gives the fin this
+    # lifting area, and the fairing is no part of it.
+    O["fin_skin"]["side_area_m2"] = round(side_area(O["fin_skin"]), 4)
     # The canopy's lower edge dips into the fuselage; keep the cockpit cell clear of it.
     solid = canopy.build_canopy(p, structure_mat)  # the closed canopy shape; the built hood and windscreen are open
-    canopy_cut = interior.grown(solid, 0.01)
+    # Grown 2 cm and thinned to a fifth of its faces: the cut takes on the cutter's faceting, and the full glass mesh
+    # would spend a thousand triangles of the cell on it.
+    canopy_cut = interior.grown(solid, 0.02)
+    canopy_cut.modifiers.new("coarse", "DECIMATE").ratio = 0.2
     interior.subtract(interior.outward(O["cockpit_cell"]), [canopy_cut])
     for o in (solid, canopy_cut):
         bpy.data.objects.remove(o, do_unlink=True)
@@ -329,7 +348,134 @@ def _organise(p, icarus, internals, structure_mat):
 
 
 def check(icarus):
-    return None
+    import budget
+
+    over = budget.over_caps(icarus, BUDGET)
+    if over:
+        raise ValueError("parts: over the triangle caps: " + "; ".join(over))
+    print(surface_sweep(icarus))
+
+
+def side_area(obj):
+    """Area of a mesh seen along X, as IcarusAuthor.Aero.cs SideArea measures it: every triangle projected on the
+    YZ plane, both faces, halved."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.triangulate(bm, faces=bm.faces)
+    rot = obj.matrix_world.to_3x3()
+    area = sum(abs((rot @ (f.verts[1].co - f.verts[0].co)).cross(rot @ (f.verts[2].co - f.verts[0].co)).x) / 2
+               for f in bm.faces)
+    bm.free()
+    return area / 2
+
+
+SWEEP_STEP = 2.5  # most degrees between two poses of the surface sweep
+TWO_WAY = ("aileron", "rudder", "stabilator")  # the rest move one way: flaps and LEFs droop, speed brakes open out
+# What a moving surface must not meet: the boxes and skins around it, the nozzle, and every other surface at rest.
+SWEEP_FIXED = ("wing_skin_", "wing_spar_", "fin_skin", "fin_spar", "ventral_fin", "radome", "skin_", "dorsal_cover",
+               "nozzle", "pylon_", "intake_duct_")
+
+
+def surface_sweep(icarus):
+    """Turn every hinge with a deflection_deg (flaps, LEFs, ailerons, rudder, stabilator halves, speed brakes) through
+    its authored travel in steps of at most SWEEP_STEP, both ways where it has them, and fail if its mesh meets the
+    airframe or another surface at rest: BVH triangle overlap, not sampled points."""
+    O = bpy.data.objects
+    hinges = sorted((o for o in icarus.all_objects if o.type == "EMPTY" and "deflection_deg" in o), key=lambda o: o.name)
+    meshes = {o.name: checks.tree(o) for o in icarus.all_objects if o.type == "MESH" and (
+        o.name.startswith(SWEEP_FIXED) or o.name in [h.name + "_visible" for h in hinges])}
+    clashes, poses = [], 0
+    for hinge in hinges:
+        vis = O[hinge.name + "_visible"]
+        local = hinge.matrix_world.inverted() @ vis.matrix_world
+        centre = sum((v.co for v in vis.data.vertices), Vector()) / len(vis.data.vertices)
+
+        def turned(deg):
+            return hinge.matrix_world @ Matrix.Rotation(math.radians(deg), 4, "X") @ local
+
+        travel = hinge["deflection_deg"]
+        kind = hinge.name[:-2] if hinge.name.endswith(("_L", "_R")) else hinge.name
+        if kind in TWO_WAY:
+            signs = (1, -1)
+        else:  # the way that moves the middle down (flaps, LEFs) or away from the centreline (speed brakes)
+            score = (lambda m: abs((m @ centre).x)) if kind == "speed_brake" else (lambda m: -(m @ centre).z)
+            signs = (1 if score(turned(1.0)) > score(turned(-1.0)) else -1,)
+        steps = math.ceil(travel / SWEEP_STEP)
+        others = [n for n in meshes if n != vis.name]
+        for sign in signs:
+            for i in range(steps + 1):
+                deg = sign * travel * i / steps
+                bm = bmesh.new()
+                bm.from_mesh(vis.data)
+                bm.transform(turned(deg))
+                posed = BVHTree.FromBMesh(bm)
+                bm.free()
+                poses += 1
+                clashes += ["%s at %+.1f deg meets %s" % (hinge.name, deg, n) for n in others if posed.overlap(meshes[n])]
+    if clashes:
+        raise ValueError("surface sweep: " + "; ".join(clashes[:20]) + (" (%d in all)" % len(clashes) if len(clashes) > 20 else ""))
+    return "surface sweep: %d hinges clear through %d poses" % (len(hinges), poses)
+
+
+def open_bays(icarus):
+    """Open the gear wells to view from below, in the structure cores' render meshes only (their hulls are built).
+    The internals build each bay as a closed box clipped to the inside of the skin and joined into its core, so from
+    below a bay read as shut, its walls facing away from anyone looking in. The floor under the shut doors goes, the
+    rest of the bay turns to face inward, and the frames and keel running through the bay are cut back to its walls."""
+    O = bpy.data.objects
+    nose, main = interior.INTERNALS["nose_gear_bay"], interior.INTERNALS["main_gear_bay"]
+    wells = {"fuselage_forward": ([nose["box"] + (0.0,)], ("gear_door_N_L", "gear_door_N_R")),
+             "fuselage_mid": ([main["box"] + (side * main["x"],) for side in (1, -1)],
+                              ("gear_door_main_L", "gear_door_main_R"))}
+    for core_name, (boxes, doors) in wells.items():
+        core = O[core_name]
+        bay_slot = [m.name for m in core.data.materials].index("jet_mechanical")
+        door_trees = [checks.tree(O[d + "_visible"]) for d in doors]
+        # the structure members, less the bay boxes run on down through the skin
+        members = core.copy()
+        members.data = core.data.copy()
+        icarus.objects.link(members)
+        bm = bmesh.new()
+        bm.from_mesh(members.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == bay_slot], context="FACES")
+        bm.to_mesh(members.data)
+        bm.free()
+        cutters = []
+        for s0, s1, hw, z0, z1, xc in boxes:
+            me = bpy.data.meshes.new("bay_cutter")
+            me.from_pydata([bi.P(s, xc + sx * hw, z) for s in (s0, s1) for sx in (-1, 1) for z in (z0 - 0.3, z1)], [],
+                           [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)])
+            cutter = bpy.data.objects.new("bay_cutter", me)
+            icarus.objects.link(cutter)
+            cutters.append(cutter)
+            mod = members.modifiers.new("bay", "BOOLEAN")
+            mod.operation, mod.solver, mod.object = "DIFFERENCE", "EXACT", cutter
+        bpy.context.view_layer.update()
+        cut = bpy.data.meshes.new_from_object(members.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+        # the bay: its faces turned to face in, less the floor under each door (a ray out of it meets the shut door)
+        bm = bmesh.new()
+        bm.from_mesh(core.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index != bay_slot], context="FACES")
+        to_world, rot = core.matrix_world, core.matrix_world.to_3x3()
+
+        def under_door(f):
+            o, n = to_world @ f.calc_center_median(), (rot @ f.normal).normalized()
+            return n.z < -0.25 and any(t.ray_cast(o, n, 0.12)[0] is not None for t in door_trees)
+
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if under_door(f)], context="FACES")
+        bmesh.ops.reverse_faces(bm, faces=bm.faces)
+        before = len(bm.faces)
+        bm.from_mesh(cut)  # appends the cut members, on the members' slots; the cut faces take the first, structure
+        bm.faces.ensure_lookup_table()
+        for f in bm.faces[before:]:
+            f.material_index = min(f.material_index, len(core.data.materials) - 1)
+        bm.to_mesh(core.data)
+        bm.free()
+        for o in cutters + [members]:
+            me = o.data
+            bpy.data.objects.remove(o)
+            bpy.data.meshes.remove(me)
+        bpy.data.meshes.remove(cut)
 
 
 def merge_details(icarus):
@@ -359,11 +505,11 @@ def merge_details(icarus):
         order = sorted(range(len(slots)), key=lambda i: slots[i].name != SKIN)  # stable: the skin moves to the front
         for f in bm.faces:
             f.material_index = order.index(f.material_index)
-        bm.to_mesh(part.data)
-        bm.free()
-        part.data.materials.clear()
+        part.data.materials.clear()  # resets the faces' indices, so before the faces are written back
         for i in order:
             part.data.materials.append(slots[i])
+        bm.to_mesh(part.data)
+        bm.free()
         bpy.data.meshes.remove(me)
         data = detail.data
         bpy.data.objects.remove(detail, do_unlink=True)
