@@ -9,9 +9,9 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The generator's material slots (art/blender/build_icarus.py and internals.py), remapped by name on import.
-        // Icarus_Body is the skin, the only slot that takes a livery; the internals keep their flat review colours so a
-        // part torn away reads as tank, engine or structure.
+        // The generator's material slots (art/blender/materials.py), remapped by name on import. Icarus_Body is the skin,
+        // the only slot that takes a livery; the internals keep their flat review colours so a part torn away reads as
+        // tank, engine or structure.
         private const string SkinSlot = "Icarus_Body";
         private const string GlassSlot = "Icarus_Glass";
         private const string LodSlot = "LOD";
@@ -26,11 +26,17 @@ namespace Icarus.Editor
             ("Icarus_Int_Engine", new Color32(149, 145, 140, 255), 0.9f, 0.6f),
             ("Icarus_Int_Structure", new Color32(219, 221, 224, 255), 0.6f, 0.5f),
             ("Icarus_Int_Avionics", new Color32(124, 180, 149, 255), 0.1f, 0.4f),
-            ("Icarus_Int_Cockpit", new Color32(155, 157, 160, 255), 0.2f, 0.4f),
             ("Icarus_Int_Bay", new Color32(89, 89, 92, 255), 0f, 0.2f),
             ("Icarus_Frame", new Color32(124, 126, 129, 255), 0.6f, 0.5f),
             ("Icarus_Strut", new Color32(219, 220, 221, 255), 1f, 0.75f),
             ("Icarus_Tyre", new Color32(49, 49, 49, 255), 0f, 0.1f),
+        };
+        // The stock slots (materials.py STOCK), each the game material Blueprinter patches in for its placeholder.
+        private static readonly string[] StockSlots =
+        {
+            "jet_mechanical", "aircraft_structure", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear", "fighter1_canopy",
+            "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats", "LOD", "light_red_off", "light_green_off",
+            "slimelight_on",
         };
         // The blockout finish (sRGB): bare steel, the generator's Icarus_Body, fully metallic at smoothness 0.68 (the metal
         // map holds metallic in R and smoothness in A).
@@ -63,6 +69,9 @@ namespace Icarus.Editor
             var map = new Dictionary<string, Material> { { SkinSlot, skin }, { GlassSlot, glass }, { LodSlot, Load<Material>(Stock + "Material/LOD_PLACEHOLDER.mat") } };
             foreach (var (slot, colour, metallic, smoothness) in FlatSlots)
                 map[slot] = AuthorFlat(slot, colour, metallic, smoothness);
+            foreach (var slot in StockSlots)
+                map[slot] = Load<Material>(Stock + "Material/" + slot + "_PLACEHOLDER.mat");
+            AuthorCockpitMaterial(map);
             return map;
         }
 

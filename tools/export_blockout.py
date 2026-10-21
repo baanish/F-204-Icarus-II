@@ -5,7 +5,8 @@ blender --background --factory-startup --python-exit-code 1 --python tools/expor
 The Icarus collection holds meshes and hinge empties. Every hinge has local X along
 its axis and a <name>_visible mesh child. Optional Colliders and LOD1 meshes must
 be identity-parented to their owner. Pivots and axes are world-space; mesh bounds
-are part-local. hinge_axis_unity is world-space positive Blender hinge X.
+are part-local. hinge_axis_unity is world-space positive Blender hinge X. Each mesh part lists its uv_layers, and
+design_eye is the canopy's design eye point (canopy.EYE), world-space.
 Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
 """
 
@@ -23,6 +24,7 @@ sys.path.insert(0, str(REPO / "tools"))
 sys.path.insert(0, str(REPO / "art/blender"))
 from scrub_fbx import scrub_file
 import build_icarus
+import canopy
 
 MAX_HULL = 255
 
@@ -195,15 +197,18 @@ def main():
         entry.update({"fbx": fbx.name, "sha256": sha256(fbx),
                       "bounds_blender": [[round(c, 5) for c in v] for v in (lo, hi)],
                       "bounds_unity": bounds_unity(lo, hi), "tris": tris(render),
-                      "materials": material_tris(render), "colliders": pieces,
+                      "materials": material_tris(render), "uv_layers": [layer.name for layer in render.uv_layers],
+                      "colliders": pieces,
                       "lod1": {"tris": tris(lod)} if lod else None})
         for temp in temps:
             bpy.data.objects.remove(temp, do_unlink=True)
         for _, mesh in meshes:
             bpy.data.meshes.remove(mesh)
     source = REPO / "art/blender/build_icarus.py"
+    eye = build_icarus.P(*canopy.EYE)
     manifest = {"source_generator": source.relative_to(REPO).as_posix(), "source_sha256": sha256(source),
                 "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
+                "design_eye": {"blender": [round(c, 5) for c in eye], "unity": to_unity(eye)},
                 "parts": report}
     (out / "blockout.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
     count = sum(p["fbx"] is not None for p in report.values())

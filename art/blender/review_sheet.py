@@ -91,16 +91,18 @@ def three_quarter(scene, out_dir):
     render_view(scene, cam, os.path.join(out_dir, "three_quarter.png"), (1600, 900))
 
 
-# Close-ups for details a full view hides: name -> (camera location, look-at point), Blender axes.
+# Close-ups for details a full view hides: name -> (camera location, look-at point), Blender axes. Each module in
+# build_icarus.MODULES adds its own.
 CLOSEUPS = {
-    "intake": (Vector((3.2, -6.6, 1.0)), Vector((0.8, -1.2, 0.2))),
     "tail": (Vector((4.5, 4.0, 5.5)), Vector((0.0, 7.8, 2.4))),
-    "intake_head_on": (Vector((0.8, -16.0, 0.22)), Vector((0.8, -1.0, 0.22))),
 }
 
 
 def closeups(scene, out_dir):
-    for name, (loc, target) in CLOSEUPS.items():
+    views = dict(CLOSEUPS)
+    for module in build_icarus.modules():
+        views.update(module.CLOSEUPS)
+    for name, (loc, target) in views.items():
         cam = camera("ReviewCam_" + name)
         cam.data.type = "PERSP"
         cam.data.lens = 200 if name.endswith("head_on") else 50

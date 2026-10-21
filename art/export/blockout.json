@@ -1,7 +1,19 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "395160586ce7ad26461fdbb8ee9e20b0aa5be5cd97b6677d44c8e5009a071836",
+ "source_sha256": "a87226020dd6af331ca1837f583b681d4cba8bdb1c6137aff8d72fbb50d80d9e",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
+ "design_eye": {
+  "blender": [
+   0.0,
+   -4.564,
+   0.93
+  ],
+  "unity": [
+   -0.0,
+   0.93,
+   4.564
+  ]
+ },
  "parts": {
   "aileron_L": {
    "fbx": null,
@@ -89,7 +101,7 @@
      0.00037
     ]
    ],
-   "sha256": "7ff040c8b106442b867b081ebefc6fb9a8dcb5f5cd1d3c47568f9080c8790983",
+   "sha256": "8ea9a6743f63099f6ecde699c04e2d1b4ac8d2edfb504edd87b0573991641d2a",
    "bounds_blender": [
     [
      -0.0053,
@@ -109,6 +121,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "aileron_L_visible_colmesh0",
@@ -218,7 +231,7 @@
      0.00037
     ]
    ],
-   "sha256": "ea2e3c8ffb3b85dd6d77dc7d986958364df7d554752b10dca603d5e1f37d73e1",
+   "sha256": "f05f5e8428528f353a95515db8f5c2f620a2c2eee2dd7cec2404edc25046f65e",
    "bounds_blender": [
     [
      -0.0053,
@@ -238,6 +251,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "aileron_R_visible_colmesh0",
@@ -307,7 +321,7 @@
      0.13
     ]
    ],
-   "sha256": "6b3659f8f628bf8affc253a216fa136082ba20c40cd72d54f96d09e5015284c9",
+   "sha256": "334e1ff771eccbcfcbea9f93717276df75972107721323a469f609596ad828f5",
    "bounds_blender": [
     [
      -0.006,
@@ -327,6 +341,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "antenna_datalink_top_colmesh0",
@@ -396,7 +411,7 @@
      0.11
     ]
    ],
-   "sha256": "8828e6508fd36045d8fe12f8860a394d484b738cfde4f4480a509c8049586980",
+   "sha256": "2de9f41c17f766c880865aca01a43a496712ae09ab450ad228ed3f1e84a32b97",
    "bounds_blender": [
     [
      -0.006,
@@ -416,6 +431,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "antenna_iff_belly_colmesh0",
@@ -485,7 +501,7 @@
      0.15
     ]
    ],
-   "sha256": "cc1bdd13759898816b64576d41e15b8d075abb3773f466cc5bdd9a3b8d634acc",
+   "sha256": "86d9e189e2527a7d3d21c27e3531921b051799ce4fd6389d70ef8da6f85047d3",
    "bounds_blender": [
     [
      -0.006,
@@ -505,6 +521,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "antenna_uhf_top_colmesh0",
@@ -575,7 +592,7 @@
      0.1
     ]
    ],
-   "sha256": "ade3fccd547d1cfab4b0ea8844374c5f7dc85df1015cc8475387f5d3ceb4d897",
+   "sha256": "9da4467ef78c73f975eeac448bd62ca204bb3ad210afd4f4b7437bd10a3ac7e0",
    "bounds_blender": [
     [
      -0.42,
@@ -595,6 +612,7 @@
      124
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "avionics_tray_colmesh0",
@@ -705,7 +723,7 @@
      0.47165
     ]
    ],
-   "sha256": "adbc27efcef6bd4075b3b541c56d30cdb4fb28d8104512df67c9c4f09831b499",
+   "sha256": "0c06d594a8a93ba0ddd24e20f9b3ac103b99cb71e1eedc4af8a9aae486a0f4d2",
    "bounds_blender": [
     [
      -0.0,
@@ -725,6 +743,7 @@
      5326
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "canopy_visible_colmesh0",
@@ -795,7 +814,7 @@
      1.275
     ]
    ],
-   "sha256": "25b765e2c02635e65a3fa338b4011952125f9d3b48d7ae1dbd19f21e41d37781",
+   "sha256": "1ad39384ea38b3489b3fffddbf307b0d9003644dde564e55152bf210c69ed623",
    "bounds_blender": [
     [
      -0.38,
@@ -815,6 +834,7 @@
      3238
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "cockpit_cell_colmesh0",
@@ -884,7 +904,7 @@
      3.70136
     ]
    ],
-   "sha256": "a885f455a9b746d53619c9f732c310853f2283033dc0f2f1d418d3622667d414",
+   "sha256": "489444852b85cfba8556540035ee113078f28cf1e8a3fbd96e5f5bc428a0a51f",
    "bounds_blender": [
     [
      -0.31231,
@@ -904,6 +924,7 @@
      2616
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "dorsal_cover_colmesh0",
@@ -1126,7 +1147,7 @@
      2.65
     ]
    ],
-   "sha256": "8d0d8d59066830158cd81c79fb64aa0a9e377c7acc6a033ebf325849df6431c1",
+   "sha256": "fdc147dd7361f48263a231bf1894adc1d1864a08388596c75e9f30a1cbed6141",
    "bounds_blender": [
     [
      -0.46,
@@ -1146,6 +1167,7 @@
      252
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "engine_core_colmesh0",
@@ -1215,7 +1237,7 @@
      1.65375
     ]
    ],
-   "sha256": "d071a57d339e515318b5f27b8f86a3b45b57593f3355197e5c1c7aec0e359c35",
+   "sha256": "fabedba95fb0fe33829dbac167a3966da711838539966404cab1763fbcf427f9",
    "bounds_blender": [
     [
      -0.08344,
@@ -1235,6 +1257,7 @@
      2776
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fin_skin_colmesh0",
@@ -1338,7 +1361,7 @@
      0.81962
     ]
    ],
-   "sha256": "fa6cbc76d6d8d31ea459df49f0862888ee27e71e3caba697baea29c81bc212ff",
+   "sha256": "ba3d63ece43fd5f4da333a89a95f03b98068812e6740e8071c02df0cb63c836c",
    "bounds_blender": [
     [
      -0.06681,
@@ -1358,6 +1381,7 @@
      912
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fin_spar_colmesh0",
@@ -1467,7 +1491,7 @@
      0.00333
     ]
    ],
-   "sha256": "60f44691c9305c189d7d789a67c5aceda56c263901ebb1a86ddbf3fbcfa674e9",
+   "sha256": "03f0487436b66331d9fac082e89a3ad76248dd83f4af1da4ab1684e002e8a3fa",
    "bounds_blender": [
     [
      -0.00848,
@@ -1487,6 +1511,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "flap_L_visible_colmesh0",
@@ -1596,7 +1621,7 @@
      0.00333
     ]
    ],
-   "sha256": "b13ca0ab0a94df38d7269537fc4ba1538cc51418fe551566399998f998abf061",
+   "sha256": "7ac000781b19d4363681baff50f539a1835ec05a59ac33aafe772e694c08292c",
    "bounds_blender": [
     [
      -0.00848,
@@ -1616,6 +1641,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "flap_R_visible_colmesh0",
@@ -1689,7 +1715,7 @@
      0.775
     ]
    ],
-   "sha256": "bfe93dee51f835485de8ea09b170f6a0696a56e531dfa968b2127f4ec2075b34",
+   "sha256": "9fd5b596b948d2aacd0e25daee5fb94522ac4362acd28a0a3258e49d4e7e5844",
    "bounds_blender": [
     [
      -0.33,
@@ -1709,6 +1735,7 @@
      2506
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aft_L_colmesh0",
@@ -1782,7 +1809,7 @@
      0.775
     ]
    ],
-   "sha256": "1bacf0955b1a464fa9f9108e0206a8152261b9e0741d8c7bb9b0f6aa643faee4",
+   "sha256": "0f5f37f78a7129020dfda6b23b644f5b4fe91990116c5d03c9e56bef5d054d2c",
    "bounds_blender": [
     [
      -0.33,
@@ -1802,6 +1829,7 @@
      2502
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aft_R_colmesh0",
@@ -1875,7 +1903,7 @@
      0.775
     ]
    ],
-   "sha256": "cf41eda338952ab9d1327eba36fc5be281ca43931110afb3c43bf497a7bbea20",
+   "sha256": "feccc23182afcf23981cadbe03f5959e4eab954fe468d53e1914621b9def6cd4",
    "bounds_blender": [
     [
      -0.24,
@@ -1895,6 +1923,7 @@
      2254
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aft_center_colmesh0",
@@ -1968,7 +1997,7 @@
      0.35
     ]
    ],
-   "sha256": "8b3c1d4db735bc5ef9cd5dfa7ace513fae20aa6694d272c057ec24ae46aa5e56",
+   "sha256": "8a47ab94ebe9441e23e9f864a5f75947230967aa69d96ed0d07a33d7cf4f12c7",
    "bounds_blender": [
     [
      -0.59571,
@@ -1988,6 +2017,7 @@
      1020
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_aux_colmesh0",
@@ -2061,7 +2091,7 @@
      0.875
     ]
    ],
-   "sha256": "4edf26b6987a02807d713cbe3c65c4053191866e5f1d0a5e51d984f81061b85f",
+   "sha256": "6b21b031c0a6bef44361cc53374c7d95e90b78776cf68bdee1827e4e4b5bd7b4",
    "bounds_blender": [
     [
      -0.94828,
@@ -2081,6 +2111,7 @@
      3256
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuel_forward_main_colmesh0",
@@ -2150,7 +2181,7 @@
      2.0
     ]
    ],
-   "sha256": "3db9b68b05f5645397c3f7f031a06c366002401d138f08418816cca4f606bc94",
+   "sha256": "0f0e1c559b1e218938ccc54a5ad6aecc287fb35da267327c838051724270980b",
    "bounds_blender": [
     [
      -0.84307,
@@ -2170,6 +2201,7 @@
      8076
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_aft_colmesh0",
@@ -2239,7 +2271,7 @@
      2.0
     ]
    ],
-   "sha256": "4c28c946262e587c3bb8123f368fbe69e87a0d010dd8bbdd6cfa16cd836c55cd",
+   "sha256": "6e6a60e4374dacc60de61de955cece7e99e0199a7af4f9f8e869e9387d073ae3",
    "bounds_blender": [
     [
      -0.58812,
@@ -2263,6 +2295,7 @@
      952
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_forward_colmesh0",
@@ -2332,7 +2365,7 @@
      2.775
     ]
    ],
-   "sha256": "cdcf533a954c17e6f833b3da2f1357a23265a9fe667e85efe8fc67c9c9f6e0ae",
+   "sha256": "d796b6f367d7862daa95367e2121718fe35d4bb26bf7b74dd066021b1811ead6",
    "bounds_blender": [
     [
      -1.04205,
@@ -2356,6 +2389,7 @@
      2736
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_mid_colmesh0",
@@ -2466,7 +2500,7 @@
      0.03332
     ]
    ],
-   "sha256": "922dfc5ce46761db1943ff1ebe16eaf187b719c67a4ac76456c5e1179ceb68e6",
+   "sha256": "ed8925ae1dc9323cd3f09e4643322f24f53ee73854c9aa137fbe80d0619682cc",
    "bounds_blender": [
     [
      -0.0,
@@ -2486,6 +2520,7 @@
      150
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_N_L_visible_colmesh0",
@@ -2596,7 +2631,7 @@
      0.03332
     ]
    ],
-   "sha256": "c89ca706a52f8a54b39b4246ad854b5bfbf43eddc0b400f165ee06acd4355560",
+   "sha256": "8330a7194f84540ae0820641818f1e1e9efbffe6504f22df9a188fd8fd2a2ae9",
    "bounds_blender": [
     [
      -0.00132,
@@ -2616,6 +2651,7 @@
      150
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_N_R_visible_colmesh0",
@@ -2726,7 +2762,7 @@
      0.20718
     ]
    ],
-   "sha256": "322cdb7fa7c3b25a0396b67ab0533bab4da94ff0d91fdd9b1f66ef1be1f92f28",
+   "sha256": "e931db1d4e51d0ea66f2e79af64d8a5ad9e8ca5d886ecf37c83a0746763b874e",
    "bounds_blender": [
     [
      -0.01152,
@@ -2746,6 +2782,7 @@
      482
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_main_L_visible_colmesh0",
@@ -2856,7 +2893,7 @@
      0.20718
     ]
    ],
-   "sha256": "5ca38e5f91fca14b57dcac36cb8927adb6ae8f1724448c7319f097d8efe85209",
+   "sha256": "3c903cebed604ba8f1e447a86cec65ee2d16d51afecd8439b96f439b3d6144a8",
    "bounds_blender": [
     [
      0.0,
@@ -2876,6 +2913,7 @@
      482
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_door_main_R_visible_colmesh0",
@@ -2986,7 +3024,7 @@
      0.8981
     ]
    ],
-   "sha256": "487ec59b1164b1693f169bf509211582fb225a25e351fc27a87ad0daf28d083c",
+   "sha256": "6bcd3de4d7db1658cd5a5e7236f7b31ccc27860deebfa32e549c81f92ac12af8",
    "bounds_blender": [
     [
      -0.12785,
@@ -3006,6 +3044,7 @@
      60
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_leg_L_visible_colmesh0",
@@ -3116,7 +3155,7 @@
      0.03263
     ]
    ],
-   "sha256": "d8c098c81081bb279af4a5be66c109ccb7a315e5f0222f8e300d5f44626cd8cc",
+   "sha256": "89a1e915dedf63cdceab1ff43fb7c2c1742258d07a61371cf321ade1e43bcfdd",
    "bounds_blender": [
     [
      -0.03498,
@@ -3136,6 +3175,7 @@
      60
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_leg_N_visible_colmesh0",
@@ -3246,7 +3286,7 @@
      0.89803
     ]
    ],
-   "sha256": "a6ddf30d1f7dc47e9c28d0461263cb120f17517ad3562034ce7fcd68a48f4c7f",
+   "sha256": "48aad0e30e5b1be2311e6d6a8c30d29dd148cd7940f473573acc5aba41036d51",
    "bounds_blender": [
     [
      -0.04979,
@@ -3266,6 +3306,7 @@
      60
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_leg_R_visible_colmesh0",
@@ -3373,7 +3414,7 @@
      0.33973
     ]
    ],
-   "sha256": "238b01c811090d57dda0aaf4665d076f228fdaea5eee51cf9eba76a3d41d11c4",
+   "sha256": "162537b1ff2e83db3c8c6f7ad44650f2b6e21eab8499bddb48bf17fb1ddf75b5",
    "bounds_blender": [
     [
      -0.32509,
@@ -3393,6 +3434,7 @@
      92
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_wheel_L_visible_colmesh0",
@@ -3500,7 +3542,7 @@
      0.23937
     ]
    ],
-   "sha256": "142c7b770223fae70efc3f07942bf0e878f06e13a0bb356c553d9ff2a84042fc",
+   "sha256": "61e59b8268b4c4a049f56cb52aa161cea69414f43cf08fa7bde214f52bd62213",
    "bounds_blender": [
     [
      -0.23937,
@@ -3520,6 +3562,7 @@
      92
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_wheel_N_visible_colmesh0",
@@ -3627,7 +3670,7 @@
      0.33973
     ]
    ],
-   "sha256": "4972d2e04c6024b88ff723ac67b539726342ae684879373f4a1df0365ab8ce3b",
+   "sha256": "865d2f8ca3b4515a6d2d3e398f539d076a84dee75b24ed23f3861a6e5d31b6af",
    "bounds_blender": [
     [
      -0.32509,
@@ -3647,6 +3690,7 @@
      92
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "gear_wheel_R_visible_colmesh0",
@@ -3716,7 +3760,7 @@
      1.725
     ]
    ],
-   "sha256": "d51ca5c65df311c849a63788749f6ae826cc13327cd51c8971b9ded5db60a0e1",
+   "sha256": "7af39acdf36fb0763f1c2138a8b13be0adf5d0952bc4151ed2102aa590e1997a",
    "bounds_blender": [
     [
      -0.4505,
@@ -3740,6 +3784,7 @@
      3166
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "intake_duct_L_colmesh0",
@@ -3928,7 +3973,7 @@
      1.725
     ]
    ],
-   "sha256": "549d6173829e7b3349b203b6bfb2b52f0c41b1d7d0ecf2a12c1020e7a0273913",
+   "sha256": "b7c0e2f123d4421a2e383a0174ce30e5a0671014186d97d831966b35e953b76c",
    "bounds_blender": [
     [
      -0.4505,
@@ -3952,6 +3997,7 @@
      3166
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "intake_duct_R_colmesh0",
@@ -4180,7 +4226,7 @@
      0.33515
     ]
    ],
-   "sha256": "bb4f13cf020d679bc518de0638eedf30af654f53e17e0546846b2f680dc04c1d",
+   "sha256": "6ab35c9381d7db9dab86edf9ea06b4cccff324a0f25f27d72f1e6b4f82052811",
    "bounds_blender": [
     [
      -0.1832,
@@ -4200,6 +4246,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "lef_L_visible_colmesh0",
@@ -4309,7 +4356,7 @@
      0.33515
     ]
    ],
-   "sha256": "0448fd25e82e70bded11922d95c92e2183196b541b5b36e5346f08f30f80bb22",
+   "sha256": "cbb5ccb7e743554c0aa7cab26304485ee6219ffcdf8879030aa17801cf2b2fc1",
    "bounds_blender": [
     [
      -0.1832,
@@ -4329,6 +4376,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "lef_R_visible_colmesh0",
@@ -4664,7 +4712,7 @@
      0.15
     ]
    ],
-   "sha256": "4d33e7610efc49cc5877f849a6d5a6396e1d64825099c6e01a1fcf0d9d325cde",
+   "sha256": "8259eed94f3d8a901700fbca2b2b54a7e627ad6106e4054b2d11c932dd62b650",
    "bounds_blender": [
     [
      -0.385,
@@ -4688,6 +4736,7 @@
      142
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "nozzle_colmesh0",
@@ -4794,7 +4843,7 @@
      -0.0
     ]
    ],
-   "sha256": "63d710a122866bc2cc40f566e393b276d0c72980dc46fb10e12598cc3e954959",
+   "sha256": "be8f27ddf9fa9a7fd938fce3ea992fef14d99287976f48a39ebe35846015c50c",
    "bounds_blender": [
     [
      -0.0705,
@@ -4814,6 +4863,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -4900,7 +4950,7 @@
      -0.0
     ]
    ],
-   "sha256": "7567c38545fc92887a9c3beb7c78e279c694ff5db7ca0f780e641f152f481470",
+   "sha256": "7e1e4fa0229272faa46c35c0fc26be7e437482977e2f1cb8c604e0881b72bf8e",
    "bounds_blender": [
     [
      -0.0705,
@@ -4920,6 +4970,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5006,7 +5057,7 @@
      -0.0
     ]
    ],
-   "sha256": "3d05b59935ddc6755fd3f2d4832ab57bcb354c84898d63d4b3e995ae54e158fc",
+   "sha256": "96617b248e34a6ef7fadb7f1d06d7de2680bdaaf82d7f2baaf729b85f7a7160c",
    "bounds_blender": [
     [
      -0.0705,
@@ -5026,6 +5077,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5112,7 +5164,7 @@
      -0.0
     ]
    ],
-   "sha256": "b3b8a9ac1eb124ec0a1ef52a6596f657d5f25159cc3477a5075f67e204e0c0ef",
+   "sha256": "cdbd27024e6d232367a5d8ad867a8c0f7b622ede3caaf186d97d21dc22b68a27",
    "bounds_blender": [
     [
      -0.0705,
@@ -5132,6 +5184,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5218,7 +5271,7 @@
      -0.0
     ]
    ],
-   "sha256": "65540813bbd4e629f9f5f512337bb49a270c9bd4da5072ff4d44a59891d65244",
+   "sha256": "ae830456863e803e61619f79cc1edc488a01c3a2e65d5df3c5c69415a4af8706",
    "bounds_blender": [
     [
      -0.0705,
@@ -5238,6 +5291,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5324,7 +5378,7 @@
      -0.0
     ]
    ],
-   "sha256": "02958aa81fa741874fa856281c433c00d05447c1237776284a93991688613b71",
+   "sha256": "6cd17b72507bef08f60a4032689baa8d77f2c877b99e84f75d9eaebe404883ce",
    "bounds_blender": [
     [
      -0.0705,
@@ -5344,6 +5398,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5430,7 +5485,7 @@
      -0.0
     ]
    ],
-   "sha256": "2f681e0ef8f94d598d867a6ef04154b4012d3ff09e56e19438ad484bc10192e0",
+   "sha256": "5db736f2a1dd6e028aedb8dcfc206abfc65c0e15e60071bd3713fabf5f1a3ec3",
    "bounds_blender": [
     [
      -0.0705,
@@ -5450,6 +5505,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5536,7 +5592,7 @@
      -0.0
     ]
    ],
-   "sha256": "fb1caffa0f3673925569c04fba7345850dc31a49c5276f56fc427b5cae916b1f",
+   "sha256": "61b4333ff3b30030ac372e450657fc7942deb2e7fbbdd1199c66de1ecfe407dd",
    "bounds_blender": [
     [
      -0.0705,
@@ -5556,6 +5612,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5642,7 +5699,7 @@
      -0.0
     ]
    ],
-   "sha256": "f5ecbba25e933ef796756fe6453593231731e2a3724cd6e0f92eb7b302db5896",
+   "sha256": "0de5ba98367c39085f3e090fa1bdd253e3c36b3553e5f76a4ba491b7768eb7de",
    "bounds_blender": [
     [
      -0.0705,
@@ -5662,6 +5719,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5748,7 +5806,7 @@
      -0.0
     ]
    ],
-   "sha256": "ca59add3da5b315e76212075e20c30ce5693198335c8ca56ad31937332d4992e",
+   "sha256": "4ec154f26791a494c6764f697b67f0550c6f532f41eae2f44213043504d4b8e8",
    "bounds_blender": [
     [
      -0.0705,
@@ -5768,6 +5826,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5854,7 +5913,7 @@
      -0.0
     ]
    ],
-   "sha256": "52d849661ffafae979ba0d47a7f438563607cfdc8c7f3f76faf6a24b7dbd1005",
+   "sha256": "953e3edff7ff719a1ecf557cfb30d5e840902ee09de8410b851fc89508cbc97a",
    "bounds_blender": [
     [
      -0.0705,
@@ -5874,6 +5933,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -5960,7 +6020,7 @@
      -0.0
     ]
    ],
-   "sha256": "53e9689f04d64fbd25731ae757d0a41c6dff2d31f3f285907a544199ba582178",
+   "sha256": "eec80d3c951ffa32236b14fa79c65294c9e78c09e214a451f72c243777ab9b89",
    "bounds_blender": [
     [
      -0.0705,
@@ -5980,6 +6040,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6066,7 +6127,7 @@
      -0.0
     ]
    ],
-   "sha256": "5489bf7daad3605dd78b8ced6c051136230f066eeab3176f09495efef476418b",
+   "sha256": "e2927912b6e70e39cb7887746c717893e411ef1eab7f801302c169aad8f324f8",
    "bounds_blender": [
     [
      -0.0705,
@@ -6086,6 +6147,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6172,7 +6234,7 @@
      -0.0
     ]
    ],
-   "sha256": "b069e7c5ef1aacc52bcb785b4e4ad6dccb884c956d98652ba9614e2affa20b42",
+   "sha256": "dfce759d509372c0d2085154d2d8b18dc3cd5592d664dac8a5fe1879a4691504",
    "bounds_blender": [
     [
      -0.0705,
@@ -6192,6 +6254,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6278,7 +6341,7 @@
      -0.0
     ]
    ],
-   "sha256": "be39e6ffd5c53efb582efbc0b5fb826800c2b6b96b8bcbe4dabd91f3f321d741",
+   "sha256": "efc31dfb955e5ccacafa0838b30daa708e9dd1c37f49f2e8436da41a4705f820",
    "bounds_blender": [
     [
      -0.0705,
@@ -6298,6 +6361,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6384,7 +6448,7 @@
      -0.0
     ]
    ],
-   "sha256": "3967f153d2c86ca4d62a76971b22eee3d5d62fd60abe1d9b6838cdef0ba919f1",
+   "sha256": "50966b8f19892afbf2e06d2de898b145ed5cdfebd4567eba911c349d65ba261b",
    "bounds_blender": [
     [
      -0.0705,
@@ -6404,6 +6468,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6490,7 +6555,7 @@
      -0.0
     ]
    ],
-   "sha256": "5f8d062fd7a12d9d8f1eed33316f29f769bef2af90d66de6ddb9d9435e51ce80",
+   "sha256": "862b105fc1a955797126f7063f5df96e7b9600a44e70bb6a16d8f5e464dd2fe1",
    "bounds_blender": [
     [
      -0.04935,
@@ -6510,6 +6575,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6596,7 +6662,7 @@
      -0.0
     ]
    ],
-   "sha256": "973739048f3077bac7a2b110367413beeb5e4b3e42ea9c81ecaa79d2d7d4bb01",
+   "sha256": "e6f34c678b98449638ce3544b6c3486f1b94f0c6002af3350404efb6bd929f5a",
    "bounds_blender": [
     [
      -0.04935,
@@ -6616,6 +6682,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6702,7 +6769,7 @@
      -0.0
     ]
    ],
-   "sha256": "068f6804456b99417f2e0986fa289ef88570a1e8217b21cf61f6c754de346d92",
+   "sha256": "2cae2fa2d747f76c51a0e69d392c046d3744c086250765d695f0b603748d87ae",
    "bounds_blender": [
     [
      -0.04935,
@@ -6722,6 +6789,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6808,7 +6876,7 @@
      -0.0
     ]
    ],
-   "sha256": "e817cb7dcf2b28c051abad520e0bb4ddcb88642d42994f43cb57723279f64b03",
+   "sha256": "f0122fb1542c92e70a951e58df549d3a33ccc45af8c571659a1b71074deafb95",
    "bounds_blender": [
     [
      -0.04935,
@@ -6828,6 +6896,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -6914,7 +6983,7 @@
      -0.0
     ]
    ],
-   "sha256": "76d55d862d3a2d655c789f009a8dc3a145d393779edd72688746da857b73ffc8",
+   "sha256": "4649d036c7a85480772385bbbfdffb8b16456269def8c1404929477698218092",
    "bounds_blender": [
     [
      -0.04935,
@@ -6934,6 +7003,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7020,7 +7090,7 @@
      -0.0
     ]
    ],
-   "sha256": "d1e73917dc44de58d90fe86f3f8c1f2a55be22ec460d654139ddbb8fcb8b5881",
+   "sha256": "6463dd736b8f72bbf0e684417c242b3566c99a0dc504c8c2afb3b6ed72999d54",
    "bounds_blender": [
     [
      -0.04935,
@@ -7040,6 +7110,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7126,7 +7197,7 @@
      -0.0
     ]
    ],
-   "sha256": "75f5c24253344547c563e99a882af5bdb6d367b27cf1e4b558b07c5c8c44f3aa",
+   "sha256": "c4f91257674f4d977eaaa48b66bc6010e615fb5b0763b8a8a829cd0d319083f0",
    "bounds_blender": [
     [
      -0.04935,
@@ -7146,6 +7217,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7232,7 +7304,7 @@
      -0.0
     ]
    ],
-   "sha256": "6ff44924e8f7d65a8ec78c74f276b316ee85ba7ff091845581c232d0c52dced4",
+   "sha256": "bca3d6c74cb7ca43db160898fa01784fd84969574d0dc18cdf622562f50b6bf2",
    "bounds_blender": [
     [
      -0.04935,
@@ -7252,6 +7324,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7338,7 +7411,7 @@
      -0.0
     ]
    ],
-   "sha256": "59ecc1a138221534994a38c3963db764a4193d0e6277e1548f4647ae722b6583",
+   "sha256": "997dbc93d4fac6318fab687466aececf68163aeecf5189497e0076b04ca4a3a8",
    "bounds_blender": [
     [
      -0.04935,
@@ -7358,6 +7431,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7444,7 +7518,7 @@
      -0.0
     ]
    ],
-   "sha256": "cafd0a0c32651340ca2aca1ff084e3877f72bc0275b983aa62ca3685625a66d5",
+   "sha256": "476e1df2b7ef0aee966cf052460967dd720ecd07cc9dadf8fddd5e637cd52e5b",
    "bounds_blender": [
     [
      -0.04935,
@@ -7464,6 +7538,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7550,7 +7625,7 @@
      -0.0
     ]
    ],
-   "sha256": "0567bd46dc6d49227618fdda093acbe736dce7b884df04319eefe83913706d15",
+   "sha256": "bc635c91f86c6d9e89ebcdf0b65c06e1399ae04a820b74f73f80ad45c64f4adc",
    "bounds_blender": [
     [
      -0.04935,
@@ -7570,6 +7645,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7656,7 +7732,7 @@
      -0.0
     ]
    ],
-   "sha256": "da6c6463844140d1e414f2e6e37f317983e38ed594995513e5eb7828df0ecbd0",
+   "sha256": "1f5f062bea674710fbe820dd3564ac0670eef76c359f778ca689462194378d30",
    "bounds_blender": [
     [
      -0.04935,
@@ -7676,6 +7752,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7762,7 +7839,7 @@
      -0.0
     ]
    ],
-   "sha256": "b0615b1db9590d2a1676fe581220a0c66f025b33541d4f90a53eef3bd683334d",
+   "sha256": "4c81e2f4716ef00f0c4bd750584ce0eec6b5524b160962dac28bb82db97cc459",
    "bounds_blender": [
     [
      -0.04935,
@@ -7782,6 +7859,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7868,7 +7946,7 @@
      -0.0
     ]
    ],
-   "sha256": "52d391ca45d29e47c7addea6a0b38d7770cdc7732a72ddf7f3021addbb6e7eef",
+   "sha256": "6f2c8074a293ddc88a0aea54637a83623f46139c6bc6b4dd507c91b9325b7722",
    "bounds_blender": [
     [
      -0.04935,
@@ -7888,6 +7966,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -7974,7 +8053,7 @@
      -0.0
     ]
    ],
-   "sha256": "07cc0df37b14aaafd43f4e651b063129395e0e94f38c8829b9a04b545c7aa83f",
+   "sha256": "20563fbc6d144e79c3d8d7f82536ded1a4231534907fb34f0a8c2cc003a638fd",
    "bounds_blender": [
     [
      -0.04935,
@@ -7994,6 +8073,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -8080,7 +8160,7 @@
      -0.0
     ]
    ],
-   "sha256": "9389c40a62c58c00aceb57d2b9e236dd4aa130280c714606629e195d4fa84d7e",
+   "sha256": "703ac1c3be434dcc36685501990872fed767d6f2c5fdf26dcd3d2c2dd551afc9",
    "bounds_blender": [
     [
      -0.04935,
@@ -8100,6 +8180,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -8182,7 +8263,7 @@
      0.75
     ]
    ],
-   "sha256": "3f298c5748e76c26f30ce1f1ea58bbe8698b5776cb1aa71470195afcf58d562f",
+   "sha256": "29f647906f589582e592ef307b7076b3f1e0abecc0bb2b0dab437dc97c34840a",
    "bounds_blender": [
     [
      -0.05,
@@ -8202,6 +8283,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -8251,7 +8333,7 @@
      0.75
     ]
    ],
-   "sha256": "5ea2d4ad99bb20304a2c915165137336fd529005d347176b1e17c50e63ee9f8e",
+   "sha256": "2ce8255a8e26a5c25b4cb3027008ac323d796c43c2c30e122f6957527cff3c01",
    "bounds_blender": [
     [
      -0.05,
@@ -8271,6 +8353,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -8320,7 +8403,7 @@
      0.75
     ]
    ],
-   "sha256": "7c8d7d7710acf521b545a4ccc45efafed2cef8100798b6e3521157b00240e6a9",
+   "sha256": "c1538718ef46453cfca87f1e25677e4744cf5b646efc1463d59538071336765d",
    "bounds_blender": [
     [
      -0.05,
@@ -8340,6 +8423,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -8389,7 +8473,7 @@
      0.75
     ]
    ],
-   "sha256": "cb00cf0fcd35dc12c9debaaaa73fd1b0fe6ca03f7b29d729d80ce6c327b23c3a",
+   "sha256": "c0a59e13bb46ee1625a25534fefc0bcc98b2a890c556576b26fba837129858dc",
    "bounds_blender": [
     [
      -0.05,
@@ -8409,6 +8493,7 @@
      12
     ]
    ],
+   "uv_layers": [],
    "colliders": [],
    "lod1": null
   },
@@ -8458,7 +8543,7 @@
      0.675
     ]
    ],
-   "sha256": "c1e4191d994b65b6002e9a97179ed65dbf900805c9116002499a65104d2f8b68",
+   "sha256": "3cd110cdc4e3401d1db10d9717966e1f8e2810944ae4d2b5be523131fd035061",
    "bounds_blender": [
     [
      -0.3,
@@ -8478,6 +8563,7 @@
      1690
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "radar_tray_colmesh0",
@@ -8547,7 +8633,7 @@
      1.38792
     ]
    ],
-   "sha256": "19548e2b8d48566f1732e1178e35add2139128dcea7a5700071e7d07e7c5c85c",
+   "sha256": "e7cc6ebad57e7d515427032b253b6f87d3339841d4c5ffbe1d10879be317197b",
    "bounds_blender": [
     [
      -0.35123,
@@ -8571,6 +8657,7 @@
      264
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "radome_colmesh0",
@@ -8901,7 +8988,7 @@
      -0.0
     ]
    ],
-   "sha256": "984dae7611a5085cb29b5d062362ac7e3f4e0122530366eb351174a04782e5a8",
+   "sha256": "88e2524de031357d72dbac2a0d61d770716f28041bce1a0e41d0a38e286cd18f",
    "bounds_blender": [
     [
      0.0,
@@ -8921,6 +9008,7 @@
      860
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "rudder_visible_colmesh0",
@@ -8990,7 +9078,7 @@
      2.0779
     ]
    ],
-   "sha256": "7ec7241cab0d0a2cfec9ca79ec0d06b2942e09b200b11fb71fb9dbd17bdf9fca",
+   "sha256": "9475c642d16a9fcd30d5f614d9f80a46f6774d2f28e4042690e048dd19cf7082",
    "bounds_blender": [
     [
      -0.44922,
@@ -9010,6 +9098,7 @@
      5064
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "skin_aft_L_colmesh0",
@@ -9572,7 +9661,7 @@
      2.0779
     ]
    ],
-   "sha256": "e9ab790969f9b2aa964e050b8796502e119836c18998f5bf029b44ed0f76dbd9",
+   "sha256": "e54756d615164de1cf7480a49ac32de34362c0cabbed8953c1d9650269559074",
    "bounds_blender": [
     [
      -0.44981,
@@ -9592,6 +9681,7 @@
      5064
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "skin_aft_R_colmesh0",
@@ -10154,7 +10244,7 @@
      2.02329
     ]
    ],
-   "sha256": "4672e248ea6725a8f936f7b3b9f5ff0f403c371c6779e89d3ccf26e82f06ac04",
+   "sha256": "9d2ab51fdb489eb20c7a8ce0f03525bd17348ad2a9ca353c849c3dfe368eb4d5",
    "bounds_blender": [
     [
      -0.3151,
@@ -10174,6 +10264,7 @@
      2768
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "skin_forward_L_colmesh0",
@@ -10787,7 +10878,7 @@
      2.02329
     ]
    ],
-   "sha256": "f86977781d8b6a6c914ffe583e03660621042d1f3f46d1c78e0b960b175685a2",
+   "sha256": "73b18afd241088002dd3b447af31ab7f32be55258739b3488906f77c409c9004",
    "bounds_blender": [
     [
      -0.3151,
@@ -10807,6 +10898,7 @@
      2768
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "skin_forward_R_colmesh0",
@@ -11420,7 +11512,7 @@
      2.69589
     ]
    ],
-   "sha256": "b6b38b2339a5a78b2ac12ceccd227cc6ee1e59d7fcd73f4c51ffe26b98c07b6f",
+   "sha256": "f8ac057e3823a7b098c1df28bf003cb02d12351ab55dda0cdb7edc885fa54042",
    "bounds_blender": [
     [
      -0.54084,
@@ -11440,6 +11532,7 @@
      5542
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "skin_mid_L_colmesh0",
@@ -12104,7 +12197,7 @@
      2.69589
     ]
    ],
-   "sha256": "16baf31da3a15b46fa9c84620fff53ed15f42a19dcd651478c774a7725d12d81",
+   "sha256": "a13da3722f13cc7985238290e2db9b0cba901b1b2aca0c24a995485a828a7a09",
    "bounds_blender": [
     [
      -0.54084,
@@ -12124,6 +12217,7 @@
      5542
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "skin_mid_R_colmesh0",
@@ -12828,7 +12922,7 @@
      -0.0
     ]
    ],
-   "sha256": "be8daa99433d72f72381d977c681689b677a30a66662c30a5f141b53727301c2",
+   "sha256": "cc0e93c627c2ddb01a52e07498293ce0f29948588b84cb5c88556df943df5cae",
    "bounds_blender": [
     [
      -0.04512,
@@ -12848,6 +12942,7 @@
      360
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "speed_brake_L_visible_colmesh0",
@@ -12957,7 +13052,7 @@
      -0.0
     ]
    ],
-   "sha256": "329e6e7f36e1d7f525da0af528d1fc911c8a9fb6340409049964b3ba15adf3f2",
+   "sha256": "e0ac0c257b09fd3b9d90ced91ca674b70a409a141eab3cc497f34c86b8969e0e",
    "bounds_blender": [
     [
      -0.04512,
@@ -12977,6 +13072,7 @@
      360
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "speed_brake_R_visible_colmesh0",
@@ -13086,7 +13182,7 @@
      0.67
     ]
    ],
-   "sha256": "c265e084732811496647fc860c300709e9a3035da399b125f3aadf933d03b5d3",
+   "sha256": "9d9eba72eba760b2159a67fd9c181b1401004e26367a2783702dac1e7a9ea5cd",
    "bounds_blender": [
     [
      0.0,
@@ -13106,6 +13202,7 @@
      272
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "stabilator_L_visible_colmesh0",
@@ -13215,7 +13312,7 @@
      0.67
     ]
    ],
-   "sha256": "146e277c7e88cd75901487c6fcbe7437239ca5648c8b09bd5aa3a53fb63a599f",
+   "sha256": "56ee7bcaa1b35af28587af9c8f0567695c920f141dede7ee427bfef4922bbee3",
    "bounds_blender": [
     [
      0.0,
@@ -13235,6 +13332,7 @@
      272
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "stabilator_R_visible_colmesh0",
@@ -13304,7 +13402,7 @@
      1.125
     ]
    ],
-   "sha256": "2dee4072cf5aaef7425b7a374a2edd726604065fce0414b483e33b956fe51f9e",
+   "sha256": "d6e9291d9e8b9a4f320653b17dd5a390aa823d5a6a3555f90fa3a354ed904d7e",
    "bounds_blender": [
     [
      -0.05599,
@@ -13324,6 +13422,7 @@
      180
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "ventral_fin_colmesh0",
@@ -13393,7 +13492,7 @@
      0.30217
     ]
    ],
-   "sha256": "479564f21054fa70fe7bf2c5726974ff4baa73ea71af8dd3e6ec4298139ae37c",
+   "sha256": "1e35cf2d1726992e95af32cf3359cde663630dcec4c0f1253df7d30afb30bcd2",
    "bounds_blender": [
     [
      -0.3636,
@@ -13413,6 +13512,7 @@
      1582
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "windscreen_colmesh0",
@@ -13482,7 +13582,7 @@
      0.04
     ]
    ],
-   "sha256": "e4c4676863c05f4f4642177227ee754bff6e41af10d3527ccbe36379062ba239",
+   "sha256": "8996d0499c90b2d5c122f61930b636207b9b2e89ebefa38e7422a3ca98e737fa",
    "bounds_blender": [
     [
      -0.38033,
@@ -13502,6 +13602,7 @@
      196
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "windscreen_frame_colmesh0",
@@ -13571,7 +13672,7 @@
      2.46088
     ]
    ],
-   "sha256": "416a88a4fa8d7991fc42ee60e1b876f2cc7e6146a6185ad3774e9eb9439c51c4",
+   "sha256": "c5cb7dd3d72203fa2f24f941c139e1b76e7eda7151dafdbf4df67495fc1fadf8",
    "bounds_blender": [
     [
      -1.41,
@@ -13591,6 +13692,7 @@
      3164
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "wing_skin_L_colmesh0",
@@ -13711,7 +13813,7 @@
      2.46088
     ]
    ],
-   "sha256": "e19968c7470153a9917d7a627fbdfe96c9b174fbde0e781376c7975984a34b71",
+   "sha256": "160100ec239e2f6555ea678a0a0b1b6c1b0b5ba22ce429943a4a198df81635c4",
    "bounds_blender": [
     [
      -1.41,
@@ -13731,6 +13833,7 @@
      3164
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "wing_skin_R_colmesh0",
@@ -13852,7 +13955,7 @@
      1.80428
     ]
    ],
-   "sha256": "6a6ee4314b92d98a2a26f89553be6fa263ff65c5fbdb690fc650fd26592744aa",
+   "sha256": "6f4fc77bbdc13c3365ee848d8aa0f4a2a5c03fef3bc80ea0f53b8b81a4f6cd44",
    "bounds_blender": [
     [
      -1.366,
@@ -13876,6 +13979,7 @@
      1336
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "wing_spar_L_colmesh0",
@@ -13946,7 +14050,7 @@
      1.80428
     ]
    ],
-   "sha256": "b31b76873c6e5a2782c9bcc41cc3f7dfd502f78b8d9ed71982baca695e7eeba6",
+   "sha256": "6dca2cb4ca20190c4b5736829218c48861f1cf118f16a3ba377d0fe452f2485d",
    "bounds_blender": [
     [
      -1.366,
@@ -13970,6 +14074,7 @@
      1336
     ]
    ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "wing_spar_R_colmesh0",

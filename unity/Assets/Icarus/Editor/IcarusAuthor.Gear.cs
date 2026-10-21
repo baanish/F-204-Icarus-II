@@ -32,55 +32,6 @@ namespace Icarus.Editor
         // The F-104G's height to the stabilator top, which the stance should come out near.
         private const float F104Height = 4.12f;
 
-        // An export hinge as the game drives one: the frame at the hinge's pose (local X along the hinge, the part itself
-        // when the hinge is a part), a "<name>_hinge" child at identity that turns about local X, and the _visible mesh.
-        // flip puts the hinge under a "<name>_axis" frame turned 180 degrees about Y, so it turns about the reversed axis.
-        private static (Transform Frame, Transform Hinge, MeshRenderer Visible) HingeRig(Build b, string name, Transform parent, Transform frame = null, bool flip = false)
-        {
-            if (frame == null)
-            {
-                frame = new GameObject(name) { layer = parent.gameObject.layer }.transform;
-                frame.SetParent(parent, false);
-                frame.SetPositionAndRotation(b.Blockout.Local(name), b.Blockout.Rotation(name));
-                b.Visuals[name] = frame;
-            }
-            var axis = frame;
-            if (flip)
-            {
-                axis = new GameObject(name + "_axis") { layer = frame.gameObject.layer }.transform;
-                axis.SetParent(frame, false);
-                axis.localRotation = Quaternion.Euler(0f, 180f, 0f);
-            }
-            var hinge = new GameObject(name + "_hinge") { layer = frame.gameObject.layer }.transform;
-            hinge.SetParent(axis, false);
-            var visible = MeshVisual(b, name + "_visible", hinge);
-            return (frame, hinge, visible);
-        }
-
-        // A blockout mesh as a plain renderer at its export pose under parent.
-        private static MeshRenderer MeshVisual(Build b, string name, Transform parent)
-        {
-            var go = new GameObject(name) { layer = parent.gameObject.layer };
-            go.transform.SetParent(parent, false);
-            go.transform.SetPositionAndRotation(b.Blockout.Local(name), b.Blockout.Rotation(name));
-            go.AddComponent<MeshFilter>().sharedMesh = b.Meshes[name].Render;
-            var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterials = b.Meshes[name].Materials;
-            b.Visuals[name] = go.transform;
-            return renderer;
-        }
-
-        // travel_deg turns the hinge from its built pose about its local X. Which way a positive turn goes is measured on the
-        // mesh: the way that moves its middle further in the wanted direction (score). Returns the signed angle, and
-        // whether it kept the export's sign.
-        private static (float Angle, bool Kept) Travel(Build b, Transform frame, Vector3 centre, string name, Func<Vector3, float> score)
-        {
-            var travel = b.Blockout.Parts[name].Number("travel_deg");
-            Vector3 Turned(float angle) => frame.position + Quaternion.AngleAxis(angle, frame.right) * (centre - frame.position);
-            var kept = score(Turned(travel)) >= score(Turned(-travel));
-            return (kept ? travel : -travel, kept);
-        }
-
         // A tyre's centre, axle (its mesh's least-spread direction, pointing right) and radius, in world space.
         private static (Vector3 Centre, Vector3 Axle, float Radius) WheelOf(Transform t, Mesh mesh)
         {
@@ -299,68 +250,6 @@ namespace Icarus.Editor
                 lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg about {(foldKept ? "the export's axis" : "the reversed axis")}, breaks off with {GearBreakShare * b.Mass[leg]:0} of its {b.Mass[leg]:0} kg, wheel fold {wheelTravel}, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], pushes on {carrier}, its drag down {extendedDrag}");
             }
             b.Report.Add("gear: the Icarus hinges on the Revoker's LandingGear; " + string.Join("; ", lines));
-        }
-
-        // The Revoker's cockpit, crew and ladder move as one so its pilot's eye lands under the Icarus canopy. The Revoker
-        // canopy rig is gone; its Canopy opens the Icarus hood on its hinge and ejects the canopy part.
-        private static void BuildCockpit(Build b)
-        {
-            var canopy = b.Parts["canopy"].transform;
-            var (_, hood, glass) = HingeRig(b, "canopy", null, canopy);
-            var cockpit = b.Parts["cockpit_cell"].transform;
-            var windscreen = MeshVisual(b, "windscreen", cockpit);
-            var bow = MeshVisual(b, "windscreen_frame", cockpit);
-            var points = WorldVertices(glass.transform, b.Meshes["canopy_visible"].Render);
-            var topY = points.Max(p => p.y);
-            var crown = points.Where(p => p.y > topY - 0.01f).ToArray();
-            var eye = new Vector3(0f, topY - EyeBelowCanopyTop, crown.Average(p => p.z));
-            var helmet = (Transform)GetRef(b.Aircraft, "cockpitViewPoint");
-            var delta = eye - helmet.position;
-            var moved = new[] { "cockpit_interior", "cockpit_interior_simple", "targetScreen", "pilot", "joystick", "throttle" }
-                .Select(n => cockpit.Find(n) ?? throw new MissingReferenceException("cockpit_cell/" + n)).ToArray();
-            foreach (var t in moved)
-                t.position += delta;
-            // Everything of the interior above the windscreen frame's foot (the sill) must sit behind the frame, or the
-            // frame crosses the pilot's view of the panel: the cockpit moves aft until it does.
-            var sill = bow.bounds.min.y;
-            var reach = moved[0].GetComponentsInChildren<MeshFilter>(true).Where(f => f.sharedMesh != null)
-                .SelectMany(f => WorldVertices(f.transform, f.sharedMesh)).Where(v => v.y > sill).Max(v => v.z);
-            var aft = Mathf.Max(0f, reach - (bow.bounds.min.z - PanelBehindBow));
-            foreach (var t in moved)
-                t.position += Vector3.back * aft;
-            eye += Vector3.back * aft;
-            delta += Vector3.back * aft;
-            b.Placed.UnionWith(moved);
-            var ladder = b.Find("ladder");
-            ladder.position += delta;
-            b.Placed.Add(ladder);
-
-            var (open, kept) = Travel(b, canopy, glass.bounds.center, "canopy", p => p.y); // the hood swings up
-            var component = canopy.gameObject.AddComponent(GameType("Canopy"));
-            EditorUtility.CopySerialized(b.Donor.CanopyTemplate, component);
-            var so = new SerializedObject(component);
-            Prop(so, "attachedPart").objectReferenceValue = b.Part("canopy");
-            Prop(so, "ejectionTransform").objectReferenceValue = canopy;
-            Prop(so, "ejectionCollider").objectReferenceValue = canopy.GetComponent<MeshCollider>();
-            var hinges = Prop(so, "canopyHinges");
-            hinges.arraySize = 1;
-            hinges.GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue = hood;
-            hinges.GetArrayElementAtIndex(0).FindPropertyRelative("hingeAngle").floatValue = open;
-            SetList(Prop(so, "glassRenderers"), new Object[] { glass, windscreen });
-            // Canopy pushes along its part's own forward and up (Canopy.cs FixedUpdate); the hood's hinge frame has up
-            // pointing down into the cockpit, so the Revoker's push is re-expressed in that frame to point up out of it.
-            var push = Vector3.up * Prop(so, "ejectionForce").vector3Value.magnitude;
-            Prop(so, "ejectionForce").vector3Value = new Vector3(0f, Vector3.Dot(push, canopy.up), Vector3.Dot(push, canopy.forward));
-            so.ApplyModifiedPropertiesWithoutUndo();
-
-            var aircraft = new SerializedObject(b.Aircraft);
-            SetList(Prop(aircraft, "canopies"), new Object[] { component });
-            // Hidden in cockpit view: the internal meshes round the pilot, which the Revoker interior stands inside.
-            SetList(Prop(aircraft, "exteriorRenderers"), new[] { "cockpit_cell", "avionics_tray", "radar_tray" }
-                .Select(n => (Object)b.Parts[n].GetComponent<MeshRenderer>()).Append(b.Visuals["gear_leg_N_visible"].GetComponent<MeshRenderer>()).ToArray());
-            aircraft.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add($"cockpit: eye at {eye} ({EyeBelowCanopyTop} m under the canopy crown, {aft:F2} m aft of it to clear the windscreen frame), Revoker interior, crew and ladder moved {delta}; " +
-                $"hood opens {open:+0;-0} deg on its sill hinge ({(kept ? "export sign" : "export sign flipped")}) and ejects as its own part");
         }
     }
 }

@@ -16,12 +16,16 @@ import bmesh
 import bpy
 
 import build_icarus as bi
+import stations
 
 MAX_HULL = 255
 LOD_GREY = (0.14, 0.14, 0.14, 1.0)  # the colour the Unity author checks LOD1 meshes for
 # Animated petals and seals, and the pylon blades and plugs the game shows and hides by station: no collider or LOD,
 # since a LOD1 hull would stay drawn at a distance whichever of them is hidden.
 SKIP = ("nozzle_petal_", "nozzle_seal_", "pylon_")
+# Renderers that stay visuals of their part (glass, wheels, lenses, exterior proxies) and the cockpit view's renderers
+# get neither. Role "cockpit" is the cockpit_cell part itself, which keeps both.
+SKIP_ROLES = ("visual", "cockpit_view")
 # Station length and angle around the body axis of one skin patch. A patch's hull bulges inward by its sagitta
 # (r(1 - cos(angle/2))), which must stay inside the 3 cm compartment inset even on the narrow nose.
 SKIN_PATCH = (1.0, math.radians(30))
@@ -30,6 +34,18 @@ DUCT_CHUNK = 0.45  # length of one intake duct hull: at least two of the duct's 
 STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft")
 BODY_AXIS_Z = 0.3  # height of the axis skin patch angles are measured around
 NARROW_NOSE_END = 4.0  # ahead of this station the body tapers fast, so skin patches are half as long
+
+
+# LOD1 and collider limits, by collection: triangles in total (budget.py sums them).
+BUDGET = {
+    "lod1": {"target": 760, "cap": 760, "collection": "LOD1"},
+    "colliders": {"target": 3000, "cap": 3000, "collection": "Colliders"},
+}
+CLOSEUPS = {}
+
+
+def check(icarus):
+    return None
 
 
 def hull_mesh(name, points):
@@ -79,6 +95,7 @@ def groups(owner):
         return [[c for c, w in zip(local, world) if abs(w.x) <= 0.06 and w.z <= floor + 0.25]]
     if name.startswith(("skin_", "dorsal", "radome")):
         length, sector = SKIN_PATCH
+        splits = stations.collider_splits()
         cells = {}
         for c, w in zip(local, world):
             s = w.y + bi.S0
@@ -86,6 +103,7 @@ def groups(owner):
             narrow = s < NARROW_NOSE_END
             key = (narrow, math.floor(s / (length / 2 if narrow else length)),
                    math.floor(math.atan2(abs(w.x), w.z - BODY_AXIS_Z) / sector))
+            key += tuple((w - at).dot(normal) >= 0 for at, normal in splits)
             cells.setdefault(key, []).append(c)
         return [pts for pts in cells.values() if len(pts) >= 4]
     if name.startswith("intake_duct_"):  # a curved tube: short hulls, or one fat hull would swallow the fuel cells
@@ -114,7 +132,8 @@ def build(icarus):
     lods = bi.collection("LOD1")
     lod_mat = lod_material()
     count = {"colliders": 0, "lods": 0}
-    for owner in [o for o in icarus.all_objects if o.type == "MESH" and not o.name.startswith(SKIP)]:
+    for owner in [o for o in icarus.all_objects
+                  if o.type == "MESH" and not o.name.startswith(SKIP) and o.get("role") not in SKIP_ROLES]:
         meshes = [m for m in (hull_mesh("%s_col" % owner.name, pts) for pts in groups(owner)) if m is not None]
         for i, me in enumerate(meshes):
             me.name = "%s_col%d" % (owner.name, i)

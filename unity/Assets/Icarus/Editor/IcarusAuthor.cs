@@ -160,6 +160,10 @@ namespace Icarus.Editor
         private static Dictionary<string, PartMeshes> ImportBlockout(Blockout blockout, Dictionary<string, Material> slots)
         {
             var slotOf = slots.GroupBy(s => s.Value).ToDictionary(g => g.Key, g => g.Select(s => s.Key).ToArray());
+            // Remapped only where some export mesh wears the slot (LOD on the hulls): a remap makes its material a
+            // dependency of the model, and the bundle would carry every stock material whether a mesh uses it or not.
+            var worn = new HashSet<string>(blockout.Parts.Values.SelectMany(p => p.Materials)) { LodSlot };
+            var remaps = slots.Where(s => worn.Contains(s.Key)).ToDictionary(s => s.Key, s => s.Value);
             var meshParts = blockout.Parts.Values.Where(p => p.Fbx != null).ToArray();
             var wanted = new HashSet<string>(meshParts.Select(p => BlockoutFolder + "/" + p.Fbx));
             foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { BlockoutFolder }))
@@ -182,7 +186,7 @@ namespace Icarus.Editor
                     File.WriteAllBytes(target, bytes);
                     AssetDatabase.ImportAsset(target, ImportAssetOptions.ForceSynchronousImport);
                 }
-                ConfigureModelImporter(target, slots);
+                ConfigureModelImporter(target, remaps);
 
                 var assets = AssetDatabase.LoadAllAssetsAtPath(target).OfType<Mesh>().ToArray();
                 // Blender suffixes a node whose name is taken in its scene (".001"); the FBX is still that node.
@@ -293,6 +297,7 @@ namespace Icarus.Editor
             Apply(importer.importLights, false, v => importer.importLights = v);
             Apply(importer.importBlendShapes, false, v => importer.importBlendShapes = v);
             Apply(importer.importNormals, ModelImporterNormals.Import, v => importer.importNormals = v);
+            Apply(importer.importTangents, ModelImporterTangents.CalculateMikk, v => importer.importTangents = v);
             Apply(importer.addCollider, false, v => importer.addCollider = v);
             if (changed)
                 importer.SaveAndReimport();
@@ -427,6 +432,55 @@ namespace Icarus.Editor
         }
 
         // ---------- helpers ----------
+
+        // An export hinge as the game drives one: the frame at the hinge's pose (local X along the hinge, the part itself
+        // when the hinge is a part), a "<name>_hinge" child at identity that turns about local X, and the _visible mesh.
+        // flip puts the hinge under a "<name>_axis" frame turned 180 degrees about Y, so it turns about the reversed axis.
+        private static (Transform Frame, Transform Hinge, MeshRenderer Visible) HingeRig(Build b, string name, Transform parent, Transform frame = null, bool flip = false)
+        {
+            if (frame == null)
+            {
+                frame = new GameObject(name) { layer = parent.gameObject.layer }.transform;
+                frame.SetParent(parent, false);
+                frame.SetPositionAndRotation(b.Blockout.Local(name), b.Blockout.Rotation(name));
+                b.Visuals[name] = frame;
+            }
+            var axis = frame;
+            if (flip)
+            {
+                axis = new GameObject(name + "_axis") { layer = frame.gameObject.layer }.transform;
+                axis.SetParent(frame, false);
+                axis.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            }
+            var hinge = new GameObject(name + "_hinge") { layer = frame.gameObject.layer }.transform;
+            hinge.SetParent(axis, false);
+            var visible = MeshVisual(b, name + "_visible", hinge);
+            return (frame, hinge, visible);
+        }
+
+        // A blockout mesh as a plain renderer at its export pose under parent.
+        private static MeshRenderer MeshVisual(Build b, string name, Transform parent)
+        {
+            var go = new GameObject(name) { layer = parent.gameObject.layer };
+            go.transform.SetParent(parent, false);
+            go.transform.SetPositionAndRotation(b.Blockout.Local(name), b.Blockout.Rotation(name));
+            go.AddComponent<MeshFilter>().sharedMesh = b.Meshes[name].Render;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterials = b.Meshes[name].Materials;
+            b.Visuals[name] = go.transform;
+            return renderer;
+        }
+
+        // travel_deg turns the hinge from its built pose about its local X. Which way a positive turn goes is measured on the
+        // mesh: the way that moves its middle further in the wanted direction (score). Returns the signed angle, and
+        // whether it kept the export's sign.
+        private static (float Angle, bool Kept) Travel(Build b, Transform frame, Vector3 centre, string name, Func<Vector3, float> score)
+        {
+            var travel = b.Blockout.Parts[name].Number("travel_deg");
+            Vector3 Turned(float angle) => frame.position + Quaternion.AngleAxis(angle, frame.right) * (centre - frame.position);
+            var kept = score(Turned(travel)) >= score(Turned(-travel));
+            return (kept ? travel : -travel, kept);
+        }
 
         private static T Ensure<T>(GameObject go) where T : Component => go.TryGetComponent<T>(out var c) ? c : go.AddComponent<T>();
 

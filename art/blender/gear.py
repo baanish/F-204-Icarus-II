@@ -1,8 +1,8 @@
-"""Landing gear, gear doors, the opening canopy, lights and antennas.
+"""Landing gear and gear doors.
 
 Positions follow the F-104: a nose leg just aft of the cockpit folding forward under it, and two main legs on a
 2.5 m track folding forward into the fuselage. Every moving piece is a hinge empty (local X along the hinge) with a
-<name>_visible mesh child, like the control surfaces; the built pose is gear down, doors shut, canopy shut. A hinge's
+<name>_visible mesh child, like the control surfaces; the built pose is gear down, doors shut. A hinge's
 "travel_deg" property is the rotation about its X from the built pose to the stowed or open pose.
 """
 import math
@@ -26,26 +26,26 @@ GEAR = {
               ("gear_door_main_L", 9.35, 11.10, 0.16, 0.56), ("gear_door_main_R", 9.35, 11.10, -0.56, -0.16)],
     "door_open_deg": 85,
 }
-CANOPY = {"windscreen_end_s": 2.95, "hinge_side_x": 1, "open_deg": 75, "frame_w": 0.04}
-LIGHTS = [  # (name, s, x, z, kind, colour)
-    ("light_nav_L", None, None, None, "nav", "red"),  # at the left wingtip, placed from the wing
-    ("light_nav_R", None, None, None, "nav", "green"),
-    ("light_beacon_top", 15.20, 0.0, 2.90, "anticollision", "red"),
-    ("light_beacon_belly", 9.00, 0.0, -0.40, "anticollision", "red"),
-    ("light_formation_L", 6.30, 0.95, 0.30, "formation", "green"),
-    ("light_formation_R", 6.30, -0.95, 0.30, "formation", "green"),
-    ("light_landing", None, None, None, "landing", "white"),  # on the nose leg
-]
-ANTENNAS = [  # (name, s, z of root, height, chord, which side: top or belly)
-    ("antenna_uhf_top", 7.20, None, 0.20, 0.30, "top"),
-    ("antenna_iff_belly", 6.40, None, 0.15, 0.22, "belly"),
-    ("antenna_datalink_top", 11.60, None, 0.16, 0.26, "top"),
-]
-# Weapon pylons: one blade under each wing at a fraction of the span from the root row to the tip. Each carries one
-# mount, which the game hangs from the hardpoint at the pylon's lower edge. The wingtip stations have no blade or rail:
-# every mount brings its own launch rail, which bears straight on the tip face. The game hides an empty station's blade
-# and shows its plug instead, a stub on the blade's root footprint standing "plug" metres below the wing.
-PYLONS = {"inner": 0.45, "length": 1.5, "depth": 0.26, "thickness": 0.10, "rake": 0.30, "bury": 0.03, "plug": 0.03}
+# Object names the other modules and the Unity author build against, per leg N, L and R: the sprung leg is
+# gear_leg_<leg>_visible and the wheel gear_wheel_<leg>_visible; the piston and axle slide as gear_unsprung_<leg>,
+# and a drag brace is gear_arm_<leg>.
+UNSPRUNG, ARM = "gear_unsprung_", "gear_arm_"
+# Triangles per component: target and cap (budget.py sums them). A leg counts its sprung, unsprung, arm and wheel.
+BUDGET = {
+    **{"leg_" + leg: {"target": 3800, "cap": 3800, "objects": ("gear_leg_" + leg, "gear_wheel_" + leg, UNSPRUNG + leg, ARM + leg)}
+       for leg in ("N", "L", "R")},
+    "doors": {"target": 520, "cap": 520, "objects": ("gear_door_",)},
+}
+CLOSEUPS = {}
+
+
+def build(p, mats):
+    """The three legs; the doors are cut from the fuselage skin earlier (cut_doors)."""
+    return build_gear(mats)
+
+
+def check(icarus):
+    return None
 
 
 def cylinder(name, a, b, r, segments=16):
@@ -147,130 +147,4 @@ def cut_doors(fuselage):
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if inside(f.calc_center_median())], context="FACES")
         bm.to_mesh(fuselage.data)
         bm.free()
-    return parts
-
-
-def hinge_canopy(p, canopy, frame_mat):
-    """Split the canopy into a fixed windscreen and an opening hood hinged along its left sill."""
-    end = CANOPY["windscreen_end_s"] - bi.S0
-    pieces = {}
-    for name, keep in (("windscreen", lambda c: c.y < end), ("canopy_mesh", lambda c: c.y >= end)):
-        me = canopy.data.copy()
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        bmesh.ops.delete(bm, geom=[f for f in bm.faces if not keep(f.calc_center_median())], context="FACES")
-        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
-        bm.to_mesh(me)
-        bm.free()
-        obj = bpy.data.objects.new(name, me)
-        bi.TARGET.objects.link(obj)
-        pieces[name] = obj
-    hood = pieces["canopy_mesh"]
-    sill = [v.co for v in hood.data.vertices if v.co.x > 0]
-    low = min(v.z for v in sill)
-    rim = [v for v in sill if v.z < low + 0.03]
-    a = min(rim, key=lambda v: v.y)
-    b = max(rim, key=lambda v: v.y)
-    # The windscreen frame: an arched band where the windscreen meets the hood.
-    s0 = CANOPY["windscreen_end_s"]
-    rows = bi.resample(p["canopy"], [s0 - CANOPY["frame_w"], s0 + CANOPY["frame_w"]])
-    rings = []
-    for s_, hw, top, bot in rows:
-        ring = bi.body_ring(s_, hw * 1.03, top + 0.01, bot, 2.0, e_bot=4.0, zmid=bot + 0.02)
-        rings.append(ring)
-    bow = bi.finish(bi.loft("windscreen_frame", rings), frame_mat, smooth=False)
-    bpy.data.objects.remove(canopy, do_unlink=True)
-    parts = bi.hinged("canopy", hood, frame_on(a, b - a))  # hinged along the left sill
-    # opened, the hood swings up and over to the left: its right edge rises and moves toward the hinge
-    parts[0]["travel_deg"] = opening_travel(parts[0], CANOPY["open_deg"], lambda pts: max(q.z for q in pts) + min(q.x for q in pts))
-    return parts + [pieces["windscreen"], bow]
-
-
-def lights_and_antennas(p, mats):
-    w = p["wing"]
-    # The nav lamps sit on top of the tip, 0.075 m inboard of the tip face the wingtip store's rail bears on, as on
-    # the Revoker.
-    lamp_x = w["planform"][-1][1] - 0.075
-    lamp_le, lamp_z, lamp_chord = wing_at(w, lamp_x)
-    parts = []
-    for name, s, x, z, kind, colour in LIGHTS:
-        if kind == "nav":
-            side = 1 if name.endswith("_L") else -1
-            pos = bi.P(lamp_le + lamp_chord * 0.35, side * lamp_x, lamp_z + bi.airfoil(0.35) * w["thickness"] * lamp_chord)
-        elif kind == "landing":
-            g = GEAR["nose"]
-            pos = bi.P(g["wheel_s"] - 0.15, 0.0, GEAR["ground_z"] + g["wheel_d"] + 0.15)
-        else:
-            pos = bi.P(s, x, z)
-        e = bi.empty(name, Matrix.Translation(pos))
-        e["light"] = kind
-        e["colour"] = colour
-        parts.append(e)
-    for name, s, _, h, chord, where in ANTENNAS:
-        ring = bi.blended_ring(p, s)
-        z0 = max(v.z for v in ring) if where == "top" else min(v.z for v in ring)
-        up = 1 if where == "top" else -1
-        verts = [bi.P(s - chord / 2, 0.0, z0 - up * 0.02), bi.P(s + chord / 2, 0.0, z0 - up * 0.02),
-                 bi.P(s + chord * 0.1, 0.0, z0 + up * h), bi.P(s - chord * 0.05, 0.0, z0 + up * h)]
-        thick = Vector((0.006, 0, 0))
-        v = [q - thick for q in verts] + [q + thick for q in verts]
-        f = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
-        obj = bi.finish(bi.mesh_object(name, v, f), mats["antenna"], smooth=False)
-        obj["role"] = "antenna"
-        parts.append(obj)
-    return parts
-
-
-def wing_at(w, x):
-    """The wing section (s of the leading edge, z of the chord line, chord) at spanwise x, between planform rows."""
-    sections = bi.wing_sections(w)
-    for (le0, x0, z0, c0), (le1, x1, z1, c1) in zip(sections, sections[1:]):
-        if x0 <= x <= x1:
-            t = (x - x0) / (x1 - x0)
-            return le0 + t * (le1 - le0), z0 + t * (z1 - z0), c0 + t * (c1 - c0)
-    raise ValueError("x %.2f is outside the wing" % x)
-
-
-def slab(name, s0, s1, x, z_top, depth, thick, rake, mat):
-    """A vertical blade along s, its top at z_top and its lower edge raked back from the front by rake."""
-    profile = [bi.P(s0, x, z_top), bi.P(s1, x, z_top), bi.P(s1 - rake / 3, x, z_top - depth), bi.P(s0 + rake, x, z_top - depth)]
-    half = Vector((thick / 2, 0, 0))
-    v = [q - half for q in profile] + [q + half for q in profile]
-    f = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
-    obj = bi.finish(bi.mesh_object(name, v, f), mat, smooth=False)
-    obj["role"] = "pylon"
-    return obj
-
-
-def fixed_box(p, x):
-    """Chord fractions (front, back) of the fixed wing box at spanwise x, the same limits build_icarus.box_stations
-    leaves between the leading-edge devices and trailing-edge surfaces."""
-    gap, front, back = p["surface_gap"], 0.0, 1.0
-    for _, a, b, c0, c1 in p["wing_surfaces"]:
-        if a - gap / 2 <= x <= b + gap / 2:
-            if c0 == 0.0:
-                front = max(front, c1 + gap / 2)
-            else:
-                back = min(back, c0 - gap / 2)
-    return front, back
-
-
-def pylons(p, mat):
-    """The inner wing pylons and their plugs."""
-    w, y = p["wing"], PYLONS
-    root_x, tip_x = w["planform"][0][1], w["planform"][-1][1]
-    parts = []
-    for side, suffix in ((1, "_L"), (-1, "_R")):
-        x = root_x + y["inner"] * (tip_x - root_x)
-        le, z, chord = wing_at(w, x)
-        low = z - 0.5 * w["thickness"] * chord
-        length = min(y["length"], 0.75 * chord)
-        # The blade's buried root stays on the fixed box, clear of the moving surfaces and the space they sweep.
-        front, back = fixed_box(p, x)
-        s0 = max(le + front * chord, le + 0.45 * chord - length / 2)
-        s1 = min(le + back * chord, le + 0.45 * chord + length / 2)
-        parts.append(slab("pylon_inner%s" % suffix, s0, s1, side * x, low + y["bury"],
-                          y["depth"] + y["bury"], y["thickness"], y["rake"], mat))
-        parts.append(slab("pylon_inner_plug%s" % suffix, s0, s1, side * x, low + y["bury"],
-                          y["plug"] + y["bury"], y["thickness"], 0.0, mat))
     return parts

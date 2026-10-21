@@ -5,16 +5,43 @@ joint to its parent, and what a hit or a detachment reveals is whatever geometry
 split into thin panels that can come away, the frames, spars and tanks they cover are parts of their own, and the
 Blender parent tree is the part tree the Unity author builds. Names, parents and dry masses follow the Full Fidelity
 plan in the project notes (41 parts, 5,800 kg dry); the stabilator is two pivoting halves.
+
+Detail a package builds as its own object tagged merge_into = "<part>" joins that part's mesh (merge_details), so it
+takes the part's livery and damage without a renderer of its own.
 """
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
 import build_icarus as bi
-import gear
+import canopy
 import internals as interior
+import lights
+import stations
 
-# part name -> (parent, dry mass kg). Hinged surfaces are listed by their hinge name.
+SKIN = "Icarus_Body"
+# Triangles per component: target and cap (budget.py sums them). Caps are ceilings; the references sit lower.
+BUDGET = {
+    "fuselage_skin": {"target": 20000, "cap": 20000, "objects": ("radome", "skin_", "dorsal_cover")},
+    "wing_box_L": {"target": 2000, "cap": 2000, "objects": ("wing_skin_L",)},
+    "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
+    **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
+       for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
+    "stabilator_L": {"target": 1060, "cap": 1060, "objects": ("stabilator_L_visible",)},
+    "stabilator_R": {"target": 1060, "cap": 1060, "objects": ("stabilator_R_visible",)},
+    "fins": {"target": 1600, "cap": 1600, "objects": ("fin_skin", "ventral_fin")},
+    "speed_brake_L": {"target": 480, "cap": 480, "objects": ("speed_brake_L_visible",)},
+    "speed_brake_R": {"target": 480, "cap": 480, "objects": ("speed_brake_R_visible",)},
+    "structure_cores": {"target": 11000, "cap": 11000, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
+    "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
+    "fuel_cells": {"target": 5000, "cap": 5000, "objects": ("fuel_",)},
+    "engine": {"target": 1500, "cap": 1500, "objects": ("engine_core",)},
+    "radar_avionics_cockpit": {"target": 1500, "cap": 1500, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
+}
+CLOSEUPS = {}
+
+# part name -> (parent, dry mass kg). Hinged surfaces are listed by their hinge name. The canopy, light and station
+# modules list their own parts (organise merges their TREEs).
 TREE = {
     "fuselage_mid": (None, 910),
     "fuselage_forward": ("fuselage_mid", 500),
@@ -57,26 +84,10 @@ TREE = {
     "skin_mid_R": ("fuselage_mid", 45),
     "skin_aft_L": ("fuselage_aft", 45),
     "skin_aft_R": ("fuselage_aft", 45),
-    "windscreen": ("cockpit_cell", 0),
-    "windscreen_frame": ("cockpit_cell", 0),
     "gear_door_N_L": ("fuselage_forward", 0),
     "gear_door_N_R": ("fuselage_forward", 0),
     "gear_door_main_L": ("fuselage_mid", 0),
     "gear_door_main_R": ("fuselage_mid", 0),
-    "light_nav_L": ("wing_skin_L", 0),
-    "light_nav_R": ("wing_skin_R", 0),
-    "light_beacon_top": ("fin_skin", 0),
-    "light_beacon_belly": ("fuselage_mid", 0),
-    "light_formation_L": ("skin_mid_L", 0),
-    "light_formation_R": ("skin_mid_R", 0),
-    "light_landing": ("gear_leg_N", 0),
-    "antenna_uhf_top": ("dorsal_cover", 0),
-    "antenna_iff_belly": ("skin_mid_L", 0),
-    "antenna_datalink_top": ("dorsal_cover", 0),
-    "pylon_inner_L": ("wing_spar_L", 0),
-    "pylon_inner_R": ("wing_spar_R", 0),
-    "pylon_inner_plug_L": ("wing_spar_L", 0),
-    "pylon_inner_plug_R": ("wing_spar_R", 0),
     "dorsal_cover": ("fuselage_mid", 40),
     # Not in the 41: small parts the plan folds into their parents' budgets.
     "speed_brake_L": ("fuselage_aft", 0),
@@ -193,6 +204,11 @@ def recentre(obj):
     obj.matrix_world = obj.matrix_world @ Matrix.Translation(c)
 
 
+def full_tree():
+    """Every part: TREE, then the parts the canopy, light and station modules list."""
+    return {**TREE, **canopy.TREE, **lights.TREE, **stations.TREE}
+
+
 def organise(p, icarus, internals, structure_mat):
     """Turn the built exterior and internals into the part tree. Returns the parts by name."""
     prev, bi.TARGET = bi.TARGET, icarus
@@ -212,12 +228,12 @@ def _organise(p, icarus, internals, structure_mat):
     # The canopy is its own loft on top of the body, so the body's top skin ran on under it as a floor across the
     # cockpit, and the frames there closed over the pilot as full rings. The cockpit opening is whatever of the skin
     # and the frames lies inside the canopy's closed shape.
-    canopy_solid = interior.outward(bi.build_canopy(p, structure_mat))
+    canopy_solid = interior.outward(canopy.build_canopy(p, structure_mat))
     for obj in [fus] + [o for o in icarus.objects if o.name.startswith("frame_")]:
         drop_inside(obj, canopy_solid)
     # The windscreen frame is a band round the whole canopy section, whose lower part dips into the body: inside the
     # open cockpit it crossed the pilot's view as a full ring. Only the arch above the skin stays.
-    bow_s = gear.CANOPY["windscreen_end_s"]
+    bow_s = canopy.CANOPY["windscreen_end_s"]
     body = interior.inner_solid(p, 0.0, bow_s - 0.2, bow_s + 0.2)
     drop_inside(O["windscreen_frame"], body)
     bpy.data.objects.remove(body, do_unlink=True)
@@ -272,14 +288,15 @@ def _organise(p, icarus, internals, structure_mat):
         interior.subtract(interior.outward(obj), [body])
     bpy.data.objects.remove(body, do_unlink=True)
     # The canopy's lower edge dips into the fuselage; keep the cockpit cell clear of it.
-    solid = bi.build_canopy(p, structure_mat)  # the closed canopy shape; the built hood and windscreen are open
+    solid = canopy.build_canopy(p, structure_mat)  # the closed canopy shape; the built hood and windscreen are open
     canopy_cut = interior.grown(solid, 0.01)
     interior.subtract(interior.outward(O["cockpit_cell"]), [canopy_cut])
     for o in (solid, canopy_cut):
         bpy.data.objects.remove(o, do_unlink=True)
 
+    tree = full_tree()
     parts = {}
-    for name, (parent, mass) in TREE.items():
+    for name, (parent, mass) in tree.items():
         obj = O.get(name)
         if obj is None:
             raise ValueError("part %s was not built" % name)
@@ -287,7 +304,7 @@ def _organise(p, icarus, internals, structure_mat):
     for name, obj in parts.items():
         if obj.type == "MESH":
             recentre(obj)
-    for name, (parent, mass) in TREE.items():
+    for name, (parent, mass) in tree.items():
         obj = parts[name]
         role = next((r for k, r in ROLE.items() if name.startswith(k)), "structure")
         target = O.get(name + "_visible", obj) if obj.type == "EMPTY" else obj  # lights are bare empties
@@ -301,13 +318,58 @@ def _organise(p, icarus, internals, structure_mat):
     world = nozzle_vector.matrix_world.copy()
     nozzle_vector.parent = parts["nozzle"]
     nozzle_vector.matrix_world = world
-    leftover = [o.name for o in icarus.objects if o.parent is None and o.name not in TREE]
+    # detail waiting to join its part (merge_details) is not a part of its own
+    leftover = [o.name for o in icarus.objects if o.parent is None and o.name not in tree and "merge_into" not in o]
     if leftover:
         raise ValueError("objects outside the part tree: %s" % ", ".join(sorted(leftover)))
     for obj in icarus.objects:
         if obj.type == "MESH" and not obj.name.startswith("intake_duct"):
             face_outward(obj)
     return parts
+
+
+def check(icarus):
+    return None
+
+
+def merge_details(icarus):
+    """Join every mesh tagged merge_into = "<part>" into that part's mesh (a hinged part's _visible mesh), its faces
+    keeping their materials, with the skin slot first: the game paints a livery on slot 0 only (UnitPart.SetLivery).
+    Returns the number merged."""
+    details = [o for o in icarus.objects if o.type == "MESH" and "merge_into" in o]
+    for detail in details:
+        part = bpy.data.objects[detail["merge_into"]]
+        if part.type == "EMPTY":
+            part = bpy.data.objects[part.name + "_visible"]
+        me = detail.data.copy()
+        me.transform(part.matrix_world.inverted() @ detail.matrix_world)
+        slots = list(part.data.materials)
+        remap = []
+        for mat in me.materials:
+            if mat not in slots:
+                slots.append(mat)
+            remap.append(slots.index(mat))
+        bm = bmesh.new()
+        bm.from_mesh(part.data)
+        before = len(bm.faces)
+        bm.from_mesh(me)
+        bm.faces.ensure_lookup_table()
+        for f in bm.faces[before:]:
+            f.material_index = remap[f.material_index] if remap else 0
+        order = sorted(range(len(slots)), key=lambda i: slots[i].name != SKIN)  # stable: the skin moves to the front
+        for f in bm.faces:
+            f.material_index = order.index(f.material_index)
+        bm.to_mesh(part.data)
+        bm.free()
+        part.data.materials.clear()
+        for i in order:
+            part.data.materials.append(slots[i])
+        bpy.data.meshes.remove(me)
+        data = detail.data
+        bpy.data.objects.remove(detail, do_unlink=True)
+        if data.users == 0:
+            bpy.data.meshes.remove(data)
+    return len(details)
 
 
 def face_outward(obj):

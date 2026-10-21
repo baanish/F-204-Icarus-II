@@ -291,22 +291,6 @@ def mesh_object(name, verts, faces):
     return obj
 
 
-def material(name, rgba, metallic=0.0, roughness=0.5):
-    mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    mat.diffuse_color = rgba
-    mat.metallic = metallic
-    mat.roughness = roughness
-    mat.use_nodes = True
-    bsdf = mat.node_tree.nodes.get("Principled BSDF")
-    if bsdf:
-        bsdf.inputs["Base Color"].default_value = rgba
-        bsdf.inputs["Metallic"].default_value = metallic
-        bsdf.inputs["Roughness"].default_value = roughness
-        if rgba[3] < 1:
-            bsdf.inputs["Alpha"].default_value = rgba[3]
-    return mat
-
-
 def finish(obj, mat, smooth=True):
     obj.data.materials.append(mat)
     if smooth:
@@ -375,11 +359,16 @@ def blended_ring(p, s):
     # behind it.
     behind_lip = s - p["intake"][0][0]
     k = p["blend"] * (0.12 + 0.88 * min(1.0, behind_lip / 1.2)) if behind_lip >= 0 else p["blend"]
+    import stations
+
+    carves = stations.carve_shapes(p, s)  # the conformal trough, cut out of the union
 
     def field(x, z):
         d = shapes[0](x, z)
         for f in shapes[1:]:
             d = smin(d, f(x, z), k)
+        for c in carves:
+            d = max(d, -c(x, z))
         return d
 
     ar = p["area_rule"]
@@ -438,25 +427,6 @@ def inward_fix(obj, axis_point):
         obj.data.flip_normals()
 
 
-def build_ducts(p, duct_mat):
-    """Intake ducts, faces pointing inward, from just inside the lip to a capped engine face."""
-    rows = resample(p["duct"], spaced(p["duct"][0][0], p["duct"][-1][0], 16))
-    parts = []
-    for side, name in ((1, "duct_L"), (-1, "duct_R")):
-        rings = [[P(s, side * (cx + r * math.cos(a)), cz + r * math.sin(a))
-                  for a in [2 * math.pi * k / 48 for k in range(48)]] for s, cx, cz, r in rows]
-        obj = loft(name, rings, cap_back=True)
-        inward_fix(obj, Vector((side * rows[0][1], rows[0][0] - S0, rows[0][2])))
-        parts.append(finish(obj, duct_mat))
-    return parts
-
-
-def build_canopy(p, mat):
-    rows = resample(p["canopy"], spaced(p["canopy"][0][0], p["canopy"][-1][0], 24))
-    rings = [body_ring(s, hw, top, bot, 2.0, e_bot=4.0, zmid=bot + 0.02) for s, hw, top, bot in rows]
-    return finish(loft("canopy", rings, cap_back=True, cap_front=True), mat)
-
-
 def build_probe(p, mat):
     pr = p["probe"]
     z = p["fuselage"][0][2]
@@ -465,32 +435,6 @@ def build_probe(p, mat):
     rings = [[P(s, r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / 24 for k in range(24)]]
              for s, r in profile]
     return finish(loft("probe", rings, tip_front=P(-pr["length"] - 0.02, 0.0, z)), mat)
-
-
-def build_shock_cones(p, mat, duct_mat):
-    sc = p["shock_cone"]
-    zc = p["intake"][0][2]
-    parts = []
-    for side, name in ((1, "shock_cone_L"), (-1, "shock_cone_R")):
-        profile = [(sc["apex_s"] + (sc["break_s"] - sc["apex_s"]) * i / 6, sc["break_r"] * i / 6) for i in range(1, 7)]
-        profile += [(sc["break_s"] + (sc["base_s"] - sc["break_s"]) * i / 5,
-                     sc["break_r"] + (sc["radius"] - sc["break_r"]) * i / 5) for i in range(1, 6)]
-        rings = [[P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
-                  for a in [2 * math.pi * k / RING for k in range(RING)]] for s, r in profile]
-        cone = finish(loft(name, rings, tip_front=P(sc["apex_s"], side * sc["x"], zc), cap_back=True), mat)
-        parts.append(cone)
-        # Bleed slot: a dark band just proud of the cone surface near its base.
-        r0 = sc["break_r"] + (sc["radius"] - sc["break_r"]) * (sc["bleed_s"] - sc["break_s"]) / (sc["base_s"] - sc["break_s"])
-        band = []
-        for ds in (0.0, 0.035):
-            r = r0 + (sc["radius"] - sc["break_r"]) * ds / (sc["base_s"] - sc["break_s"]) + 0.003
-            band.append([P(sc["bleed_s"] + ds, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
-                         for a in [2 * math.pi * k / RING for k in range(RING)]])
-        slot = loft(name + "_bleed", band)
-        if side < 0:
-            slot.data.flip_normals()
-        parts.append(finish(slot, duct_mat))
-    return parts
 
 
 def section_at(sections, u, axis):
@@ -663,24 +607,6 @@ def build_speed_brakes(p, mat):
     return left + mirror_part(left)
 
 
-def ring_points(s, r, z, n=RING):
-    return [P(s, r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / n for k in range(n)]]
-
-
-def plate(name, root_w, tip_w, length, thickness):
-    """A tapered plate in hinge space: X along the hinge, Y aft, Z outward; the hinge line is the root edge."""
-    hw0, hw1, t = root_w / 2, tip_w / 2, thickness
-    verts = [(-hw0, 0, 0), (hw0, 0, 0), (hw1, length, 0), (-hw1, length, 0),
-             (-hw0, 0, -t), (hw0, 0, -t), (hw1, length, -t), (-hw1, length, -t)]
-    faces = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
-    me = bpy.data.meshes.new(name)
-    me.from_pydata(verts, [], faces)
-    me.validate()
-    obj = bpy.data.objects.new(name, me)
-    TARGET.objects.link(obj)
-    return obj
-
-
 def empty(name, matrix, parent=None):
     obj = bpy.data.objects.new(name, None)
     obj.empty_display_type = "ARROWS"
@@ -689,58 +615,6 @@ def empty(name, matrix, parent=None):
     obj.parent = parent
     obj.matrix_world = matrix
     return obj
-
-
-def nozzle_hinge_matrix(p, kind, i, open_deg=0.0, pitch_deg=0.0, yaw_deg=0.0):
-    """World matrix of one petal or seal hinge. Opening adds to every petal; vectoring tilts the exit: a petal at
-    ring angle phi gains -pitch*sin(phi) - yaw*cos(phi), so a positive pitch points the exit down (nose-up moment)."""
-    n = p["nozzle"]
-    count = n["petals"]
-    phi = 2 * math.pi * i / count + (math.pi / count if kind == "seal" else 0.0)
-    radial = Vector((math.cos(phi), 0.0, math.sin(phi)))
-    # X runs clockwise round the ring seen from behind, so X, aft and outward make a right-handed frame; a positive
-    # rotation about X turns aft toward outward, opening the petal.
-    hinge_x = Vector((math.sin(phi), 0.0, -math.cos(phi)))
-    basis = Matrix((hinge_x, Vector((0.0, 1.0, 0.0)), radial)).transposed().to_4x4()
-    inset = n["seal_inset"] if kind == "seal" else 0.0
-    hinge_at = P(n["ring_s"], 0.0, n["z"]) + radial * (n["ring_r"] - inset)
-    angle = n["dry_angle_deg"] + open_deg - pitch_deg * math.sin(phi) - yaw_deg * math.cos(phi)
-    return Matrix.Translation(hinge_at) @ basis @ Matrix.Rotation(math.radians(angle), 4, "X")
-
-
-def pose_nozzle(open_deg=0.0, pitch_deg=0.0, yaw_deg=0.0):
-    """Pose the built nozzle, the way the plugin will drive it in game."""
-    for kind in ("petal", "seal"):
-        for i in range(PARAMS["nozzle"]["petals"]):
-            hinge = bpy.data.objects["nozzle_%s_%02d" % (kind, i)]
-            hinge.matrix_world = nozzle_hinge_matrix(PARAMS, kind, i, open_deg, pitch_deg, yaw_deg)
-
-
-def build_nozzle(p, mat, duct_mat):
-    n = p["nozzle"]
-    z, s_ring, r = n["z"], n["ring_s"], n["ring_r"]
-    petal_mat = material("Icarus_Petal", (0.46, 0.44, 0.42, 1.0), 0.85, 0.3)
-    seal_mat = material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4)
-    shroud = loft("nozzle_shroud", [ring_points(n["shroud_start"], n["shroud_r"], z), ring_points(s_ring, n["shroud_r"], z),
-                                   ring_points(s_ring, n["duct_r"], z), ring_points(n["shroud_start"], n["duct_r"], z)],
-                  cap_back=True)
-    finish(shroud, mat)
-    shroud.data.materials.append(duct_mat)
-    shroud.data.polygons[-1].material_index = 1  # engine face up the duct
-    gimbal = empty("nozzle_vector", Matrix.Translation(P(s_ring, 0.0, z)))
-    parts = [shroud, gimbal]
-    count = n["petals"]
-    for kind, w0, w1 in (("petal", n["petal_root_w"], n["petal_tip_w"]),
-                         ("seal", n["petal_root_w"] * 0.7, n["petal_tip_w"] * 0.7)):
-        for i in range(count):
-            name = "nozzle_%s_%02d" % (kind, i)
-            hinge = empty(name, nozzle_hinge_matrix(p, kind, i), parent=gimbal)
-            hinge["hinge_axis"] = "X"
-            vis = plate(name + "_visible", w0, w1, n["petal_length"], n["petal_thickness"])
-            vis.parent = hinge
-            vis.data.materials.append(petal_mat if kind == "petal" else seal_mat)
-            parts += [hinge, vis]
-    return parts
 
 
 def build_references(p, repo):
@@ -821,46 +695,50 @@ def build(repo=None, overrides=None):
         PARAMS = base
 
 
+# The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
+# (review_sheet.py).
+MODULES = ("parts", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit")
+
+
+def modules():
+    import importlib
+
+    return [importlib.import_module(name) for name in MODULES]
+
+
 def _build(repo):
     global TARGET
     repo = repo or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     TARGET = collection("Icarus")
-    body = material("Icarus_Body", (0.56, 0.57, 0.59, 1.0), 1.0, 0.32)  # bare steel for the blockout
-    glass = material("Icarus_Glass", (0.10, 0.16, 0.22, 0.6), 0.0, 0.05)
-    duct = material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8)
-    metal = material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35)
-    p = PARAMS
-    import gear
+    import materials
 
-    fuselage = build_fuselage(p, body, duct)
-    parts = [fuselage, build_probe(p, metal)]
+    mats = materials.build()
+    p = PARAMS
+    import canopy
+    import cockpit
+    import gear
+    import lights
+    import propulsion
+    import stations
+
+    fuselage = build_fuselage(p, mats["body"], mats["duct"])
+    parts = [fuselage, build_probe(p, mats["metal"])]
     parts += gear.cut_doors(fuselage)
-    frame = material("Icarus_Frame", (0.20, 0.21, 0.22, 1.0), 0.6, 0.5)
-    parts += gear.hinge_canopy(p, build_canopy(p, glass), frame)
-    parts += build_nozzle(p, metal, duct)
-    parts += build_shock_cones(p, body, duct)
-    parts += build_ducts(p, duct)
-    parts += build_surfaces(p, body)
-    parts += build_speed_brakes(p, body)
-    parts += gear.build_gear({"strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
-                              "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9)})
-    parts += gear.lights_and_antennas(p, {"antenna": body})
-    parts += gear.pylons(p, body)
+    parts += canopy.build(p, mats)
+    parts += propulsion.build(p, mats)
+    parts += build_surfaces(p, mats["body"])
+    parts += build_speed_brakes(p, mats["body"])
+    parts += gear.build(p, mats)
+    parts += lights.build(p, mats)
+    parts += stations.build(p, mats)
+    parts += cockpit.build(p, mats)
     import internals  # imports this module back for its helpers, so it loads after them
 
-    inner_mats = {
-        "fuel_tank": material("Icarus_Int_Fuel", (0.85, 0.55, 0.12, 1.0), 0.0, 0.6),
-        "engine": material("Icarus_Int_Engine", (0.30, 0.28, 0.26, 1.0), 0.9, 0.4),
-        "structure": material("Icarus_Int_Structure", (0.70, 0.72, 0.74, 1.0), 0.6, 0.5),
-        "avionics": material("Icarus_Int_Avionics", (0.20, 0.45, 0.30, 1.0), 0.1, 0.6),
-        "radar": material("Icarus_Int_Avionics", (0.20, 0.45, 0.30, 1.0), 0.1, 0.6),
-        "cockpit": material("Icarus_Int_Cockpit", (0.32, 0.33, 0.35, 1.0), 0.2, 0.6),
-        "gear_bay": material("Icarus_Int_Bay", (0.10, 0.10, 0.11, 1.0), 0.0, 0.8),
-    }
-    internals.build(p, collection("Internals"), inner_mats)
+    internals.build(p, collection("Internals"), mats)
     import parts as part_tree
 
-    tree = part_tree.organise(p, TARGET, bpy.data.collections["Internals"], inner_mats["structure"])
+    tree = part_tree.organise(p, TARGET, bpy.data.collections["Internals"], mats["structure"])
+    part_tree.merge_details(TARGET)
     bpy.context.view_layer.update()
     import hulls
 
@@ -869,6 +747,11 @@ def _build(repo):
 
     checks.fuel_cell_clearance(TARGET)
     checks.internals_inside_skin(TARGET)
+    for module in modules():
+        module.check(TARGET)
+    import budget
+
+    print(budget.report(TARGET))
     refs = build_references(p, repo)
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])
@@ -883,5 +766,8 @@ def _build(repo):
 
 
 if __name__ == "__main__":
-    result = build()
-    print("icarus:", result)
+    # Run as a script this file is __main__, but the other modules import build_icarus: build through that one copy,
+    # so TARGET and PARAMS are the ones they read.
+    import build_icarus
+
+    print("icarus:", build_icarus.build())

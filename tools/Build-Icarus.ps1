@@ -2,7 +2,7 @@
 #
 # Builds the Icarus runtime DLL and the Blueprinter bundle. Passes only when the pinned exports match
 # art/export-manifest.json, dotnet builds src/Icarus, Unity exits 0 with exactly one "[Icarus] Build complete: <nobp>"
-# line, every authoring check A1 to A12 logged PASS, no "[Icarus] Captured build error" line, and the .nobp and DLL are
+# line, every authoring check A1 to A15 logged PASS, no "[Icarus] Captured build error" line, and the .nobp and DLL are
 # newer than this run's start. Then copies them to build/ with SHA256SUMS.txt. Every Unity log stays in build/logs.
 # The last line is always the verdict: "B0 PASS: ..." or "B0 FAIL: ...".
 #
@@ -37,7 +37,7 @@ $clock = [Diagnostics.Stopwatch]::StartNew()
 $deadline = [TimeSpan]::FromMinutes(30)
 $licenseFailure = 'No valid Unity Editor license found'
 $maxLicenseRetries = 3
-$checks = 1..12 | ForEach-Object { "A$_" }
+$checks = 1..15 | ForEach-Object { "A$_" }
 
 function Fail([string]$why) {
     Write-Output "B0 FAIL: $why ($([int]$clock.Elapsed.TotalSeconds) s)"
