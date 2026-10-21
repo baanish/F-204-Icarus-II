@@ -244,12 +244,6 @@ def _organise(p, icarus, internals, structure_mat):
     canopy_solid = interior.outward(canopy.build_canopy(p, structure_mat))
     for obj in [fus] + [o for o in icarus.objects if o.name.startswith("frame_")]:
         drop_inside(obj, canopy_solid)
-    # The windscreen frame is a band round the whole canopy section, whose lower part dips into the body: inside the
-    # open cockpit it crossed the pilot's view as a full ring. Only the arch above the skin stays.
-    bow_s = canopy.CANOPY["windscreen_end_s"]
-    body = interior.inner_solid(p, 0.0, bow_s - 0.2, bow_s + 0.2)
-    drop_inside(O["windscreen_frame"], body)
-    bpy.data.objects.remove(body, do_unlink=True)
     bpy.data.objects.remove(canopy_solid, do_unlink=True)
     side = lambda c: "L" if c.x >= 0 else "R"
     dorsal = lambda c: DORSAL[0] <= station(c) <= DORSAL[1] and c.z > DORSAL_Z and abs(c.x) < DORSAL_HALF_WIDTH
@@ -342,7 +336,7 @@ def _organise(p, icarus, internals, structure_mat):
     if leftover:
         raise ValueError("objects outside the part tree: %s" % ", ".join(sorted(leftover)))
     for obj in icarus.objects:
-        if obj.type == "MESH" and not obj.name.startswith("intake_duct"):
+        if obj.type == "MESH" and not obj.name.startswith("intake_duct") and obj.get("role") != "cockpit_view":
             face_outward(obj)
     return parts
 
@@ -520,8 +514,8 @@ def merge_details(icarus):
 
 def face_outward(obj):
     """Point every face of a render mesh out of its surface. The game culls back faces, and most lofts come out wound
-    inward (the fin's rows happen to run the other way), so the skins drew inside out in game. The intake ducts keep
-    their inward faces: they are seen from inside."""
+    inward (the fin's rows happen to run the other way), so the skins drew inside out in game. The intake ducts and the
+    cockpit view's renderers (the inner glass) keep their inward faces: they are seen from inside."""
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)

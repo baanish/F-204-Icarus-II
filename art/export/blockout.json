@@ -5,13 +5,13 @@
  "design_eye": {
   "blender": [
    0.0,
-   -4.564,
-   0.93
+   -3.635,
+   0.885
   ],
   "unity": [
    -0.0,
-   0.93,
-   4.564
+   0.885,
+   3.635
   ]
  },
  "parts": {
@@ -102,7 +102,7 @@
      0.00037
     ]
    ],
-   "sha256": "93d7ec7afa26ffbc6f103e6486c0e33ba0c3323fb7a07aac5c19b4eb3a7b21bc",
+   "sha256": "709eff804f96229136a251a82e2b4f2addf68b8a9bd6924139c92e02abffe1c5",
    "bounds_blender": [
     [
      -0.0053,
@@ -237,7 +237,7 @@
      0.00037
     ]
    ],
-   "sha256": "0c95d4c6b6198a559d06e7340bdc388192d59be3da663107a3f69452a21830d1",
+   "sha256": "529e2585f85090fe8006be21a52769700c9dfa14351eca368001c9b483c636ce",
    "bounds_blender": [
     [
      -0.0053,
@@ -331,7 +331,7 @@
      0.13
     ]
    ],
-   "sha256": "26abc8474bb27e680fc5f2adbb9beb82b6bc33b16d7e9186970abf493d59d0a9",
+   "sha256": "388ecff976299b960b1a13c381f652148cdb939a32db42200d8529b03df4b62a",
    "bounds_blender": [
     [
      -0.006,
@@ -421,7 +421,7 @@
      0.11
     ]
    ],
-   "sha256": "a0b05aa0c844ed6031dc16e153da82404bfe33b9974d4b5e9d402cfdef9471b5",
+   "sha256": "f528a0b83f4923e695c48786fdbdace5bac6dedd1b60dea3dbce7baf137f45a0",
    "bounds_blender": [
     [
      -0.006,
@@ -511,7 +511,7 @@
      0.15
     ]
    ],
-   "sha256": "f8657b8c4102d8cc490234cea40adddefd0e210938573937e0bc01008f40cc1e",
+   "sha256": "6e4296bc23445f16a2cea97749d9ebf5fbfb540d01d2dbfc5cfcdd3cf83886d5",
    "bounds_blender": [
     [
      -0.006,
@@ -602,7 +602,7 @@
      0.1
     ]
    ],
-   "sha256": "ab4250e91992175f69eb0f1e7a751d6086b941d880f9b6d81bb7bcebb7840c23",
+   "sha256": "5eba1603efac1880795a9fb3cd0abc1b76d4bfd6f60f2bcd66d605024a8bd2ce",
    "bounds_blender": [
     [
      -0.42,
@@ -650,71 +650,215 @@
    "fbx": null,
    "blender_parent": "cockpit_cell",
    "pivot_blender": [
-    0.3636,
-    -5.07565,
-    0.53366
+    0.36859,
+    -5.05,
+    0.49241
    ],
    "pivot_unity": [
-    -0.3636,
-    0.53366,
-    5.07565
+    -0.36859,
+    0.49241,
+    5.05
    ],
    "axes_unity": {
     "right": [
-     -0.76115,
-     0.00075,
-     0.64858
+     -0.0,
+     -0.15301,
+     0.98823
     ],
     "up": [
-     -0.00098,
      -1.0,
-     0.0
+     -0.0,
+     -0.0
     ],
     "forward": [
-     0.64858,
-     -0.00064,
-     0.76115
+     0.0,
+     -0.98823,
+     -0.15301
     ]
    },
    "props": {
     "hinge_axis": "X",
-    "travel_deg": -75
+    "travel_deg": 75
    },
    "bounds_unity": null,
    "hinge_axis_unity": [
-    0.76115,
-    -0.00075,
-    -0.64858
+    0.0,
+    0.15301,
+    -0.98823
    ]
+  },
+  "canopy_glass_inner": {
+   "fbx": "canopy_glass_inner.fbx",
+   "blender_parent": "canopy",
+   "pivot_blender": [
+    0.36859,
+    -5.05,
+    0.49241
+   ],
+   "pivot_unity": [
+    -0.36859,
+    0.49241,
+    5.05
+   ],
+   "axes_unity": {
+    "right": [
+     -0.0,
+     -0.15301,
+     0.98823
+    ],
+    "up": [
+     -1.0,
+     -0.0,
+     -0.0
+    ],
+    "forward": [
+     0.0,
+     -0.98823,
+     -0.15301
+    ]
+   },
+   "props": {
+    "role": "cockpit_view",
+    "mass_kg": 0
+   },
+   "bounds_unity": [
+    [
+     -2.20432,
+     -0.78961,
+     -0.57545
+    ],
+    [
+     -0.00045,
+     0.05243,
+     0.11465
+    ]
+   ],
+   "sha256": "907686f36d0a4c6a5c891b485a310b71c8a05f1b2600ba86aa731b79bfeda4dc",
+   "bounds_blender": [
+    [
+     0.00045,
+     -0.11465,
+     -0.78961
+    ],
+    [
+     2.20432,
+     0.57545,
+     0.05243
+    ]
+   ],
+   "tris": 454,
+   "materials": [
+    [
+     "fighter1_canopy_int",
+     454
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "canopy_glass_outer": {
+   "fbx": "canopy_glass_outer.fbx",
+   "blender_parent": "canopy",
+   "pivot_blender": [
+    0.36859,
+    -5.05,
+    0.49241
+   ],
+   "pivot_unity": [
+    -0.36859,
+    0.49241,
+    5.05
+   ],
+   "axes_unity": {
+    "right": [
+     -0.0,
+     -0.15301,
+     0.98823
+    ],
+    "up": [
+     -1.0,
+     -0.0,
+     -0.0
+    ],
+    "forward": [
+     0.0,
+     -0.98823,
+     -0.15301
+    ]
+   },
+   "props": {
+    "role": "visual",
+    "mass_kg": 0
+   },
+   "bounds_unity": [
+    [
+     -2.2077,
+     -0.79359,
+     -0.57944
+    ],
+    [
+     -0.0,
+     0.05641,
+     0.11834
+    ]
+   ],
+   "sha256": "66a0e032f7965644cfc9af59e717f58ebfb6b47aad2a288820872c44de5fb68d",
+   "bounds_blender": [
+    [
+     0.0,
+     -0.11834,
+     -0.79359
+    ],
+    [
+     2.2077,
+     0.57944,
+     0.05641
+    ]
+   ],
+   "tris": 454,
+   "materials": [
+    [
+     "fighter1_canopy",
+     454
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
   },
   "canopy_visible": {
    "fbx": "canopy_visible.fbx",
    "blender_parent": "canopy",
    "pivot_blender": [
-    0.3636,
-    -5.07565,
-    0.53366
+    0.36859,
+    -5.05,
+    0.49241
    ],
    "pivot_unity": [
-    -0.3636,
-    0.53366,
-    5.07565
+    -0.36859,
+    0.49241,
+    5.05
    ],
    "axes_unity": {
     "right": [
-     -0.76115,
-     0.00075,
-     0.64858
+     -0.0,
+     -0.15301,
+     0.98823
     ],
     "up": [
-     -0.00098,
      -1.0,
-     0.0
+     -0.0,
+     -0.0
     ],
     "forward": [
-     0.64858,
-     -0.00064,
-     0.76115
+     0.0,
+     -0.98823,
+     -0.15301
     ]
    },
    "props": {
@@ -723,58 +867,58 @@
    },
    "bounds_unity": [
     [
-     -1.91593,
-     -0.59623,
-     -1.61496
+     -2.21443,
+     -0.79953,
+     -0.50328
     ],
     [
-     0.0,
-     0.01971,
-     0.47165
+     0.00145,
+     0.06233,
+     0.11074
     ]
    ],
-   "sha256": "57749fcdd2dc9ee9c33afd47a011c93107e651ff19392819aef1600d10e64a7e",
+   "sha256": "c1f0e7f3dade64c6536cc37170aa9fcf212f4720337b56c683fbc8613bfcb52e",
    "bounds_blender": [
     [
-     -0.0,
-     -0.47165,
-     -0.59623
+     -0.00145,
+     -0.11074,
+     -0.79953
     ],
     [
-     1.91593,
-     1.61496,
-     0.01971
+     2.21443,
+     0.50328,
+     0.06233
     ]
    ],
-   "tris": 5326,
+   "tris": 460,
    "materials": [
     [
-     "Icarus_Glass",
-     5326
+     "Icarus_Body",
+     460
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "canopy_visible_colmesh0",
-     "verts": 127,
-     "tris": 250,
+     "verts": 118,
+     "tris": 232,
      "bounds_unity": [
       [
-       -1.91593,
-       -0.59623,
-       -1.61496
+       -2.21443,
+       -0.79953,
+       -0.50328
       ],
       [
-       0.0,
-       0.01964,
-       0.47165
+       0.00145,
+       0.06233,
+       0.11074
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 250
+    "tris": 232
    }
   },
   "cockpit_cell": {
@@ -783,11 +927,11 @@
    "pivot_blender": [
     0.0,
     -4.375,
-    0.365
+    0.34822
    ],
    "pivot_unity": [
     -0.0,
-    0.365,
+    0.34822,
     4.375
    ],
    "axes_unity": {
@@ -815,57 +959,57 @@
    "bounds_unity": [
     [
      -0.38,
-     -0.415,
+     -0.39822,
      -1.275
     ],
     [
      0.38,
-     0.415,
+     0.39822,
      1.275
     ]
    ],
-   "sha256": "02f0518ea4a06ed0532ba3649951c4f265c4280232971a86516fcfa2bb775a0e",
+   "sha256": "af501466fbae25feee5269e5cadc5eb34874c31183daf371420b10a60361f8dc",
    "bounds_blender": [
     [
      -0.38,
      -1.275,
-     -0.415
+     -0.39822
     ],
     [
      0.38,
      1.275,
-     0.415
+     0.39822
     ]
    ],
-   "tris": 446,
+   "tris": 204,
    "materials": [
     [
      "jet_mechanical",
-     446
+     204
     ]
    ],
    "uv_layers": [],
    "colliders": [
     {
      "name": "cockpit_cell_colmesh0",
-     "verts": 113,
-     "tris": 222,
+     "verts": 65,
+     "tris": 126,
      "bounds_unity": [
       [
        -0.38,
-       -0.415,
+       -0.39822,
        -1.275
       ],
       [
        0.38,
-       0.415,
+       0.39822,
        1.275
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 222
+    "tris": 126
    }
   },
   "dorsal_cover": {
@@ -914,7 +1058,7 @@
      3.66443
     ]
    ],
-   "sha256": "b90ae2653df7fc639b696a49a6c099b968448293c2ddb173c255c6e438f8a51c",
+   "sha256": "7ad4fd369f5dcb9e69a0283508ca922d4e4b76adb9a5cf1823ced279b4b61ea9",
    "bounds_blender": [
     [
      -0.31812,
@@ -1123,7 +1267,7 @@
      2.65
     ]
    ],
-   "sha256": "5989191893d49a5843736fbe178be6e2e79d33ddbf84c4f32500240762546827",
+   "sha256": "4164c7521017ba47142e1113f4a8e9543bf3b737ab8fd3956fc1c66bc850c241",
    "bounds_blender": [
     [
      -0.46,
@@ -1214,7 +1358,7 @@
      1.65406
     ]
    ],
-   "sha256": "3dff53f78c5c140b9066f69f452de472a7966e5c441c5c9268aed703881cc321",
+   "sha256": "a5b37397936e4821bf4b3423ad5e258cc52fed7d6902cb027d1260ff378e758a",
    "bounds_blender": [
     [
      -0.08453,
@@ -1342,7 +1486,7 @@
      0.81993
     ]
    ],
-   "sha256": "61b794978eff50ff982a087fa369aedd085c3741f533544836f5ec192756d057",
+   "sha256": "75865d9b07fb82ad6493a747a0818ad514744be268b7cbcf14bcae3f3e5a732c",
    "bounds_blender": [
     [
      -0.06682,
@@ -1473,7 +1617,7 @@
      0.00333
     ]
    ],
-   "sha256": "2978d90c372ca71114e0276df4448032ffdb541cd47888337fa7958e58b94099",
+   "sha256": "9df616a18c401c554aebe5a53f1dc27f8de3d2f8392ce862aa989b7a09776794",
    "bounds_blender": [
     [
      -0.00848,
@@ -1608,7 +1752,7 @@
      0.00333
     ]
    ],
-   "sha256": "0e56a7b13027379f1bc443ccd6658ac83ce02078eb402a32166f46f8487f9775",
+   "sha256": "211118b6f5dbb20a61e2004ffa6819e1eb252d8719a27cb9fd8e7c70e40c5bdd",
    "bounds_blender": [
     [
      -0.00848,
@@ -1706,7 +1850,7 @@
      0.775
     ]
    ],
-   "sha256": "fb770ec5ecae83e5af2e9622f9c3b7cdf426ddadf2813225613fac0ad632dd0c",
+   "sha256": "bcf4e146cd1dbb44d92cb311c63795dfcb6aa1ea66e4b7147575f4956dc0c192",
    "bounds_blender": [
     [
      -0.33,
@@ -1800,7 +1944,7 @@
      0.775
     ]
    ],
-   "sha256": "41dc7fcdfa15c44e99f1c61144ab0666978180a85229012d5d0b694f8fa932fe",
+   "sha256": "3a2dc3b53f660cbc4738ada61542aa92620654e19c4087808709115dc7441f29",
    "bounds_blender": [
     [
      -0.33,
@@ -1894,7 +2038,7 @@
      0.775
     ]
    ],
-   "sha256": "f1609098dabd7beadb0db66d536d59d231fac5249c930c26c94036676c399a7e",
+   "sha256": "238f99bad4675174e1d3969ca1ae91db6b5ddc07c09ca6a83f4f66a519c57092",
    "bounds_blender": [
     [
      -0.24,
@@ -1988,7 +2132,7 @@
      0.35
     ]
    ],
-   "sha256": "06b346b546e660584417b934d688d9dd28fb6bf98a4ddb2d3f4e07500bf16680",
+   "sha256": "3797e0ba1aafcdaf881c8fad49fee9d16e31332fdc4be7dbff2711ff48d49dbe",
    "bounds_blender": [
     [
      -0.5957,
@@ -2082,7 +2226,7 @@
      0.875
     ]
    ],
-   "sha256": "cfd49fa6bd3c6edd0ac63a0743e013caba097367f3a4a7053b8bd2bc86289efd",
+   "sha256": "a07cce85a0cfda193e19cdd1fc66c8b9d300755b2b79c594843a6c1b1e604921",
    "bounds_blender": [
     [
      -0.94658,
@@ -2172,7 +2316,7 @@
      2.0
     ]
    ],
-   "sha256": "acaecb06964389fc5ca036b524c51f6e5e39b5f64deae1dde3f16dcdacae7cd4",
+   "sha256": "2f726ae442876386d650e8947dde17b200fed594df5e706e80babb5a7a2da769",
    "bounds_blender": [
     [
      -0.83408,
@@ -2262,7 +2406,7 @@
      2.0
     ]
    ],
-   "sha256": "2973ca79e3720cc76034a3975d64f7dba5bfd3404ad40721d3cd43c9567315b7",
+   "sha256": "e1efc87e36ff1c805b1a76e7e64228cd41c4330bee9e95a3ea5504f7fab86293",
    "bounds_blender": [
     [
      -0.58761,
@@ -2275,11 +2419,11 @@
      0.73246
     ]
    ],
-   "tris": 2444,
+   "tris": 2378,
    "materials": [
     [
      "aircraft_structure",
-     2392
+     2326
     ],
     [
      "jet_mechanical",
@@ -2356,7 +2500,7 @@
      2.775
     ]
    ],
-   "sha256": "c90a138ff55be046ce8e14680d304cd168f3712187ba8bae8ee7416685618fd8",
+   "sha256": "32dc0bfc414227c9c96ae99a0b4a5568274dd091db027cbf1a5d51a05ec5ce13",
    "bounds_blender": [
     [
      -1.02786,
@@ -2491,7 +2635,7 @@
      0.03802
     ]
    ],
-   "sha256": "e203bc111f48591a6e1ef94196448884bc27191eca2e82778922ebc052213b82",
+   "sha256": "36bf1cdc1522b3718ba72dffb263f022087377f2dc2616ff20f628977268100e",
    "bounds_blender": [
     [
      0.0,
@@ -2622,7 +2766,7 @@
      0.03802
     ]
    ],
-   "sha256": "a1cb1943d2eccf16b30e64815a63040b5a2ffd1275eaf9a1bf2a4a28d7a5a65f",
+   "sha256": "a856fa2dc944debf5cb1af7bd0ea81597ba938c88060be123b601dfd59c7dbd8",
    "bounds_blender": [
     [
      -0.00221,
@@ -2753,7 +2897,7 @@
      0.20542
     ]
    ],
-   "sha256": "3f6420647e470e3761c2efa71f26b0cb202f9ef1be240cdf9243205faf7ab715",
+   "sha256": "59c31d088065120ad5dcd131b121a08eb016b0f28721b7fdd041c27a749541ed",
    "bounds_blender": [
     [
      -0.00821,
@@ -2884,7 +3028,7 @@
      0.20542
     ]
    ],
-   "sha256": "ca8a470508002fcc9a79822b334f0b56c27d4a594c4a2957465f3371ad8fdd4c",
+   "sha256": "8b061a8d874b7a4194b9b61281047acf6e8f13917eaa61bb611fe1ab71c24f49",
    "bounds_blender": [
     [
      -0.15809,
@@ -3015,7 +3159,7 @@
      0.8981
     ]
    ],
-   "sha256": "a477f6c7118e834600d51c98c97c48aa6217da2476ad64814259137c3de76d41",
+   "sha256": "caa719bd3cf672809919e145d5c5e3b437c0dfe304dc1105b02d2e40c1493339",
    "bounds_blender": [
     [
      -0.12785,
@@ -3146,7 +3290,7 @@
      0.03263
     ]
    ],
-   "sha256": "5104af8cfda29dfbd5d2919a24acae9ff1b81f297c51a481b60e249cfe7fb627",
+   "sha256": "9231d6d9532599ea0fa4ca1a867c61a058e9cb4b04b4aedcdd6315272a5ee91f",
    "bounds_blender": [
     [
      -0.03498,
@@ -3277,7 +3421,7 @@
      0.89803
     ]
    ],
-   "sha256": "bf281a3df9c37f9a896cebcd547e5b662f02c556ee635b5287367e2cbbf904b3",
+   "sha256": "b85f509d1a5db3959f9f5ea58657b7da3b7f4e909c0bbd481f9a746e40d272e0",
    "bounds_blender": [
     [
      -0.04979,
@@ -3405,7 +3549,7 @@
      0.33973
     ]
    ],
-   "sha256": "366c115a202c424321e8a8ac3025ef90446c0f65db0d7e5a7c184c2bb9690657",
+   "sha256": "a2fdd46fb7a6c391fb4999b93f2e6e0728ff09102a0c36971e2a29a3d9367433",
    "bounds_blender": [
     [
      -0.32509,
@@ -3533,7 +3677,7 @@
      0.23937
     ]
    ],
-   "sha256": "4415138a8408f323568b0f3bd53bf3127a27376fc877b0af9b92ed03b9c4e01b",
+   "sha256": "5dca999911e192ad235ab954c9c2aa64e1f78b0d68499a3cd86c64be0f5314fe",
    "bounds_blender": [
     [
      -0.23937,
@@ -3661,7 +3805,7 @@
      0.33973
     ]
    ],
-   "sha256": "1e897894fe2ec48e6de47733dac81756e3b00124ea804951232e47e45f3272e9",
+   "sha256": "023bb77b20e7036a819276cfa4c736da34ce0a9425a8636998a7440c984f3289",
    "bounds_blender": [
     [
      -0.32509,
@@ -3751,7 +3895,7 @@
      1.725
     ]
    ],
-   "sha256": "6027ce8c3e2c7e804bc24497566c4d6753c583327025db73eab2d37b680e3602",
+   "sha256": "23cf1f3c647b459aaa32fd6dd3f90333a727a1b3d3a95d65365b9096625aa5bd",
    "bounds_blender": [
     [
      -0.4505,
@@ -3964,7 +4108,7 @@
      1.725
     ]
    ],
-   "sha256": "e7c59ef44a9b78b42afa5ae214cff88498c62e3f6e8947a1cb90cf138fcb902a",
+   "sha256": "851a40837a51f3da0b12d131c3d6161f22a2658b29b1cefe5c530e16cdde76fe",
    "bounds_blender": [
     [
      -0.4505,
@@ -4218,7 +4362,7 @@
      0.33515
     ]
    ],
-   "sha256": "152ac1e93af2ad2e88abe66ac9125bdf10ebd0733348ef830874f93ffd2e0ba5",
+   "sha256": "1fd8cf93fa36d7efd7c7a770cd916bc30afafd872faad5e61dd36f68f5edbfec",
    "bounds_blender": [
     [
      -0.1832,
@@ -4353,7 +4497,7 @@
      0.33515
     ]
    ],
-   "sha256": "6ecba6baba9b3b71a81647c268bae3a76100dba6eb03c8d657065bdbebaee8c4",
+   "sha256": "c218bee02a11fd011bc7e24cd1d0d9fa5a517fe1a52675571fcdf0087fadf279",
    "bounds_blender": [
     [
      -0.1832,
@@ -4713,7 +4857,7 @@
      0.15
     ]
    ],
-   "sha256": "11393bf8d56d48e6b459ae735c16c070d2f1376de17cb386216552242017b38b",
+   "sha256": "43e5c922e6678b2aaa41f8168bd683b454038f367e1a358c1d1094018a31dacc",
    "bounds_blender": [
     [
      -0.385,
@@ -4844,7 +4988,7 @@
      -0.0
     ]
    ],
-   "sha256": "c87a1eb929f1b25dfb019f748f8c86a3438115f63dd44c62e8a484480ef8ebbc",
+   "sha256": "9f7bf4bf9d27d64dd8a1ca2d100886514498fcd497a4039fe3473f9047697c1d",
    "bounds_blender": [
     [
      -0.0705,
@@ -4951,7 +5095,7 @@
      -0.0
     ]
    ],
-   "sha256": "080c6bf13c87d131ee8443d42cd58dba2c14fe2822e785003710202136f82d9c",
+   "sha256": "e5c27cf3cb3b418268b2b7537a55057f930d961e4f6c49fcfadffd3da7757e40",
    "bounds_blender": [
     [
      -0.0705,
@@ -5058,7 +5202,7 @@
      -0.0
     ]
    ],
-   "sha256": "0fc315a88f71f278b372a916b757210141fa470999af7d21c40d4f8f06cfa7b3",
+   "sha256": "f49e9c007ec2a61cd797c881cb68812b2193a833969bb4bec991a3d575412765",
    "bounds_blender": [
     [
      -0.0705,
@@ -5165,7 +5309,7 @@
      -0.0
     ]
    ],
-   "sha256": "600b8e70ec42f33251a74cfa57828c619e16a5bf3effd2174c692a773da6cc15",
+   "sha256": "663ea19dbc2204bd784db5e281f9b2f79009913f185756047c5c812909bec3e3",
    "bounds_blender": [
     [
      -0.0705,
@@ -5272,7 +5416,7 @@
      -0.0
     ]
    ],
-   "sha256": "cc73c6dd0ae846764ac2b55cc87d874ae4486549de0ce77a67bb20cb987bc918",
+   "sha256": "9799a2fa3ba15dea1e63a6893b17f0fa5a43965deb0c4d8dcaadee342de6544f",
    "bounds_blender": [
     [
      -0.0705,
@@ -5379,7 +5523,7 @@
      -0.0
     ]
    ],
-   "sha256": "3356aa4e807f85fc9aa8896c574017d1f1f5eee361363f5982885ed046fab1b0",
+   "sha256": "4a4d2fde5d726afc26ce958683a06ef8d04de4893d0dc15e6970321c78bff96b",
    "bounds_blender": [
     [
      -0.0705,
@@ -5486,7 +5630,7 @@
      -0.0
     ]
    ],
-   "sha256": "4c9dd793f985d20023f3e410cdc767328cd4cd36ec089ea7a057c24ec24031a2",
+   "sha256": "7daae6adbcfe356c99c69c914ea054bb260ff7a6badb3b3af8ec086690095786",
    "bounds_blender": [
     [
      -0.0705,
@@ -5593,7 +5737,7 @@
      -0.0
     ]
    ],
-   "sha256": "8575d8b17041bdda0149ff224dec0ebf8784ca746e1350109bea8e7157564d23",
+   "sha256": "48569bf86866117af01c524c111b166ee61990fd2ccc3e3b567ae35fa93fe806",
    "bounds_blender": [
     [
      -0.0705,
@@ -5700,7 +5844,7 @@
      -0.0
     ]
    ],
-   "sha256": "89b7f789b2ed369e354944e97bc70a65b65b90772b20f087833a7e0d3aaa5a49",
+   "sha256": "edfe20fea9f7ca06cf27f329db63a8a889a7acffc62fc3a3da6e430fca66149c",
    "bounds_blender": [
     [
      -0.0705,
@@ -5807,7 +5951,7 @@
      -0.0
     ]
    ],
-   "sha256": "24b3a45dd4d724e7d696e80911a67658afb34e1c744f949877363bb4fd97711b",
+   "sha256": "dc31c8f48351b9933dfa3ae0dbcabf78c7ed771a00ddd2cc3d0d539a8a7a97fc",
    "bounds_blender": [
     [
      -0.0705,
@@ -5914,7 +6058,7 @@
      -0.0
     ]
    ],
-   "sha256": "e587bea4166b463743f4aae4109e66c6f092093c30053929932efa242fd6ccfc",
+   "sha256": "3a4222afe6ce68754df4dd3eb413fd99c898e0ca74f20f0345df49ed47cabd29",
    "bounds_blender": [
     [
      -0.0705,
@@ -6021,7 +6165,7 @@
      -0.0
     ]
    ],
-   "sha256": "2162b43ee9473f3e1717a0296bb32e379634b0692b2c11bf39718e98f992c1f1",
+   "sha256": "352f7b863b9162f56d8084be0eb38631af71363f047ca8898458c62d85378c01",
    "bounds_blender": [
     [
      -0.0705,
@@ -6128,7 +6272,7 @@
      -0.0
     ]
    ],
-   "sha256": "f47230d7548ad4dfeb11526a7a8f9eac9c2cb7eefda3fdeb616720ede6a52ed8",
+   "sha256": "010cbc892597967fa47904bbd8edb8e30deaebfc8be2361082fb56c99462cb72",
    "bounds_blender": [
     [
      -0.0705,
@@ -6235,7 +6379,7 @@
      -0.0
     ]
    ],
-   "sha256": "7ab26754fe688f368616437e73767d5233e67a86f692208b6bed827e9dc483f2",
+   "sha256": "75ec0c55d62bcace4e382e0c758c384f2e2b1eb55a05805a83236cd2a1806e53",
    "bounds_blender": [
     [
      -0.0705,
@@ -6342,7 +6486,7 @@
      -0.0
     ]
    ],
-   "sha256": "171164f2919e635bb6c361ed79428afdcd961b49da5616c6ace3f36cb246785e",
+   "sha256": "e8b2125f8db3b6f4cbaa4d002dd0d5d576e7c81fda68b8f94ee494cc02b67e0a",
    "bounds_blender": [
     [
      -0.0705,
@@ -6449,7 +6593,7 @@
      -0.0
     ]
    ],
-   "sha256": "232d1fb05cdbbf6b1b292cf6a25c0cef74bb98b3b9b3abfb93dda5780410750a",
+   "sha256": "201c005d46e6755a9363cb160407434c5e524c508def8269be4153d0527d5127",
    "bounds_blender": [
     [
      -0.0705,
@@ -6556,7 +6700,7 @@
      -0.0
     ]
    ],
-   "sha256": "c3e40023798dbac5dfa2e26986389ef374adc0d79e623b412a19b21b55b23415",
+   "sha256": "3ffba835da6fcda517d2171a045c848e9a1093c0dcec7040257a228a6aa8f197",
    "bounds_blender": [
     [
      -0.04935,
@@ -6663,7 +6807,7 @@
      -0.0
     ]
    ],
-   "sha256": "9c928fe5a5f22ecef22742463e00057626d9a1b0760ae15baf6903c54e50915e",
+   "sha256": "85f37a270d1beb158703d932c1ad3d28fa694baba310115e7a9af39c5884d601",
    "bounds_blender": [
     [
      -0.04935,
@@ -6770,7 +6914,7 @@
      -0.0
     ]
    ],
-   "sha256": "de569211cdcb6b7872292ac9b8c7c52d934e33a910950ab32fee8288b88515ce",
+   "sha256": "6ee4a4065c5016d93950669ee4def121bc9477f04544d9d3ce28d36b9e391fc4",
    "bounds_blender": [
     [
      -0.04935,
@@ -6877,7 +7021,7 @@
      -0.0
     ]
    ],
-   "sha256": "20f42503c63f3991e2c33edb29a00c7577d67c9518f89c9c64cde7099bf2c55a",
+   "sha256": "3c47c04e15f8e4165964ce6db90c08216483cade1cb1712760b2aa50db4a5634",
    "bounds_blender": [
     [
      -0.04935,
@@ -6984,7 +7128,7 @@
      -0.0
     ]
    ],
-   "sha256": "87ac387dde8d4106fb82f28bd3de9136dcf4b06d721674bf1725fcb1808e2734",
+   "sha256": "e00d6a8b9a06e01d75704c2e11c20da24ec6447dbbfceeec0e5524d1425f8426",
    "bounds_blender": [
     [
      -0.04935,
@@ -7091,7 +7235,7 @@
      -0.0
     ]
    ],
-   "sha256": "46a8ee1b0e381a837751c1a25ab1f61318f8622af291b5d83655aad48e193cb6",
+   "sha256": "c0a1e396f37b82e38eadade136fb33ae7d48cfb2421b77f8e8181739ecb07646",
    "bounds_blender": [
     [
      -0.04935,
@@ -7198,7 +7342,7 @@
      -0.0
     ]
    ],
-   "sha256": "afea91d6d8b14f7f7eb232723c9b101d38b1e971168de59ab73a88879278d86f",
+   "sha256": "d51589a16a03c5339c3cba8a7ff7e7746b4eec51bf6b915e886fdd1e09c94bfa",
    "bounds_blender": [
     [
      -0.04935,
@@ -7305,7 +7449,7 @@
      -0.0
     ]
    ],
-   "sha256": "7809e314de79da339f07afce5abbb9dcb367c8f9ee26da54ba3e0f32e37d7324",
+   "sha256": "e33b3f790ab47b5ea6d99f2f68176ef0635168c7b961c2c7853b9a09f45fc170",
    "bounds_blender": [
     [
      -0.04935,
@@ -7412,7 +7556,7 @@
      -0.0
     ]
    ],
-   "sha256": "787d02d776f21ad8faf95a9a96cfaacd06e9bde1253920da8d16384181a05b63",
+   "sha256": "df1c503043b76f5749a11541afadf3524fc7b380904997e633bdee6006b8dabe",
    "bounds_blender": [
     [
      -0.04935,
@@ -7519,7 +7663,7 @@
      -0.0
     ]
    ],
-   "sha256": "b732e3913abc125ebcf515d21a78d49939f1fc1c83bb3b60194139c4386864d3",
+   "sha256": "ac87b47ce194a30359327f2a3d6e300c04f2db6015e6c728e2d9fefbedabeda6",
    "bounds_blender": [
     [
      -0.04935,
@@ -7626,7 +7770,7 @@
      -0.0
     ]
    ],
-   "sha256": "d438f10ddb60863de6f299257fcf3606554f04b260cafd52e23584f0f8cac9a7",
+   "sha256": "7dea352f0f974c9bca787d4a358bf08e3909324190ff147d433f8b91aaa6ba82",
    "bounds_blender": [
     [
      -0.04935,
@@ -7733,7 +7877,7 @@
      -0.0
     ]
    ],
-   "sha256": "3c9c66cd0ff9c41c30df4226255f36b9626eb419677fb1fbfc157e7ead3d5586",
+   "sha256": "a5611a489294b15216d373374c45a128fe445ee464b4c5b32fcb0fc8f6598e03",
    "bounds_blender": [
     [
      -0.04935,
@@ -7840,7 +7984,7 @@
      -0.0
     ]
    ],
-   "sha256": "a0a50ceed8833f62b2c95a9fc3aa020d9c7b1ecd7748ab4c67481dbb472e5944",
+   "sha256": "28adc50d143e6b5f19565ea5ee284527e214769258cf37e9a88aad5536d5abbf",
    "bounds_blender": [
     [
      -0.04935,
@@ -7947,7 +8091,7 @@
      -0.0
     ]
    ],
-   "sha256": "a9a1187d8fefe9685fd75d1afa59d5281c2c12cd81e4cca48d5af91686740a35",
+   "sha256": "4f2d18435be0d9c31cbf82b82d3bb6cd0ee1cb1052187aeffe672db823121603",
    "bounds_blender": [
     [
      -0.04935,
@@ -8054,7 +8198,7 @@
      -0.0
     ]
    ],
-   "sha256": "46b2fa767bd5d3e7d623f492a75a0e4a622b79e6c65960e6107faa4e427dd4ec",
+   "sha256": "b1068bf39ae303cb03e30950bc93432dafd4730983fcc45cdf7a92ee1b008346",
    "bounds_blender": [
     [
      -0.04935,
@@ -8161,7 +8305,7 @@
      -0.0
     ]
    ],
-   "sha256": "b56d1e20854233d2ed0ffadbf01025259163a1b7a2fca8ddb3679f1d6b933416",
+   "sha256": "2119e10167dfc54dad7b5b230f08402618d01599b0321ca1ce0ddda80af3bcac",
    "bounds_blender": [
     [
      -0.04935,
@@ -8264,7 +8408,7 @@
      0.75
     ]
    ],
-   "sha256": "2ded1e98580d699d38fba445b41ff12c34d5e81893e59d604314b3124417775c",
+   "sha256": "db861a35aefec8f9ee2b5742dfe12e4f049358d6d2270947a4c97655cc462eb0",
    "bounds_blender": [
     [
      -0.05,
@@ -8334,7 +8478,7 @@
      0.75
     ]
    ],
-   "sha256": "0abc8f1d1e4d0b2ec57205f443d1691288a19023abf38fa6d7a4f7bc90d86970",
+   "sha256": "eeaa161560e19521a00a66f4b34da75b66d7ff2fa51417ab7024b68f927b9191",
    "bounds_blender": [
     [
      -0.05,
@@ -8404,7 +8548,7 @@
      0.75
     ]
    ],
-   "sha256": "2db6f7394e782693f1285010df8896f94292cbf13f159ad4d2a16b0fae0ee4e2",
+   "sha256": "bc6bfb92f3984be97f8c7017a2231eb470fb58be15f85e75896e06c4ccbec7c9",
    "bounds_blender": [
     [
      -0.05,
@@ -8474,7 +8618,7 @@
      0.75
     ]
    ],
-   "sha256": "39c23f2c68321e6ab8f95aebc965ad7d8a23edc281190cdda0871bd08e56bce8",
+   "sha256": "1aed7983351f48f5b03071ba9612a625d49bd750476874a9adbadbe4eddb454c",
    "bounds_blender": [
     [
      -0.05,
@@ -8544,7 +8688,7 @@
      0.675
     ]
    ],
-   "sha256": "5a7876a7c397a34c204f6b29db745c92e7c172f862fee7abb7d33b4fc574c5d7",
+   "sha256": "8f9f9e15a3dcf3e5ed5d488732cfdf0590f6ad4763fc3e008a9aa537141ea3f4",
    "bounds_blender": [
     [
      -0.3,
@@ -8634,7 +8778,7 @@
      1.38792
     ]
    ],
-   "sha256": "483e99e3167bb5dee27fed2d26e6ed558a85e1d764f68155db88a630451a79ff",
+   "sha256": "aee19434c22b905de8d96a681f0046285a9dedc73ccd32b511099469c41bb3fe",
    "bounds_blender": [
     [
      -0.35123,
@@ -8647,11 +8791,11 @@
      0.41468
     ]
    ],
-   "tris": 1896,
+   "tris": 1890,
    "materials": [
     [
      "Icarus_Body",
-     1896
+     1890
     ]
    ],
    "uv_layers": [],
@@ -8726,11 +8870,11 @@
     },
     {
      "name": "radome_colmesh4",
-     "verts": 7,
-     "tris": 9,
+     "verts": 6,
+     "tris": 7,
      "bounds_unity": [
       [
-       -0.0918,
+       -0.06196,
        0.39806,
        -1.38792
       ],
@@ -8896,7 +9040,7 @@
     }
    ],
    "lod1": {
-    "tris": 44
+    "tris": 46
    }
   },
   "rudder": {
@@ -8986,7 +9130,7 @@
      -0.0
     ]
    ],
-   "sha256": "a70151364556f83fdeb03138e53d38b68b697932689a421bc25d389ac9790b8d",
+   "sha256": "0d5c12c294fa95d7f3b1ed2e0246a6c9f755f71a957d08cc85c53c8e66246d16",
    "bounds_blender": [
     [
      0.0,
@@ -9080,7 +9224,7 @@
      2.1352
     ]
    ],
-   "sha256": "ac510416ad97096059a57607bea6aeae49162ac2f907ff35f0468f224db4fb16",
+   "sha256": "4f26207a7cac708c1348c6e17c91e86ea10cddd6a054df03b64979563c635df1",
    "bounds_blender": [
     [
      -0.45319,
@@ -9714,7 +9858,7 @@
      2.1352
     ]
    ],
-   "sha256": "cfb17b7bb66b6ce6624e84346a6240d5b8bf3435de47a514295504be71f791f8",
+   "sha256": "8ce34b958e857d16a0e3d6fe417aebd3bb2522033755d3c67b99dc539140df66",
    "bounds_blender": [
     [
      -0.45371,
@@ -10343,29 +10487,29 @@
      -2.01282
     ],
     [
-     0.31484,
-     0.67063,
+     0.31542,
+     0.82452,
      2.01282
     ]
    ],
-   "sha256": "d26e56b0d09d987fe3b1969978200a26b3f915d513776ce484e35a40f895b22b",
+   "sha256": "a93a9992d057fb3318160f560c9f59684752aad0b525d1cd2329ce8ffee0882d",
    "bounds_blender": [
     [
-     -0.31484,
+     -0.31542,
      -2.01282,
      -0.67063
     ],
     [
      0.31484,
      2.01282,
-     0.67063
+     0.82452
     ]
    ],
-   "tris": 1314,
+   "tris": 1632,
    "materials": [
     [
      "Icarus_Body",
-     1314
+     1632
     ]
    ],
    "uv_layers": [],
@@ -10440,23 +10584,40 @@
     },
     {
      "name": "skin_forward_L_colmesh4",
-     "verts": 6,
-     "tris": 7,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
        -0.10372,
        0.1609,
-       0.98026
+       0.66865
       ],
       [
-       -0.0218,
-       0.31994,
-       0.98026
+       -0.00615,
+       0.33605,
+       1.02665
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh5",
+     "verts": 16,
+     "tris": 28,
+     "bounds_unity": [
+      [
+       -0.05852,
+       0.34721,
+       0.66865
+      ],
+      [
+       0.02792,
+       0.62592,
+       1.02665
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh6",
      "verts": 12,
      "tris": 19,
      "bounds_unity": [
@@ -10473,7 +10634,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh6",
+     "name": "skin_forward_L_colmesh7",
      "verts": 11,
      "tris": 17,
      "bounds_unity": [
@@ -10490,7 +10651,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh7",
+     "name": "skin_forward_L_colmesh8",
      "verts": 22,
      "tris": 40,
      "bounds_unity": [
@@ -10507,24 +10668,24 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh8",
-     "verts": 19,
-     "tris": 34,
+     "name": "skin_forward_L_colmesh9",
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        -0.18859,
        0.14591,
-       0.21381
+       0.19176
       ],
       [
-       -0.06595,
-       0.36041,
+       -0.05637,
+       0.37267,
        0.61865
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh9",
+     "name": "skin_forward_L_colmesh10",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -10541,7 +10702,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh10",
+     "name": "skin_forward_L_colmesh11",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -10554,23 +10715,6 @@
        -0.03871,
        -0.1728,
        0.61865
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_L_colmesh11",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.25961,
-       -0.1709,
-       -0.19103
-      ],
-      [
-       -0.21392,
-       0.1317,
-       0.01139
       ]
      ]
     },
@@ -10593,23 +10737,40 @@
     },
     {
      "name": "skin_forward_L_colmesh13",
-     "verts": 13,
-     "tris": 22,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       -0.21515,
-       0.15758,
+       -0.25961,
+       -0.1709,
        -0.19103
       ],
       [
-       -0.10107,
-       0.37626,
+       -0.21392,
+       0.1317,
        0.01139
       ]
      ]
     },
     {
      "name": "skin_forward_L_colmesh14",
+     "verts": 17,
+     "tris": 30,
+     "bounds_unity": [
+      [
+       -0.21515,
+       0.15758,
+       -0.28513
+      ],
+      [
+       -0.08953,
+       0.39034,
+       0.01139
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh15",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -10626,7 +10787,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh15",
+     "name": "skin_forward_L_colmesh16",
      "verts": 20,
      "tris": 36,
      "bounds_unity": [
@@ -10643,7 +10804,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh16",
+     "name": "skin_forward_L_colmesh17",
      "verts": 44,
      "tris": 84,
      "bounds_unity": [
@@ -10660,9 +10821,9 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh17",
-     "verts": 35,
-     "tris": 66,
+     "name": "skin_forward_L_colmesh18",
+     "verts": 31,
+     "tris": 58,
      "bounds_unity": [
       [
        -0.24897,
@@ -10670,31 +10831,31 @@
        -1.20314
       ],
       [
-       -0.13774,
+       -0.13241,
        0.40342,
        -0.39345
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh18",
-     "verts": 21,
-     "tris": 38,
+     "name": "skin_forward_L_colmesh19",
+     "verts": 19,
+     "tris": 34,
      "bounds_unity": [
       [
-       -0.12886,
-       0.40463,
-       -1.20314
+       -0.13647,
+       0.40291,
+       -1.2389
       ],
       [
-       0.02027,
-       0.6486,
+       0.01479,
+       0.65609,
        -0.39345
       ]
      ]
     },
     {
-     "name": "skin_forward_L_colmesh19",
+     "name": "skin_forward_L_colmesh20",
      "verts": 35,
      "tris": 66,
      "bounds_unity": [
@@ -10711,7 +10872,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh20",
+     "name": "skin_forward_L_colmesh21",
      "verts": 51,
      "tris": 98,
      "bounds_unity": [
@@ -10728,7 +10889,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh21",
+     "name": "skin_forward_L_colmesh22",
      "verts": 28,
      "tris": 52,
      "bounds_unity": [
@@ -10740,23 +10901,6 @@
       [
        -0.26342,
        0.13891,
-       -1.40556
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_L_colmesh22",
-     "verts": 27,
-     "tris": 50,
-     "bounds_unity": [
-      [
-       -0.2733,
-       0.14561,
-       -2.01282
-      ],
-      [
-       -0.1725,
-       0.38874,
        -1.40556
       ]
      ]
@@ -10780,8 +10924,25 @@
     },
     {
      "name": "skin_forward_L_colmesh24",
-     "verts": 24,
-     "tris": 44,
+     "verts": 27,
+     "tris": 50,
+     "bounds_unity": [
+      [
+       -0.2733,
+       0.14561,
+       -2.01282
+      ],
+      [
+       -0.1725,
+       0.38874,
+       -1.40556
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh25",
+     "verts": 21,
+     "tris": 38,
      "bounds_unity": [
       [
        -0.15372,
@@ -10796,7 +10957,24 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh25",
+     "name": "skin_forward_L_colmesh26",
+     "verts": 5,
+     "tris": 6,
+     "bounds_unity": [
+      [
+       0.01524,
+       0.65503,
+       -2.01282
+      ],
+      [
+       0.0631,
+       0.72473,
+       -1.40556
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh27",
      "verts": 34,
      "tris": 64,
      "bounds_unity": [
@@ -10813,7 +10991,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh26",
+     "name": "skin_forward_L_colmesh28",
      "verts": 32,
      "tris": 60,
      "bounds_unity": [
@@ -10830,7 +11008,24 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh27",
+     "name": "skin_forward_L_colmesh29",
+     "verts": 21,
+     "tris": 38,
+     "bounds_unity": [
+      [
+       0.03061,
+       0.56951,
+       0.72734
+      ],
+      [
+       0.31542,
+       0.82452,
+       1.00372
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_L_colmesh30",
      "verts": 9,
      "tris": 14,
      "bounds_unity": [
@@ -10847,7 +11042,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh28",
+     "name": "skin_forward_L_colmesh31",
      "verts": 27,
      "tris": 50,
      "bounds_unity": [
@@ -10864,7 +11059,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh29",
+     "name": "skin_forward_L_colmesh32",
      "verts": 12,
      "tris": 19,
      "bounds_unity": [
@@ -10881,7 +11076,7 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh30",
+     "name": "skin_forward_L_colmesh33",
      "verts": 9,
      "tris": 13,
      "bounds_unity": [
@@ -10898,14 +11093,14 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh31",
-     "verts": 5,
-     "tris": 5,
+     "name": "skin_forward_L_colmesh34",
+     "verts": 9,
+     "tris": 14,
      "bounds_unity": [
       [
-       0.02188,
+       -0.00546,
        0.31252,
-       1.3366
+       1.14265
       ],
       [
        0.13128,
@@ -10915,25 +11110,25 @@
      ]
     },
     {
-     "name": "skin_forward_L_colmesh32",
-     "verts": 5,
-     "tris": 5,
+     "name": "skin_forward_L_colmesh35",
+     "verts": 9,
+     "tris": 14,
      "bounds_unity": [
       [
-       0.16472,
+       0.11712,
        0.43432,
-       1.3366
+       1.13619
       ],
       [
        0.31484,
-       0.47173,
+       0.54966,
        1.3366
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 226
+    "tris": 252
    }
   },
   "skin_forward_R": {
@@ -10972,17 +11167,17 @@
    },
    "bounds_unity": [
     [
-     -0.31484,
+     -0.31542,
      -0.67063,
      -2.01282
     ],
     [
      0.31484,
-     0.67063,
+     0.82452,
      2.01282
     ]
    ],
-   "sha256": "79e9b0ce772a8a3673c70220f05a5a6fa4e145264449ae3851cff24b7fcd12e9",
+   "sha256": "43f438c545ea2cfc095470c614e825e8b2a3b76664eaf15c8957ecc792bf968f",
    "bounds_blender": [
     [
      -0.31484,
@@ -10990,16 +11185,16 @@
      -0.67063
     ],
     [
-     0.31484,
+     0.31542,
      2.01282,
-     0.67063
+     0.82452
     ]
    ],
-   "tris": 1314,
+   "tris": 1632,
    "materials": [
     [
      "Icarus_Body",
-     1314
+     1632
     ]
    ],
    "uv_layers": [],
@@ -11057,23 +11252,40 @@
     },
     {
      "name": "skin_forward_R_colmesh3",
-     "verts": 6,
-     "tris": 7,
+     "verts": 16,
+     "tris": 28,
      "bounds_unity": [
       [
-       0.0218,
-       0.1609,
-       0.98026
+       -0.02806,
+       0.34739,
+       0.66865
       ],
       [
-       0.10372,
-       0.31994,
-       0.98026
+       0.05848,
+       0.62564,
+       1.02665
       ]
      ]
     },
     {
      "name": "skin_forward_R_colmesh4",
+     "verts": 12,
+     "tris": 20,
+     "bounds_unity": [
+      [
+       0.00618,
+       0.1609,
+       0.66865
+      ],
+      [
+       0.10372,
+       0.33628,
+       1.02665
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh5",
      "verts": 9,
      "tris": 13,
      "bounds_unity": [
@@ -11090,7 +11302,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh5",
+     "name": "skin_forward_R_colmesh6",
      "verts": 11,
      "tris": 17,
      "bounds_unity": [
@@ -11107,7 +11319,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh6",
+     "name": "skin_forward_R_colmesh7",
      "verts": 12,
      "tris": 19,
      "bounds_unity": [
@@ -11124,24 +11336,24 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh7",
-     "verts": 19,
-     "tris": 34,
+     "name": "skin_forward_R_colmesh8",
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.06595,
+       0.05637,
        0.14591,
-       0.21381
+       0.19176
       ],
       [
        0.18859,
-       0.36041,
+       0.37277,
        0.61865
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh8",
+     "name": "skin_forward_R_colmesh9",
      "verts": 22,
      "tris": 40,
      "bounds_unity": [
@@ -11158,7 +11370,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh9",
+     "name": "skin_forward_R_colmesh10",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -11175,7 +11387,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh10",
+     "name": "skin_forward_R_colmesh11",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -11188,23 +11400,6 @@
        0.04097,
        -0.48655,
        0.61865
-      ]
-     ]
-    },
-    {
-     "name": "skin_forward_R_colmesh11",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       0.10107,
-       0.15758,
-       -0.19103
-      ],
-      [
-       0.21515,
-       0.37626,
-       0.01139
       ]
      ]
     },
@@ -11227,6 +11422,23 @@
     },
     {
      "name": "skin_forward_R_colmesh13",
+     "verts": 17,
+     "tris": 30,
+     "bounds_unity": [
+      [
+       0.08953,
+       0.15758,
+       -0.28513
+      ],
+      [
+       0.21515,
+       0.39027,
+       0.01139
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh14",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -11243,7 +11455,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh14",
+     "name": "skin_forward_R_colmesh15",
      "verts": 20,
      "tris": 36,
      "bounds_unity": [
@@ -11260,7 +11472,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh15",
+     "name": "skin_forward_R_colmesh16",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -11277,29 +11489,29 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh16",
-     "verts": 21,
-     "tris": 38,
+     "name": "skin_forward_R_colmesh17",
+     "verts": 19,
+     "tris": 34,
      "bounds_unity": [
       [
-       -0.02027,
-       0.40463,
-       -1.20314
+       -0.01479,
+       0.40268,
+       -1.2389
       ],
       [
-       0.12886,
-       0.6486,
+       0.13646,
+       0.65591,
        -0.39345
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh17",
-     "verts": 35,
-     "tris": 66,
+     "name": "skin_forward_R_colmesh18",
+     "verts": 32,
+     "tris": 60,
      "bounds_unity": [
       [
-       0.13774,
+       0.13241,
        0.14249,
        -1.20314
       ],
@@ -11311,7 +11523,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh18",
+     "name": "skin_forward_R_colmesh19",
      "verts": 44,
      "tris": 84,
      "bounds_unity": [
@@ -11328,7 +11540,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh19",
+     "name": "skin_forward_R_colmesh20",
      "verts": 51,
      "tris": 98,
      "bounds_unity": [
@@ -11345,7 +11557,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh20",
+     "name": "skin_forward_R_colmesh21",
      "verts": 35,
      "tris": 66,
      "bounds_unity": [
@@ -11362,35 +11574,18 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh21",
-     "verts": 24,
-     "tris": 44,
-     "bounds_unity": [
-      [
-       0.01563,
-       0.40943,
-       -2.01282
-      ],
-      [
-       0.15372,
-       0.62919,
-       -1.40556
-      ]
-     ]
-    },
-    {
      "name": "skin_forward_R_colmesh22",
-     "verts": 27,
-     "tris": 50,
+     "verts": 5,
+     "tris": 6,
      "bounds_unity": [
       [
-       0.1725,
-       0.14561,
+       -0.0631,
+       0.65503,
        -2.01282
       ],
       [
-       0.2733,
-       0.38874,
+       -0.01525,
+       0.72464,
        -1.40556
       ]
      ]
@@ -11414,6 +11609,40 @@
     },
     {
      "name": "skin_forward_R_colmesh24",
+     "verts": 21,
+     "tris": 38,
+     "bounds_unity": [
+      [
+       0.01563,
+       0.40943,
+       -2.01282
+      ],
+      [
+       0.15372,
+       0.62919,
+       -1.40556
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh25",
+     "verts": 27,
+     "tris": 50,
+     "bounds_unity": [
+      [
+       0.1725,
+       0.14561,
+       -2.01282
+      ],
+      [
+       0.2733,
+       0.38874,
+       -1.40556
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh26",
      "verts": 28,
      "tris": 52,
      "bounds_unity": [
@@ -11430,7 +11659,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh25",
+     "name": "skin_forward_R_colmesh27",
      "verts": 32,
      "tris": 60,
      "bounds_unity": [
@@ -11447,7 +11676,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh26",
+     "name": "skin_forward_R_colmesh28",
      "verts": 34,
      "tris": 64,
      "bounds_unity": [
@@ -11464,7 +11693,24 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh27",
+     "name": "skin_forward_R_colmesh29",
+     "verts": 20,
+     "tris": 36,
+     "bounds_unity": [
+      [
+       -0.31542,
+       0.56843,
+       0.72719
+      ],
+      [
+       -0.03167,
+       0.82452,
+       1.00362
+      ]
+     ]
+    },
+    {
+     "name": "skin_forward_R_colmesh30",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -11481,7 +11727,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh28",
+     "name": "skin_forward_R_colmesh31",
      "verts": 27,
      "tris": 50,
      "bounds_unity": [
@@ -11498,41 +11744,41 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh29",
-     "verts": 5,
-     "tris": 5,
+     "name": "skin_forward_R_colmesh32",
+     "verts": 9,
+     "tris": 14,
      "bounds_unity": [
       [
        -0.31484,
        0.43432,
-       1.3366
+       1.13614
       ],
       [
-       -0.16472,
-       0.47173,
+       -0.11839,
+       0.54831,
        1.3366
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh30",
-     "verts": 5,
-     "tris": 5,
+     "name": "skin_forward_R_colmesh33",
+     "verts": 8,
+     "tris": 12,
      "bounds_unity": [
       [
        -0.13128,
        0.31252,
-       1.3366
+       1.14265
       ],
       [
-       -0.02188,
+       0.00507,
        0.41484,
        1.3366
       ]
      ]
     },
     {
-     "name": "skin_forward_R_colmesh31",
+     "name": "skin_forward_R_colmesh34",
      "verts": 9,
      "tris": 13,
      "bounds_unity": [
@@ -11549,7 +11795,7 @@
      ]
     },
     {
-     "name": "skin_forward_R_colmesh32",
+     "name": "skin_forward_R_colmesh35",
      "verts": 12,
      "tris": 19,
      "bounds_unity": [
@@ -11567,7 +11813,7 @@
     }
    ],
    "lod1": {
-    "tris": 220
+    "tris": 216
    }
   },
   "skin_mid_L": {
@@ -11616,7 +11862,7 @@
      2.64906
     ]
    ],
-   "sha256": "8af84d8eeb88504f455ce7439486326a60fbbee77de94dcaecfdad995a5623d7",
+   "sha256": "d085b138ac48c96bbbd6789501137aeb8d2b618c25e449d84a29ce20b8b5ee9f",
    "bounds_blender": [
     [
      -0.54111,
@@ -12250,7 +12496,7 @@
      2.64906
     ]
    ],
-   "sha256": "0ccafc15c8c18798552e92ed4c9ffed36df92704c924e97d3c18817dddaf514e",
+   "sha256": "0c20abac39438cfddbc0fa65381fb7e1bc764a5a14fc5ac2ac2072934431872e",
    "bounds_blender": [
     [
      -0.54111,
@@ -12925,7 +13171,7 @@
      -0.0
     ]
    ],
-   "sha256": "3468d26086fe0688ae7db25415507bac89383c0945eae40a0ce212fffc927536",
+   "sha256": "b5e27ad5b466e6b14c5acde8cf2d7f35edcae8d9ffecb6f7f2cb7980790ba65a",
    "bounds_blender": [
     [
      -0.05316,
@@ -13060,7 +13306,7 @@
      0.0
     ]
    ],
-   "sha256": "1da4ceaab34719238a977e1bb638233379a6426b266f2393cdec3a0ebf472383",
+   "sha256": "69bbfcaaad4aac79d1cbc0a56b4c63944334c42da8be59e91596055c5ead1609",
    "bounds_blender": [
     [
      -0.05316,
@@ -13195,7 +13441,7 @@
      0.646
     ]
    ],
-   "sha256": "73c8dd993b113e994792778ebf466414cdfa5d18ec1f23d1cffb71f7a6934c19",
+   "sha256": "72d00a592ee6502876e2aab09bd1aa72df839849586528ab94c2b6f72c4d4a18",
    "bounds_blender": [
     [
      0.07,
@@ -13326,7 +13572,7 @@
      0.646
     ]
    ],
-   "sha256": "061b2e9bbe262b120668f6f5dab1c7cc17509fa5e96b879c2b0e9ea72b14bc6e",
+   "sha256": "18c2cd7a58c3d338f2f88cc6f2fcc1cdbabe077f4829f8ad8a36d79d371aa032",
    "bounds_blender": [
     [
      0.07,
@@ -13416,7 +13662,7 @@
      1.125
     ]
    ],
-   "sha256": "822a104307c8307bf040ecf12c64be2b4abc235b11e78a8089f8e5424e603568",
+   "sha256": "fd83afafa99d747499ac0dcefaf067385e385b7e611f429ac3cf916262141c77",
    "bounds_blender": [
     [
      -0.05594,
@@ -13465,13 +13711,13 @@
    "blender_parent": "cockpit_cell",
    "pivot_blender": [
     0.0,
-    -5.37783,
-    0.75401
+    -5.3647,
+    0.71842
    ],
    "pivot_unity": [
     -0.0,
-    0.75401,
-    5.37783
+    0.71842,
+    5.3647
    ],
    "axes_unity": {
     "right": [
@@ -13496,72 +13742,74 @@
    },
    "bounds_unity": [
     [
-     -0.3636,
-     -0.25401,
-     -0.30217
+     -0.36966,
+     -0.26242,
+     -0.3153
     ],
     [
-     0.3636,
-     0.25401,
-     0.30217
+     0.36966,
+     0.26242,
+     0.3153
     ]
    ],
-   "sha256": "47a18d08fff5d34bae28697833fb6d94f7092736f4ed1c0aa24e0b98a8d2e5df",
+   "sha256": "fa1136247a392152fd93c77b5ba2ee562b4341d3075e39575a224773d300b5bc",
    "bounds_blender": [
     [
-     -0.3636,
-     -0.30217,
-     -0.25401
+     -0.36966,
+     -0.3153,
+     -0.26242
     ],
     [
-     0.3636,
-     0.30217,
-     0.25401
+     0.36966,
+     0.3153,
+     0.26242
     ]
    ],
-   "tris": 1582,
+   "tris": 174,
    "materials": [
     [
-     "Icarus_Glass",
-     1582
+     "fighter1_canopy",
+     174
     ]
    ],
-   "uv_layers": [],
+   "uv_layers": [
+    "UVMap"
+   ],
    "colliders": [
     {
      "name": "windscreen_colmesh0",
-     "verts": 99,
-     "tris": 194,
+     "verts": 79,
+     "tris": 154,
      "bounds_unity": [
       [
-       -0.3636,
-       -0.25401,
-       -0.30217
+       -0.36966,
+       -0.26242,
+       -0.3153
       ],
       [
-       0.3636,
-       0.25401,
-       0.30217
+       0.36966,
+       0.26242,
+       0.3153
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 194
+    "tris": 154
    }
   },
-  "windscreen_frame": {
-   "fbx": "windscreen_frame.fbx",
-   "blender_parent": "cockpit_cell",
+  "windscreen_inner": {
+   "fbx": "windscreen_inner.fbx",
+   "blender_parent": "windscreen",
    "pivot_blender": [
     0.0,
-    -5.05,
-    0.78206
+    0.0,
+    0.0
    ],
    "pivot_unity": [
     -0.0,
-    0.78206,
-    5.05
+    0.0,
+    -0.0
    ],
    "axes_unity": {
     "right": [
@@ -13581,64 +13829,46 @@
     ]
    },
    "props": {
-    "role": "canopy",
+    "role": "cockpit_view",
     "mass_kg": 0
    },
    "bounds_unity": [
     [
-     -0.38033,
-     -0.26433,
-     -0.04
+     -0.36571,
+     0.456,
+     5.04907
     ],
     [
-     0.38033,
-     0.26433,
-     0.04
+     0.36571,
+     0.97737,
+     5.67718
     ]
    ],
-   "sha256": "14e7680431efdd6472caa050200fe8d3660e8cb203c592cca45c6ee666fa1ab0",
+   "sha256": "9a3494443ffba6ef2b0eb14615bdaa16e35331436764c0c6eb6d5097a586d12d",
    "bounds_blender": [
     [
-     -0.38033,
-     -0.04,
-     -0.26433
+     -0.36571,
+     -5.67718,
+     0.456
     ],
     [
-     0.38033,
-     0.04,
-     0.26433
+     0.36571,
+     -5.04907,
+     0.97737
     ]
    ],
-   "tris": 196,
+   "tris": 174,
    "materials": [
     [
-     "Icarus_Frame",
-     196
+     "fighter1_canopy_int",
+     174
     ]
    ],
-   "uv_layers": [],
-   "colliders": [
-    {
-     "name": "windscreen_frame_colmesh0",
-     "verts": 99,
-     "tris": 194,
-     "bounds_unity": [
-      [
-       -0.37997,
-       -0.26433,
-       -0.04
-      ],
-      [
-       0.38015,
-       0.26385,
-       0.04
-      ]
-     ]
-    }
+   "uv_layers": [
+    "UVMap"
    ],
-   "lod1": {
-    "tris": 194
-   }
+   "colliders": [],
+   "lod1": null
   },
   "wing_skin_L": {
    "fbx": "wing_skin_L.fbx",
@@ -13686,7 +13916,7 @@
      2.525
     ]
    ],
-   "sha256": "a094975a38399b1a37a0b1b345f86e3019a21f0840a85331c361d8f9aa87bfde",
+   "sha256": "71ac8e270ca415896e7aca400397abeedd5f7248a25584fa3890b8919181ed7b",
    "bounds_blender": [
     [
      -1.41,
@@ -13831,7 +14061,7 @@
      2.525
     ]
    ],
-   "sha256": "a9159311126aa403673c753c53e74d890fc0506b2b7a1225f5eb7915df823d43",
+   "sha256": "4a6d477961fe75304945595829f0d091d13e88c6aa6c82ca8aec02ae7afa35f0",
    "bounds_blender": [
     [
      -1.41,
@@ -13977,7 +14207,7 @@
      1.80428
     ]
    ],
-   "sha256": "d943945213f272ba50412ac87c9ae00dc882923e2fef77c022d13359858129f8",
+   "sha256": "d680c88f9470f9b378563b995afba9f600b69f3a315000bef7e9056786eac982",
    "bounds_blender": [
     [
      -1.366,
@@ -14072,7 +14302,7 @@
      1.80428
     ]
    ],
-   "sha256": "086878168b70a9eec7b7873d5a4e32115ca2818ad4dad26729eeb6e8a0ce897d",
+   "sha256": "5fd8a3a83d17a966eb25e05054224c9786328fc43672836a76f6df7733453c4c",
    "bounds_blender": [
     [
      -1.366,

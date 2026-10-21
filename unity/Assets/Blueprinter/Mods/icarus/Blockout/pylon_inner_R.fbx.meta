@@ -92,6 +92,16 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: fighter1_canopy
+    second: {fileID: 2100000, guid: f68282079e2a22142b2abad952ae03a9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fighter1_canopy_int
+    second: {fileID: 2100000, guid: 31b5915f6a155774b9737cdc4cf692a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: jet_mechanical
     second: {fileID: 2100000, guid: 2f39b761a790bde41949ec823a1d99ff, type: 2}
   materials:
