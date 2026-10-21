@@ -14,6 +14,8 @@ namespace Icarus.Editor
         private const float EyeBelowCanopyTop = 0.20f;
         // The Revoker panel's clearance behind the windscreen frame (BuildCockpit).
         private const float PanelBehindBow = 0.03f;
+        // The FS-12 Revoker's body width with its intakes, which its vapour cone is sized to (estimated from its art).
+        private const float RevokerBodyWidth = 2.5f;
         // TargetCam renders from 2 m out: its mounts sit 2.5 m clear of every mesh (Centurion's measured margin).
         private const float CameraClearance = 2.5f;
 
@@ -117,13 +119,17 @@ namespace Icarus.Editor
             var wingRoot = WorldVertices(b.Parts["wing_skin_L"].transform, b.Meshes["wing_skin_L"].Render).OrderBy(v => Mathf.Abs(v.x)).Take(20).Max(v => v.z);
             var cone = b.Parts["fuselage_forward"].transform.Find("vaporCone") ?? throw new MissingReferenceException("vaporCone");
             cone.position = new Vector3(0f, b.Parts[RootPart].GetComponent<MeshRenderer>().bounds.center.y, wingRoot);
+            // Its 7-8 m particles were sized for the Revoker's broad body; the system scales locally, so the transform
+            // scales them to the Icarus's width there.
+            var width = new[] { "skin_mid_L", "skin_mid_R" }.SelectMany(n => WorldVertices(b.Parts[n].transform, b.Meshes[n].Render)).Select(v => v.x).ToArray();
+            cone.localScale = Vector3.one * ((width.Max() - width.Min()) / RevokerBodyWidth);
             var ground = Contacts(b).Min(l => l.Contact.y);
             var downwash = b.Find("downwash");
             downwash.position = new Vector3(0f, downwash.position.y + ground - b.Donor.GroundY, b.Visuals["nozzle_vector"].position.z);
             var sparks = b.Find("contactSparks");
             sparks.position = new Vector3(0f, belly, 0f);
             b.Placed.UnionWith(new[] { cone, downwash, sparks });
-            b.Report.Add($"systems: radar bound to radar_tray; target cameras F {forward.position}, R {rear.position}, landing {landing.position}; flares, nav lights, vortices, vapour, downwash and sparks placed on the Icarus");
+            b.Report.Add($"systems: radar bound to radar_tray; target cameras F {forward.position}, R {rear.position}, landing {landing.position}; flares, nav lights, vortices, vapour (cone scaled {cone.localScale.x:F2}), downwash and sparks placed on the Icarus");
         }
 
         // Eight stations in R5's fixed order, each set [L, R] with HardpointIndex 0..7 left before right.
