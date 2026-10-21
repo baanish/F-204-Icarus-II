@@ -845,6 +845,7 @@ def _build(repo):
     parts += gear.build_gear({"strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
                               "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9)})
     parts += gear.lights_and_antennas(p, {"antenna": body})
+    parts += gear.pylons(p, body)
     import internals  # imports this module back for its helpers, so it loads after them
 
     inner_mats = {

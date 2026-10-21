@@ -135,23 +135,16 @@ namespace Icarus.Editor
         // Eight stations in R5's fixed order, each set [L, R] with HardpointIndex 0..7 left before right.
         private static void BuildStations(Build b)
         {
-            Vector3 WingPoint(string side, float fraction)
+            // A wing station hangs from the middle of its pylon's lower edge (art/blender/gear.py pylons).
+            Vector3 PylonPoint(string pylon)
             {
-                var skin = WorldVertices(b.Parts["wing_skin_" + side].transform, b.Meshes["wing_skin_" + side].Render);
-                var chord = skin.Concat(new[] { "flap_", "aileron_", "lef_" }.SelectMany(s => WorldVertices(b.Visuals[s + side + "_visible"], b.Meshes[s + side + "_visible"].Render))).ToArray();
-                var inner = skin.Min(v => Mathf.Abs(v.x));
-                var outer = skin.Max(v => Mathf.Abs(v.x));
-                var sign = side == "L" ? -1f : 1f;
-                if (fraction >= 1f)
-                {
-                    var tip = skin.Where(v => Mathf.Abs(v.x) > outer - 0.05f).ToArray();
-                    return new Vector3(sign * outer, tip.Average(v => v.y), tip.Average(v => v.z));
-                }
-                var x = sign * (inner + fraction * (outer - inner));
-                var slab = chord.Where(v => Mathf.Abs(v.x - x) < 0.15f).ToArray();
-                var z = (slab.Max(v => v.z) + slab.Min(v => v.z)) / 2;
-                var under = skin.Where(v => Mathf.Abs(v.x - x) < 0.15f && Mathf.Abs(v.z - z) < 0.4f).ToArray();
-                return new Vector3(x, under.Min(v => v.y) - 0.02f, z);
+                var probe = new GameObject("pylon_probe").transform;
+                probe.SetPositionAndRotation(b.Blockout.Local(pylon), b.Blockout.Rotation(pylon));
+                var points = WorldVertices(probe, b.Meshes[pylon].Render);
+                Object.DestroyImmediate(probe.gameObject);
+                var low = points.Min(v => v.y);
+                var edge = points.Where(v => v.y < low + 0.01f).ToArray();
+                return new Vector3(edge.Average(v => v.x), low, edge.Average(v => v.z));
             }
             Vector3 ConformalPoint(string side)
             {
@@ -164,9 +157,9 @@ namespace Icarus.Editor
 
             var sets = new (string Name, string Part, Func<string, Vector3> Where)[]
             {
-                (SetNames[0], "wing_spar_", s => WingPoint(s, 1f)),
-                (SetNames[1], "wing_spar_", s => WingPoint(s, 0.35f)),
-                (SetNames[2], "wing_spar_", s => WingPoint(s, 0.70f)),
+                (SetNames[0], "wing_spar_", s => PylonPoint("rail_tip_" + s)),
+                (SetNames[1], "wing_spar_", s => PylonPoint("pylon_inner_" + s)),
+                (SetNames[2], "wing_spar_", s => PylonPoint("pylon_outer_" + s)),
                 (SetNames[3], RootPart, ConformalPoint),
             };
             var manager = b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager"));

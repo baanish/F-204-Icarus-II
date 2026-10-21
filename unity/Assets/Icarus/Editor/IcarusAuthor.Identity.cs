@@ -16,6 +16,7 @@ namespace Icarus.Editor
 
         // The stock mounts each set offers, taken from the Revoker's own sets (R5): its wingtip rails for the wingtips, its
         // wing pylons for both underwing stations, and its wingtip rails' missiles for the semi-recessed conformal stations.
+        // Every station carries one store, so the Revoker's double and triple racks are left out (a rocket pod is one store).
         private sealed class Stations
         {
             public readonly List<Object>[] Options = new List<Object>[4];
@@ -26,12 +27,14 @@ namespace Icarus.Editor
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
             ("Interceptor", new[] { "AAM1_single", "AAM4_single", "AAM2_single", "AAM2_single" }),
-            ("Air Superiority", new[] { "AAM1_single", "AAM2_double", "AAM1_double", "AAM2_single" }),
+            ("Air Superiority", new[] { "AAM1_single", "AAM2_single", "AAM1_single", "AAM2_single" }),
             ("Strike", new[] { "AAM1_single", "bomb_500_single", "AGM_heavy_single", "AAM2_single" }),
             ("SEAD", new[] { "AAM1_single", "ARM1_single", "ARM2_single", "AAM2_single" }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
+
+        private static bool SingleStore(Object mount) => !System.Text.RegularExpressions.Regex.IsMatch(KeyOf(mount), @"_(double|triple)$|x\d+$");
 
         private static Stations ReadDonorStations(GameObject donor)
         {
@@ -48,8 +51,8 @@ namespace Icarus.Editor
                 throw new InvalidDataException("The Revoker has no hardpoint set " + setName);
             }
             var stations = new Stations();
-            var tips = OptionsOf("Wingtip Pylons");
-            var pylons = OptionsOf("Wing Pylons");
+            var tips = OptionsOf("Wingtip Pylons").Where(SingleStore).ToList();
+            var pylons = OptionsOf("Wing Pylons").Where(SingleStore).ToList();
             stations.Options[0] = tips;
             stations.Options[1] = pylons;
             stations.Options[2] = pylons;

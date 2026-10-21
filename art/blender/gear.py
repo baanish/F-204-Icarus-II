@@ -41,6 +41,10 @@ ANTENNAS = [  # (name, s, z of root, height, chord, which side: top or belly)
     ("antenna_iff_belly", 6.40, None, 0.15, 0.22, "belly"),
     ("antenna_datalink_top", 11.60, None, 0.16, 0.26, "top"),
 ]
+# Weapon pylons: blades under the wing at a fraction of the span from the root row to the tip, and a launch rail under
+# each wingtip. Each carries one store, which the game hangs from the hardpoint at the pylon's lower edge.
+PYLONS = {"inner": 0.35, "outer": 0.70, "length": 1.5, "depth": 0.26, "thickness": 0.07, "rake": 0.30, "bury": 0.03}
+TIP_RAIL = {"inset": 0.05, "width": 0.07, "depth": 0.08}
 
 
 def cylinder(name, a, b, r, segments=16):
@@ -210,4 +214,46 @@ def lights_and_antennas(p, mats):
         obj = bi.finish(bi.mesh_object(name, v, f), mats["antenna"], smooth=False)
         obj["role"] = "antenna"
         parts.append(obj)
+    return parts
+
+
+def wing_at(w, x):
+    """The wing section (s of the leading edge, z of the chord line, chord) at spanwise x, between planform rows."""
+    sections = bi.wing_sections(w)
+    for (le0, x0, z0, c0), (le1, x1, z1, c1) in zip(sections, sections[1:]):
+        if x0 <= x <= x1:
+            t = (x - x0) / (x1 - x0)
+            return le0 + t * (le1 - le0), z0 + t * (z1 - z0), c0 + t * (c1 - c0)
+    raise ValueError("x %.2f is outside the wing" % x)
+
+
+def slab(name, s0, s1, x, z_top, depth, thick, rake, mat):
+    """A vertical blade along s, its top at z_top and its lower edge raked back from the front by rake."""
+    profile = [bi.P(s0, x, z_top), bi.P(s1, x, z_top), bi.P(s1 - rake / 3, x, z_top - depth), bi.P(s0 + rake, x, z_top - depth)]
+    half = Vector((thick / 2, 0, 0))
+    v = [q - half for q in profile] + [q + half for q in profile]
+    f = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
+    obj = bi.finish(bi.mesh_object(name, v, f), mat, smooth=False)
+    obj["role"] = "pylon"
+    return obj
+
+
+def pylons(p, mat):
+    """The inner and outer wing pylons and the wingtip rails, one store each."""
+    w, y = p["wing"], PYLONS
+    root_x, tip_x = w["planform"][0][1], w["planform"][-1][1]
+    parts = []
+    for side, suffix in ((1, "_L"), (-1, "_R")):
+        for station in ("inner", "outer"):
+            x = root_x + y[station] * (tip_x - root_x)
+            le, z, chord = wing_at(w, x)
+            low = z - 0.5 * w["thickness"] * chord
+            length = min(y["length"], 0.75 * chord)
+            s0 = le + 0.45 * chord - length / 2
+            parts.append(slab("pylon_%s%s" % (station, suffix), s0, s0 + length, side * x, low + y["bury"],
+                              y["depth"] + y["bury"], y["thickness"], y["rake"], mat))
+        le, z, chord = wing_at(w, tip_x)
+        r = TIP_RAIL
+        parts.append(slab("rail_tip%s" % suffix, le + r["inset"], le + chord - r["inset"], side * (tip_x - r["width"] / 2), z,
+                          r["depth"], r["width"], 0.0, mat))
     return parts

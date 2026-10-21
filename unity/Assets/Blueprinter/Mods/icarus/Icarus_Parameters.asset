@@ -872,8 +872,8 @@ MonoBehaviour:
     loadout:
       weapons:
       - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
-      - {fileID: 11400000, guid: 69b5e66560c97414da73449d867e708a, type: 2}
-      - {fileID: 11400000, guid: f3f2cc8ddfdccf5409fe2af25651bfee, type: 2}
+      - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
+      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
       - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
     FuelRatio: 1
   - disabled: 0
