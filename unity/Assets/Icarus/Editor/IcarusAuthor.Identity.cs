@@ -12,18 +12,19 @@ namespace Icarus.Editor
     public static partial class IcarusAuthor
     {
         // The hardpoint set order is an API: loadouts, exclusions and Blueprinter registrations address sets by position.
-        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Outer Wing", "Conformal" };
+        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal" };
 
-        // What each set carries, one store per station, trimmed to a Starfighter's kind of load: the wingtip rails take
-        // only the MMR-S3 and IRM-S2; the outer pylons small stores; the inner pylons the heavier missiles, the 500 kg and
-        // cluster bombs and the Genie; the semi-recessed conformal stations air-to-air missiles. No Tusko-B, GBM-500LR or
-        // GPO-2P Auger, and none of the Revoker's double or triple racks (a rocket pod is one store).
+        // What each set carries: a starter jet, so a Starfighter's kind of load and nothing advanced. The wingtip rails
+        // take only the MMR-S3 and IRM-S2; the wing pylons the missiles, the 500 kg and cluster bombs, the Genie and the
+        // pods, one store each, or a twin rack of MMR-S3 or IRM-S2; the semi-recessed conformal stations air-to-air
+        // missiles. No AAM-36 Scimitar, ARADs, AGM-68, AGM-99, Tusko-B, GBM-500LR or GPO-2P Auger, and no other double
+        // or triple racks (a rocket pod is one store; the AAM-29 twin's adapter hangs it low enough to reach the runway
+        // before the tail).
         private static readonly string[][] StationKeys =
         {
             new[] { "AAM1_single", "AAM3_single" },
-            new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM4_single", "ARM1_single", "ARM2_single", "AGM_heavy_single",
-                    "AShM2_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "Rocket2_4Pod", "SpecialSmokePod", "SpecialFlarePod" },
-            new[] { "AAM1_single", "AAM3_single", "AAM2_single", "ARM2_single", "Rocket2_4Pod", "SpecialSmokePod", "SpecialFlarePod" },
+            new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM1_double", "AAM3_double", "bomb_500_single",
+                    "bomb_cluster1_single", "AIR-2_Genie_single", "Rocket2_4Pod", "SpecialSmokePod", "SpecialFlarePod" },
             new[] { "AAM1_single", "AAM3_single", "AAM2_single" },
         };
         // Blueprinter's stand-ins for stock mounts the Revoker doesn't carry (the IRM-S2).
@@ -31,17 +32,17 @@ namespace Icarus.Editor
 
         private sealed class Stations
         {
-            public readonly List<Object>[] Options = new List<Object>[4];
+            public readonly List<Object>[] Options = new List<Object>[SetNames.Length];
             public readonly Dictionary<string, Object> ByKey = new Dictionary<string, Object>();
         }
 
         // Standard loadouts by mount jsonKey, one per set in SetNames order. loadouts[1], the default, is the first.
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
-            ("Interceptor", new[] { "AAM1_single", "AAM4_single", "AAM2_single", "AAM2_single" }),
-            ("Air Superiority", new[] { "AAM3_single", "AAM2_single", "AAM1_single", "AAM1_single" }),
-            ("Strike", new[] { "AAM3_single", "bomb_500_single", "Rocket2_4Pod", "AAM1_single" }),
-            ("SEAD", new[] { "AAM3_single", "ARM1_single", "ARM2_single", "AAM1_single" }),
+            ("Interceptor", new[] { "AAM1_single", "AAM2_single", "AAM2_single" }),
+            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", "AAM2_single" }),
+            ("Strike", new[] { "AAM3_single", "bomb_500_single", "AAM1_single" }),
+            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", "AAM1_single" }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
@@ -218,7 +219,7 @@ namespace Icarus.Editor
             Prop(so, "jsonKey").stringValue = JsonKey;
             Prop(so, "unitName").stringValue = "F-204 Icarus II";
             Prop(so, "code").stringValue = "F-204";
-            Prop(so, "description").stringValue = "A modernized Starfighter: a single-turbojet interceptor on a cranked-arrow wing with leading-edge flaps and a vectoring iris nozzle. Fast and quick to climb, it bleeds energy in a turn. Eight stations carry missiles and light strike stores.";
+            Prop(so, "description").stringValue = "A modernized Starfighter: a single-turbojet interceptor on a cranked-arrow wing with leading-edge flaps and a vectoring iris nozzle. Fast and quick to climb, it bleeds energy in a turn. Six stations carry missiles and light strike stores.";
             Num(so, "roleIdentity.antiAir", 1f);
             Num(so, "roleIdentity.antiSurface", 0.3f);
             Num(so, "roleIdentity.antiRadar", 0.3f);

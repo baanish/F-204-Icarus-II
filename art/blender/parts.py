@@ -75,12 +75,8 @@ TREE = {
     "antenna_datalink_top": ("dorsal_cover", 0),
     "pylon_inner_L": ("wing_spar_L", 0),
     "pylon_inner_R": ("wing_spar_R", 0),
-    "pylon_outer_L": ("wing_spar_L", 0),
-    "pylon_outer_R": ("wing_spar_R", 0),
     "pylon_inner_plug_L": ("wing_spar_L", 0),
     "pylon_inner_plug_R": ("wing_spar_R", 0),
-    "pylon_outer_plug_L": ("wing_spar_L", 0),
-    "pylon_outer_plug_R": ("wing_spar_R", 0),
     "dorsal_cover": ("fuselage_mid", 40),
     # Not in the 41: small parts the plan folds into their parents' budgets.
     "speed_brake_L": ("fuselage_aft", 0),

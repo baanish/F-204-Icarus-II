@@ -13,10 +13,10 @@ TEMPLATES = pathlib.Path(r"NO-Agentic-Framework\templates")
 
 AIRCRAFT, TITLE = "baanish_icarus", "F-240 Icarus II"
 # The Icarus's AircraftDefinition, as the build's rest-pose report logs it: spawnOffset (0, 1.49, -1.49), restRotation.x
-# -0.21 (nose up). Four hardpoint sets (Wingtip, Inner Wing, Outer Wing, Conformal); four empty keys fly it clean, and a list
-# of any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
+# -0.21 (nose up). Three hardpoint sets (Wingtip, Inner Wing, Conformal); three empty keys fly it clean, and a list of
+# any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
 SPAWN_UP, REST_PITCH = 1.49, -0.21
-CLEAN = {"Selected": [{"Key": ""} for _ in range(4)]}
+CLEAN = {"Selected": [{"Key": ""} for _ in range(3)]}
 
 # Sandrift's runway surface under runway_start's spot (x 27877, z -19300) is 136.93 m, as the framework's make_missions.py
 # measured it; the origin starts spawnOffset.y plus 0.12 m above it, as runway_start does for the KR-67.

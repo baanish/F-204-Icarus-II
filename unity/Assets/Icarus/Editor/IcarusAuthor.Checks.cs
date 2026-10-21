@@ -217,7 +217,7 @@ namespace Icarus.Editor
                     indices.Add(hp.FindPropertyRelative("HardpointIndex").intValue);
                 }
             }
-            if (!indices.OrderBy(i => i).SequenceEqual(Enumerable.Range(0, 8))) p.Add("HardpointIndex values [" + string.Join(", ", indices) + "], expected 0..7 once each");
+            if (!indices.OrderBy(i => i).SequenceEqual(Enumerable.Range(0, 2 * SetNames.Length))) p.Add("HardpointIndex values [" + string.Join(", ", indices) + $"], expected 0..{2 * SetNames.Length - 1} once each");
             var so = new SerializedObject(parameters);
             var lengths = new List<int>();
             var loadouts = Prop(so, "loadouts");
@@ -232,7 +232,7 @@ namespace Icarus.Editor
             }
             if (loadouts.arraySize < 2) p.Add("fewer than two ordinary loadouts (WeaponManager falls back to loadouts[1])");
             if (lengths.Any(l => l != SetNames.Length)) p.Add("loadout lengths [" + string.Join(", ", lengths) + "]");
-            return $"sets [{string.Join(", ", names)}], hardpoints 0..7 left before right, loadout lengths [{string.Join(", ", lengths)}]";
+            return $"sets [{string.Join(", ", names)}], hardpoints 0..{2 * SetNames.Length - 1} left before right, loadout lengths [{string.Join(", ", lengths)}]";
         }
 
         private static string CheckTanks(Build b, List<string> p)

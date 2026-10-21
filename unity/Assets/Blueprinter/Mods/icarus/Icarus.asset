@@ -28,7 +28,7 @@ MonoBehaviour:
   bogeyName: 
   description: 'A modernized Starfighter: a single-turbojet interceptor on a cranked-arrow
     wing with leading-edge flaps and a vectoring iris nozzle. Fast and quick to climb,
-    it bleeds energy in a turn. Eight stations carry missiles and light strike stores.'
+    it bleeds energy in a turn. Six stations carry missiles and light strike stores.'
   code: F-204
   visibleRange: 3000
   iconRange: 100000

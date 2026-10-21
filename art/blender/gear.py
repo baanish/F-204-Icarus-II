@@ -41,12 +41,11 @@ ANTENNAS = [  # (name, s, z of root, height, chord, which side: top or belly)
     ("antenna_iff_belly", 6.40, None, 0.15, 0.22, "belly"),
     ("antenna_datalink_top", 11.60, None, 0.16, 0.26, "top"),
 ]
-# Weapon pylons: blades under the wing at a fraction of the span from the root row to the tip. Each carries one store,
-# which the game hangs from the hardpoint at the pylon's lower edge. The wingtip stations have no blade or rail: every
-# mount brings its own launch rail, which bears straight on the tip face. The game hides an empty station's blade and
-# shows its plug instead, a stub on the blade's root footprint standing "plug" metres below the wing.
-PYLONS = {"inner": 0.37, "outer": 0.70, "length": 1.5, "depth": 0.26, "thickness": 0.10, "rake": 0.30, "bury": 0.03,
-          "plug": 0.03}
+# Weapon pylons: one blade under each wing at a fraction of the span from the root row to the tip. Each carries one
+# mount, which the game hangs from the hardpoint at the pylon's lower edge. The wingtip stations have no blade or rail:
+# every mount brings its own launch rail, which bears straight on the tip face. The game hides an empty station's blade
+# and shows its plug instead, a stub on the blade's root footprint standing "plug" metres below the wing.
+PYLONS = {"inner": 0.45, "length": 1.5, "depth": 0.26, "thickness": 0.10, "rake": 0.30, "bury": 0.03, "plug": 0.03}
 
 
 def cylinder(name, a, b, r, segments=16):
@@ -257,22 +256,21 @@ def fixed_box(p, x):
 
 
 def pylons(p, mat):
-    """The inner and outer wing pylons, one store each, and their plugs."""
+    """The inner wing pylons and their plugs."""
     w, y = p["wing"], PYLONS
     root_x, tip_x = w["planform"][0][1], w["planform"][-1][1]
     parts = []
     for side, suffix in ((1, "_L"), (-1, "_R")):
-        for station in ("inner", "outer"):
-            x = root_x + y[station] * (tip_x - root_x)
-            le, z, chord = wing_at(w, x)
-            low = z - 0.5 * w["thickness"] * chord
-            length = min(y["length"], 0.75 * chord)
-            # The blade's buried root stays on the fixed box, clear of the moving surfaces and the space they sweep.
-            front, back = fixed_box(p, x)
-            s0 = max(le + front * chord, le + 0.45 * chord - length / 2)
-            s1 = min(le + back * chord, le + 0.45 * chord + length / 2)
-            parts.append(slab("pylon_%s%s" % (station, suffix), s0, s1, side * x, low + y["bury"],
-                              y["depth"] + y["bury"], y["thickness"], y["rake"], mat))
-            parts.append(slab("pylon_%s_plug%s" % (station, suffix), s0, s1, side * x, low + y["bury"],
-                              y["plug"] + y["bury"], y["thickness"], 0.0, mat))
+        x = root_x + y["inner"] * (tip_x - root_x)
+        le, z, chord = wing_at(w, x)
+        low = z - 0.5 * w["thickness"] * chord
+        length = min(y["length"], 0.75 * chord)
+        # The blade's buried root stays on the fixed box, clear of the moving surfaces and the space they sweep.
+        front, back = fixed_box(p, x)
+        s0 = max(le + front * chord, le + 0.45 * chord - length / 2)
+        s1 = min(le + back * chord, le + 0.45 * chord + length / 2)
+        parts.append(slab("pylon_inner%s" % suffix, s0, s1, side * x, low + y["bury"],
+                          y["depth"] + y["bury"], y["thickness"], y["rake"], mat))
+        parts.append(slab("pylon_inner_plug%s" % suffix, s0, s1, side * x, low + y["bury"],
+                          y["plug"] + y["bury"], y["thickness"], 0.0, mat))
     return parts

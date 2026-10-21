@@ -132,22 +132,20 @@ namespace Icarus.Editor
             b.Report.Add($"systems: radar bound to radar_tray; target cameras F {forward.position}, R {rear.position}, landing {landing.position}; flares, nav lights, vortices, vapour (cone scaled {cone.localScale.x:F2}), downwash and sparks placed on the Icarus");
         }
 
-        // Eight stations in R5's fixed order, each set [L, R] with HardpointIndex 0..7 left before right.
+        // Six stations in SetNames order, each set [L, R] with HardpointIndex 0..5 left before right.
         private static void BuildStations(Build b)
         {
-            // A wing station hangs from its pylon's lower edge, 0.45 of the blade's length back from its front, where stock
-            // blades put theirs (art/blender/gear.py pylons), or from the foremost point of that edge.
-            Vector3 PylonPoint(string pylon, bool foremost)
+            // A wing station hangs from the foremost point of its pylon's flat lower edge, ahead of where stock blades put
+            // theirs (0.45 of the blade back): the swept wing puts the blade well behind the main wheels, and a store
+            // hung further aft reaches the runway before the tail in a nose-up rotation (art/blender/gear.py pylons).
+            Vector3 PylonPoint(string pylon)
             {
                 var probe = new GameObject("pylon_probe").transform;
                 probe.SetPositionAndRotation(b.Blockout.Local(pylon), b.Blockout.Rotation(pylon));
                 var points = WorldVertices(probe, b.Meshes[pylon].Render);
                 Object.DestroyImmediate(probe.gameObject);
-                var top = points.Max(v => v.y);
                 var low = points.Min(v => v.y);
-                var root = points.Where(v => v.y > top - 0.01f).ToArray();
-                var front = root.Max(v => v.z);
-                var z = foremost ? points.Where(v => v.y < low + 0.01f).Max(v => v.z) : front - 0.45f * (front - root.Min(v => v.z));
+                var z = points.Where(v => v.y < low + 0.01f).Max(v => v.z);
                 return new Vector3(points.Average(v => v.x), low, z);
             }
             // A wingtip station sits on the flat tip face, 0.005 m in from it at mid-thickness, 0.40 of the tip chord back
@@ -191,14 +189,12 @@ namespace Icarus.Editor
             }
 
             // Pylon names the blade and plug a wing station shows and hides by load. Roll is the left station's turn about
-            // the forward axis; the right one turns the other way. The outer stations sit far behind the main wheels, so
-            // their stores hang as far forward as the blade allows and reach the runway later in a nose-up rotation.
+            // the forward axis; the right one turns the other way.
             var sets = new (string Name, string Part, string Pylon, Func<string, Vector3> Where, float Roll)[]
             {
                 (SetNames[0], "wing_spar_", null, TipPoint, -90f),
-                (SetNames[1], "wing_spar_", "pylon_inner_", s => PylonPoint("pylon_inner_" + s, false), 0f),
-                (SetNames[2], "wing_spar_", "pylon_outer_", s => PylonPoint("pylon_outer_" + s, true), 0f),
-                (SetNames[3], RootPart, null, ConformalPoint, 0f),
+                (SetNames[1], "wing_spar_", "pylon_inner_", s => PylonPoint("pylon_inner_" + s), 0f),
+                (SetNames[2], RootPart, null, ConformalPoint, 0f),
             };
             var manager = b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager"));
             var so = new SerializedObject(manager);

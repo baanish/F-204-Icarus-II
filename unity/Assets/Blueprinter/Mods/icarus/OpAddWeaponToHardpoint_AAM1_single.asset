@@ -15,4 +15,4 @@ MonoBehaviour:
   weaponJsonKey: AAM1_single
   aircraft:
   - aircraftJsonKey: baanish_icarus
-    hardpointIndices: 00000000010000000200000003000000
+    hardpointIndices: 000000000100000002000000

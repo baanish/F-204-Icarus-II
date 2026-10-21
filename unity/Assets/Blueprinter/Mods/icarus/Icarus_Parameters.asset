@@ -851,10 +851,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
   - weapons:
     - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
-    - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
     - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
     - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
   StandardLoadouts:
@@ -863,7 +861,6 @@ MonoBehaviour:
     loadout:
       weapons:
       - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
-      - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
       - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
       - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
     FuelRatio: 1
@@ -872,9 +869,8 @@ MonoBehaviour:
     loadout:
       weapons:
       - {fileID: 11400000, guid: 5e792fc887f33b845b380cc1c2bf6ab2, type: 2}
+      - {fileID: 11400000, guid: f3f2cc8ddfdccf5409fe2af25651bfee, type: 2}
       - {fileID: 11400000, guid: 9d8b45c29314cbd408a1ffe0087c4793, type: 2}
-      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
-      - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
     FuelRatio: 1
   - disabled: 0
     Name: Strike
@@ -882,16 +878,14 @@ MonoBehaviour:
       weapons:
       - {fileID: 11400000, guid: 5e792fc887f33b845b380cc1c2bf6ab2, type: 2}
       - {fileID: 11400000, guid: 5bc769201eee23f4bb7308f851746cbc, type: 2}
-      - {fileID: 11400000, guid: d422e757e9952ea438da00797fb1f096, type: 2}
       - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
     FuelRatio: 1
   - disabled: 0
-    Name: SEAD
+    Name: Close Support
     loadout:
       weapons:
       - {fileID: 11400000, guid: 5e792fc887f33b845b380cc1c2bf6ab2, type: 2}
-      - {fileID: 11400000, guid: 261c6aab4e5e98e4da6c60d80fa21e95, type: 2}
-      - {fileID: 11400000, guid: 54ef8a806ec911a459fb41b2da805223, type: 2}
+      - {fileID: 11400000, guid: d422e757e9952ea438da00797fb1f096, type: 2}
       - {fileID: 11400000, guid: 52c8920b03156244d9c093742d1a4479, type: 2}
     FuelRatio: 1
   DefaultFuelLevel: 1
