@@ -1,6 +1,6 @@
 // Low-altitude supersonic yaw: the Icarus at 3,000 m (about 10,000 ft) over Ignus, heading east at 480 m/s, about
-// Mach 1.46, held level at full afterburner for 40 s at 20 Hz so the yaw rate and sideslip trace show any directional
-// oscillation. Yaw vectoring set to 0 through the live tuning knob, to compare with yaw_supersonic_low.
+// Mach 1.46, held level at full afterburner, then stepped 20 degrees right and back, at 20 Hz, so the yaw rate and sideslip trace
+// show any directional oscillation the steps excite. Yaw vectoring set to 0 through the live tuning knob, to compare with yaw_supersonic_low.
 // Measured only. From the repo root: no-agentic run tests/scenarios/yaw_supersonic_low_novector.scenario.jsonc
 {
   "mission": "icarus_ignus_3km_fast.mission.json",
@@ -18,7 +18,13 @@
       "label": "the Icarus airborne at 3 km" },
     { "config": { "guid": "baanish.icarus", "section": "Tuning.Vectoring", "key": "YawDegrees", "value": "0" } },
     { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 1 } },
-    { "check": { "path": "own.alive", "eq": true }, "for": 40, "label": "40 s level at full afterburner" },
+    { "check": { "path": "own.alive", "eq": true }, "for": 15, "label": "15 s level at full afterburner" },
+    { "mark": { "label": "turn" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 110, "throttle": 1 } },
+    { "check": { "path": "own.alive", "eq": true }, "for": 15, "label": "15 s turning onto 110 and holding it" },
+    { "mark": { "label": "back" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "path": "own.alive", "eq": true }, "for": 15, "label": "15 s back onto 090" },
     { "record": { "path": "own.mach" }, "label": "Mach at the end" },
     { "record": { "path": "own.tas_mps" }, "label": "TAS at the end, m/s" },
   ],
