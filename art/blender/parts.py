@@ -77,8 +77,10 @@ TREE = {
     "pylon_inner_R": ("wing_spar_R", 0),
     "pylon_outer_L": ("wing_spar_L", 0),
     "pylon_outer_R": ("wing_spar_R", 0),
-    "rail_tip_L": ("wing_spar_L", 0),
-    "rail_tip_R": ("wing_spar_R", 0),
+    "pylon_inner_plug_L": ("wing_spar_L", 0),
+    "pylon_inner_plug_R": ("wing_spar_R", 0),
+    "pylon_outer_plug_L": ("wing_spar_L", 0),
+    "pylon_outer_plug_R": ("wing_spar_R", 0),
     "dorsal_cover": ("fuselage_mid", 40),
     # Not in the 41: small parts the plan folds into their parents' budgets.
     "speed_brake_L": ("fuselage_aft", 0),
@@ -88,7 +90,7 @@ TREE = {
 
 ROLE = {"fuel_": "fuel_tank", "skin_": "skin", "dorsal": "skin", "wing_skin": "skin", "fin_skin": "skin",
         "radome": "skin", "engine": "engine", "nozzle": "engine", "gear_": "gear", "cockpit": "cockpit",
-        "canopy": "canopy", "windscreen": "canopy", "radar": "radar", "light_": "light", "antenna_": "antenna", "pylon_": "pylon", "rail_": "pylon", "avionics": "avionics", "intake": "intake"}
+        "canopy": "canopy", "windscreen": "canopy", "radar": "radar", "light_": "light", "antenna_": "antenna", "pylon_": "pylon", "avionics": "avionics", "intake": "intake"}
 
 # Fuselage skin panels by station: radome ahead of RADOME_END, then forward, mid and aft panels per side; the
 # dorsal cover is the spine strip between DORSAL s range above DORSAL_Z.

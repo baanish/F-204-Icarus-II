@@ -41,10 +41,12 @@ ANTENNAS = [  # (name, s, z of root, height, chord, which side: top or belly)
     ("antenna_iff_belly", 6.40, None, 0.15, 0.22, "belly"),
     ("antenna_datalink_top", 11.60, None, 0.16, 0.26, "top"),
 ]
-# Weapon pylons: blades under the wing at a fraction of the span from the root row to the tip, and a launch rail under
-# each wingtip. Each carries one store, which the game hangs from the hardpoint at the pylon's lower edge.
-PYLONS = {"inner": 0.35, "outer": 0.70, "length": 1.5, "depth": 0.26, "thickness": 0.07, "rake": 0.30, "bury": 0.03}
-TIP_RAIL = {"inset": 0.05, "width": 0.07, "depth": 0.08}
+# Weapon pylons: blades under the wing at a fraction of the span from the root row to the tip. Each carries one store,
+# which the game hangs from the hardpoint at the pylon's lower edge. The wingtip stations have no blade or rail: every
+# mount brings its own launch rail, which bears straight on the tip face. The game hides an empty station's blade and
+# shows its plug instead, a stub on the blade's root footprint standing "plug" metres below the wing.
+PYLONS = {"inner": 0.37, "outer": 0.70, "length": 1.5, "depth": 0.26, "thickness": 0.10, "rake": 0.30, "bury": 0.03,
+          "plug": 0.03}
 
 
 def cylinder(name, a, b, r, segments=16):
@@ -186,13 +188,16 @@ def hinge_canopy(p, canopy, frame_mat):
 
 
 def lights_and_antennas(p, mats):
-    wing = bi.wing_sections(p["wing"])
-    tip = wing[-1]
+    w = p["wing"]
+    # The nav lamps sit on top of the tip, 0.075 m inboard of the tip face the wingtip store's rail bears on, as on
+    # the Revoker.
+    lamp_x = w["planform"][-1][1] - 0.075
+    lamp_le, lamp_z, lamp_chord = wing_at(w, lamp_x)
     parts = []
     for name, s, x, z, kind, colour in LIGHTS:
         if kind == "nav":
             side = 1 if name.endswith("_L") else -1
-            pos = bi.P(tip[0] + tip[3] * 0.35, side * (tip[1] + 0.02), tip[2])
+            pos = bi.P(lamp_le + lamp_chord * 0.35, side * lamp_x, lamp_z + bi.airfoil(0.35) * w["thickness"] * lamp_chord)
         elif kind == "landing":
             g = GEAR["nose"]
             pos = bi.P(g["wheel_s"] - 0.15, 0.0, GEAR["ground_z"] + g["wheel_d"] + 0.15)
@@ -238,8 +243,21 @@ def slab(name, s0, s1, x, z_top, depth, thick, rake, mat):
     return obj
 
 
+def fixed_box(p, x):
+    """Chord fractions (front, back) of the fixed wing box at spanwise x, the same limits build_icarus.box_stations
+    leaves between the leading-edge devices and trailing-edge surfaces."""
+    gap, front, back = p["surface_gap"], 0.0, 1.0
+    for _, a, b, c0, c1 in p["wing_surfaces"]:
+        if a - gap / 2 <= x <= b + gap / 2:
+            if c0 == 0.0:
+                front = max(front, c1 + gap / 2)
+            else:
+                back = min(back, c0 - gap / 2)
+    return front, back
+
+
 def pylons(p, mat):
-    """The inner and outer wing pylons and the wingtip rails, one store each."""
+    """The inner and outer wing pylons, one store each, and their plugs."""
     w, y = p["wing"], PYLONS
     root_x, tip_x = w["planform"][0][1], w["planform"][-1][1]
     parts = []
@@ -249,11 +267,12 @@ def pylons(p, mat):
             le, z, chord = wing_at(w, x)
             low = z - 0.5 * w["thickness"] * chord
             length = min(y["length"], 0.75 * chord)
-            s0 = le + 0.45 * chord - length / 2
-            parts.append(slab("pylon_%s%s" % (station, suffix), s0, s0 + length, side * x, low + y["bury"],
+            # The blade's buried root stays on the fixed box, clear of the moving surfaces and the space they sweep.
+            front, back = fixed_box(p, x)
+            s0 = max(le + front * chord, le + 0.45 * chord - length / 2)
+            s1 = min(le + back * chord, le + 0.45 * chord + length / 2)
+            parts.append(slab("pylon_%s%s" % (station, suffix), s0, s1, side * x, low + y["bury"],
                               y["depth"] + y["bury"], y["thickness"], y["rake"], mat))
-        le, z, chord = wing_at(w, tip_x)
-        r = TIP_RAIL
-        parts.append(slab("rail_tip%s" % suffix, le + r["inset"], le + chord - r["inset"], side * (tip_x - r["width"] / 2), z,
-                          r["depth"], r["width"], 0.0, mat))
+            parts.append(slab("pylon_%s_plug%s" % (station, suffix), s0, s1, side * x, low + y["bury"],
+                              y["plug"] + y["bury"], y["thickness"], 0.0, mat))
     return parts

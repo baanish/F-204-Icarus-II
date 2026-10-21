@@ -19,7 +19,9 @@ import build_icarus as bi
 
 MAX_HULL = 255
 LOD_GREY = (0.14, 0.14, 0.14, 1.0)  # the colour the Unity author checks LOD1 meshes for
-SKIP = ("nozzle_petal_", "nozzle_seal_")  # animated petals and seals: no collider or LOD
+# Animated petals and seals, and the pylon blades and plugs the game shows and hides by station: no collider or LOD,
+# since a LOD1 hull would stay drawn at a distance whichever of them is hidden.
+SKIP = ("nozzle_petal_", "nozzle_seal_", "pylon_")
 # Station length and angle around the body axis of one skin patch. A patch's hull bulges inward by its sagitta
 # (r(1 - cos(angle/2))), which must stay inside the 3 cm compartment inset even on the narrow nose.
 SKIN_PATCH = (1.0, math.radians(30))
