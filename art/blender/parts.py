@@ -11,6 +11,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 import build_icarus as bi
+import gear
 import internals as interior
 
 # part name -> (parent, dry mass kg). Hinged surfaces are listed by their hinge name.
@@ -205,9 +206,17 @@ def _organise(p, icarus, internals, structure_mat):
 
     fus = O["fuselage"]
     # The canopy is its own loft on top of the body, so the body's top skin ran on under it as a floor across the
-    # cockpit. The cockpit opening is the body skin inside the canopy's closed shape.
+    # cockpit, and the frames there closed over the pilot as full rings. The cockpit opening is whatever of the skin
+    # and the frames lies inside the canopy's closed shape.
     canopy_solid = interior.outward(bi.build_canopy(p, structure_mat))
-    drop_inside(fus, canopy_solid)
+    for obj in [fus] + [o for o in icarus.objects if o.name.startswith("frame_")]:
+        drop_inside(obj, canopy_solid)
+    # The windscreen frame is a band round the whole canopy section, whose lower part dips into the body: inside the
+    # open cockpit it crossed the pilot's view as a full ring. Only the arch above the skin stays.
+    bow_s = gear.CANOPY["windscreen_end_s"]
+    body = interior.inner_solid(p, 0.0, bow_s - 0.2, bow_s + 0.2)
+    drop_inside(O["windscreen_frame"], body)
+    bpy.data.objects.remove(body, do_unlink=True)
     bpy.data.objects.remove(canopy_solid, do_unlink=True)
     side = lambda c: "L" if c.x >= 0 else "R"
     dorsal = lambda c: DORSAL[0] <= station(c) <= DORSAL[1] and c.z > DORSAL_Z and abs(c.x) < DORSAL_HALF_WIDTH

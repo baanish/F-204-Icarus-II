@@ -309,19 +309,28 @@ namespace Icarus.Editor
             var (_, hood, glass) = HingeRig(b, "canopy", null, canopy);
             var cockpit = b.Parts["cockpit_cell"].transform;
             var windscreen = MeshVisual(b, "windscreen", cockpit);
-            MeshVisual(b, "windscreen_frame", cockpit);
+            var bow = MeshVisual(b, "windscreen_frame", cockpit);
             var points = WorldVertices(glass.transform, b.Meshes["canopy_visible"].Render);
             var topY = points.Max(p => p.y);
             var crown = points.Where(p => p.y > topY - 0.01f).ToArray();
-            var eye = new Vector3(0f, topY - EyeBelowCanopyTop, crown.Average(p => p.z) - EyeAftOfCrown);
+            var eye = new Vector3(0f, topY - EyeBelowCanopyTop, crown.Average(p => p.z));
             var helmet = (Transform)GetRef(b.Aircraft, "cockpitViewPoint");
             var delta = eye - helmet.position;
-            foreach (var name in new[] { "cockpit_interior", "cockpit_interior_simple", "targetScreen", "pilot", "joystick", "throttle" })
-            {
-                var t = cockpit.Find(name) ?? throw new MissingReferenceException("cockpit_cell/" + name);
+            var moved = new[] { "cockpit_interior", "cockpit_interior_simple", "targetScreen", "pilot", "joystick", "throttle" }
+                .Select(n => cockpit.Find(n) ?? throw new MissingReferenceException("cockpit_cell/" + n)).ToArray();
+            foreach (var t in moved)
                 t.position += delta;
-                b.Placed.Add(t);
-            }
+            // Everything of the interior above the windscreen frame's foot (the sill) must sit behind the frame, or the
+            // frame crosses the pilot's view of the panel: the cockpit moves aft until it does.
+            var sill = bow.bounds.min.y;
+            var reach = moved[0].GetComponentsInChildren<MeshFilter>(true).Where(f => f.sharedMesh != null)
+                .SelectMany(f => WorldVertices(f.transform, f.sharedMesh)).Where(v => v.y > sill).Max(v => v.z);
+            var aft = Mathf.Max(0f, reach - (bow.bounds.min.z - PanelBehindBow));
+            foreach (var t in moved)
+                t.position += Vector3.back * aft;
+            eye += Vector3.back * aft;
+            delta += Vector3.back * aft;
+            b.Placed.UnionWith(moved);
             var ladder = b.Find("ladder");
             ladder.position += delta;
             b.Placed.Add(ladder);
@@ -350,7 +359,7 @@ namespace Icarus.Editor
             SetList(Prop(aircraft, "exteriorRenderers"), new[] { "cockpit_cell", "avionics_tray", "radar_tray" }
                 .Select(n => (Object)b.Parts[n].GetComponent<MeshRenderer>()).Append(b.Visuals["gear_leg_N_visible"].GetComponent<MeshRenderer>()).ToArray());
             aircraft.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add($"cockpit: eye at {eye} ({EyeBelowCanopyTop} m under the canopy crown), Revoker interior, crew and ladder moved {delta}; " +
+            b.Report.Add($"cockpit: eye at {eye} ({EyeBelowCanopyTop} m under the canopy crown, {aft:F2} m aft of it to clear the windscreen frame), Revoker interior, crew and ladder moved {delta}; " +
                 $"hood opens {open:+0;-0} deg on its sill hinge ({(kept ? "export sign" : "export sign flipped")}) and ejects as its own part");
         }
     }
