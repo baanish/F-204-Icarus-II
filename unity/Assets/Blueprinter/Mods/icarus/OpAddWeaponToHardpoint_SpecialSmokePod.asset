@@ -15,4 +15,4 @@ MonoBehaviour:
   weaponJsonKey: SpecialSmokePod
   aircraft:
   - aircraftJsonKey: baanish_icarus
-    hardpointIndices: 000000000100000002000000
+    hardpointIndices: 0100000002000000

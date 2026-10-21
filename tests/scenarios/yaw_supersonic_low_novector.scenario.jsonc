@@ -1,0 +1,25 @@
+// Low-altitude supersonic yaw: the Icarus at 3,000 m (about 10,000 ft) over Ignus, heading east at 480 m/s, about
+// Mach 1.46, held level at full afterburner for 40 s at 20 Hz so the yaw rate and sideslip trace show any directional
+// oscillation. Yaw vectoring set to 0 through the live tuning knob, to compare with yaw_supersonic_low.
+// Measured only. From the repo root: no-agentic run tests/scenarios/yaw_supersonic_low_novector.scenario.jsonc
+{
+  "mission": "icarus_ignus_3km_fast.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 2500 } ] },
+      "label": "the Icarus airborne at 3 km" },
+    { "config": { "guid": "baanish.icarus", "section": "Tuning.Vectoring", "key": "YawDegrees", "value": "0" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "path": "own.alive", "eq": true }, "for": 40, "label": "40 s level at full afterburner" },
+    { "record": { "path": "own.mach" }, "label": "Mach at the end" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at the end, m/s" },
+  ],
+}

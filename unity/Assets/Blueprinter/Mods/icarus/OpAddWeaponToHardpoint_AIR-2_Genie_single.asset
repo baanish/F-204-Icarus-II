@@ -15,4 +15,4 @@ MonoBehaviour:
   weaponJsonKey: AIR-2_Genie_single
   aircraft:
   - aircraftJsonKey: baanish_icarus
-    hardpointIndices: 0100000002000000
+    hardpointIndices: 01000000

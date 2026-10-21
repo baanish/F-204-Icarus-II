@@ -14,9 +14,21 @@ namespace Icarus.Editor
         // The hardpoint set order is an API: loadouts, exclusions and Blueprinter registrations address sets by position.
         private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Outer Wing", "Conformal" };
 
-        // The stock mounts each set offers, taken from the Revoker's own sets (R5): its wingtip rails for the wingtips, its
-        // wing pylons for both underwing stations, and its wingtip rails' missiles for the semi-recessed conformal stations.
-        // Every station carries one store, so the Revoker's double and triple racks are left out (a rocket pod is one store).
+        // What each set carries, one store per station, trimmed to a Starfighter's kind of load: the wingtip rails take
+        // only the MMR-S3 and IRM-S2; the outer pylons small stores; the inner pylons the heavier missiles, the 500 kg and
+        // cluster bombs and the Genie; the semi-recessed conformal stations air-to-air missiles. No Tusko-B, GBM-500LR or
+        // GPO-2P Auger, and none of the Revoker's double or triple racks (a rocket pod is one store).
+        private static readonly string[][] StationKeys =
+        {
+            new[] { "AAM1_single", "AAM3_single" },
+            new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM4_single", "ARM1_single", "ARM2_single", "AGM_heavy_single",
+                    "AShM2_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "Rocket2_4Pod", "SpecialSmokePod", "SpecialFlarePod" },
+            new[] { "AAM1_single", "AAM3_single", "AAM2_single", "ARM2_single", "Rocket2_4Pod", "SpecialSmokePod", "SpecialFlarePod" },
+            new[] { "AAM1_single", "AAM3_single", "AAM2_single" },
+        };
+        // Blueprinter's stand-ins for stock mounts the Revoker doesn't carry (the IRM-S2).
+        private const string MountPlaceholders = "Assets/Blueprinter/_donotship/MonoBehaviour/";
+
         private sealed class Stations
         {
             public readonly List<Object>[] Options = new List<Object>[4];
@@ -27,40 +39,29 @@ namespace Icarus.Editor
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
             ("Interceptor", new[] { "AAM1_single", "AAM4_single", "AAM2_single", "AAM2_single" }),
-            ("Air Superiority", new[] { "AAM1_single", "AAM2_single", "AAM1_single", "AAM2_single" }),
-            ("Strike", new[] { "AAM1_single", "bomb_500_single", "AGM_heavy_single", "AAM2_single" }),
-            ("SEAD", new[] { "AAM1_single", "ARM1_single", "ARM2_single", "AAM2_single" }),
+            ("Air Superiority", new[] { "AAM3_single", "AAM2_single", "AAM1_single", "AAM1_single" }),
+            ("Strike", new[] { "AAM3_single", "bomb_500_single", "Rocket2_4Pod", "AAM1_single" }),
+            ("SEAD", new[] { "AAM3_single", "ARM1_single", "ARM2_single", "AAM1_single" }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
-
-        private static bool SingleStore(Object mount) => !System.Text.RegularExpressions.Regex.IsMatch(KeyOf(mount), @"_(double|triple)$|x\d+$");
 
         private static Stations ReadDonorStations(GameObject donor)
         {
             var manager = donor.transform.Find("fuselage/cockpit").GetComponent(GameType("WeaponManager"));
             var sets = Prop(new SerializedObject(manager), "hardpointSets");
-            List<Object> OptionsOf(string setName)
-            {
-                for (var i = 0; i < sets.arraySize; i++)
-                {
-                    var set = sets.GetArrayElementAtIndex(i);
-                    if (set.FindPropertyRelative("name").stringValue == setName)
-                        return GetList(set.FindPropertyRelative("weaponOptions")).Where(o => o != null).ToList();
-                }
-                throw new InvalidDataException("The Revoker has no hardpoint set " + setName);
-            }
             var stations = new Stations();
-            var tips = OptionsOf("Wingtip Pylons").Where(SingleStore).ToList();
-            var pylons = OptionsOf("Wing Pylons").Where(SingleStore).ToList();
-            stations.Options[0] = tips;
-            stations.Options[1] = pylons;
-            stations.Options[2] = pylons;
-            stations.Options[3] = tips.Where(m => KeyOf(m).StartsWith("AAM", StringComparison.Ordinal)).ToList();
-            foreach (var mount in tips.Concat(pylons))
-                stations.ByKey[KeyOf(mount)] = mount;
+            for (var i = 0; i < sets.arraySize; i++)
+                foreach (var mount in GetList(sets.GetArrayElementAtIndex(i).FindPropertyRelative("weaponOptions")).Where(o => o != null))
+                    stations.ByKey[KeyOf(mount)] = mount;
+            Object Mount(string key) => stations.ByKey.TryGetValue(key, out var mount) ? mount
+                : stations.ByKey[key] = AssetDatabase.LoadAssetAtPath<Object>(MountPlaceholders + key + "_PLACEHOLDER.asset")
+                    ?? throw new InvalidDataException($"no stock mount {key}: not on the Revoker and no {MountPlaceholders}{key}_PLACEHOLDER.asset");
             for (var i = 0; i < SetNames.Length; i++)
+            {
+                stations.Options[i] = StationKeys[i].Select(Mount).ToList();
                 Debug.Log($"[Icarus] stage: set {i} {SetNames[i]} offers {string.Join(", ", stations.Options[i].Select(KeyOf))}");
+            }
             return stations;
         }
 

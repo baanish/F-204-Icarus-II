@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c39d0b3dbc2446349568e124e8619bff, type: 3}
-  m_Name: OpAddWeaponToHardpoint_bomb_500_glide_single
+  m_Name: OpAddWeaponToHardpoint_AAM3_single
   m_EditorClassIdentifier: 
-  weaponJsonKey: bomb_500_glide_single
+  weaponJsonKey: AAM3_single
   aircraft:
   - aircraftJsonKey: baanish_icarus
-    hardpointIndices: 0100000002000000
+    hardpointIndices: 00000000010000000200000003000000
