@@ -735,7 +735,7 @@ class Face:
         for x, y in spots[:fasteners]:
             g.put(kit.fastener(), self.at(x, y, -d), group)
         if title:
-            lab = kit.atlas.label(title, cap_mm=4.0)
+            lab = kit.atlas.label(title, cap_mm=3.5)
             g.put(kit.placard(lab), self.at((x0 + x1) / 2, y1 - 0.0035 - lab.h_m / 2, -d), group)
         return lambda x, y, lift=0.0: self.at(x, y, -d + lift)
 
@@ -1118,7 +1118,7 @@ def tub(g, uv, kit, atlas, space):
         s, z = 3.36, 0.315
         text, ink, paper = (("F-204 ICARUS II\nSERIAL 0001  BLOCK 2\nOXY / FUEL / HYD: SEE T.O. 1F-204-1", "ink", "plate")
                             if side > 0 else ("WARNING\nEJECTION SEAT\nKEEP CLEAR OF HANDLES", "ink_dark", "hatch_light"))
-        lab = atlas.label(text, ink=ink, paper=paper, cap_mm=4.0, box=True)
+        lab = atlas.label(text, ink=ink, paper=paper, cap_mm=3.2, box=True)
         g.put(kit.placard(lab, lift=0.0015), frame(P(s, side * (space.wall_x(s, z) - 0.001), z), Z, Vector((-side, 0.0, 0.0))),
               "tub")
     # the floor in tread cells, the footwell wall, kick panels
@@ -1168,10 +1168,10 @@ def breakers(g, uv, kit, atlas, space, side):
                      along=Y, caps="structure"), None, "tub")
     for r, title in enumerate(("PRI", "SEC", "ARM")):
         z = z1 - 0.030 - 0.048 * r
-        for i in range(4):
-            s = s0 + 0.060 + 0.080 * i
+        for i in range(3):
+            s = s0 + 0.080 + 0.100 * i
             g.put(kit.breaker(), frame(at(s, z, 0.004), Z, inward), "tub")
-        g.put(kit.placard(atlas.label(title, cap_mm=4.0)), frame(at(s0 + 0.014, z, 0.004), Z, inward), "tub")
+        g.put(kit.placard(atlas.label(title, cap_mm=3.5)), frame(at(s0 + 0.014, z, 0.004), Z, inward), "tub")
 
 
 def pedals(g, uv, kit):
@@ -1870,7 +1870,11 @@ def check(icarus):
     pos, tris, _, _, _ = mesh_arrays(O[INTERIOR])
     ahead = [Vector(p) for p in pos if LAYOUT["coaming"][0] + 0.02 < p[1] + bi.S0 < EYE[0] - 0.4
              and (p[1] + bi.S0 > LAYOUT["coaming"][1] or abs(p[0]) < 0.25)]
-    high = [v for v in ahead if v.z > over_nose_z(v.y + bi.S0) - LAYOUT["over_nose_margin"] + 0.0005]
+    import cockpit_front as front
+
+    def limit(s):  # ahead of the hood the windscreen's foot bounds the view over the nose (cockpit_front.shroud)
+        return front.windscreen_deck_z(s) if s <= LAYOUT["coaming"][1] else over_nose_z(s) - LAYOUT["over_nose_margin"]
+    high = [v for v in ahead if v.z > limit(v.y + bi.S0) + 0.0005]
     if high:
         v = max(high, key=lambda v: v.z - over_nose_z(v.y + bi.S0))
         problems.append("the front office stands above the over-nose line at s %.3f x %.3f z %.3f" % sxz(v))

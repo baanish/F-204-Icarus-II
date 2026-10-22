@@ -920,7 +920,8 @@ MonoBehaviour:
       m_EditorAssetChanged: 0
   StatusDisplay: {fileID: 6924495073706621936, guid: 8ede1fec56a24134d889d46b0c7476d2,
     type: 3}
-  HUDExtras: {fileID: 1709254077376921, guid: 05a9924a9a348c24c9a319f97f56e2e5, type: 3}
+  HUDExtras: {fileID: 1103936501734876095, guid: c1692063c85d6ab4dae549122c43f019,
+    type: 3}
   takeoffMusic: {fileID: 0}
   AoAEffects:
     AudioClip: {fileID: 8300000, guid: 538a618131d43e94d80579ec26f888da, type: 3}

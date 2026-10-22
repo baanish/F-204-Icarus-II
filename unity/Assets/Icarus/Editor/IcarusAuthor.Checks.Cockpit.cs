@@ -51,7 +51,11 @@ namespace Icarus.Editor
                 }
             }
             var so = new SerializedObject(parameters);
-            if (Prop(so, "HUDExtras").objectReferenceValue != Load<GameObject>(DonorHudExtras)) p.Add("HUDExtras isn't the afterburner-and-airbrake HUD");
+            var hud = (GameObject)Prop(so, "HUDExtras").objectReferenceValue;
+            var speedGauge = hud == null ? null : hud.GetComponentsInChildren(GameType("SpeedGauge"), true).SingleOrDefault();
+            if (hud == null || AssetDatabase.GetAssetPath(hud) != HudExtrasPath || speedGauge == null
+                || Prop(new SerializedObject(speedGauge), "overspeedThreshold").floatValue != OverspeedThreshold)
+                p.Add($"HUDExtras isn't the Icarus's copy of the afterburner-and-airbrake HUD with overspeed at {OverspeedThreshold} m/s");
             var display = (GameObject)Prop(so, "StatusDisplay").objectReferenceValue;
             var images = display == null ? new string[0] : Enumerable.Range(0, Prop(new SerializedObject(display.GetComponent(GameType("StatusDisplay"))), "statusDisplays").arraySize)
                 .Select(i => ((Component)Prop(new SerializedObject(display.GetComponent(GameType("StatusDisplay"))), "statusDisplays").GetArrayElementAtIndex(i).FindPropertyRelative("partImage").objectReferenceValue).gameObject.name).ToArray();
@@ -67,7 +71,7 @@ namespace Icarus.Editor
                 foreach (var camera in cameras)
                     minimum = Mathf.Min(minimum, Vector3.Distance(camera.position, r.bounds.ClosestPoint(camera.position)));
             if (minimum < CameraClearance - 0.01f) p.Add($"a target camera is {minimum:F2} m from the airframe, under {CameraClearance}");
-            return $"aircraft links set, no Revoker interior mesh, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts covering all {partNames.Length}, target cameras {minimum:F2} m clear";
+            return $"aircraft links set, no Revoker interior mesh, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake and overspeed at {OverspeedThreshold} m/s, {images.Length} diagram images on unique parts covering all {partNames.Length}, target cameras {minimum:F2} m clear";
         }
 
         private static string CheckEscape(Build b, List<string> p)

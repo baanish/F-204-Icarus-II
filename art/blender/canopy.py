@@ -286,14 +286,19 @@ def inner_pane(name, outer, mat):
 
 
 def unroll_uvs(obj):
-    """UVs in metres: u along the station, v round the section from the crown, for the glass shaders' grime and
-    cracks."""
+    """UVs inside the clear window of the stock canopy texture both glass materials sample (fighter1_canopy_int_b,
+    the Revoker hood's outline, clear inside and an opaque tan border outside, set to repeat): u round the section
+    with the crown at 0.5, v along the length from 0.30 (the outline's narrow nose lies below) to 0.95. UVs run past
+    0..1 sampled the border, which showed through the glass as a tan Y from the cockpit."""
     me = obj.data
     layer = me.uv_layers.new(name="UVMap")
+    s0, s1 = PROFILE[0][0], PROFILE[-1][0]
     for loop in me.loops:
         co = me.vertices[loop.vertex_index].co
         s = co.y + bi.S0
-        layer.data[loop.index].uv = (s - PROFILE[0][0], 0.4 * math.atan2(co.x, co.z - centre_z(s)))
+        psi = math.atan2(co.x, co.z - centre_z(s))
+        layer.data[loop.index].uv = (0.5 + 0.4 * max(-1.0, min(1.0, psi / (math.pi / 2))),
+                                     0.30 + 0.65 * min(max((s - s0) / (s1 - s0), 0.0), 1.0))
 
 
 def cut_edge(fuselage, solid):

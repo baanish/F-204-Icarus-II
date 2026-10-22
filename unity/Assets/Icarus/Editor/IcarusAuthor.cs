@@ -64,7 +64,8 @@ namespace Icarus.Editor
             var stations = ReadDonorStations(donor);
             var liveries = AuthorLiveries((Texture2D)skin.GetTexture("_Livery"));
             var statusDisplay = AuthorStatusDisplay();
-            var parameters = AuthorParameters(stations, liveries, statusDisplay);
+            var hudExtras = AuthorHudExtras();
+            var parameters = AuthorParameters(stations, liveries, statusDisplay, hudExtras);
             var definition = AuthorDefinition(parameters);
             var prefab = AuthorPrefab(blockout, meshes, definition, parameters);
             Set(definition, "unitPrefab", prefab);

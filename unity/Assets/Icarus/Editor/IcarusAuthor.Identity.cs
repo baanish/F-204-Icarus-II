@@ -151,7 +151,7 @@ namespace Icarus.Editor
         private const float ApproachAtLowFuel = 75f;
         private static float LandingSpeedField => ApproachAtLowFuel * Mathf.Sqrt(MaxWeight / LowFuelLandingMass);
 
-        private static Object AuthorParameters(Stations stations, List<LiveryEntry> liveries, GameObject statusDisplay)
+        private static Object AuthorParameters(Stations stations, List<LiveryEntry> liveries, GameObject statusDisplay, GameObject hudExtras)
         {
             var parameters = Object.Instantiate(Load<Object>(DonorParameters));
             parameters.name = Path.GetFileNameWithoutExtension(ParametersPath);
@@ -198,8 +198,8 @@ namespace Icarus.Editor
                 reference.FindPropertyRelative("m_SubObjectName").stringValue = string.Empty;
             }
             Prop(so, "StatusDisplay").objectReferenceValue = statusDisplay;
-            // The Revoker's HUD extras flag an afterburner and an airbrake, both of which the Icarus has.
-            Prop(so, "HUDExtras").objectReferenceValue = Load<GameObject>(DonorHudExtras);
+            // The Icarus's copy of the Revoker's HUD extras (IcarusAuthor.Hud.cs): its overspeed warning at the Icarus's speeds.
+            Prop(so, "HUDExtras").objectReferenceValue = hudExtras;
 
             // First-cut AI numbers (R4/R7): an interceptor that bleeds energy in turns and lands fast.
             Num(so, "aircraftGLimit", 7.33f); // the F-104's limit

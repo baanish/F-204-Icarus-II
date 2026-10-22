@@ -68,13 +68,13 @@ KINDS = {
     "panel": ("panel", 1330, 6.0, 1.2, 1.6),
     "plate": ("plate", 1330, 6.0, 1.0, 1.4),
     "cheek": ("hood", 1000, 5.0, 1.5, 2.0),
-    "rim": ("hood", 420, 3.5, 2.5, 2.5),
+    "rim": ("hood", 400, 3.5, 2.5, 2.5),
     "hood": ("hood", 380, 3.5, 2.5, 2.5),
     "deck": ("hood", 300, 2.4, 2.5, 2.5),
-    "console": ("console", 440, 2.2, 2.0, 2.0),
+    "console": ("console", 420, 2.2, 2.0, 2.0),
     "sill": ("frame", 420, 2.2, 2.0, 2.5),
     "tub": ("tub", 300, 2.8, 2.5, 2.5),
-    "floor": ("floor", 310, 4.5, 2.5, 3.0),
+    "floor": ("floor", 300, 4.5, 2.5, 3.0),
     "back": ("tub", 220, 2.8, 2.5, 2.5),  # behind the seat, seen from the eye only past the headbox
     "frame": ("frame", 340, 3.5, 2.0, 2.5),
     "structure": ("structure", 400, 3.5, 1.5, 2.0),
@@ -95,7 +95,7 @@ TILES = {  # name -> (w, h) px
 }
 # Full-width strips along the bottom, top to bottom: name -> (height px, px per metre along U and V).
 STRIP_ROWS = (
-    ("structure", 48, 360), ("bezel", 24, 1500), ("knurl", 12, 1500), ("knob_lo", 12, 1500), ("guard", 10, 1500),
+    ("structure", 40, 360), ("bezel", 20, 1500), ("knurl", 12, 1500), ("knob_lo", 12, 1500), ("guard", 10, 1500),
     ("guard_lo", 10, 1500), ("metal", 10, 1500), ("metal_lo", 10, 1500), ("keyside", 8, 1500), ("key_lo", 8, 1500),
     ("recess", 8, 1500), ("bezel_dark", 8, 1500),
 )
@@ -587,11 +587,17 @@ class Atlas:
     def pack(self):
         """Lay out every chart, label and tile above the strips: the panel-density charts first, the rest round them."""
         self.charts = [c for c in self.charts if c.lo[0] < math.inf]  # asked for, never drawn on
-        order = lambda items: sorted(items, key=lambda c: (-c.size()[1], -c.size()[0], c.name))  # tallest first
         panel = [c for c in self.charts if c.d >= PANEL_DENSITY]
         rest = [c for c in self.charts if c.d < PANEL_DENSITY] + list(self.labels.values()) + list(self.tiles.values())
-        left, sky = skyline_pack(order(panel), 0, W, STRIP_TOP)
-        left, _ = skyline_pack(left + order(rest), 0, W, STRIP_TOP, sky)
+        # a skyline packer is order-sensitive: try the usual orders in turn, the first that fits wins
+        for key in (lambda c: (-c.size()[1], -c.size()[0], c.name), lambda c: (-c.size()[0] * c.size()[1], c.name),
+                    lambda c: (-c.size()[0], -c.size()[1], c.name), lambda c: (-max(c.size()), c.name)):
+            for c in panel + rest:
+                c.at = None
+            left, sky = skyline_pack(sorted(panel, key=key), 0, W, STRIP_TOP)
+            left, _ = skyline_pack(left + sorted(rest, key=key), 0, W, STRIP_TOP, sky)
+            if not left:
+                break
         self.panel_rects = [(c.at[0], c.at[1]) + c.size() for c in panel if c.at]
         if left:
             for c in sorted(self.charts, key=lambda c: -c.size()[0] * c.size()[1]):

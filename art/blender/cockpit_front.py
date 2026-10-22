@@ -34,13 +34,14 @@ FACE_N = Vector((0.0, math.cos(TILT), math.sin(TILT)))
 FACE_UP = Vector((0.0, -math.sin(TILT), math.cos(TILT)))
 FRONT = {
     # the main displays' glass top edge: the hood's rim clears the sight line to it by 25 mm
-    "glass_top": (3.5846, 0.585),
+    "glass_top": (3.5846, 0.596),
     "half_width": 0.300,  # the display face, between the cheeks
     "stem_half_width": 0.130,
     "face_bottom_z": 0.385,  # the display face's bottom edge; the stem runs on down
     "stem_bottom_z": 0.245,  # clear of the stock seat's front edge (s 3.75)
-    "bezel": {"side": 0.024, "top": 0.022, "bottom": 0.026, "column": 0.020, "height": 0.006, "step": 0.0025},
-    "rim": {"depth": 0.078, "behind": 0.05, "thickness": 0.035, "radius": 0.011, "corner": 0.045, "seg": 6},
+    # the top frame narrow: it stands under the rim, which hides most of it from the eye
+    "bezel": {"side": 0.024, "top": 0.012, "bottom": 0.026, "column": 0.020, "height": 0.006, "step": 0.0025},
+    "rim": {"depth": 0.074, "behind": 0.05, "thickness": 0.026, "radius": 0.010, "corner": 0.045, "seg": 6},
     "margin": 0.005,  # under the over-nose line
     "wing": {"yaw": 18.0, "tilt": 20.0, "z": (0.200, 0.375), "recess": 0.045},
     "pedestal": {"s0": 3.58, "half_width": 0.105},
@@ -394,7 +395,7 @@ WINGS = {
           ("lamp_red", -0.020, -0.030, "TRANS"), ("gear", 0.018, 0.000, None)]),
         ("FLAPS", 0.002, -0.086, 0.084, -0.002, 4,
          [("toggle3", -0.010, -0.004, "UP\nTO\nLDG"), ("lamp_green", 0.024, 0.010, "FLAP")]),
-        ("HOOK", -0.084, -0.086, -0.006, -0.026, 4, [("toggle", -0.010, -0.004, "HOOK"), ("knob", 0.020, -0.004, "TRIM")])],
+        ("HOOK", -0.084, -0.086, -0.006, -0.026, 4, [("toggle", 0.0, -0.004, "HOOK")])],
     -1: [("SYS STATUS", -0.078, -0.030, 0.044, 0.088, 4, [("display", -0.002, -0.003, "D")]),
          ("CAUTION", 0.047, -0.030, 0.088, 0.088, 4, [("caution", 0.0, -0.004, None)]),
          ("FUEL", -0.084, -0.090, 0.000, -0.035, 4, [("dial", -0.014, -0.001, "dial_fuel"), ("key", 0.026, 0.010, "FWD"),
@@ -539,6 +540,43 @@ def pedestal(g, kit, atlas, uv):
     return face
 
 
+# --- the side panels ---
+
+SIDE_PANELS = {
+    # (title, controls): a control is (kind, x, y, legend), x outboard from the panel's centre line, y up its slope
+    1: ("BRAKES", [("button", 0.0, 0.118, "ANTI\nSKID"), ("button", -0.012, 0.072, "NWS"), ("button", 0.016, 0.072, "PARK")]),
+    -1: ("ECS", [("knob", 0.0, 0.118, "TEMP"), ("button", -0.012, 0.066, "DEFOG"), ("button", 0.016, 0.066, "RAM")]),
+}
+SIDE_PANEL = {"low": (3.775, 0.322), "high": (3.680, 0.470), "inner": 0.339}
+
+
+def side_panels(g, kit, atlas, uv, space):
+    """Outboard of each cheek, the console kicks up toward the panel: a sloped face from the console's front edge up
+    to the cheek's height, between the cheek and the wall, facing the eye, with its own plate. It closes the bare
+    wall the eye saw there."""
+    (s0, z0), (s1, z1) = SIDE_PANEL["low"], SIDE_PANEL["high"]
+    up = (P(s1, 0.0, z1) - P(s0, 0.0, z0)).normalized()
+    normal = Vector((0.0, -up.z, up.y)) if up.z > 0 else Vector((0.0, up.z, -up.y))
+    if normal.y < 0:
+        normal = -normal
+    length = (P(s1, 0.0, z1) - P(s0, 0.0, z0)).length
+    faces = []
+    for side in (1, -1):
+        x_in = SIDE_PANEL["inner"]
+        x_out = min(space.wall_x(s, z) for s, z in ((s0, z0), (s1, z1), ((s0 + s1) / 2, (z0 + z1) / 2))) - 0.004
+        xc = (x_in + x_out) / 2
+        m = frame(P(s0, side * xc, z0), up, normal)
+        hw = (x_out - x_in) / 2
+        face = Face("side%d" % side, m, rect(-hw, 0.0, hw, length), atlas.chart("console", "side_panel%d" % side))
+        title, controls = SIDE_PANELS[side]
+        top = face.pocket(g, kit, uv, -hw + 0.006, 0.040, hw - 0.006, length - 0.006, title, 4, "front")
+        for kind, x, y, legend in controls:
+            control(g, kit, atlas, top, kind, -side * x, y, legend)
+        face.close(g)
+        faces.append(face)
+    return faces
+
+
 # --- the hood and the coaming ---------------------------------------------------------------------------------------
 
 def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
@@ -560,6 +598,9 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     for s in rows_s:
         z0 = deck(s)
         if s <= 3.0:
+            # ahead of the hood the deck rises to just under the windscreen's foot: a sight line that low meets the
+            # skin anyway, so the deck hides no more of the view over the nose, and no well opens under the glass
+            z0 = max(z0, foot[s] - WINDSCREEN_DECK)
             side = [(space.skin_x(s, z, inset), z) for z in bi.spaced(foot[s], z0, 4)]
         else:
             # under the hood: the skirt at the cheeks' outer face
@@ -589,6 +630,15 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     wall = resample_line(arc, n)
     chart = atlas.chart("deck", "coaming_wall") if not proxy else "structure"
     g.put(ck.grid_sheet(uv, [first, wall], chart), None, group)
+
+
+WINDSCREEN_DECK = 0.004  # the coaming deck's top under the windscreen's foot line (PROFILE bottom less 10 mm)
+
+
+def windscreen_deck_z(s):
+    """The coaming deck's top ahead of the hood: under the windscreen's foot, or the over-nose line where higher."""
+    foot = bi.resample(canopy.PROFILE, [s])[0][3] - 0.010
+    return max(over_nose_z(s) - FRONT["margin"], foot - WINDSCREEN_DECK)
 
 
 def resample_line(points, n):
@@ -675,6 +725,7 @@ def build(g, kit, atlas, uv, space):
     d_screen, faces = wings(g, kit, atlas, uv)
     closures(g, uv)
     ped = pedestal(g, kit, atlas, uv)
+    faces += side_panels(g, kit, atlas, uv, space)
     shroud(g, atlas, uv, space, y_top)
     lenses = lamp_housings(g, kit, atlas, uv, y_top)
     screens = screens + c_screen + d_screen
