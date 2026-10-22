@@ -24,31 +24,31 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _AO:
-        m_Texture: {fileID: 2800000, guid: c47926a7210559d41853797652de25c1, type: 3}
+        m_Texture: {fileID: 2800000, guid: a68cac5eda9eb8e468a182dab6d76c83, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Basecolor:
-        m_Texture: {fileID: 2800000, guid: f28a1981e57b9084aa62dc0875f2e462, type: 3}
+        m_Texture: {fileID: 2800000, guid: a25a77bea4b65a648820cc0844fcce74, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BasecolorDmg:
-        m_Texture: {fileID: 2800000, guid: e20c800e37e7adc40b486e965593c257, type: 3}
+        m_Texture: {fileID: 2800000, guid: f7bb0b2a95cde18419af0123384b56c5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Livery:
-        m_Texture: {fileID: 2800000, guid: f28a1981e57b9084aa62dc0875f2e462, type: 3}
+        m_Texture: {fileID: 2800000, guid: a25a77bea4b65a648820cc0844fcce74, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Metallic:
-        m_Texture: {fileID: 2800000, guid: d678805b420ee894ba3e6b5330333542, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5bb3779a5de5e264e8c8c10f4ef7022b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Normal:
-        m_Texture: {fileID: 2800000, guid: f37c966fca61bb44d8d13ca25df454cc, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6ebb60897d543b84b918251f77044ce2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalDmg:
-        m_Texture: {fileID: 2800000, guid: 308dd1716cb87c34f872e525f01a728e, type: 3}
+        m_Texture: {fileID: 2800000, guid: e6eb5aaf02ae80e4c945521c2fd1eb55, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:

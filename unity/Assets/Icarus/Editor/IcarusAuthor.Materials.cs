@@ -10,8 +10,7 @@ namespace Icarus.Editor
     public static partial class IcarusAuthor
     {
         // The generator's material slots (art/blender/materials.py), remapped by name on import. Icarus_Body is the skin,
-        // the only slot that takes a livery; the internals keep their flat review colours so a part torn away reads as
-        // tank, engine or structure.
+        // the only slot that takes a livery; the internals keep their stock trim materials.
         private const string SkinSlot = "Icarus_Body";
         private const string GlassSlot = "Icarus_Glass";
         private const string LodSlot = "LOD";
@@ -38,24 +37,17 @@ namespace Icarus.Editor
             "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats", "LOD", "light_red_off", "light_green_off",
             "slimelight_on",
         };
-        // The blockout finish (sRGB): bare steel, the generator's Icarus_Body, fully metallic at smoothness 0.68 (the metal
-        // map holds metallic in R and smoothness in A).
-        private static readonly Color32 GrayboxPaint = new Color32(196, 198, 201, 255);
-        private static readonly Color32 SteelMetal = new Color32(255, 0, 0, 173);
-
-        // The skin on the stock AircraftSkin shader with flat maps the mod owns, since the Revoker's maps follow its own UVs.
         private static Material AuthorSkin()
         {
-            var flatNormal = new Color32(128, 128, 255, 255);
-            var albedo = AuthorFlatTexture(LiveryFolder + "/icarus_graybox.png", GrayboxPaint, true, false);
+            var albedo = ImportSkinTexture("Icarus_livery_1.png", true, false, TextureImporterFormat.DXT1);
             var skin = new Material(Load<Shader>(Stock + "Shader/Shader Graphs_AircraftSkin_PLACEHOLDER.shader")) { name = "Icarus_skin" };
             skin.SetTexture("_Basecolor", albedo);
             skin.SetTexture("_Livery", albedo);
-            skin.SetTexture("_Metallic", AuthorFlatTexture(SkinFolder + "/icarus_graybox_m.png", SteelMetal, true, false));
-            skin.SetTexture("_Normal", AuthorFlatTexture(SkinFolder + "/icarus_graybox_n.png", flatNormal, false, true));
-            skin.SetTexture("_AO", AuthorFlatTexture(SkinFolder + "/icarus_graybox_ao.png", new Color32(255, 255, 255, 255), false, false));
-            skin.SetTexture("_BasecolorDmg", AuthorFlatTexture(SkinFolder + "/icarus_graybox_dmg_b.png", new Color32(210, 208, 208, 165), true, false));
-            skin.SetTexture("_NormalDmg", AuthorFlatTexture(SkinFolder + "/icarus_graybox_dmg_n.png", flatNormal, false, true));
+            skin.SetTexture("_Metallic", ImportSkinTexture("Icarus_skin_m.png", false, false, TextureImporterFormat.DXT5));
+            skin.SetTexture("_Normal", ImportSkinTexture("Icarus_skin_n.png", false, true, TextureImporterFormat.DXT5));
+            skin.SetTexture("_AO", ImportSkinTexture("Icarus_skin_ao.png", false, false, TextureImporterFormat.DXT1));
+            skin.SetTexture("_BasecolorDmg", ImportSkinTexture("Icarus_skin_dmg_b.png", true, false, TextureImporterFormat.DXT5));
+            skin.SetTexture("_NormalDmg", ImportSkinTexture("Icarus_skin_dmg_n.png", false, true, TextureImporterFormat.DXT5));
             skin.SetFloat("_HitPoints", 100f);
             skin.SetFloat("_Glossiness", 0f);
             return SaveAsset(skin, SkinPath);
@@ -96,27 +88,45 @@ namespace Icarus.Editor
             return SaveAsset(m, SkinFolder + "/" + name + ".mat");
         }
 
-        // A flat 64² texture the mod owns, imported with the colour space and type the stock skin maps use.
-        private static Texture2D AuthorFlatTexture(string path, Color32 colour, bool sRgb, bool normalMap)
+        private static Texture2D ImportSkinTexture(string name, bool sRgb, bool normalMap, TextureImporterFormat format)
         {
-            var texture = new Texture2D(64, 64, TextureFormat.RGBA32, false);
-            texture.SetPixels32(Enumerable.Repeat(colour, 64 * 64).ToArray());
-            var png = texture.EncodeToPNG();
-            Object.DestroyImmediate(texture);
-            if (!File.Exists(path) || !File.ReadAllBytes(path).SequenceEqual(png))
+            var source = Path.Combine(ExportFolder, "textures", name);
+            var gate = (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(RepoRoot, "art/textures/gate.json")));
+            var hashes = (Dictionary<string, object>)gate["outputs"];
+            var bytes = File.ReadAllBytes(source);
+            if (!hashes.TryGetValue(name, out var expected) || Sha256(bytes) != (string)expected)
+                throw new InvalidDataException("skin texture differs from gate.json: " + name);
+            var path = (name.StartsWith("Icarus_livery_") ? LiveryFolder : SkinFolder) + "/" + name;
+            if (!File.Exists(path) || Sha256(File.ReadAllBytes(path)) != (string)expected)
             {
-                File.WriteAllBytes(path, png);
+                File.WriteAllBytes(path, bytes);
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
             }
+            if (Sha256(File.ReadAllBytes(path)) != (string)expected)
+                throw new InvalidDataException("skin texture copy SHA mismatch: " + name);
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
-            var type = normalMap ? TextureImporterType.NormalMap : TextureImporterType.Default;
-            if (importer.textureType != type || importer.sRGBTexture != sRgb)
-            {
-                importer.textureType = type;
-                importer.sRGBTexture = sRgb;
-                importer.SaveAndReimport();
-            }
-            return Load<Texture2D>(path);
+            importer.textureType = normalMap ? TextureImporterType.NormalMap : TextureImporterType.Default;
+            importer.sRGBTexture = sRgb;
+            importer.maxTextureSize = 2048;
+            importer.mipmapEnabled = true;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.alphaSource = format == TextureImporterFormat.DXT1 ? TextureImporterAlphaSource.None : TextureImporterAlphaSource.FromInput;
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            // The default platform takes only Automatic; the explicit DXT format goes on the Standalone override.
+            var platform = importer.GetDefaultPlatformTextureSettings();
+            platform.maxTextureSize = 2048;
+            platform.format = TextureImporterFormat.Automatic;
+            importer.SetPlatformTextureSettings(platform);
+            var standalone = importer.GetPlatformTextureSettings("Standalone");
+            standalone.overridden = true;
+            standalone.maxTextureSize = 2048;
+            standalone.format = format;
+            importer.SetPlatformTextureSettings(standalone);
+            importer.SaveAndReimport();
+            var texture = Load<Texture2D>(path);
+            if (texture.width != 2048 || texture.height != 2048)
+                throw new InvalidDataException("skin texture must be 2048 square: " + name);
+            return texture;
         }
 
         private sealed class LiveryEntry
@@ -125,30 +135,36 @@ namespace Icarus.Editor
             public Object Faction, Data;
         }
 
-        // The Icarus flies for Primeva (PALA) only. The livery's texture is the blockout grey on the skin's own UVs, which
-        // UnitPart.SetLivery sets as _Livery; LiveryData.Colors[0] is the paint the HUD and mounts read.
         private static List<LiveryEntry> AuthorLiveries(Texture2D skinLivery)
         {
-            AssetDatabase.DeleteAsset(LiveryFolder + "/icarus_pala_blockout.asset"); // the grey blockout livery it replaced
-            var data = ScriptableObject.CreateInstance(GameType("LiveryData"));
-            data.name = "icarus_pala_steel";
-            var so = new SerializedObject(data);
-            Prop(so, "Texture").objectReferenceValue = skinLivery;
-            Prop(so, "Glossiness").floatValue = 0f;
-            var colors = Prop(so, "Colors");
-            colors.arraySize = 1;
-            colors.GetArrayElementAtIndex(0).FindPropertyRelative("Color").colorValue = GrayboxPaint;
-            colors.GetArrayElementAtIndex(0).FindPropertyRelative("Count").intValue = 1;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            return new List<LiveryEntry>
+            var result = new List<LiveryEntry>();
+            foreach (var old in new[] { "icarus_pala_blockout", "icarus_pala_steel" })
+                AssetDatabase.DeleteAsset(LiveryFolder + "/" + old + ".asset");
+            var files = Directory.GetFiles(Path.Combine(RepoRoot, "art/textures/liveries"), "*.json").OrderBy(f => f).ToArray();
+            if (files.Length != 4) throw new InvalidDataException("expected four PALA livery specifications");
+            foreach (var file in files)
             {
-                new LiveryEntry
+                var spec = (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(file));
+                var id = System.Convert.ToInt32(spec["id"]);
+                var data = ScriptableObject.CreateInstance(GameType("LiveryData"));
+                data.name = "icarus_pala_" + id;
+                var so = new SerializedObject(data);
+                Prop(so, "Texture").objectReferenceValue = id == 1 ? skinLivery : ImportSkinTexture("Icarus_livery_" + id + ".png", true, false, TextureImporterFormat.DXT1);
+                Prop(so, "Glossiness").floatValue = System.Convert.ToSingle(spec["glossiness"]);
+                var dominant = (List<object>)spec["dominant"];
+                var colors = Prop(so, "Colors");
+                colors.arraySize = 1;
+                colors.GetArrayElementAtIndex(0).FindPropertyRelative("Color").colorValue = new Color32(System.Convert.ToByte(dominant[0]), System.Convert.ToByte(dominant[1]), System.Convert.ToByte(dominant[2]), 255);
+                colors.GetArrayElementAtIndex(0).FindPropertyRelative("Count").intValue = 1;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                result.Add(new LiveryEntry
                 {
-                    Name = "PALA Bare Steel",
+                    Name = (string)spec["name"],
                     Faction = Load<Object>(Stock + "MonoBehaviour/Primeva_PLACEHOLDER.asset"),
                     Data = SaveAsset(data, LiveryFolder + "/" + data.name + ".asset"),
-                },
-            };
+                });
+            }
+            return result;
         }
 
         // Every renderer wearing the skin goes in its part's damageMaterial.renderers, the only renderers UnitPart.SetLivery
@@ -160,6 +176,7 @@ namespace Icarus.Editor
             foreach (var renderer in b.Root.GetComponentsInChildren<MeshRenderer>(true).Where(r => r.sharedMaterials.Contains(b.Skin)))
             {
                 var owner = renderer.GetComponentInParent(aeroType, true);
+                if (owner == null) throw new InvalidDataException("skin renderer has no part owner: " + renderer.name);
                 var so = new SerializedObject(owner);
                 var list = so.FindProperty("damageMaterial").FindPropertyRelative("renderers");
                 if (GetList(list).Contains(renderer))

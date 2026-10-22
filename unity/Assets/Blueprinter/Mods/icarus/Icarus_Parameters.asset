@@ -890,10 +890,31 @@ MonoBehaviour:
     FuelRatio: 1
   DefaultFuelLevel: 1
   liveries:
-  - name: PALA Bare Steel
+  - name: PALA Navy
     faction: {fileID: 11400000, guid: 781c80aa02e6c3c43810c5793ae051ea, type: 2}
     assetReference:
-      m_AssetGUID: 47f181e406f9338409f28a03a2c98fe9
+      m_AssetGUID: 04579d5c93b31c94c8900321846bfd97
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: PALA Black
+    faction: {fileID: 11400000, guid: 781c80aa02e6c3c43810c5793ae051ea, type: 2}
+    assetReference:
+      m_AssetGUID: 0b5f5597e860d3444a7353bf5a76ee70
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: PALA Desert
+    faction: {fileID: 11400000, guid: 781c80aa02e6c3c43810c5793ae051ea, type: 2}
+    assetReference:
+      m_AssetGUID: dafb0e2cce82eeb4c8d1e51b09c9ce0e
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: PALA Bare Metal
+    faction: {fileID: 11400000, guid: 781c80aa02e6c3c43810c5793ae051ea, type: 2}
+    assetReference:
+      m_AssetGUID: a84af4be014743c42bdebc317dd2bff9
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0

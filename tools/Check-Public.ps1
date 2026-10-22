@@ -30,6 +30,22 @@ function Read-GitPaths([string[]]$GitArgs) {
     return @($raw.Split([char]0, [StringSplitOptions]::RemoveEmptyEntries))
 }
 
+function Resolve-LfsBytes([byte[]]$Bytes, [string]$Path) {
+    # A staged LFS pointer stands for the object git lfs stored at add time; inspect that object, not the pointer.
+    $text = [Text.Encoding]::ASCII.GetString($Bytes, 0, [Math]::Min($Bytes.Length, 200))
+    if (-not $text.StartsWith('version https://git-lfs.github.com/spec/v1')) { return ,$Bytes }
+    if ($text -notmatch 'oid sha256:([0-9a-f]{64})') { throw "$Path has an unreadable LFS pointer" }
+    $oid = $Matches[1]
+    $common = [Text.Encoding]::UTF8.GetString((Read-GitBytes @('rev-parse', '--git-common-dir'))).Trim()
+    $object = Join-Path $common "lfs/objects/$($oid.Substring(0, 2))/$($oid.Substring(2, 2))/$oid"
+    if (-not (Test-Path -LiteralPath $object)) { throw "$Path has no local LFS object" }
+    $real = [IO.File]::ReadAllBytes($object)
+    if ([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($real)).ToLowerInvariant() -cne $oid) {
+        throw "$Path LFS object does not match its pointer"
+    }
+    return ,$real
+}
+
 function Read-ScanBytes([byte[]]$Bytes, [string]$Path) {
     # Compressed PNG pixels can accidentally spell paths; retain every metadata chunk.
     if ($Path -notmatch '\.png$' -or $Bytes.Length -lt 8) { return ,$Bytes }
@@ -68,16 +84,13 @@ try {
         if ($path -match '(?i)\.(dll|exe|nobp|unity3d|assets)(\.meta)?$') {
             $failures.Add("${path}: game or third-party binary")
         }
-        $bytes = Read-GitBytes @('show', ":$path")
+        $bytes = Resolve-LfsBytes (Read-GitBytes @('show', ":$path")) $path
         $text = [Text.Encoding]::Latin1.GetString((Read-ScanBytes $bytes $path))
         $views = @($path, $text, $text.Replace([string][char]0, ''))
         foreach ($rule in $rules.Keys) {
             if (@($views | Where-Object { $_ -imatch $rules[$rule] }).Count) {
                 $failures.Add("${path}: $rule")
             }
-        }
-        if ($path -match '(?i)\.(fbx|png)$' -and $text.StartsWith('version https://git-lfs.github.com/spec/v1')) {
-            $failures.Add("${path}: LFS placeholder instead of inspectable asset bytes")
         }
         if ($path -match '(?i)\.fbx$') {
             $temp = [IO.Path]::GetTempFileName()
@@ -100,7 +113,7 @@ try {
                 $failures.Add("${path}: missing or extra staged export")
                 continue
             }
-            $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData((Read-GitBytes @('show', ":$path")))).ToLowerInvariant()
+            $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData((Resolve-LfsBytes (Read-GitBytes @('show', ":$path")) $path))).ToLowerInvariant()
             if ($digest -cne $manifest[$path]) { $failures.Add("${path}: staged export hash differs") }
         }
     }

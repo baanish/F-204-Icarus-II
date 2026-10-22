@@ -1,0 +1,1 @@
+{"id":4,"name":"PALA Bare Metal","lower":[0.72,0.74,0.76],"upper":[0.67,0.70,0.73],"dominant":[184,189,194],"demarcation":[0.12,0.30],"pattern":"bands","band":[0.91,0.28,0.055],"source":"bare_metal.png","source_scale_m":1.8,"wear_strength":0.8,"glossiness":0.45,"light_markings":false}
