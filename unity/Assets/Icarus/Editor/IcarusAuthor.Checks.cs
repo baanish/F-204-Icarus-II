@@ -10,8 +10,9 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // R5's ordered strip checklist, A1 to A15, run on the finished prefab before it is saved. Each item logs one line;
-        // any failure throws with every problem found, so the build fails and nothing is saved.
+        // R5's ordered strip checklist, A1 to A15, and A16 for the plugin's stock-mission supply, run on the finished prefab
+        // before it is saved. Each item logs one line; any failure throws with every problem found, so the build fails and
+        // nothing is saved.
         private static void RunChecks(Build b, Object definition, Object parameters)
         {
             var failures = new List<string>();
@@ -51,6 +52,7 @@ namespace Icarus.Editor
             Item("A13", "skin slot 0 and livery coverage", p => CheckSkin(b, p));
             Item("A14", "mounted store colliders", p => CheckStoreColliders(b, p));
             Item("A15", "cockpit renderers", p => CheckCockpitRenderers(b, p));
+            Item("A16", "stock-mission supply keys", p => CheckStockSupply(definition, p));
             if (failures.Count > 0)
                 throw new InvalidDataException("Icarus authoring checks failed:\n  " + string.Join("\n  ", failures));
         }

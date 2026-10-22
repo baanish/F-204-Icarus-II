@@ -10,7 +10,7 @@ namespace Icarus;
 
 /// <summary>
 /// The F-204 Icarus II plugin: config (BepInEx/config/baanish.icarus.cfg), the "[Icarus]" logger, the Harmony install,
-/// the startup hold and AI supply repair, the iris nozzle driver and the live tuning knobs.
+/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver and the live tuning knobs.
 /// </summary>
 [BepInPlugin(Guid, "F-204 Icarus II", Version)]
 public sealed class IcarusPlugin : BaseUnityPlugin
@@ -21,10 +21,10 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>AircraftDefinition.jsonKey of the Icarus (IcarusAuthor.JsonKey).</summary>
     public const string JsonKey = "baanish_icarus";
 
-    /// <summary>Seconds between a mission starting and the supply repair, so the HQs have loaded.</summary>
+    /// <summary>Seconds between a mission starting and the supply repair and stock-mission supply, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(StockMissionSupply.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 
@@ -45,6 +45,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
         stageLogging.SettingChanged += (_, _) => Log.StageEnabled = stageLogging.Value;
         Log.Info($"F-204 Icarus II {Version} ({Guid}); Diagnostics.StageLogging={stageLogging.Value}");
         Tuning.Install(Config, Log);
+        StockMissionSupply.Install(Config, Log);
         harmony = new Harmony(Guid);
         FeaturesOff = PatchTarget.InstallAll(harmony, PatchTargets, Log);
     }
@@ -81,6 +82,15 @@ public sealed class IcarusPlugin : BaseUnityPlugin
         catch (Exception e)
         {
             Log.Error($"ai supply repair failed: {e}");
+        }
+
+        try
+        {
+            StockMissionSupply.Apply(Log);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"stock supply failed: {e}");
         }
     }
 }
