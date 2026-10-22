@@ -16,7 +16,8 @@ namespace Icarus.Editor
         // The Icarus cockpit (art/blender/cockpit.py) in the Revoker's systems. Its interior takes the Revoker interior's place
         // on the GameObject carrying Cockpit and CockpitWarningLights; the inner frames, tac screen and lamps are its own
         // renderers, the hood's inner frame and frame proxy riding the hood. The stock stick and throttle stand on the export's
-        // pivots, and the stock seat and pilot rig keep the Revoker's offsets from its eye, moved to the canopy's eye.
+        // pivots, and the stock seat and pilot rig keep the Revoker's offsets from its eye, moved to the canopy's eye, less the
+        // seat's drop to the export's cockpit_seat.
         private static void BuildCockpit(Build b)
         {
             var fit = BuildCanopy(b);
@@ -28,6 +29,12 @@ namespace Icarus.Editor
             var ladder = b.Find("ladder");
             pilot.position += delta;
             ladder.position += delta;
+            // The seat, and the pilot in it, sit at the export's seat empty: a little under the Revoker's offset from its
+            // eye, so the headbox clears the hood glass. The camera point stays on the eye.
+            var seat = FindDeep(pilot, "EjectionSeat");
+            var drop = b.Blockout.Local("cockpit_seat") - seat.position;
+            pilot.position += drop;
+            helmet.position = fit.Eye;
             var stick = Child("joystick");
             var throttle = Child("throttle");
             // the pivots are the Revoker's reach from its eye moved to the Icarus eye, so they land where the move would
@@ -80,7 +87,7 @@ namespace Icarus.Editor
                 .Select(n => (Object)b.Parts[n].GetComponent<MeshRenderer>()).Append(b.Visuals["gear_leg_N_visible"].GetComponent<MeshRenderer>())
                 .Concat(fit.Exterior).Concat(proxies).ToArray());
             aircraft.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add($"cockpit: eye at {fit.Eye}, the stock seat and pilot rig and the ladder moved {delta}, the stick and throttle on their " +
+            b.Report.Add($"cockpit: eye at {fit.Eye}, the stock seat and pilot rig and the ladder moved {delta}, the seat and pilot a further {drop} to clear the hood glass, the stick and throttle on their " +
                 $"pivots ({drift * 1000:F1} mm from the Revoker's reach); interior {Tris(inside)}, frames {Tris(frames[0])} + {Tris(frames[1])}, " +
                 $"tac screen {Tris(screen)}, lamps {Tris(lamps)}, proxies {Tris(proxies[0])} + {Tris(proxies[1])} triangles; " +
                 $"hood opens {fit.Open:+0;-0} deg on its sill hinge ({(fit.Kept ? "export sign" : "export sign flipped")}) and ejects as its own part");

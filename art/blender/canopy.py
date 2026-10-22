@@ -29,6 +29,10 @@ import materials  # noqa: E402
 from solids import X, Y, Z, Solids, bvh, hit, must  # noqa: E402
 
 CANOPY = {"windscreen_end_s": 2.95, "open_deg": 75}
+# Shut, the glass and its frames run on under the skin, the spine and the windscreen's edge: the hood seats in
+# them. Opening, it may only lift out of that seat, and must be clear of the fuselage from SEAT_RELEASE_DEG on.
+SEAT_RELEASE_DEG = 40
+FUSELAGE = ("skin_forward_L", "skin_forward_R", "dorsal_cover", "windscreen", "windscreen_inner")
 # Sections (s, half width, z top, z bottom): a half ellipse over a 2 cm lip. Round the eye the widest point sits on the
 # skin, so the glass walls meet the fuselage where they are steepest; aft of it the hood keeps its old seam, the lip
 # standing about 4 cm proud as it tapers into the spine.
@@ -45,6 +49,7 @@ PROFILE = [
 WINDSCREEN_ROWS, HOOD_ROWS, RING = 4, 9, 40  # loft stations ahead of and behind windscreen_end_s; points per section
 GLASS_GAP = 0.004  # the inner panes sit this far inside the outer ones
 FRAME_HALF = 0.006  # frames straddle the glass by this much either side
+HINGE_CLEAR = 0.035  # the hinge line stands this far outboard of the left seam, at the fixed sill's outer edge
 SKIN = "Icarus_Body"
 # The design eye, (s, x, z) as in PARAMS: where the stock seat's pilot looks from. tools/export_blockout.py writes it to
 # blockout.json, and the Unity author fits the cockpit to it.
@@ -95,9 +100,7 @@ def build(p, mats):
     hood, rails = Solids(), {}
     for side in (1, -1):
         rails[side] = sill_rail(hood, glass, skin, bi.spaced(s0, s1 - 0.004, 8), side)
-    # The hinge runs along the left rail's foot, held square to x (the hood narrows aft) so the joint is symmetric.
-    a, b = rails[1][0], rails[1][-1]
-    u = Vector((0.0, b.y - a.y, b.z - a.z)).normalized()
+    a, u = hinge_line(rails[1])
     for i, bow in enumerate(((joint(a, u, 0.003), joint(a, u, 0.035)), (station(4.07), station(4.13)),
                              (station(5.05), station(s1 - 0.004)))):
         rows = []
@@ -166,6 +169,15 @@ def check(icarus):
     clashes = opening_clashes(bpy.data.objects["canopy"])
     if clashes:
         raise ValueError("canopy: the opening hood meets the windscreen at " + "; ".join(clashes))
+    seat, gap = opening_sweep(bpy.data.objects["canopy"])
+    risen = [k for k in range(1, len(seat)) if seat[k][1] > seat[k - 1][1]]
+    caught = [(a, n) for a, n in seat if a >= SEAT_RELEASE_DEG - 1e-6 and n]
+    if risen or caught:
+        raise ValueError("canopy: the opening hood does not lift clear of the fuselage: face pairs in contact by angle "
+                         + ", ".join("%.1f deg %d" % s for s in seat))
+    print("canopy: the opening hood lifts out of its seat (%d face pairs shut, %s) and clears the fuselage from %.0f deg, "
+          "least gap %.4f m on to full travel" % (seat[0][1], ", ".join("%.1f deg %d" % s for s in seat[1:] if s[1]),
+                                                   SEAT_RELEASE_DEG, gap))
     at = bi.P(*EYE)
     faces = [(o.matrix_world @ f.center - at).dot(o.matrix_world.to_3x3() @ f.normal) < 0
              for o in (bpy.data.objects[GLASS_INNER], bpy.data.objects[WINDSCREEN_INNER]) for f in o.data.polygons]
@@ -308,6 +320,20 @@ def cut_edge(fuselage, solid):
 def station(s):
     """Ray frame of the station plane at s: origin on the centre line, up, and the plane's normal."""
     return bi.P(s, 0.0, centre_z(s)), Z, Y
+
+
+def hinge_line(seam):
+    """The hood's hinge: a point and axis along the left sill, HINGE_CLEAR outboard of the left seam's widest point and
+    level with the seam where it runs lowest, held square to x (the hood narrows aft) so the joint is symmetric. The
+    seam is lowest at the joint and rises ever faster aft, so the line through its joint end with the shallowest
+    slope that stays under the rest is the one that hugs it. Every point of the hood then sits inboard of the hinge and
+    no lower than it but for the seat under the skin, and lifts out as the hood opens. The chord from end to end ran
+    7 cm above and 5 cm inboard of the seam mid-hood and swung the lower left edge down and in, through the fixed sill
+    and the skin, all the way open."""
+    first = seam[0]
+    slope = min((q.z - first.z) / (q.y - first.y) for q in seam[1:])
+    a = Vector((max(q.x for q in seam) + HINGE_CLEAR, first.y, first.z))
+    return a, Vector((0.0, 1.0, slope)).normalized()
 
 
 def joint(a, u, offset):
@@ -505,6 +531,31 @@ def opening_clashes(hinge, steps=8):
             clashes.append("%.0f deg at (s %.3f, x %.3f, z %.3f)" % (angle, at.y + bi.S0, at.x, at.z))
         moved.free()
     return clashes
+
+
+def opening_sweep(hinge, step_deg=2.5):
+    """The hood (every mesh on the hinge) through its travel against the fuselage it seats in (FUSELAGE): face pairs
+    in contact at each angle, and the least distance from a hood vertex to the fuselage from SEAT_RELEASE_DEG on."""
+    from mathutils.bvhtree import BVHTree
+
+    O = bpy.data.objects
+    a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
+    fixed = bvh([O[n] for n in FUSELAGE])
+    hood = [o for o in hinge.children if o.type == "MESH"]
+    steps = int(math.ceil(abs(hinge["travel_deg"]) / step_deg))
+    seat, gap = [], math.inf
+    for k in range(steps + 1):
+        angle = hinge["travel_deg"] * k / steps
+        turn = Matrix.Translation(a) @ Matrix.Rotation(math.radians(angle), 4, u) @ Matrix.Translation(-a)
+        verts, polys = [], []
+        for o in hood:
+            base = len(verts)
+            verts += [turn @ o.matrix_world @ v.co for v in o.data.vertices]
+            polys += [tuple(base + i for i in f.vertices) for f in o.data.polygons]
+        seat.append((abs(angle), len(BVHTree.FromPolygons(verts, polys).overlap(fixed))))
+        if abs(angle) >= SEAT_RELEASE_DEG - 1e-6:
+            gap = min(gap, min(fixed.find_nearest(v)[3] for v in verts))
+    return seat, gap
 
 
 # --- review renders ------------------------------------------------------------------------------------------------

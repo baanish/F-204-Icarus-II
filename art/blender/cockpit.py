@@ -40,6 +40,7 @@ FRAMES_INNER = ("windscreen_frame_inner", "canopy_frame_inner")
 TAC_SCREEN, WARNING_LAMPS = "cockpit_tac_screen", "cockpit_warning_lamps"
 PROXIES = ("cockpit_proxy", "canopy_frame_proxy")
 PIVOTS = ("cockpit_stick_pivot", "cockpit_throttle_pivot")  # empties the stock stick and throttle hang from
+SEAT = "cockpit_seat"  # an empty where the stock seat's origin goes
 SLOT = "Icarus_Cockpit"
 # Triangles per renderer: target and cap (budget.py sums them). The cockpit's hard limit is 35,000 in all; the stock
 # stick (1,890) and throttle (880) count toward it but are not built here. The warning lamps (40 to 80) and the stock
@@ -76,10 +77,17 @@ EYE = canopy.EYE
 # The stock rig at the Revoker's offsets from its helmet eye, moved to EYE (Fighter1.prefab: helmetCamPoint, the
 # EjectionSeat under the pilot rig, the joystick and the throttle). Boxes (s0, s1, |x| or x range, z0, z1) bound their
 # meshes by height band; the interior keeps clear of them through the controls' travel (Cockpit: joystick 9 deg pitch
-# and roll, throttle 6.5 deg about a pivot 1 m below its grip).
+# and roll, throttle 6.5 deg about a pivot 1 m below its grip). The seat and the pilot in it sit SEAT_DROP lower than
+# that offset, so the headbox clears the hood glass (owner, 2026-10-22); the eye stays at EYE.
+SEAT_DROP = 0.020
+SEAT_BOXES = [(3.75, 4.47, 0.270, -0.19, 0.31), (4.44, 4.68, 0.262, -0.19, 0.82), (4.68, 4.88, 0.190, 0.54, 0.82)]
+SEAT_HEAD = [(4.54, 4.88, 0.188, 0.82, 0.94), (4.56, 4.83, 0.164, 0.94, 1.02), (4.57, 4.66, 0.164, 1.02, 1.06),
+             (4.62, 4.64, 0.139, 1.06, 1.078)]  # the headbox, in 4 cm bands of the stock mesh
+HEAD_GLASS_GAP = 0.005  # the least the headbox keeps from the hood's glass and frames, shut and opening
 STOCK = {
-    "seat_origin": (4.256, 0.0, 0.154),
-    "seat": [(3.75, 4.47, 0.270, -0.19, 0.31), (4.44, 4.68, 0.262, -0.19, 1.08), (4.68, 4.88, 0.190, 0.54, 1.01)],
+    "seat_origin": (4.256, 0.0, 0.154 - SEAT_DROP),
+    "seat": [(s0, s1, hx, z0 - SEAT_DROP, z1 - SEAT_DROP) for s0, s1, hx, z0, z1 in SEAT_BOXES + SEAT_HEAD],
+    "seat_head": [(s0, s1, hx, z0 - SEAT_DROP, z1 - SEAT_DROP) for s0, s1, hx, z0, z1 in SEAT_HEAD],
     "stick_pivot": (3.936, -0.398, 0.343),
     "stick": [(3.895, 3.977, -0.432, -0.355, 0.332, 0.38), (3.904, 3.960, -0.409, -0.317, 0.38, 0.43),
               (3.868, 3.951, -0.408, -0.314, 0.43, 0.49), (3.844, 3.935, -0.374, -0.291, 0.49, 0.549)],
@@ -101,6 +109,9 @@ LAYOUT = {
     "pedestal": {"s0": 3.58, "s1": 3.70, "half_width": 0.08},
     "floor_z": -0.05,
     "footwell_s": 3.08,
+    # the coaming under the windscreen: from its front (s0) back to the glare shield (s1), its deck this far inside
+    # the skin at the sides
+    "coaming": (2.36, 3.06, 0.008),
     "console": {"s0": 3.78, "s1": 4.84, "inner": 0.278, "top_z": 0.322},
     "pedals": {"s": 3.28, "x": 0.12, "bar": (3.18, 0.36)},
     "bulkhead": (4.88, 4.92),
@@ -124,6 +135,7 @@ TAC_SCREEN_PX = (1024, 512)
 BEZEL = {"frame": 0.020, "height": 5 * MM, "recess_ring": 3 * MM, "recess_z": 2.5 * MM, "floor_z": 1 * MM,
          "screen_z": 1.5 * MM}
 FRAME = {"glass_inset": 0.0052, "depth": 0.028, "seam_cover": 0.065}  # the inner frame shell, off the inner glass
+SEAT_CLEAR = 0.010  # the inner frame stops this far up the glass from the seam, clear of the skin the hood seats in
 LEDGE_DROP = 0.024  # the cockpit sill's top under the glass seam: 0.27 m or more below the eye (Cockpit rule 27)
 
 
@@ -600,6 +612,15 @@ class Space:
         point, _, _ = canopy.glass_at(self.inner_glass, f, psi)
         return point.x, point.z
 
+    def skin_x(self, s, z, inset):
+        """|x| of the skin's section pulled in by inset, at (s, z), on the left side."""
+        key = (round(s, 4), inset)
+        if key not in self._rings:
+            ring = self.internals.ring_at(self.p, s, inset)
+            self._rings[key] = sorted((v.z, v.x) for v in ring if v.x > 0)
+        pts = self._rings[key]
+        return float(np.interp(z, [q[0] for q in pts], [q[1] for q in pts]))
+
     def hood_sweep(self, extra):
         """Every hood vertex (its frame, both glass layers, and the extra Gathers hung from it) through the hinge's
         travel in 2.5 degree steps, closed included, as an array of (s, x, z)."""
@@ -608,7 +629,6 @@ class Space:
         a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
         pts = [o.matrix_world @ v.co for o in hinge.children if o.type == "MESH" for v in o.data.vertices]
         pts += [v for g in extra for v in g.verts]
-        self.hinge, self.closed = (a.copy(), u.copy()), pts
         self.hood = bvh([o for o in hinge.children if o.type == "MESH"])
         out, verts, polys = [], [], []
         faces = [(o.matrix_world, o.data) for o in hinge.children if o.type == "MESH"]
@@ -629,19 +649,10 @@ class Space:
         self.swept = BVHTree.FromPolygons(verts, polys)
 
     def sweep_floor(self, s, x0, x1, reach=0.08):
-        """The lowest z the hood reaches over x0..x1 (signed) near station s, opening or shut: the swept vertices
-        there, and on the hinge's side the bottom of the circle that the hood's farthest point below the hinge line
-        sweeps, since the vertices alone undersample the faces between them."""
+        """The lowest z a hood vertex reaches over x0..x1 (signed) near station s, opening or shut."""
         q = self.sweep
         sel = (np.abs(q[:, 0] - s) < reach) & (q[:, 1] >= min(x0, x1) - 0.01) & (q[:, 1] <= max(x0, x1) + 0.01)
-        floor = float(q[sel, 2].min()) if sel.any() else math.inf
-        a, u = self.hinge
-        at = a + u * ((P(s, 0.0, 0.0).y - a.y) / u.y)
-        if min(x0, x1) * at.x > 0:  # the hinge's side
-            near = [p for p in self.closed if abs(p.y - at.y) < reach and p.x * at.x > 0 and p.z < at.z]
-            r = max(((p - a) - u * (p - a).dot(u)).length for p in near) if near else 0.0
-            floor = min(floor, at.z - r)
-        return floor
+        return float(q[sel, 2].min()) if sel.any() else math.inf
 
     def hood_x(self, s, z, side):
         """|x| of the shut hood (frame or glass) at height z on one side, from the centreline out."""
@@ -842,6 +853,47 @@ def glare_shield(uv):
     return solid(uv, verts, faces, "structure", along=X, hidden=(len(faces) - 2, len(faces) - 1))
 
 
+def coaming(g, uv, space, group):
+    """A dark tray under the windscreen, from the glare shield forward to the windscreen's front, closing the view into
+    the nose bay: the canopy's cut runs on forward under the glass, so below the skin line the eye saw the bay's frames
+    and the radome from inside. The deck stays under the 16 deg over-nose line with the glare shield's margin; its
+    sides run up the inner skin to the glass's foot, and its front wall up to the skin's line at the windscreen's
+    front, so nothing above that line changes."""
+    s0, s1, inset = LAYOUT["coaming"]
+    gl = LAYOUT["glare"]
+    stations = bi.spaced(s0, s1, 7)
+    deck = lambda s: min(over_nose_z(s) - LAYOUT["over_nose_margin"], gl["z0"])
+    # the sides stop at the glass's foot (PROFILE's bottom, 2 cm under its widest point, where its lip turns in under
+    # the skin), clear of the windscreen's base rails and the hood's longerons
+    foot = [row[3] for row in bi.resample(canopy.PROFILE, stations)]
+    rows = []
+    for s, top in zip(stations, foot):
+        z0 = deck(s)
+        side = [(space.skin_x(s, z, inset), z) for z in bi.spaced(top, z0, 4)]
+        w = side[-1][0]
+        across = [(w * f, z0) for f in bi.spaced(1, -1, 7)[1:-1]]
+        rows.append([P(s, x, z) for x, z in side] + [P(s, x, z) for x, z in across]
+                    + [P(s, -x, z) for x, z in side[::-1]])
+    g.put(grid_sheet(uv, rows, "structure", along=X), None, group)
+    # the front wall: the first section, filled up to 5 mm over the skin's line over the top, so the look that grazes
+    # the nose (7 deg) cannot slip under it
+    s, first = stations[0], rows[0]
+    over, under = (space.internals.ring_at(space.p, s, d) for d in (-0.005, inset))
+    arc = [o if abs(o.x) < 0.12 else u for o, u in zip(over, under) if u.z > foot[0]]
+    arc.sort(key=lambda v: -math.atan2(v.x, v.z - foot[0]))
+    arc = [first[0]] + [P(s, v.x, v.z) for v in arc] + [first[-1]]
+    run = [0.0]
+    for a, b in zip(arc, arc[1:]):
+        run.append(run[-1] + (b - a).length)
+    top = []
+    for i in range(len(first)):
+        t = run[-1] * i / (len(first) - 1)
+        k = min(max(j for j in range(len(run)) if run[j] <= t), len(arc) - 2)
+        f = (t - run[k]) / max(run[k + 1] - run[k], 1e-9)
+        top.append(arc[k].lerp(arc[k + 1], f))
+    g.put(grid_sheet(uv, [first, top], "structure", along=X), None, group)
+
+
 def glare_top(s, x):
     """A point on the glare shield's top and the top's normal there."""
     g = LAYOUT["glare"]
@@ -1010,8 +1062,8 @@ def stick_base(g, uv, kit, atlas, space):
 def ledge_rows(space, side, columns):
     """The sill ledge along one side: (s, |x| in, |x| out, top z) per station, from the lining's top out to just inside
     the shut hood, LEDGE_DROP under the glass seam; the hood's longeron comes down over the gap, P5's fixed-sill flange
-    stands behind it. On the hinge side the hood's lower edge swings down and in as it opens (the hinge line runs above
-    the seam mid-hood), so there the ledge drops under that sweep."""
+    stands behind it. The ledge stays under every place the hood's vertices pass through as it opens, then is pulled in
+    and down a segment at a time until the swept hood's faces clear it."""
     rows = []
     for s in columns:
         sx, sz = space.seam(s)
@@ -1242,9 +1294,10 @@ def hood_frame_inner(uv, kit, glass, proxy=False):
     for planes in bows:
         planes = planes[::2] if proxy else planes
         depths = (d1, d1) if proxy else (d1, d1 + 0.010, d1)
-        left, right = glass.seam(planes[0], 1), glass.seam(planes[0], -1)
+        # the bow's ends stop at the highest seam across its planes, clear of the skin the glass runs on under
+        left, right = min(glass.seam(f, 1) for f in planes), max(glass.seam(f, -1) for f in planes)
         r = canopy.glass_at(glass.tree, planes[0], left)[2]
-        psis = bi.spaced(left - 0.004 / r, right + 0.004 / r, cols)
+        psis = bi.spaced(left - SEAT_CLEAR / r, right + SEAT_CLEAR / r, cols)
         outer, inner = member(glass, planes, psis, d0, depths)
         g.put(slab_piece(uv, outer, inner, "frame"), None, "frame")
     # longerons: from the front bow to the aft bow along each sill, covering the glass from the seam up, deepest a
@@ -1257,9 +1310,9 @@ def hood_frame_inner(uv, kit, glass, proxy=False):
             seam = glass.seam(f, side)
             r = canopy.glass_at(glass.tree, f, seam)[2]
             if proxy:
-                psis, depths = [seam - side * 0.005 / r, seam - side * FRAME["seam_cover"] / r], (d1 + 0.006, d1 + 0.006)
-            else:  # 5 mm up from the seam, where the glass turns in under the hood's lip
-                psis = [seam - side * 0.005 / r, seam - side * 0.022 / r, seam - side * FRAME["seam_cover"] / r]
+                psis, depths = [seam - side * SEAT_CLEAR / r, seam - side * FRAME["seam_cover"] / r], (d1 + 0.006, d1 + 0.006)
+            else:  # up from the seam, where the glass turns in under the hood's lip
+                psis = [seam - side * SEAT_CLEAR / r, seam - side * 0.022 / r, seam - side * FRAME["seam_cover"] / r]
                 depths = (d1 + 0.006, d1 + 0.014, d1)
             rows_o.append([glass.at(f, q, d0) for q in psis])
             rows_i.append([glass.at(f, q, d) for q, d in zip(psis, depths)])
@@ -1377,6 +1430,7 @@ def cockpit_proxy(uv, space):
         sx, sz = space.seam(s)
         deck.append([P(s, f * (sx - 0.020), sz - 0.025 + 0.05 * (1 - f * f)) for f in bi.spaced(-1, 1, 7)])
     g.put(grid_sheet(uv, deck, "structure"), None, "proxy")
+    coaming(g, uv, space, "proxy")
     # the seat's silhouette is the stock seat itself, drawn in every view
     return g
 
@@ -1422,6 +1476,7 @@ def build(p, mats):
     space.hood_sweep([hood_inner, frame_proxy])
     interior = Gather(INTERIOR)
     screens, lamps = front_office(interior, uv, kit, atlas)
+    coaming(interior, uv, space, "front")
     consoles(interior, uv, kit, atlas, space)
     tub(interior, uv, kit, atlas, space)
     proxy = cockpit_proxy(uv, space)
@@ -1447,7 +1502,7 @@ def build(p, mats):
         obj["mass_kg"] = 0
     open_cell(cell)
     trim_frames(O["fuselage_forward"], space)
-    for name, at in zip(PIVOTS, (STOCK["stick_pivot"], STOCK["throttle_pivot"])):
+    for name, at in zip(PIVOTS + (SEAT,), (STOCK["stick_pivot"], STOCK["throttle_pivot"], STOCK["seat_origin"])):
         made.append(bi.empty(name, Matrix.Translation(P(*at)), cell))
         made[-1]["role"] = "cockpit_view"
         made[-1]["mass_kg"] = 0
@@ -1676,6 +1731,26 @@ def box_tree(boxes):
     return BVHTree.FromPolygons(verts, [tuple(f) for f in faces])
 
 
+def head_gap(hinge, hood, step_deg=5.0):
+    """The least distance from the stock seat's headbox (STOCK seat_head, its corners and edge midpoints) to the hood's
+    meshes, shut and at each step of the opening."""
+    points = []
+    for s0, s1, hx, z0, z1 in STOCK["seat_head"]:
+        for s in (s0, (s0 + s1) / 2, s1):
+            for x in (-hx, 0.0, hx):
+                for z in (z0, z1):
+                    points.append(P(s, x, z))
+    a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
+    steps = int(math.ceil(abs(hinge["travel_deg"]) / step_deg))
+    gap = math.inf
+    for k in range(steps + 1):
+        turn = Matrix.Translation(a) @ Matrix.Rotation(math.radians(hinge["travel_deg"] * k / steps), 4, u) \
+            @ Matrix.Translation(-a)
+        tree = tree_of(hood, turn)
+        gap = min(gap, min(tree.find_nearest(q)[3] for q in points))
+    return gap
+
+
 def stock_keepout():
     """Boxes the stock seat, stick and throttle occupy through the controls' travel."""
     boxes = [(s0, s1, -hx, hx, z0, z1) for s0, s1, hx, z0, z1 in STOCK["seat"]]
@@ -1761,7 +1836,7 @@ def check(icarus):
         problems.append("interior enters the stock seat, stick or throttle space (%d pairs): %s" % (len(pairs), where(pairs)))
     import internals
 
-    body = internals.inner_solid(bi.PARAMS, 0.004, 2.5, 5.4)
+    body = internals.inner_solid(bi.PARAMS, 0.004, LAYOUT["coaming"][0] - 0.1, 5.4)
     hood = internals.outward(canopy.build_canopy(None, bpy.data.materials[SLOT]))
     solids = [tree_of([body]), tree_of([hood])]
     for o in (body, hood):
@@ -1804,6 +1879,11 @@ def check(icarus):
         if blocked:
             problems.append("display %s: %d of 25 eye rays blocked" % ("ABC"[k], blocked))
 
+    # the stock seat's headbox clear of the hood, shut and through the opening
+    m["head_gap"] = head_gap(hinge, hood_objs)
+    if m["head_gap"] < HEAD_GLASS_GAP:
+        problems.append("the stock seat's headbox comes %.4f m from the hood, under %.3f" % (m["head_gap"], HEAD_GLASS_GAP))
+
     # the inner frames sit glass_inset inside the inner glass, never outside it
     glass = tree_of([O[canopy.GLASS_INNER], O[canopy.WINDSCREEN_INNER]])
     for name in ("canopy_frame_inner", "windscreen_frame_inner"):
@@ -1823,7 +1903,8 @@ def check(icarus):
                         for k, d in zip(DISPLAYS, m["displays"])),
               m["overhead"], m["side"], m["sill"], m["panel_ahead"], m["frame_inner"], m["frame_shell"], m["windscreen_frame_inner"],
               m["lamps"], m["proxy_interior"], m["proxy_frame"], m["cockpit_tris"]))
-    print("cockpit items: " + ", ".join(m["top_classes"]) + "; regions %s; hud zone %d" % (m["regions"], m["hud"]))
+    print("cockpit items: " + ", ".join(m["top_classes"]) + "; regions %s; hud zone %d; seat headbox %.4f m from the hood"
+          % (m["regions"], m["hud"], m["head_gap"]))
     if problems:
         raise ValueError("cockpit: " + "; ".join(problems))
     return m
@@ -1846,7 +1927,7 @@ def stock_rig(collection):
     except (ImportError, SystemExit):
         return []
     eye_u = (0.0, 0.758, 6.897)  # Fighter1.prefab helmetCamPoint, prefab root frame
-    items = (("stock_seat", "ejectionSeat", (0.0, 0.027, 7.006), -6.8, (0.33, 0.36, 0.30, 1.0)),
+    items = (("stock_seat", "ejectionSeat", (0.0, 0.027 - SEAT_DROP, 7.006), -6.8, (0.33, 0.36, 0.30, 1.0)),
              ("stock_stick", "fighter1_joystick", (0.398, 0.216, 7.326), 0.0, (0.12, 0.12, 0.12, 1.0)),
              ("stock_throttle", "fighter1_throttle", (-0.382, -0.768, 7.393), 0.0, (0.12, 0.12, 0.12, 1.0)))
     made = []
