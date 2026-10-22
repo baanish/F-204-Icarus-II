@@ -4,7 +4,8 @@ Nuclear Option damages an aircraft part by part: each part is a separate body wi
 joint to its parent, and what a hit or a detachment reveals is whatever geometry lies under it. So the exterior skin is
 split into thin panels that can come away, the frames, spars and tanks they cover are parts of their own, and the
 Blender parent tree is the part tree the Unity author builds. Names, parents and dry masses follow the Full Fidelity
-plan in the project notes (41 parts, 5,800 kg dry); the stabilator is two pivoting halves.
+plan in the project notes (5,800 kg dry), except that the stabilator is one all-moving piece where the plan has two
+halves, so 40 parts where it has 41.
 
 Detail a package builds as its own object tagged merge_into = "<part>" joins that part's mesh (merge_details), so it
 takes the part's livery and damage without a renderer of its own.
@@ -31,8 +32,7 @@ BUDGET = {
     "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
-    "stabilator_L": {"target": 1060, "cap": 1060, "objects": ("stabilator_L_visible",)},
-    "stabilator_R": {"target": 1060, "cap": 1060, "objects": ("stabilator_R_visible",)},
+    "stabilator": {"target": 2120, "cap": 2120, "objects": ("stabilator_visible",)},
     "fins": {"target": 1600, "cap": 1600, "objects": ("fin_skin", "ventral_fin")},
     "speed_brake_L": {"target": 480, "cap": 480, "objects": ("speed_brake_L_visible",)},
     "speed_brake_R": {"target": 480, "cap": 480, "objects": ("speed_brake_R_visible",)},
@@ -78,8 +78,7 @@ TREE = {
     "fin_spar": ("fuselage_aft", 100),
     "fin_skin": ("fin_spar", 35),
     "rudder": ("fin_spar", 30),
-    "stabilator_L": ("fin_spar", 60),
-    "stabilator_R": ("fin_spar", 60),
+    "stabilator": ("fin_spar", 120),
     "gear_leg_N": ("cockpit_cell", 75),
     "gear_leg_L": ("fuselage_mid", 100),
     "gear_leg_R": ("fuselage_mid", 100),
@@ -99,7 +98,7 @@ TREE = {
     "gear_door_main_L": ("fuselage_mid", 0),
     "gear_door_main_R": ("fuselage_mid", 0),
     "dorsal_cover": ("fuselage_mid", 40),
-    # Not in the 41: small parts the plan folds into their parents' budgets.
+    # Not in the plan's 41: small parts the plan folds into their parents' budgets.
     "speed_brake_L": ("fuselage_aft", 0),
     "speed_brake_R": ("fuselage_aft", 0),
     "ventral_fin": ("fuselage_aft", 0),
@@ -371,7 +370,7 @@ SWEEP_FIXED = ("wing_skin_", "wing_spar_", "fin_skin", "fin_spar", "ventral_fin"
 
 
 def surface_sweep(icarus):
-    """Turn every hinge with a deflection_deg (flaps, LEFs, ailerons, rudder, stabilator halves, speed brakes) through
+    """Turn every hinge with a deflection_deg (flaps, LEFs, ailerons, rudder, stabilator, speed brakes) through
     its authored travel in steps of at most SWEEP_STEP, both ways where it has them, and fail if its mesh meets the
     airframe or another surface at rest: BVH triangle overlap, not sampled points."""
     O = bpy.data.objects

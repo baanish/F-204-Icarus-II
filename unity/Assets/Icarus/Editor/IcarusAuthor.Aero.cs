@@ -15,7 +15,7 @@ namespace Icarus.Editor
         private static readonly (string Name, SurfaceKind Kind)[] Surfaces =
         {
             ("aileron_L", SurfaceKind.Roll), ("aileron_R", SurfaceKind.Roll), ("rudder", SurfaceKind.Yaw),
-            ("stabilator_L", SurfaceKind.Pitch), ("stabilator_R", SurfaceKind.Pitch),
+            ("stabilator", SurfaceKind.Pitch),
             ("flap_L", SurfaceKind.Flap), ("flap_R", SurfaceKind.Flap), ("lef_L", SurfaceKind.LeadingEdge), ("lef_R", SurfaceKind.LeadingEdge),
         };
         // Control ranges, flap and leading-edge flap droop and the speed brakes' opening come from the generator's surface
@@ -41,7 +41,7 @@ namespace Icarus.Editor
         {
             { RootPart, 0.135f }, { "fuselage_forward", 0.11f }, { "canopy", 0.04f }, { "radome", 0.02f }, { "fuselage_aft", 0.09f },
             { "nozzle", 0.02f }, { "intake_duct_L", 0.03f }, { "intake_duct_R", 0.03f }, { "wing_spar_L", 0.02f }, { "wing_spar_R", 0.02f },
-            { "fin_spar", 0.015f }, { "stabilator_L", 0.01f }, { "stabilator_R", 0.01f },
+            { "fin_spar", 0.015f }, { "stabilator", 0.02f },
         };
         private const float DragAreaTotal = 0.55f;
         // R14: each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, for a
@@ -225,8 +225,8 @@ namespace Icarus.Editor
                 if (spar <= 0)
                     throw new InvalidDataException($"wing {side}: its surfaces' {surfaces.Sum(s => aero[s].Area):F2} m2 leave nothing of R7's {WingArea / 2} m2 for the spar");
                 aero["wing_spar_" + side] = (spar, WingAirfoil);
-                aero["stabilator_" + side] = (TailArea / 2, TailAirfoil);
             }
+            aero["stabilator"] = (TailArea, TailAirfoil);
             // the fin's own side area, which the generator measures before the fin-tip fairing joins the fin skin
             var finArea = b.Blockout.Parts["fin_skin"].Number("side_area_m2");
             if (finArea <= 0)

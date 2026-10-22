@@ -125,11 +125,13 @@ PARAMS = {
     # Speed brakes on the aft fuselage sides: s range and the height band of skin they cover; hinged at the front.
     "speed_brake": {"s0": 12.55, "s1": 13.35, "z0": -0.18, "z1": 0.30},
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
-    # with a small 45 degree cut at the tip's trailing corner. The root rib stands just outboard of the fin-tip
-    # fairing, so a half pivots clear of the fairing and of its twin.
+    # with a small 45 degree cut at the tip's trailing corner. Left-hand sections; the stabilator is one piece, its
+    # sides meeting behind the fin-tip fairing, notch_gap aft of the fairing's tail, and standing just outboard of
+    # the fairing beside it, so it pivots clear.
     "stabilator": {
         "sections": [(14.804, 0.07, 2.82, 1.886), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
         "thickness": 0.045,
+        "notch_gap": 0.02,
     },
     # The fin-tip fairing round the stabilator pivot, as on the F-104: a body of revolution about a fore-aft axis at
     # height z, from s0 to s1, hiding the fin tip.
@@ -472,18 +474,23 @@ def span_stations(sections, axis, u0, u1, breaks=()):
     return out
 
 
-def strip(name, sections, stations, thickness, axis, mats=None, trim_caps=False, count=None):
+def strip(name, sections, stations, thickness, axis, mats=None, trim_caps=False, count=None, clamp=False):
     """A closed piece of a lifting surface. stations: (u, f0, f1) along the span; each ring spans chord fractions
     f0..f1 of the full-chord airfoil, so neighbouring pieces share one airfoil, with count points a side (by default
     in proportion to the widest span of chord). Two stations at the same u with different fractions make the wall at
     a cutout's end. mats = (skin, trim) finishes the piece: the walls a cut leaves (inside the chord, and at a
     cutout's ends) go on the trim, and the end caps too with trim_caps, so the cove a moving surface opens shows trim,
-    not skin."""
+    not skin. With clamp, every ring samples the full chord and every station's ends, and pulls the points outside its
+    own f0..f1 onto those ends, so a ring cut short shares its points with the full rings beside it and one piece
+    runs on through the cut."""
     count = count or max(6, round(CHORD * max(f1 - f0 for _, f0, f1 in stations)))
+    full = [0.5 * (1 - math.cos(math.pi * i / (count - 1))) for i in range(count)]
+    if clamp:
+        full = sorted(set(full) | {f for _, f0, f1 in stations for f in (f0, f1)})
     rings = []
     for u, f0, f1 in stations:
         s_le, x, z, chord = section_at(sections, u, axis)
-        ts = [f0 + (f1 - f0) * 0.5 * (1 - math.cos(math.pi * i / (count - 1))) for i in range(count)]
+        ts = [min(max(t, f0), f1) for t in full] if clamp else [f0 + (f1 - f0) * t for t in full]
         upper, lower = [], []
         for t in ts:
             half = max(airfoil(t) * thickness * chord, 0.0015)
@@ -639,11 +646,25 @@ def build_surfaces(p, mats):
     parts.append(build_fin_fairing(p, mats["body"]))
     vf = p["ventral_fin"]
     parts.append(finish(lifting_surface("ventral_fin", vf["sections"], vf["thickness"], "x"), mats["body"]))
-    st = p["stabilator"]["sections"]
-    stab = finish(lifting_surface("stabilator_L", st, p["stabilator"]["thickness"], "z"), mats["body"])
-    left = hinged("stabilator_L", stab, Matrix.Translation(P(p["stabilator_pivot_s"], 0.0, st[0][2])))
-    left[0]["deflection_deg"] = surface_travel(p, "stabilator_L")
-    return parts + left + mirror_part(left)
+    return parts + build_stabilator(p, mats)
+
+
+def build_stabilator(p, mats):
+    """The all-moving stabilator as one piece, tip to tip, notched round the fin-tip fairing: between the roots the
+    chord starts notch_gap behind the fairing's tail."""
+    st = p["stabilator"]
+    sections = [(s, -x, z, c) for s, x, z, c in reversed(st["sections"])] + st["sections"]
+    s_le, root_x, z, chord = st["sections"][0]
+    notch = (p["fin_fairing"]["s1"] + st["notch_gap"] - s_le) / chord
+    stations = []
+    for u in span_stations(sections, "x", -sections[-1][1], sections[-1][1]):
+        for f0 in dict.fromkeys([notch if abs(v) < root_x else 0.0 for v in (u - 1e-6, u + 1e-6)]):
+            stations.append((u, f0, 1.0))
+    obj = strip("stabilator", sections, stations, st["thickness"], "x", (mats["body"], mats["mechanical"]),
+                clamp=True)
+    parts = hinged("stabilator", obj, Matrix.Translation(P(p["stabilator_pivot_s"], 0.0, z)))
+    parts[0]["deflection_deg"] = surface_travel(p, "stabilator")
+    return parts
 
 
 def build_fin_fairing(p, mat):

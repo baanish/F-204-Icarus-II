@@ -34,7 +34,7 @@ namespace Icarus.Editor
         private static PartSpec P(string name, string parent, JointClass joint, string armour, string reuse = null) =>
             new PartSpec { Name = name, Parent = parent, Joint = joint, Armour = armour, Reuse = reuse };
 
-        // R13's "Suggested decision" tree, with the stabilator as two pivoting halves; parents before children. Armour is the
+        // R13's "Suggested decision" tree, with the stabilator as one all-moving piece; parents before children. Armour is the
         // Revoker part whose armour class the part takes. Reuse is the Revoker GameObject that becomes the part, carrying
         // its systems: the root holds the aircraft, engine and countermeasures, the fuselage its vapour cone, the cockpit
         // the weapon manager, fly-by-wire, autopilot, crew and displays, the nose the radar and cameras, the tail the
@@ -58,8 +58,7 @@ namespace Icarus.Editor
             P("fin_spar", "fuselage_aft", JointClass.Spar, "vstab1"),
             P("fin_skin", "fin_spar", JointClass.Panel, "vstab1/vstab2"),
             P("rudder", "fin_spar", JointClass.Surface, "vstab1/vstab2/rudder"),
-            P("stabilator_L", "fin_spar", JointClass.Surface, "vstab1/vstab2"),
-            P("stabilator_R", "fin_spar", JointClass.Surface, "vstab1/vstab2"),
+            P("stabilator", "fin_spar", JointClass.Surface, "vstab1/vstab2"),
             P("skin_aft_L", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("skin_aft_R", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("intake_duct_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
