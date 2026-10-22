@@ -2,9 +2,10 @@
 count, the static material list, and the sums of every module's BUDGET against the global limits.
 
 Each module in build_icarus.MODULES carries BUDGET = {component: {"target", "cap", "objects" or "collection",
-"cockpit"}}: "objects" are object-name prefixes the component counts, "collection" counts a whole collection (LOD1,
-Colliders), and "cockpit" puts it in the cockpit sum instead of the exterior one. Targets steer and caps are
-ceilings; a module enforces its own caps in its check() (over_caps). This report enforces nothing.
+"exact", "cockpit"}}: "objects" are object-name prefixes the component counts, "exact" whole object names,
+"collection" counts a whole collection (LOD1, Colliders), and "cockpit" puts it in the cockpit sum instead of the
+exterior one. Targets steer and caps are ceilings; a module enforces its own caps in its check() (over_caps). This
+report enforces nothing.
 
     print(report(bpy.data.collections["Icarus"]))   # build_icarus._build prints it after every build
 """
@@ -38,7 +39,7 @@ def measure(icarus, item):
     if "collection" in item:
         col = bpy.data.collections.get(item["collection"])
         return sum(tris(o) for o in col.objects if o.type == "MESH") if col else 0
-    prefixes = tuple(item["objects"])
+    prefixes, exact = tuple(item.get("objects", ())), set(item.get("exact", ()))
     if "face_attribute" in item:
         total = 0
         for obj in meshes(icarus):
@@ -46,7 +47,7 @@ def measure(icarus, item):
             if obj.name.startswith(prefixes) and tag:
                 total += sum(len(f.vertices) - 2 for f in obj.data.polygons if tag.data[f.index].value)
         return total
-    return sum(tris(o) for o in meshes(icarus) if prefixes and o.name.startswith(prefixes))
+    return sum(tris(o) for o in meshes(icarus) if o.name in exact or prefixes and o.name.startswith(prefixes))
 
 
 def over_caps(icarus, budget):

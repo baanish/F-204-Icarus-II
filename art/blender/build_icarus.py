@@ -847,7 +847,6 @@ def _build(repo):
     parts += gear.build(p, mats)
     parts += lights.build(p, mats)
     parts += stations.build(p, mats)
-    parts += cockpit.build(p, mats)
     import internals  # imports this module back for its helpers, so it loads after them
 
     internals.build(p, collection("Internals"), mats)
@@ -855,6 +854,7 @@ def _build(repo):
 
     tree = part_tree.organise(p, TARGET, bpy.data.collections["Internals"], mats["structure"])
     part_tree.merge_details(TARGET)
+    parts += cockpit.build(p, mats)  # hangs from the organised part tree
     bpy.context.view_layer.update()
     import hulls
 

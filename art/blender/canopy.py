@@ -60,13 +60,14 @@ WINDSCREEN, WINDSCREEN_INNER = "windscreen", "windscreen_inner"  # the windscree
 TREE = {
     "windscreen": ("cockpit_cell", 0),
 }
-# Triangles per component: target and cap (budget.py sums them). WINDSCREEN counts both windscreen layers, since a
-# name prefix also takes windscreen_inner; GLASS_CAP holds each layer of both panes in check(). The windscreen frame
-# and the fixed sill count in the forward skin panels they merge into; build() holds them to DETAIL_CAPS.
+# Triangles per component: target and cap (budget.py sums them). WINDSCREEN counts the outer pane by its exact name,
+# not as a prefix that would take windscreen_inner and the cockpit's windscreen_frame_inner too; GLASS_CAP holds each
+# layer of both panes in check(). The windscreen frame and the fixed sill count in the forward skin panels they merge
+# into; build() holds them to DETAIL_CAPS.
 BUDGET = {
     "hood_frame": {"target": 420, "cap": 480, "objects": (FRAME,)},
     "hood_glass": {"target": 600, "cap": 1500, "objects": (GLASS_OUTER,)},
-    "windscreen_glass": {"target": 400, "cap": 1100, "objects": (WINDSCREEN,)},
+    "windscreen_glass": {"target": 400, "cap": 1100, "exact": (WINDSCREEN,)},
     "hood_glass_inner": {"target": 600, "cap": 1500, "objects": (GLASS_INNER,), "cockpit": True},
 }
 GLASS_CAP = 2050

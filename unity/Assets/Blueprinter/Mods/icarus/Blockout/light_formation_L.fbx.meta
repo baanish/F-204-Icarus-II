@@ -7,8 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: CockpitWarningLight
+    second: {fileID: 2100000, guid: 9b435de6ceaaedc46855a819ed75e0a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Icarus_Body
     second: {fileID: 2100000, guid: 32c352d7a7d67254d9dbdcd405f1d5c3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Icarus_Cockpit
+    second: {fileID: 2100000, guid: 389c2b00ac7ee5e489dd7c835db65512, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -24,6 +34,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: LOD
     second: {fileID: 2100000, guid: 7d6ad621856f7a14695bf6cfe2bb81ba, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Matte_black
+    second: {fileID: 2100000, guid: 9eb01ebd73517014fac228bfed656b62, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -49,6 +64,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: light_green_off
     second: {fileID: 2100000, guid: 406fb6739984f2b4987be74f6fc2295d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tacScreenDisplay
+    second: {fileID: 2100000, guid: 2deff68261b7b374c881668b3d165451, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

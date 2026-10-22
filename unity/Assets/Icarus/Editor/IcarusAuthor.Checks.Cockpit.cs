@@ -22,6 +22,8 @@ namespace Icarus.Editor
             if (GetList(Prop(aircraft, "pilots")).Any(o => o == null)) p.Add("a null pilot");
             if (GetList(Prop(aircraft, "groundEquipment")).Any(o => o == null)) p.Add("dead ground equipment");
             if (GetList(Prop(aircraft, "exteriorRenderers")).Any(o => o == null)) p.Add("a null exterior renderer");
+            var revoker = b.Root.GetComponentsInChildren<MeshFilter>(true).Where(f => f.sharedMesh != null && RevokerCockpitMeshes.Contains(f.sharedMesh.name)).ToArray();
+            if (revoker.Length > 0) p.Add("Revoker cockpit meshes remain: " + string.Join(", ", revoker.Select(f => PathOf(f.transform, b.Root.transform) + " " + f.sharedMesh.name)));
             // The tac screen: one pylon set per HardpointIndex (PylonIndicator indexes them directly), and every engine
             // gauge named for a damageable that carries the engine.
             var cockpitUi = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
@@ -63,7 +65,7 @@ namespace Icarus.Editor
                 foreach (var camera in cameras)
                     minimum = Mathf.Min(minimum, Vector3.Distance(camera.position, r.bounds.ClosestPoint(camera.position)));
             if (minimum < CameraClearance - 0.01f) p.Add($"a target camera is {minimum:F2} m from the airframe, under {CameraClearance}");
-            return $"aircraft links set, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts, target cameras {minimum:F2} m clear";
+            return $"aircraft links set, no Revoker interior mesh, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts, target cameras {minimum:F2} m clear";
         }
 
         private static string CheckEscape(Build b, List<string> p)
@@ -120,7 +122,60 @@ namespace Icarus.Editor
             return $"one pilot with an ejection seat, no capsule, the canopy part ejects, the seat clears {airframe.Length} colliders at {RailCollidable} and {RailEnd} m";
         }
 
-        // A15: the cockpit renderers' layers, lists, enabled states, materials and triangle counts. Nothing is measured yet.
-        private static string CheckCockpitRenderers(Build b, List<string> p) => "not built";
+        // The renderers the cockpit view draws (Cockpit rule 1): the joined interior, both inner frames, both inner panes, the
+        // tac screen, the stock stick and throttle.
+        private static readonly string[] CockpitViewRenderers =
+            { "canopy_frame_inner", "canopy_glass_inner", "cockpit_interior", "cockpit_tac_screen", "joystick", "throttle", "windscreen_frame_inner", "windscreen_inner" };
+
+        // A15: Cockpit rules 20 to 24 (lists, layers, serialized states, proxies in LOD0), the materials each renderer wears,
+        // and the triangle bands of rules 2, 3, 20, 23 and 26.
+        private static string CheckCockpitRenderers(Build b, List<string> p)
+        {
+            var aircraft = new SerializedObject(b.Aircraft);
+            var view = GetList(Prop(aircraft, "cockpitRenderers")).OfType<Renderer>().ToArray();
+            var names = view.Select(r => r.name).OrderBy(n => n, StringComparer.Ordinal).ToArray();
+            if (!names.SequenceEqual(CockpitViewRenderers)) p.Add($"cockpitRenderers are [{string.Join(", ", names)}]");
+            foreach (var r in view)
+            {
+                if (r.gameObject.layer != CockpitLayer) p.Add($"{r.name} is on layer {r.gameObject.layer}");
+                if (r.enabled) p.Add(r.name + " is serialized enabled");
+            }
+            Material Stocked(string slot) => Load<Material>(Stock + "Material/" + slot + "_PLACEHOLDER.mat");
+            int Count(Renderer r) => r.GetComponent<MeshFilter>().sharedMesh.triangles.Length / 3;
+            Renderer Named(string n) => view.FirstOrDefault(r => r.name == n);
+            foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner" })
+                if (Named(n) != null && (Named(n).sharedMaterials.Length != 1 || Named(n).sharedMaterial.name != CockpitSlot)) p.Add(n + " isn't on the cockpit atlas");
+            var cockpitUi = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
+            var screen = GetRef(cockpitUi, "tacScreenRender") as Renderer;
+            if (screen == null || screen.name != "cockpit_tac_screen" || screen.sharedMaterial != Stocked("tacScreenDisplay"))
+                p.Add("Cockpit.tacScreenRender isn't cockpit_tac_screen on tacScreenDisplay");
+            var lamps = GetList(Prop(new SerializedObject(b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("CockpitWarningLights"), true).Single()), "lightRenderers")).OfType<Renderer>().ToArray();
+            if (lamps.Length != 1 || lamps[0].name != "cockpit_warning_lamps" || lamps[0].enabled || lamps[0].gameObject.layer != CockpitLayer
+                || lamps[0].sharedMaterial != Stocked("CockpitWarningLight") || Count(lamps[0]) < 40 || Count(lamps[0]) > 80)
+                p.Add("CockpitWarningLights.lightRenderers isn't the Icarus lamp mesh, 40 to 80 triangles on CockpitWarningLight, layer 3, serialized off");
+            var exterior = GetList(Prop(aircraft, "exteriorRenderers")).OfType<Renderer>().ToArray();
+            var lod0 = b.Root.GetComponent<LODGroup>().GetLODs()[0].renderers;
+            var proxies = new[] { ("cockpit_proxy", 700, 1030), ("canopy_frame_proxy", 240, 1900) }.Select(e => (e, r: exterior.FirstOrDefault(x => x.name == e.Item1))).ToArray();
+            foreach (var ((name, lo, hi), r) in proxies)
+            {
+                if (r == null) p.Add(name + " isn't in exteriorRenderers");
+                else if (!r.enabled || r.gameObject.layer == CockpitLayer || r.sharedMaterial != Stocked("Matte_black") || !lod0.Contains(r) || Count(r) < lo || Count(r) > hi)
+                    p.Add($"{name} isn't an enabled Matte_black renderer in LOD0 of {lo} to {hi} triangles");
+            }
+            if (exterior.Any(r => r.gameObject.layer == CockpitLayer)) p.Add("an exteriorRenderers entry on the cockpit layer");
+            if (view.Intersect(exterior).Any()) p.Add("a renderer in both cockpitRenderers and exteriorRenderers");
+            var interior = Named("cockpit_interior");
+            if (b.Parts["cockpit_cell"].GetComponentsInChildren<Light>(true).Any(l => view.Any(r => l.transform.IsChildOf(r.transform))))
+                p.Add("a Light in the cockpit");
+            var total = view.Sum(Count);
+            var frame = Named("canopy_frame_inner");
+            if (interior == null || frame == null)
+                return "no interior";
+            if (Count(interior) < 10500 || Count(interior) > 13500) p.Add($"the interior has {Count(interior)} triangles, outside 10,500 to 13,500");
+            if (Count(frame) < 1300 || Count(frame) > 8000) p.Add($"the hood's inner frame has {Count(frame)} triangles, outside 1,300 to 8,000");
+            if (total > 35000) p.Add($"the cockpit renderers have {total} triangles, over 35,000");
+            return $"{view.Length} cockpit renderers on layer 3 serialized off, {total} triangles (interior {Count(interior)}, inner frames {Count(frame)} + {Count(Named("windscreen_frame_inner"))}); " +
+                $"tac screen on tacScreenDisplay, lamps {Count(lamps[0])} in CockpitWarningLights, proxies {Count(proxies[0].r)} + {Count(proxies[1].r)} in exteriorRenderers and LOD0, no cockpit Light";
+        }
     }
 }

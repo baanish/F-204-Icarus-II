@@ -14,10 +14,13 @@ namespace Icarus.Editor
         // and EngineTelemetry finds its engine by the GameObject name of the damageable carrying it.
         private const string DonorTacScreen = Stock + "GameObject/tacScreen_fighter1_PLACEHOLDER.prefab";
         private const string TacScreenPath = ModFolder + "/Icarus_TacScreen.prefab";
+        // Where the conformal markers sit on the tac screen's front profile, in its pixels: the Revoker's bay dot is at
+        // (0, -32.6), its wing pylons at (+-100, -15.7).
+        private const float ConformalMarkerX = 24f, ConformalMarkerY = -32.6f;
 
         // The Revoker's sets by its HardpointIndex: wingtips 0 and 5, wing pylons 1 and 4, bays 2, cannon 3. Each Icarus
         // station takes the Revoker marker standing nearest its place on the Revoker's silhouette: the conformal stations
-        // take the bay and cannon markers, until the Icarus screen.
+        // take the bay and cannon markers, moved and retitled.
         private static void BuildTacScreen(Build b)
         {
             var cockpit = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
@@ -53,8 +56,19 @@ namespace Icarus.Editor
                     SetList(entry.FindPropertyRelative("pylonTexts"), revoker[map[i]].Texts);
                 }
                 indicator.ApplyModifiedPropertiesWithoutUndo();
+                // The two conformal stations get their own markers: the Revoker's bay and gun dots move under the belly either
+                // side of the centreline on the front profile (its +x is the aircraft's left), and their boxes are retitled.
+                RectTransform Marker(string n) => screen.GetComponentsInChildren<RectTransform>(true).Single(t => t.name == n);
+                Marker("hardpoint_BayL").anchoredPosition = new Vector2(ConformalMarkerX, ConformalMarkerY);
+                Marker("hardpoint_Gun").anchoredPosition = new Vector2(-ConformalMarkerX, ConformalMarkerY);
+                foreach (var (box, title) in new[] { ("Box_Bay", "L.CONF"), ("Box_Gun", "R.CONF") })
+                {
+                    var text = new SerializedObject(Marker(box).Find("Title").GetComponents<Component>().Single(c => new SerializedObject(c).FindProperty("m_text") != null));
+                    Prop(text, "m_text").stringValue = title;
+                    text.ApplyModifiedPropertiesWithoutUndo();
+                }
                 Set(cockpit, "tacScreenUIPrefab", SavePrefab(screen, TacScreenPath));
-                b.Report.Add($"tac screen: owned copy with engine telemetry on {PrefabName} and {map.Length} pylon sets on the Revoker markers [{string.Join(", ", map)}]");
+                b.Report.Add($"tac screen: owned copy with engine telemetry on {PrefabName} and {map.Length} pylon sets on the Revoker markers [{string.Join(", ", map)}], the conformal markers under the belly titled L.CONF and R.CONF");
             }
             finally
             {
