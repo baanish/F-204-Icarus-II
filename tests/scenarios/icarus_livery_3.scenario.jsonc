@@ -1,0 +1,22 @@
+// Livery 3 of 4: the Icarus parked on Sandrift's runway in livery index 2 (icarus_pala_3), shot from the same orbit as the other three. Pass: the run completes and the screenshot
+// shows the aircraft in that livery. The verdict is read from the screenshot; the steps only set the shot up.
+// From the repo root: no-agentic run tests/scenarios/icarus_livery_3.scenario.jsonc
+{
+  "mission": "icarus_livery_3.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 330, "pitch_deg": 10 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles on the orbit" },
+    { "screenshot": { "name": "livery_3" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is still the player's aircraft after the shot" },
+    { "camera": { "mode": "game" } },
+  ],
+}

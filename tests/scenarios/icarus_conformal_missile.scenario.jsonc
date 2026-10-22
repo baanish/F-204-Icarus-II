@@ -1,0 +1,37 @@
+// Conformal missile: the Icarus flies level at 10,000 m with an AAM-29 on its conformal station (hardpoint set 2, the
+// baanish_icarus_AAM2_conformal mount, in icarus_conformal_missile.mission.json's savedLoadout), locks a stationary Boscali
+// COIN 12 km ahead and fires from that station. Pass: the Icarus is undamaged for 8 s after the launch (the missile leaves the
+// trough without hitting or exploding near the aircraft), the launch is an AAM2 at T1 from the conformal station, and the
+// missile hits T1.
+// From the repo root: no-agentic run tests/scenarios/icarus_conformal_missile.scenario.jsonc
+{
+  "mission": "icarus_conformal_missile.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.alt_msl_m", "near": 10000, "tol": 200 }, "timeout": 30, "hold": 2, "label": "level at 10,000 m" },
+    { "spawn": { "kind": "aircraft", "type": "COIN", "faction": "Boscali", "back_m": -12000, "speed_mps": 0, "name": "T1" } },   // a stationary target 12 km ahead
+    { "wait": { "path": "contacts.T1.live", "eq": true }, "timeout": 20, "label": "the player's HQ tracks T1" },
+    { "act": { "station": 0 } },
+    { "act": { "target": "T1" } },
+    { "check": { "all": [ { "path": "own.station.name", "eq": "AAM-29 Scythe" }, { "path": "own.target", "eq": "T1" } ] },
+      "label": "the conformal AAM-29 station is selected and T1 is the target" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 25, "hdg_deg": 300, "pitch_deg": -10 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles on the orbit" },
+    { "mark": { "label": "fire" } },
+    { "act": { "fire": 0.2 } },
+    { "check": { "event": "own_launch", "type": "AAM2", "target": "T1" }, "within": 2, "label": "the Icarus launched an AAM-29 from the conformal station at T1" },
+    { "screenshot": { "name": "conformal_launch" } },
+    { "camera": { "mode": "game" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "not": { "event": "damage", "since": "fire" } } ] }, "for": 8,
+      "label": "the Icarus takes no damage for 8 s after the launch" },
+    { "check": { "event": "missile_end", "type": "AAM2", "result": "hit", "since": "fire" }, "within": 60, "label": "the AAM-29 hits T1" },
+  ],
+}
