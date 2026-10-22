@@ -1,6 +1,7 @@
 """Hang every mount the built Icarus offers from its hardpoints and check what the stores clear.
 
 python tools/store_clearance.py [path-to-icarus.nobp]       # default: the newest build/*.nobp
+python tools/store_clearance.py --lights-blockout .cache/review/wave2/p7/01/lights-blockout.json
 
 Reads the built bundle for the airframe, the hardpoint sets and the mounts registered on them (twin racks included),
 the LandingGear components, the rest pose and the mod's own mounts (the conformal ones), and tools/local-paths.json's
@@ -15,11 +16,15 @@ game export for the stock mounts. Prints a verdict per check and exits nonzero o
   from the rest attitude (exact: the first contact of a plane is a vertex).
 - Stores rule 5: each wingtip hardpoint on its tip face, 0.005 m in, at mid-thickness, 0.545 of the tip chord back from
   the leading edge (where both hooks of every wingtip mount bear on the face), its mount's -Y outboard.
+- Stores rule 14: both nav lenses outside every tip store's rendered bounds and physical collider envelope. The
+  --lights-blockout mode uses tools/review_lights.py's geometry snapshot and the source Wingtip option list, for
+  verification before Unity can build. It also checks the entire stock lens stays inboard of the tip face.
 
 Mount colliders against the tyres are reported, not judged: store-versus-airframe collider overlap is Unity's check
 (A14). Everything is in the aircraft root frame (Unity: +x right, +y up, +z forward).
 """
 import math
+import json
 import re
 import sys
 from pathlib import Path
@@ -36,6 +41,7 @@ from stores import meshverts  # noqa: E402
 from stores.bodies import mesh_path  # noqa: E402
 from stores.mounts import load_mount  # noqa: E402
 from stores.prefab_tree import asset_index  # noqa: E402
+from stores.lights import check_tip_lamps, stock_lens, wingtip_keys  # noqa: E402
 
 GAP = 0.05  # Stores rule 12
 STEP = 0.01  # largest gear vertex move between two poses of a sweep
@@ -59,6 +65,21 @@ def box_mesh(centre, rot, half):
 
 
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == "--lights-blockout":
+        snapshot = json.loads(Path(sys.argv[2]).read_text())
+        root = LOCAL["game_export"]
+        index = asset_index(root, "Mesh")
+        lamps = [("navlight_" + side, stock_lens(index, side, anchor)) for side, anchor in snapshot["nav_anchors"].items()]
+        stations = [(name, np.asarray(t["position"]), quat_matrix(t["rotation"])) for name, t in snapshot["tip_stations"].items()]
+        mounts = {key: load_mount(root, index, key) for key in wingtip_keys(paths.REPO)}
+        print("Blender geometry and source Wingtip options; stock 14 triangle lens, centred as PlaceSystems places it")
+        passed = check_tip_lamps(stations, lamps, mounts)
+        for side, anchor in snapshot["nav_anchors"].items():
+            verts, _ = stock_lens(index, side, anchor)
+            tip_gap = snapshot["tip_faces"][side] - np.abs(verts[:, 0]).max()
+            print(f"navlight_{side} tip face {'PASS' if tip_gap > 0.00001 else 'FAIL'}: {tip_gap:.6f} m inboard")
+            passed &= tip_gap > 0.00001
+        sys.exit(0 if passed else 1)
     builds = sorted(Path(paths.REPO / "build").glob("*.nobp"), key=lambda p: p.stat().st_mtime)
     nobp = Path(sys.argv[1]) if len(sys.argv) > 1 else (builds[-1] if builds else None)
     if nobp is None or not nobp.exists():
@@ -215,6 +236,16 @@ def main():
 
     print("\n## Verdicts")
     failed = False
+    print("\n## Tip lamps (Stores rule 14)")
+    tip_stations = [(name, *plane.world(hp)[:2]) for set_name, hardpoints in plane.sets if set_name == "Wingtip" for name, hp in hardpoints]
+    lamps = []
+    for side in ("L", "R"):
+        name = "navlight_" + side
+        pos, rot, scale = plane.world(plane.find(name))
+        verts, tris = stock_lens(index, side)
+        lamps.append((name, (pos + (verts * scale) @ rot.T, tris)))
+    tip_mounts = {key: mounts[key] for i, (name, _) in enumerate(plane.sets) if name == "Wingtip" for key in plane.mounts[i]}
+    failed |= not check_tip_lamps(tip_stations, lamps, tip_mounts)
     gap, hp, key, where = min(rule12)
     ok = gap >= GAP
     failed |= not ok

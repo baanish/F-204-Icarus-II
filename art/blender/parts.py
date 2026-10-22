@@ -320,7 +320,7 @@ def _organise(p, icarus, internals, structure_mat):
         obj = parts[name]
         role = next((r for k, r in ROLE.items() if name.startswith(k)), "structure")
         target = O.get(name + "_visible", obj) if obj.type == "EMPTY" else obj  # lights are bare empties
-        target["role"] = role
+        target["role"] = target.get("role", role)
         target["mass_kg"] = mass
         if parent:
             world = obj.matrix_world.copy()

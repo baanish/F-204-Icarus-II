@@ -39,6 +39,13 @@ def measure(icarus, item):
         col = bpy.data.collections.get(item["collection"])
         return sum(tris(o) for o in col.objects if o.type == "MESH") if col else 0
     prefixes = tuple(item["objects"])
+    if "face_attribute" in item:
+        total = 0
+        for obj in meshes(icarus):
+            tag = obj.data.attributes.get(item["face_attribute"])
+            if obj.name.startswith(prefixes) and tag:
+                total += sum(len(f.vertices) - 2 for f in obj.data.polygons if tag.data[f.index].value)
+        return total
     return sum(tris(o) for o in meshes(icarus) if prefixes and o.name.startswith(prefixes))
 
 

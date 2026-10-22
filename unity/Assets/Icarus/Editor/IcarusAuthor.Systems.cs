@@ -53,10 +53,11 @@ namespace Icarus.Editor
             }
             ejector.ApplyModifiedPropertiesWithoutUndo();
 
-            // The export's light empties on the Revoker's lights: the nav lamps on the wing skins' tips, which carry them
-            // away when they go, the gear light as the landing light on the nose leg, and the Revoker's formation-light
-            // switching on copies of the nav lamp. It has no anticollision beacon to give the two beacon empties.
+            // Keep the stock nav lenses by reference. Formation strips use our surface-following mesh and the
+            // Revoker's off material and switching, so the wing and skin parts carry their own lights away.
             var navLights = new SerializedObject(b.Root.GetComponent(GameType("NavLights")));
+            var formationOff = Load<GameObject>(DonorPrefab).GetComponentsInChildren<MeshRenderer>(true)
+                .First(r => r.name.StartsWith("slimelights", StringComparison.Ordinal)).sharedMaterial;
             Vector3 Lamp(Transform lamp, string empty) => b.Blockout.Local(empty)
                 - (lamp.GetComponent<MeshFilter>() is MeshFilter filter && filter.sharedMesh != null ? lamp.TransformVector(filter.sharedMesh.bounds.center) : Vector3.zero);
             var lights = new List<string>();
@@ -65,20 +66,24 @@ namespace Icarus.Editor
                 var skin = b.Parts["wing_skin_" + side].transform;
                 var nav = root.Find("navlight_" + side);
                 nav.SetParent(skin, true);
+                nav.rotation = Quaternion.identity;
+                nav.localScale = Vector3.one;
                 nav.position = Lamp(nav, "light_nav_" + side);
                 NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
                 lights.Add($"{nav.name} at light_nav_{side}");
 
-                var formation = Object.Instantiate(nav.gameObject, b.Parts["skin_mid_" + side].transform).transform;
-                formation.name = "light_formation_" + side;
-                foreach (var child in formation.Cast<Transform>().ToArray())
-                    Object.DestroyImmediate(child.gameObject);
-                formation.rotation = nav.rotation;
-                formation.position = Lamp(formation, "light_formation_" + side);
+                var formationName = "light_formation_" + side;
+                var formation = new GameObject(formationName) { layer = b.Root.layer }.transform;
+                formation.SetParent(b.Parts["skin_mid_" + side].transform, true);
+                formation.SetPositionAndRotation(b.Blockout.Local(formationName), b.Blockout.Rotation(formationName));
+                formation.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes[formationName].Render;
+                var formationRenderer = formation.gameObject.AddComponent<MeshRenderer>();
+                formationRenderer.sharedMaterial = formationOff;
+                b.Visuals[formationName] = formation;
                 var entries = Prop(navLights, "navLights");
                 entries.arraySize++;
                 var entry = entries.GetArrayElementAtIndex(entries.arraySize - 1);
-                entry.FindPropertyRelative("renderer").objectReferenceValue = formation.GetComponent<Renderer>();
+                entry.FindPropertyRelative("renderer").objectReferenceValue = formationRenderer;
                 entry.FindPropertyRelative("objects").arraySize = 0;
                 entry.FindPropertyRelative("litMaterial").objectReferenceValue = b.Donor.FormationLit;
                 entry.FindPropertyRelative("part").objectReferenceValue = b.Part("skin_mid_" + side);
@@ -108,7 +113,7 @@ namespace Icarus.Editor
             b.Placed.Add(landingLight);
             lights.Add("gearlight_F at light_landing on the nose leg");
             navLights.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add("lights: " + string.Join("; ", lights) + "; light_beacon_top and light_beacon_belly unwired (no Revoker beacon)");
+            b.Report.Add("lights: " + string.Join("; ", lights));
 
             // The transonic vapour cone where the wing root meets the body; the downwash under the nozzle on the Icarus
             // ground line; the scrape sparks on the belly.
