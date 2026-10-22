@@ -13,8 +13,8 @@ game export for the stock mounts. Prints a verdict per check and exits nonzero o
   moves more than 0.01 m between poses.
 - Stores rule 13: no store touches the ground before the airframe in a nose-up rotation about the main-wheel contact
   from the rest attitude (exact: the first contact of a plane is a vertex).
-- Stores rule 5: each wingtip hardpoint on its tip face, 0.005 m in, at mid-thickness, 0.40 of the tip chord back from
-  the leading edge, its mount's -Y outboard.
+- Stores rule 5: each wingtip hardpoint on its tip face, 0.005 m in, at mid-thickness, 0.545 of the tip chord back from
+  the leading edge (where both hooks of every wingtip mount bear on the face), its mount's -Y outboard.
 
 Mount colliders against the tyres are reported, not judged: store-versus-airframe collider overlap is Unity's check
 (A14). Everything is in the aircraft root frame (Unity: +x right, +y up, +z forward).
@@ -40,7 +40,7 @@ from stores.prefab_tree import asset_index  # noqa: E402
 GAP = 0.05  # Stores rule 12
 STEP = 0.01  # largest gear vertex move between two poses of a sweep
 REACH = 0.5  # gaps beyond this are reported as "> REACH"
-TIP_INSET, TIP_CHORD, TIP_TOLERANCE = 0.005, 0.40, 0.001  # Stores rule 5
+TIP_INSET, TIP_CHORD, TIP_TOLERANCE = 0.005, 0.545, 0.001  # Stores rule 5
 LEG = re.compile(r"^gear_(leg|unsprung|arm)_[NLR](_visible)?$")
 TYRE = re.compile(r"^gear_wheel_[NLR]_visible$")
 DOOR = re.compile(r"^gear_door_\w+_visible$")

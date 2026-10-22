@@ -20,8 +20,7 @@ namespace Icarus.Editor
         // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie and the pods, one store
         // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations the MMR-S3, IRM-S2 and
         // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
-        // Auger, and no other double or triple racks (a rocket pod is one store). The owner accepts that the AAM-29 twin,
-        // hung low by its adapter, reaches the runway about 2.2 deg before the tail in a nose-up rotation.
+        // Auger, and no other double or triple racks (a rocket pod is one store).
         private static readonly string[][] StationKeys =
         {
             new[] { "AAM1_single", "AAM3_single" },

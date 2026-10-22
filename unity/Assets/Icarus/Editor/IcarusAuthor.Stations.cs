@@ -16,10 +16,10 @@ namespace Icarus.Editor
         // MeasuredTolerance: moving a station means a new clearance run and a new entry here.
         private static readonly Dictionary<string, (Vector3 Position, float Roll)> MeasuredHardpoints = new Dictionary<string, (Vector3, float)>
         {
-            { "hardpoint_wingtip_L", (new Vector3(-3.395f, -0.562f, -2.595f), 270f) },
-            { "hardpoint_wingtip_R", (new Vector3(3.395f, -0.562f, -2.595f), 90f) },
-            { "hardpoint_innerwing_L", (new Vector3(-1.849f, -0.594f, -1.692f), 0f) },
-            { "hardpoint_innerwing_R", (new Vector3(1.849f, -0.594f, -1.692f), 0f) },
+            { "hardpoint_wingtip_L", (new Vector3(-3.395f, -0.562f, -2.7835f), 270f) },
+            { "hardpoint_wingtip_R", (new Vector3(3.395f, -0.562f, -2.7835f), 90f) },
+            { "hardpoint_innerwing_L", (new Vector3(-1.849f, -0.4135f, -1.8800f), 0f) },
+            { "hardpoint_innerwing_R", (new Vector3(1.849f, -0.4135f, -1.8800f), 0f) },
             // Raised 0.055 m onto the trough floor for the Icarus's own conformal mounts (art/blender/stations.py).
             { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.455f, 0.950f), 0f) },
             { "hardpoint_conformal_R", (new Vector3(0.550f, -0.455f, 0.950f), 0f) },
@@ -131,9 +131,8 @@ namespace Icarus.Editor
         // Six stations in SetNames order, each set [L, R] with HardpointIndex 0..5 left before right.
         private static void BuildStations(Build b)
         {
-            // A wing station hangs from the foremost point of its pylon's flat lower edge, ahead of where stock blades put
-            // theirs (0.45 of the blade back): the swept wing puts the blade well behind the main wheels, and a store
-            // hung further aft reaches the runway before the tail in a nose-up rotation (art/blender/stations.py pylons).
+            // A wing station hangs under the middle of its pylon's flat lower edge, as stock blades put theirs, so every
+            // mount's hooks and twin rack bear on the blade (art/blender/stations.py PYLONS).
             Vector3 PylonPoint(string pylon)
             {
                 var probe = new GameObject("pylon_probe").transform;
@@ -141,11 +140,12 @@ namespace Icarus.Editor
                 var points = WorldVertices(probe, b.Meshes[pylon].Render);
                 Object.DestroyImmediate(probe.gameObject);
                 var low = points.Min(v => v.y);
-                var z = points.Where(v => v.y < low + 0.01f).Max(v => v.z);
-                return new Vector3(points.Average(v => v.x), low, z);
+                var edge = points.Where(v => v.y < low + 0.01f).ToArray();
+                return new Vector3(points.Average(v => v.x), low, (edge.Max(v => v.z) + edge.Min(v => v.z)) / 2f);
             }
-            // A wingtip station sits on the flat tip face, 0.005 m in from it at mid-thickness, 0.40 of the tip chord back
-            // from the leading edge; its roll turns the mount's rail onto the face, so the store hangs beside the tip.
+            // A wingtip station sits on the flat tip face, 0.005 m in from it at mid-thickness, 0.545 of the tip chord back
+            // from the leading edge, where both hooks of every wingtip mount's rail bear on the face (Stores rule 5 as the
+            // owner redefined it); its roll turns the mount's rail onto the face, so the store hangs beside the tip.
             Vector3 TipPoint(string side)
             {
                 var vertices = WorldVertices(b.Parts["wing_skin_" + side].transform, b.Meshes["wing_skin_" + side].Render);
@@ -153,7 +153,7 @@ namespace Icarus.Editor
                 var tip = vertices.Where(v => Mathf.Abs(v.x) > outer - 0.001f).ToArray();
                 var leading = tip.Max(v => v.z);
                 return new Vector3(Mathf.Sign(tip[0].x) * (outer - 0.005f), (tip.Max(v => v.y) + tip.Min(v => v.y)) / 2f,
-                    leading - 0.40f * (leading - tip.Min(v => v.z)));
+                    leading - 0.545f * (leading - tip.Min(v => v.z)));
             }
             // Heights at which the vertical line through (x, z) crosses a part's mesh.
             IEnumerable<float> Crossings(string part, float x, float z)

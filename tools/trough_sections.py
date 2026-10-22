@@ -6,7 +6,7 @@ python tools/trough_sections.py --profiles    # the body envelopes art/blender/s
 The first form builds the Icarus in Blender twice (with the trough, and without it for the old belly line), slices the
 skin, intake ducts and fuel cells, hangs each conformal store's stock missile mesh in the Icarus's own mount (layout
 from stations.MOUNTS) and renders it from below, the side and three-quarter, and renders the left pylon empty (plug)
-and loaded. Back outside Blender it draws one section per conformal store at the missile's mid-length and prints, per
+and loaded with each of INNER_STORES. Back outside Blender it draws one section per conformal store at the missile's mid-length and prints, per
 store: how much of the body sits above the old belly line, the rendered missile's least gap to the trough skin, and
 its fins' least gap to the intake ducts. The stock missile meshes come from tools/local-paths.json's game export and
 stay local: nothing here is committed but the numbers.
@@ -23,7 +23,7 @@ sys.path.insert(0, str(REPO / "art" / "blender"))
 from stores import paths  # noqa: E402
 
 STOCK = {"AAM1_single": "AAM1", "AAM3_single": "AAM3", "AAM2_single": "AAM2"}
-INNER_STORE = "AAM1_single"  # the store hung on the pylon for its loaded render
+INNER_STORES = ("AAM2_single", "AAM2_double", "AGM_heavy_single", "bomb_500_single")  # hung on the pylon for its loaded renders
 
 
 def to_blender(v):
@@ -182,18 +182,20 @@ def blender_main(out):
     blade, plug = bpy.data.objects["pylon_inner_L"], bpy.data.objects["pylon_inner_plug_L"]
     pts = [blade.matrix_world @ v.co for v in blade.data.vertices]
     low = min(q.z for q in pts)
-    nose = min((q for q in pts if q.z < low + 0.01), key=lambda q: q.y)
-    hp = Vector((sum(q.x for q in pts) / len(pts), nose.y, low))
-    (verts, tris), _ = load_mount(local["game_export"], index, INNER_STORE)
-    view = (hp + Vector((2.2, -2.4, -0.9)), hp + Vector((0.0, 0.5, 0.15)))
+    edge = [q.y for q in pts if q.z < low + 0.01]
+    hp = Vector((sum(q.x for q in pts) / len(pts), (min(edge) + max(edge)) / 2, low))  # under the edge's middle
+    view = (hp + Vector((2.2, -2.4, -0.9)), hp + Vector((0.0, 0.2, 0.15)))
+    side = (hp + Vector((3.6, 0.2, -0.1)), hp + Vector((0.0, 0.2, 0.05)))
     blade.hide_render, plug.hide_render = True, False
     shoot("pylon_empty", *view, 45)
-    shoot("pylon_empty_side", hp + Vector((3.2, 0.5, -0.1)), hp + Vector((0.0, 0.5, 0.1)), 45)
-    store = hang("pylon_store", verts.tolist(), tris.tolist(), hp, red)
+    shoot("pylon_empty_side", *side, 40)
     blade.hide_render, plug.hide_render = False, True
-    shoot("pylon_loaded", *view, 45)
-    shoot("pylon_loaded_side", hp + Vector((3.2, 0.5, -0.1)), hp + Vector((0.0, 0.5, 0.1)), 45)
-    bpy.data.objects.remove(store, do_unlink=True)
+    for key in INNER_STORES:
+        (verts, tris), _ = load_mount(local["game_export"], index, key)
+        store = hang("pylon_store", verts.tolist(), tris.tolist(), hp, red)
+        shoot("pylon_%s_three_quarter" % key, *view, 45)
+        shoot("pylon_%s_side" % key, *side, 40)
+        bpy.data.objects.remove(store, do_unlink=True)
 
     # Fins: the missile mesh points above the axis that lie off the body (X fins), for the duct gap.
     data = {"layout": layout, "conformal": c, "gap": stations.GAP, "mids": mids, "cuts": cuts,

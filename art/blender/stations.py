@@ -2,8 +2,8 @@
 conformal mounts.
 
 One blade hangs under each wing at a fraction of the span from the root row to the tip. Each carries one mount, which
-the game hangs from the hardpoint at the front of the blade's flat lower edge. The blade is an aerofoil shell whose
-root flares into the wing's lower surface. The wingtip stations have no blade or rail: every mount brings its own
+the game hangs from the hardpoint under the middle of the blade's flat lower edge, so every mount's hooks and twin rack
+bear on the blade. The blade is a shallow aerofoil shell whose root flares into the wing's lower surface. The wingtip stations have no blade or rail: every mount brings its own
 launch rail, which bears straight on the tip face. The game hides an empty station's blade and shows its plug instead,
 a stub on the blade's root footprint. The hardpoints themselves are placed by the Unity author
 (IcarusAuthor.Stations.cs), which holds them to their measured positions.
@@ -25,7 +25,13 @@ from mathutils.bvhtree import BVHTree
 
 import build_icarus as bi
 
-PYLONS = {"inner": 0.45, "length": 1.5, "depth": 0.26, "half": 0.053, "nose": 0.10, "tail": 0.20, "rake": 0.30,
+# The inner blades: span fraction; the hardpoint's chord fraction (forward enough that the twin racks clear the
+# bottomed main wheel by Stores rule 12's 0.05 m: 0.074 m here, 0.043 m at 0.37);
+# length, which covers the longest inner mount's hooks (the AAM-29, AAM-4, AGM-68 and Genie rails: 0.84 m aft to
+# 0.66 m forward of the hardpoint) with the hardpoint centred; depth below the wing's lowest point, shallow so the
+# stores ride close to the wing (every store and rack still clears it at rest); and the plan outline's half-width, nose
+# and tail, short enough that the rear hook stays under the tail's full width.
+PYLONS = {"inner": 0.45, "centre": 0.35, "length": 1.75, "depth": 0.08, "half": 0.053, "nose": 0.10, "tail": 0.12,
           "bury": 0.008, "plug": 0.03}
 # The conformal hardpoint (left; the right mirrors it), Blender (x, s, z): x and s held since P0, z raised onto the
 # trough floor, INSET above the skin there (Stores rule 9). The floor sits GAP above the highest body.
@@ -387,9 +393,9 @@ def outline(front, back, half, nose, tail, n_nose=8, n_tail=4):
 
 
 def pylons(p, mat):
-    """The inner wing pylons and their plugs. The blade's flat lower edge runs from the held hardpoint aft; its front
-    is raked back from the root, and its root flares into the wing in a fillet. The plug is the root footprint, down
-    to PYLONS["plug"] below the wing."""
+    """The inner wing pylons and their plugs. The blade's flat lower edge is as long as its root, with the hardpoint
+    under the middle of both, and its root flares into the wing in a fillet. The plug is the root footprint, down to
+    PYLONS["plug"] below the wing."""
     w, y = p["wing"], PYLONS
     root_x, tip_x = w["planform"][0][1], w["planform"][-1][1]
     parts = []
@@ -397,20 +403,19 @@ def pylons(p, mat):
         x = root_x + y["inner"] * (tip_x - root_x)
         le, z, chord = wing_at(w, x)
         low = z - 0.5 * w["thickness"] * chord
-        length = min(y["length"], 0.75 * chord)
         # The root stays on the fixed box, clear of the moving surfaces and the space they sweep.
         front, back = fixed_box(p, x)
-        s0 = max(le + front * chord, le + 0.45 * chord - length / 2)
-        s1 = min(le + back * chord, le + 0.45 * chord + length / 2)
+        s0 = le + y["centre"] * chord - y["length"] / 2
+        s1 = s0 + y["length"]
+        if s0 < le + front * chord or s1 > le + back * chord:
+            raise ValueError("pylon_inner%s s %.3f to %.3f leaves the fixed box, s %.3f to %.3f" % (
+                suffix, s0, s1, le + front * chord, le + back * chord))
         z_b = low - y["depth"]
-        # Plan outline at a level f (0 at the root, 1 at the lower edge); the hardpoint is its nose at the lower edge.
-        level = lambda f: outline(s0 + y["nose"] + y["rake"] * f, s1 - y["tail"] - y["rake"] / 3 * f,
-                                  y["half"], y["nose"], y["tail"])
+        plan = outline(s0 + y["nose"], s1 - y["tail"], y["half"], y["nose"], y["tail"])
         xc = side * x
-        flat = lambda f, zz: [bi.P(s, xc + dx, zz) for s, dx in level(f)]
         on_wing = lambda grow, drop: [bi.P(s, xc + dx * (1 + grow / y["half"]), wing_lower(w, s, xc + dx) - drop)
-                                      for s, dx in level(0.0)]
-        rings = [flat(1.0, z_b), flat(0.2, z_b + 0.8 * (low - z_b)), on_wing(0.0, 0.02), on_wing(0.012, 0.004),
+                                      for s, dx in plan]
+        rings = [[bi.P(s, xc + dx, z_b) for s, dx in plan], on_wing(0.0, 0.02), on_wing(0.012, 0.004),
                  on_wing(0.02, -y["bury"])]
         blade = bi.loft("pylon_inner%s" % suffix, rings, cap_back=True, cap_front=True)
         bi.finish(blade, mat, smooth=True)
