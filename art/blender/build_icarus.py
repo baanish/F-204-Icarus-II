@@ -163,6 +163,7 @@ def wing_sections(w):
 
 
 RING = 96  # vertices around a fuselage section; the intakes span only a fraction of each ring
+TROUGH_LIP_COLUMNS = (19 * RING // 24, 23 * RING // 24)  # 16 spans across each arch keep its chords clear of the stores
 CHORD = 22  # points along each airfoil surface over the full chord; a piece of the chord takes its share, at least 6
 SPAN_STEP = 0.4  # most metres between the span stations of a lifting-surface piece
 
@@ -368,7 +369,7 @@ def fuselage_shapes(p, s):
     return shapes, zmid
 
 
-def blended_ring(p, s):
+def blended_ring(p, s, angles=None):
     shapes, zc = fuselage_shapes(p, s)
     # At the lip the intake meets the body almost sharply, so it reads as a slice of a circle; the fillet fades in
     # behind it.
@@ -378,54 +379,117 @@ def blended_ring(p, s):
 
     carves = stations.carve_shapes(p, s)  # the conformal trough, cut out of the union
 
-    def field(x, z):
+    def skin_field(x, z):
         d = shapes[0](x, z)
         for f in shapes[1:]:
             d = smin(d, f(x, z), k)
-        for c in carves:
-            d = max(d, -c(x, z))
         return d
+
+    def field(x, z):
+        d = skin_field(x, z)
+        return max(d, -min(c(x, z) for c in carves)) if carves else d
 
     ar = p["area_rule"]
     u = (s - ar["centre_s"]) / ar["half_length"]
     squeeze = 1.0 - ar["depth"] * math.cos(0.5 * math.pi * u) ** 2 if abs(u) < 1 else 1.0
-    ring = []
-    for i in range(RING):
-        a = 2 * math.pi * i / RING
+
+    def radius(a, sample):
         c, sn = math.cos(a), math.sin(a)
         r_out, step, r = 0.0, 0.02, 0.0
-        inside = field(0.0, zc) < 0
+        inside = sample(0.0, zc) < 0
         while r < 3.0:  # keep the outermost inside-to-outside crossing, so concave fillets resolve
             r_next = r + step
-            now = field(r_next * c, zc + r_next * sn) < 0
+            now = sample(r_next * c, zc + r_next * sn) < 0
             if inside and not now:
                 lo, hi = r, r_next
                 for _ in range(20):
                     mid = 0.5 * (lo + hi)
-                    if field(mid * c, zc + mid * sn) < 0:
+                    if sample(mid * c, zc + mid * sn) < 0:
                         lo = mid
                     else:
                         hi = mid
                 r_out = 0.5 * (lo + hi)
             inside, r = now, r_next
+        return r_out
+
+    sample_angles = angles if angles is not None else [2 * math.pi * i / RING for i in range(RING)]
+    if carves and angles is None:
+        # Fixed lip columns stop the trough wandering between angular samples from ring to ring.
+        def on_skin(a):
+            r = radius(a, skin_field)
+            return min(c(r * math.cos(a), zc + r * math.sin(a)) for c in carves)
+
+        samples = [(sample_angles[i], on_skin(sample_angles[i])) for i in range(3 * RING // 4, RING)]
+        samples.append((2 * math.pi, on_skin(2 * math.pi)))
+        lips = []
+        for (a, da), (b, db) in zip(samples, samples[1:]):
+            if (da < 0) != (db < 0):
+                for _ in range(20):
+                    mid = (a + b) / 2
+                    if (on_skin(mid) < 0) == (da < 0):
+                        a = mid
+                    else:
+                        b = mid
+                lips.append((a + b) / 2)
+        if len(lips) == 2:
+            # Keep skin vertices between the trough lip and the intake opening, including above the body side.
+            anchors = [(3 * RING // 4, 1.5 * math.pi), (TROUGH_LIP_COLUMNS[0], lips[0]),
+                       (TROUGH_LIP_COLUMNS[1], lips[1]), (RING + RING // 12, 2 * math.pi + math.pi / 6)]
+            for (i0, a), (i1, b) in zip(anchors, anchors[1:]):
+                for i in range(i0, i1):
+                    angle = a + (b - a) * (i - i0) / (i1 - i0)
+                    sample_angles[i % RING] = angle
+                    sample_angles[(3 * RING // 2 - i) % RING] = (math.pi - angle) % (2 * math.pi)
+    ring = []
+    for a in sample_angles:
+        c, sn = math.cos(a), math.sin(a)
+        r_out = radius(a, field)
         ring.append(P(s, r_out * c * squeeze, zc + r_out * sn * squeeze))
     return ring
+
+
+def fuselage_stations(p):
+    lip = p["intake"][0][0]
+    return (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
+            + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, p["fuselage"][-1][0], 50)[1:])
+
+
+def skin_ring(p, s):
+    """Section of the rendered loft, so internal fits cannot bridge a differently sampled SDF contour."""
+    stations = fuselage_stations(p)
+    if s <= stations[0] or s >= stations[-1]:
+        return blended_ring(p, s)
+    i = next(i for i, end in enumerate(stations[1:]) if s <= end)
+    a, b = stations[i:i + 2]
+    t = (s - a) / (b - a)
+    return [v.lerp(w, t) for v, w in zip(blended_ring(p, a), blended_ring(p, b))]
 
 
 def build_fuselage(p, mat, duct_mat):
     table = p["fuselage"]
     lip = p["intake"][0][0]
-    stations = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
-                + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, table[-1][0], 50)[1:])
+    stations = fuselage_stations(p)
     rings = [blended_ring(p, s) for s in stations]
     obj = loft("fuselage", rings, tip_front=P(0.0, 0.0, table[0][2]))  # open at the tail: the nozzle shroud fills it
     finish(obj, mat)
+    lip_columns = set(TROUGH_LIP_COLUMNS) | {3 * RING // 2 - i for i in TROUGH_LIP_COLUMNS}
+    import stations as stores
+
+    for edge in obj.data.edges:
+        a, b = [i - 1 for i in edge.vertices]
+        if a >= 0 and a % RING == b % RING and a % RING in lip_columns:
+            if all(stores.carve_shapes(p, stations[i // RING]) for i in (a, b)):
+                edge.use_edge_sharp = True
     obj.data.materials.append(duct_mat)
     # The faces between the last ring ahead of the lip and the lip itself would close the intakes; delete them so
     # the openings look into the ducts.
     j = stations.index(lip) - 1
-    step = [(Vector((b.x, b.z)) - Vector((a.x, a.z))).length for a, b in zip(rings[j], rings[j + 1])]
-    opening = [RING + j * RING + k for k in range(RING) if max(step[k], step[(k + 1) % RING]) > 0.005]
+    zc = fuselage_shapes(p, lip)[1]
+    # Angular redistribution alone is not an intake opening. Compare the skin at the lip ring's own angles.
+    ahead = blended_ring(p, stations[j], [math.atan2(v.z - zc, v.x) for v in rings[j + 1]])
+    step = [(Vector((b.x, b.z)) - Vector((a.x, a.z))).length for a, b in zip(ahead, rings[j + 1])]
+    # A stationary endpoint belongs to the skin bridge between the trough and the intake.
+    opening = [RING + j * RING + k for k in range(RING) if min(step[k], step[(k + 1) % RING]) > 0.005]
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bm.faces.ensure_lookup_table()

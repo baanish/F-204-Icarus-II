@@ -57,7 +57,7 @@ def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None, count=None):
     """The skin section at s pulled inward by inset. With floor or x limits, the section is clipped to z >= floor
     and x_lo <= x <= x_hi (a true polygon cut, so the result never leaves the skin); clipped or given a count, it is
     resampled to count points evenly round its outline, so neighbouring sections loft cleanly."""
-    ring = bi.blended_ring(p, s)
+    ring = bi.skin_ring(p, s)
     cz = sum(v.z for v in ring) / len(ring)
     out = []
     for v in ring:
@@ -251,6 +251,12 @@ def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
     rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=32) for s in stations]
     obj = bi.finish(outward(bi.loft(name, rings, cap_back=True, cap_front=True)), mat, smooth=False)
     subtract(obj, cutters)  # the cells are separate from the intake ducts, with clearance for the duct walls
+    # Boolean n-gons cast broken Workbench stencil shadows through the skin. Match the export's triangulation.
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+    bm.to_mesh(obj.data)
+    bm.free()
     vol = mesh_volume(obj)
     obj["volume_m3"] = round(vol, 3)
     obj["volume_holds_kg"] = round(vol * 1000 * FUEL_DENSITY, 1)
