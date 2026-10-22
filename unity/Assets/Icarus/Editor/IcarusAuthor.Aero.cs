@@ -36,14 +36,15 @@ namespace Icarus.Editor
         // surfaces included), 3.0 of horizontal tail (R7's, not the drawn 5.75), 2.0 of body; the fin and rudder carry
         // their drawn side areas.
         private const float WingArea = 20.8079f, TailArea = 3.0f, BodyArea = 2.0f;
-        // R14's 0.55 of aggregate clean dragArea, shared over the parts that meet the air.
+        // Aggregate clean dragArea, shared over the parts that meet the air in R14's proportions. R14 modelled 0.55; in
+        // game that left the jet 4% short of Mach 2.46 at 10 km, and 0.47 holds R14's level speeds at 10 and 15 km.
+        private const float DragAreaR14 = 0.55f, DragAreaTotal = 0.47f;
         private static readonly Dictionary<string, float> DragAreas = new Dictionary<string, float>
         {
             { RootPart, 0.135f }, { "fuselage_forward", 0.11f }, { "canopy", 0.04f }, { "radome", 0.02f }, { "fuselage_aft", 0.09f },
             { "nozzle", 0.02f }, { "intake_duct_L", 0.03f }, { "intake_duct_R", 0.03f }, { "wing_spar_L", 0.02f }, { "wing_spar_R", 0.02f },
             { "fin_spar", 0.015f }, { "stabilator", 0.02f },
-        };
-        private const float DragAreaTotal = 0.55f;
+        }.ToDictionary(e => e.Key, e => e.Value * DragAreaTotal / DragAreaR14);
         // R14: each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, for a
         // 5% MAC static margin empty and 8.7% at 20% fuel (its neutral point 9.326 m, MAC 3.491 m).
         private const float SparForceStation = 7.83455f;
@@ -235,7 +236,7 @@ namespace Icarus.Editor
             aero["rudder"] = (SideArea(b.Meshes["rudder_visible"].Render, b.Visuals["rudder_visible"]), TailAirfoil);
             aero[RootPart] = (BodyArea, BodyAirfoil);
             if (Mathf.Abs(DragAreas.Values.Sum() - DragAreaTotal) > 1e-4f)
-                throw new InvalidDataException($"dragArea shares add up to {DragAreas.Values.Sum()}, not R7's {DragAreaTotal}");
+                throw new InvalidDataException($"dragArea shares add up to {DragAreas.Values.Sum()}, not the tuned {DragAreaTotal}");
 
             foreach (var spec in b.Specs)
             {

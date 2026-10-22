@@ -932,7 +932,7 @@ MonoBehaviour:
   aircraftGLimit: 7.33
   PIDReferenceAirspeed: 180
   maxSpeed: 800
-  takeoffSpeed: 95
+  takeoffSpeed: 75
   takeoffDistance: 1500
   verticalLanding: 0
   turningRadius: 2500

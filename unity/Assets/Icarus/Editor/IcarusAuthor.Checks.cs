@@ -190,7 +190,7 @@ namespace Icarus.Editor
             foreach (var skin in Tree.Where(s => s.Name.Contains("skin") || s.Name == "dorsal_cover"))
                 if (GetFloat(b.Part(skin.Name), "wingArea") != 0) p.Add(skin.Name + " has lift; skins carry none (R13)");
             var drag = All(b, "AeroPart").Sum(a => GetFloat(a, "dragArea"));
-            if (Mathf.Abs(drag - DragAreaTotal) > 1e-3f) p.Add($"dragArea {drag:F3}, not R7's {DragAreaTotal}");
+            if (Mathf.Abs(drag - DragAreaTotal) > 1e-3f) p.Add($"dragArea {drag:F3}, not the tuned {DragAreaTotal}");
             return $"airfoils [{string.Join(", ", names)}]; {surfaces.Length} ControlSurfaces (pitch {Sum("pitchRange")}, roll {Sum("rollRange")}, yaw {Sum("yawRange")}), {devices.Length} HighLiftDevices, two speed brakes; wing {wing:F2} m2, dragArea {drag:F2}";
         }
 

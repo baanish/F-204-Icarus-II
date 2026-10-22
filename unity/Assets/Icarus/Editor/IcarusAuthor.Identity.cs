@@ -204,7 +204,9 @@ namespace Icarus.Editor
             // First-cut AI numbers (R4/R7): an interceptor that bleeds energy in turns and lands fast.
             Num(so, "aircraftGLimit", 7.33f); // the F-104's limit
             Num(so, "maxSpeed", 800f);
-            Num(so, "takeoffSpeed", 95f); // R7: 87 m/s approach at full fuel
+            // The takeoff AI rotates at 0.7 of this and gains about 30 m/s in the rotation on afterburner: 75 lifts off at
+            // 90 to 94 m/s, inside R7's band; below about 70 m/s the stabilator cannot raise the nose.
+            Num(so, "takeoffSpeed", 75f);
             Num(so, "takeoffDistance", 1500f);
             Num(so, "turningRadius", 2500f);
             Num(so, "cornerSpeed", 250f);
