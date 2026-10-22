@@ -173,7 +173,8 @@ namespace Icarus.Editor
             var frame = Named("canopy_frame_inner");
             if (interior == null || frame == null)
                 return "no interior";
-            if (Count(interior) < 10500 || Count(interior) > 13500) p.Add($"the interior has {Count(interior)} triangles, outside 10,500 to 13,500");
+            // Cockpit rule 2's 13,500 raised to 16,000 for the cockpit's detail (owner, 2026-10-22; art/blender/cockpit.py RULES)
+            if (Count(interior) < 10500 || Count(interior) > 16000) p.Add($"the interior has {Count(interior)} triangles, outside 10,500 to 16,000");
             if (Count(frame) < 1300 || Count(frame) > 8000) p.Add($"the hood's inner frame has {Count(frame)} triangles, outside 1,300 to 8,000");
             if (total > 35000) p.Add($"the cockpit renderers have {total} triangles, over 35,000");
             return $"{view.Length} cockpit renderers on layer 3 serialized off, {total} triangles (interior {Count(interior)}, inner frames {Count(frame)} + {Count(Named("windscreen_frame_inner"))}); " +
