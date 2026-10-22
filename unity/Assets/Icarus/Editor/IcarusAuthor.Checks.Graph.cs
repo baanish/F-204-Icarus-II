@@ -59,6 +59,11 @@ namespace Icarus.Editor
                 if (!collider.convex) p.Add(PathOf(collider.transform, b.Root.transform) + " has a concave MeshCollider");
             var lod = b.Root.GetComponent<LODGroup>().GetLODs();
             if (lod.SelectMany(l => l.renderers).Any(r => r == null || !r.transform.IsChildOf(b.Root.transform))) p.Add("a LOD renderer outside the prefab");
+            var hulls = lod[lod.Length - 1].renderers.Select(r => (r, tris: (int)r.GetComponent<MeshFilter>().sharedMesh.GetIndexCount(0) / 3)).ToArray();
+            foreach (var (r, tris) in hulls.Where(h => h.tris > Lod1PerHull))
+                p.Add($"LOD1 hull {r.name} has {tris} triangles, over {Lod1PerHull}");
+            if (hulls.Sum(h => h.tris) > Lod1Total) p.Add($"LOD1 hulls have {hulls.Sum(h => h.tris)} triangles, over {Lod1Total}");
+            var pieces = b.Root.GetComponentsInChildren<MeshCollider>(true).Where(c => c.sharedMesh != null).ToArray();
             // After the braces, no two parts without a joint between them may overlap.
             var linked = new HashSet<(Object, Object)>();
             foreach (var part in parts)
@@ -88,7 +93,9 @@ namespace Icarus.Editor
                         p.Add($"unjointed overlap {depth:F3} m: {PathOf(a.transform, b.Root.transform)} and {PathOf(c.transform, b.Root.transform)}");
                     }
                 }
-            return $"{parts.Length} AeroParts, {mass:0} kg, every part jointed to its parent and collidable, convex hulls, {colliders.Length} colliders with {overlaps} unjointed overlaps, {dangling} dangling references, LOD in the prefab";
+            return $"{parts.Length} AeroParts, {mass:0} kg, every part jointed to its parent and collidable, convex hulls, {colliders.Length} colliders " +
+                $"({pieces.Length} mesh hulls, {pieces.Sum(c => c.sharedMesh.triangles.Length / 3)} triangles) with {overlaps} unjointed overlaps, {dangling} dangling references, " +
+                $"LOD in the prefab, {hulls.Length} LOD1 hulls of {hulls.Sum(h => h.tris)} triangles (largest {hulls.Max(h => h.tris)})";
         }
     }
 }

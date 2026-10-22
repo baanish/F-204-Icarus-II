@@ -335,11 +335,13 @@ namespace Icarus.Editor
                 $"{blocking.Count} where one part's collider would block hits on another: {string.Join(", ", blocking)}");
         }
 
-        // The structure cores (keel strips and spars) and the thin skin panels, which other parts sit inside or against by
-        // design: a hit passes through them to what is underneath.
+        // The structure cores (keel strips and spars), the thin skin panels and the intake ducts the fuel cells wrap, which
+        // other parts sit inside or against by design: a hit passes through them to what is underneath. A cell's one hull
+        // fills its duct cut-out (art/blender/hulls.py).
         private static bool Shelters(string part) => part == "fuselage_forward" || part == RootPart || part == "fuselage_aft"
             || part.StartsWith("wing_spar_", StringComparison.Ordinal) || part == "fin_spar"
-            || part.StartsWith("skin_", StringComparison.Ordinal) || part.StartsWith("wing_skin_", StringComparison.Ordinal) || part == "fin_skin" || part == "dorsal_cover";
+            || part.StartsWith("skin_", StringComparison.Ordinal) || part.StartsWith("wing_skin_", StringComparison.Ordinal) || part == "fin_skin" || part == "dorsal_cover"
+            || part == "radome" || part.StartsWith("intake_duct_", StringComparison.Ordinal);
 
         private static int Depth(Transform t)
         {
