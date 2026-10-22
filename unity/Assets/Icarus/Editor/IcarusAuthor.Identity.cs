@@ -247,55 +247,6 @@ namespace Icarus.Editor
             return SaveAsset(definition, DefinitionPath);
         }
 
-        // The Revoker's damage diagram with each part image renamed to the Icarus part that stands where it did; images
-        // with no Icarus counterpart (canards, bays) go. The silhouette is still the Revoker's until the cockpit stage.
-        // The root part's GameObject carries the prefab's name, as the Revoker's carries "Fighter1".
-        private static readonly Dictionary<string, string> DiagramNames = new Dictionary<string, string>
-        {
-            { "Fighter1", PrefabName }, { "fuselage", "fuselage_forward" }, { "tail", "fuselage_aft" }, { "cockpit", "cockpit_cell" },
-            { "nose", "radome" }, { "cheek_L", "skin_forward_L" }, { "cheek_R", "skin_forward_R" },
-            { "wing1a_L", "wing_spar_L" }, { "wing1a_R", "wing_spar_R" }, { "wing2_L", "wing_skin_L" }, { "wing2_R", "wing_skin_R" },
-            { "aileron_L", "aileron_L" }, { "aileron_R", "aileron_R" }, { "flap_L", "flap_L" }, { "flap_R", "flap_R" },
-            { "intake_L", "intake_duct_L" }, { "intake_R", "intake_duct_R" }, { "wing1b_L", "skin_mid_L" }, { "wing1b_R", "skin_mid_R" },
-            { "vstab1", "fin_spar" }, { "vstab2", "fin_skin" }, { "rudder", "rudder" },
-        };
-
-        private static GameObject AuthorStatusDisplay()
-        {
-            var instance = (GameObject)Object.Instantiate(Load<GameObject>(DonorStatusDisplay));
-            try
-            {
-                instance.name = Path.GetFileNameWithoutExtension(StatusDisplayPath);
-                var display = instance.GetComponent(GameType("StatusDisplay"));
-                var so = new SerializedObject(display);
-                var entries = Prop(so, "statusDisplays");
-                var renamed = new List<string>();
-                var removed = new List<string>();
-                for (var i = entries.arraySize - 1; i >= 0; i--)
-                {
-                    var image = (Component)entries.GetArrayElementAtIndex(i).FindPropertyRelative("partImage").objectReferenceValue;
-                    if (image != null && DiagramNames.TryGetValue(image.gameObject.name, out var icarus))
-                    {
-                        renamed.Add(image.gameObject.name + "->" + icarus);
-                        image.gameObject.name = icarus;
-                        continue;
-                    }
-                    // Hidden rather than destroyed: an image may parent another entry's.
-                    removed.Add(image == null ? "null" : image.gameObject.name);
-                    if (image != null)
-                        image.gameObject.SetActive(false);
-                    entries.DeleteArrayElementAtIndex(i);
-                }
-                so.ApplyModifiedPropertiesWithoutUndo();
-                Debug.Log($"[Icarus] stage: damage diagram renamed [{string.Join(", ", renamed)}], removed [{string.Join(", ", removed)}]");
-                return SavePrefab(instance, StatusDisplayPath);
-            }
-            finally
-            {
-                Object.DestroyImmediate(instance);
-            }
-        }
-
         // The hangars the Revoker uses, and every stock mount on the sets that offer it.
         private static readonly string[] HangarUnitKeys = { "hangar_med", "shelter1" };
 

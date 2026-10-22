@@ -58,6 +58,8 @@ namespace Icarus.Editor
             var partNames = All(b, "AeroPart").Select(a => a.gameObject.name).ToArray();
             foreach (var image in images)
                 if (partNames.Count(n => n == image) != 1) p.Add($"damage diagram image {image} matches {partNames.Count(n => n == image)} parts");
+            foreach (var part in partNames.Except(images))
+                p.Add($"part {part} has no damage diagram image");
             if (images.Length == 0) p.Add("no damage diagram images");
             var cameras = new[] { "camMountForward", "camMountRear" }.Select(f => (Transform)Prop(new SerializedObject(b.Parts["radome"].GetComponent(GameType("TargetCam"))), f).objectReferenceValue).ToArray();
             var minimum = float.PositiveInfinity;
@@ -65,7 +67,7 @@ namespace Icarus.Editor
                 foreach (var camera in cameras)
                     minimum = Mathf.Min(minimum, Vector3.Distance(camera.position, r.bounds.ClosestPoint(camera.position)));
             if (minimum < CameraClearance - 0.01f) p.Add($"a target camera is {minimum:F2} m from the airframe, under {CameraClearance}");
-            return $"aircraft links set, no Revoker interior mesh, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts, target cameras {minimum:F2} m clear";
+            return $"aircraft links set, no Revoker interior mesh, tac screen with {pylonSets} pylon sets for {stations.Length} stations and its engine gauges on the engine, HUD extras with afterburner and airbrake, {images.Length} diagram images on unique parts covering all {partNames.Length}, target cameras {minimum:F2} m clear";
         }
 
         private static string CheckEscape(Build b, List<string> p)
