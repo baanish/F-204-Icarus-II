@@ -18,15 +18,10 @@ def main():
     parser.add_argument("--reference", type=Path, default=REPO / ".cache/research/R8/Lockheed-page-8.png")
     args = parser.parse_args()
     section = json.loads((args.out / "section.json").read_text())
-    m = section["mouth"]
     fig, axes = plt.subplots(1, 2, figsize=(14, 7), layout="constrained")
     ax = axes[0]
     edge = section["lip_edge_x_z"]
     ax.plot([p[0] for p in edge], [p[1] for p in edge], color="#718a9f", lw=5, label="Outer lip / skin")
-    z, x = zip(*section["body_z_x"])
-    ax.plot(x, z, color="#50565c", lw=5, label="Fuselage side")
-    ax.plot([v + m["stand_off"] for v in x], z, color="#b98032", lw=5, label="Diverter inner face")
-    ax.plot([v + m["stand_off"] + m["plate_thickness"] for v in x], z, color="#b98032", lw=2)
     theta = [2 * math.pi * i / 128 for i in range(129)]
     cx, cz, radius = section["duct"]
     ax.plot([cx + radius * math.cos(a) for a in theta], [cz + radius * math.sin(a) for a in theta],
@@ -34,9 +29,6 @@ def main():
     cone = section["cone_radius_at_lip"]
     ax.plot([section["cone_x"] + cone * math.cos(a) for a in theta], [cz + cone * math.sin(a) for a in theta],
             color="#767b80", lw=2, label="Shock cone")
-    mid = min(section["body_z_x"], key=lambda p: abs(p[0] - cz))
-    ax.annotate("40 mm lateral stand-off", xy=(mid[1] + 0.02, mid[0]), xytext=(0.12, 0.42),
-                arrowprops={"arrowstyle": "->"})
     ax.set(xlabel="Lateral x, m", ylabel="Height z, m", title="Mouth section at s 6.85 m", xlim=(0.1, 1.03), ylim=(-0.22, 0.70))
     ax.set_aspect("equal")
     ax.legend(loc="lower left", fontsize=8)
@@ -71,7 +63,7 @@ def main():
     reference = reference.resize((970, 700))
     sheet.paste(reference, (1190, 75))
     draw.text((1190, 790), "Lockheed F-104 power plant, page 6 / R8 source L", fill="#20272e", font=small)
-    draw.text((30, 895), "Model: 40 mm stand-off, 8 mm splitter, 30 mm cone undercut. Proportions await owner judgement.", fill="#20272e", font=small)
+    draw.text((30, 895), "Model: 30 mm cone undercut; no splitter plate or stand-off (owner).", fill="#20272e", font=small)
     section_image = Image.open(args.out / "inlet_section.png").convert("RGB")
     section_image.thumbnail((2140, 1070))
     sheet.paste(section_image, ((2200 - section_image.width) // 2, 950))

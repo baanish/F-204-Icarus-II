@@ -19,10 +19,9 @@ BUDGET = {
     "intake_R": {"target": 3500, "cap": 4600, "objects": ("intake_duct_R",)},
     "nozzle": {"target": 3200, "cap": 3900, "objects": ("nozzle", "nozzle_petal_", "nozzle_seal_")},
 }
-# The reference establishes the undercut and stand-off, but gives no dimensioned section. These metre values are
-# silhouette assumptions for owner review, not measured F-104 dimensions. Keep the duct envelope above the trough.
-MOUTH = {"stand_off": 0.04, "plate_thickness": 0.008, "front_s": 6.58, "back_s": 7.14,
-         "bottom_z": -0.07, "top_z": 0.51, "undercut": 0.03}
+# The reference establishes the cone's undercut but gives no dimensioned section; this metre value is a silhouette
+# assumption, not a measured F-104 dimension. The owner had the splitter plate and stand-off removed.
+MOUTH = {"undercut": 0.03}
 # Review close-ups: name -> (camera location, look-at point), Blender axes.
 CLOSEUPS = {
     "intake": (Vector((3.2, -6.6, 1.0)), Vector((0.8, -1.2, 0.2))),
@@ -113,14 +112,6 @@ def build_shock_cones(p, mat, duct_mat):
     return parts
 
 
-def core_x(p, s, z):
-    """The fuselage side without its intake lobe, so the diverter follows the body rather than floating on it."""
-    hw, top, bot, exponent = bi.resample(p["fuselage"], [s])[0][1:]
-    mid = min(bot + hw, top)
-    e, height = (exponent, top - mid) if z >= mid else (2.0, mid - bot)
-    return hw * max(0.0, 1 - abs((z - mid) / height) ** e) ** (1 / e)
-
-
 def lip_edge(p, skin):
     s, xo, cz, _ = p["intake"][0]
     cx = (xo + p["intake_inner_x"]) / 2
@@ -167,39 +158,6 @@ def build_mouth(p, mats):
     faces = [(j * width + k, (j + 1) * width + k, (j + 1) * width + k + 1, j * width + k + 1)
              for j in range(len(rings) - 1) for k in range(width - 1)]
     indices = [1 if k == width - 2 else 0 for j in range(len(rings) - 1) for k in range(width - 1)]
-    # Two faces of a curved splitter, 40 mm off the body. Its leading edge leaves the bleed mouth open;
-    # the passage discharges above and below the plate instead of ending in a painted black strip.
-    m = MOUTH
-    rows = 12
-    start = len(verts)
-    for offset in (m["stand_off"], m["stand_off"] + m["plate_thickness"]):
-        for station in (m["front_s"], s, m["back_s"]):
-            for i in range(rows + 1):
-                z = m["bottom_z"] + (m["top_z"] - m["bottom_z"]) * i / rows
-                verts.append(bi.P(station, core_x(p, station, z) + offset, z))
-    stride = rows + 1
-    for surface in range(2):
-        for j in range(2):
-            for k in range(rows):
-                a = start + surface * 3 * stride + j * stride + k
-                face = (a, a + 1, a + stride + 1, a + stride)
-                faces.append(face if surface == 0 else face[::-1])
-                indices.append(1 if surface == 0 else 0)
-    for k in range(rows):
-        a = start + k
-        faces.append((a, a + 3 * stride, a + 3 * stride + 1, a + 1))
-        indices.append(0)
-    # Body-side lining defines a physical passage opposite the splitter's inner face.
-    base = len(verts)
-    for station in (m["front_s"], s, m["back_s"]):
-        for i in range(rows + 1):
-            z = m["bottom_z"] + (m["top_z"] - m["bottom_z"]) * i / rows
-            verts.append(bi.P(station, core_x(p, station, z) + 0.001, z))
-    for j in range(2):
-        for k in range(rows):
-            a = base + j * stride + k
-            faces.append((a, a + stride, a + stride + 1, a + 1))
-            indices.append(1)
     return [detail_mesh("intake_mouth_" + sd, "intake_duct_" + sd, verts, faces,
                         [mats["body"], mats["mechanical"]], indices, side)
             for side, sd in ((1, "L"), (-1, "R"))]

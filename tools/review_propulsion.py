@@ -88,9 +88,7 @@ def section_data():
             "cone_profile": [[sc["apex_s"], 0], [sc["break_s"], sc["break_r"]], [a, at(a)],
                              [a, at(a) - m["undercut"]], [b, at(b) - m["undercut"]], [b, at(b)],
                              [sc["base_s"], sc["radius"]]],
-            "lip_edge_x_z": [[v.x, v.z] for v in propulsion.lip_edge(p, bpy.data.objects["skin_mid_L"])],
-            "body_z_x": [[z, propulsion.core_x(p, 6.85, z)]
-                         for z in [m["bottom_z"] + (m["top_z"] - m["bottom_z"]) * i / 12 for i in range(13)]]}
+            "lip_edge_x_z": [[v.x, v.z] for v in propulsion.lip_edge(p, bpy.data.objects["skin_mid_L"])]}
 
 
 def main():
