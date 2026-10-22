@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Blueprinter;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -19,10 +20,113 @@ namespace Icarus.Editor
             { "hardpoint_wingtip_R", (new Vector3(3.395f, -0.562f, -2.595f), 90f) },
             { "hardpoint_innerwing_L", (new Vector3(-1.849f, -0.594f, -1.692f), 0f) },
             { "hardpoint_innerwing_R", (new Vector3(1.849f, -0.594f, -1.692f), 0f) },
-            { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.510f, 0.950f), 0f) },
-            { "hardpoint_conformal_R", (new Vector3(0.550f, -0.510f, 0.950f), 0f) },
+            // Raised 0.055 m onto the trough floor for the Icarus's own conformal mounts (art/blender/stations.py).
+            { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.455f, 0.950f), 0f) },
+            { "hardpoint_conformal_R", (new Vector3(0.550f, -0.455f, 0.950f), 0f) },
         };
         private const float MeasuredTolerance = 0.001f;
+        private const string MountFolder = ModFolder + "/Mounts";
+
+        // The conformal section of blockout.json (art/blender/stations.py export): the left hardpoint, world, and the
+        // Icarus's own mounts by the stock mount each replaces.
+        private static Dictionary<string, object> ConformalLayout() =>
+            (Dictionary<string, object>)((Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(ExportFolder, "blockout.json"))))["conformal"];
+
+        private static Vector3 Vec3(object value)
+        {
+            var list = (List<object>)value;
+            return new Vector3(Convert.ToSingle(list[0]), Convert.ToSingle(list[1]), Convert.ToSingle(list[2]));
+        }
+
+        // The conformal mounts: each a copy of the stock external single (its missile, WeaponInfo, mass, drag and RCS,
+        // and missileBay 0, so it flies as an exposed store) under a new jsonKey, with the stock launch rail swapped for
+        // a low shoe, the missile hung at the trough's depth and pitch, and its capsule fitted to the body so it clears
+        // the trough. The AAM-29's rail box collider goes with its rail. Rebuilt in place on every run, GUIDs kept.
+        private static Dictionary<string, Object> AuthorConformalMounts()
+        {
+            BlueprinterAssets.EnsureFolder(MountFolder);
+            var shoeMaterial = Load<Material>(Stock + "Material/jet_mechanical_PLACEHOLDER.mat");
+            var authored = new Dictionary<string, Object>();
+            foreach (var entry in ((Dictionary<string, object>)ConformalLayout()["mounts"]).OrderBy(e => e.Key, StringComparer.Ordinal))
+            {
+                var m = (Dictionary<string, object>)entry.Value;
+                var key = (string)m["key"];
+                var prefabPath = MountFolder + "/" + key + ".prefab";
+                var assetPath = MountFolder + "/" + key + ".asset";
+                foreach (var (source, target) in new[] { ("GameObject/" + entry.Key + "_PLACEHOLDER.prefab", prefabPath), ("MonoBehaviour/" + entry.Key + "_PLACEHOLDER.asset", assetPath) })
+                {
+                    File.Copy(Stock + source, target, true); // keeps the target's .meta, so its GUID survives
+                    AssetDatabase.ImportAsset(target, ImportAssetOptions.ForceSynchronousImport);
+                }
+                var shoe = SaveAsset(ShoeMesh(key + "_shoe", ((List<object>)m["shoe"]).Select(Vec3).ToArray()), MountFolder + "/" + key + "_shoe.asset");
+                var root = PrefabUtility.LoadPrefabContents(prefabPath);
+                try
+                {
+                    root.name = key;
+                    var rail = root.transform.Find("pylon") ?? throw new InvalidDataException(entry.Key + " has no pylon (its launch rail)");
+                    var missile = rail.Find((string)m["missile"]) ?? throw new InvalidDataException(entry.Key + " has no " + m["missile"]);
+                    rail.localPosition = Vector3.zero;
+                    rail.localRotation = Quaternion.identity;
+                    rail.localScale = Vector3.one;
+                    rail.GetComponent<MeshFilter>().sharedMesh = shoe;
+                    rail.GetComponent<MeshRenderer>().sharedMaterials = new[] { shoeMaterial };
+                    foreach (var box in rail.GetComponents<BoxCollider>())
+                        Object.DestroyImmediate(box, true);
+                    missile.localPosition = Vec3(m["position"]);
+                    missile.localRotation = Quaternion.Euler(Convert.ToSingle(m["pitch"]), 0f, 0f); // +x turns the nose down
+                    missile.localScale = Vector3.one;
+                    var capsule = missile.GetComponent<CapsuleCollider>() ?? throw new InvalidDataException(entry.Key + "'s missile has no capsule");
+                    capsule.radius = Convert.ToSingle(m["capsule_radius"]);
+                    PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+                }
+                finally
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+                var mount = Load<Object>(assetPath);
+                mount.name = key;
+                var so = new SerializedObject(mount);
+                Prop(so, "jsonKey").stringValue = key;
+                Prop(so, "prefab").objectReferenceValue = Load<GameObject>(prefabPath);
+                if (Prop(so, "missileBay").intValue != 0)
+                    throw new InvalidDataException(entry.Key + " is a bay mount; the conformal stations are exposed");
+                so.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(mount);
+                authored[key] = mount;
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Icarus] stage: conformal mounts " + string.Join(", ", authored.Keys));
+            return authored;
+        }
+
+        // A box from its eight corners (bottom four then top four, each -x then +x, at the back then the front), flat
+        // shaded, every face turned out from the centre.
+        private static Mesh ShoeMesh(string name, Vector3[] c)
+        {
+            var quads = new[] { new[] { 0, 1, 3, 2 }, new[] { 4, 6, 7, 5 }, new[] { 2, 3, 7, 6 }, new[] { 0, 4, 5, 1 }, new[] { 0, 2, 6, 4 }, new[] { 1, 5, 7, 3 } };
+            var centre = c.Aggregate(Vector3.zero, (a, v) => a + v) / c.Length;
+            var vertices = new List<Vector3>();
+            var triangles = new List<int>();
+            foreach (var q in quads)
+            {
+                var face = q.Select(i => c[i]).ToArray();
+                var normal = Vector3.Cross(face[1] - face[0], face[2] - face[0]);
+                var mid = face.Aggregate(Vector3.zero, (a, v) => a + v) / 4f;
+                if (Vector3.Dot(normal, mid - centre) > 0f) // Unity's front faces wind clockwise seen from outside
+                    Array.Reverse(face);
+                var start = vertices.Count;
+                vertices.AddRange(face);
+                triangles.AddRange(new[] { start, start + 1, start + 2, start, start + 2, start + 3 });
+            }
+            var mesh = new Mesh { name = name };
+            mesh.SetVertices(vertices);
+            mesh.SetTriangles(triangles, 0);
+            mesh.SetUVs(0, vertices.Select(v => new Vector2(v.z, v.y + v.x)).ToList());
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.RecalculateBounds();
+            return mesh;
+        }
 
         // Six stations in SetNames order, each set [L, R] with HardpointIndex 0..5 left before right.
         private static void BuildStations(Build b)
@@ -68,12 +172,13 @@ namespace Icarus.Editor
                         yield return u * p.y + w * q.y + (1f - u - w) * r.y;
                 }
             }
-            // A conformal station sits 0.005 m inside the belly skin right above it: the IRM-S2's rail top stands only
-            // 0.012 m above its hardpoint, so any deeper gap shows under it.
+            // A conformal station sits 0.005 m inside the trough floor right above it (Stores rule 9), where its mount's
+            // shoe bears; x and z are the station's own (art/blender/stations.py CONFORMAL).
+            var conformal = Vec3(ConformalLayout()["hardpoint_unity"]) - b.Blockout.Origin;
             Vector3 ConformalPoint(string side)
             {
-                var x = (side == "L" ? -1f : 1f) * 0.55f;
-                var z = b.Parts["fuel_forward_main"].transform.position.z - 0.6f;
+                var x = (side == "L" ? 1f : -1f) * conformal.x;
+                var z = conformal.z;
                 var skin = new[] { RootPart, "intake_duct_L", "intake_duct_R", "skin_mid_L", "skin_mid_R" }.SelectMany(n => Crossings(n, x, z)).ToArray();
                 if (skin.Length == 0)
                     throw new InvalidDataException($"no belly skin above the conformal station at x {x}, z {z:F2}");

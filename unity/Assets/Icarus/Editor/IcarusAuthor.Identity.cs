@@ -12,23 +12,27 @@ namespace Icarus.Editor
     public static partial class IcarusAuthor
     {
         // The hardpoint set order is an API: loadouts, exclusions and Blueprinter registrations address sets by position.
+        // Index 3 stays reserved for the tip-tank set (Stores rule 7: a tank never hangs from the rolled missile station).
         private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal" };
 
         // What each set carries: a starter jet, so a Starfighter's kind of load and little that is advanced. The wingtip
         // rails take only the MMR-S3 and IRM-S2; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
         // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie and the pods, one store
-        // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations air-to-air missiles. No
-        // ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P Auger, and no other double or triple racks (a rocket pod is one
-        // store). The owner accepts that the AAM-29 twin, hung low by its adapter, reaches the runway about 0.3 deg
-        // before the tail in a nose-up rotation.
+        // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations the MMR-S3, IRM-S2 and
+        // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
+        // Auger, and no other double or triple racks (a rocket pod is one store). The owner accepts that the AAM-29 twin,
+        // hung low by its adapter, reaches the runway about 2.2 deg before the tail in a nose-up rotation.
         private static readonly string[][] StationKeys =
         {
             new[] { "AAM1_single", "AAM3_single" },
             new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM4_single", "AAM1_double", "AAM3_double", "AAM2_double",
                     "AGM_heavy_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "Rocket2_4Pod",
                     "SpecialSmokePod", "SpecialFlarePod" },
-            new[] { "AAM1_single", "AAM3_single", "AAM2_single" },
+            new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2 },
         };
+        // The conformal mounts' jsonKeys (art/blender/stations.py MOUNTS).
+        private const string ConformalAAM1 = "baanish_icarus_AAM1_conformal", ConformalAAM3 = "baanish_icarus_AAM3_conformal",
+            ConformalAAM2 = "baanish_icarus_AAM2_conformal";
         // Blueprinter's stand-ins for stock mounts the Revoker doesn't carry (the IRM-S2).
         private const string MountPlaceholders = "Assets/Blueprinter/_donotship/MonoBehaviour/";
 
@@ -41,10 +45,10 @@ namespace Icarus.Editor
         // Standard loadouts by mount jsonKey, one per set in SetNames order. loadouts[1], the default, is the first.
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
-            ("Interceptor", new[] { "AAM1_single", "AAM4_single", "AAM2_single" }),
-            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", "AAM2_single" }),
-            ("Strike", new[] { "AAM3_single", "bomb_500_single", "AAM1_single" }),
-            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", "AAM1_single" }),
+            ("Interceptor", new[] { "AAM1_single", "AAM4_single", ConformalAAM2 }),
+            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", ConformalAAM2 }),
+            ("Strike", new[] { "AAM3_single", "bomb_500_single", ConformalAAM1 }),
+            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", ConformalAAM1 }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
@@ -54,6 +58,8 @@ namespace Icarus.Editor
             var manager = donor.transform.Find("fuselage/cockpit").GetComponent(GameType("WeaponManager"));
             var sets = Prop(new SerializedObject(manager), "hardpointSets");
             var stations = new Stations();
+            foreach (var own in AuthorConformalMounts())
+                stations.ByKey[own.Key] = own.Value;
             for (var i = 0; i < sets.arraySize; i++)
                 foreach (var mount in GetList(sets.GetArrayElementAtIndex(i).FindPropertyRelative("weaponOptions")).Where(o => o != null))
                     stations.ByKey[KeyOf(mount)] = mount;
@@ -322,8 +328,11 @@ namespace Icarus.Editor
                         offered[key] = list = new List<int>();
                     list.Add(set);
                 }
-            // A mount the index doesn't know can't be registered; a standard loadout must not need one.
-            var unknown = offered.Keys.Where(k => !index.Weapons.Contains(k)).OrderBy(k => k, StringComparer.Ordinal).ToArray();
+            // A stock mount the index doesn't know can't be registered; a standard loadout must not need one. The mod's own
+            // mounts are registered by their own keys, as baanish-armory registers its Lance pod.
+            var own = stations.Options.SelectMany(o => o).Where(m => AssetDatabase.GetAssetPath(m).StartsWith(ModFolder + "/", StringComparison.Ordinal))
+                .Select(KeyOf).ToHashSet();
+            var unknown = offered.Keys.Where(k => !index.Weapons.Contains(k) && !own.Contains(k)).OrderBy(k => k, StringComparer.Ordinal).ToArray();
             var needed = unknown.Where(k => StandardLoadouts.Any(l => l.Keys.Contains(k))).ToArray();
             if (needed.Length > 0)
                 throw new InvalidDataException("A5: OpReferenceIndex has no weapon " + string.Join(", ", needed) + ", which a standard loadout carries.");
@@ -345,7 +354,7 @@ namespace Icarus.Editor
                 op.aircraft.Add(new OpAddWeaponToHardpoint.AircraftTarget { aircraftJsonKey = JsonKey, hardpointIndices = new List<int>(entry.Value) });
                 SaveAsset(op, ModFolder + "/" + op.name + ".asset");
             }
-            Debug.Log($"[Icarus] check A5 registration PASS: sets [{string.Join(", ", sets)}]; hangars [{string.Join(", ", HangarUnitKeys)}]; {offered.Count} stock mounts: " +
+            Debug.Log($"[Icarus] check A5 registration PASS: sets [{string.Join(", ", sets)}]; hangars [{string.Join(", ", HangarUnitKeys)}]; {offered.Count} mounts ({own.Count} the mod's own): " +
                 string.Join("; ", offered.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => e.Key + " on " + string.Join("/", e.Value))));
         }
     }

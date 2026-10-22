@@ -1,5 +1,6 @@
 """The built Icarus from its Blueprinter bundle (.nobp), read with UnityPy: the prefab's transform tree, every rendered
-mesh, the hardpoint sets and the stock mounts registered on them, the LandingGear components and the rest pose.
+mesh, the hardpoint sets and the mounts registered on them, the mod's own mounts, the LandingGear components and the
+rest pose.
 
 Everything is in the aircraft root frame (Unity: +x right, +y up, +z forward). A pose overrides the local rotation or
 position of chosen transforms, the way the game drives the gear, and world() places any transform in it.
@@ -74,25 +75,87 @@ class Aircraft:
                 for i in target["hardpointIndices"]:
                     self.mounts[i].append(payload["weaponJsonKey"])
 
+        # Every mount whose prefab travels in the bundle, by jsonKey: the mod's own, and the stock ones it depends on.
+        self.bundle_mounts = {d["jsonKey"]: d["prefab"]["m_PathID"] for d in behaviours.get("WeaponMount", []) if d.get("jsonKey")}
+        self._objs, self._T, self._comps = objs, T, self._components(objs, comp_go)
+        self._cache = {}
         self.meshes = {}  # transform -> (name, local verts, tris) of every enabled, active renderer under the root
-        cache = {}
-        for go, comps in self._components(objs, comp_go).items():
+        for go, comps in self._comps.items():
             transform = self.go_transform.get(go)
-            if transform is None or self._root_of(transform) != self.root or not T(go).get("m_IsActive", 1):
+            if transform is None or self._root_of(transform) != self.root:
                 continue
-            filters = [c for c in comps if objs[c].type.name == "MeshFilter"]
-            renderers = [c for c in comps if objs[c].type.name == "MeshRenderer"]
-            if not filters or not renderers or not T(renderers[0]).get("m_Enabled"):
+            found = self._rendered(go, comps)
+            if found is not None and not re.search(r"_lod\d|colmesh", self.names[go]):
+                self.meshes[transform] = (self.names[go],) + found
+
+    def _rendered(self, go, comps, external=None):
+        """(verts, tris) of a GameObject's mesh, local, when it is active and draws it; else None. A mesh the bundle only
+        references (a stock one Blueprinter patches in at load) comes from external(GameObject name), when given."""
+        objs, T = self._objs, self._T
+        if not T(go).get("m_IsActive", 1):
+            return None
+        filters = [c for c in comps if objs[c].type.name == "MeshFilter"]
+        renderers = [c for c in comps if objs[c].type.name == "MeshRenderer"]
+        if not filters or not renderers or not T(renderers[0]).get("m_Enabled"):
+            return None
+        mesh = T(filters[0])["m_Mesh"]["m_PathID"]
+        if mesh not in objs:
+            return external(self.names[go]) if external else None
+        if mesh not in self._cache:
+            text = objs[mesh].read().export()
+            verts = [(-float(a), float(b), float(c)) for a, b, c in (l.split()[1:4] for l in text.splitlines() if l.startswith("v "))]
+            faces = [[int(w.split("/")[0]) - 1 for w in l.split()[1:4]] for l in text.splitlines() if l.startswith("f ")]
+            self._cache[mesh] = (np.asarray(verts, float).reshape(-1, 3), np.asarray(faces, int).reshape(-1, 3))
+        return self._cache[mesh]
+
+    def mount(self, key, external=None):
+        """A mount from the bundle in the form stores.mounts.load_mount gives a stock one: its rendered meshes merged
+        (verts, tris) and its colliders, both in the mount's frame, which is the hardpoint's once hung. external(name)
+        gives the stock mesh a renderer of that name shows, where the bundle only references it."""
+        root = self.go_transform[self.bundle_mounts[key]]
+        verts, tris, colliders = [], [], []
+        for t, n in self.nodes.items():
+            if self._root_of(t) != root:
                 continue
-            mesh = T(filters[0])["m_Mesh"]["m_PathID"]
-            if mesh not in objs or re.search(r"_lod\d|colmesh", self.names[go]):
-                continue
-            if mesh not in cache:
-                text = objs[mesh].read().export()
-                verts = [(-float(a), float(b), float(c)) for a, b, c in (l.split()[1:4] for l in text.splitlines() if l.startswith("v "))]
-                faces = [[int(w.split("/")[0]) - 1 for w in l.split()[1:4]] for l in text.splitlines() if l.startswith("f ")]
-                cache[mesh] = (np.asarray(verts, float).reshape(-1, 3), np.asarray(faces, int).reshape(-1, 3))
-            self.meshes[transform] = (self.names[go],) + cache[mesh]
+            pos, rot, scale = self.world(t)
+            q = self._quat(t)
+            comps = self._comps.get(n["go"], [])
+            found = self._rendered(n["go"], comps, external)
+            if found is not None:
+                base = sum(len(v) for v in verts)
+                verts.append(pos + (found[0] * scale) @ rot.T)
+                tris.append(found[1] + base)
+            for c in comps:
+                kind = self._objs[c].type.name
+                if kind not in ("CapsuleCollider", "BoxCollider"):
+                    continue
+                d = self._T(c)
+                if not d.get("m_Enabled", 1):
+                    continue
+                centre = pos + rot @ (scale * xyz(d["m_Center"]))
+                shape = dict(kind=kind[:-len("Collider")], name=f"{key}/{n['name']}", trigger=bool(d["m_IsTrigger"]), centre=tuple(centre), rot=q)
+                if kind == "BoxCollider":
+                    shape["half"] = tuple(np.abs(xyz(d["m_Size"]) * scale) / 2)
+                else:
+                    axis = d["m_Direction"]
+                    r = d["m_Radius"] * max(abs(scale[i]) for i in range(3) if i != axis)
+                    shape.update(axis=axis, r=r, half_len=max(d["m_Height"] * abs(scale[axis]), 2 * r) / 2 - r)
+                colliders.append(shape)
+        mesh = (np.concatenate(verts) if verts else np.zeros((0, 3)), np.concatenate(tris) if tris else np.zeros((0, 3), int))
+        return mesh, colliders
+
+    def _quat(self, t):
+        """Rotation of transform t in its root's frame, as a quaternion (x, y, z, w)."""
+        from stores.prefab_tree import qmul
+
+        chain = []
+        while t in self.nodes:
+            chain.append(t)
+            t = self.nodes[t]["parent"]
+        q = (0.0, 0.0, 0.0, 1.0)
+        for node in reversed(chain[:-1]):
+            q = qmul(q, self.nodes[node]["rot"])
+        return q
 
     def _components(self, objs, comp_go):
         out = {}

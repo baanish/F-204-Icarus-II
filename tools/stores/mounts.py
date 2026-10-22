@@ -15,9 +15,10 @@ def add(a, b):
     return tuple(a[i] + b[i] for i in range(3))
 
 
-def load_mount(root, index, name):
+def load_mount(root, index, name, nodes=None):
     """(mesh, colliders): every enabled renderer's triangles merged into one mesh (verts, tris), and the colliders as
-    dicts: kind, name, trigger, centre and rot, plus r, axis and half_len (capsule) or half (box)."""
+    dicts: kind, name, trigger, centre and rot, plus r, axis and half_len (capsule) or half (box). A nodes dict gets
+    each transform's path -> (position, rotation, scale) in the mount frame."""
     docs = docs_of(root / "GameObject" / (name + ".prefab"))
     gos = {fid: d for fid, d in docs.items() if d["type"] == 1}
     comps = {}
@@ -42,6 +43,8 @@ def load_mount(root, index, name):
         ls = tuple(v["scl"][i] * ws[i] for i in range(3))
         np_ = add(wp, qrot(wr, tuple(v["pos"][i] * ws[i] for i in range(3))))
         nr = qmul(wr, v["rot"])
+        if nodes is not None:
+            nodes[(path + "/" if path else "") + nm] = (np_, nr, ls)
         cs = comps.get(go, [])
         rendered = [d for _, d in cs if d["type"] == 23 and re.search(r"m_Enabled: 1", d["body"])]
         for _, d in cs:

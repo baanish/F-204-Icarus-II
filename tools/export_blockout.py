@@ -6,7 +6,8 @@ The Icarus collection holds meshes and hinge empties. Every hinge has local X al
 its axis and a <name>_visible mesh child. Optional Colliders and LOD1 meshes must
 be identity-parented to their owner. Pivots and axes are world-space; mesh bounds
 are part-local. hinge_axis_unity is world-space positive Blender hinge X. Each mesh part lists its uv_layers, and
-design_eye is the canopy's design eye point (canopy.EYE), world-space.
+design_eye is the canopy's design eye point (canopy.EYE), world-space, and conformal the conformal
+hardpoint and the Icarus's own conformal mounts (stations.export).
 Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
 """
 
@@ -25,6 +26,7 @@ sys.path.insert(0, str(REPO / "art/blender"))
 from scrub_fbx import scrub_file
 import build_icarus
 import canopy
+import stations
 
 MAX_HULL = 255
 
@@ -209,6 +211,7 @@ def main():
     manifest = {"source_generator": source.relative_to(REPO).as_posix(), "source_sha256": sha256(source),
                 "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
                 "design_eye": {"blender": [round(c, 5) for c in eye], "unity": to_unity(eye)},
+                "conformal": stations.export(to_unity),
                 "parts": report}
     (out / "blockout.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
     count = sum(p["fbx"] is not None for p in report.values())

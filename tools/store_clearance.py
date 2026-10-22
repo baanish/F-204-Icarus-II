@@ -1,10 +1,10 @@
-"""Hang every stock mount the built Icarus offers from its hardpoints and check what the stores clear.
+"""Hang every mount the built Icarus offers from its hardpoints and check what the stores clear.
 
 python tools/store_clearance.py [path-to-icarus.nobp]       # default: the newest build/*.nobp
 
 Reads the built bundle for the airframe, the hardpoint sets and the mounts registered on them (twin racks included),
-the LandingGear components and the rest pose, and tools/local-paths.json's game export for the stock mount meshes.
-Prints a verdict per check and exits nonzero on any FAIL:
+the LandingGear components, the rest pose and the mod's own mounts (the conformal ones), and tools/local-paths.json's
+game export for the stock mounts. Prints a verdict per check and exits nonzero on any FAIL:
 
 - Stores rule 12: every store's rendered mesh (rail included) at least 0.05 m from every gear leg, tyre and open gear
   door: with the suspension free, at rest and bottomed (LandingGear.maxCompression, past which the game breaks the
@@ -32,6 +32,8 @@ from stores import paths
 LOCAL = paths.load()
 from stores.bundle import Aircraft  # noqa: E402
 from stores.geometry import axis_quat, bounds, box_gap, mesh_distance, quat_matrix, segment_distance  # noqa: E402
+from stores import meshverts  # noqa: E402
+from stores.bodies import mesh_path  # noqa: E402
 from stores.mounts import load_mount  # noqa: E402
 from stores.prefab_tree import asset_index  # noqa: E402
 
@@ -131,6 +133,11 @@ def main():
               f"{[round(d, 1) for _, d in leg['doors']]} deg closing in {m} steps; meshes "
               f"{sorted(plane.meshes[t][0] for t in leg['meshes'])}")
 
+    def stock_mesh(name):
+        """The stock mesh a mod mount's renderer shows, named like its GameObject (aam1 shows AAM1)."""
+        path = mesh_path(index, name)
+        return np.array(meshverts.positions(path), float), np.asarray(meshverts.triangles(path), int).reshape(-1, 3)
+
     mounts = {}
     rule12, rule13 = [], []
     print("\n## Stores (rendered mesh, rail included)")
@@ -141,7 +148,9 @@ def main():
             pos, rot, _ = plane.world(hp)
             for key in plane.mounts[s]:
                 if key not in mounts:
-                    mounts[key] = load_mount(root, index, key)
+                    # a stock mount from the game export; the mod's own from the bundle, which carries its prefab
+                    stock = (root / "GameObject" / (key + ".prefab")).exists()
+                    mounts[key] = load_mount(root, index, key) if stock else plane.mount(key, stock_mesh)
                 (verts, tris), colliders = mounts[key]
                 store = (pos + verts @ rot.T, tris)
                 angle = strike(store[0])
