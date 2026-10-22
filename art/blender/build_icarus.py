@@ -813,7 +813,7 @@ def build(repo=None, overrides=None):
 
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
 # (review_sheet.py).
-MODULES = ("parts", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit")
+MODULES = ("parts", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit", "uvs")
 
 
 def modules():
@@ -860,6 +860,9 @@ def _build(repo):
 
     hull_count = hulls.build(TARGET)
     part_tree.open_bays(TARGET)  # render meshes only, after the hulls
+    import uvs
+
+    uvs.unwrap(TARGET)
     import checks
 
     checks.fuel_cell_clearance(TARGET)
