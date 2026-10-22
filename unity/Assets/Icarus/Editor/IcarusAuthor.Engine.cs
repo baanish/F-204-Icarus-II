@@ -42,6 +42,7 @@ namespace Icarus.Editor
             ring.SetPositionAndRotation(b.Blockout.Local("nozzle_vector"), b.Blockout.Rotation("nozzle_vector"));
             b.Visuals["nozzle_vector"] = ring;
             var petals = 0;
+            var nozzleRenderers = new List<Object> { nozzlePart.GetComponent<MeshRenderer>() };
             float petalLength = 0;
             foreach (var hingeName in b.Blockout.Parts.Values.Where(p => p.BlenderParent == "nozzle_vector").Select(p => p.Name).OrderBy(n => n, System.StringComparer.Ordinal))
             {
@@ -54,12 +55,23 @@ namespace Icarus.Editor
                 visible.transform.SetParent(hinge, false);
                 visible.transform.SetPositionAndRotation(b.Blockout.Local(hingeName + "_visible"), b.Blockout.Rotation(hingeName + "_visible"));
                 visible.AddComponent<MeshFilter>().sharedMesh = b.Meshes[hingeName + "_visible"].Render;
-                visible.AddComponent<MeshRenderer>().sharedMaterials = b.Meshes[hingeName + "_visible"].Materials;
+                var renderer = visible.AddComponent<MeshRenderer>();
+                renderer.sharedMaterials = b.Meshes[hingeName + "_visible"].Materials;
+                nozzleRenderers.Add(renderer);
                 b.Visuals[hingeName] = hinge;
                 b.Visuals[hingeName + "_visible"] = visible.transform;
                 petalLength = Mathf.Max(petalLength, b.Meshes[hingeName + "_visible"].Render.bounds.size.z);
                 petals++;
             }
+            if (petals != 32 || ring.childCount != 32)
+                throw new InvalidDataException($"A2: nozzle_vector has {petals} petals and seals, expected 32 hinges for NozzleDriver");
+            if (petalLength <= 0)
+                throw new InvalidDataException("A2: nozzle petals have no axial length for flame and glow scaling");
+            var nozzleDamage = new SerializedObject(b.Part("nozzle"));
+            SetList(Prop(nozzleDamage, "damageMaterial").FindPropertyRelative("renderers"), nozzleRenderers);
+            nozzleDamage.ApplyModifiedPropertiesWithoutUndo();
+            if (GetList(Prop(new SerializedObject(b.Part("nozzle")), "damageMaterial").FindPropertyRelative("renderers")).Length != 33)
+                throw new InvalidDataException("A2: nozzle damage must cover the shroud and all 32 petal and seal renderers");
 
             var thrust = b.Parts["fuselage_aft"].transform.Find("thrust_vector") ?? throw new MissingReferenceException("fuselage_aft/thrust_vector");
             var jet = thrust.GetComponent(GameType("JetNozzle"));
@@ -80,6 +92,8 @@ namespace Icarus.Editor
                 t.localPosition = Vector3.zero;
                 t.localScale = effectScale;
             }
+            b.Report.Add($"nozzle effects: petal length {petalLength:0.000} m, ring radius {ringRadius:0.000} m, " +
+                $"flame/glow/haze scale {effectScale}, 32 NozzleDriver hinges, 33 damage renderers");
             b.Placed.UnionWith(new[] { thrust, flame, glow, heatHaze, thrust.Find("thrustTransform") });
 
             var so = new SerializedObject(jet);

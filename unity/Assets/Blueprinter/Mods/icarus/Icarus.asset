@@ -45,7 +45,7 @@ MonoBehaviour:
   captureDefense: 0
   length: 17.859995
   width: 6.875188
-  height: 4.114956
+  height: 4.1149573
   value: 45
   mass: 5800
   manpower: 1
@@ -54,7 +54,7 @@ MonoBehaviour:
   CanSlingLoad: 0
   unitPrefab: {fileID: 6683705595984790249, guid: b27237e5bd0f37a48af6e373aca680b5,
     type: 3}
-  spawnOffset: {x: 0, y: 1.4901721, z: -1.4942551}
+  spawnOffset: {x: 0, y: 1.4901733, z: -1.4942551}
   disabled: 0
   isEventContent: 0
   dontAutomaticallyAddToEncyclopedia: 0
@@ -67,4 +67,4 @@ MonoBehaviour:
     stallSpeed: 230
     maneuverability: 6
     maxWeight: 10200
-  restRotation: {x: -0.19740786, y: 0, z: 0}
+  restRotation: {x: -0.1975271, y: 0, z: 0}
