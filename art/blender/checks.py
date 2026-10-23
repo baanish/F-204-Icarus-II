@@ -24,6 +24,41 @@ def tree(obj, slot=None):
     return t
 
 
+def intake_wing_junction(icarus):
+    """The intake/wing landing has no opening or fore-aft crease. Limit turns across its station rings to
+    10 degrees; the rounded cross-section's much larger turns along longitudinal edges are intentional.
+    Both sides must contain checked edges, so a missing skin cannot pass an empty measurement.
+    The band is in world metres, stations 8.5 to 10, above the deliberate trough and gear openings.
+    """
+    counts, worst, problems = {1: 0, -1: 0}, 0.0, []
+    for obj in icarus.all_objects:
+        if obj.name not in ("fuselage", "skin_mid_L", "skin_mid_R"):
+            continue
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bm.transform(obj.matrix_world)
+        bm.normal_update()
+        for edge in bm.edges:
+            a, b = [v.co for v in edge.verts]
+            q = (a + b) / 2
+            if not (.85 < abs(q.x) < 1.1 and .5 < q.y < 2.0 and .18 < q.z < .5):
+                continue
+            if abs(a.y - b.y) > 1e-5:
+                continue
+            counts[1 if q.x > 0 else -1] += 1
+            angle = math.degrees(edge.calc_face_angle(0.0))
+            worst = max(worst, angle)
+            if len(edge.link_faces) != 2 or angle > 10.0:
+                problems.append("%s at %s: %d faces, %.3f deg" %
+                                (obj.name, tuple(round(v, 4) for v in q), len(edge.link_faces), angle))
+        bm.free()
+    if problems or not all(counts.values()):
+        raise ValueError("intake/wing skin: " + "; ".join(problems[:8]) + " edges per side %s" % counts)
+    print("intake/wing skin: %d ring edges, maximum turn %.3f deg <= 10.000 deg: PASS" %
+          (sum(counts.values()), worst), flush=True)
+    return {"ring_edges": sum(counts.values()), "maximum_turn_deg": worst}
+
+
 def fuel_cell_clearance(icarus):
     meshes = [o for o in icarus.all_objects if o.type == "MESH"]
     cells = [o for o in meshes if o.get("role") == "fuel_tank"]

@@ -517,7 +517,7 @@
    "skin_mid_L": {
     "sprite": "Icarus_status_skin_mid_L.png",
     "centre": [
-     -7.65,
+     -7.91,
      -6.59
     ],
     "size": [
@@ -525,14 +525,14 @@
      80.16
     ],
     "px": [
-     449,
+     448,
      385
     ]
    },
    "skin_mid_R": {
     "sprite": "Icarus_status_skin_mid_R.png",
     "centre": [
-     7.65,
+     7.91,
      -6.59
     ],
     "size": [
@@ -540,7 +540,7 @@
      80.16
     ],
     "px": [
-     507,
+     508,
      385
     ]
    },

@@ -439,9 +439,10 @@ def blended_ring(p, s, angles=None):
                         b = mid
                 lips.append((a + b) / 2)
         if len(lips) == 2:
-            # Keep skin vertices between the trough lip and the intake opening, including above the body side.
+            # End the redistribution at the body side. Moving its upper skin columns with the trough lips
+            # twists the intake fairing when the trough ends and those columns return to uniform angles.
             anchors = [(3 * RING // 4, 1.5 * math.pi), (TROUGH_LIP_COLUMNS[0], lips[0]),
-                       (TROUGH_LIP_COLUMNS[1], lips[1]), (RING + RING // 12, 2 * math.pi + math.pi / 6)]
+                       (TROUGH_LIP_COLUMNS[1], lips[1]), (RING, 2 * math.pi)]
             for (i0, a), (i1, b) in zip(anchors, anchors[1:]):
                 for i in range(i0, i1):
                     angle = a + (b - a) * (i - i0) / (i1 - i0)
@@ -1029,6 +1030,7 @@ def _build(repo):
     uvs.unwrap(TARGET)
     import checks
 
+    checks.intake_wing_junction(TARGET)
     checks.fuel_cell_clearance(TARGET)
     checks.internals_inside_skin(TARGET)
     checks.interior_visibility(TARGET)
