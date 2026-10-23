@@ -212,6 +212,33 @@ def inner_solid(p, inset, s0=0.25, s1=15.15, step=0.05, count=None):
     return outward(bi.loft("inner_solid", rings, cap_back=True, cap_front=True))
 
 
+def compartment_solid(p, inset, s0, s1):
+    """Offset the rendered skin's triangles inward, keeping at least inset to each incident face plane.
+
+    Radial ring offsets have less normal clearance on sloping skin, and resampled rings can bridge its bends.
+    Keep the skin's own stations and angular vertices so neither approximation defines a compartment's fit.
+    Two micrometres of extra offset absorb float32 and Boolean rounding.
+    """
+    stations = [s0] + [s for s in bi.fuselage_stations(p) if s0 < s < s1] + [s1]
+    solid = outward(bi.loft("compartment_solid", [bi.skin_ring(p, s) for s in stations],
+                            cap_back=True, cap_front=True))
+    solid.data.calc_loop_triangles()
+    triangulated = bpy.data.meshes.new("compartment_triangles")
+    triangulated.from_pydata([v.co for v in solid.data.vertices], [], [t.vertices for t in solid.data.loop_triangles])
+    original = solid.data
+    solid.data = triangulated
+    bpy.data.meshes.remove(original)
+    bm = bmesh.new()
+    bm.from_mesh(solid.data)
+    bm.normal_update()
+    offsets = {v: v.normal * ((inset + 2e-6) / min(v.normal.dot(f.normal) for f in v.link_faces)) for v in bm.verts}
+    for v, offset in offsets.items():
+        v.co -= offset
+    bm.to_mesh(solid.data)
+    bm.free()
+    return solid
+
+
 def clip_to(obj, solid):
     """Bake obj intersected with solid into obj's own mesh, so a box compartment follows the round skin."""
     outward(obj)
@@ -409,10 +436,7 @@ def build(p, col, mats):
 def _build(p, mats):
     I = INTERNALS
     parts = []
-    # Compartments are boxes clipped to a solid just inside the skin, so none can show through it. Ahead of the intakes
-    # the section is convex, so a coarse solid stays inside the skin; the main bays, by the intake fillets, clip to
-    # the skin's own ring.
-    inner = inner_solid(p, I["compartment_inset"], 0.25, 5.35, step=0.25, count=48)
+    inner = compartment_solid(p, I["compartment_inset"], 0.25, 5.35)
     r = I["radar"]
     nose = bi.blended_ring(p, r["dish_s"])
     cz = (max(v.z for v in nose) + min(v.z for v in nose)) / 2
@@ -422,8 +446,15 @@ def _build(p, mats):
     unit = box("radar_unit", r["dish_s"] + 0.08, r["s"][1], 0.20, -0.15, 0.22)
     parts.append(tag(bi.finish(clip_to(unit, inner), mats["avionics"], smooth=False), "radar", "fuselage", r["mass_kg"] * 0.6))
 
-    for name, role in (("avionics_nose", "avionics"), ("cockpit_tub", "cockpit"), ("avionics_aft", "avionics"),
-                       ("nose_gear_bay", "gear_bay")):
+    s0, s1, hw, z0, z1 = I["avionics_nose"]["box"]
+    obj = bi.finish(clip_to(box("avionics_nose", s0, s1, hw, z0, z1), inner), mats["avionics"], smooth=False)
+    parts.append(tag(obj, "avionics", "fuselage", I["avionics_nose"]["mass_kg"]))
+    import checks
+
+    checks.compartment_clearance(parts, bpy.data.objects["fuselage"], I["compartment_inset"])
+    bpy.data.objects.remove(inner, do_unlink=True)
+    inner = inner_solid(p, I["compartment_inset"], 0.25, 5.35, step=0.25, count=48)
+    for name, role in (("cockpit_tub", "cockpit"), ("avionics_aft", "avionics"), ("nose_gear_bay", "gear_bay")):
         s0, s1, hw, z0, z1 = I[name]["box"]
         obj = bi.finish(clip_to(box(name, s0, s1, hw, z0, z1), inner), mats[role], smooth=False)
         parts.append(tag(obj, role, "fuselage", I[name]["mass_kg"]))

@@ -83,15 +83,15 @@
     "sprite": "Icarus_status_dorsal_cover.png",
     "centre": [
      0.0,
-     -12.92
+     -13.18
     ],
     "size": [
      10.55,
-     110.74
+     109.69
     ],
     "px": [
      492,
-     351
+     354
     ]
    },
    "engine_core": {
@@ -248,14 +248,14 @@
     "sprite": "Icarus_status_fuselage_aft.png",
     "centre": [
      0.0,
-     -75.94
+     -74.88
     ],
     "size": [
-     26.37,
-     63.28
+     27.42,
+     61.17
     ],
     "px": [
-     462,
+     460,
      680
     ]
    },

@@ -587,7 +587,7 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     s0, s_coam, inset = ck.LAYOUT["coaming"]
     margin = FRONT["margin"]
     deck = lambda s: over_nose_z(s) - margin
-    rows_s = bi.spaced(s0, s_coam, 8) + bi.spaced(3.08, 3.40, 5)
+    rows_s = sorted(set(bi.spaced(s0, s_coam, 8) + bi.spaced(3.08, 3.40, 5) + [canopy.CANOPY["windscreen_end_s"]]))
     foot = {s: row[3] - 0.010 for s, row in zip(rows_s, bi.resample(canopy.PROFILE, rows_s))}
     hood_w = FRONT["half_width"] + FRONT["rim"]["thickness"]
     skirt_z = 0.462
@@ -609,7 +609,9 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
             z_end = (1 - t) * foot[s] + t * skirt_z
             w_top = (1 - t) * space.skin_x(s, min(z0, foot[s] - 0.001), inset) + t * hood_w
             side = [(x_end, z_end)] + [((1 - f) * x_end + f * w_top, (1 - f) * z_end + f * z0) for f in (0.5, 1.0)]
-        side = [(min(x, space.skin_x(s, z, 0.006), space.hood_x(s, z, 1) - 0.010, space.hood_x(s, z, -1) - 0.010), z)
+        sill_limit = space.sill_limit(s, min(z for _, z in side), max(z for _, z in side)) - 0.006
+        side = [(min(x, space.skin_x(s, z, 0.006), sill_limit,
+                     space.hood_x(s, z, 1) - 0.010, space.hood_x(s, z, -1) - 0.010), z)
                 for x, z in side]
         w = side[-1][0]
         line = [P(s, x, z) for x, z in side] + [P(s, w * f, z0) for f in bi.spaced(1, -1, 9)[1:-1]] + \

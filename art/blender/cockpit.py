@@ -756,7 +756,8 @@ class Space:
         self.skin = bvh([o for o in bi.TARGET.all_objects if o.type == "MESH" and o.get("role") == "skin"])
         self.outer_glass = bvh([O[canopy.GLASS_OUTER], O[canopy.WINDSCREEN]])
         self.inner_glass = bvh([O[canopy.GLASS_INNER], O[canopy.WINDSCREEN_INNER]])
-        self.sill = bvh([O[n] for n in ("skin_forward_L", "skin_forward_R", "dorsal_cover")])  # the cut skin under the seam
+        self.sill_objects = [O[n] for n in ("skin_forward_L", "skin_forward_R", "dorsal_cover")]
+        self.sill = bvh(self.sill_objects)  # the cut skin under the seam
         self._rings = {}
         self.internals = internals
 
@@ -826,6 +827,14 @@ class Space:
         """|x| of the cut skin under the glass seam at height z on one side, from the centreline out."""
         found = hit(self.sill, P(s, 0.0, z), Vector((side, 0.0, 0.0)), 1.0)
         return abs(found[0].x) if found else math.inf
+
+    def sill_limit(self, s, z0, z1):
+        """Narrowest skin clearance across a shroud wall's full height, including a flange between its corners."""
+        lo, hi = sorted((z0, z1))
+        points = [q for obj in self.sill_objects for q in self.internals.section_points(obj, s)]
+        widths = [abs(x) for x, z in points if lo <= z <= hi]
+        widths += [self.sill_x(s, z, side) for z in (lo, hi) for side in (1, -1)]
+        return min(widths)
 
     def hood_x(self, s, z, side):
         """|x| of the shut hood (frame, glass, or the inner frame hung from it) at height z on one side, from the
@@ -1067,11 +1076,11 @@ def ledge_rows(space, side, columns):
 
 
 def ledge_tree(rows, side):
-    """A BVH of the ledge between two rows, a hair inside its faces."""
+    """A BVH of the actual ledge between two rows, including the faces the clearance solver must keep clear."""
     verts, polys = [], []
     for s, x_in, x_out, top in rows:
-        verts += [P(s, side * q, z) for q, z in ((x_in + 0.001, top - 0.029), (x_in + 0.001, top - 0.001),
-                                                 (x_out - 0.001, top - 0.001), (x_out - 0.001, top - 0.029))]
+        verts += [P(s, side * q, z) for q, z in ((x_in, top - 0.030), (x_in, top),
+                                                 (x_out, top), (x_out, top - 0.030))]
     polys = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (0, 3, 2, 1), (4, 5, 6, 7)]
     return BVHTree.FromPolygons(verts, polys)
 

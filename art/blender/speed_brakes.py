@@ -286,6 +286,7 @@ def build(p, mats):
             well.face([well.vert(q) for q in quad], 0, toward=void)
     for j in (0, len(g) - 1):
         well.face([well.vert(q) for q in g[j] + [floor[j][1], floor[j][0]]], 0, toward=void)
+    hardware_start = len(well.faces)
     for c in (-sh["knuckle"], sh["knuckle"]):
         for side in (1, -1):
             t0, t1 = sorted((c + side * 0.017, c + side * 0.031))
@@ -320,6 +321,8 @@ def build(p, mats):
         obj["reach_m"] = round(reach, 5)  # how far it runs from its eye along its axis
     cylinder_obj["parent_part"] = "fuselage_aft"  # parts.organise hangs it there
     well_obj = well.realise("speed_brake_well_L", (mech,))
+    hardware = well_obj.data.attributes.new(name="exterior_hardware", type="INT", domain="FACE")
+    hardware.data.foreach_set("value", [int(i >= hardware_start) for i in range(len(well.faces))])
     well_obj["merge_into"] = "fuselage_aft"
     left += [rod_obj, cylinder_obj, well_obj]
     parts = left + bi.mirror_part(left)

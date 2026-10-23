@@ -127,19 +127,36 @@ def station(v):
 
 
 def drop_inside(obj, solid):
-    """Delete obj's faces whose centres lie inside the closed, outward-facing solid."""
-    to_solid = solid.matrix_world.inverted() @ obj.matrix_world
-    bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    drop = []
-    for f in bm.faces:
-        c = to_solid @ f.calc_center_median()
-        found, at, normal, _ = solid.closest_point_on_mesh(c)
-        if found and (c - at).dot(normal) < 0:
-            drop.append(f)
-    bmesh.ops.delete(bm, geom=drop, context="FACES")
-    bm.to_mesh(obj.data)
-    bm.free()
+    """Cut only the portion inside the closed solid, including faces crossing its boundary.
+
+    A nearest-face normal misclassifies points ahead of the canopy's concave bottom edge; deleting whole faces
+    by their centres also opens gaps outside the glass. An exact surface cut does neither.
+    """
+    cut_material = bpy.data.materials.new("canopy_cut_surface")
+    obj.data.materials.append(cut_material)
+    cutter = solid.copy()
+    cutter.data = solid.data.copy()
+    bi.TARGET.objects.link(cutter)
+    cutter.data.materials.clear()
+    for material in obj.data.materials:
+        cutter.data.materials.append(material)
+    for face in cutter.data.polygons:
+        face.material_index = len(obj.data.materials) - 1
+    try:
+        interior.subtract(interior.outward(obj), [cutter])
+        # The skin is an open sheet. Discard the Boolean's new cap faces, leaving only the trimmed original sheet.
+        slot = list(obj.data.materials).index(cut_material)
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == slot], context="FACES")
+        bm.to_mesh(obj.data)
+        bm.free()
+        obj.data.materials.pop(index=slot)
+    finally:
+        mesh = cutter.data
+        bpy.data.objects.remove(cutter, do_unlink=True)
+        bpy.data.meshes.remove(mesh)
+        bpy.data.materials.remove(cut_material)
 
 
 def subset(name, source, keep_face):
@@ -550,6 +567,8 @@ def merge_details(icarus):
         bm = bmesh.new()
         bm.from_mesh(part.data)
         before = len(bm.faces)
+        if me.attributes.get("exterior_hardware") and not bm.faces.layers.int.get("exterior_hardware"):
+            bm.faces.layers.int.new("exterior_hardware")
         bm.from_mesh(me)
         bm.faces.ensure_lookup_table()
         for f in bm.faces[before:]:
