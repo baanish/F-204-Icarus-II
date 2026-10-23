@@ -184,6 +184,8 @@ namespace Icarus.Editor
             var airbrake = new SerializedObject(b.Root.GetComponent(GameType("Airbrake")));
             var openers = GetList(Prop(airbrake, "transforms"));
             if (openers.Length != 2 || openers.Any(o => o == null || !Inside(b, o))) p.Add("Airbrake transforms aren't the two speed brakes");
+            var actuators = GetList(Prop(airbrake, "constraints"));
+            if (actuators.Length != 4 || actuators.Any(c => !(c is UnityEngine.Animations.AimConstraint aim) || aim.sourceCount != 1 || !Inside(b, aim))) p.Add("Airbrake constraints aren't the four actuator pieces' AimConstraints");
             if (Prop(airbrake, "part").objectReferenceValue != b.Part("fuselage_aft")) p.Add("Airbrake part isn't fuselage_aft");
             var wing = new[] { "wing_spar_L", "wing_spar_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" }.Sum(n => GetFloat(b.Part(n), "wingArea"));
             if (Mathf.Abs(wing - WingArea) > 0.01f) p.Add($"main wing {wing:F2} m2, not R7's {WingArea}");

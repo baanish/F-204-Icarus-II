@@ -35,8 +35,6 @@ BUDGET = {
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
     "stabilator": {"target": 2120, "cap": 2120, "objects": ("stabilator_visible",)},
     "fins": {"target": 1600, "cap": 1600, "objects": ("fin_skin", "ventral_fin")},
-    "speed_brake_L": {"target": 480, "cap": 480, "objects": ("speed_brake_L_visible",)},
-    "speed_brake_R": {"target": 480, "cap": 480, "objects": ("speed_brake_R_visible",)},
     "structure_cores": {"target": 11000, "cap": 11000, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
     "fuel_cells": {"target": 5000, "cap": 5000, "objects": ("fuel_",)},
@@ -331,12 +329,16 @@ def _organise(p, icarus, internals, structure_mat):
     world = nozzle_vector.matrix_world.copy()
     nozzle_vector.parent = parts["nozzle"]
     nozzle_vector.matrix_world = world
+    for obj in [o for o in icarus.objects if "parent_part" in o]:  # a visual riding a part (a speed brake cylinder)
+        world = obj.matrix_world.copy()
+        obj.parent = parts[obj["parent_part"]]
+        obj.matrix_world = world
     # detail waiting to join its part (merge_details) is not a part of its own
     leftover = [o.name for o in icarus.objects if o.parent is None and o.name not in tree and "merge_into" not in o]
     if leftover:
         raise ValueError("objects outside the part tree: %s" % ", ".join(sorted(leftover)))
     for obj in icarus.objects:
-        if obj.type == "MESH" and not obj.name.startswith("intake_duct") and obj.get("role") != "cockpit_view":
+        if obj.type == "MESH" and not obj.name.startswith(("intake_duct", "speed_brake_well_")) and obj.get("role") != "cockpit_view":
             face_outward(obj)
     return parts
 
@@ -514,8 +516,9 @@ def merge_details(icarus):
 
 def face_outward(obj):
     """Point every face of a render mesh out of its surface. The game culls back faces, and most lofts come out wound
-    inward (the fin's rows happen to run the other way), so the skins drew inside out in game. The intake ducts and the
-    cockpit view's renderers (the inner glass) keep their inward faces: they are seen from inside."""
+    inward (the fin's rows happen to run the other way), so the skins drew inside out in game. The intake ducts, the
+    speed brake wells and the cockpit view's renderers (the inner glass) keep their inward faces: they are seen from
+    inside."""
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)

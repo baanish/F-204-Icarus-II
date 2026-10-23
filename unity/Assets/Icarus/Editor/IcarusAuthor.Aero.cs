@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Animations;
 using Object = UnityEngine.Object;
 
 namespace Icarus.Editor
@@ -140,11 +141,15 @@ namespace Icarus.Editor
         }
 
         // The speed brakes open on the stock Airbrake, which turns each transform about its own +X: each panel hangs from
-        // an opener whose +X is the hinge axis signed so a positive turn swings the panel out.
+        // an opener whose +X is the hinge axis signed so a positive turn swings the panel out. Each actuator is two pieces
+        // with their pivots at their eyes, the cylinder on fuselage_aft and the rod on the opener, each aimed at the
+        // other's eye by an AimConstraint about the hinge axis; the Airbrake enables its constraints while the brakes are
+        // open, as the stock VTOLTrainer1 aims its piston.
         private static void BuildSpeedBrakes(Build b)
         {
             var aft = b.Parts["fuselage_aft"].transform;
             var openers = new List<Object>();
+            var constraints = new List<Object>();
             foreach (var name in new[] { "speed_brake_L", "speed_brake_R" })
             {
                 var opener = new GameObject(name) { layer = aft.gameObject.layer }.transform;
@@ -166,16 +171,40 @@ namespace Icarus.Editor
                 b.Visuals[name] = opener;
                 b.Visuals[name + "_visible"] = visible.transform;
                 openers.Add(opener);
+                var cylinder = MeshVisual(b, name + "_cylinder", aft).transform;
+                var rod = MeshVisual(b, name + "_rod", opener).transform;
+                constraints.Add(AimAtEye(cylinder, rod, aft, opener.right));
+                constraints.Add(AimAtEye(rod, cylinder, aft, opener.right));
             }
             var airbrake = b.Root.GetComponent(GameType("Airbrake"));
             var so = new SerializedObject(airbrake);
             SetList(Prop(so, "transforms"), openers);
+            SetList(Prop(so, "constraints"), constraints);
             Prop(so, "part").objectReferenceValue = b.Part("fuselage_aft");
             if (Deflection(b, "speed_brake_L") != Deflection(b, "speed_brake_R"))
                 throw new InvalidDataException("the speed brakes open by different angles; the one Airbrake turns both alike");
             Prop(so, "maxAngle").floatValue = Deflection(b, "speed_brake_L");
             so.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add($"speed brakes: {openers.Count} panels open {Prop(so, "maxAngle").floatValue} deg outward on fuselage_aft, drag {Prop(so, "dragAmount").floatValue}");
+            b.Report.Add($"speed brakes: {openers.Count} panels open {Prop(so, "maxAngle").floatValue} deg outward on fuselage_aft, drag {Prop(so, "dragAmount").floatValue}; {constraints.Count} actuator pieces aimed");
+        }
+
+        // An actuator piece turning about its eye so it keeps pointing at the other piece's eye, its twist held about the
+        // hinge axis (fixed in frame, the part both pieces ride). Built at rest, the constraint reproduces the export pose.
+        private static AimConstraint AimAtEye(Transform piece, Transform other, Transform frame, Vector3 hingeAxis)
+        {
+            var aim = piece.gameObject.AddComponent<AimConstraint>();
+            aim.AddSource(new ConstraintSource { sourceTransform = other, weight = 1f });
+            aim.aimVector = Quaternion.Inverse(piece.rotation) * (other.position - piece.position).normalized;
+            aim.upVector = Quaternion.Inverse(piece.rotation) * hingeAxis;
+            aim.worldUpType = AimConstraint.WorldUpType.ObjectRotationUp;
+            aim.worldUpObject = frame;
+            aim.worldUpVector = Quaternion.Inverse(frame.rotation) * hingeAxis;
+            aim.rotationAtRest = piece.localEulerAngles;
+            aim.rotationOffset = Vector3.zero;
+            aim.weight = 1f;
+            aim.locked = true;
+            aim.constraintActive = true;
+            return aim;
         }
 
         // Streamwise lift frame: Z along the chord (leading edge ahead), Y the surface normal, up for a wing and to the

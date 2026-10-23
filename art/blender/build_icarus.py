@@ -122,7 +122,8 @@ PARAMS = {
     # the speed brakes open outward.
     "surface_travel": {"aileron": 20, "rudder": 25, "stabilator": 15, "flap": 25, "lef": 20, "speed_brake": 60},
     "stabilator_pivot_s": 15.45,
-    # Speed brakes on the aft fuselage sides: s range and the height band of skin they cover; hinged at the front.
+    # Speed brakes on the aft fuselage sides: s range and the height band of skin they cover; hinged at the front
+    # (speed_brakes.py builds them).
     "speed_brake": {"s0": 12.55, "s1": 13.35, "z0": -0.18, "z1": 0.30},
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
     # with a small 45 degree cut at the tip's trailing corner. Left-hand sections; the stabilator is one piece, its
@@ -754,39 +755,6 @@ def build_fin_fairing(p, mat):
     return obj
 
 
-def build_speed_brakes(p, mats):
-    """Panels lifted 6 mm off the side skin, 3 mm thick, so they clear it shut. Each opens outward on a hinge along
-    its front edge, set at the edge's outermost point: the edge follows the round side, and a hinge on its chord
-    would swing the middle of the edge into the skin ahead."""
-    sb = p["speed_brake"]
-    columns = []
-    for i in range(6):
-        s = sb["s0"] + (sb["s1"] - sb["s0"]) * i / 5
-        side = sorted((v for v in blended_ring(p, s) if v.x > 0.05 and sb["z0"] <= v.z <= sb["z1"]), key=lambda v: v.z)
-        columns.append([v + Vector((1.0, 0.0, 0.0)) * 0.006 for v in side])
-    n = min(len(c) for c in columns)
-    columns = [c[:n] for c in columns]
-    outer = [v for c in columns for v in c]
-    inner = [v - Vector((1.0, 0.0, 0.0)) * 0.003 for v in outer]
-    m = len(outer)
-    faces = []
-    for j in range(len(columns) - 1):
-        for k in range(n - 1):
-            a, b, c, d = j * n + k, j * n + k + 1, (j + 1) * n + k + 1, (j + 1) * n + k
-            faces += [(d, c, b, a), (a + m, b + m, c + m, d + m)]
-    obj = finish(mesh_object("speed_brake_L", outer + inner, faces), mats["body"])
-    obj.data.materials.append(mats["mechanical"])  # the inner face, seen when open
-    for poly in obj.data.polygons:
-        poly.material_index = poly.index % 2
-    front = columns[0]
-    along = (front[-1] - front[0]).normalized()
-    out = (Vector((1.0, 0.0, 0.0)) - along * along.x).normalized()
-    lift = out * max((q - front[0]).dot(out) for q in front)
-    left = hinged("speed_brake_L", obj, hinge_frame(front[0] + lift, front[-1] + lift))
-    left[0]["deflection_deg"] = surface_travel(p, "speed_brake_L")
-    return left + mirror_part(left)
-
-
 def empty(name, matrix, parent=None):
     obj = bpy.data.objects.new(name, None)
     obj.empty_display_type = "ARROWS"
@@ -877,7 +845,7 @@ def build(repo=None, overrides=None):
 
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
 # (review_sheet.py).
-MODULES = ("parts", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit", "uvs")
+MODULES = ("parts", "speed_brakes", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit", "uvs")
 
 
 def modules():
@@ -899,6 +867,7 @@ def _build(repo):
     import gear
     import lights
     import propulsion
+    import speed_brakes
     import stations
 
     fuselage = build_fuselage(p, mats["body"], mats["duct"])
@@ -907,7 +876,7 @@ def _build(repo):
     parts += canopy.build(p, mats)
     parts += propulsion.build(p, mats)
     parts += build_surfaces(p, mats)
-    parts += build_speed_brakes(p, mats)
+    parts += speed_brakes.build(p, mats)
     parts += gear.build(p, mats)
     parts += lights.build(p, mats)
     parts += stations.build(p, mats)

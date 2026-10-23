@@ -278,29 +278,29 @@
     "sprite": "Icarus_status_fuselage_mid.png",
     "centre": [
      0.0,
-     -8.44
+     -9.76
     ],
     "size": [
      32.7,
-     84.38
+     81.21
     ],
     "px": [
      450,
-     384
+     395
     ]
    },
    "gear_leg_L": {
     "sprite": "Icarus_status_gear_leg_L.png",
     "centre": [
-     -12.66,
-     -34.28
+     -12.92,
+     -32.17
     ],
     "size": [
-     15.82,
-     20.04
+     14.77,
+     15.82
     ],
     "px": [
-     434,
+     435,
      604
     ]
    },
@@ -308,29 +308,29 @@
     "sprite": "Icarus_status_gear_leg_N.png",
     "centre": [
      0.0,
-     39.29
+     38.76
     ],
     "size": [
-     3.16,
+     5.27,
      9.49
     ],
     "px": [
-     506,
-     345
+     502,
+     347
     ]
    },
    "gear_leg_R": {
     "sprite": "Icarus_status_gear_leg_R.png",
     "centre": [
-     12.66,
-     -34.28
+     12.92,
+     -32.17
     ],
     "size": [
-     15.82,
-     20.04
+     14.77,
+     15.82
     ],
     "px": [
-     530,
+     533,
      604
     ]
    },
