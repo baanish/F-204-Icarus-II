@@ -1,0 +1,60 @@
+// Tail rigidity in a hard turn: the owner saw the Icarus's whole tail, fin, rudder and T-tail stabilator, turned about the
+// fuselage axis against the wings in a turn, and the stabilator wobbling. Each tail part is its own rigidbody on FixedJoints;
+// hung on the light fin_spar alone, the fin skin, rudder and stabilator sat 8 deg rolled off the root in a 9 g pull on the
+// physics bench and swung 8 deg either way (check A18 in B0 holds them within 1 deg there). The plugin's "[Icarus]
+// tail-flex:" stage line gives each tail part's peak turn against the root over each second (src/Icarus/TailFlex.cs).
+// The Icarus starts over Ignus at 10 km, heading east at 400 m/s, half fuel, clean; a hold at full throttle reverses onto
+// 300 (a left turn of 150 deg, about 8 to 9 g), then back onto 90 (a roll reversal and a right turn).
+// Pass: the airframe intact through both turns, and the fin skin and the stabilator within 1.5 deg of the root in every
+// line from the turn's start to its end; the rudder and fin_spar are recorded.
+// From the repo root: no-agentic run tests/scenarios/tail_rigidity.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 10,
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s after spawn" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "require": { "log_value": { "match": "tail-flex: fin_skin ([0-9.]+) deg", "since": "start", "lt": 1.5 } }, "within": 5,
+      "label": "gate: the plugin logs the tail's flex, and the fin skin sits within 1.5 deg of the root in level flight" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
+    { "wait": { "path": "own.engines.0.rpm_frac", "gt": 0.99 }, "timeout": 10, "label": "the engine at full RPM" },
+    { "mark": { "label": "turn" } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 30, "hdg_deg": 180, "pitch_deg": 5 } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 300, "throttle": 1 } },
+    { "wait": { "any": [ { "path": "own.load_g", "gt": 7 }, { "event": "part_detached", "since": "turn" } ] }, "timeout": 8,
+      "label": "the hold pulls the turn past 7 g (or a part comes off first)" },
+    { "screenshot": { "name": "turn_from_behind" } },
+    { "check": { "all": [
+        { "log_value": { "match": "tail-flex: fin_skin ([0-9.]+) deg", "since": "turn", "lt": 1.5 } },
+        { "log_value": { "match": "tail-flex: .*stabilator ([0-9.]+) deg", "since": "turn", "lt": 1.5 } },
+        { "not": { "event": "part_detached", "since": "turn" } } ] }, "for": 8,
+      "label": "8 s into the left turn: the fin skin and the stabilator within 1.5 deg of the root each second, nothing detached" },
+    { "record": { "path": "own.load_g" }, "label": "load in the left turn" },
+    { "record": { "log_value": { "match": "tail-flex: fin_skin ([0-9.]+) deg", "since": "turn" } }, "label": "fin skin's peak turn over the last second, deg" },
+    { "record": { "log_value": { "match": "tail-flex: .*stabilator ([0-9.]+) deg", "since": "turn" } }, "label": "stabilator's peak turn over the last second, deg" },
+    { "record": { "log_value": { "match": "tail-flex: .*rudder ([0-9.]+) deg", "since": "turn" } }, "label": "rudder's peak turn over the last second, deg" },
+    { "record": { "log_value": { "match": "tail-flex: .*fin_spar ([0-9.]+) deg", "since": "turn" } }, "label": "fin_spar's peak turn over the last second, deg" },
+    { "mark": { "label": "reversal" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "all": [
+        { "log_value": { "match": "tail-flex: fin_skin ([0-9.]+) deg", "since": "turn", "lt": 1.5 } },
+        { "log_value": { "match": "tail-flex: .*stabilator ([0-9.]+) deg", "since": "turn", "lt": 1.5 } },
+        { "not": { "event": "part_detached", "since": "turn" } } ] }, "for": 10,
+      "label": "10 s through the roll reversal and the right turn: the fin skin and the stabilator within 1.5 deg of the root, nothing detached" },
+    { "record": { "path": "own.load_g" }, "label": "load in the right turn" },
+    { "record": { "log_value": { "match": "tail-flex: fin_skin ([0-9.]+) deg", "since": "reversal" } }, "label": "fin skin after the reversal, deg" },
+    { "record": { "log_value": { "match": "tail-flex: .*stabilator ([0-9.]+) deg", "since": "reversal" } }, "label": "stabilator after the reversal, deg" },
+  ],
+}

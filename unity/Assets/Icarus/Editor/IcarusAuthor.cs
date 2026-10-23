@@ -316,7 +316,7 @@ namespace Icarus.Editor
             public Object Parameters;
             public readonly Dictionary<string, GameObject> Parts = new Dictionary<string, GameObject>();
             public readonly Dictionary<string, Transform> Visuals = new Dictionary<string, Transform>();
-            public readonly Dictionary<string, List<string>> Joints = new Dictionary<string, List<string>>(); // part -> parent
+            public readonly Dictionary<string, List<string>> Joints = new Dictionary<string, List<string>>(); // part -> parent, then its TailBraces
             public readonly List<Renderer> Lod1 = new List<Renderer>();
             public readonly HashSet<Transform> Placed = new HashSet<Transform>(); // effects and markers moved off donor offsets
             public readonly List<string> Report = new List<string>();

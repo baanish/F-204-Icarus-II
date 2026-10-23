@@ -1,0 +1,268 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
+
+namespace Icarus.Editor
+{
+    public static partial class IcarusAuthor
+    {
+        // The game's physics, read from its globalgamemanagers (Unity 2022.3.62f2, the editor's own PhysX): a 1/60 s step,
+        // PGS with 6 position and 1 velocity iterations, angular speed capped at 14 rad/s.
+        private const float BenchStep = 1f / 60f;
+        private const int BenchPositionIterations = 6, BenchVelocityIterations = 1;
+        private const float BenchMaxAngularSpeed = 14f;
+
+        private sealed class BenchCase
+        {
+            public string Name;
+            public float G;          // the load factor the lifting surfaces carry, trimmed in pitch by the trim parts
+            public float FinSide;    // N on the vertical surfaces, by area, along the aircraft's right
+            public float Roll;       // N up on the left wing and down on the right (an aileron roll), applied for RollTime
+            public float RollTime;
+            public float Seconds;    // loads ramp in over the first half second; the last second is measured
+        }
+
+        private static readonly BenchCase[] BenchCases =
+        {
+            new BenchCase { Name = "9 g pull", G = 9f, Seconds = 3f },
+            new BenchCase { Name = "9 g pull, 5 kN fin side load", G = 9f, FinSide = 5000f, Seconds = 3f },
+            new BenchCase { Name = "1 g, 5 kN fin side load", G = 1f, FinSide = 5000f, Seconds = 3f },
+            new BenchCase { Name = "5 g pull, 20 kN aileron roll for 0.5 s", G = 5f, Roll = 20000f, RollTime = 0.5f, Seconds = 2f },
+        };
+
+        private sealed class BenchPart
+        {
+            public string Name;
+            public Component Part;
+            public Rigidbody Rb;
+            public float WingArea;
+            public Vector3 LiftUp;     // the lift normal's up, in the root's frame
+            public Vector3 LiftOffset; // centerOfLift turned by the lift normal, in the part's frame: the game's lift acts there
+        }
+
+        // Rebuilds an aircraft prefab's complex physics the way Aircraft.SetComplexPhysics does (AeroPart.CreateRB, then
+        // CreateJoints, with each anchor in body space as src/Icarus/JointAnchors.cs sets it when icarusAnchors) on a copy
+        // in a preview scene of its own (its own physics scene, stepped here, so the project's simulation mode is left
+        // alone), loads it as each case says and reports each watched part's turn against the root over the last second:
+        // its mean roll about the fuselage axis, its largest turn about any axis (into worst, by "case part") and its
+        // roll's peak-to-peak (wobble), with each joint's mean load there against its in-game break force.
+        private static string RunTailBench(GameObject prefab, string[] watched, string[] trimParts, bool icarusAnchors, float fuelFraction, Dictionary<string, float> worst)
+        {
+            var report = new StringBuilder();
+            foreach (var bench in BenchCases)
+            {
+                var scene = EditorSceneManager.NewPreviewScene();
+                try
+                {
+                    var copy = (GameObject)Object.Instantiate(prefab, Vector3.zero, Quaternion.identity);
+                    SceneManager.MoveGameObjectToScene(copy, scene);
+                    report.Append(BenchRun(copy, scene.GetPhysicsScene(), bench, watched, trimParts, icarusAnchors, fuelFraction, worst));
+                }
+                finally
+                {
+                    EditorSceneManager.ClosePreviewScene(scene);
+                }
+            }
+            return report.ToString();
+        }
+
+        private static string BenchRun(GameObject root, PhysicsScene physics, BenchCase bench, string[] watched, string[] trimParts, bool icarusAnchors,
+            float fuelFraction, Dictionary<string, float> worst)
+        {
+            var parts = root.GetComponentsInChildren(GameType("AeroPart"), true)
+                .ToDictionary(c => c.gameObject == root ? "root" : c.gameObject.name, c => new BenchPart { Name = c.gameObject.name, Part = c });
+            if (!parts.ContainsKey("root"))
+                throw new InvalidOperationException(root.name + ": no AeroPart on the root; are the game's scripts loaded?");
+            foreach (var wheel in root.GetComponentsInChildren<WheelCollider>(true))
+                Object.DestroyImmediate(wheel);
+            foreach (var extra in root.GetComponentsInChildren<Rigidbody>(true).Where(r => r.gameObject != root))
+                Object.DestroyImmediate(extra);
+            var fuel = new Dictionary<Component, float>();
+            foreach (var tank in root.GetComponentsInChildren(GameType("FuelTank"), true))
+            {
+                var so = new SerializedObject(tank);
+                var host = (Component)Prop(so, "part").objectReferenceValue;
+                if (host != null)
+                    fuel[host] = (fuel.TryGetValue(host, out var f) ? f : 0) + Prop(so, "fuelCapacity").floatValue * fuelFraction;
+            }
+            foreach (var p in parts.Values)
+            {
+                var so = new SerializedObject(p.Part);
+                var lift = (Transform)Prop(so, "liftNormal").objectReferenceValue;
+                if (lift == null)
+                    lift = p.Part.transform;
+                p.WingArea = Prop(so, "wingArea").floatValue;
+                p.LiftUp = root.transform.InverseTransformDirection(lift.up);
+                p.LiftOffset = p.Part.transform.InverseTransformVector(lift.rotation * Prop(so, "centerOfLift").vector3Value);
+            }
+            // CreateRB: every part but the root leaves the hierarchy on a body of its own.
+            foreach (var p in parts.Values.Where(p => p.Part.gameObject != root))
+                p.Part.transform.SetParent(null, true);
+            foreach (var p in parts.Values)
+            {
+                var so = new SerializedObject(p.Part);
+                var rb = p.Part.GetComponent<Rigidbody>();
+                if (rb == null)
+                    rb = p.Part.gameObject.AddComponent<Rigidbody>();
+                rb.isKinematic = false;
+                rb.useGravity = false;
+                rb.mass = Prop(so, "mass").floatValue + (fuel.TryGetValue(p.Part, out var kg) ? kg : 0);
+                rb.drag = 0;
+                rb.angularDrag = 0;
+                rb.sleepThreshold = 0;
+                rb.maxAngularVelocity = BenchMaxAngularSpeed;
+                rb.solverIterations = BenchPositionIterations;
+                rb.solverVelocityIterations = BenchVelocityIterations;
+                rb.ResetCenterOfMass();
+                rb.ResetInertiaTensor();
+                // UnitPart.ModifyMass, from a tank's fuel.
+                var com = (Transform)Prop(so, "centerOfMass").objectReferenceValue;
+                if (fuel.ContainsKey(p.Part) && com != null)
+                    rb.centerOfMass = com.localPosition;
+                p.Rb = rb;
+            }
+            // The Icarus's parts ignore one another (src/Icarus/SelfCollision.cs); stock parts sit apart.
+            var colliders = parts.Values.Select(p => p.Part.GetComponentsInChildren<Collider>(true).Where(c => !c.isTrigger).ToArray()).ToArray();
+            for (var i = 0; i < colliders.Length; i++)
+                for (var j = i + 1; j < colliders.Length; j++)
+                    foreach (var a in colliders[i])
+                        foreach (var c in colliders[j])
+                            Physics.IgnoreCollision(a, c);
+            // CreateJoints, unbreakable here: the bench measures deflection and reports the load against the break force.
+            var joints = new List<(string Owner, string To, FixedJoint Joint, float Break)>();
+            var rbOf = parts.Values.ToDictionary(p => (Object)p.Part, p => p.Rb);
+            foreach (var p in parts.Values)
+            {
+                var list = Prop(new SerializedObject(p.Part), "joints");
+                for (var i = 0; i < list.arraySize; i++)
+                {
+                    var pj = list.GetArrayElementAtIndex(i);
+                    var to = pj.FindPropertyRelative("connectedPart").objectReferenceValue;
+                    if (to == null || !rbOf.ContainsKey(to))
+                        continue;
+                    var joint = p.Part.gameObject.AddComponent<FixedJoint>();
+                    var anchor = (Transform)pj.FindPropertyRelative("anchor").objectReferenceValue;
+                    if (anchor != null)
+                        joint.anchor = icarusAnchors ? p.Part.transform.InverseTransformPoint(anchor.position) : anchor.position - p.Rb.position;
+                    joint.connectedBody = rbOf[to];
+                    joint.enableCollision = false;
+                    var iterations = pj.FindPropertyRelative("solverIterations").intValue;
+                    if (iterations != 6)
+                        p.Rb.solverIterations = iterations;
+                    joints.Add((p.Name, ((Component)to).gameObject.name, joint, pj.FindPropertyRelative("breakForce").floatValue * 10f));
+                }
+            }
+
+            // Lift on the horizontal surfaces by area, and on the trim parts what zeroes the pitching moment about the centre
+            // of mass: the load a trimmed pull puts on the airframe. Each acts where the game's does (centerOfLift).
+            var rootRb = parts["root"].Rb;
+            var bodies = parts.Values.ToArray();
+            var mass = bodies.Sum(p => p.Rb.mass);
+            var lifting = bodies.Where(p => p.WingArea > 0 && Mathf.Abs(p.LiftUp.y) > 0.7f && !trimParts.Contains(p.Name)).ToArray();
+            var trim = bodies.Where(p => trimParts.Contains(p.Name)).ToArray();
+            var fins = bodies.Where(p => p.WingArea > 0 && Mathf.Abs(p.LiftUp.x) > 0.7f).ToArray();
+            Vector3 LiftPoint(BenchPart p) => p.Rb.worldCenterOfMass + p.Part.transform.TransformVector(p.LiftOffset);
+            float Station(Vector3 world) => root.transform.InverseTransformPoint(world).z;
+            var cg = bodies.Sum(p => Station(p.Rb.worldCenterOfMass) * p.Rb.mass) / mass;
+            var area = lifting.Sum(p => p.WingArea);
+            var liftArm = lifting.Sum(p => p.WingArea / area * (Station(LiftPoint(p)) - cg));
+            var trimArm = trim.Average(p => Station(LiftPoint(p)) - cg);
+            var total = bench.G * 9.81f * mass;
+            var trimLift = -total * liftArm / (trimArm - liftArm); // wing + trim = total, wing * liftArm + trim * trimArm = 0
+            var wingLift = total - trimLift;
+            var finArea = fins.Sum(p => p.WingArea);
+
+            Quaternion Relative(Rigidbody rb) => Quaternion.Inverse(rootRb.rotation) * rb.rotation;
+            var watch = watched.Where(parts.ContainsKey).ToArray();
+            var rest = watch.ToDictionary(n => n, n => Relative(parts[n].Rb));
+            var turns = watch.ToDictionary(n => n, n => new List<(float Angle, float Roll)>());
+            var load = joints.ToDictionary(j => j.Joint, j => (Force: 0f, Torque: 0f, Samples: 0));
+            var steps = Mathf.RoundToInt(bench.Seconds / BenchStep);
+            for (var step = 0; step < steps; step++)
+            {
+                var t = step * BenchStep;
+                var ramp = Mathf.Clamp01(t / 0.5f);
+                var up = rootRb.rotation * Vector3.up * ramp;
+                var right = rootRb.rotation * Vector3.right * ramp;
+                foreach (var p in lifting)
+                    p.Rb.AddForceAtPosition(up * wingLift * p.WingArea / area, LiftPoint(p));
+                foreach (var p in trim)
+                    p.Rb.AddForceAtPosition(up * trimLift / trim.Length, LiftPoint(p));
+                foreach (var p in fins)
+                    p.Rb.AddForceAtPosition(right * bench.FinSide * p.WingArea / finArea, LiftPoint(p));
+                if (t >= 0.5f && t < 0.5f + bench.RollTime)
+                    foreach (var p in lifting.Where(p => p.WingArea > 1f))
+                        p.Rb.AddForce(up * bench.Roll * -Mathf.Sign(root.transform.InverseTransformPoint(p.Rb.worldCenterOfMass).x) / 2f);
+                physics.Simulate(BenchStep);
+                if (t < bench.Seconds - 1f)
+                    continue;
+                foreach (var j in joints)
+                {
+                    var l = load[j.Joint];
+                    load[j.Joint] = (l.Force + j.Joint.currentForce.magnitude, l.Torque + j.Joint.currentTorque.magnitude, l.Samples + 1);
+                }
+                foreach (var n in watch)
+                {
+                    (Relative(parts[n].Rb) * Quaternion.Inverse(rest[n])).ToAngleAxis(out var angle, out var axis);
+                    if (angle > 180f) angle -= 360f;
+                    turns[n].Add((Mathf.Abs(angle), angle * Vector3.Dot(axis, Vector3.forward)));
+                }
+            }
+
+            var line = new StringBuilder($"  {bench.Name} ({mass:0} kg, wing {wingLift / 1000:0.0} kN, trim {trimLift / 1000:0.0} kN):");
+            foreach (var n in watch)
+            {
+                var s = turns[n];
+                worst[bench.Name + " " + n] = s.Max(x => x.Angle);
+                line.Append($" {n} roll {s.Average(x => x.Roll):+0.00;-0.00} deg, max {s.Max(x => x.Angle):0.00}, wobble {s.Max(x => x.Roll) - s.Min(x => x.Roll):0.00};");
+            }
+            line.AppendLine();
+            foreach (var j in joints.Where(j => watch.Contains(j.Owner) || watch.Contains(j.To)))
+                line.AppendLine($"    joint {j.Owner} -> {j.To}: {load[j.Joint].Force / load[j.Joint].Samples / 1000:0.0} kN, {load[j.Joint].Torque / load[j.Joint].Samples / 1000:0.0} kN m (breaks at {j.Break / 1000:0} in game)");
+            return line.ToString();
+        }
+
+        // The most an Icarus tail part may turn against the root on the bench (check A18). Stock tails stay under half a
+        // degree (the Revoker's fin 0.34, the Vagrant's elevator 0.19); with the fin skin, rudder and stabilator on fin_spar
+        // alone they sat 8 deg rolled off the root in a 9 g pull and reached 21.
+        private const float TailFlexLimitDeg = 1f;
+        private static readonly string[] TailParts = { "fin_spar", "fin_skin", "rudder", "stabilator" };
+
+        private static string CheckTailStiffness(Build b, List<string> p)
+        {
+            var worst = new Dictionary<string, float>();
+            RunTailBench(b.Root, TailParts, new[] { "stabilator" }, true, 0.5f, worst);
+            foreach (var w in worst.Where(w => w.Value > TailFlexLimitDeg))
+                p.Add($"{w.Key}: turns {w.Value:0.00} deg against the root, over {TailFlexLimitDeg}");
+            var top = worst.OrderByDescending(w => w.Value).First();
+            return $"{string.Join(", ", TailParts)} within {TailFlexLimitDeg} deg of the root in {BenchCases.Length} bench cases at half fuel; worst {top.Key} {top.Value:0.00} deg";
+        }
+
+        // Batch entry, which authors nothing: pwsh tools/Build-Icarus.ps1 -ExecuteMethod Icarus.Editor.IcarusAuthor.TailBenchFromBatch
+        // (B0's verdict then reads FAIL for the missing checks; the bench is the "[Icarus] tail bench" block in the Unity log).
+        // Benches the saved Icarus prefab, any older Icarus prefab copied into Assets/IcarusBench (git show
+        // <commit>:unity/Assets/Blueprinter/Mods/icarus/Icarus.prefab), and the stock Revoker and Vagrant, at half fuel.
+        public static void TailBenchFromBatch()
+        {
+            IcarusBuild.InitializeGameTasks();
+            var worst = new Dictionary<string, float>();
+            var watched = TailParts.Append("fuselage_aft").ToArray();
+            var log = new StringBuilder("[Icarus] tail bench\n");
+            log.Append("Icarus:\n").Append(RunTailBench(Load<GameObject>(PrefabPath), watched, new[] { "stabilator" }, true, 0.5f, worst));
+            foreach (var guid in AssetDatabase.IsValidFolder("Assets/IcarusBench") ? AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/IcarusBench" }) : new string[0])
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                log.Append(path + ":\n").Append(RunTailBench(Load<GameObject>(path), watched, new[] { "stabilator" }, true, 0.5f, worst));
+            }
+            log.Append("Revoker FS-12:\n").Append(RunTailBench(Load<GameObject>(DonorPrefab), new[] { "vstab1", "vstab2", "rudder", "tail" }, new[] { "canard_L", "canard_R" }, false, 0.5f, worst));
+            log.Append("Vagrant VT-7:\n").Append(RunTailBench(Load<GameObject>(Stock + "GameObject/VTOLTrainer1_PLACEHOLDER.prefab"), new[] { "vstab1", "vstab2", "elevator_L", "tail" }, new[] { "elevator_L", "elevator_R" }, false, 0.5f, worst));
+            Debug.Log(log.ToString());
+        }
+    }
+}

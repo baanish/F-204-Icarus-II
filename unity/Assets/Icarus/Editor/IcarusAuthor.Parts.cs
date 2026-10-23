@@ -28,6 +28,16 @@ namespace Icarus.Editor
         private const float ForwardSectionThreshold = -100f;
         // The Revoker runs 6 to 8; the light skins and dry tanks hang off cores ten to sixty times their mass.
         private const int JointSolverIterations = 12;
+        // The stabilator (120 kg), the fin skin and the rudder (185 kg together) hang on fin_spar, a 100 kg slab with little
+        // inertia, and PhysX's iterative joint solver can't hold them stiff on it: on their own joints the three sat 8 deg
+        // rolled off the root in a 9 g pull, swinging through 8 deg, while fin_spar stayed within 0.2 (check A18). Each
+        // also joins fuselage_aft, as the Revoker joins every fin piece to its root. The cross joint is the part's own, at
+        // its own class, so its hit points weaken it, and its tensor is fin_spar (the stock rule: the owner's ancestor
+        // under the two parts' common ancestor), so it lets go when the fin does.
+        private static readonly (string Owner, string To, string Tensor)[] TailBraces =
+        {
+            ("stabilator", "fuselage_aft", "fin_spar"), ("rudder", "fuselage_aft", "fin_spar"), ("fin_skin", "fuselage_aft", "fin_spar"),
+        };
 
         private sealed class PartSpec
         {
@@ -150,6 +160,8 @@ namespace Icarus.Editor
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
             }
+            foreach (var brace in TailBraces)
+                b.Joints[brace.Owner].Add(brace.To);
             b.Report.Add($"parts: {b.Specs.Count} AeroParts ({Tree.Length} on the R13 tree), {b.Mass.Values.Sum():0} kg dry, " +
                 $"tanks {string.Join(", ", b.Tanks.Select(t => t + " " + b.Blockout.Parts[t].Number("fuel_kg")))}");
         }
@@ -300,10 +312,10 @@ namespace Icarus.Editor
             b.Report.Add("damage: armour from " + string.Join("; ", b.Specs.GroupBy(s => s.Armour).Select(g => (g.Key == "" ? "Fighter1" : g.Key) + " -> " + string.Join(", ", g.Select(s => s.Name)))));
         }
 
-        // Serialized PartJoints: one per part, to its parent part (AeroPart.Awake reads joints[0]), pinned where their colliders
-        // meet. No cross joints brace touching neighbours: the Icarus's parts ignore one another's colliders at spawn
-        // (src/Icarus/SelfCollision.cs), so a neighbour can't push them apart, and a section shed in a breakup takes nothing
-        // but its children with it.
+        // Serialized PartJoints: one per part to its parent part (AeroPart.Awake reads joints[0]), then its TailBraces, each
+        // pinned where the two parts' colliders meet. No other cross joints brace touching neighbours: the
+        // Icarus's parts ignore one another's colliders at spawn (src/Icarus/SelfCollision.cs), so a neighbour can't push
+        // them apart, and a section shed in a breakup takes nothing but its children with it.
         private static void WriteJoints(Build b)
         {
             var aeroType = GameType("AeroPart");
@@ -322,7 +334,7 @@ namespace Icarus.Editor
                     var force = JointForces[spec[entry.Key].Joint];
                     var joint = joints.GetArrayElementAtIndex(i);
                     joint.FindPropertyRelative("connectedPart").objectReferenceValue = b.Part(list[i]);
-                    joint.FindPropertyRelative("tensor").objectReferenceValue = null;
+                    joint.FindPropertyRelative("tensor").objectReferenceValue = i == 0 ? null : b.Part(TailBraces.Single(t => t.Owner == entry.Key && t.To == list[i]).Tensor);
                     joint.FindPropertyRelative("solverIterations").intValue = JointSolverIterations;
                     joint.FindPropertyRelative("breakForce").floatValue = force;
                     joint.FindPropertyRelative("breakTorque").floatValue = force;
@@ -332,7 +344,8 @@ namespace Icarus.Editor
                 }
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
-            b.Report.Add("joints: " + string.Join(", ", Enum.GetValues(typeof(JointClass)).Cast<JointClass>().Select(c => $"{c} {JointForces[c] / 1000:0} kN")) + $", {JointSolverIterations} solver iterations");
+            b.Report.Add("joints: " + string.Join(", ", Enum.GetValues(typeof(JointClass)).Cast<JointClass>().Select(c => $"{c} {JointForces[c] / 1000:0} kN")) + $", {JointSolverIterations} solver iterations; " +
+                "tail cross joints " + string.Join(", ", TailBraces.Select(t => $"{t.Owner} -> {t.To} (tensor {t.Tensor})")));
         }
 
         // Where two parts meet: the middle of their colliders' common bounds, or of the gap between them.
