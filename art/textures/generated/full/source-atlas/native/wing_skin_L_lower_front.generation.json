@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "output": null,
+  "accepted": false,
+  "generation_error": "image generation failed",
+  "fallback": "base luminance derivation"
+}

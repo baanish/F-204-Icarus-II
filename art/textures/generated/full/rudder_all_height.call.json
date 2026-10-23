@@ -1,0 +1,10 @@
+{
+  "name": "rudder_all_height",
+  "kind": "height",
+  "prompt": "art/textures/generated/full/rudder_all_height.prompt.txt",
+  "base": "art/textures/generated/full/rudder_all.png",
+  "references": [
+    "art/textures/generated/full/rudder_all.png"
+  ],
+  "output": "art/textures/generated/full/rudder_all_height.png"
+}

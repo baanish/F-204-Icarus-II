@@ -1,0 +1,11 @@
+{
+  "name": "skin_aft_L_lower",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/skin_aft_L_lower.prompt.txt",
+  "references": [
+    "art/textures/generated/full/skin_aft_L_lower.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/skin_aft_L_lower.template.png"
+  ],
+  "source_path": "art/textures/generated/full/skin_aft_L_lower.png"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "canopy_all_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/canopy_all_roughness.prompt.txt",
+  "base": "art/textures/generated/full/canopy_all.stitched.png",
+  "references": [
+    "art/textures/generated/full/canopy_all.stitched.png"
+  ],
+  "output": "art/textures/generated/full/canopy_all_roughness.png"
+}

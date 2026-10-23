@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/skin_forward_L_lower_roughness.png",
+  "output": "art/textures/generated/full/skin_forward_L_lower_roughness.png",
+  "sha256": "a8ef1c7ae1bb82f3ea562664fe22597aaf6d31a305990e67293512c6d7d79c98",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

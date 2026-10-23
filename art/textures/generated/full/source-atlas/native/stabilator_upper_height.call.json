@@ -1,0 +1,10 @@
+{
+  "name": "stabilator_upper_height",
+  "kind": "height",
+  "prompt": "art/textures/generated/full/stabilator_upper_height.prompt.txt",
+  "base": "art/textures/generated/full/stabilator_upper.png",
+  "references": [
+    "art/textures/generated/full/stabilator_upper.png"
+  ],
+  "output": "art/textures/generated/full/stabilator_upper_height.png"
+}

@@ -3,13 +3,16 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
-from scipy.ndimage import distance_transform_edt
+from scipy.ndimage import distance_transform_edt, zoom
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '.cache/review/wave2/p9b/02'
 SOURCE = ROOT / 'art/textures/generated'
 EXPORT = ROOT / 'art/export/textures'
-SIZE = 2048
+SIZE = 4096  # production skin atlas: art/blender/uvs.py ATLAS_SIZE
+PAINT_SIZE = 2048  # generated paint registration and AO bake: uvs.PAINT_SIZE
+PX_PER_M = 300  # uvs.TEXEL_DENSITY
+GUTTER_PX = 16
 
 
 def sample(image, u, v, repeat=False):
@@ -42,7 +45,7 @@ def read_source(name):
 def dilate(values, used):
     result = values.copy()
     distance, index = distance_transform_edt(~used, return_indices=True)
-    band = (~used) & (distance <= 8)
+    band = (~used) & (distance <= GUTTER_PX)
     result[band] = values[index[0][band], index[1][band]]
     return result
 
@@ -56,3 +59,39 @@ def save_map(path, values, used):
 def smoothstep(value):
     value = np.clip(value, 0, 1)
     return value * value * (3 - 2 * value)
+
+
+def upsample(values, used):
+    """A PAINT_SIZE field bilinearly sampled at SIZE texel centres, padded from the nearest skin first."""
+    _, index = distance_transform_edt(~used, return_indices=True)
+    padded = values[index[0], index[1]]
+    factor = SIZE / values.shape[0]
+    return zoom(padded, (factor, factor) + (1,) * (values.ndim - 2), order=1, grid_mode=True, mode='nearest')
+
+
+def extend_geometry(position, normal, part, width=3):
+    """Extrapolate each island's world position a few texels past its edge along its own UV derivatives.
+
+    Features evaluated there keep their true shape, so image-space gradients stay correct up to UV cuts.
+    Returns position, normal and part over the band, the evaluated mask, and the per-texel derivatives.
+    """
+    used = part > 0
+    derivatives = []
+    for axis in (1, 0):
+        ahead, behind = np.roll(position, -1, axis), np.roll(position, 1, axis)
+        forward = used & (np.roll(part, -1, axis) == part)
+        backward = used & (np.roll(part, 1, axis) == part)
+        step = np.where(forward[..., None], ahead - position, np.where(backward[..., None], position - behind, np.nan))
+        derivatives.append(step)
+    known = used & np.isfinite(derivatives[0]).all(-1) & np.isfinite(derivatives[1]).all(-1)
+    _, index = distance_transform_edt(~known, return_indices=True)
+    dx, dy = (d[index[0], index[1]] for d in derivatives)
+    distance, nearest = distance_transform_edt(~used, return_indices=True)
+    band = ~used & (distance <= width)
+    yy, xx = np.nonzero(band)
+    iy, ix = nearest[0][band], nearest[1][band]
+    position, normal, part = position.copy(), normal.copy(), part.copy()
+    position[band] = position[iy, ix] + dx[iy, ix] * (xx - ix)[:, None] + dy[iy, ix] * (yy - iy)[:, None]
+    normal[band] = normal[iy, ix]
+    part[band] = part[iy, ix]
+    return position, normal, part, used | band, dx, dy

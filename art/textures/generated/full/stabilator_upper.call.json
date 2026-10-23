@@ -1,0 +1,12 @@
+{
+  "name": "stabilator_upper",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/stabilator_upper.prompt.txt",
+  "references": [
+    "art/textures/generated/full/stabilator_upper.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/stabilator_upper.template.png",
+    "art/textures/generated/full/stabilator_upper.neighbor_fin_left.png"
+  ],
+  "source_path": "art/textures/generated/full/stabilator_upper.png"
+}

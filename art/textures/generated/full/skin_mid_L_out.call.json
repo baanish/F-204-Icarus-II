@@ -1,0 +1,13 @@
+{
+  "name": "skin_mid_L_out",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/skin_mid_L_out.prompt.txt",
+  "references": [
+    "art/textures/generated/full/skin_mid_L_out.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/skin_mid_L_out.template.png",
+    "art/textures/generated/full/skin_mid_L_out.neighbor_wing_root.png",
+    "art/textures/generated/full/skin_mid_L_out.neighbor_wing_upper.png"
+  ],
+  "source_path": "art/textures/generated/full/skin_mid_L_out.png"
+}

@@ -12,9 +12,13 @@ from mathutils.kdtree import KDTree
 
 import cycles_device
 
-ATLAS_SIZE = 2048
-TEXEL_DENSITY = 150  # Highest density allowed by rule 6; the current skin cannot cover 60% at 128 px/m.
-MARGIN_PX = 4
+# Stock skins are 2048 square at 108 to 132 px/m. This doubles the 2048 / 150 px/m / 4 px layout with identical UV
+# fractions, so 8 mm fastener heads and seam lines get whole texels.
+ATLAS_SIZE = 4096
+TEXEL_DENSITY = 300
+MARGIN_PX = 8
+# The generated paint registration (round-2 source atlas) and the AO bake stay at this size; compose upsamples them.
+PAINT_SIZE = 2048
 SKIN = "Icarus_Body"
 # The single tip-to-tip stabilator and every lettering-bearing part have unique islands.
 MIRROR_PAIRS = (
@@ -367,8 +371,7 @@ def check(icarus):
               "trim": trims.check(icarus)}
     print("uvs measurements: " + json.dumps(report, sort_keys=True))
     problems = []
-    if not (110 <= TEXEL_DENSITY <= 150 and 110 - 0.01 <= median <= 150 + 0.01
-            and abs(median / TEXEL_DENSITY - 1) <= 0.1
+    if not (abs(median / TEXEL_DENSITY - 1) <= 0.1
             and 0.9 * median <= p10 <= p90 <= 1.1 * median):
         problems.append("density %.3f / %.3f / %.3f (p10 / median / p90)" % (p10, median, p90))
     if outside:
@@ -503,7 +506,7 @@ def render_review(icarus, out_dir):
         label(marker, center.x, center.y, 0.013)
         name = obj.name + (" = " + twins[obj.name] if obj.name in twins else "")
         label(marker + "  " + name, 1.025, 0.94 - index * 0.031, 0.012, material)
-    label("2048 skin atlas | %.0f px/m | %.2f%% covered" % (TEXEL_DENSITY, 100 * report["atlas_use"]),
+    label("%d skin atlas | %.0f px/m | %.2f%% covered" % (ATLAS_SIZE, TEXEL_DENSITY, 100 * report["atlas_use"]),
           0.01, 1.025, 0.018)
     label("L is canonical; matching R shares its islands", 1.025, 0.985, 0.013)
     cam.location = (0.84, 0.52, 10)

@@ -1,0 +1,10 @@
+{
+  "name": "wing_skin_L_lower_front_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/wing_skin_L_lower_front_roughness.prompt.txt",
+  "base": "art/textures/generated/full/wing_skin_L_lower_front.stitched.png",
+  "references": [
+    "art/textures/generated/full/wing_skin_L_lower_front.stitched.png"
+  ],
+  "output": "art/textures/generated/full/wing_skin_L_lower_front_roughness.png"
+}

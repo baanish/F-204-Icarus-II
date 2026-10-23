@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: icarus_pala_4
   m_EditorClassIdentifier: 
   Texture: {fileID: 2800000, guid: 8cb7fa2b7e9985a488af6dfa809a2c77, type: 3}
-  Glossiness: 0.45
+  Glossiness: 0
   Colors:
   - Color:
       serializedVersion: 2
-      rgba: 4290952632
+      rgba: 4291807941
     Count: 1

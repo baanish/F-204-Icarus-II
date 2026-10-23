@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/stabilator_upper_roughness.png",
+  "output": "art/textures/generated/full/stabilator_upper_roughness.png",
+  "sha256": "fd571debe5fa3ca8128bf46677e49f1621c378c11f4c8c3340cc11dddf097732",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

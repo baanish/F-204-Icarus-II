@@ -1,0 +1,13 @@
+{
+  "name": "nozzle_petal_00_all",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/nozzle_petal_00_all.prompt.txt",
+  "references": [
+    "art/textures/generated/full/nozzle_petal_00_all.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/nozzle_petal_00_all.template.png",
+    "art/textures/generated/full/nozzle_petal_00_all.neighbor_fin_left.png",
+    "art/textures/generated/full/nozzle_petal_00_all.neighbor_rudder_all.png"
+  ],
+  "source_path": "art/textures/generated/full/nozzle_petal_00_all.png"
+}

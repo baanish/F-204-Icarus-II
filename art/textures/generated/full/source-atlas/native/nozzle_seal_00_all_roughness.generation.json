@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/nozzle_seal_00_all_roughness.png",
+  "output": "art/textures/generated/full/nozzle_seal_00_all_roughness.png",
+  "sha256": "55c111d1fd06a313ca02ccf6f8335eca5ba3139073f8d958b53bc67212f2ea01",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

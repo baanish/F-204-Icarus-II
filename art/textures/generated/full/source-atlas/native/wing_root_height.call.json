@@ -1,0 +1,10 @@
+{
+  "name": "wing_root_height",
+  "kind": "height",
+  "prompt": "art/textures/generated/full/wing_root_height.prompt.txt",
+  "base": "art/textures/generated/pilot2/wing_root.png",
+  "references": [
+    "art/textures/generated/pilot2/wing_root.png"
+  ],
+  "output": "art/textures/generated/full/wing_root_height.png"
+}

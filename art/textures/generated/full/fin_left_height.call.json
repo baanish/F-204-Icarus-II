@@ -1,0 +1,10 @@
+{
+  "name": "fin_left_height",
+  "kind": "height",
+  "prompt": "art/textures/generated/full/fin_left_height.prompt.txt",
+  "base": "art/textures/generated/pilot2/fin_left.png",
+  "references": [
+    "art/textures/generated/pilot2/fin_left.png"
+  ],
+  "output": "art/textures/generated/full/fin_left_height.png"
+}

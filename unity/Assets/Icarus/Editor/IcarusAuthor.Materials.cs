@@ -12,6 +12,8 @@ namespace Icarus.Editor
         // The generator's material slots (art/blender/materials.py), remapped by name on import. Icarus_Body is the skin,
         // the only slot that takes a livery; the internals keep their stock trim materials.
         private const string SkinSlot = "Icarus_Body";
+        // art/blender/uvs.py ATLAS_SIZE: every skin, livery and damage map is this square.
+        private const int SkinSize = 4096;
         private const string GlassSlot = "Icarus_Glass";
         private const string LodSlot = "LOD";
         private const string SkinPath = SkinFolder + "/Icarus_skin.mat";
@@ -107,25 +109,25 @@ namespace Icarus.Editor
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = normalMap ? TextureImporterType.NormalMap : TextureImporterType.Default;
             importer.sRGBTexture = sRgb;
-            importer.maxTextureSize = 2048;
+            importer.maxTextureSize = SkinSize;
             importer.mipmapEnabled = true;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.alphaSource = format == TextureImporterFormat.DXT1 ? TextureImporterAlphaSource.None : TextureImporterAlphaSource.FromInput;
             importer.textureCompression = TextureImporterCompression.Compressed;
             // The default platform takes only Automatic; the explicit DXT format goes on the Standalone override.
             var platform = importer.GetDefaultPlatformTextureSettings();
-            platform.maxTextureSize = 2048;
+            platform.maxTextureSize = SkinSize;
             platform.format = TextureImporterFormat.Automatic;
             importer.SetPlatformTextureSettings(platform);
             var standalone = importer.GetPlatformTextureSettings("Standalone");
             standalone.overridden = true;
-            standalone.maxTextureSize = 2048;
+            standalone.maxTextureSize = SkinSize;
             standalone.format = format;
             importer.SetPlatformTextureSettings(standalone);
             importer.SaveAndReimport();
             var texture = Load<Texture2D>(path);
-            if (texture.width != 2048 || texture.height != 2048)
-                throw new InvalidDataException("skin texture must be 2048 square: " + name);
+            if (texture.width != SkinSize || texture.height != SkinSize)
+                throw new InvalidDataException("skin texture must be " + SkinSize + " square: " + name);
             return texture;
         }
 
@@ -167,13 +169,30 @@ namespace Icarus.Editor
             return result;
         }
 
-        // Every renderer wearing the skin goes in its part's damageMaterial.renderers, the only renderers UnitPart.SetLivery
+        private static void AuthorLiveryMaterialCarrier(Build b)
+        {
+            var bare = new Material(b.Skin) { name = "Icarus_bare_metal" };
+            bare.SetTexture("_Livery", Load<Texture2D>(LiveryFolder + "/Icarus_livery_4.png"));
+            bare.SetTexture("_Metallic", ImportSkinTexture("Icarus_livery_4_m.png", false, false, TextureImporterFormat.DXT5));
+            bare = SaveAsset(bare, SkinFolder + "/Icarus_bare_metal.mat");
+            // BareMetalLivery reads slots 0/1 as the untouched skin and the Bare Metal livery/map pair.
+            var carrier = new GameObject("Icarus_livery_materials") { layer = 3 };
+            carrier.SetActive(false);
+            carrier.transform.SetParent(b.Root.transform, false);
+            var renderer = carrier.AddComponent<MeshRenderer>();
+            renderer.enabled = false;
+            renderer.sharedMaterials = new[] { b.Skin, bare };
+        }
+
+        // Every mesh renderer wearing the skin goes in its part's damageMaterial.renderers, the only renderers UnitPart.SetLivery
         // paints and tints with damage.
         private static void ListLiveryRenderers(Build b)
         {
+            AuthorLiveryMaterialCarrier(b);
             var aeroType = GameType("AeroPart");
             var listed = 0;
-            foreach (var renderer in b.Root.GetComponentsInChildren<MeshRenderer>(true).Where(r => r.sharedMaterials.Contains(b.Skin)))
+            foreach (var renderer in b.Root.GetComponentsInChildren<MeshRenderer>(true)
+                .Where(r => r.TryGetComponent<MeshFilter>(out var filter) && filter.sharedMesh != null && r.sharedMaterials.Contains(b.Skin)))
             {
                 var owner = renderer.GetComponentInParent(aeroType, true);
                 if (owner == null) throw new InvalidDataException("skin renderer has no part owner: " + renderer.name);

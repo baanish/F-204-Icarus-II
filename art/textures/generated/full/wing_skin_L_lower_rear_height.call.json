@@ -1,0 +1,10 @@
+{
+  "name": "wing_skin_L_lower_rear_height",
+  "kind": "height",
+  "prompt": "art/textures/generated/full/wing_skin_L_lower_rear_height.prompt.txt",
+  "base": "art/textures/generated/full/wing_skin_L_lower_rear.png",
+  "references": [
+    "art/textures/generated/full/wing_skin_L_lower_rear.png"
+  ],
+  "output": "art/textures/generated/full/wing_skin_L_lower_rear_height.png"
+}

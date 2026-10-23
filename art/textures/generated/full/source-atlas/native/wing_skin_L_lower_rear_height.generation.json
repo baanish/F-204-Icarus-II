@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/wing_skin_L_lower_rear_height.png",
+  "output": "art/textures/generated/full/wing_skin_L_lower_rear_height.png",
+  "sha256": "2c1107a978198729d51ee5d04d1912cda8b84923da68bd75f0e041c339f17677",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

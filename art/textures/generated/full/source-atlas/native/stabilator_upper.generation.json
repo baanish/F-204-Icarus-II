@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/stabilator_upper.png",
+  "output": "art/textures/generated/full/stabilator_upper.png",
+  "sha256": "c3275f6bb285458b5f6fcc1359990bcfafbbea805fffa8f0da0fb42e257c01c4",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

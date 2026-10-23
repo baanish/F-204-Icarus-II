@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/skin_aft_L_upper_roughness.png",
+  "output": "art/textures/generated/full/skin_aft_L_upper_roughness.png",
+  "sha256": "7dc753c2ebfbe9c6693bafdca137269f3517df4168f3430893ff16cee1b651ab",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

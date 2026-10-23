@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/rudder_all_height.png",
+  "output": "art/textures/generated/full/rudder_all_height.png",
+  "sha256": "16c437045ab02978d619b2a449a6c2a049fae4983a7a49b00a35203115530907",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

@@ -1,0 +1,13 @@
+{
+  "name": "ventral_fin_all",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/ventral_fin_all.prompt.txt",
+  "references": [
+    "art/textures/generated/full/ventral_fin_all.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/ventral_fin_all.template.png",
+    "art/textures/generated/full/ventral_fin_all.neighbor_flap_L_all.png",
+    "art/textures/generated/full/ventral_fin_all.neighbor_skin_aft_L_lower.png"
+  ],
+  "source_path": "art/textures/generated/full/ventral_fin_all.png"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "wing_upper_height",
+  "kind": "height",
+  "prompt": "art/textures/generated/full/wing_upper_height.prompt.txt",
+  "base": "art/textures/generated/pilot2/wing_upper.png",
+  "references": [
+    "art/textures/generated/pilot2/wing_upper.png"
+  ],
+  "output": "art/textures/generated/full/wing_upper_height.png"
+}

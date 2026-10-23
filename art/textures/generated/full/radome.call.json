@@ -1,0 +1,11 @@
+{
+  "name": "radome",
+  "generation_required": false,
+  "prompt": "art/textures/generated/full/radome.prompt.txt",
+  "references": [
+    "art/textures/generated/pilot2/radome.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/pilot2/radome.template.png"
+  ],
+  "source_path": "art/textures/generated/pilot2/radome.png"
+}

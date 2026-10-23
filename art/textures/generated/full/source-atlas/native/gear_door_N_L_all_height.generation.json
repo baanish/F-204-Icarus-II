@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/gear_door_N_L_all_height.png",
+  "output": "art/textures/generated/full/gear_door_N_L_all_height.png",
+  "sha256": "03b88cbfa6b0d602a50e4b826e6399cea74272380c4721a6b2f6794130940e27",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

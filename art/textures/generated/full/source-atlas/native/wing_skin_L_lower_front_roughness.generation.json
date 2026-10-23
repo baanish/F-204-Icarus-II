@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/wing_skin_L_lower_front_roughness.png",
+  "output": "art/textures/generated/full/wing_skin_L_lower_front_roughness.png",
+  "sha256": "8bcc0d89ecff43e1551ccb079ac575d77944ccc7be9c0de154e34d045e6bdbde",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

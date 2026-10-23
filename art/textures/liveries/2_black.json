@@ -1,1 +1,1 @@
-{"id":2,"name":"PALA Black","lower":[0.16,0.18,0.20],"upper":[0.085,0.10,0.12],"dominant":[22,26,31],"demarcation":[0.12,0.12],"pattern":"height","source":"paint.png","source_scale_m":1.6,"wear_strength":1.2,"glossiness":0.0,"light_markings":true}
+{"id":2,"name":"PALA Black","lower":[0.16,0.18,0.20],"upper":[0.085,0.10,0.12],"dominant":[22,26,31],"demarcation":[0.12,0.12],"pattern":"height","source":"paint.png","source_scale_m":1.6,"wear_strength":0.5,"glossiness":0.0,"light_markings":true}

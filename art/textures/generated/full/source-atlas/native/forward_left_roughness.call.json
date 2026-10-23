@@ -1,0 +1,10 @@
+{
+  "name": "forward_left_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/forward_left_roughness.prompt.txt",
+  "base": "art/textures/generated/pilot2/forward_left.png",
+  "references": [
+    "art/textures/generated/pilot2/forward_left.png"
+  ],
+  "output": "art/textures/generated/full/forward_left_roughness.png"
+}

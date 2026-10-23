@@ -1,0 +1,10 @@
+{
+  "name": "skin_aft_L_lower_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/skin_aft_L_lower_roughness.prompt.txt",
+  "base": "art/textures/generated/full/skin_aft_L_lower.png",
+  "references": [
+    "art/textures/generated/full/skin_aft_L_lower.png"
+  ],
+  "output": "art/textures/generated/full/skin_aft_L_lower_roughness.png"
+}

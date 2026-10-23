@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/skin_mid_L_out.png",
+  "output": "art/textures/generated/full/skin_mid_L_out.png",
+  "sha256": "2d10f8a56067baa7d9c033bcdd349d90a08954c5227b0e7a0ab6f301c4f50d3c",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

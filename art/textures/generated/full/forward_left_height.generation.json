@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/forward_left_height.png",
+  "output": "art/textures/generated/full/forward_left_height.png",
+  "sha256": "711db82f1d3e1cd775e447b40f1c7771f6cfac44c22e94f66a025f03280ce24f",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

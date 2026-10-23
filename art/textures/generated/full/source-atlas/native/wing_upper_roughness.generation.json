@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/wing_upper_roughness.png",
+  "output": "art/textures/generated/full/wing_upper_roughness.png",
+  "sha256": "6575e14079aa9077476c78525b3f8dfdd90a666ab025ff16b5d8ff2185c46d32",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

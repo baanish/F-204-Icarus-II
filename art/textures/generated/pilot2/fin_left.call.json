@@ -1,0 +1,9 @@
+{
+  "prompt": "art\\textures\\generated\\pilot2\\fin_left.prompt.txt",
+  "references": [
+    "art\\textures\\generated\\pilot2\\fin_left.guide.png",
+    "art\\textures\\generated\\pilot2\\style_anchor.png",
+    "art\\textures\\generated\\pilot2\\fin_left.template.png",
+    "art\\textures\\generated\\pilot2\\fin_left.neighbor_wing_upper.png"
+  ]
+}

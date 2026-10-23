@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/flap_L_all.png",
+  "output": "art/textures/generated/full/flap_L_all.png",
+  "sha256": "48627a9955b9dd1125ae0b360344c1e9386af7e1fd69ab2e4e192eaaa537fdfc",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

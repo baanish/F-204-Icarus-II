@@ -1,0 +1,134 @@
+{
+  "method": "per-chart generated paint fit to exact template",
+  "source": "art/textures/generated/full/skin_forward_L_lower.png",
+  "source_sha256": "3d777b21607cfe0e509e221872e861c5513f3b85b1f868d1cc6980600ac1f03e",
+  "output": "art/textures/generated/full/skin_forward_L_lower.stitched.png",
+  "output_sha256": "1b8e4f0cd10ab33e149cb292c2b9fb65a5558a2248ae3046d99878fedb549606",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "charts": [
+    {
+      "source_box": [
+        34,
+        120,
+        1221,
+        279
+      ],
+      "chart": "skin_forward_L:lower:021",
+      "target_box": [
+        33,
+        122,
+        1220,
+        281
+      ]
+    },
+    {
+      "source_box": [
+        34,
+        351,
+        234,
+        430
+      ],
+      "chart": "skin_forward_L:upper:066",
+      "target_box": [
+        33,
+        350,
+        236,
+        430
+      ]
+    },
+    {
+      "source_box": [
+        285,
+        349,
+        930,
+        422
+      ],
+      "chart": "skin_forward_L:out:064",
+      "target_box": [
+        285,
+        350,
+        929,
+        422
+      ]
+    },
+    {
+      "source_box": [
+        33,
+        495,
+        677,
+        568
+      ],
+      "chart": "skin_forward_L:lower:048",
+      "target_box": [
+        33,
+        500,
+        677,
+        568
+      ]
+    },
+    {
+      "source_box": [
+        32,
+        635,
+        678,
+        676
+      ],
+      "chart": "skin_forward_L:in:017",
+      "target_box": [
+        33,
+        638,
+        679,
+        677
+      ]
+    },
+    {
+      "source_box": [
+        31,
+        743,
+        677,
+        778
+      ],
+      "chart": "skin_forward_L:lower:041",
+      "target_box": [
+        33,
+        746,
+        677,
+        779
+      ]
+    },
+    {
+      "source_box": [
+        30,
+        842,
+        677,
+        862
+      ],
+      "chart": "skin_forward_L:lower:058",
+      "target_box": [
+        33,
+        848,
+        673,
+        861
+      ]
+    },
+    {
+      "source_box": [
+        717,
+        838,
+        891,
+        856
+      ],
+      "chart": "skin_forward_L:out:063",
+      "target_box": [
+        722,
+        848,
+        894,
+        858
+      ]
+    }
+  ],
+  "limitation": "base-only chart fitting before companion generation; raw generated original remains unchanged"
+}

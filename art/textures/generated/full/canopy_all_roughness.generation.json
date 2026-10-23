@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/canopy_all_roughness.png",
+  "output": "art/textures/generated/full/canopy_all_roughness.png",
+  "sha256": "c7dd5bdbc0892acff0d825a41b8aeda7d4144f2b1308398158c95fb76ee25249",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

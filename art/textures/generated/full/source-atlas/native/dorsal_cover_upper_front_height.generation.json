@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/dorsal_cover_upper_front_height.png",
+  "output": "art/textures/generated/full/dorsal_cover_upper_front_height.png",
+  "sha256": "25dba4ae38fc7a0531250825d0147a6b2e3ef522eab2f2fcc4cab388bb3306cc",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

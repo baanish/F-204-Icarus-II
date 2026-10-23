@@ -1,0 +1,2156 @@
+{
+  "schema_version": 2,
+  "canonical_texels": 2381226,
+  "assigned_texels": 2381226,
+  "unassigned_texels": 0,
+  "unassigned_islands": [],
+  "direct_texels": 0,
+  "transferred_texels": 2381226,
+  "native_reuse_texels": 2191991,
+  "unmatched_surface_texels": 189235,
+  "parts": {
+    "aileron_L_visible": {
+      "canonical_texels": 29021,
+      "assigned_texels": 29021,
+      "native_reuse_texels": 18022,
+      "parent_paint_texels": 10999,
+      "groups": [
+        "aileron_L_all"
+      ]
+    },
+    "canopy_visible": {
+      "canonical_texels": 22901,
+      "assigned_texels": 22901,
+      "native_reuse_texels": 21951,
+      "parent_paint_texels": 950,
+      "groups": [
+        "canopy_all"
+      ]
+    },
+    "dorsal_cover": {
+      "canonical_texels": 118743,
+      "assigned_texels": 118743,
+      "native_reuse_texels": 118743,
+      "parent_paint_texels": 0,
+      "groups": [
+        "dorsal_cover_upper_front",
+        "dorsal_cover_upper_rear"
+      ]
+    },
+    "fin_skin": {
+      "canonical_texels": 163607,
+      "assigned_texels": 163607,
+      "native_reuse_texels": 141833,
+      "parent_paint_texels": 21774,
+      "groups": [
+        "fin_left"
+      ]
+    },
+    "flap_L_visible": {
+      "canonical_texels": 36633,
+      "assigned_texels": 36633,
+      "native_reuse_texels": 28759,
+      "parent_paint_texels": 7874,
+      "groups": [
+        "flap_L_all"
+      ]
+    },
+    "gear_door_N2_L_visible": {
+      "canonical_texels": 1054,
+      "assigned_texels": 1054,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 1054,
+      "groups": [
+        "gear_door_N_L_all"
+      ]
+    },
+    "gear_door_N2_R_visible": {
+      "canonical_texels": 1052,
+      "assigned_texels": 1052,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 1052,
+      "groups": [
+        "gear_door_N_L_all"
+      ]
+    },
+    "gear_door_N_L_visible": {
+      "canonical_texels": 8576,
+      "assigned_texels": 8576,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 8576,
+      "groups": [
+        "gear_door_N_L_all"
+      ]
+    },
+    "gear_door_flap_L_visible": {
+      "canonical_texels": 13636,
+      "assigned_texels": 13636,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 13636,
+      "groups": [
+        "gear_door_main_L_all"
+      ]
+    },
+    "gear_door_flap_R_visible": {
+      "canonical_texels": 13620,
+      "assigned_texels": 13620,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 13620,
+      "groups": [
+        "gear_door_main_L_all"
+      ]
+    },
+    "gear_door_main_L_visible": {
+      "canonical_texels": 8778,
+      "assigned_texels": 8778,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 8778,
+      "groups": [
+        "gear_door_main_L_all"
+      ]
+    },
+    "intake_duct_L": {
+      "canonical_texels": 28851,
+      "assigned_texels": 28851,
+      "native_reuse_texels": 28821,
+      "parent_paint_texels": 30,
+      "groups": [
+        "intake_duct_L_all"
+      ]
+    },
+    "lef_L_visible": {
+      "canonical_texels": 20247,
+      "assigned_texels": 20247,
+      "native_reuse_texels": 15597,
+      "parent_paint_texels": 4650,
+      "groups": [
+        "lef_L_all"
+      ]
+    },
+    "nozzle": {
+      "canonical_texels": 23213,
+      "assigned_texels": 23213,
+      "native_reuse_texels": 23213,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_all"
+      ]
+    },
+    "nozzle_petal_00_visible": {
+      "canonical_texels": 1646,
+      "assigned_texels": 1646,
+      "native_reuse_texels": 1575,
+      "parent_paint_texels": 71,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_01_visible": {
+      "canonical_texels": 1660,
+      "assigned_texels": 1660,
+      "native_reuse_texels": 1660,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_02_visible": {
+      "canonical_texels": 1766,
+      "assigned_texels": 1766,
+      "native_reuse_texels": 1766,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_03_visible": {
+      "canonical_texels": 1644,
+      "assigned_texels": 1644,
+      "native_reuse_texels": 1644,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_04_visible": {
+      "canonical_texels": 1763,
+      "assigned_texels": 1763,
+      "native_reuse_texels": 1763,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_05_visible": {
+      "canonical_texels": 1662,
+      "assigned_texels": 1662,
+      "native_reuse_texels": 1662,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_06_visible": {
+      "canonical_texels": 1589,
+      "assigned_texels": 1589,
+      "native_reuse_texels": 1589,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_07_visible": {
+      "canonical_texels": 1746,
+      "assigned_texels": 1746,
+      "native_reuse_texels": 1676,
+      "parent_paint_texels": 70,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_08_visible": {
+      "canonical_texels": 1604,
+      "assigned_texels": 1604,
+      "native_reuse_texels": 1604,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_09_visible": {
+      "canonical_texels": 1732,
+      "assigned_texels": 1732,
+      "native_reuse_texels": 1732,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_10_visible": {
+      "canonical_texels": 1590,
+      "assigned_texels": 1590,
+      "native_reuse_texels": 1590,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_11_visible": {
+      "canonical_texels": 1591,
+      "assigned_texels": 1591,
+      "native_reuse_texels": 1591,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_12_visible": {
+      "canonical_texels": 1673,
+      "assigned_texels": 1673,
+      "native_reuse_texels": 1673,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_13_visible": {
+      "canonical_texels": 1747,
+      "assigned_texels": 1747,
+      "native_reuse_texels": 1747,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_14_visible": {
+      "canonical_texels": 1590,
+      "assigned_texels": 1590,
+      "native_reuse_texels": 1519,
+      "parent_paint_texels": 71,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_petal_15_visible": {
+      "canonical_texels": 1660,
+      "assigned_texels": 1660,
+      "native_reuse_texels": 1660,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
+    "nozzle_seal_00_visible": {
+      "canonical_texels": 1319,
+      "assigned_texels": 1319,
+      "native_reuse_texels": 1319,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_01_visible": {
+      "canonical_texels": 1299,
+      "assigned_texels": 1299,
+      "native_reuse_texels": 1229,
+      "parent_paint_texels": 70,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_02_visible": {
+      "canonical_texels": 1151,
+      "assigned_texels": 1151,
+      "native_reuse_texels": 1151,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_03_visible": {
+      "canonical_texels": 1208,
+      "assigned_texels": 1208,
+      "native_reuse_texels": 1138,
+      "parent_paint_texels": 70,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_04_visible": {
+      "canonical_texels": 1155,
+      "assigned_texels": 1155,
+      "native_reuse_texels": 1085,
+      "parent_paint_texels": 70,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_05_visible": {
+      "canonical_texels": 1231,
+      "assigned_texels": 1231,
+      "native_reuse_texels": 1231,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_06_visible": {
+      "canonical_texels": 1163,
+      "assigned_texels": 1163,
+      "native_reuse_texels": 1163,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_07_visible": {
+      "canonical_texels": 1146,
+      "assigned_texels": 1146,
+      "native_reuse_texels": 1146,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_08_visible": {
+      "canonical_texels": 1219,
+      "assigned_texels": 1219,
+      "native_reuse_texels": 1148,
+      "parent_paint_texels": 71,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_09_visible": {
+      "canonical_texels": 1237,
+      "assigned_texels": 1237,
+      "native_reuse_texels": 1237,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_10_visible": {
+      "canonical_texels": 1244,
+      "assigned_texels": 1244,
+      "native_reuse_texels": 1173,
+      "parent_paint_texels": 71,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_11_visible": {
+      "canonical_texels": 1236,
+      "assigned_texels": 1236,
+      "native_reuse_texels": 1166,
+      "parent_paint_texels": 70,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_12_visible": {
+      "canonical_texels": 1305,
+      "assigned_texels": 1305,
+      "native_reuse_texels": 1305,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_13_visible": {
+      "canonical_texels": 1167,
+      "assigned_texels": 1167,
+      "native_reuse_texels": 1167,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_14_visible": {
+      "canonical_texels": 1164,
+      "assigned_texels": 1164,
+      "native_reuse_texels": 1093,
+      "parent_paint_texels": 71,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "nozzle_seal_15_visible": {
+      "canonical_texels": 1302,
+      "assigned_texels": 1302,
+      "native_reuse_texels": 1302,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_seal_00_all"
+      ]
+    },
+    "pylon_inner_L": {
+      "canonical_texels": 18842,
+      "assigned_texels": 18842,
+      "native_reuse_texels": 18842,
+      "parent_paint_texels": 0,
+      "groups": [
+        "pylon_inner_L_all"
+      ]
+    },
+    "pylon_inner_plug_L": {
+      "canonical_texels": 11031,
+      "assigned_texels": 11031,
+      "native_reuse_texels": 11031,
+      "parent_paint_texels": 0,
+      "groups": [
+        "pylon_inner_plug_L_all"
+      ]
+    },
+    "radome": {
+      "canonical_texels": 57509,
+      "assigned_texels": 57509,
+      "native_reuse_texels": 57215,
+      "parent_paint_texels": 294,
+      "groups": [
+        "radome"
+      ]
+    },
+    "rudder_visible": {
+      "canonical_texels": 50207,
+      "assigned_texels": 50207,
+      "native_reuse_texels": 33334,
+      "parent_paint_texels": 16873,
+      "groups": [
+        "rudder_all"
+      ]
+    },
+    "skin_aft_L": {
+      "canonical_texels": 165280,
+      "assigned_texels": 165280,
+      "native_reuse_texels": 165280,
+      "parent_paint_texels": 0,
+      "groups": [
+        "skin_aft_L_lower",
+        "skin_aft_L_out",
+        "skin_aft_L_upper"
+      ]
+    },
+    "skin_aft_R": {
+      "canonical_texels": 165256,
+      "assigned_texels": 165256,
+      "native_reuse_texels": 165256,
+      "parent_paint_texels": 0,
+      "groups": [
+        "skin_aft_L_lower",
+        "skin_aft_L_out",
+        "skin_aft_L_upper"
+      ]
+    },
+    "skin_forward_L": {
+      "canonical_texels": 139140,
+      "assigned_texels": 139140,
+      "native_reuse_texels": 136349,
+      "parent_paint_texels": 2791,
+      "groups": [
+        "forward_left",
+        "skin_forward_L_lower"
+      ]
+    },
+    "skin_forward_R": {
+      "canonical_texels": 139102,
+      "assigned_texels": 139102,
+      "native_reuse_texels": 136503,
+      "parent_paint_texels": 2599,
+      "groups": [
+        "forward_left",
+        "skin_forward_L_lower"
+      ]
+    },
+    "skin_mid_L": {
+      "canonical_texels": 239750,
+      "assigned_texels": 239750,
+      "native_reuse_texels": 237128,
+      "parent_paint_texels": 2622,
+      "groups": [
+        "skin_mid_L_lower",
+        "skin_mid_L_out",
+        "skin_mid_L_upper"
+      ]
+    },
+    "skin_mid_R": {
+      "canonical_texels": 238416,
+      "assigned_texels": 238416,
+      "native_reuse_texels": 235814,
+      "parent_paint_texels": 2602,
+      "groups": [
+        "skin_mid_L_lower",
+        "skin_mid_L_out",
+        "skin_mid_L_upper"
+      ]
+    },
+    "speed_brake_L_visible": {
+      "canonical_texels": 9986,
+      "assigned_texels": 9986,
+      "native_reuse_texels": 0,
+      "parent_paint_texels": 9986,
+      "groups": [
+        "speed_brake_L_all"
+      ]
+    },
+    "stabilator_visible": {
+      "canonical_texels": 257694,
+      "assigned_texels": 257694,
+      "native_reuse_texels": 235442,
+      "parent_paint_texels": 22252,
+      "groups": [
+        "stabilator_lower",
+        "stabilator_upper"
+      ]
+    },
+    "ventral_fin": {
+      "canonical_texels": 45685,
+      "assigned_texels": 45685,
+      "native_reuse_texels": 45685,
+      "parent_paint_texels": 0,
+      "groups": [
+        "ventral_fin_all"
+      ]
+    },
+    "wing_skin_L": {
+      "canonical_texels": 307187,
+      "assigned_texels": 307187,
+      "native_reuse_texels": 271669,
+      "parent_paint_texels": 35518,
+      "groups": [
+        "wing_root",
+        "wing_upper",
+        "wing_skin_L_lower_front",
+        "wing_skin_L_lower_rear"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "name": "aileron_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/aileron_L_visible.source-transfer.npz",
+      "target_part": "aileron_L_visible",
+      "source_part": "aileron_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 29021,
+      "geometric_matches": 18022,
+      "native_reuse_texels": 18022,
+      "unmatched_surface_texels": 10999,
+      "max_distance_m": 0.045502014458179474,
+      "p95_distance_m": 0.01655012182891369,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "aileron_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/aileron_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "canopy_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/canopy_visible.source-transfer.npz",
+      "target_part": "canopy_visible",
+      "source_part": "canopy_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 22901,
+      "geometric_matches": 21951,
+      "native_reuse_texels": 21951,
+      "unmatched_surface_texels": 950,
+      "max_distance_m": 0.020204991102218628,
+      "p95_distance_m": 0.004248304292559624,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "canopy_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/canopy_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "dorsal_cover_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/dorsal_cover.source-transfer.npz",
+      "target_part": "dorsal_cover",
+      "source_part": "dorsal_cover",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 118743,
+      "geometric_matches": 118743,
+      "native_reuse_texels": 118743,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.00639146426692605,
+      "p95_distance_m": 0.004142878111451864,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "dorsal_cover_upper_front",
+        "dorsal_cover_upper_rear"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/dorsal_cover.source-transfer.mask.png"
+    },
+    {
+      "name": "fin_skin_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/fin_skin.source-transfer.npz",
+      "target_part": "fin_skin",
+      "source_part": "fin_skin",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 163607,
+      "geometric_matches": 141833,
+      "native_reuse_texels": 141833,
+      "unmatched_surface_texels": 21774,
+      "max_distance_m": 0.0683629959821701,
+      "p95_distance_m": 0.00589546887204051,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "fin_left"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/fin_skin.source-transfer.mask.png"
+    },
+    {
+      "name": "flap_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/flap_L_visible.source-transfer.npz",
+      "target_part": "flap_L_visible",
+      "source_part": "flap_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 36633,
+      "geometric_matches": 28759,
+      "native_reuse_texels": 28759,
+      "unmatched_surface_texels": 7874,
+      "max_distance_m": 0.09641771763563156,
+      "p95_distance_m": 0.052683357149362564,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "flap_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/flap_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "gear_door_N2_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/gear_door_N2_L_visible.source-transfer.npz",
+      "target_part": "gear_door_N2_L_visible",
+      "source_part": "gear_door_N_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "named_gear_door_parent",
+        "matched_detail_claim": false
+      },
+      "target_texels": 1054,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 1054,
+      "max_distance_m": 0.34707140922546387,
+      "p95_distance_m": 0.29983508586883545,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "gear_door_N_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/gear_door_N2_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "gear_door_N2_R_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/gear_door_N2_R_visible.source-transfer.npz",
+      "target_part": "gear_door_N2_R_visible",
+      "source_part": "gear_door_N_L_visible",
+      "reflect_world_x": true,
+      "donor_decision": {
+        "policy": "named_gear_door_parent",
+        "matched_detail_claim": false
+      },
+      "target_texels": 1052,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 1052,
+      "max_distance_m": 0.35430267453193665,
+      "p95_distance_m": 0.3027793765068054,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "gear_door_N_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/gear_door_N2_R_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "gear_door_N_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/gear_door_N_L_visible.source-transfer.npz",
+      "target_part": "gear_door_N_L_visible",
+      "source_part": "gear_door_N_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": false
+      },
+      "target_texels": 8576,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 8576,
+      "max_distance_m": 0.16563983261585236,
+      "p95_distance_m": 0.1466940939426422,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "gear_door_N_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/gear_door_N_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "gear_door_flap_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/gear_door_flap_L_visible.source-transfer.npz",
+      "target_part": "gear_door_flap_L_visible",
+      "source_part": "gear_door_main_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "named_gear_door_parent",
+        "matched_detail_claim": false
+      },
+      "target_texels": 13636,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 13636,
+      "max_distance_m": 0.2281491905450821,
+      "p95_distance_m": 0.15356099605560303,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "gear_door_main_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/gear_door_flap_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "gear_door_flap_R_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/gear_door_flap_R_visible.source-transfer.npz",
+      "target_part": "gear_door_flap_R_visible",
+      "source_part": "gear_door_main_L_visible",
+      "reflect_world_x": true,
+      "donor_decision": {
+        "policy": "named_gear_door_parent",
+        "matched_detail_claim": false
+      },
+      "target_texels": 13620,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 13620,
+      "max_distance_m": 0.2275952249765396,
+      "p95_distance_m": 0.15311311185359955,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "gear_door_main_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/gear_door_flap_R_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "gear_door_main_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/gear_door_main_L_visible.source-transfer.npz",
+      "target_part": "gear_door_main_L_visible",
+      "source_part": "gear_door_main_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": false
+      },
+      "target_texels": 8778,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 8778,
+      "max_distance_m": 0.08367622643709183,
+      "p95_distance_m": 0.07013013958930969,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "gear_door_main_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/gear_door_main_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "intake_duct_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/intake_duct_L.source-transfer.npz",
+      "target_part": "intake_duct_L",
+      "source_part": "intake_duct_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 28851,
+      "geometric_matches": 28821,
+      "native_reuse_texels": 28821,
+      "unmatched_surface_texels": 30,
+      "max_distance_m": 0.017088189721107483,
+      "p95_distance_m": 0.0034592258743941784,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "intake_duct_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/intake_duct_L.source-transfer.mask.png"
+    },
+    {
+      "name": "lef_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/lef_L_visible.source-transfer.npz",
+      "target_part": "lef_L_visible",
+      "source_part": "lef_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 20247,
+      "geometric_matches": 15597,
+      "native_reuse_texels": 15597,
+      "unmatched_surface_texels": 4650,
+      "max_distance_m": 0.031882394105196,
+      "p95_distance_m": 0.015980856493115425,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "lef_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/lef_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle.source-transfer.npz",
+      "target_part": "nozzle",
+      "source_part": "nozzle",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 23213,
+      "geometric_matches": 23213,
+      "native_reuse_texels": 23213,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006349540781229734,
+      "p95_distance_m": 0.0037851256784051657,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_00_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_00_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_00_visible",
+      "source_part": "nozzle_petal_00_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1646,
+      "geometric_matches": 1575,
+      "native_reuse_texels": 1575,
+      "unmatched_surface_texels": 71,
+      "max_distance_m": 0.005716672167181969,
+      "p95_distance_m": 0.0033099765423685312,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_00_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_01_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_01_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_01_visible",
+      "source_part": "nozzle_petal_01_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1660,
+      "geometric_matches": 1660,
+      "native_reuse_texels": 1660,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006602272391319275,
+      "p95_distance_m": 0.004136617295444012,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_01_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_02_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_02_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_02_visible",
+      "source_part": "nozzle_petal_02_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1766,
+      "geometric_matches": 1766,
+      "native_reuse_texels": 1766,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006926846690475941,
+      "p95_distance_m": 0.00396611075848341,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_02_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_03_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_03_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_03_visible",
+      "source_part": "nozzle_petal_03_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1644,
+      "geometric_matches": 1644,
+      "native_reuse_texels": 1644,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.0061881584115326405,
+      "p95_distance_m": 0.002516841283068061,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_03_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_04_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_04_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_04_visible",
+      "source_part": "nozzle_petal_04_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1763,
+      "geometric_matches": 1763,
+      "native_reuse_texels": 1763,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.009284364059567451,
+      "p95_distance_m": 0.004583150148391724,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_04_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_05_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_05_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_05_visible",
+      "source_part": "nozzle_petal_05_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1662,
+      "geometric_matches": 1662,
+      "native_reuse_texels": 1662,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.005991972051560879,
+      "p95_distance_m": 0.0034223708789795637,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_05_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_06_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_06_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_06_visible",
+      "source_part": "nozzle_petal_06_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1589,
+      "geometric_matches": 1589,
+      "native_reuse_texels": 1589,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.007165044080466032,
+      "p95_distance_m": 0.0032974279019981623,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_06_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_07_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_07_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_07_visible",
+      "source_part": "nozzle_petal_07_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1746,
+      "geometric_matches": 1676,
+      "native_reuse_texels": 1676,
+      "unmatched_surface_texels": 70,
+      "max_distance_m": 0.007618362549692392,
+      "p95_distance_m": 0.006073571741580963,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_07_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_08_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_08_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_08_visible",
+      "source_part": "nozzle_petal_08_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1604,
+      "geometric_matches": 1604,
+      "native_reuse_texels": 1604,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006383948959410191,
+      "p95_distance_m": 0.004885979928076267,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_08_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_09_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_09_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_09_visible",
+      "source_part": "nozzle_petal_09_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1732,
+      "geometric_matches": 1732,
+      "native_reuse_texels": 1732,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006251465063542128,
+      "p95_distance_m": 0.0044366600923240185,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_09_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_10_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_10_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_10_visible",
+      "source_part": "nozzle_petal_10_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1590,
+      "geometric_matches": 1590,
+      "native_reuse_texels": 1590,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.005541130434721708,
+      "p95_distance_m": 0.0035301626194268465,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_10_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_11_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_11_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_11_visible",
+      "source_part": "nozzle_petal_11_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1591,
+      "geometric_matches": 1591,
+      "native_reuse_texels": 1591,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.007063810247927904,
+      "p95_distance_m": 0.003479049541056156,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_11_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_12_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_12_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_12_visible",
+      "source_part": "nozzle_petal_12_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1673,
+      "geometric_matches": 1673,
+      "native_reuse_texels": 1673,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.00610011164098978,
+      "p95_distance_m": 0.0033761297818273306,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_12_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_13_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_13_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_13_visible",
+      "source_part": "nozzle_petal_13_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1747,
+      "geometric_matches": 1747,
+      "native_reuse_texels": 1747,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006560618057847023,
+      "p95_distance_m": 0.004153759218752384,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_13_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_14_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_14_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_14_visible",
+      "source_part": "nozzle_petal_14_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1590,
+      "geometric_matches": 1519,
+      "native_reuse_texels": 1519,
+      "unmatched_surface_texels": 71,
+      "max_distance_m": 0.005442214664071798,
+      "p95_distance_m": 0.0038234475068747997,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_14_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_petal_15_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_petal_15_visible.source-transfer.npz",
+      "target_part": "nozzle_petal_15_visible",
+      "source_part": "nozzle_petal_15_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1660,
+      "geometric_matches": 1660,
+      "native_reuse_texels": 1660,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.005336413625627756,
+      "p95_distance_m": 0.0038446506951004267,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_petal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_petal_15_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_00_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_00_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_00_visible",
+      "source_part": "nozzle_seal_00_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1319,
+      "geometric_matches": 1319,
+      "native_reuse_texels": 1319,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.009609312750399113,
+      "p95_distance_m": 0.004613575991243124,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_00_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_01_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_01_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_01_visible",
+      "source_part": "nozzle_seal_01_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1299,
+      "geometric_matches": 1229,
+      "native_reuse_texels": 1229,
+      "unmatched_surface_texels": 70,
+      "max_distance_m": 0.00825938954949379,
+      "p95_distance_m": 0.005940172355622053,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_01_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_02_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_02_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_02_visible",
+      "source_part": "nozzle_seal_02_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1151,
+      "geometric_matches": 1151,
+      "native_reuse_texels": 1151,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006179903633892536,
+      "p95_distance_m": 0.002393105998635292,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_02_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_03_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_03_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_03_visible",
+      "source_part": "nozzle_seal_03_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1208,
+      "geometric_matches": 1138,
+      "native_reuse_texels": 1138,
+      "unmatched_surface_texels": 70,
+      "max_distance_m": 0.00651745917275548,
+      "p95_distance_m": 0.003152524819597602,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_03_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_04_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_04_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_04_visible",
+      "source_part": "nozzle_seal_04_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1155,
+      "geometric_matches": 1085,
+      "native_reuse_texels": 1085,
+      "unmatched_surface_texels": 70,
+      "max_distance_m": 0.007096928544342518,
+      "p95_distance_m": 0.0034918750170618296,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_04_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_05_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_05_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_05_visible",
+      "source_part": "nozzle_seal_05_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1231,
+      "geometric_matches": 1231,
+      "native_reuse_texels": 1231,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006043323781341314,
+      "p95_distance_m": 0.0042204475030303,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_05_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_06_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_06_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_06_visible",
+      "source_part": "nozzle_seal_06_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1163,
+      "geometric_matches": 1163,
+      "native_reuse_texels": 1163,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.00556669058278203,
+      "p95_distance_m": 0.0025747499894350767,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_06_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_07_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_07_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_07_visible",
+      "source_part": "nozzle_seal_07_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1146,
+      "geometric_matches": 1146,
+      "native_reuse_texels": 1146,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.005530658643692732,
+      "p95_distance_m": 0.0040127793326973915,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_07_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_08_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_08_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_08_visible",
+      "source_part": "nozzle_seal_08_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1219,
+      "geometric_matches": 1148,
+      "native_reuse_texels": 1148,
+      "unmatched_surface_texels": 71,
+      "max_distance_m": 0.005697118584066629,
+      "p95_distance_m": 0.0038884810637682676,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_08_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_09_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_09_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_09_visible",
+      "source_part": "nozzle_seal_09_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1237,
+      "geometric_matches": 1237,
+      "native_reuse_texels": 1237,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.005804795306175947,
+      "p95_distance_m": 0.004790997598320246,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_09_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_10_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_10_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_10_visible",
+      "source_part": "nozzle_seal_10_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1244,
+      "geometric_matches": 1173,
+      "native_reuse_texels": 1173,
+      "unmatched_surface_texels": 71,
+      "max_distance_m": 0.006684059742838144,
+      "p95_distance_m": 0.004066758323460817,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_10_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_11_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_11_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_11_visible",
+      "source_part": "nozzle_seal_11_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1236,
+      "geometric_matches": 1166,
+      "native_reuse_texels": 1166,
+      "unmatched_surface_texels": 70,
+      "max_distance_m": 0.006245681084692478,
+      "p95_distance_m": 0.004880470223724842,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_11_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_12_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_12_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_12_visible",
+      "source_part": "nozzle_seal_12_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1305,
+      "geometric_matches": 1305,
+      "native_reuse_texels": 1305,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.005651985760778189,
+      "p95_distance_m": 0.004412220790982246,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_12_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_13_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_13_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_13_visible",
+      "source_part": "nozzle_seal_13_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1167,
+      "geometric_matches": 1167,
+      "native_reuse_texels": 1167,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.0072812833823263645,
+      "p95_distance_m": 0.003300438402220607,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_13_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_14_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_14_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_14_visible",
+      "source_part": "nozzle_seal_14_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1164,
+      "geometric_matches": 1093,
+      "native_reuse_texels": 1093,
+      "unmatched_surface_texels": 71,
+      "max_distance_m": 0.006933860946446657,
+      "p95_distance_m": 0.002435096772387624,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_14_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "nozzle_seal_15_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/nozzle_seal_15_visible.source-transfer.npz",
+      "target_part": "nozzle_seal_15_visible",
+      "source_part": "nozzle_seal_15_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 1302,
+      "geometric_matches": 1302,
+      "native_reuse_texels": 1302,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.0111139677464962,
+      "p95_distance_m": 0.006416157353669405,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "nozzle_seal_00_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/nozzle_seal_15_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "pylon_inner_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/pylon_inner_L.source-transfer.npz",
+      "target_part": "pylon_inner_L",
+      "source_part": "pylon_inner_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 18842,
+      "geometric_matches": 18842,
+      "native_reuse_texels": 18842,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006400303915143013,
+      "p95_distance_m": 0.0036450254265218973,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "pylon_inner_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/pylon_inner_L.source-transfer.mask.png"
+    },
+    {
+      "name": "pylon_inner_plug_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/pylon_inner_plug_L.source-transfer.npz",
+      "target_part": "pylon_inner_plug_L",
+      "source_part": "pylon_inner_plug_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 11031,
+      "geometric_matches": 11031,
+      "native_reuse_texels": 11031,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006622247397899628,
+      "p95_distance_m": 0.0030639469623565674,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "pylon_inner_plug_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/pylon_inner_plug_L.source-transfer.mask.png"
+    },
+    {
+      "name": "radome_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/radome.source-transfer.npz",
+      "target_part": "radome",
+      "source_part": "radome",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 57509,
+      "geometric_matches": 57215,
+      "native_reuse_texels": 57215,
+      "unmatched_surface_texels": 294,
+      "max_distance_m": 0.034559279680252075,
+      "p95_distance_m": 0.003864603117108345,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "radome"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/radome.source-transfer.mask.png"
+    },
+    {
+      "name": "rudder_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/rudder_visible.source-transfer.npz",
+      "target_part": "rudder_visible",
+      "source_part": "rudder_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 50207,
+      "geometric_matches": 33334,
+      "native_reuse_texels": 33334,
+      "unmatched_surface_texels": 16873,
+      "max_distance_m": 0.10850698500871658,
+      "p95_distance_m": 0.05820353329181671,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "rudder_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/rudder_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "skin_aft_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/skin_aft_L.source-transfer.npz",
+      "target_part": "skin_aft_L",
+      "source_part": "skin_aft_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 165280,
+      "geometric_matches": 165280,
+      "native_reuse_texels": 165280,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.009122844785451889,
+      "p95_distance_m": 0.0039802915416657925,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "skin_aft_L_lower",
+        "skin_aft_L_out",
+        "skin_aft_L_upper"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/skin_aft_L.source-transfer.mask.png"
+    },
+    {
+      "name": "skin_aft_R_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/skin_aft_R.source-transfer.npz",
+      "target_part": "skin_aft_R",
+      "source_part": "skin_aft_R",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 165256,
+      "geometric_matches": 165256,
+      "native_reuse_texels": 165256,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.013314747251570225,
+      "p95_distance_m": 0.0040033236145973206,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "skin_aft_L_lower",
+        "skin_aft_L_out",
+        "skin_aft_L_upper"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/skin_aft_R.source-transfer.mask.png"
+    },
+    {
+      "name": "skin_forward_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/skin_forward_L.source-transfer.npz",
+      "target_part": "skin_forward_L",
+      "source_part": "skin_forward_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 139140,
+      "geometric_matches": 136349,
+      "native_reuse_texels": 136349,
+      "unmatched_surface_texels": 2791,
+      "max_distance_m": 0.1858612447977066,
+      "p95_distance_m": 0.003902481170371175,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "forward_left",
+        "skin_forward_L_lower"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/skin_forward_L.source-transfer.mask.png"
+    },
+    {
+      "name": "skin_forward_R_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/skin_forward_R.source-transfer.npz",
+      "target_part": "skin_forward_R",
+      "source_part": "skin_forward_R",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 139102,
+      "geometric_matches": 136503,
+      "native_reuse_texels": 136503,
+      "unmatched_surface_texels": 2599,
+      "max_distance_m": 0.18855395913124084,
+      "p95_distance_m": 0.004367337096482515,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "forward_left",
+        "skin_forward_L_lower"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/skin_forward_R.source-transfer.mask.png"
+    },
+    {
+      "name": "skin_mid_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/skin_mid_L.source-transfer.npz",
+      "target_part": "skin_mid_L",
+      "source_part": "skin_mid_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 239750,
+      "geometric_matches": 237128,
+      "native_reuse_texels": 237128,
+      "unmatched_surface_texels": 2622,
+      "max_distance_m": 0.2163461446762085,
+      "p95_distance_m": 0.0038509927690029144,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "skin_mid_L_lower",
+        "skin_mid_L_out",
+        "skin_mid_L_upper"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/skin_mid_L.source-transfer.mask.png"
+    },
+    {
+      "name": "skin_mid_R_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/skin_mid_R.source-transfer.npz",
+      "target_part": "skin_mid_R",
+      "source_part": "skin_mid_R",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 238416,
+      "geometric_matches": 235814,
+      "native_reuse_texels": 235814,
+      "unmatched_surface_texels": 2602,
+      "max_distance_m": 0.21499349176883698,
+      "p95_distance_m": 0.004103571176528931,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "skin_mid_L_lower",
+        "skin_mid_L_out",
+        "skin_mid_L_upper"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/skin_mid_R.source-transfer.mask.png"
+    },
+    {
+      "name": "speed_brake_L_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/speed_brake_L_visible.source-transfer.npz",
+      "target_part": "speed_brake_L_visible",
+      "source_part": "speed_brake_L_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": false
+      },
+      "target_texels": 9986,
+      "geometric_matches": 0,
+      "native_reuse_texels": 0,
+      "unmatched_surface_texels": 9986,
+      "max_distance_m": 0.06643324345350266,
+      "p95_distance_m": 0.02642514556646347,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "speed_brake_L_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/speed_brake_L_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "stabilator_visible_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/stabilator_visible.source-transfer.npz",
+      "target_part": "stabilator_visible",
+      "source_part": "stabilator_visible",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 257694,
+      "geometric_matches": 235442,
+      "native_reuse_texels": 235442,
+      "unmatched_surface_texels": 22252,
+      "max_distance_m": 0.042332302778959274,
+      "p95_distance_m": 0.0028278117533773184,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "stabilator_lower",
+        "stabilator_upper"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/stabilator_visible.source-transfer.mask.png"
+    },
+    {
+      "name": "ventral_fin_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/ventral_fin.source-transfer.npz",
+      "target_part": "ventral_fin",
+      "source_part": "ventral_fin",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 45685,
+      "geometric_matches": 45685,
+      "native_reuse_texels": 45685,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.0076117063872516155,
+      "p95_distance_m": 0.0015020568389445543,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "ventral_fin_all"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/ventral_fin.source-transfer.mask.png"
+    },
+    {
+      "name": "wing_skin_L_source_atlas",
+      "mode": "registered_source_atlas_nearest_parent",
+      "source_space": "generation_atlas",
+      "map": "art/textures/generated/full/source-atlas/current/wing_skin_L.source-transfer.npz",
+      "target_part": "wing_skin_L",
+      "source_part": "wing_skin_L",
+      "reflect_world_x": false,
+      "donor_decision": {
+        "policy": "same_physical_part",
+        "matched_detail_claim": true
+      },
+      "target_texels": 307187,
+      "geometric_matches": 271669,
+      "native_reuse_texels": 271669,
+      "unmatched_surface_texels": 35518,
+      "max_distance_m": 0.05533851310610771,
+      "p95_distance_m": 0.005099243484437466,
+      "match_tolerance_m": 0.015,
+      "normal_cosine_min": 0.95,
+      "source_groups": [
+        "wing_root",
+        "wing_upper",
+        "wing_skin_L_lower_front",
+        "wing_skin_L_lower_rear"
+      ],
+      "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
+      "target_mask": "art/textures/generated/full/source-atlas/current/wing_skin_L.source-transfer.mask.png"
+    }
+  ],
+  "owner_map": "art/textures/generated/full/source-atlas/current/ownership.npz",
+  "inferred_parent_parts": [],
+  "transfer_index_convention": "row-major atlas indices; source indices address immutable generation atlas; target indices address current atlas; apply rules in listed order",
+  "field_contract": [
+    "base",
+    "height",
+    "roughness",
+    "height_valid",
+    "roughness_valid",
+    "used"
+  ]
+}

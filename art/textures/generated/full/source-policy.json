@@ -1,0 +1,8 @@
+{
+  "method": "per_part_full",
+  "base_groups": 33,
+  "pilot_groups": 5,
+  "material_reuse_groups": ["wing_skin_L_lower_front", "pylon_inner_plug_L_all"],
+  "companion_policy": "native positional validation; independent base-derived fallback for rejected channels",
+  "damage_policy": "preserve existing damage maps"
+}

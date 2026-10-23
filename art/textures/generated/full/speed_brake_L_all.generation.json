@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/speed_brake_L_all.png",
+  "output": "art/textures/generated/full/speed_brake_L_all.png",
+  "sha256": "a3009c129692861f354e2d51bf756f69042f19ebb726c8fb19d15d1af113e132",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

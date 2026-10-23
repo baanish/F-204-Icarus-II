@@ -1,0 +1,314 @@
+{
+  "method": "per-chart generated paint fit to exact template",
+  "source": "art/textures/generated/full/canopy_all.png",
+  "source_sha256": "9e899baa020221d258e585c9bb1c96344773a2cef94cc638d5d78cb74ad8562f",
+  "output": "art/textures/generated/full/canopy_all.stitched.png",
+  "output_sha256": "a2ce29f5dcff771122757c9f55bf00fb97afb6d8f6c45154d25aed9f64ba24da",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "charts": [
+    {
+      "source_box": [
+        32,
+        121,
+        214,
+        404
+      ],
+      "chart": "canopy_visible:aft:006",
+      "target_box": [
+        33,
+        122,
+        214,
+        404
+      ]
+    },
+    {
+      "source_box": [
+        263,
+        121,
+        446,
+        404
+      ],
+      "chart": "canopy_visible:forward:017",
+      "target_box": [
+        263,
+        122,
+        448,
+        404
+      ]
+    },
+    {
+      "source_box": [
+        497,
+        120,
+        1218,
+        170
+      ],
+      "chart": "canopy_visible:in:021",
+      "target_box": [
+        497,
+        122,
+        1215,
+        168
+      ]
+    },
+    {
+      "source_box": [
+        33,
+        469,
+        752,
+        521
+      ],
+      "chart": "canopy_visible:in:031",
+      "target_box": [
+        33,
+        474,
+        750,
+        519
+      ]
+    },
+    {
+      "source_box": [
+        33,
+        584,
+        752,
+        635
+      ],
+      "chart": "canopy_visible:out:056",
+      "target_box": [
+        33,
+        589,
+        752,
+        634
+      ]
+    },
+    {
+      "source_box": [
+        33,
+        699,
+        752,
+        747
+      ],
+      "chart": "canopy_visible:out:045",
+      "target_box": [
+        33,
+        704,
+        750,
+        747
+      ]
+    },
+    {
+      "source_box": [
+        800,
+        701,
+        1116,
+        733
+      ],
+      "chart": "canopy_visible:lower:035",
+      "target_box": [
+        799,
+        704,
+        1116,
+        734
+      ]
+    },
+    {
+      "source_box": [
+        33,
+        815,
+        351,
+        846
+      ],
+      "chart": "canopy_visible:lower:042",
+      "target_box": [
+        33,
+        816,
+        352,
+        847
+      ]
+    },
+    {
+      "source_box": [
+        400,
+        813,
+        1118,
+        847
+      ],
+      "chart": "canopy_visible:upper:057",
+      "target_box": [
+        401,
+        816,
+        1118,
+        847
+      ]
+    },
+    {
+      "source_box": [
+        32,
+        914,
+        749,
+        947
+      ],
+      "chart": "canopy_visible:upper:061",
+      "target_box": [
+        33,
+        916,
+        748,
+        946
+      ]
+    },
+    {
+      "source_box": [
+        799,
+        913,
+        1115,
+        942
+      ],
+      "chart": "canopy_visible:in:030",
+      "target_box": [
+        797,
+        916,
+        1116,
+        940
+      ]
+    },
+    {
+      "source_box": [
+        32,
+        1011,
+        347,
+        1039
+      ],
+      "chart": "canopy_visible:out:046",
+      "target_box": [
+        33,
+        1016,
+        349,
+        1039
+      ]
+    },
+    {
+      "source_box": [
+        398,
+        1013,
+        576,
+        1034
+      ],
+      "chart": "canopy_visible:in:022",
+      "target_box": [
+        398,
+        1016,
+        577,
+        1035
+      ]
+    },
+    {
+      "source_box": [
+        628,
+        1013,
+        805,
+        1034
+      ],
+      "chart": "canopy_visible:in:029",
+      "target_box": [
+        626,
+        1016,
+        803,
+        1035
+      ]
+    },
+    {
+      "source_box": [
+        852,
+        1012,
+        1008,
+        1034
+      ],
+      "chart": "canopy_visible:lower:038",
+      "target_box": [
+        852,
+        1016,
+        1007,
+        1035
+      ]
+    },
+    {
+      "source_box": [
+        1057,
+        1013,
+        1222,
+        1034
+      ],
+      "chart": "canopy_visible:lower:039",
+      "target_box": [
+        1056,
+        1016,
+        1221,
+        1035
+      ]
+    },
+    {
+      "source_box": [
+        34,
+        1107,
+        209,
+        1128
+      ],
+      "chart": "canopy_visible:out:047",
+      "target_box": [
+        33,
+        1109,
+        210,
+        1128
+      ]
+    },
+    {
+      "source_box": [
+        259,
+        1107,
+        438,
+        1128
+      ],
+      "chart": "canopy_visible:out:055",
+      "target_box": [
+        259,
+        1109,
+        440,
+        1128
+      ]
+    },
+    {
+      "source_box": [
+        489,
+        1106,
+        661,
+        1128
+      ],
+      "chart": "canopy_visible:upper:058",
+      "target_box": [
+        489,
+        1109,
+        660,
+        1128
+      ]
+    },
+    {
+      "source_box": [
+        709,
+        1107,
+        866,
+        1128
+      ],
+      "chart": "canopy_visible:upper:059",
+      "target_box": [
+        709,
+        1109,
+        865,
+        1128
+      ]
+    }
+  ],
+  "limitation": "base-only chart fitting before companion generation; raw generated original remains unchanged"
+}

@@ -1,0 +1,375 @@
+{
+  "guide_size": 1536,
+  "groups": {
+    "radome": {
+      "part": "radome",
+      "description": "The dielectric radar nose, ahead of the cockpit. Four tapered charts wrap its left, underside, right and top quadrants. This is smooth composite, not a sheet-metal patchwork. Only the attachment rim at the wide aft end has a fine joint. No rivet grid across the composite. Very faint longitudinal cleaning traces, no metal scratches.",
+      "guide_scale": 2.900000000000002,
+      "guide_px_per_m": 435.00000000000034,
+      "charts": [
+        {
+          "component": 4,
+          "atlas_box": [
+            1790,
+            1232,
+            1892,
+            1479
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            150,
+            756,
+            445
+          ],
+          "world_bounds_m": [
+            [
+              -0.3506285846233368,
+              -7.9874491691589355,
+              -0.21902680397033691
+            ],
+            [
+              -0.003483430715277791,
+              -6.394190311431885,
+              0.40140411257743835
+            ]
+          ],
+          "area_m2_at_150pxm": 0.5967111111111111
+        },
+        {
+          "component": 2,
+          "atlas_box": [
+            1785,
+            609,
+            1886,
+            856
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            530,
+            756,
+            822
+          ],
+          "world_bounds_m": [
+            [
+              0.0025913661811500788,
+              -7.992389678955078,
+              -0.21589866280555725
+            ],
+            [
+              0.35090184211730957,
+              -6.394178867340088,
+              0.39967435598373413
+            ]
+          ],
+          "area_m2_at_150pxm": 0.5955111111111111
+        },
+        {
+          "component": 3,
+          "atlas_box": [
+            1815,
+            922,
+            1897,
+            1168
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            907,
+            753,
+            1144
+          ],
+          "world_bounds_m": [
+            [
+              -0.2453186810016632,
+              -7.98603630065918,
+              -0.32336515188217163
+            ],
+            [
+              0.24667847156524658,
+              -6.394217491149902,
+              0.02638113871216774
+            ]
+          ],
+          "area_m2_at_150pxm": 0.5353777777777777
+        },
+        {
+          "component": 6,
+          "atlas_box": [
+            1785,
+            1496,
+            1858,
+            1746
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            1229,
+            765,
+            1440
+          ],
+          "world_bounds_m": [
+            [
+              -0.212215855717659,
+              -7.990246295928955,
+              0.032510656863451004
+            ],
+            [
+              0.21306465566158295,
+              -6.394188404083252,
+              0.5050099492073059
+            ]
+          ],
+          "area_m2_at_150pxm": 0.48715555555555556
+        }
+      ],
+      "skin_texels": 49832,
+      "mask": ".cache/review/wave2/p9b-round2/radome.mask.png"
+    },
+    "forward_left": {
+      "part": "skin_forward_L",
+      "description": "The left forward fuselage side below the cockpit, between the radome and intake. Forward is toward the radome. The closed gun-port panel is an avionics access cover, no gun opening. Frame stations support circumferential fastener rows, not a dense rectangular greeble grid. Leave clean stencil zones under the cockpit sill; decals come later. The canopy sill is above this sheet, the intake is aft.",
+      "guide_scale": 2.3800000000000017,
+      "guide_px_per_m": 357.0000000000002,
+      "charts": [
+        {
+          "component": 12,
+          "atlas_box": [
+            1182,
+            952,
+            1387,
+            1560
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            150,
+            1487,
+            637
+          ],
+          "world_bounds_m": [
+            [
+              0.1980905532836914,
+              -6.394056797027588,
+              -0.36091652512550354
+            ],
+            [
+              0.6294504404067993,
+              -2.3685519695281982,
+              0.8291006088256836
+            ]
+          ],
+          "area_m2_at_150pxm": 3.9708
+        }
+      ],
+      "skin_texels": 89343,
+      "mask": ".cache/review/wave2/p9b-round2/forward_left.mask.png"
+    },
+    "wing_root": {
+      "part": "wing_skin_L",
+      "description": "The upper inboard wing root and strake, joining the left fuselage fillet to the main upper wing. A narrow curved sheet, not an entire triangular wing. The yellow guide zone indicates a restrained antislip walkway near the fuselage. It is a subtle grey material change with soft shoe scuffs, no black racing stripe or text. Blue structural lines follow the actual spars and ribs. Outboard it meets the upper wing.",
+      "guide_scale": 1.9200000000000013,
+      "guide_px_per_m": 288.00000000000017,
+      "charts": [
+        {
+          "component": 13,
+          "atlas_box": [
+            341,
+            1334,
+            1098,
+            1415
+          ],
+          "rotate_ccw": false,
+          "guide_box": [
+            40,
+            150,
+            1493,
+            305
+          ],
+          "world_bounds_m": [
+            [
+              0.5800099968910217,
+              -0.9916287064552307,
+              0.11845197528600693
+            ],
+            [
+              1.053999662399292,
+              4.049741268157959,
+              0.2684621512889862
+            ]
+          ],
+          "area_m2_at_150pxm": 2.2292
+        }
+      ],
+      "skin_texels": 50157,
+      "mask": ".cache/review/wave2/p9b-round2/wing_root.mask.png"
+    },
+    "wing_upper": {
+      "part": "wing_skin_L",
+      "description": "Two upper wing charts: inboard cranked panel and outboard fixed wing box. The smaller tip panel starts beyond the planform crank. The leading-edge flap, trailing flap and aileron are separate parts, absent from these islands. Their cut edges are real hinge boundaries, not extra access covers. Follow the two spars and actual rib stations. Keep a small fuel filler within the tank box, between the spars and outboard of the crank, diameter about 0.11 m. No walkway outboard.",
+      "guide_scale": 2.4200000000000017,
+      "guide_px_per_m": 363.0000000000002,
+      "charts": [
+        {
+          "component": 2,
+          "atlas_box": [
+            715,
+            156,
+            907,
+            375
+          ],
+          "rotate_ccw": false,
+          "guide_box": [
+            40,
+            150,
+            504,
+            679
+          ],
+          "world_bounds_m": [
+            [
+              2.0540313720703125,
+              1.9340275526046753,
+              -0.2675512433052063
+            ],
+            [
+              3.305443286895752,
+              3.3939578533172607,
+              -0.01942400261759758
+            ]
+          ],
+          "area_m2_at_150pxm": 1.3697777777777778
+        },
+        {
+          "component": 7,
+          "atlas_box": [
+            1385,
+            816,
+            1520,
+            1417
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            764,
+            1494,
+            1090
+          ],
+          "world_bounds_m": [
+            [
+              1.054042935371399,
+              -0.6230321526527405,
+              -0.0350179523229599
+            ],
+            [
+              1.9239871501922607,
+              3.3782119750976562,
+              0.19497208297252655
+            ]
+          ],
+          "area_m2_at_150pxm": 2.435688888888889
+        }
+      ],
+      "skin_texels": 85623,
+      "mask": ".cache/review/wave2/p9b-round2/wing_upper.mask.png"
+    },
+    "fin_left": {
+      "part": "fin_skin",
+      "description": "Left face of the vertical fin, its lower root fillet and small top cap, above the rear fuselage. The rudder is a separate trailing control surface and is absent. Use a fine perimeter joint near that cut boundary, a few flush fasteners near the base and one restrained root service cover. No invented fin spar grid: the current model has no separate fin spar layout exported here. Keep broad skin clean. Generated detail is reflected in aircraft world coordinates to the other face; the compositor adds readable separate fin markings.",
+      "guide_scale": 2.2000000000000015,
+      "guide_px_per_m": 330.0000000000002,
+      "charts": [
+        {
+          "component": 11,
+          "atlas_box": [
+            1480,
+            1396,
+            1698,
+            1801
+          ],
+          "rotate_ccw": false,
+          "guide_box": [
+            40,
+            150,
+            519,
+            1041
+          ],
+          "world_bounds_m": [
+            [
+              0.001500000013038516,
+              4.550123691558838,
+              1.1240134239196777
+            ],
+            [
+              0.07760649919509888,
+              7.2397141456604,
+              2.5722436904907227
+            ]
+          ],
+          "area_m2_at_150pxm": 2.0792888888888887
+        },
+        {
+          "component": 12,
+          "atlas_box": [
+            1415,
+            1505,
+            1470,
+            1997
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            1126,
+            1122,
+            1247
+          ],
+          "world_bounds_m": [
+            [
+              0.001500479644164443,
+              4.379094123840332,
+              0.760940670967102
+            ],
+            [
+              0.08445534110069275,
+              7.646763801574707,
+              1.1230766773223877
+            ]
+          ],
+          "area_m2_at_150pxm": 0.6594222222222222
+        },
+        {
+          "component": 1,
+          "atlas_box": [
+            1732,
+            145,
+            1778,
+            344
+          ],
+          "rotate_ccw": true,
+          "guide_box": [
+            40,
+            1332,
+            477,
+            1433
+          ],
+          "world_bounds_m": [
+            [
+              0.001500000013038516,
+              6.358088493347168,
+              2.5791807174682617
+            ],
+            [
+              0.032719649374485016,
+              7.676762104034424,
+              2.8799948692321777
+            ]
+          ],
+          "area_m2_at_150pxm": 0.35373333333333334
+        }
+      ],
+      "skin_texels": 69580,
+      "mask": ".cache/review/wave2/p9b-round2/fin_left.mask.png"
+    }
+  },
+  "shared_style": "art/textures/round2_style.txt"
+}

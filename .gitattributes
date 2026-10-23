@@ -1,5 +1,9 @@
 art/export/textures/*.png filter=lfs diff=lfs merge=lfs -text
 art/textures/generated/*.png filter=lfs diff=lfs merge=lfs -text
+art/textures/generated/pilot2/*.png filter=lfs diff=lfs merge=lfs -text
+art/textures/generated/full/*.png filter=lfs diff=lfs merge=lfs -text
+art/textures/generated/full/source-atlas/**/*.png filter=lfs diff=lfs merge=lfs -text
+art/textures/generated/full/source-atlas/**/*.npz filter=lfs diff=lfs merge=lfs -text
 unity/Assets/Blueprinter/Mods/icarus/Liveries/*.png filter=lfs diff=lfs merge=lfs -text
 unity/Assets/Blueprinter/Mods/icarus/Skin/*.png filter=lfs diff=lfs merge=lfs -text
 unity/Assets/Blueprinter/Mods/icarus/Cockpit/*.png filter=lfs diff=lfs merge=lfs -text

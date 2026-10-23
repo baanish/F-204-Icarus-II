@@ -1,0 +1,18 @@
+Use case: flat UV diffuse albedo source for one aircraft skin group.
+Target: skin_aft_L_upper, canonical object skin_aft_L on the Icarus II modernised F-104 interceptor.
+Aft engine-bay fuselage ahead of the exhaust. Closed underside vent cover follows the orange guide. Restrained soot only near the nozzle. World-normal chart family: upper.
+
+Image 1 is the labelled UV guide. Image 2 is the accepted material style anchor. Image 3 is the exact clean template.
+No generated physical-neighbour edge image exists yet; retain uniform neutral margins.
+Paint every supplied island at the same position, size and orientation. Register the full square canvas without cropping, zooming or rearranging. Extend paint 12 guide pixels beyond islands; preserve dark background elsewhere. Remove all arrows, labels, coloured guide ink and white boundaries. No aircraft illustration or perspective view. No baked text or markings. The compositor adds scheme colours and decals.
+
+Guide canvas: 1536 square. Density: 504.0 px/m. At 1254 square the native density is 411.5 px/m. Fastener heads are about 4 mm and joints 1 to 2 mm. Preserve sparse true-scale detail.
+- Atlas [1481, 1610, 1559, 2042], guide [40, 150, 1491, 412], CCW rotation True. World bounds in metres [[6.969086825847626e-06, 4.353140830993652, 0.6320043802261353], [0.4593621492385864, 7.199963569641113, 1.042203664779663]].
+- Atlas [32, 361, 100, 528], guide [40, 497, 601, 725], CCW rotation True. World bounds in metres [[0.36828988790512085, 2.9296231269836426, 0.4330299198627472], [0.7148416042327881, 4.036726474761963, 0.7176685929298401]].
+
+FWD is world -Y, UP is +Z, OUT points away from centreline. Blue ink marks actual fuselage frames or wing spars/ribs from structure.json. Orange marks closed access panels from panels.ACCESS_PANELS or the explicit fuel-filler art decision. Yellow marks upper root walkway only. On new guides pink marks measured control/root adjacency within 35 mm; accepted pilot guides retain their original legend. White outlines include UV cuts. Never outline every UV island in dark paint.
+Frames use 0.6 m pitch. Wing spars use chord fractions 0.175 and 0.70. Do not invent internal spar grids on the fin or tail. Antenna mounting zones belong on the dorsal cover; no antenna illustration. Fuel filler belongs only on the upper fixed wing. Foot wear belongs only near the upper wing root. Soot belongs near the aft exhaust and downstream intake recess, not across all paint.
+Nearby canonical parts by world centroid: speed_brake_L_visible, skin_aft_R, ventral_fin, flap_L_visible. Continue neutral paint across adjacent sheets. Keep hinge and separate control edges distinct. Mirror partners and nozzle repetitions reuse their canonical source through coverage.json, rather than independent generation. Thin edge charts receive nearest parent paint and carry no independent structural detail.
+
+Shared style block:
+Clean modernised F-104 interceptor in Primeva PALA service. Maintained aircraft, believable restrained service wear, crisp flush construction. Flat diffuse albedo only, neutral medium grey paint, no directional lighting, no highlights, shadows, ambient occlusion, perspective, bevel shading or painted dents. Fine satin paint grain and tiny handling scuffs. Recessed joints are narrow charcoal lines, not black trenches. Fasteners are small and sparse, flush heads in orderly structural rows. No random greebles, decorative panels, post-apocalyptic wear, rust, exposed machinery, text, markings, insignia or camouflage. The compositor adds scheme colours and decals later. Keep broad colour constant; detail belongs at its true physical scale.

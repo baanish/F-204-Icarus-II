@@ -1,0 +1,13 @@
+{
+  "name": "dorsal_cover_upper_front",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/dorsal_cover_upper_front.prompt.txt",
+  "references": [
+    "art/textures/generated/full/dorsal_cover_upper_front.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/dorsal_cover_upper_front.template.png",
+    "art/textures/generated/full/dorsal_cover_upper_front.neighbor_skin_mid_L_lower.png",
+    "art/textures/generated/full/dorsal_cover_upper_front.neighbor_skin_mid_L_out.png"
+  ],
+  "source_path": "art/textures/generated/full/dorsal_cover_upper_front.png"
+}

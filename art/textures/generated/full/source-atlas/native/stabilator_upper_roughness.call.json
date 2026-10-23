@@ -1,0 +1,10 @@
+{
+  "name": "stabilator_upper_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/stabilator_upper_roughness.prompt.txt",
+  "base": "art/textures/generated/full/stabilator_upper.png",
+  "references": [
+    "art/textures/generated/full/stabilator_upper.png"
+  ],
+  "output": "art/textures/generated/full/stabilator_upper_roughness.png"
+}

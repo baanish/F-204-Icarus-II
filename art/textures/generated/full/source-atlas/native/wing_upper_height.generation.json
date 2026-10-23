@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/wing_upper_height.png",
+  "output": "art/textures/generated/full/wing_upper_height.png",
+  "sha256": "218ce7647d356ad0236af23a86a7a6734156f75ed353b27c7c589cb021a8b363",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

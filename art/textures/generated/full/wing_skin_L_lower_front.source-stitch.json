@@ -1,0 +1,58 @@
+{
+  "method": "style anchor grain and structural guide",
+  "source": "art/textures/generated/pilot2/style_anchor.png",
+  "source_sha256": "22f3e60aa26457cd87340782dbe5d2ba44fa556d000867a4327a2e947c0bd44a",
+  "output": "art/textures/generated/full/wing_skin_L_lower_front.stitched.png",
+  "output_sha256": "4eeb3cc763c2b3ac322f036fe27d6be070636f09fb3ec485b1dc825c6480538b",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "charts": [
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "wing_skin_L:lower:012",
+      "target_box": [
+        33,
+        122,
+        977,
+        329
+      ]
+    },
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "wing_skin_L:lower:011",
+      "target_box": [
+        33,
+        398,
+        1219,
+        523
+      ]
+    },
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "wing_skin_L:in:007",
+      "target_box": [
+        33,
+        593,
+        979,
+        625
+      ]
+    },
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "wing_skin_L:upper:021",
+      "target_box": [
+        33,
+        695,
+        393,
+        724
+      ]
+    }
+  ],
+  "limitation": "material reuse after generation service rejection; no independently generated part detail"
+}

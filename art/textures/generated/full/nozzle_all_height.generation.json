@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/nozzle_all_height.png",
+  "output": "art/textures/generated/full/nozzle_all_height.png",
+  "sha256": "c5f9d9b8a5233dd0ada551b4554a436e9689ba9d923a69ba4bba47f8f9f9c5c1",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

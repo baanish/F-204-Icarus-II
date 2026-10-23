@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/rudder_all_roughness.png",
+  "output": "art/textures/generated/full/rudder_all_roughness.png",
+  "sha256": "2ffcb8a21ddf95b4989161607ebcc6853153be2676583cbd045378f195d46448",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

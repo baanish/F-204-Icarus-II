@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/fin_left_height.png",
+  "output": "art/textures/generated/full/fin_left_height.png",
+  "sha256": "10ebec5d90d4a618b4f44aabf782ca324cdd4f2e058513f79058fea26faa6d8c",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/ventral_fin_all_height.png",
+  "output": "art/textures/generated/full/ventral_fin_all_height.png",
+  "sha256": "b1b57de4560378b130237030c2dd2f27c8c8cf070b8cd01e5e1d9bba79066c8d",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

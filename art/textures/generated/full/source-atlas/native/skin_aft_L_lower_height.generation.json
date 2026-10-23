@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/skin_aft_L_lower_height.png",
+  "output": "art/textures/generated/full/skin_aft_L_lower_height.png",
+  "sha256": "8d6a488b15bb75b2bcdbc0040e43f025d89d0e56489cb860ec89881ece3092ae",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

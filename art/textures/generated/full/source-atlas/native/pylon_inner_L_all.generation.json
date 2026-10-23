@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/pylon_inner_L_all.png",
+  "output": "art/textures/generated/full/pylon_inner_L_all.png",
+  "sha256": "01183902e4f948997806737c440c5ad723242a7ed0d1dd8cc6c0ad5913467884",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

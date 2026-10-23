@@ -228,7 +228,7 @@ def preview_material(livery, clay=False, damage=False):
     normal_map = nodes.new('ShaderNodeNormalMap')
     links.new(normal.outputs['Color'], normal_map.inputs['Color'])
     links.new(normal_map.outputs[0], bsdf.inputs['Normal'])
-    metal = texture('Icarus_skin_m.png', True)
+    metal = texture('Icarus_livery_4_m.png' if livery == 4 else 'Icarus_skin_m.png', True)
     separate = nodes.new('ShaderNodeSeparateColor')
     links.new(metal.outputs['Color'], separate.inputs[0])
     if not clay:
@@ -236,8 +236,17 @@ def preview_material(livery, clay=False, damage=False):
         roughness = nodes.new('ShaderNodeMath')
         roughness.operation = 'SUBTRACT'
         roughness.inputs[0].default_value = 1
-        links.new(metal.outputs['Alpha'], roughness.inputs[1])
-        links.new(roughness.outputs[0], bsdf.inputs['Roughness'])
+        gloss = nodes.new('ShaderNodeMath')
+        gloss.operation = 'MAXIMUM'
+        spec = next((ROOT / 'art/textures/liveries').glob(f'{livery}_*.json'))
+        gloss.inputs[1].default_value = json.loads(spec.read_text())['glossiness']
+        links.new(metal.outputs['Alpha'], gloss.inputs[0])
+        links.new(gloss.outputs[0], roughness.inputs[1])
+        floor = nodes.new('ShaderNodeMath')
+        floor.operation = 'MAXIMUM'
+        floor.inputs[1].default_value = float(np.sqrt(.0078125))
+        links.new(roughness.outputs[0], floor.inputs[0])
+        links.new(floor.outputs[0], bsdf.inputs['Roughness'])
     else:
         bsdf.inputs['Roughness'].default_value = .6
 

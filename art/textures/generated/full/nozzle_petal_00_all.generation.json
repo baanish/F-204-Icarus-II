@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/nozzle_petal_00_all.png",
+  "output": "art/textures/generated/full/nozzle_petal_00_all.png",
+  "sha256": "fca0302fb7f90986c4232711b7e2f858fd231d6bd977f4b40cb9a19f9157a8fd",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

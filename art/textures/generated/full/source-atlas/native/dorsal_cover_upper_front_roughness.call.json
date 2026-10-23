@@ -1,0 +1,10 @@
+{
+  "name": "dorsal_cover_upper_front_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/dorsal_cover_upper_front_roughness.prompt.txt",
+  "base": "art/textures/generated/full/dorsal_cover_upper_front.png",
+  "references": [
+    "art/textures/generated/full/dorsal_cover_upper_front.png"
+  ],
+  "output": "art/textures/generated/full/dorsal_cover_upper_front_roughness.png"
+}

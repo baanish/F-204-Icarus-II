@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/nozzle_all_roughness.png",
+  "output": "art/textures/generated/full/nozzle_all_roughness.png",
+  "sha256": "44ad66ad95aebe88bed7d2cc194c5ec958a0a87d487ac1758e5d4ee2e5083f6b",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

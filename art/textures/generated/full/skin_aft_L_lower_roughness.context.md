@@ -1,0 +1,32 @@
+# skin_aft_L_lower roughness companion
+
+Accepted base: art/textures/generated/full/skin_aft_L_lower.png
+Native canvas: 1254 x 1254. No registration repair or per-map warping is permitted.
+
+White means rough and black means smooth. Default maintained satin paint is about 160 grey. Existing worn edges and walkway wear are subtly smoother, about 110 grey; existing grime and soot are rougher, about 205 grey. Keep the existing seam and fastener surface-response changes at precisely their base-image positions. The physical boundary between painted surfaces and the dark surround must match. No new scuffs, soot, walkways, panel joints or markings. This is scalar linear roughness, not a glossy photograph; no lighting, highlights or shadows.
+
+# skin_aft_L_lower
+
+Aft engine-bay fuselage ahead of the exhaust. Closed underside vent cover follows the orange guide. Restrained soot only near the nozzle. World-normal chart family: lower.
+
+Generation required: True. Source: art/textures/generated/full/skin_aft_L_lower.png.
+Guide density 336.0 px/m; native density at 1254 square 274.3 px/m.
+FWD = world -Y; UP = +Z; left OUT = +X. Each chart fits directions from the bake.
+
+- Atlas [312, 1008, 957, 1158], guide [40, 150, 1484, 486], CCW rotation False. World bounds in metres [[9.104015816774336e-07, 2.930060863494873, -0.36119696497917175], [0.8588631749153137, 7.199973106384277, 0.12997518479824066]].
+
+Closest part centroids: speed_brake_L_visible, skin_aft_R, ventral_fin, flap_L_visible. This proximity list is measured context, not proof of a shared boundary.
+Structural references: existing structure.json, panels.ACCESS_PANELS. Wing filler and walkway are placement decisions. There is no exported fin spar layout.
+Coverage rules and unmatched geometric surfaces are recorded in .cache/review/wave2/p9b-round2/full/coverage.json.
+The five accepted pilot images, masks, chart layouts and guides are reused unchanged. New prompts use the same shared style block.
+No generated physical-neighbour edge image exists yet; retain uniform neutral margins.
+
+References in image order:
+- art/textures/generated/full/skin_aft_L_lower.guide.png
+- art/textures/generated/pilot2/style_anchor.png
+- art/textures/generated/full/skin_aft_L_lower.template.png
+
+Shared style block:
+Clean modernised F-104 interceptor in Primeva PALA service. Maintained aircraft, believable restrained service wear, crisp flush construction. Flat diffuse albedo only, neutral medium grey paint, no directional lighting, no highlights, shadows, ambient occlusion, perspective, bevel shading or painted dents. Fine satin paint grain and tiny handling scuffs. Recessed joints are narrow charcoal lines, not black trenches. Fasteners are small and sparse, flush heads in orderly structural rows. No random greebles, decorative panels, post-apocalyptic wear, rust, exposed machinery, text, markings, insignia or camouflage. The compositor adds scheme colours and decals later. Keep broad colour constant; detail belongs at its true physical scale.
+
+Acceptance requires native-resolution cross-correlation displacement below one texel and reported structural feature precision and recall. A failed companion uses the base-derived fallback for that channel; failed native images remain preserved.

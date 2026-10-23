@@ -1,0 +1,13 @@
+{
+  "name": "stabilator_lower",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/stabilator_lower.prompt.txt",
+  "references": [
+    "art/textures/generated/full/stabilator_lower.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/stabilator_lower.template.png",
+    "art/textures/generated/full/stabilator_lower.neighbor_fin_left.png",
+    "art/textures/generated/full/stabilator_lower.neighbor_stabilator_upper.png"
+  ],
+  "source_path": "art/textures/generated/full/stabilator_lower.png"
+}

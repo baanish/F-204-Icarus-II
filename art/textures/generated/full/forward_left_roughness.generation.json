@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/forward_left_roughness.png",
+  "output": "art/textures/generated/full/forward_left_roughness.png",
+  "sha256": "0da9d61c15f346888e8d6f4701206f4be0a13cb09b6136e327c92322c27605d8",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

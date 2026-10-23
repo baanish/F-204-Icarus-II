@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/fin_left_roughness.png",
+  "output": "art/textures/generated/full/fin_left_roughness.png",
+  "sha256": "f7c8f63cfab67b408e4a91054f4b39e4b7034b6552ab49646373273d5bcead8d",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

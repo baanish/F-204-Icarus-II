@@ -1,0 +1,10 @@
+{
+  "name": "radome_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/radome_roughness.prompt.txt",
+  "base": "art/textures/generated/pilot2/radome.png",
+  "references": [
+    "art/textures/generated/pilot2/radome.png"
+  ],
+  "output": "art/textures/generated/full/radome_roughness.png"
+}

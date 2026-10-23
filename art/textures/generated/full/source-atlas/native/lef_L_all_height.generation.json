@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/lef_L_all_height.png",
+  "output": "art/textures/generated/full/lef_L_all_height.png",
+  "sha256": "79797150dcf27d3729a1acca3594e769d3718859bf14dc159b9a28303d6d5069",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

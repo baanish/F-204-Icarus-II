@@ -1,0 +1,13 @@
+{
+  "name": "wing_skin_L_lower_rear",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/wing_skin_L_lower_rear.prompt.txt",
+  "references": [
+    "art/textures/generated/full/wing_skin_L_lower_rear.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/wing_skin_L_lower_rear.template.png",
+    "art/textures/generated/full/wing_skin_L_lower_rear.neighbor_wing_root.png",
+    "art/textures/generated/full/wing_skin_L_lower_rear.neighbor_wing_upper.png"
+  ],
+  "source_path": "art/textures/generated/full/wing_skin_L_lower_rear.png"
+}

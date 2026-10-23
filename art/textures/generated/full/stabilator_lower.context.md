@@ -1,0 +1,27 @@
+# stabilator_lower
+
+All-moving horizontal tail. Hinge and root attachment meet the fin. Sparse flush construction, clean leading edge. No invented internal spar grid. World-normal chart family: lower.
+
+Generation required: True. Source: art/textures/generated/full/stabilator_lower.png.
+Guide density 399.0 px/m; native density at 1254 square 325.7 px/m.
+FWD = world -Y; UP = +Z; left OUT = +X. Each chart fits directions from the bake.
+
+- Atlas [1147, 356, 1692, 639], guide [40, 150, 1489, 902], CCW rotation False. World bounds in metres [[-1.8149915933609009, 6.808388710021973, 2.777606964111328], [1.8112074136734009, 8.686166763305664, 2.81850004196167]].
+- Atlas [154, 1599, 161, 1756], guide [40, 987, 457, 1005], CCW rotation True. World bounds in metres [[-1.815000057220459, 7.449065685272217, 2.8012259006500244], [-1.815000057220459, 8.489060401916504, 2.8421630859375]].
+- Atlas [506, 384, 513, 546], guide [517, 987, 947, 1005], CCW rotation True. World bounds in metres [[1.815000057220459, 7.415545463562012, 2.799715995788574], [1.815000057220459, 8.488875389099121, 2.8406834602355957]].
+
+Closest part centroids: rudder_visible, fin_skin, nozzle, skin_aft_R. This proximity list is measured context, not proof of a shared boundary.
+Structural references: existing structure.json, panels.ACCESS_PANELS. Wing filler and walkway are placement decisions. There is no exported fin spar layout.
+Coverage rules and unmatched geometric surfaces are recorded in .cache/review/wave2/p9b-round2/full/coverage.json.
+The five accepted pilot images, masks, chart layouts and guides are reused unchanged. New prompts use the same shared style block.
+Additional images are native painted edge samples from fin_left, stabilator_upper. Use these for paint-grain and joint treatment. Structural lines continue through the same physical frame/spar positions in the guide; the flattened strips are not UV coordinates.
+
+References in image order:
+- art/textures/generated/full/stabilator_lower.guide.png
+- art/textures/generated/pilot2/style_anchor.png
+- art/textures/generated/full/stabilator_lower.template.png
+- art/textures/generated/full/stabilator_lower.neighbor_fin_left.png
+- art/textures/generated/full/stabilator_lower.neighbor_stabilator_upper.png
+
+Shared style block:
+Clean modernised F-104 interceptor in Primeva PALA service. Maintained aircraft, believable restrained service wear, crisp flush construction. Flat diffuse albedo only, neutral medium grey paint, no directional lighting, no highlights, shadows, ambient occlusion, perspective, bevel shading or painted dents. Fine satin paint grain and tiny handling scuffs. Recessed joints are narrow charcoal lines, not black trenches. Fasteners are small and sparse, flush heads in orderly structural rows. No random greebles, decorative panels, post-apocalyptic wear, rust, exposed machinery, text, markings, insignia or camouflage. The compositor adds scheme colours and decals later. Keep broad colour constant; detail belongs at its true physical scale.

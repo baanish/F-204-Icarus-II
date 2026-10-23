@@ -1,0 +1,38 @@
+# wing_skin_L_lower_rear roughness companion
+
+Accepted base: art/textures/generated/full/wing_skin_L_lower_rear.png
+Native canvas: 1254 x 1254. No registration repair or per-map warping is permitted.
+
+White means rough and black means smooth. Default maintained satin paint is about 160 grey. Existing worn edges and walkway wear are subtly smoother, about 110 grey; existing grime and soot are rougher, about 205 grey. Keep the existing seam and fastener surface-response changes at precisely their base-image positions. The physical boundary between painted surfaces and the dark surround must match. No new scuffs, soot, walkways, panel joints or markings. This is scalar linear roughness, not a glossy photograph; no lighting, highlights or shadows.
+
+# wing_skin_L_lower_rear
+
+Fixed lower wing skin. Follow actual spars and ribs. Moving leading edge, flap and aileron meet the control boundaries. No upper walkway on the underside. World-normal chart family: lower.
+
+Generation required: True. Source: art/textures/generated/full/wing_skin_L_lower_rear.png.
+Guide density 522.0 px/m; native density at 1254 square 426.2 px/m.
+FWD = world -Y; UP = +Z; left OUT = +X. Each chart fits directions from the bake.
+
+- Atlas [1091, 134, 1282, 354], guide [40, 150, 704, 915], CCW rotation False. World bounds in metres [[2.05468487739563, 1.9364259243011475, -0.30394789576530457], [3.3059847354888916, 3.3948476314544678, -0.08305402100086212]].
+- Atlas [1840, 470, 1859, 699], guide [40, 1000, 836, 1066], CCW rotation True. World bounds in metres [[1.92685866355896, 1.8643200397491455, -0.0992608591914177], [2.0459940433502197, 3.383862257003784, -0.06145918741822243]].
+- Atlas [548, 400, 563, 606], guide [40, 1151, 756, 1203], CCW rotation True. World bounds in metres [[3.3060097694396973, 2.3951895236968994, -0.2950150966644287], [3.3996951580047607, 3.7609639167785645, -0.2577727138996124]].
+- Atlas [5, 318, 19, 524], guide [40, 1288, 756, 1336], CCW rotation True. World bounds in metres [[3.308424949645996, 2.396024703979492, -0.31824031472206116], [3.3971774578094482, 3.7617855072021484, -0.2831933796405792]].
+- Atlas [315, 1343, 322, 1538], guide [816, 1288, 1494, 1312], CCW rotation True. World bounds in metres [[3.4000000953674316, 2.4506852626800537, -0.3171800673007965], [3.4000000953674316, 3.744016408920288, -0.2771783769130707]].
+
+Closest part centroids: pylon_inner_L, pylon_inner_plug_L, lef_L_visible, gear_door_main_L_visible. This proximity list is measured context, not proof of a shared boundary.
+Structural references: existing structure.json, panels.ACCESS_PANELS. Wing filler and walkway are placement decisions. There is no exported fin spar layout.
+Coverage rules and unmatched geometric surfaces are recorded in .cache/review/wave2/p9b-round2/full/coverage.json.
+The five accepted pilot images, masks, chart layouts and guides are reused unchanged. New prompts use the same shared style block.
+Additional images are native painted edge samples from wing_root, wing_upper. Use these for paint-grain and joint treatment. Structural lines continue through the same physical frame/spar positions in the guide; the flattened strips are not UV coordinates.
+
+References in image order:
+- art/textures/generated/full/wing_skin_L_lower_rear.guide.png
+- art/textures/generated/pilot2/style_anchor.png
+- art/textures/generated/full/wing_skin_L_lower_rear.template.png
+- art/textures/generated/full/wing_skin_L_lower_rear.neighbor_wing_root.png
+- art/textures/generated/full/wing_skin_L_lower_rear.neighbor_wing_upper.png
+
+Shared style block:
+Clean modernised F-104 interceptor in Primeva PALA service. Maintained aircraft, believable restrained service wear, crisp flush construction. Flat diffuse albedo only, neutral medium grey paint, no directional lighting, no highlights, shadows, ambient occlusion, perspective, bevel shading or painted dents. Fine satin paint grain and tiny handling scuffs. Recessed joints are narrow charcoal lines, not black trenches. Fasteners are small and sparse, flush heads in orderly structural rows. No random greebles, decorative panels, post-apocalyptic wear, rust, exposed machinery, text, markings, insignia or camouflage. The compositor adds scheme colours and decals later. Keep broad colour constant; detail belongs at its true physical scale.
+
+Acceptance requires native-resolution cross-correlation displacement below one texel and reported structural feature precision and recall. A failed companion uses the base-derived fallback for that channel; failed native images remain preserved.

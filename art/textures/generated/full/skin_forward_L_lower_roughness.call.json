@@ -1,0 +1,10 @@
+{
+  "name": "skin_forward_L_lower_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/skin_forward_L_lower_roughness.prompt.txt",
+  "base": "art/textures/generated/full/skin_forward_L_lower.stitched.png",
+  "references": [
+    "art/textures/generated/full/skin_forward_L_lower.stitched.png"
+  ],
+  "output": "art/textures/generated/full/skin_forward_L_lower_roughness.png"
+}

@@ -137,20 +137,22 @@ def prepare():
     bpy.ops.object.select_all(action="DESELECT")
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
-    arrays = {}
-    for name, socket in (("position", geo.outputs["Position"]), ("normal", geo.outputs["Normal"]), ("part", part.outputs["Color"])):
-        links.new(socket, emit.inputs["Color"])
-        img = bpy.data.images.new("Skin_" + name, width=2048, height=2048, alpha=True, float_buffer=True)
-        img.colorspace_settings.name = "Non-Color"
-        target.image = img
-        nodes.active = target
-        bpy.ops.object.bake(type="EMIT")
-        pixels = np.empty(2048 * 2048 * 4, dtype=np.float32)
-        img.pixels.foreach_get(pixels)
-        arrays[name] = pixels.reshape(2048, 2048, 4)[::-1].copy()
-        bpy.data.images.remove(img)
-    arrays["part"] = np.rint(arrays["part"][:, :, 0] * 64).astype(np.uint8)
-    np.savez_compressed(OUT / "geometry_maps.npz", **arrays)
+    # geometry_maps.npz feeds the generated paint registration; atlas_geometry.npz is the production atlas.
+    for size, filename in ((uvs.PAINT_SIZE, "geometry_maps.npz"), (uvs.ATLAS_SIZE, "atlas_geometry.npz")):
+        arrays = {}
+        for name, socket in (("position", geo.outputs["Position"]), ("normal", geo.outputs["Normal"]), ("part", part.outputs["Color"])):
+            links.new(socket, emit.inputs["Color"])
+            img = bpy.data.images.new("Skin_" + name, width=size, height=size, alpha=True, float_buffer=True)
+            img.colorspace_settings.name = "Non-Color"
+            target.image = img
+            nodes.active = target
+            bpy.ops.object.bake(type="EMIT")
+            pixels = np.empty(size * size * 4, dtype=np.float32)
+            img.pixels.foreach_get(pixels)
+            arrays[name] = pixels.reshape(size, size, 4)[::-1].copy()
+            bpy.data.images.remove(img)
+        arrays["part"] = np.rint(arrays["part"][:, :, 0] * 64).astype(np.uint8)
+        np.savez_compressed(OUT / filename, **arrays)
     bpy.data.objects.remove(obj, do_unlink=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(OUT / "geometry.blend"))
     bake_ao(canonical)
@@ -198,14 +200,14 @@ def audit():
         if len(pair) != 2:
             continue
         a, b = pair
-        if a[4].dot(b[4]) < 0.95 or max((a[i] - b[i]).length for i in (1, 2)) < 1 / 2048:
+        if a[4].dot(b[4]) < 0.95 or max((a[i] - b[i]).length for i in (1, 2)) < 1 / uvs.ATLAS_SIZE:
             continue
         uvsides = []
         for record in pair:
             point = (record[1] + record[2]) / 2
             inward = record[3] - point
             if inward.length > 0:
-                point += inward.normalized() * (0.5 / 2048)
+                point += inward.normalized() * (0.5 / uvs.ATLAS_SIZE)
             uvsides.append(list(point))
         samples.append({"parts": [a[0], b[0]], "world_edge": endpoints, "uv": uvsides})
     (OUT / "seam_samples.json").write_text(json.dumps(samples))

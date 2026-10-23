@@ -1,0 +1,11 @@
+{
+  "name": "skin_aft_L_upper",
+  "generation_required": true,
+  "prompt": "art/textures/generated/full/skin_aft_L_upper.prompt.txt",
+  "references": [
+    "art/textures/generated/full/skin_aft_L_upper.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/full/skin_aft_L_upper.template.png"
+  ],
+  "source_path": "art/textures/generated/full/skin_aft_L_upper.png"
+}

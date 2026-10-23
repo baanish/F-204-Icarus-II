@@ -1,0 +1,10 @@
+{
+  "name": "nozzle_petal_00_all_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/nozzle_petal_00_all_roughness.prompt.txt",
+  "base": "art/textures/generated/full/nozzle_petal_00_all.png",
+  "references": [
+    "art/textures/generated/full/nozzle_petal_00_all.png"
+  ],
+  "output": "art/textures/generated/full/nozzle_petal_00_all_roughness.png"
+}

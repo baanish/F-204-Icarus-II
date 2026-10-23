@@ -1,0 +1,10 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/pilot2/wing_root.png",
+  "output": "art/textures/generated/pilot2/wing_root.png",
+  "sha256": "47462c636a683b4ad5769d9ccc937947f92a148b015e61a98490c0f54a5bc399",
+  "native_size": [
+    1254,
+    1254
+  ]
+}

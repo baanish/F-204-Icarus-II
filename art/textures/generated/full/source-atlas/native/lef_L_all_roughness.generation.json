@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/lef_L_all_roughness.png",
+  "output": "art/textures/generated/full/lef_L_all_roughness.png",
+  "sha256": "ca1660d4797b434c7e9beee88ab05a110edc3c908c1412a9ce82bcdd3e309e40",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

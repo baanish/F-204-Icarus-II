@@ -1,0 +1,58 @@
+{
+  "method": "style anchor grain and structural guide",
+  "source": "art/textures/generated/pilot2/style_anchor.png",
+  "source_sha256": "22f3e60aa26457cd87340782dbe5d2ba44fa556d000867a4327a2e947c0bd44a",
+  "output": "art/textures/generated/full/pylon_inner_plug_L_all.stitched.png",
+  "output_sha256": "af1a2bbde0f2cfb0b069365194b615bd6de236c4b6f2bd92e74a083525d4727d",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "charts": [
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "pylon_inner_plug_L:lower:002",
+      "target_box": [
+        33,
+        122,
+        1200,
+        193
+      ]
+    },
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "pylon_inner_plug_L:upper:004",
+      "target_box": [
+        33,
+        263,
+        1204,
+        334
+      ]
+    },
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "pylon_inner_plug_L:out:003",
+      "target_box": [
+        33,
+        403,
+        1218,
+        438
+      ]
+    },
+    {
+      "source": "style anchor fine grain",
+      "structure": "exact blue frame/spar guide pixels",
+      "chart": "pylon_inner_plug_L:in:001",
+      "target_box": [
+        33,
+        508,
+        1218,
+        534
+      ]
+    }
+  ],
+  "limitation": "material reuse after generation service rejection; no independently generated part detail"
+}

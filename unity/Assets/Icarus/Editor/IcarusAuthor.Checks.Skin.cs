@@ -11,7 +11,32 @@ namespace Icarus.Editor
         private static string CheckSkin(Build b, List<string> p)
         {
             var renderers = b.Root.GetComponentsInChildren<MeshRenderer>(true);
-            var skinRenderers = renderers.Where(r => r.sharedMaterials.Contains(b.Skin)).ToArray();
+            var skinRenderers = renderers.Where(r => r.GetComponent<MeshFilter>() != null && r.sharedMaterials.Contains(b.Skin)).ToArray();
+            var carrier = b.Root.transform.Find("Icarus_livery_materials");
+            var maps = carrier == null ? null : carrier.GetComponent<MeshRenderer>();
+            if (carrier == null || carrier.gameObject.activeSelf || carrier.gameObject.layer != 3 || maps == null || maps.enabled || carrier.GetComponent<MeshFilter>() != null)
+                p.Add("bare metal texture carrier must be inactive, disabled, layer 3 and mesh-free");
+            else
+            {
+                var held = maps.sharedMaterials;
+                if (held.Length != 2 || held[0] != b.Skin || held[1] == null)
+                    p.Add("bare metal carrier must hold shared skin and alternate material");
+                else
+                {
+                    var metal = held[1].GetTexture("_Metallic") as Texture2D;
+                    var livery = held[1].GetTexture("_Livery");
+                    if (metal == null || metal.width != SkinSize || metal.height != SkinSize || metal.format != TextureFormat.DXT5)
+                        p.Add("bare metal map must be " + SkinSize + " square DXT5");
+                    else
+                    {
+                        var importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(metal));
+                        if (importer.sRGBTexture || importer.alphaSource != TextureImporterAlphaSource.FromInput)
+                            p.Add("bare metal map must retain linear smoothness alpha");
+                    }
+                    if (livery != Load<Texture2D>(LiveryFolder + "/Icarus_livery_4.png") || metal == b.Skin.GetTexture("_Metallic"))
+                        p.Add("bare metal carrier must identify livery 4 and a distinct metallic map");
+                }
+            }
             if (skinRenderers.Length == 0) p.Add("no skin renderers");
             foreach (var renderer in renderers.Where(r => r.name.Contains("_detail_")))
                 p.Add("unmerged detail renderer: " + renderer.name);
@@ -52,9 +77,9 @@ namespace Icarus.Editor
             foreach (var property in new[] { "_Basecolor", "_Livery", "_Normal", "_AO", "_Metallic", "_BasecolorDmg", "_NormalDmg" })
             {
                 var texture = b.Skin.GetTexture(property) as Texture2D;
-                if (texture == null || texture.width != 2048 || texture.height != 2048)
+                if (texture == null || texture.width != SkinSize || texture.height != SkinSize)
                 {
-                    p.Add(property + " must be 2048 square");
+                    p.Add(property + " must be " + SkinSize + " square");
                     continue;
                 }
                 var importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture));
@@ -83,8 +108,8 @@ namespace Icarus.Editor
                 }
                 var so = new SerializedObject(data);
                 var texture = Prop(so, "Texture").objectReferenceValue as Texture2D;
-                if (texture == null || texture.width != 2048 || texture.height != 2048 || texture.format != TextureFormat.DXT1)
-                    p.Add("livery " + i + " must be 2048 square DXT1");
+                if (texture == null || texture.width != SkinSize || texture.height != SkinSize || texture.format != TextureFormat.DXT1)
+                    p.Add("livery " + i + " must be " + SkinSize + " square DXT1");
                 if (texture != null && !textures.Add(texture)) p.Add("liveries share a texture");
                 if (Prop(so, "Colors").arraySize == 0) p.Add("livery " + i + " has no dominant paint");
             }

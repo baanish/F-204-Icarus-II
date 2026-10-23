@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/dorsal_cover_upper_rear_roughness.png",
+  "output": "art/textures/generated/full/dorsal_cover_upper_rear_roughness.png",
+  "sha256": "b4e08b24dc8fc5cd2f3c6c552774d00d2f5e9b5886810e508185be484832d836",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

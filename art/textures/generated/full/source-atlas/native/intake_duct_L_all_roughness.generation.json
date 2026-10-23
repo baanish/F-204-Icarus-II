@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/intake_duct_L_all_roughness.png",
+  "output": "art/textures/generated/full/intake_duct_L_all_roughness.png",
+  "sha256": "3f8785f162b728914be21908c3b364d53fd86f41bf5d18992a824e3821ca2107",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

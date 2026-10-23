@@ -1,0 +1,10 @@
+{
+  "name": "skin_mid_L_upper_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/skin_mid_L_upper_roughness.prompt.txt",
+  "base": "art/textures/generated/full/skin_mid_L_upper.png",
+  "references": [
+    "art/textures/generated/full/skin_mid_L_upper.png"
+  ],
+  "output": "art/textures/generated/full/skin_mid_L_upper_roughness.png"
+}

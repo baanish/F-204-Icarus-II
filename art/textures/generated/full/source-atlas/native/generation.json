@@ -1,0 +1,202 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "transparent_background": false,
+  "original_directory": "art/textures/generated/pilot2",
+  "outputs": {
+    "style_anchor": "style_anchor.png",
+    "radome": "radome.png",
+    "forward_left": "forward_left.png",
+    "wing_root": "wing_root.png",
+    "wing_upper": "wing_upper.png",
+    "fin_left": "fin_left.png"
+  },
+  "prompts": "Exact .prompt.txt and .context.md siblings. Call reference order is in the context pack.",
+  "native_resolution": [
+    1254,
+    1254
+  ],
+  "source_policy": "Only own UV guides, own generated style anchor and own generated neighbour edge bands. No game textures.",
+  "registration": "Source silhouette components register to the corresponding UV charts. See stitch.json for bounds, shape IoU and actual minimum-axis density. Original generated PNGs are preserved unchanged.",
+  "registered_sources": {
+    "radome": {
+      "native_size": [
+        1254,
+        1254
+      ],
+      "native_px_per_m_min_axis": 400.6849315068493,
+      "registration": [
+        {
+          "chart": 4,
+          "source_box": [
+            25,
+            76,
+            728,
+            368
+          ],
+          "normalized_silhouette_iou": 0.9262754559000922,
+          "native_px_per_m_min_axis": 426.92307692307696
+        },
+        {
+          "chart": 2,
+          "source_box": [
+            22,
+            405,
+            724,
+            694
+          ],
+          "normalized_silhouette_iou": 0.9295239460854603,
+          "native_px_per_m_min_axis": 426.3157894736842
+        },
+        {
+          "chart": 3,
+          "source_box": [
+            25,
+            734,
+            728,
+            956
+          ],
+          "normalized_silhouette_iou": 0.9504526748971194,
+          "native_px_per_m_min_axis": 406.0975609756098
+        },
+        {
+          "chart": 6,
+          "source_box": [
+            25,
+            998,
+            728,
+            1193
+          ],
+          "normalized_silhouette_iou": 0.9041048637461193,
+          "native_px_per_m_min_axis": 400.6849315068493
+        }
+      ],
+      "skin_texels": 49832,
+      "sha256": "0097730b024be9ff763765d2c02d1ed52efbaea8387b3720e41988c283de1a85"
+    },
+    "forward_left": {
+      "native_size": [
+        1254,
+        1254
+      ],
+      "native_px_per_m_min_axis": 290.8717105263158,
+      "registration": [
+        {
+          "chart": 12,
+          "source_box": [
+            35,
+            121,
+            1214,
+            519
+          ],
+          "normalized_silhouette_iou": 0.9920421142046026,
+          "native_px_per_m_min_axis": 290.8717105263158
+        }
+      ],
+      "skin_texels": 89343,
+      "sha256": "b3b50fc420975725e47de99cd16eb3aaf6b8379f12100ade2e7223934b85c2a2"
+    },
+    "wing_root": {
+      "native_size": [
+        1254,
+        1254
+      ],
+      "native_px_per_m_min_axis": 235.00660501981505,
+      "registration": [
+        {
+          "chart": 13,
+          "source_box": [
+            35,
+            122,
+            1221,
+            250
+          ],
+          "normalized_silhouette_iou": 0.9724886420999496,
+          "native_px_per_m_min_axis": 235.00660501981505
+        }
+      ],
+      "skin_texels": 50157,
+      "sha256": "47462c636a683b4ad5769d9ccc937947f92a148b015e61a98490c0f54a5bc399"
+    },
+    "wing_upper": {
+      "native_size": [
+        1254,
+        1254
+      ],
+      "native_px_per_m_min_axis": 296.09375,
+      "registration": [
+        {
+          "chart": 2,
+          "source_box": [
+            33,
+            120,
+            412,
+            554
+          ],
+          "normalized_silhouette_iou": 0.9832897835414046,
+          "native_px_per_m_min_axis": 296.09375
+        },
+        {
+          "chart": 7,
+          "source_box": [
+            33,
+            623,
+            1220,
+            890
+          ],
+          "normalized_silhouette_iou": 0.990260273223047,
+          "native_px_per_m_min_axis": 296.25623960066554
+        }
+      ],
+      "skin_texels": 85623,
+      "sha256": "7894a859c127324bf3cea755e87e6ceae3506bce55c27a6808a03ded8d4637bf"
+    },
+    "fin_reflection": {
+      "target_texels": 77893,
+      "max_matching_distance_m": 0.01496310260084732
+    },
+    "fin_left": {
+      "native_size": [
+        1254,
+        1254
+      ],
+      "native_px_per_m_min_axis": 332.5925925925926,
+      "registration": [
+        {
+          "chart": 11,
+          "source_box": [
+            31,
+            26,
+            533,
+            924
+          ],
+          "normalized_silhouette_iou": 0.9718508834816345,
+          "native_px_per_m_min_axis": 332.5925925925926
+        },
+        {
+          "chart": 12,
+          "source_box": [
+            29,
+            945,
+            1200,
+            1080
+          ],
+          "normalized_silhouette_iou": 0.9098744151686776,
+          "native_px_per_m_min_axis": 357.0121951219512
+        },
+        {
+          "chart": 1,
+          "source_box": [
+            34,
+            1114,
+            492,
+            1217
+          ],
+          "normalized_silhouette_iou": 0.9894278606965174,
+          "native_px_per_m_min_axis": 335.8695652173913
+        }
+      ],
+      "skin_texels": 69580,
+      "sha256": "c0480017587b5637fb9df92f0921c990fb095bd7b9bcd2dd9d432de5d629668a"
+    }
+  }
+}

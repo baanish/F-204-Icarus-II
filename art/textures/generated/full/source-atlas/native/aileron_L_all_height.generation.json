@@ -1,0 +1,11 @@
+{
+  "tool": "image_gen.imagegen built-in",
+  "original": "art/textures/generated/full/aileron_L_all_height.png",
+  "output": "art/textures/generated/full/aileron_L_all_height.png",
+  "sha256": "e0bfdfcffa6dfe77b007272c52ebec2fa40dea2126b612988084fe4be9b944bd",
+  "native_size": [
+    1254,
+    1254
+  ],
+  "transparent_background": false
+}

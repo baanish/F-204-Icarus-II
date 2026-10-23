@@ -1,0 +1,10 @@
+{
+  "name": "wing_upper_roughness",
+  "kind": "roughness",
+  "prompt": "art/textures/generated/full/wing_upper_roughness.prompt.txt",
+  "base": "art/textures/generated/pilot2/wing_upper.png",
+  "references": [
+    "art/textures/generated/pilot2/wing_upper.png"
+  ],
+  "output": "art/textures/generated/full/wing_upper_roughness.png"
+}

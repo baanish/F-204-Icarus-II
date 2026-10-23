@@ -1,0 +1,32 @@
+{
+  "source_generation_inputs": {
+    "art/textures/generated/full/source-atlas/native/generation-inputs/old-bake/geometry_maps.npz": "1964da8c558eb9efb6c8a3842af95340de68b12e0f29e7a9a4102c4d8c47a18c",
+    "art/textures/generated/full/source-atlas/native/generation-inputs/old-bake/atlas_triangles.json": "7b4278bd8a89793c5692162b4b18464459dd448922909f82c421198073429980",
+    "art/textures/generated/full/source-atlas/native/generation-inputs/old-pilot/structure.json": "30c56384e9b393961fba1e751bf26a51a2a3d71f779000cdc9d2939c32d0ca6a",
+    "art/textures/generated/full/source-atlas/native/generation-inputs/old-pilot/parts.json": "a1fe6585d8c127866e0515d356bd2c3bc09b0f2dc61875f025dc4afbd3a5c347",
+    "art/textures/round2_style.txt": "a9707cda546b70022cce3a9a912a88614baa5db7c85f130e5ed988910b1b81cd"
+  },
+  "current_geometry_sha256": "8872c81cf292b4076cb1be191271b4e17c903b535bcd3015bc417befb28b6e7d",
+  "current_atlas_triangles_sha256": "b2d1da21d55d7e7d8aa3096bd4326def882836a106732b699ae0a709730667ad",
+  "native_registration_gates": {
+    "normalized_silhouette_iou_min": 0.7,
+    "native_px_per_m_min": 180
+  },
+  "native_companion_alignment": "unchanged companion_maps.py gates before remapping",
+  "mapping_policy": {
+    "position_tolerance_m": 0.015,
+    "normal_cosine_min": 0.95,
+    "replaced_parts_always_parent_paint": [
+      "gear_door_*",
+      "speed_brake_*"
+    ]
+  },
+  "field_contract": [
+    "base",
+    "height",
+    "roughness",
+    "height_valid",
+    "roughness_valid",
+    "used"
+  ]
+}
