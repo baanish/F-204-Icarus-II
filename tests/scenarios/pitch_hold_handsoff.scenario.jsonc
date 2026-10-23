@@ -1,0 +1,33 @@
+// Hands-off pitch hold below half fuel: the owner's Icarus kept pitching down in level cruise once fuel fell under about
+// half, while the fly-by-wire read no pitch rate (the cockpit body's angular velocity stayed near 0 as the airframe's
+// attitude fell 0.3 to 0.9 deg/s). The Icarus starts over Ignus at 13 km, 520 m/s, 40% fuel; a hold settles it for 20 s,
+// then the stick is let go for 60 s with the throttle where the hold left it. Pass: pitch stays within -1.5 to 3 deg and load
+// within 0.1 g of 1 for the hands-off minute. .cache/pitchdown/fuelbins.py <run>/trace.jsonl measures the drift the
+// fly-by-wire missed (attitude change minus integrated measured rate), which must stay within 0.05 deg/s.
+// From the repo root: no-agentic run tests/scenarios/pitch_hold_handsoff.scenario.jsonc
+{
+  "mission": "icarus_ignus_13km_40.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 10,
+  "timeout": 240,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 12500 } ] },
+      "label": "the Icarus airborne at 13 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 13000, "hdg_deg": 90, "throttle": 0.85 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-0.2, 0.2] }, "hold": 20, "timeout": 60, "label": "settled level under the hold" },
+    { "record": { "path": "own.pitch_deg" }, "label": "pitch when let go, deg" },
+    { "fly": { "mode": "off" } },
+    { "mark": { "label": "hands_off" } },
+    { "check": { "all": [ { "path": "own.pitch_deg", "between": [-1.5, 3.0] }, { "path": "own.load_g", "near": 1, "tol": 0.1 } ] }, "for": 60,
+      "label": "pitch and load hold for a hands-off minute" },
+    { "record": { "path": "own.pitch_deg" }, "label": "pitch after the hands-off minute, deg" },
+    { "record": { "path": "own.inputs.throttle" }, "label": "throttle while hands off" },
+    { "record": { "path": "own.fuel_frac" }, "label": "fuel at the end" },
+  ],
+}
