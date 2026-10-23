@@ -14,6 +14,10 @@ import numpy as np
 from stores.geometry import quat_matrix
 
 
+# MountedMissile.RailDirection, in the missile's own frame: Forward, Down, Right, Left, Backward, Up.
+RAIL_DIRECTIONS = np.array([[0, 0, 1], [0, -1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, -1], [0, 1, 0]], float)
+
+
 def xyz(d):
     return np.array([d["x"], d["y"], d["z"]], float)
 
@@ -77,6 +81,7 @@ class Aircraft:
 
         # Every mount whose prefab travels in the bundle, by jsonKey: the mod's own, and the stock ones it depends on.
         self.bundle_mounts = {d["jsonKey"]: d["prefab"]["m_PathID"] for d in behaviours.get("WeaponMount", []) if d.get("jsonKey")}
+        self._launchers = behaviours.get("MountedMissile", [])
         self._objs, self._T, self._comps = objs, T, self._components(objs, comp_go)
         self._cache = {}
         self.meshes = {}  # transform -> (name, local verts, tris) of every enabled, active renderer under the root
@@ -143,6 +148,21 @@ class Aircraft:
                 colliders.append(shape)
         mesh = (np.concatenate(verts) if verts else np.zeros((0, 3)), np.concatenate(tris) if tris else np.zeros((0, 3), int))
         return mesh, colliders
+
+    def ejected(self, key, external=None):
+        """A bundle mount's rail-launched missiles, each as (mesh, direction, length) in the mount's frame: the rendered
+        missile, and the unit vector and distance MountedMissile.RailLaunch slides it, with its parent, before the game
+        spawns the round there and its motor lights. A missile with no rail is spawned where it hangs (length 0)."""
+        root = self.go_transform[self.bundle_mounts[key]]
+        out = []
+        for d in self._launchers:
+            t = self.go_transform[d["m_GameObject"]["m_PathID"]]
+            if self._root_of(t) != root:
+                continue
+            pos, rot, scale = self.world(t)
+            verts, tris = self._rendered(d["m_GameObject"]["m_PathID"], self._comps.get(d["m_GameObject"]["m_PathID"], []), external)
+            out.append(((pos + (verts * scale) @ rot.T, tris), rot @ RAIL_DIRECTIONS[d["railDirection"]], d["railLength"]))
+        return out
 
     def _quat(self, t):
         """Rotation of transform t in its root's frame, as a quaternion (x, y, z, w)."""

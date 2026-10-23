@@ -19,6 +19,9 @@ game export for the stock mounts. Prints a verdict per check and exits nonzero o
 - Stores rule 14: both nav lenses outside every tip store's rendered bounds and physical collider envelope. The
   --lights-blockout mode uses tools/review_lights.py's geometry snapshot and the source Wingtip option list, for
   verification before Unity can build. It also checks the entire stock lens stays inboard of the tip face.
+- Stores rule 18: every Conformal missile, where its rail ends and the motor lights, at least 1 m from every airframe
+  mesh in flight (gear and doors stowed), the intake ducts named apart; and on its way down the rail at least rule 12's
+  0.05 m from the stowed gear.
 
 Mount colliders against the tyres are reported, not judged: store-versus-airframe collider overlap is Unity's check
 (A14). Everything is in the aircraft root frame (Unity: +x right, +y up, +z forward).
@@ -47,6 +50,7 @@ GAP = 0.05  # Stores rule 12
 STEP = 0.01  # largest gear vertex move between two poses of a sweep
 REACH = 0.5  # gaps beyond this are reported as "> REACH"
 TIP_INSET, TIP_CHORD, TIP_TOLERANCE = 0.005, 0.545, 0.001  # Stores rule 5
+EJECT_CLEAR = 1.0  # Stores rule 18
 LEG = re.compile(r"^gear_(leg|unsprung|arm)_[NLR](_visible)?$")
 TYRE = re.compile(r"^gear_wheel_[NLR]_visible$")
 DOOR = re.compile(r"^gear_door_\w+_visible$")
@@ -214,6 +218,37 @@ def main():
                 print(f"{hp_name} | {key} | {'-' if angle is None else f'{angle:.2f}'} | {clearance:.3f} | {cells} "
                       f"({worst[1] or 'all beyond reach'}) | {coll}")
 
+    # A rail-launched missile rides its rail with the aircraft, so where its motor lights is fixed in the root frame at
+    # any airspeed. It drops past the stowed gear, so its path is held to Stores rule 12's gap from the gear as well.
+    print("\n## Eject (Stores rule 18: the motor lights where the rail ends)")
+    print("hardpoint | mount | rail m | at ignition, least gap m to the airframe (where) / to the intake ducts | "
+          "on the rail, least gap m to the stowed gear (where)")
+    flight = {}
+    for leg in legs:
+        flight.update(leg_pose(leg, 0.0, 1.0, 0.0))
+    flown = [(name, plane.posed(t, flight)) for t, (name, _, _) in plane.meshes.items()]
+    rule18 = []
+    for s, (set_name, hardpoints) in enumerate(plane.sets):
+        if set_name != "Conformal":
+            continue
+        for hp_name, hp in hardpoints:
+            pos, rot, _ = plane.world(hp)
+            for key in plane.mounts[s]:
+                for (verts, tris), direction, length in plane.ejected(key, stock_mesh):
+                    body, along = pos + verts @ rot.T, rot @ direction
+                    lit = (body + along * length, tris)
+                    reach = EJECT_CLEAR + REACH
+                    gap, where = min((mesh_distance(lit, mesh, reach), name) for name, mesh in flown)
+                    ducts = min(mesh_distance(lit, mesh, reach) for name, mesh in flown if name.startswith("intake_duct"))
+                    n = max(1, math.ceil(length / STEP))
+                    path = min(((mesh_distance((body + along * (length * i / n), tris), mesh, REACH), f"{name} at {length * i / n:.2f} m")
+                                for i in range(n + 1) for name, mesh in flown if LEG.match(name) or TYRE.match(name) or DOOR.match(name)),
+                               default=(REACH, None))
+                    rule18.append((gap, ducts, path[0], hp_name, key, where))
+                    show = lambda g, r: "> %.2f" % r if g >= r else "%.3f" % g
+                    print(f"{hp_name} | {key} | {length:.2f} | {show(gap, reach)} ({where}) / {show(ducts, reach)} | "
+                          f"{show(path[0], REACH)} ({path[1] or 'all beyond reach'})")
+
     print("\n## Wingtip stations (Stores rule 5)")
     rule5 = []
     for set_name, hardpoints in plane.sets:
@@ -255,6 +290,16 @@ def main():
     failed |= not ok
     print(f"Stores rule 13 {'PASS' if ok else 'FAIL'}: first store to the ground {key} on {hp} at {angle:.2f} deg, "
           f"airframe tail strike {tail:.2f} deg")
+    if rule18:
+        gap, ducts, path, hp, key, where = min(rule18)
+        ok = all(g >= EJECT_CLEAR and d >= EJECT_CLEAR and p >= GAP for g, d, p, _, _, _ in rule18)
+        failed |= not ok
+        print(f"Stores rule 18 {'PASS' if ok else 'FAIL'}: least gap at ignition {gap:.3f} m (need {EJECT_CLEAR}), {key} on {hp} "
+              f"to {where}; intake ducts {min(r[1] for r in rule18):.3f} m; stowed gear on the rail {min(r[2] for r in rule18):.3f} m "
+              f"(need {GAP})")
+    else:
+        failed = True
+        print("Stores rule 18 FAIL: no missile on a Conformal mount in the bundle")
     if rule5:
         miss, outboard, ahead, hp = max(rule5)
         ok = all(m <= TIP_TOLERANCE and o <= 0.1 and h <= 0.1 for m, o, h, _ in rule5)

@@ -29,6 +29,11 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<NozzleDriver>();
         }
 
+        if (!__instance.TryGetComponent<EjectLog>(out _))
+        {
+            __instance.gameObject.AddComponent<EjectLog>();
+        }
+
         IcarusPlugin.Log.Stage("spawn", $"Icarus {__instance.persistentID} seen, local sim {localSim}");
         Tuning.Track(__instance);
     }

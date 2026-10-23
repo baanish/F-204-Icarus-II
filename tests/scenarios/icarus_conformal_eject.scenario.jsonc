@@ -1,0 +1,53 @@
+// Conformal eject: the Icarus flies level at 10,000 m with an AAM-29 on its conformal station (hardpoint set 2, the
+// baanish_icarus_AAM2_conformal mount, in icarus_conformal_eject.mission.json's savedLoadout), locks a stationary Boscali
+// COIN 12 km ahead and fires from that station. The mount's rail pushes the missile 1.5 m straight down before the game
+// spawns it and its motor lights, which puts its axis near (+-0.55, -2.11, +1.24) m from the aircraft in the root frame
+// (+x right, +y up, +z forward), against -0.61 m hung in the trough. The plugin's "eject <id>" stage line (src/Icarus/EjectLog.cs),
+// a second after the spawn, gives where it spawned, where its motor lit and its path at quarter seconds.
+// Pass: the motor lights within 0.1 s of the spawn at least 1.8 m below the aircraft's root, still under its station,
+// keeps below that height for its first second, the Icarus is undamaged for 8 s, and the missile hits T1.
+// From the repo root: no-agentic run tests/scenarios/icarus_conformal_eject.scenario.jsonc
+{
+  "mission": "icarus_conformal_eject.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.alt_msl_m", "near": 10000, "tol": 200 }, "timeout": 30, "hold": 2, "label": "level at 10,000 m" },
+    { "spawn": { "kind": "aircraft", "type": "COIN", "faction": "Boscali", "back_m": -12000, "speed_mps": 0, "name": "T1" } },   // a stationary target 12 km ahead
+    { "wait": { "path": "contacts.T1.live", "eq": true }, "timeout": 20, "label": "the player's HQ tracks T1" },
+    { "act": { "station": 0 } },
+    { "act": { "target": "T1" } },
+    { "check": { "all": [ { "path": "own.station.name", "eq": "AAM-29 Scythe" }, { "path": "own.target", "eq": "T1" } ] },
+      "label": "the conformal AAM-29 station is selected and T1 is the target" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 25, "hdg_deg": 300, "pitch_deg": -10 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles on the orbit" },
+    { "mark": { "label": "fire" } },
+    { "act": { "fire": 0.2 } },
+    { "check": { "event": "own_launch", "type": "AAM2", "target": "T1" }, "within": 2, "label": "the Icarus launched an AAM-29 from the conformal station at T1" },
+    { "screenshot": { "name": "conformal_eject" } },
+    { "camera": { "mode": "game" } },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 spawned at .*; motor lit ([\\d.]+) s after spawn", "source": "F-204 Icarus II", "since": "fire", "between": [0, 0.1] } },
+      "within": 3, "label": "the AAM-29's motor lights within 0.1 s of its spawn at the rail's end" },
+    { "record": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 spawned at \\([+-]([\\d.]+), ", "source": "F-204 Icarus II", "since": "fire" } }, "label": "spawn: metres out from the centreline" },
+    { "record": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 spawned at \\([+-][\\d.]+, (-?[\\d.]+), ", "source": "F-204 Icarus II", "since": "fire" } }, "label": "spawn: metres up from the root (negative is below)" },
+    { "record": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 spawned at \\([+-][\\d.]+, [+-][\\d.]+, ([+-][\\d.]+)\\)", "source": "F-204 Icarus II", "since": "fire" } }, "label": "spawn: metres forward of the root" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 .*; motor lit [\\d.]+ s after spawn at \\([+-][\\d.]+, (-?[\\d.]+), ", "source": "F-204 Icarus II", "since": "fire", "lt": -1.8 } },
+      "label": "the motor lights at least 1.8 m below the root, 1.2 m under the trough's missile axis" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 .*; motor lit [\\d.]+ s after spawn at \\([+-]([\\d.]+), ", "source": "F-204 Icarus II", "since": "fire", "between": [0.4, 0.8] } },
+      "label": "the motor lights under its station, 0.4 to 0.8 m out from the centreline" },
+    { "record": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 .*; motor lit [\\d.]+ s after spawn at \\([+-][\\d.]+, [+-][\\d.]+, ([+-][\\d.]+)\\)", "source": "F-204 Icarus II", "since": "fire" } }, "label": "ignition: metres forward of the root" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 .*; path .*, 1\\.\\d\\d s \\([+-][\\d.]+, (-?[\\d.]+), ", "source": "F-204 Icarus II", "since": "fire", "lt": -1.8 } },
+      "label": "a second after its spawn the AAM-29 is still at least 1.8 m below the root" },
+    { "record": { "log_value": { "match": "^\\[Icarus\\] eject \\d+: AAM2 .*; path .*, 1\\.\\d\\d s \\([+-][\\d.]+, [+-][\\d.]+, ([+-][\\d.]+)\\)", "source": "F-204 Icarus II", "since": "fire" } }, "label": "after 1 s: metres forward of the root" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "not": { "event": "damage", "since": "fire" } } ] }, "for": 8,
+      "label": "the Icarus takes no damage for 8 s after the launch" },
+    { "check": { "event": "missile_end", "type": "AAM2", "result": "hit", "since": "fire" }, "within": 60, "label": "the AAM-29 hits T1" },
+  ],
+}

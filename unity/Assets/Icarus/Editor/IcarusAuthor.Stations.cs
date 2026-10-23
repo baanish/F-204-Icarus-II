@@ -42,6 +42,12 @@ namespace Icarus.Editor
         // and missileBay 0, so it flies as an exposed store) under a new jsonKey, with the stock launch rail swapped for
         // a low shoe, the missile hung at the trough's depth and pitch, and its capsule fitted to the body so it clears
         // the trough. The AAM-29's rail box collider goes with its rail. Rebuilt in place on every run, GUIDs kept.
+        // Each missile ejects as the stock bay mounts' do: MountedMissile.RailLaunch slides it EjectLength straight down
+        // with the aircraft at EjectSpeed, then spawns the round there with that speed added, and its motor lights at
+        // once, so the length is what puts the burn clear of the belly (tools/store_clearance.py, Stores rule 18). No
+        // delay: the trough has no doors to wait for. Straight down, not outboard: one mount serves both sides, and the
+        // rail runs along one of the missile's own axes.
+        private const float EjectLength = 1.5f, EjectSpeed = 6f;
         private static Dictionary<string, Object> AuthorConformalMounts()
         {
             BlueprinterAssets.EnsureFolder(MountFolder);
@@ -77,6 +83,12 @@ namespace Icarus.Editor
                     missile.localScale = Vector3.one;
                     var capsule = missile.GetComponent<CapsuleCollider>() ?? throw new InvalidDataException(entry.Key + "'s missile has no capsule");
                     capsule.radius = Convert.ToSingle(m["capsule_radius"]);
+                    var launcher = new SerializedObject(missile.GetComponent(GameType("MountedMissile")) ?? throw new InvalidDataException(entry.Key + "'s missile has no MountedMissile"));
+                    Prop(launcher, "railDirection").intValue = 1; // RailDirection.Down: the missile's own -y
+                    Prop(launcher, "railLength").floatValue = EjectLength;
+                    Prop(launcher, "railSpeed").floatValue = EjectSpeed;
+                    Prop(launcher, "railDelay").floatValue = 0f;
+                    launcher.ApplyModifiedPropertiesWithoutUndo();
                     PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
                 }
                 finally
