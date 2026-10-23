@@ -366,15 +366,18 @@ def wing_lower(w, s, x):
 
 
 def fixed_box(p, x):
-    """Chord fractions (front, back) of the fixed wing box at spanwise x, the same limits build_icarus.box_stations
-    leaves between the leading-edge devices and trailing-edge surfaces."""
-    gap, cove, front, back = p["surface_gap"], p.get("surface_cove", 0.0), 0.0, 1.0
-    for _, a, b, c0, c1 in p["wing_surfaces"]:
-        if a - gap / 2 - cove <= x <= b + gap / 2 + cove:
-            if c0 == 0.0:
-                front = max(front, c1 + gap / 2)
+    """Chord fractions (front, back) of the fixed wing box at spanwise x: the lips of the coves build_icarus.box
+    leaves round the leading-edge devices and trailing-edge surfaces."""
+    w, front, back = p["wing"], 0.0, 1.0
+    sections = bi.wing_sections(w)
+    for cut in p["wing_surfaces"]:
+        h = bi.hinge_line(sections, cut, "x")
+        if h["reach"][0] <= x <= h["reach"][1]:
+            lips = bi.cove_lips(sections, h, x, w["thickness"], "x", p["surface_cove_gap"])
+            if h["aft"]:
+                back = min(back, *lips)
             else:
-                back = min(back, c0 - gap / 2)
+                front = max(front, *lips)
     return front, back
 
 

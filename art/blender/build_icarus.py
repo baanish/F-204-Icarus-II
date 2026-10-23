@@ -104,19 +104,21 @@ PARAMS = {
                      (13.30, 0.0, 1.60, 2.35), (14.68, 0.0, 2.88, 1.00)],
         "thickness": 0.05,
     },
-    # Control surfaces cut from the wing and fin: (name, span from, span to, chord fraction from, to). Span is x on
-    # the wing, z on the fin; chord fractions are of the local full chord. Each becomes a hinge empty with the
-    # surface as its _visible child.
+    # Control surfaces cut from the wing and fin: (name, span from, span to, chord fraction from, to, end gaps). Span
+    # is x on the wing, z on the fin; chord fractions are of the local full chord, and the one inside the chord is the
+    # hinge line's (a leading-edge device hinges on its aft edge, the rest on their front edge). The end gaps are the
+    # metres between each end of the surface and the box: the ends are streamwise, and a surface turning on a hinge
+    # swept and drooped out of the span plane swings them spanwise, so each gap is the least that clears its travel
+    # (parts.surface_sweep). Each becomes a hinge empty with the surface as its _visible child.
     "wing_surfaces": [
-        ("lef_L", 1.95, 3.28, 0.00, 0.16),  # automatic leading-edge flap, outboard of the crank
-        ("flap_L", 1.08, 2.02, 0.78, 1.00),
-        ("aileron_L", 2.08, 3.28, 0.74, 1.00),
+        ("lef_L", 1.956, 3.274, 0.00, 0.154, (0.006, 0.006)),  # automatic leading-edge flap, outboard of the crank
+        ("flap_L", 1.086, 2.014, 0.786, 1.00, (0.018, 0.008)),
+        ("aileron_L", 2.086, 3.274, 0.746, 1.00, (0.010, 0.006)),
     ],
-    "fin_surfaces": [("rudder", 1.15, 2.55, 0.68, 1.00)],
-    "surface_gap": 0.012,  # metres between a surface and the box spanwise; a fraction of the local chord chordwise
-    # Metres the box's cut-out runs on past each end of its surface: a surface turning on a swept hinge in the
-    # drooped wing plane swings its end inboard, through the 6 mm spanwise gap.
-    "surface_cove": 0.02,
+    "fin_surfaces": [("rudder", 1.156, 2.544, 0.686, 1.00, (0.012, 0.008))],
+    # A surface's hinged edge is a round nose about its hinge line, nested in a cove of the same shape in the box,
+    # surface_cove_gap metres larger, so it turns through its travel with no slot opening and only skin in view.
+    "surface_cove_gap": 0.003,
     # Authored travel in degrees from the built pose, the one source IcarusAuthor.Aero.cs reads (blockout.json,
     # each hinge's deflection_deg): ailerons, rudder and stabilators both ways; flaps and leading-edge flaps droop;
     # the speed brakes open outward.
@@ -539,15 +541,13 @@ def span_stations(sections, axis, u0, u1, breaks=()):
     return out
 
 
-def strip(name, sections, stations, thickness, axis, mats=None, trim_caps=False, count=None, clamp=False):
+def strip(name, sections, stations, thickness, axis, count=None, clamp=False):
     """A closed piece of a lifting surface. stations: (u, f0, f1) along the span; each ring spans chord fractions
     f0..f1 of the full-chord airfoil, so neighbouring pieces share one airfoil, with count points a side (by default
     in proportion to the widest span of chord). Two stations at the same u with different fractions make the wall at
-    a cutout's end. mats = (skin, trim) finishes the piece: the walls a cut leaves (inside the chord, and at a
-    cutout's ends) go on the trim, and the end caps too with trim_caps, so the cove a moving surface opens shows trim,
-    not skin. With clamp, every ring samples the full chord and every station's ends, and pulls the points outside its
-    own f0..f1 onto those ends, so a ring cut short shares its points with the full rings beside it and one piece
-    runs on through the cut."""
+    a cutout's end. With clamp, every ring samples the full chord and every station's ends, and pulls the points
+    outside its own f0..f1 onto those ends, so a ring cut short shares its points with the full rings beside it and
+    one piece runs on through the cut."""
     count = count or max(6, round(CHORD * max(f1 - f0 for _, f0, f1 in stations)))
     full = [0.5 * (1 - math.cos(math.pi * i / (count - 1))) for i in range(count)]
     if clamp:
@@ -564,25 +564,12 @@ def strip(name, sections, stations, thickness, axis, mats=None, trim_caps=False,
             upper.append(base + d)
             lower.append(base - d)
         rings.append(upper + lower[::-1])
-    n = len(rings[0])
-    verts = [v for r in rings for v in r]
-    faces, walls = [], []
-    for j, ((u, f0, f1), (u_next, _, _)) in enumerate(zip(stations, stations[1:])):
-        for k in range(n):
-            faces.append((j * n + k, j * n + (k + 1) % n, (j + 1) * n + (k + 1) % n, (j + 1) * n + k))
-            # quad count - 1 is the wall across chord fraction f1, quad n - 1 the wall across f0
-            walls.append(u == u_next or (k == count - 1 and f1 < 1.0) or (k == n - 1 and f0 > 0.0))
-    faces.append(tuple(range(n))[::-1])
-    faces.append(tuple((len(rings) - 1) * n + k for k in range(n)))
-    walls += [trim_caps, trim_caps]
-    obj = mesh_object(name, verts, faces)
-    if mats is not None:
-        finish(obj, mats[0])
-        obj.data.materials.append(mats[1])
-        for poly, wall in zip(obj.data.polygons, walls):
-            poly.material_index = 1 if wall else 0
-    # Two rings at one u share the chord end their fractions have in common: weld those points, so the wall carries
-    # no zero-area faces (the importer drops them and the slot's triangles no longer match the export).
+    return welded(loft(name, rings, cap_back=True, cap_front=True))
+
+
+def welded(obj):
+    """Weld the points two rings at one u share, so the wall between them carries no zero-area faces (the importer
+    drops them and the slot's triangles no longer match the export)."""
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
@@ -591,30 +578,155 @@ def strip(name, sections, stations, thickness, axis, mats=None, trim_caps=False,
     return obj
 
 
-def box_stations(sections, axis, cuts, gap, cove):
-    """Stations for the fixed box of a surface: full chord except where a control surface is cut out, the cut-out
-    running cove past the surface's ends."""
+# --- control surfaces ----------------------------------------------------------------------------------------------
+# A control surface's hinged edge is a round nose about its hinge line, and the box it is cut from ends in a cove of
+# the same shape surface_cove_gap larger, both swept along the span: as the surface turns, its nose stays the same
+# distance inside the cove, so the gap is the same at every deflection and the skin covers it, as on a real wing.
+# Every ring lies in a span plane (x on the wing, z on the fin), the nose and cove points on circles about the hinge
+# line square to it, so the surfaces' ends and the box's cut-out ends are span planes too.
+
+SURFACE_ARC = 7  # points round a surface's nose between its two skins
+BOX_SKIN = 13  # points along each face of the box between its leading and trailing closures
+BOX_CLOSURE = 10  # points round the box's leading or trailing closure: a cove, or the airfoil round its edge
+
+
+def skin_point(sections, u, t, side, thickness, axis):
+    """The airfoil's upper (side 1) or lower (side -1) skin at chord fraction t and span u."""
+    s_le, x, z, chord = section_at(sections, u, axis)
+    half = side * max(airfoil(t) * thickness * chord, 0.0015)
+    return P(s_le + t * chord, x, z) + (Vector((0.0, 0.0, half)) if axis == "x" else Vector((half, 0.0, 0.0)))
+
+
+def hinge_line(sections, cut, axis):
+    """A cut's hinge line: its ends on the chord line at the hinge fraction and the surface's ends, and the hinge
+    frame (X along it, Y as close to aft as it allows). aft: the surface lies aft of its hinge; reach: the span the
+    box's cove runs, the surface's and its end gaps."""
+    _, u0, u1, f0, f1, (gap0, gap1) = cut
+    f = f1 if f0 == 0.0 else f0
+    a, b = [P(s_le + f * chord, x, z) for s_le, x, z, chord in (section_at(sections, u, axis) for u in (u0, u1))]
+    frame = hinge_frame(a, b)
+    return {"a": a, "b": b, "aft": f0 > 0.0, "key": 0 if axis == "x" else 2, "reach": (u0 - gap0, u1 + gap1),
+            "X": frame.col[0].xyz, "Y": frame.col[1].xyz, "Z": frame.col[2].xyz}
+
+
+def hinge_at(h, u):
+    """The point of the hinge line at span u."""
+    k = h["key"]
+    return h["a"] + (h["b"] - h["a"]) * ((u - h["a"][k]) / (h["b"][k] - h["a"][k]))
+
+
+def hinge_fraction(sections, h, u, axis):
+    s_le, _, _, chord = section_at(sections, u, axis)
+    return (hinge_at(h, u).y + S0 - s_le) / chord
+
+
+def polar(h, p, u):
+    """Distance of p from the hinge line and its angle about it (from Y towards Z)."""
+    d = p - hinge_at(h, u)
+    return math.hypot(d.dot(h["Y"]), d.dot(h["Z"])), math.atan2(d.dot(h["Z"]), d.dot(h["Y"]))
+
+
+def arc(h, u, start, end, through, count):
+    """count points strictly between the points start and end, round the hinge line the way that passes the angle
+    through, the radius blending from one end's to the other's, each slid along the hinge line into span plane u."""
+    (r0, a0), (r1, a1) = polar(h, start, u), polar(h, end, u)
+    sweep = (a1 - a0) % (2 * math.pi)
+    if (through - a0) % (2 * math.pi) > sweep:
+        sweep -= 2 * math.pi
+    out = []
+    for i in range(1, count + 1):
+        r, a = r0 + (r1 - r0) * i / (count + 1), a0 + sweep * i / (count + 1)
+        d = (h["Y"] * math.cos(a) + h["Z"] * math.sin(a)) * r
+        out.append(hinge_at(h, u) + d - h["X"] * (d[h["key"]] / h["X"][h["key"]]))
+    return out
+
+
+def nose_radius(sections, h, u, thickness, axis):
+    """The surface's nose radius at span u: as far from the hinge line as its skins at the hinge."""
+    t = hinge_fraction(sections, h, u, axis)
+    return max(polar(h, skin_point(sections, u, t, side, thickness, axis), u)[0] for side in (1, -1))
+
+
+def cove_lips(sections, h, u, thickness, axis, gap):
+    """Chord fractions (upper, lower) where the box's skins meet its cove round the hinge at span u."""
+    radius = nose_radius(sections, h, u, thickness, axis) + gap
+    t_hinge = hinge_fraction(sections, h, u, axis)
+    lips = []
+    for side in (1, -1):
+        near, far = t_hinge, max(0.0, t_hinge - 0.5) if h["aft"] else min(1.0, t_hinge + 0.5)
+        for _ in range(48):
+            mid = (near + far) / 2
+            if polar(h, skin_point(sections, u, mid, side, thickness, axis), u)[0] > radius:
+                far = mid
+            else:
+                near = mid
+        lips.append(far)
+    return tuple(lips)
+
+
+def box_span(sections, axis, hinges):
+    """Span stations of a fixed box: its sections, and the ends of its cut-outs."""
     key = 1 if axis == "x" else 2
     u0, u1 = sections[0][key], sections[-1][key]
-    reach = gap / 2 + cove
-    edges = {c for _, a, b, _, _ in cuts for c in (a - reach, b + reach) if u0 < c < u1}
+    return span_stations(sections, axis, u0, u1, [u for h in hinges.values() for u in h["reach"] if u0 < u < u1])
 
-    def chord_range(u):
-        f0, f1 = 0.0, 1.0
-        for _, a, b, c0, c1 in cuts:
-            if a - reach <= u <= b + reach:
-                if c0 == 0.0:
-                    f0 = max(f0, c1 + gap / 2)
-                else:
-                    f1 = min(f1, c0 - gap / 2)
-        return f0, f1
 
-    stations = []
-    for u in span_stations(sections, axis, u0, u1, edges):
-        # at a cut edge the box steps from the chord range on one side to the other's: two rings at one u
-        for f in dict.fromkeys([chord_range(u - 1e-6), chord_range(u + 1e-6)]):
-            stations.append((u,) + f)
-    return stations
+def box(name, sections, thickness, axis, hinges, cove_gap):
+    """The fixed box of a lifting surface, with a cove round each control surface's hinge over the cut-out's reach.
+    Each ring runs: upper skin, trailing closure, lower skin, leading closure. A closure is the cove where a surface
+    is cut out, and the airfoil round its edge elsewhere; the skins end at the cove's lips, and between cut-outs at
+    fractions blended from the lips either side, so at a cut-out's end two rings at one u share their skins and the
+    closures between them make its end wall."""
+
+    def open_cut(u, aft, inclusive):
+        for name_, h in hinges.items():
+            a, b = h["reach"]
+            if h["aft"] == aft and (a <= u <= b if inclusive else a < u < b):
+                return name_
+        return None
+
+    stations = box_span(sections, axis, hinges)
+    splits = {}
+    for aft, default in ((True, 0.85), (False, 0.15)):
+        known = {}
+        for u in stations:
+            name_ = open_cut(u, aft, True)
+            if name_:
+                known[u] = cove_lips(sections, hinges[name_], u, thickness, axis, cove_gap)
+        for u in stations:
+            below = [v for v in known if v <= u]
+            above = [v for v in known if v >= u]
+            if not known:
+                splits[u, aft] = (default, default)
+            elif not below or not above:
+                splits[u, aft] = known[max(below) if below else min(above)]
+            else:
+                a, b = max(below), min(above)
+                w = 0.0 if a == b else (u - a) / (b - a)
+                splits[u, aft] = tuple(x + (y - x) * w for x, y in zip(known[a], known[b]))
+
+    half = BOX_CLOSURE // 2
+    rings = []
+    for u in stations:
+        # at a cut-out's end, the ring outside it then the one inside, or the other way round
+        for aft_cut, fore_cut in dict.fromkeys([(open_cut(v, True, False), open_cut(v, False, False))
+                                                for v in (u - 1e-6, u + 1e-6)]):
+            (fu, fl), (au, al) = splits[u, False], splits[u, True]
+            skin = lambda t, side: skin_point(sections, u, t, side, thickness, axis)
+            upper = [skin(fu + (au - fu) * i / (BOX_SKIN - 1), 1) for i in range(BOX_SKIN)]
+            lower = [skin(fl + (al - fl) * i / (BOX_SKIN - 1), -1) for i in range(BOX_SKIN)][::-1]
+            if aft_cut:
+                trailing = arc(hinges[aft_cut], u, upper[-1], lower[0], math.pi, BOX_CLOSURE)
+            else:
+                trailing = ([skin(au + (1 - au) * i / half, 1) for i in range(1, half + 1)]
+                            + [skin(1 - (1 - al) * i / half, -1) for i in range(half)])
+            if fore_cut:
+                leading = arc(hinges[fore_cut], u, lower[-1], upper[0], 0.0, BOX_CLOSURE)
+            else:
+                leading = ([skin(fl * (1 - i / half), -1) for i in range(1, half + 1)]
+                           + [skin(fu * i / half, 1) for i in range(half)])
+            rings.append(upper + trailing + lower + leading)
+    return welded(loft(name, rings, cap_back=True, cap_front=True))
 
 
 def hinge_frame(a, b):
@@ -645,20 +757,37 @@ def surface_travel(p, name):
     return p["surface_travel"][name[:-2] if name.endswith(("_L", "_R")) else name]
 
 
-def control_surface(p, name, sections, cut, thickness, axis, gap, mats):
-    _, u0, u1, f0, f1 = cut
-    u0, u1 = u0 + gap / 2, u1 - gap / 2
-    f0 = f0 + gap / 2 if f0 > 0 else f0
-    f1 = f1 - gap / 2 if f1 < 1 else f1
-    stations = [(u, f0, f1) for u in span_stations(sections, axis, u0, u1)]
-    obj = strip(name, sections, stations, thickness, axis, (mats["body"], mats["mechanical"]), trim_caps=True)
-    hinge_f = f1 if f0 == 0.0 else f0  # a leading-edge device hinges on its aft edge, the rest on their front edge
-    ends = []
-    for u in (u0, u1):
-        s_le, x, z, chord = section_at(sections, u, axis)
-        ends.append(P(s_le + hinge_f * chord, x, z))
-    parts = hinged(name, obj, hinge_frame(*ends))
+def control_surface(p, cut, sections, h, thickness, axis, box_stations, mat):
+    """A hinged surface from its hinge line to its trailing edge (or, for a leading-edge device, from its leading edge
+    to its hinge line), its hinged edge a round nose. Its rings stand at its ends and at the box's stations between,
+    so nose and cove are drawn alike."""
+    name, u0, u1, f0, f1, _ = cut
+    count = max(6, round(CHORD * (f1 - f0)))
+    rings = []
+    for u in [u0] + [v for v in box_stations if u0 < v < u1] + [u1]:
+        t = hinge_fraction(sections, h, u, axis)
+        skin = lambda f, side: skin_point(sections, u, f, side, thickness, axis)
+        if h["aft"]:
+            upper = [skin(t + (1 - t) * i / (count - 1), 1) for i in range(count)]
+            lower = [skin(1 - (1 - t) * i / (count - 1), -1) for i in range(count)]
+            rings.append(upper + lower + arc(h, u, lower[-1], upper[0], math.pi, SURFACE_ARC))
+        else:
+            upper = [skin(t * i / (count - 1), 1) for i in range(count)]
+            lower = [skin(t * (1 - i / (count - 1)), -1) for i in range(count)]
+            rings.append(upper + arc(h, u, upper[-1], lower[0], 0.0, SURFACE_ARC) + lower)
+    obj = finish(loft(name, rings, cap_back=True, cap_front=True), mat)
+    parts = hinged(name, obj, hinge_frame(h["a"], h["b"]))
     parts[0]["deflection_deg"] = surface_travel(p, name)
+    return parts
+
+
+def build_box(p, name, sections, thickness, axis, cuts, mats):
+    """A fixed box and the control surfaces cut from it."""
+    hinges = {cut[0]: hinge_line(sections, cut, axis) for cut in cuts}
+    parts = [finish(box(name, sections, thickness, axis, hinges, p["surface_cove_gap"]), mats["body"])]
+    stations = box_span(sections, axis, hinges)
+    for cut in cuts:
+        parts += control_surface(p, cut, sections, hinges[cut[0]], thickness, axis, stations, mats["body"])
     return parts
 
 
@@ -694,20 +823,9 @@ def mirror_part(parts):
 
 
 def build_surfaces(p, mats):
-    gap = p["surface_gap"]
-    wing = wing_sections(p["wing"])
-    cuts = p["wing_surfaces"]
-    t = p["wing"]["thickness"]
-    trimmed = (mats["body"], mats["mechanical"])
-    cove = p["surface_cove"]
-    left = [strip("wing_L", wing, box_stations(wing, "x", cuts, gap, cove), t, "x", trimmed)]
-    for cut in cuts:
-        left += control_surface(p, cut[0], wing, cut, t, "x", gap, mats)
+    left = build_box(p, "wing_L", wing_sections(p["wing"]), p["wing"]["thickness"], "x", p["wing_surfaces"], mats)
     parts = left + mirror_part(left)
-    fin, ft = p["fin"]["sections"], p["fin"]["thickness"]
-    parts.append(strip("fin", fin, box_stations(fin, "z", p["fin_surfaces"], gap, cove), ft, "z", trimmed))
-    for cut in p["fin_surfaces"]:
-        parts += control_surface(p, cut[0], fin, cut, ft, "z", gap, mats)
+    parts += build_box(p, "fin", p["fin"]["sections"], p["fin"]["thickness"], "z", p["fin_surfaces"], mats)
     parts.append(build_fin_fairing(p, mats["body"]))
     vf = p["ventral_fin"]
     parts.append(finish(lifting_surface("ventral_fin", vf["sections"], vf["thickness"], "x"), mats["body"]))
@@ -725,8 +843,7 @@ def build_stabilator(p, mats):
     for u in span_stations(sections, "x", -sections[-1][1], sections[-1][1]):
         for f0 in dict.fromkeys([notch if abs(v) < root_x else 0.0 for v in (u - 1e-6, u + 1e-6)]):
             stations.append((u, f0, 1.0))
-    obj = strip("stabilator", sections, stations, st["thickness"], "x", (mats["body"], mats["mechanical"]),
-                clamp=True)
+    obj = finish(strip("stabilator", sections, stations, st["thickness"], "x", clamp=True), mats["body"])
     parts = hinged("stabilator", obj, Matrix.Translation(P(p["stabilator_pivot_s"], 0.0, z)))
     parts[0]["deflection_deg"] = surface_travel(p, "stabilator")
     return parts
