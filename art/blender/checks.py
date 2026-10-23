@@ -125,23 +125,43 @@ def compartment_clearance(objects, skin, inset):
         print("compartment clearance: %s %.6f m >= %.6f m: PASS" % (obj.name, distance, inset), flush=True)
 
 
+def intake_and_tailpipe():
+    """What a view into an intake or the tailpipe crosses: the fuselage's band of faces at the intake lip, the
+    mouths and the skin round them, and the disc closing its open tail end."""
+    import build_icarus as bi
+
+    p = bi.PARAMS
+    stations = bi.fuselage_stations(p)
+    lip = stations.index(p["intake"][0][0])
+    ahead, mouth, tail = (bi.blended_ring(p, stations[j]) for j in (lip - 1, lip, -1))
+    n = len(ahead)
+    faces = [(k, (k + 1) % n, n + (k + 1) % n, n + k) for k in range(n)]
+    faces.append(tuple(range(2 * n, 2 * n + len(tail))))
+    return BVHTree.FromPolygons(ahead + mouth + tail, faces)
+
+
 def interior_visibility(icarus, allow_openings=True):
     """Sample enclosed damage parts at 25 mm spacing from 14 outside directions.
 
-    The intake mouths, gear door patches, speed brake wells and exhaust are deliberate openings. Close those
-    exact patches for this fit check; allow_openings=False also reports views through them for an art review.
-    Well hinge fittings are exterior hardware even after joining a structure core. Cockpit-view meshes cannot
-    hide a failed fit.
+    The gear door patches and speed brake wells are deliberate openings. Close those exact patches for this fit
+    check; allow_openings=False also reports views through them for an art review. The intake mouths and the
+    tailpipe stay open: their ducts and backplates must hide the structure as the game draws them. A view entering
+    either passes back faces, which the game culls, and trim faces reaching the stock texture's alpha-clipped
+    lightening holes (trims.clipped). Well hinge fittings are exterior hardware even after joining a structure core.
+    Cockpit-view meshes cannot hide a failed fit.
     """
+    import trims
+
     meshes = [o for o in icarus.all_objects if o.type == "MESH"]
     inside = [o for o in meshes if o.name in ("radar_tray", "avionics_tray", "cockpit_cell", "fin_spar")
               or o.name.startswith(("fuel_", "fuselage_", "wing_spar_"))]
     outside = [o for o in meshes if o not in inside and o.get("role") != "cockpit_view"]
-    verts, faces = [], []
+    verts, faces, clipped = [], [], []
     for obj in outside:
         offset = len(verts)
         verts.extend(obj.matrix_world @ v.co for v in obj.data.vertices)
         faces.extend(tuple(offset + i for i in f.vertices) for f in obj.data.polygons)
+        clipped.extend(bool(obj.data.materials) and trims.clipped(obj, f) for f in obj.data.polygons)
     exterior_vertices, exterior_faces = len(verts), len(faces)
     if allow_openings:
         import build_icarus as bi
@@ -170,13 +190,10 @@ def interior_visibility(icarus, allow_openings=True):
                                      [[vid(j, vk(k)) for k in range(k0, k1 + 1)] for j in (j0, j1)])
                     patches.append({vid(j, vk(k))
                                     for j in range(j0, j1 + 1) for k in range(k0, k1 + 1)})
-            lip = stations.index(p["intake"][0][0])
-            patches.append({vid(j, k) for j in (lip - 1, lip) for k in range(bi.RING)})
             offset = len(verts)
             verts.extend(v.co.copy() for v in reference.data.vertices)
             faces.extend(tuple(offset + i for i in f.vertices) for f in reference.data.polygons
                          if any(set(f.vertices) <= patch for patch in patches))
-            faces.append(tuple(offset + vid(len(rings) - 1, k) for k in range(bi.RING)))
             grid = speed_brakes.Patch(p)
             for side in (1, -1):
                 start = len(verts)
@@ -195,7 +212,19 @@ def interior_visibility(icarus, allow_openings=True):
                   ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1))
                   + tuple((x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1))]
     rays = [(direction, direction * 30, -direction) for direction in directions]
-    ray_cast = shell.ray_cast
+    portals = intake_and_tailpipe()
+
+    def drawn_cast(origin, direction, reach):
+        """The first face the game draws across the ray: turned toward it and not cut out."""
+        travelled = 0.0
+        while True:
+            hit, normal, index, distance = shell.ray_cast(origin, direction, reach - travelled)
+            if hit is None or any(n.dot(direction) < 0 and not clipped[i]  # with any face coincident there
+                                  for _, n, i, _ in [(hit, normal, index, 0)] + shell.find_nearest_range(hit, 1e-5)):
+                return hit, normal, index, None if hit is None else travelled + distance
+            travelled += distance + 1e-5
+            origin = hit + direction * 1e-5
+
     failures, total = [], 0
     for obj in inside:
         points = surface_samples(obj)
@@ -207,7 +236,8 @@ def interior_visibility(icarus, allow_openings=True):
             for direction, origin, inward in rays:
                 # Aim at the sample from well outside the entire aircraft. A shell hit at the sample itself
                 # gives no clearance and must fail too; checking intersections alone misses open skin gaps.
-                hit, _, _, distance = ray_cast(q + origin, inward, 30.0001)
+                into = portals.ray_cast(q + origin, inward, 29.9999)[0] is not None
+                hit, _, _, distance = (drawn_cast if into else shell.ray_cast)(q + origin, inward, 30.0001)
                 if hit is None or distance >= 29.9999:
                     tangent = direction.cross(Vector((0, 0, 1)))
                     tangent = tangent.normalized() if tangent.length > .1 else Vector((1, 0, 0))
@@ -215,7 +245,8 @@ def interior_visibility(icarus, allow_openings=True):
                     offsets = (Vector(), tangent * 1e-5, tangent * -1e-5, across * 1e-5, across * -1e-5)
                     # A ray down a shell seam, through a vertex seen end on, can slip between the faces that share
                     # it: the sample is covered if a ray a hair to one side meets the shell before it.
-                    beside = [ray_cast(q + origin + offset, inward, 30.0001) for offset in offsets[1:]]
+                    beside = [(drawn_cast if into else shell.ray_cast)(q + origin + offset, inward, 30.0001)
+                              for offset in offsets[1:]]
                     if any(h[0] is not None and h[3] < 29.9999 for h in beside):
                         continue
                     # A well rim may lie on an opening's edge; unlike an enclosed compartment it needs no gap

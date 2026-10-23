@@ -557,6 +557,20 @@ def _build(p, mats):
         parts.append(tag(bi.finish(wall, mats["frame"], smooth=False), "structure", "fuselage"))
     for obj in stringers(p):
         parts.append(tag(bi.finish(obj, mats["frame"], smooth=False), "structure", "fuselage"))
+    # A frame's web stands further in from the skin than the intake lobe clears its duct; cut the frames and
+    # stringers clear of the ducts, as the fuel cells are, or they show inside the intake mouths.
+    cutters = duct_cutter(p, I["duct_clearance"])
+    reach = [(Vector([min(v.co[i] for v in c.data.vertices) for i in range(3)]),
+              Vector([max(v.co[i] for v in c.data.vertices) for i in range(3)])) for c in cutters]
+    for obj in [o for o in parts if o.name.startswith(("frame_", "stringer_"))]:
+        co = [v.co for v in obj.data.vertices]
+        lo = Vector([min(v[i] for v in co) for i in range(3)])
+        hi = Vector([max(v[i] for v in co) for i in range(3)])
+        crossing = [c for c, (a, b) in zip(cutters, reach) if all(lo[i] < b[i] and hi[i] > a[i] for i in range(3))]
+        if crossing:
+            subtract(obj, crossing)
+    for c in cutters:
+        bpy.data.objects.remove(c, do_unlink=True)
     return parts
 
 

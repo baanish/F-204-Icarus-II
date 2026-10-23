@@ -67,11 +67,22 @@ namespace Icarus.Editor
                 throw new InvalidDataException($"A2: nozzle_vector has {petals} petals and seals, expected 32 hinges for NozzleDriver");
             if (petalLength <= 0)
                 throw new InvalidDataException("A2: nozzle petals have no axial length for flame and glow scaling");
+            // The actuation (art/blender/propulsion.py ACTUATION): the sync ring and the rams' cylinders ride the nozzle part,
+            // the links and the rams' rods the ring. NozzleDriver slides and tilts the ring with the petals and turns each
+            // piece about its eye toward the other's.
+            var sync = MeshVisual(b, "nozzle_sync_ring", nozzlePart);
+            nozzleRenderers.Add(sync);
+            foreach (var piece in b.Blockout.Parts.Values.Where(p => p.Name.StartsWith("nozzle_link_") || p.Name.StartsWith("nozzle_ram_"))
+                         .OrderBy(p => p.Name, System.StringComparer.Ordinal))
+                nozzleRenderers.Add(MeshVisual(b, piece.Name, piece.BlenderParent == "nozzle_sync_ring" ? sync.transform : nozzlePart));
+            var rams = b.Blockout.Parts.Keys.Count(n => n.StartsWith("nozzle_ram_") && n.EndsWith("_rod"));
+            if (rams == 0 || sync.transform.childCount != 16 + rams || nozzleRenderers.Count != 34 + 16 + 2 * rams)
+                throw new InvalidDataException($"A2: nozzle actuation has {sync.transform.childCount} links and rods on its ring and {nozzleRenderers.Count - 34} pieces in all, expected 16 links and {rams} rams");
             var nozzleDamage = new SerializedObject(b.Part("nozzle"));
             SetList(Prop(nozzleDamage, "damageMaterial").FindPropertyRelative("renderers"), nozzleRenderers);
             nozzleDamage.ApplyModifiedPropertiesWithoutUndo();
-            if (GetList(Prop(new SerializedObject(b.Part("nozzle")), "damageMaterial").FindPropertyRelative("renderers")).Length != 33)
-                throw new InvalidDataException("A2: nozzle damage must cover the shroud and all 32 petal and seal renderers");
+            if (GetList(Prop(new SerializedObject(b.Part("nozzle")), "damageMaterial").FindPropertyRelative("renderers")).Length != nozzleRenderers.Count)
+                throw new InvalidDataException("A2: nozzle damage must cover the shroud, all 32 petal and seal renderers and every actuation piece");
 
             var thrust = b.Parts["fuselage_aft"].transform.Find("thrust_vector") ?? throw new MissingReferenceException("fuselage_aft/thrust_vector");
             var jet = thrust.GetComponent(GameType("JetNozzle"));
@@ -93,7 +104,7 @@ namespace Icarus.Editor
                 t.localScale = effectScale;
             }
             b.Report.Add($"nozzle effects: petal length {petalLength:0.000} m, ring radius {ringRadius:0.000} m, " +
-                $"flame/glow/haze scale {effectScale}, 32 NozzleDriver hinges, 33 damage renderers");
+                $"flame/glow/haze scale {effectScale}, 32 NozzleDriver hinges, a sync ring with 16 links and {rams} rams, {nozzleRenderers.Count} damage renderers");
             b.Placed.UnionWith(new[] { thrust, flame, glow, heatHaze, thrust.Find("thrustTransform") });
 
             var so = new SerializedObject(jet);

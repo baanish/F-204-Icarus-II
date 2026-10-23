@@ -270,7 +270,7 @@
      0.03011
     ]
    ],
-   "sha256": "9df2067de9d4cce4fed8040051922663a51a502d5803e94e05c2a02285106ab1",
+   "sha256": "4207d19c1dd036ed792074ff4596e774f1d5b694fc47f7aee36d151da1f263c0",
    "bounds_blender": [
     [
      -0.00573,
@@ -403,7 +403,7 @@
      0.03011
     ]
    ],
-   "sha256": "fd935b2d23375bfcbacbccd3f2062c3d15df71146d9707f6a053908b3066f2c5",
+   "sha256": "2106527b83febe8281ceae8b9c3db9185f91657579cbd804287aff54dadd3ac9",
    "bounds_blender": [
     [
      -0.00573,
@@ -496,7 +496,7 @@
      0.1
     ]
    ],
-   "sha256": "1aaac71b13cb536641f047b1b5577b2e2fccb56d21fa12d728ab9e38f2a557d7",
+   "sha256": "da4b5093c26adbe45b76da8b8aabbb4a31db04b9427cbc778121e783ed38810c",
    "bounds_blender": [
     [
      -0.42,
@@ -627,7 +627,7 @@
      1.08129
     ]
    ],
-   "sha256": "eddc0b24d4d7230d2fabdb58f131bca3622683d431fe9cb8f48d7294971251b3",
+   "sha256": "3f5305219eb5d61756059c4530ff38bfccdcdaccfed8538848e6e29415cbde75",
    "bounds_blender": [
     [
      -0.41687,
@@ -699,7 +699,7 @@
      1.08129
     ]
    ],
-   "sha256": "5beb79be4db4faf3dd800ceeb6888c62cd7d8693fab9697f06ca29566efedbd1",
+   "sha256": "97010b901feb4070d66af4a9ca3b28102192e293e33002f2bbd4926402b2886c",
    "bounds_blender": [
     [
      -0.41677,
@@ -771,7 +771,7 @@
      0.00214
     ]
    ],
-   "sha256": "143ff3c655c60c9fde709ff5ec37b49f27f2af4807b886d78dff4da8e6db7515",
+   "sha256": "e6dcbfdca9c304d0d9cd81ec0e516fed0d4bc8eb7cfdc84686149d6c061f6551",
    "bounds_blender": [
     [
      0.0,
@@ -843,7 +843,7 @@
      0.00214
     ]
    ],
-   "sha256": "64f96293ba44ef5f76de17c6d3e3d57aab082b2c909bf9f839f4d4d0ad427dbd",
+   "sha256": "264cc53143523bbb3a46b720f6c39b9bf46be4dba1f72feae4e9b4e916ccf061",
    "bounds_blender": [
     [
      -0.0,
@@ -915,7 +915,7 @@
      0.01056
     ]
    ],
-   "sha256": "dd33f16a33f2b8a513fa589afca2f099ca6fb92a91f2a71fe0673d155164da86",
+   "sha256": "8b5a3404d895682b0d7b11453c6c01b98bbfcdec2e929950416ed03292591d9f",
    "bounds_blender": [
     [
      -0.00046,
@@ -1008,7 +1008,7 @@
      1.275
     ]
    ],
-   "sha256": "1417198a89f5cfdbbabbd59ebfaff95a54981d558d70873b79f9bc0dc08316ea",
+   "sha256": "e4474b77abac59f7270ccd2696cb140b19b29843cf1b1c6914ec039746e7442b",
    "bounds_blender": [
     [
      -0.38,
@@ -1098,7 +1098,7 @@
      1.50581
     ]
    ],
-   "sha256": "88b2b4f67cd6adaa220a077b32c86b89202a8db90b9e9b7ec16f2474ba741d8a",
+   "sha256": "e961a39ca33e38e0944ecb5e2a9a41f35bceeb8654605fec88fe544c5bc8dc02",
    "bounds_blender": [
     [
      -0.55908,
@@ -1170,7 +1170,7 @@
      1.335
     ]
    ],
-   "sha256": "7a87e3ccc5587ac9372b2e7c320bb748fdf329a7a4bc75f7782f9f04300e9b73",
+   "sha256": "53a3946e07b347abed019b693748350b1d9bad5927a29823d22412bfac474946",
    "bounds_blender": [
     [
      -0.54934,
@@ -1314,7 +1314,7 @@
      0.07202
     ]
    ],
-   "sha256": "cb019350603c670777cc5fc4598f40b729056359029c3c6f548ab75dae2f1545",
+   "sha256": "e6f6b313254bfccb370510000f417092bc1824d9ea8c0038a1792290e8b68997",
    "bounds_blender": [
     [
      -0.25927,
@@ -1422,7 +1422,7 @@
      0.00838
     ]
    ],
-   "sha256": "11e72507a2c319a58a34dab99aa2c92d0a6a8c944b0ded5894fccc8059b704ca",
+   "sha256": "7bf4708aaa4fe9f12205d0831cb025e9501b923aa01a0d8002e8112a9f3fdaeb",
    "bounds_blender": [
     [
      -0.32054,
@@ -1494,7 +1494,7 @@
      3.6422
     ]
    ],
-   "sha256": "fa2e9f1031c3779b4c266c7072ba71b28c1be4251694d18574db4bfef7503210",
+   "sha256": "0d78800d6fc658d95387e03ed5b0cf04d4cf3f547f25797b0968ad809dd35e01",
    "bounds_blender": [
     [
      -0.31812,
@@ -1671,7 +1671,7 @@
      2.65
     ]
    ],
-   "sha256": "4120bf88e023ecf89d4c31d5260c04e75be9a868ea53ece4fbe39aa0587f9723",
+   "sha256": "eab51531cea5d8f1124e6f7cf43038d4370887f5b6f5020f8c071680e750d8aa",
    "bounds_blender": [
     [
      -0.46,
@@ -1762,7 +1762,7 @@
      1.65448
     ]
    ],
-   "sha256": "fb2f76719a232e14865a0a43f3bfb7462b8130c59c88596688db286995207ce0",
+   "sha256": "bc65d3c232a001c51bf03d97e6c7f6d78043e2f57852fab5c22fc293389d110c",
    "bounds_blender": [
     [
      -0.085,
@@ -1939,7 +1939,7 @@
      0.81995
     ]
    ],
-   "sha256": "fa0bd818c593fc6f172f00158cc7fb19f9f6a39155ef03dfed3d17c90d646d13",
+   "sha256": "a2e93fc602e941294a267087bf4da59f771560a2e5033beb9fca670e7ac03421",
    "bounds_blender": [
     [
      -0.06683,
@@ -2070,7 +2070,7 @@
      0.05168
     ]
    ],
-   "sha256": "b84744fc67e1aa06547f88e556711663eb1c66594c1973cba961a428cb22eb34",
+   "sha256": "9e8b58e3e9a6e25719acb8bd5300b0c1de3db59a9bb25906bcb451f286fadd99",
    "bounds_blender": [
     [
      -0.02254,
@@ -2203,7 +2203,7 @@
      0.05168
     ]
    ],
-   "sha256": "7b8725892b186c0623128a98026d9c7648e9b285ebaed8f57960e3f4ffcd96e0",
+   "sha256": "eb635f394fbda4af8e0c87315b8020b6e1d55bea93d310ab0547e6b5048e13ad",
    "bounds_blender": [
     [
      -0.02254,
@@ -2299,7 +2299,7 @@
      0.775
     ]
    ],
-   "sha256": "9ec9aefdd04dfbb148607462bba9957173cf2ebdb3c6bd824bb194ea3f384cc0",
+   "sha256": "9c509b63102fb505d990acea7325a8bd92688d87fe3cbe85eb0ffc2a3b5537ea",
    "bounds_blender": [
     [
      -0.33,
@@ -2393,7 +2393,7 @@
      0.775
     ]
    ],
-   "sha256": "94a4d37ddb5b4ad0be8238c69acbd25f6c5559abc1a78dc0ec2c188f32662b74",
+   "sha256": "ffc499ca67b346c5cc7dc0dfb016046203a5b606a44704e8f37a559493bc9e34",
    "bounds_blender": [
     [
      -0.33,
@@ -2487,7 +2487,7 @@
      0.775
     ]
    ],
-   "sha256": "ddfd79dd40c94e4de16bb74fa0de2bc16104939de3d1721c3ae4bacb5c80b1ce",
+   "sha256": "394afc30a7d39df3ee482dcf5a3c3ed74c3877431013d3031a21ca5ef8236001",
    "bounds_blender": [
     [
      -0.24,
@@ -2581,7 +2581,7 @@
      0.35
     ]
    ],
-   "sha256": "65debb9c9bf0a972c382c603c7ef0c91188108b7969384e0e12168eff30499de",
+   "sha256": "a92c8e593fe8f70351f37706e3df617ce273f683ba788cf7edaf022135a9368e",
    "bounds_blender": [
     [
      -0.5951,
@@ -2675,7 +2675,7 @@
      0.875
     ]
    ],
-   "sha256": "21263f1e6c8e5d71a0c58b5d4008cd2d8a33c5dc12e83f3aacb2645c085acdf2",
+   "sha256": "13cb186bdf1690f554ee357a1a229985c90273d09b39e45b3fcc14b24126b4d9",
    "bounds_blender": [
     [
      -0.9465,
@@ -2765,7 +2765,7 @@
      1.98
     ]
    ],
-   "sha256": "b8a0f916380914eaec5428ea166426314ae2316ce5d338bdba324f4b0f4cd551",
+   "sha256": "f36e111cb0a5cb75c4012d6fc6e29e83c2a3530b1f48a9c3691521608b6c8e59",
    "bounds_blender": [
     [
      -0.86142,
@@ -2978,7 +2978,7 @@
      2.0
     ]
    ],
-   "sha256": "cb2c603e4bac7836bd475fe8025e192b7114aa6b273e8de26e36501736bb15c3",
+   "sha256": "b64d228fdf12a5dfe0f9cc53b727dbe218490e5389044c74bcc965ece304ae3c",
    "bounds_blender": [
     [
      -0.59831,
@@ -3123,7 +3123,7 @@
      2.575
     ]
    ],
-   "sha256": "fdead640cbc92bfbbc8a347c70e10001965d6be81beafa9225d566a823c010aa",
+   "sha256": "fed279344eaae05602bbfdf1c52b6a869c75a099069894f4672ffa72ce26696e",
    "bounds_blender": [
     [
      -1.05515,
@@ -3136,11 +3136,11 @@
      0.74523
     ]
    ],
-   "tris": 5166,
+   "tris": 5876,
    "materials": [
     [
      "Icarus_Frame",
-     4538
+     5248
     ],
     [
      "jet_mechanical",
@@ -3191,13 +3191,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       -0.78853,
-       -0.46058,
+       -0.92331,
+       -0.3903,
        -2.775
       ],
       [
-       -0.1985,
-       -0.15714,
+       -0.25146,
+       -0.08679,
        2.575
       ]
      ]
@@ -3242,13 +3242,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       0.38705,
-       -0.39014,
-       -2.775
+       0.37792,
+       -0.46058,
+       -0.64372
       ],
       [
-       0.9197,
-       -0.12051,
+       0.89185,
+       -0.13267,
        2.575
       ]
      ]
@@ -3335,7 +3335,7 @@
      0.26888
     ]
    ],
-   "sha256": "0737d489ba29d0effb0ff4c9734f93dac8710eab7b3146febd08dc0ff735c709",
+   "sha256": "21f23c734a01680580723b4c04bfe311799f44c469968aad97e829de3aacc351",
    "bounds_blender": [
     [
      -0.30142,
@@ -3404,7 +3404,7 @@
      0.26888
     ]
    ],
-   "sha256": "2f5337e889cbefd9db18d2e66b3f968f8746de5cb774b4fdc7a20714d43af2ea",
+   "sha256": "b4657d00fdd1896a8988f42198ce4dee672e79a8ccd45b31ac0887a977d6c720",
    "bounds_blender": [
     [
      -0.03,
@@ -3520,7 +3520,7 @@
      0.001
     ]
    ],
-   "sha256": "2d5492faf7afb3118182bdfc7ebe956053f9d3415beb027f2c33dc9488391c84",
+   "sha256": "26f408fe4ea4ce42ed320942e1b4e1fa2cf6a777043bda441e799709ded5f05f",
    "bounds_blender": [
     [
      -0.00625,
@@ -3644,7 +3644,7 @@
      0.001
     ]
    ],
-   "sha256": "5b23d3fdf948256d491ce17ab83cfa9e328f014f75cbdf62c2ad5395f9aaabac",
+   "sha256": "bda32e329262d8b64e846bf677d666a08c57a3bf9b49f3936a2a1765d1c8dd3f",
    "bounds_blender": [
     [
      -0.24814,
@@ -3768,7 +3768,7 @@
      0.08815
     ]
    ],
-   "sha256": "5c49531d2053f8f6d058d2a9156c13866aa4a75a1c6564fee36cf07e0d3598e5",
+   "sha256": "5d4393b53c4be7dcf2ee19f79b7d7d3a67b091a09dc3ae7256a40d271d188375",
    "bounds_blender": [
     [
      0.0,
@@ -3892,7 +3892,7 @@
      0.08815
     ]
    ],
-   "sha256": "e5aaf31c06077ceecc53af72b1ae87733b0ae486018730af10c56dcf22ddcfa0",
+   "sha256": "2e034a59a24d57ec48fbf42ac40a11f83b31944b04d265dda19ed54a5e14d119",
    "bounds_blender": [
     [
      -1.21066,
@@ -4016,7 +4016,7 @@
      0.22085
     ]
    ],
-   "sha256": "22cf1a4e95624db869769d9eb645832afa0fb37af1c539302ef7b0cecab49bce",
+   "sha256": "71ac21ff12fa8f81b264c4a1e55bb6a0aa356277a651d004ce89e002fb6c95cc",
    "bounds_blender": [
     [
      -4e-05,
@@ -4140,7 +4140,7 @@
      0.22085
     ]
    ],
-   "sha256": "ce6e1fdf2b28701aa02e6565894db5d72e5b9e98dc7ccc491f7c28c9431f53ba",
+   "sha256": "c03573f2b3f8de2452f82c763fcb1fd8205663c06f9eb2f905e484cbbde6c18b",
    "bounds_blender": [
     [
      -1.42256,
@@ -4264,7 +4264,7 @@
      0.00565
     ]
    ],
-   "sha256": "2f63f453164fa0493c4d24112ae087342274f80371b6185fdde3b84c4d827467",
+   "sha256": "3a1e8971f880ff9e7b9aa7eaf320f2e691e7aaf69610bf2a3e9717b7b2613131",
    "bounds_blender": [
     [
      -0.00017,
@@ -4388,7 +4388,7 @@
      0.00565
     ]
    ],
-   "sha256": "d7e85f89830f0feb86f674d92b38f17115c823c21b4fe4f560d676f8fcc55ebe",
+   "sha256": "00c8289874ee72b20490c01c874a67d1cfc8e57a31d4ca5554fcc75d5448f37a",
    "bounds_blender": [
     [
      -1.42034,
@@ -4507,7 +4507,7 @@
      0.03416
     ]
    ],
-   "sha256": "6c0f1f74a2c915bdb08ea8eb10ad04aa6d72047803dfd4fc7db958a50ab297e2",
+   "sha256": "c88145882be24ab257844ed58246fb68d0d72a2d6cc8c2b0afffeeeb048cd431",
    "bounds_blender": [
     [
      -0.06,
@@ -4638,7 +4638,7 @@
      0.035
     ]
    ],
-   "sha256": "575574a5551edb8c96047c6b84bf30fb4dc3b33e33cbc691a4286ad43e89f513",
+   "sha256": "c779b2ee609578fd0f80ac1d53559f136485533b0c5e8d4f2812baadab2ab5b0",
    "bounds_blender": [
     [
      -0.1,
@@ -4773,7 +4773,7 @@
      0.03416
     ]
    ],
-   "sha256": "e0f00518f0f5bfa9ec439660d8a47ecd11a685bdf7dfe7c72713347aa5a41555",
+   "sha256": "407a833de18af637be0d948665f551c0ea5e4c6c3645ddd513aba45ffcc15dca",
    "bounds_blender": [
     [
      -0.2816,
@@ -4862,7 +4862,7 @@
      0.65526
     ]
    ],
-   "sha256": "80df7761f48758fc7c1fc0fc588f311696dd30e09f8d0c23bd24f4416f324495",
+   "sha256": "4e8822209cbea1c5431244ef96cd35b2a3f12a1d282bf405feb48db76226480c",
    "bounds_blender": [
     [
      -0.38452,
@@ -4935,7 +4935,7 @@
      0.093
     ]
    ],
-   "sha256": "1cc0c0dcd5529ceea77fa2f9c2e218b07643e2bf4b643db7615b547c887d92f8",
+   "sha256": "34c468f59c8d00d54d43971d219d84ae0b59cdd5fb301b57a06770ecf02f60e0",
    "bounds_blender": [
     [
      -0.02,
@@ -5008,7 +5008,7 @@
      0.65526
     ]
    ],
-   "sha256": "a1f48102a2e9489e453065e6639ecfd70a4b13d98f3f4da98d32729bc5961582",
+   "sha256": "07cffe7d67c7122d42a5fd800feb9fc16db332d89f69764b5aee362e0453712d",
    "bounds_blender": [
     [
      -0.10307,
@@ -5127,7 +5127,7 @@
      0.90166
     ]
    ],
-   "sha256": "35c408f10fd0b7cd000282eba4fc90be161aa915f7cde6310114d085b62fad3a",
+   "sha256": "59b265d472b290ac57eab1fa56f133978c2d27f337de7bd97614dc8567fe285b",
    "bounds_blender": [
     [
      -0.24212,
@@ -5244,7 +5244,7 @@
      0.24
     ]
    ],
-   "sha256": "2fa9ca8ba1584ab62561a350104d5d9ce3401ee65afda19455dda38afc4756c0",
+   "sha256": "056ef39479632eb713c32cd50b820b123ae2a477bd3597324a2458c30190a88d",
    "bounds_blender": [
     [
      -0.24,
@@ -5361,7 +5361,7 @@
      0.90166
     ]
    ],
-   "sha256": "7f411cf0cc0dc146c9658c397dac257e95973d44a9dab32f8731a019a6d9e5ec",
+   "sha256": "cf200aadca18b89c6ca286a2d6d3e303bf46f49ffc32c4a78361bc2ed5c825aa",
    "bounds_blender": [
     [
      -0.37702,
@@ -5433,7 +5433,7 @@
      1.725
     ]
    ],
-   "sha256": "9f75ec655329dcb34523231dd99390b10fc0b64a0728a3fc086af065bb24caae",
+   "sha256": "17e7a46f6cdd4ca99b82fd00e77dedbfb8e9adbb7b6cdce7fa2479cbbdd86e3b",
    "bounds_blender": [
     [
      -0.4505,
@@ -5446,7 +5446,7 @@
      0.39657
     ]
    ],
-   "tris": 2704,
+   "tris": 2894,
    "materials": [
     [
      "Icarus_Body",
@@ -5454,7 +5454,11 @@
     ],
     [
      "jet_mechanical",
-     1404
+     1564
+    ],
+    [
+     "Icarus_Duct",
+     30
     ]
    ],
    "uv_layers": [
@@ -5612,7 +5616,7 @@
      1.725
     ]
    ],
-   "sha256": "2885bc8942a81952872a4840bee719cda2ff82cc608c8b01c2336d147c852731",
+   "sha256": "fe2a233224494f359979e5ab840549979267541c8d427606a27187506a96ce92",
    "bounds_blender": [
     [
      -0.46004,
@@ -5625,7 +5629,7 @@
      0.39657
     ]
    ],
-   "tris": 2704,
+   "tris": 2894,
    "materials": [
     [
      "Icarus_Body",
@@ -5633,7 +5637,11 @@
     ],
     [
      "jet_mechanical",
-     1404
+     1564
+    ],
+    [
+     "Icarus_Duct",
+     30
     ]
    ],
    "uv_layers": [
@@ -5832,7 +5840,7 @@
      0.33515
     ]
    ],
-   "sha256": "c210251690cfdc439c9e2502f61f54746bb9639a931badf810c95d25823923dd",
+   "sha256": "56c11d83947e30b292a256cbd53905e876128eb4e16ec3d1358863ee71710a26",
    "bounds_blender": [
     [
      -0.1832,
@@ -5965,7 +5973,7 @@
      0.33515
     ]
    ],
-   "sha256": "30242c113505c1b10aba8dccc362276128d678c303909b5c5e1de4fa54d506e8",
+   "sha256": "284358f3f4d65cf183f3b284e6edecc5f292cd78a055ff155ab1919dcff16353",
    "bounds_blender": [
     [
      -0.1832,
@@ -6058,7 +6066,7 @@
      0.25
     ]
    ],
-   "sha256": "e11911c47606326d5ecc609507be6f0ca84859ebae7f73cb90cb94bbe06f9826",
+   "sha256": "56c0dafb03ee7915151c44db1830ef7a478464bbd6d468ff3585fcfcb1638e88",
    "bounds_blender": [
     [
      -0.00856,
@@ -6131,7 +6139,7 @@
      0.25
     ]
    ],
-   "sha256": "f27989dd1141ba12277d131a9d806fde8a000e6728363e538326bbdc4b5ebc68",
+   "sha256": "e9920983aa63c72b2fd45c33d2cb5127296d75dc8a668d5560b4ac329a2a436c",
    "bounds_blender": [
     [
      -0.00858,
@@ -6307,30 +6315,30 @@
    },
    "bounds_unity": [
     [
-     -0.385,
-     -0.385,
+     -0.392,
+     -0.40496,
      -0.16126
     ],
     [
-     0.385,
-     0.385,
+     0.392,
+     0.40496,
      0.15
     ]
    ],
-   "sha256": "7a0a22b2278583d633e1c6b0b246b4892233ebd2d3e076db33f32e251347f40d",
+   "sha256": "f6cf20735e4d7696232bfffc46103c67782d7f6a485d5d22e53dcb5c17403f6e",
    "bounds_blender": [
     [
-     -0.385,
+     -0.392,
      -0.15,
-     -0.385
+     -0.40496
     ],
     [
-     0.385,
+     0.392,
      0.16126,
-     0.385
+     0.40496
     ]
    ],
-   "tris": 1148,
+   "tris": 2990,
    "materials": [
     [
      "Icarus_Body",
@@ -6338,7 +6346,11 @@
     ],
     [
      "jet_mechanical",
-     412
+     2000
+    ],
+    [
+     "Icarus_Duct",
+     254
     ]
    ],
    "uv_layers": [
@@ -6351,13 +6363,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       -0.385,
-       -0.385,
+       -0.392,
+       -0.40496,
        -0.16126
       ],
       [
-       0.385,
-       0.385,
+       0.392,
+       0.40496,
        0.15
       ]
      ]
@@ -6366,6 +6378,1158 @@
    "lod1": {
     "tris": 32
    }
+  },
+  "nozzle_link_00": {
+   "fbx": "nozzle_link_00.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.39,
+    7.36,
+    0.37
+   ],
+   "pivot_unity": [
+    -0.39,
+    0.37,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "up": [
+     0.61069,
+     0.0,
+     0.79187
+    ],
+    "forward": [
+     -0.79187,
+     -0.0,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "591d82ebff608bd83fd1715e3919ed1f9e279c655aaf7c75ae6283e5d04b0839",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_01": {
+   "fbx": "nozzle_link_01.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.36031,
+    7.36,
+    0.51925
+   ],
+   "pivot_unity": [
+    -0.36031,
+    0.51925,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -0.38268,
+     -0.92388,
+     0.0
+    ],
+    "up": [
+     0.5642,
+     -0.2337,
+     0.79187
+    ],
+    "forward": [
+     -0.73159,
+     0.30304,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "ab6264bf9e1ec0cf3901668f1d34010e6503c5508e7cdb1988b7815cb4860a03",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_02": {
+   "fbx": "nozzle_link_02.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.27577,
+    7.36,
+    0.64577
+   ],
+   "pivot_unity": [
+    -0.27577,
+    0.64577,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -0.70711,
+     -0.70711,
+     0.0
+    ],
+    "up": [
+     0.43182,
+     -0.43182,
+     0.79187
+    ],
+    "forward": [
+     -0.55994,
+     0.55994,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "ff9d5b2c2b2b16566ae5042ec7ca88d4e842edf84a58f88cbb76bd235b7ffeb6",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_03": {
+   "fbx": "nozzle_link_03.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.14925,
+    7.36,
+    0.73031
+   ],
+   "pivot_unity": [
+    -0.14925,
+    0.73031,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -0.92388,
+     -0.38268,
+     -0.0
+    ],
+    "up": [
+     0.2337,
+     -0.5642,
+     0.79187
+    ],
+    "forward": [
+     -0.30304,
+     0.73159,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "4671db573d03cce7c4e4eba2215819b9c304d1c163476e70cf66bba09450a47b",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_04": {
+   "fbx": "nozzle_link_04.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.0,
+    7.36,
+    0.76
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.76,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     -0.61069,
+     0.79187
+    ],
+    "forward": [
+     0.0,
+     0.79187,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "fe199ed628e839a8d9c27f4c1bc8a97ddeff48206aa374b9899ae917e762e265",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_05": {
+   "fbx": "nozzle_link_05.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.14925,
+    7.36,
+    0.73031
+   ],
+   "pivot_unity": [
+    0.14925,
+    0.73031,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -0.92388,
+     0.38268,
+     0.0
+    ],
+    "up": [
+     -0.2337,
+     -0.5642,
+     0.79187
+    ],
+    "forward": [
+     0.30304,
+     0.73159,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "af6ac384d87da5851349b8108f7d6295a069b75e54e86a68523bc1ad292fbe41",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_06": {
+   "fbx": "nozzle_link_06.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.27577,
+    7.36,
+    0.64577
+   ],
+   "pivot_unity": [
+    0.27577,
+    0.64577,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -0.70711,
+     0.70711,
+     -0.0
+    ],
+    "up": [
+     -0.43182,
+     -0.43182,
+     0.79187
+    ],
+    "forward": [
+     0.55994,
+     0.55994,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "65c81950dbdb9785da2befca3611bf62533f4871e8de08268f5652129ed759a9",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_07": {
+   "fbx": "nozzle_link_07.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.36031,
+    7.36,
+    0.51925
+   ],
+   "pivot_unity": [
+    0.36031,
+    0.51925,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     -0.38268,
+     0.92388,
+     -0.0
+    ],
+    "up": [
+     -0.5642,
+     -0.2337,
+     0.79187
+    ],
+    "forward": [
+     0.73159,
+     0.30304,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "1932fd3d3effda9c52081c15b1e3fd8759311b51085b863dbde5b84bf2a749be",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_08": {
+   "fbx": "nozzle_link_08.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.39,
+    7.36,
+    0.37
+   ],
+   "pivot_unity": [
+    0.39,
+    0.37,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.0,
+     1.0,
+     -0.0
+    ],
+    "up": [
+     -0.61069,
+     0.0,
+     0.79187
+    ],
+    "forward": [
+     0.79187,
+     -0.0,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "3187e0a3f6e47a464bb98dcf5cd2c6c899e7e592706cbf314e3321048129166b",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_09": {
+   "fbx": "nozzle_link_09.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.36031,
+    7.36,
+    0.22075
+   ],
+   "pivot_unity": [
+    0.36031,
+    0.22075,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.38268,
+     0.92388,
+     -0.0
+    ],
+    "up": [
+     -0.5642,
+     0.2337,
+     0.79187
+    ],
+    "forward": [
+     0.73159,
+     -0.30304,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "dd8eeffd449109b4be89868ccd754b6dac7c5ce19a69ce79b60f14992fbce94a",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_10": {
+   "fbx": "nozzle_link_10.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.27577,
+    7.36,
+    0.09423
+   ],
+   "pivot_unity": [
+    0.27577,
+    0.09423,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.70711,
+     0.70711,
+     0.0
+    ],
+    "up": [
+     -0.43182,
+     0.43182,
+     0.79187
+    ],
+    "forward": [
+     0.55994,
+     -0.55994,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "8885223b509ac03069f7acf78562c6b1acbf2b75426e6b358646b47db340b859",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_11": {
+   "fbx": "nozzle_link_11.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.14925,
+    7.36,
+    0.00969
+   ],
+   "pivot_unity": [
+    0.14925,
+    0.00969,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.92388,
+     0.38268,
+     0.0
+    ],
+    "up": [
+     -0.2337,
+     0.5642,
+     0.79187
+    ],
+    "forward": [
+     0.30304,
+     -0.73159,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "615234e488a2b3fd0bfcdff0058e1011bb94a61fe886dcc27b673ad476996032",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_12": {
+   "fbx": "nozzle_link_12.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.0,
+    7.36,
+    -0.02
+   ],
+   "pivot_unity": [
+    0.0,
+    -0.02,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "up": [
+     -0.0,
+     0.61069,
+     0.79187
+    ],
+    "forward": [
+     0.0,
+     -0.79187,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "5e4700bccf544300ab9e24e38d94a76c49860debf5750ab20183301e081e3680",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_13": {
+   "fbx": "nozzle_link_13.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.14925,
+    7.36,
+    0.00969
+   ],
+   "pivot_unity": [
+    -0.14925,
+    0.00969,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.92388,
+     -0.38268,
+     -0.0
+    ],
+    "up": [
+     0.2337,
+     0.5642,
+     0.79187
+    ],
+    "forward": [
+     -0.30304,
+     -0.73159,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "cde856320f42abdb375ddbdd6dd4e6cc9c3ef6e0da50543ae906d7f7a77b7fbd",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_14": {
+   "fbx": "nozzle_link_14.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.27577,
+    7.36,
+    0.09423
+   ],
+   "pivot_unity": [
+    -0.27577,
+    0.09423,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.70711,
+     -0.70711,
+     -0.0
+    ],
+    "up": [
+     0.43182,
+     0.43182,
+     0.79187
+    ],
+    "forward": [
+     -0.55994,
+     -0.55994,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "98a61533e1dda60e5186aaffa87ed95932da4e117d7ae91b2fdb78a542b3230d",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_link_15": {
+   "fbx": "nozzle_link_15.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.36031,
+    7.36,
+    0.22075
+   ],
+   "pivot_unity": [
+    -0.36031,
+    0.22075,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     0.38268,
+     -0.92388,
+     0.0
+    ],
+    "up": [
+     0.5642,
+     0.2337,
+     0.79187
+    ],
+    "forward": [
+     -0.73159,
+     -0.30304,
+     0.61069
+    ]
+   },
+   "props": {
+    "reach_m": 0.03498,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.008,
+     -0.04298
+    ],
+    [
+     0.006,
+     0.008,
+     0.008
+    ]
+   ],
+   "sha256": "c25e2066ddec96bb72e2247e7aafff077d50f214dc728d835eca030b9d941224",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.008,
+     -0.008
+    ],
+    [
+     0.006,
+     0.04298,
+     0.008
+    ]
+   ],
+   "tris": 116,
+   "materials": [
+    [
+     "jet_mechanical",
+     116
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
   },
   "nozzle_petal_00": {
    "fbx": null,
@@ -6448,11 +7612,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "5979b1339881245db2d3b269726e733e451bb3c95885dc7fa1fdc7b0c2fd2788",
+   "sha256": "f6022342e8c1409c780bbea1c380dc37fcb3d46857b0ff6563596ce243492f6a",
    "bounds_blender": [
     [
      -0.07041,
@@ -6462,10 +7626,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -6473,7 +7637,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -6563,11 +7727,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "adfdcacc5f82f91b0b2def97a6a97a518f1031f8009264207ce5ef060bff4b3e",
+   "sha256": "9cdbea6490929c4fee84a64873e33bae8bead9833d3bf320e66b6869d0310c9c",
    "bounds_blender": [
     [
      -0.07041,
@@ -6577,10 +7741,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -6588,7 +7752,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -6678,11 +7842,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "d37e376a62063ee882c1bb75f38c974dec7d4a924cf31aedb081c74268ae2236",
+   "sha256": "2124b9e3659ed58f6df73da8db09d63932c32375f412c37647113eda6780a76b",
    "bounds_blender": [
     [
      -0.07041,
@@ -6692,10 +7856,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -6703,7 +7867,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -6793,11 +7957,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "62154f17e69089f6689dd12f671aba11c1c908800a7d661c82dfd68d7d195534",
+   "sha256": "af85141722bc31768c76f9cebd5a38e7041799122e7b83e1abbad8abfcea8ac7",
    "bounds_blender": [
     [
      -0.07041,
@@ -6807,10 +7971,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -6818,7 +7982,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -6908,11 +8072,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "ed86e87254b2091be01a5d5bb9ef355c161c6a749e573bcd1b1bfd5efe1f6dcc",
+   "sha256": "5e7858350896e44af265cd8ac842ddcd64cb60cea4251cdf25e35f707615016d",
    "bounds_blender": [
     [
      -0.07041,
@@ -6922,10 +8086,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -6933,7 +8097,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7023,11 +8187,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "4899cd30db467a5579b68d91172b5d660a20afa6f80c3376c01f276194cda449",
+   "sha256": "56fb395a06e5369fadc063905dbe04b8b9dc28e208010bc989290c4ca2217f19",
    "bounds_blender": [
     [
      -0.07041,
@@ -7037,10 +8201,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7048,7 +8212,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7138,11 +8302,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "7770dcd49d6dab5c5b3d205dcfa75ec695ab413a5e41b6a74de6fa075ea139a8",
+   "sha256": "b0d108b6109d8fc87213ddaaa4da74f77605a97f90572943c6ea040231126a6a",
    "bounds_blender": [
     [
      -0.07041,
@@ -7152,10 +8316,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7163,7 +8327,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7253,11 +8417,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "a530bd7340c0adbbf3fb9e4c9b7705577634592160b205623acfb8fdd87cd4c2",
+   "sha256": "17f45cdf3aa3b35a2899c073d2da5b598c49e66bed843a36ec986676871b9583",
    "bounds_blender": [
     [
      -0.07041,
@@ -7267,10 +8431,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7278,7 +8442,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7368,11 +8532,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "d953b9bcdd4b60e80f29f033505b9836332bdae5e5a95acb216e4e328b6ee9f2",
+   "sha256": "578a8d6bd46f50e9d4d354b10d860052581234db75e8a450a86f8d8284d04f27",
    "bounds_blender": [
     [
      -0.07041,
@@ -7382,10 +8546,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7393,7 +8557,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7483,11 +8647,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "c2e5e85291fc1635c6903556033e5ceb4805a6f3f4cd54c8ccd94474b6391c2b",
+   "sha256": "6d109eb8bc8356c49b78b278dd3d461edf617acb1fe9ff11766d001f133ec237",
    "bounds_blender": [
     [
      -0.07041,
@@ -7497,10 +8661,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7508,7 +8672,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7598,11 +8762,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "8f770deac54d66cf6349cc7b9e2d286b42d78452a663b56d5421fa6c5983bd10",
+   "sha256": "925ae6b6dc90be877462ca6691b5172a6b95ee86e9cffd17e2369ad2ed24bcfc",
    "bounds_blender": [
     [
      -0.07041,
@@ -7612,10 +8776,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7623,7 +8787,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7713,11 +8877,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "0156733d24092c56960466e61051a34566d32e49467f8c8e15f58619075e6f7c",
+   "sha256": "5cfa6cd124cccb75d0558cb62ff110ae5540abcb077ca1650ddeec97aa2b4e83",
    "bounds_blender": [
     [
      -0.07041,
@@ -7727,10 +8891,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7738,7 +8902,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7828,11 +8992,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "6fb0b8f1bd5b518656e3db06a74463f50eac9075e4abac044056fb4512b339d9",
+   "sha256": "91d19d67b800d470af1428fcfbd5b3445e167e9e6ba65cf9a394c650c41e9f64",
    "bounds_blender": [
     [
      -0.07041,
@@ -7842,10 +9006,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7853,7 +9017,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -7943,11 +9107,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "6d17fec11c97f440292be718a9afa72776cbab11a74296682c7dcc717e5d6a0f",
+   "sha256": "f445ff550ad42c70346f851464a94b0002014c95ab9889d7cf2188e46a103a17",
    "bounds_blender": [
     [
      -0.07041,
@@ -7957,10 +9121,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -7968,7 +9132,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -8058,11 +9222,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "10d44ea6e8a31e62dac9fe0b4dce7476f16c32a4573004ffffaffa35d117341a",
+   "sha256": "a5f4d65a6dfbf9e16ab219e15901ddd3e44982b7862b5221a0d0f90c4c97875e",
    "bounds_blender": [
     [
      -0.07041,
@@ -8072,10 +9236,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -8083,7 +9247,7 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
     ]
    ],
    "uv_layers": [
@@ -8173,11 +9337,11 @@
     ],
     [
      0.07041,
-     0.00093,
+     0.04,
      -0.0
     ]
    ],
-   "sha256": "263500e51a55695042e54b247517b047862a8629cfb8b4759294d876e7a7a076",
+   "sha256": "6106b892b6175b10b60ab828e6f78e8958f1471a82957d779488e7acbeb7cbf8",
    "bounds_blender": [
     [
      -0.07041,
@@ -8187,10 +9351,10 @@
     [
      0.07041,
      0.48,
-     0.00093
+     0.04
     ]
    ],
-   "tris": 40,
+   "tris": 152,
    "materials": [
     [
      "Icarus_Body",
@@ -8198,7 +9362,1175 @@
     ],
     [
      "jet_mechanical",
-     12
+     124
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_0_cylinder": {
+   "fbx": "nozzle_ram_0_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    0.33342,
+    7.215,
+    0.59278
+   ],
+   "pivot_unity": [
+    -0.33342,
+    0.59278,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     -0.83147,
+     -0.0
+    ],
+    "up": [
+     0.83147,
+     -0.55557,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "2a9aaabd3b8672746dc4cf8dc169365712a305a9766a5011d3f886a15fabd418",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_0_rod": {
+   "fbx": "nozzle_ram_0_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.33342,
+    7.357,
+    0.59278
+   ],
+   "pivot_unity": [
+    -0.33342,
+    0.59278,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     -0.83147,
+     0.0
+    ],
+    "up": [
+     -0.83147,
+     0.55557,
+     -0.0
+    ],
+    "forward": [
+     0.0,
+     -0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "0c726fe7548fc149e94d01e8ecddd4c389ac65bc96fcb01d9a589bdc6fcf78d0",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_1_cylinder": {
+   "fbx": "nozzle_ram_1_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    0.07823,
+    7.215,
+    0.76329
+   ],
+   "pivot_unity": [
+    -0.07823,
+    0.76329,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     -0.19509,
+     -0.0
+    ],
+    "up": [
+     0.19509,
+     -0.98079,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "284324c3b0c1260898e8cb21e939cdf2a610ecc6a69376fd0a33b40bcfdfb59d",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_1_rod": {
+   "fbx": "nozzle_ram_1_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.07823,
+    7.357,
+    0.76329
+   ],
+   "pivot_unity": [
+    -0.07823,
+    0.76329,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     -0.19509,
+     0.0
+    ],
+    "up": [
+     -0.19509,
+     0.98079,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     -0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "75ec18ba6b377add9bf7f8b4e47a18c1fc8bd83fbd8b4e23ee91371bb64ad953",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_2_cylinder": {
+   "fbx": "nozzle_ram_2_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    -0.07823,
+    7.215,
+    0.76329
+   ],
+   "pivot_unity": [
+    0.07823,
+    0.76329,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     0.19509,
+     -0.0
+    ],
+    "up": [
+     -0.19509,
+     -0.98079,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "c5a8878f3247737d239fc29c0d0ae1e3dc69f3868ddb197c786d5ae89836fed6",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_2_rod": {
+   "fbx": "nozzle_ram_2_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.07823,
+    7.357,
+    0.76329
+   ],
+   "pivot_unity": [
+    0.07823,
+    0.76329,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     -0.98079,
+     0.19509,
+     -0.0
+    ],
+    "up": [
+     0.19509,
+     0.98079,
+     -0.0
+    ],
+    "forward": [
+     0.0,
+     -0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "076871c63813a0730a4dcd1a3aeb28a6e5f5dd74d1e3e95a46865350276ecd09",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_3_cylinder": {
+   "fbx": "nozzle_ram_3_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    -0.33342,
+    7.215,
+    0.59278
+   ],
+   "pivot_unity": [
+    0.33342,
+    0.59278,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     0.83147,
+     -0.0
+    ],
+    "up": [
+     -0.83147,
+     -0.55557,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "ee535b8031c097c00e761ae6ed74ba7ceeb53e8f918a112a6fb6ccee55d5bd6f",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_3_rod": {
+   "fbx": "nozzle_ram_3_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.33342,
+    7.357,
+    0.59278
+   ],
+   "pivot_unity": [
+    0.33342,
+    0.59278,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     -0.55557,
+     0.83147,
+     -0.0
+    ],
+    "up": [
+     0.83147,
+     0.55557,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     -0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "1516a7344a58864e71dcd33630d99634a7aaa85994df5dca80c3dad248fe4a39",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_4_cylinder": {
+   "fbx": "nozzle_ram_4_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    -0.33342,
+    7.215,
+    0.14722
+   ],
+   "pivot_unity": [
+    0.33342,
+    0.14722,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     0.83147,
+     -0.0
+    ],
+    "up": [
+     -0.83147,
+     0.55557,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "333f7a8a0e9b644cda9822243b21906e555c259a7994c2b287ae0a7d86d743f7",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_4_rod": {
+   "fbx": "nozzle_ram_4_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.33342,
+    7.357,
+    0.14722
+   ],
+   "pivot_unity": [
+    0.33342,
+    0.14722,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     0.83147,
+     -0.0
+    ],
+    "up": [
+     0.83147,
+     -0.55557,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "b1d755989e3c9fb0a08922196f0a8c065425a36fd4191f1ed9201dcf315f35ac",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_5_cylinder": {
+   "fbx": "nozzle_ram_5_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    -0.07823,
+    7.215,
+    -0.02329
+   ],
+   "pivot_unity": [
+    0.07823,
+    -0.02329,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     0.19509,
+     -0.0
+    ],
+    "up": [
+     -0.19509,
+     0.98079,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "5147143b65ca59e006d4626950211bc8d38b304a7294517be57cc8f458e7f610",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_5_rod": {
+   "fbx": "nozzle_ram_5_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    -0.07823,
+    7.357,
+    -0.02329
+   ],
+   "pivot_unity": [
+    0.07823,
+    -0.02329,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     0.19509,
+     -0.0
+    ],
+    "up": [
+     0.19509,
+     -0.98079,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "d02f9d189714d5164648842501e14f0d5b588eb03a5dccbdac77f4229f22f117",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_6_cylinder": {
+   "fbx": "nozzle_ram_6_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    0.07823,
+    7.215,
+    -0.02329
+   ],
+   "pivot_unity": [
+    -0.07823,
+    -0.02329,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     -0.19509,
+     -0.0
+    ],
+    "up": [
+     0.19509,
+     0.98079,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "2de3961c11c8963eef5183f7f775fde7c1774aedb089782a224e3b20820bca95",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_6_rod": {
+   "fbx": "nozzle_ram_6_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.07823,
+    7.357,
+    -0.02329
+   ],
+   "pivot_unity": [
+    -0.07823,
+    -0.02329,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     0.98079,
+     -0.19509,
+     0.0
+    ],
+    "up": [
+     -0.19509,
+     -0.98079,
+     -0.0
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "3e2485044dfc111ea0804a6983aa43af6fc6d093f260aa187b8945283f6c23c2",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_7_cylinder": {
+   "fbx": "nozzle_ram_7_cylinder.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    0.33342,
+    7.215,
+    0.14722
+   ],
+   "pivot_unity": [
+    -0.33342,
+    0.14722,
+    -7.215
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     -0.83147,
+     -0.0
+    ],
+    "up": [
+     0.83147,
+     0.55557,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "reach_m": 0.11006,
+    "barrel_start_m": 0.01,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.0095,
+     -0.00904,
+     -0.11006
+    ],
+    [
+     0.0095,
+     0.00904,
+     0.007
+    ]
+   ],
+   "sha256": "9cebeae3f4767141bedcb9fdeff0136454c8ddfcab72ee0c4faab09c8c2b5b28",
+   "bounds_blender": [
+    [
+     -0.0095,
+     -0.007,
+     -0.00904
+    ],
+    [
+     0.0095,
+     0.11006,
+     0.00904
+    ]
+   ],
+   "tris": 120,
+   "materials": [
+    [
+     "jet_mechanical",
+     120
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_ram_7_rod": {
+   "fbx": "nozzle_ram_7_rod.fbx",
+   "blender_parent": "nozzle_sync_ring",
+   "pivot_blender": [
+    0.33342,
+    7.357,
+    0.14722
+   ],
+   "pivot_unity": [
+    -0.33342,
+    0.14722,
+    -7.357
+   ],
+   "axes_unity": {
+    "right": [
+     0.55557,
+     -0.83147,
+     0.0
+    ],
+    "up": [
+     -0.83147,
+     -0.55557,
+     -0.0
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   },
+   "props": {
+    "reach_m": 0.08176,
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.006,
+     -0.007,
+     -0.08176
+    ],
+    [
+     0.006,
+     0.007,
+     0.007
+    ]
+   ],
+   "sha256": "9c021203a2671b654e8add3a98010c0fabcc4baa6cb2f94c578da83e532f5f18",
+   "bounds_blender": [
+    [
+     -0.006,
+     -0.007,
+     -0.007
+    ],
+    [
+     0.006,
+     0.08176,
+     0.007
+    ]
+   ],
+   "tris": 40,
+   "materials": [
+    [
+     "jet_mechanical",
+     40
     ]
    ],
    "uv_layers": [
@@ -8292,7 +10624,7 @@
      -0.0
     ]
    ],
-   "sha256": "00e4bfdafb4d458de68bfbf7ce6a1c82bd2dda63b764b324ee8cd280ddc23e3f",
+   "sha256": "a846248f7ee30f6c1339c2c31f13133d769f29cf7dcea922c4a6c9343412a95a",
    "bounds_blender": [
     [
      -0.04929,
@@ -8407,7 +10739,7 @@
      -0.0
     ]
    ],
-   "sha256": "af61f5e8a7979427e257ac2f53be5d088b3ad6e44562c08e62cbf9fcabdd7063",
+   "sha256": "9676417f595ba30fb6bc4e189c88c6ae7ef1fb6a8adec6d234b2dc74327023aa",
    "bounds_blender": [
     [
      -0.04929,
@@ -8522,7 +10854,7 @@
      -0.0
     ]
    ],
-   "sha256": "0f4566a4e0b9cbf5657ddffe8e9eb7e30422a4c78f510cf0b40dac68dcb5cb9f",
+   "sha256": "dbc7e24d14bbdd7b7f0f5094faf418ae47cd38b0ead023aa71652c400e9d7e85",
    "bounds_blender": [
     [
      -0.04929,
@@ -8637,7 +10969,7 @@
      -0.0
     ]
    ],
-   "sha256": "2d3865b4666776de36a8fb968f35efe163ad06033570e6af91446841eb6b0c11",
+   "sha256": "b65012a41922f29ad091c84ff3d5f0fc47641450e46612c69e01dbd306d1581f",
    "bounds_blender": [
     [
      -0.04929,
@@ -8752,7 +11084,7 @@
      -0.0
     ]
    ],
-   "sha256": "8d0c6187a1d5b9fe0542ae81bcbfb5deac27969ebe0bb07fd557582c3b55d6b8",
+   "sha256": "d0d5f6b6d56765618bfa0d6b8e1615c935038f15e67171464c7301f58fa3d587",
    "bounds_blender": [
     [
      -0.04929,
@@ -8867,7 +11199,7 @@
      -0.0
     ]
    ],
-   "sha256": "fb6cb7b196386637a51399fceb6aaab2f90c2fb13c28149a530bd4a2870af36d",
+   "sha256": "047a2f9dd226e40f63a933cece88f5a810e63de3d1940bb5176a46df4cbed934",
    "bounds_blender": [
     [
      -0.04929,
@@ -8982,7 +11314,7 @@
      -0.0
     ]
    ],
-   "sha256": "599e93bc370d58f743c765ea918f58903dd477fe3258a14d4a399de9c4e8bed0",
+   "sha256": "be218230481afcdccd96b540db04d6e9baf29bb80aa1312843a5b921b3b5b18a",
    "bounds_blender": [
     [
      -0.04929,
@@ -9097,7 +11429,7 @@
      -0.0
     ]
    ],
-   "sha256": "9779c0910efc59e08aaf835889491a3e62b820d319a6ab46fb5cdf3ac53553cd",
+   "sha256": "cd586642667471ba0b65f6f2298f6a0f774088a0d830f17c3c3b8c507043b5d1",
    "bounds_blender": [
     [
      -0.04929,
@@ -9212,7 +11544,7 @@
      -0.0
     ]
    ],
-   "sha256": "441684d04cc06975b5c0bbbddf746645e4087c334b907070cd0b01c93f815c8f",
+   "sha256": "ea25fee699cd3ef344627c8ad509052aaff522694ac63e582662f122d5f4b2a5",
    "bounds_blender": [
     [
      -0.04929,
@@ -9327,7 +11659,7 @@
      -0.0
     ]
    ],
-   "sha256": "93f07a29afb47ee349ad973daf82922c0139ae6b0ed9b6b261b8e73629cf3a6b",
+   "sha256": "85f411d6287203030208dc6c51c42fa76176d23286da64e04d3282cbd93d975f",
    "bounds_blender": [
     [
      -0.04929,
@@ -9442,7 +11774,7 @@
      -0.0
     ]
    ],
-   "sha256": "400b63584c7d2597aab88e0e49fc7dd33bba6f99a8969e842a06b877db6f5465",
+   "sha256": "c3a8016409e17da5697687de83e89df4f48ef3a1a7ec48c41344dcdf68acdaf1",
    "bounds_blender": [
     [
      -0.04929,
@@ -9557,7 +11889,7 @@
      -0.0
     ]
    ],
-   "sha256": "4ac46a1ac3c5566ea679e1874cd5fb58e157a6d219165b74b7ba4a6ef7b9c489",
+   "sha256": "01450f025bece02e6819695b15432864cb7370e3927e75b4c8fac6afff3fbef6",
    "bounds_blender": [
     [
      -0.04929,
@@ -9672,7 +12004,7 @@
      -0.0
     ]
    ],
-   "sha256": "c687ad0857fb3c19662e71a1df5ddd3f423941f0e078139dc3de0c8fdbbbe6a5",
+   "sha256": "1e1b41ffedda544661ecd109c34e25846b4c508fd969bbae4631b1fde42bf7fd",
    "bounds_blender": [
     [
      -0.04929,
@@ -9787,7 +12119,7 @@
      -0.0
     ]
    ],
-   "sha256": "c294d256aefef951decb25c9000e416cd1541527a14ec3a9b62d8972b42fd790",
+   "sha256": "a1ec98a7c43bba9f418004728c41f8373f2fdacae5368106db6d4736a83edfd5",
    "bounds_blender": [
     [
      -0.04929,
@@ -9902,7 +12234,7 @@
      -0.0
     ]
    ],
-   "sha256": "3b47716a13eb513d0c18b5ad63f4283445c61c342ab9bfefa8294109354d4f26",
+   "sha256": "36bf6e1d7792483236ea6348a0be3e561c28d0b82445e4e9c75f7cc51d699233",
    "bounds_blender": [
     [
      -0.04929,
@@ -10017,7 +12349,7 @@
      -0.0
     ]
    ],
-   "sha256": "26bf2a38534238d8922cbf071dc39cec22608e8b6b6cea0430ff3939d26c1bb9",
+   "sha256": "057d745e90eb62dd0b3262aff5bb60d5ae5f3ddb534c2dedede00e1f14065214",
    "bounds_blender": [
     [
      -0.04929,
@@ -10039,6 +12371,78 @@
     [
      "jet_mechanical",
      12
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "nozzle_sync_ring": {
+   "fbx": "nozzle_sync_ring.fbx",
+   "blender_parent": "nozzle",
+   "pivot_blender": [
+    0.0,
+    7.36,
+    0.37
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.37,
+    -7.36
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "parent_part": "nozzle",
+    "role": "visual"
+   },
+   "bounds_unity": [
+    [
+     -0.395,
+     -0.40251,
+     -0.009
+    ],
+    [
+     0.395,
+     0.40251,
+     0.01
+    ]
+   ],
+   "sha256": "28bef6bb27a60903191499c133e2f02ae15c6e81553ddf9ef2e9f7ec39ad24fe",
+   "bounds_blender": [
+    [
+     -0.395,
+     -0.01,
+     -0.40251
+    ],
+    [
+     0.395,
+     0.009,
+     0.40251
+    ]
+   ],
+   "tris": 1824,
+   "materials": [
+    [
+     "jet_mechanical",
+     1824
     ]
    ],
    "uv_layers": [
@@ -10126,7 +12530,7 @@
      0.875
     ]
    ],
-   "sha256": "695a19aeb8e47a9e153475d0e5460e6cb558cecbdc3aec77181638c52611d13e",
+   "sha256": "5dac3e315eb846a04db8e5ed90df8be6aa806c40a23a6c8befff6642b3424148",
    "bounds_blender": [
     [
      -0.073,
@@ -10198,7 +12602,7 @@
      0.875
     ]
    ],
-   "sha256": "546b377a37b3269df85bdff1befa2bf768bf241c0bb69b37b457612ac0272fc0",
+   "sha256": "bd07720362d4fea3c63eb3346c4a667252fe9e563fb73509cf410a91a02beb66",
    "bounds_blender": [
     [
      -0.073,
@@ -10270,7 +12674,7 @@
      0.875
     ]
    ],
-   "sha256": "146c1f3594b43f5a7fb2b5c9c81c0863636737b6cea3491194e88f6d591bc202",
+   "sha256": "73b171f0e616e2b408e0099569e98b95cd5055b33cb87c71f7b38b0908947e0e",
    "bounds_blender": [
     [
      -0.053,
@@ -10342,7 +12746,7 @@
      0.875
     ]
    ],
-   "sha256": "2bfc3af106b2ab8cafe21d947dc0fe4375e9ba933b6bd230a9d408bdc05ec2f7",
+   "sha256": "12f9f729db92fb3ac78b4b01a1fda615cfcae4dc9248aa9fc97bd8f66555384b",
    "bounds_blender": [
     [
      -0.053,
@@ -10414,7 +12818,7 @@
      0.675
     ]
    ],
-   "sha256": "0640e0615b5f32bca9f5333426e4b5177aa3c5da914ca28813543cc16b859d47",
+   "sha256": "d2367e6db9d15b0dc04c95e394b1dc9af864686573d596c645cf22bd6a88fb20",
    "bounds_blender": [
     [
      -0.3,
@@ -10504,7 +12908,7 @@
      1.38792
     ]
    ],
-   "sha256": "2965d1071da32339ea099669199871f37b53f052c6b77242d3d5f02face154e8",
+   "sha256": "1b88d5af4009a51edcff954068253d3678bb48e92e9b65e3ee2aed2a057324a4",
    "bounds_blender": [
     [
      -0.35123,
@@ -10722,7 +13126,7 @@
      0.06554
     ]
    ],
-   "sha256": "21e2ad062ab86c696e5378516c2d63f7e7a56c189a99c0fa8eb127fd99c18d6e",
+   "sha256": "d9e07e49ce0b161bef25b55a541f2a3839a243d2143387cf217194e7bce45fb0",
    "bounds_blender": [
     [
      -0.02607,
@@ -10814,7 +13218,7 @@
      2.1352
     ]
    ],
-   "sha256": "7fa68aaf7355a3d566f105a9d83b4c66faf2bbdc713a17b7ba5855a351a0ca33",
+   "sha256": "8b39dfbe2198c25142cb1e35e43cf8129002a0b9b6a8a76b4daddca98f5a5448",
    "bounds_blender": [
     [
      -0.45319,
@@ -10991,7 +13395,7 @@
      2.1352
     ]
    ],
-   "sha256": "0524efc1d74cce8d8648cd900488fee466ca95eaadaa63f7ff69ac010d0b3b4f",
+   "sha256": "964d09a353d6a6cb154ea16453cb028f8f850ae198de8b579dc85be15f0f63c8",
    "bounds_blender": [
     [
      -0.45371,
@@ -11168,7 +13572,7 @@
      2.01282
     ]
    ],
-   "sha256": "dfb77593dd7e7dd288d061f31c409351c56f1c47cfa4e8e10d1060f8cfb59c1c",
+   "sha256": "811c263f3a84baa0e20317899979ce7c8ad9681fd01c7e5529f64ab15808a226",
    "bounds_blender": [
     [
      -0.31544,
@@ -11464,7 +13868,7 @@
      2.01282
     ]
    ],
-   "sha256": "f165a36d206d83cbe919252fa50f4b46aefd99d2e7a500f9fe1873b45a06193e",
+   "sha256": "89532b74ef8a523ebdc462a99d4b562568d7960efb67ddff1b509286d10af3d2",
    "bounds_blender": [
     [
      -0.31484,
@@ -11760,7 +14164,7 @@
      2.64915
     ]
    ],
-   "sha256": "846f5b26d97f03665e0c7ebfa400f7b6249e9ddc3df0c7d68954fa2f06e7b408",
+   "sha256": "f7f18b8080faa3cd874d797c156df26c5dc96f4e46762f353149953c1a148b3a",
    "bounds_blender": [
     [
      -0.54711,
@@ -11773,11 +14177,15 @@
      0.68815
     ]
    ],
-   "tris": 2720,
+   "tris": 2760,
    "materials": [
     [
      "Icarus_Body",
      2720
+    ],
+    [
+     "jet_mechanical",
+     40
     ]
    ],
    "uv_layers": [
@@ -12034,7 +14442,7 @@
       ],
       [
        0.10865,
-       -0.35303,
+       -0.33852,
        2.64915
       ]
      ]
@@ -12107,7 +14515,7 @@
      2.64915
     ]
    ],
-   "sha256": "4fc7c97e477693ae1b5878ad5c1b1704c7ef5e91157b9b1e279c233efeea46bb",
+   "sha256": "0ccce5dace2a364d8fc1c89a4be1c305e18e4ea40d26d9f6cce8d2b8a75f323f",
    "bounds_blender": [
     [
      -0.54111,
@@ -12120,11 +14528,15 @@
      0.68815
     ]
    ],
-   "tris": 2708,
+   "tris": 2748,
    "materials": [
     [
      "Icarus_Body",
      2708
+    ],
+    [
+     "jet_mechanical",
+     40
     ]
    ],
    "uv_layers": [
@@ -12398,7 +14810,7 @@
       ],
       [
        0.00889,
-       -0.35303,
+       -0.33852,
        2.64915
       ]
      ]
@@ -12496,7 +14908,7 @@
      0.016
     ]
    ],
-   "sha256": "7b058e39426bf6081d966899ef90fbb50444269dd959cfc387c4b80f4ff9eaa2",
+   "sha256": "3c49e44a740c541c058673084dbf409e46e1abebabac023b815535dd022d6370",
    "bounds_blender": [
     [
      -0.022,
@@ -12568,7 +14980,7 @@
      0.014
     ]
    ],
-   "sha256": "31c073e1e99ec53e7448194410dced03c98aa26cef51151fd840061478fdeb07",
+   "sha256": "d8a53b1e1cc0d73ff33ad6b727916bc418730f9aaa8027cae8a3c9d919dedb4a",
    "bounds_blender": [
     [
      -0.011,
@@ -12640,7 +15052,7 @@
      0.01
     ]
    ],
-   "sha256": "193b97dde69d9c35c4b6c0fb1026d8422a20c7d21ab2aa97ed69b6ffc6e5de9d",
+   "sha256": "30d729bbf1046b760f201f784e9a9292b1aa9b14cd0e11210f8dec11c7952fb6",
    "bounds_blender": [
     [
      -0.0,
@@ -12760,7 +15172,7 @@
      0.016
     ]
    ],
-   "sha256": "ad3d19da3929903396027665d9aafe00a47b8aedc7d3c1c8b0920c6f6c6604b4",
+   "sha256": "d5aa19e2671a530eda6ecf8190f37bacf0e82375229bbccfb38dc595d592f30d",
    "bounds_blender": [
     [
      -0.022,
@@ -12832,7 +15244,7 @@
      0.014
     ]
    ],
-   "sha256": "882cf960e69157ee9d302f19bb7c1ee6e10a8afeebbf89ead2712e7d8aaa0106",
+   "sha256": "87a4b95e286771a426ae8e9264d91dcc62d6a7e60b3366b78980974db69487f6",
    "bounds_blender": [
     [
      -0.011,
@@ -12904,7 +15316,7 @@
      0.01
     ]
    ],
-   "sha256": "1a8f410ed6bd59e1080fed5d8898733b6da7ed22c93108b29c776970e47233dd",
+   "sha256": "89b7e51037b6fd7ec513af2c5ff3149261cb748d8fccc5e2209d4e314c0654f3",
    "bounds_blender": [
     [
      -0.0,
@@ -13023,7 +15435,7 @@
      0.646
     ]
    ],
-   "sha256": "9a464f5a3479ea7a773a5835aff8add94b6bf349dccb137c80e81591779c3de5",
+   "sha256": "8bdeb921d0a4152f2eaefe66d9cedbf69aafabca4941be3c20a3c88e29b9b835",
    "bounds_blender": [
     [
      -1.815,
@@ -13115,7 +15527,7 @@
      1.125
     ]
    ],
-   "sha256": "f624ec56eb280933f52f8925e51003c3e082652303b8c5bb0c78e3ce7e7f1fc2",
+   "sha256": "c47a669b426b90530cdec733e7818c7571e4fb551579c5651e30839e56c7a8a2",
    "bounds_blender": [
     [
      -0.05594,
@@ -13189,7 +15601,7 @@
      0.315
     ]
    ],
-   "sha256": "f421b2ce0e46b46d5fe7fefb94964580d1423523d27464e4a434f5e983d33de4",
+   "sha256": "83d14ffe4ff1ed9edaa47d04d60eff7e2488746dde8bf488d4ce44da64c78c22",
    "bounds_blender": [
     [
      -0.36971,
@@ -13263,7 +15675,7 @@
      0.2749
     ]
    ],
-   "sha256": "022eab5e24df7eae061a30260ca86ad166d562982f4303e50363ee9a5028ee06",
+   "sha256": "cb3b8b5ac820ee175d04a262685a82f6c402d6587b26c64adecb17d18ee6314b",
    "bounds_blender": [
     [
      -0.35866,
@@ -13335,7 +15747,7 @@
      5.68
     ]
    ],
-   "sha256": "222bf30937729f83ea38fcb5d459d9ddf72dc21ae2396d9e41a5d75ed23a5e4f",
+   "sha256": "2fdf0d11e9ed6a597568db59c2a1f7a41fa411521d46d9fd5b43c6fb790e0765",
    "bounds_blender": [
     [
      -0.36864,
@@ -13407,7 +15819,7 @@
      2.525
     ]
    ],
-   "sha256": "9a9467d8fb90c123ec1191a0812466b8a53f7fce245b63d083e6ef2cbc32e747",
+   "sha256": "f402edd1ddace7a687207ee4710e46c1763bc499cc94ec378969a53d96e9e8d5",
    "bounds_blender": [
     [
      -1.41,
@@ -13601,7 +16013,7 @@
      2.525
     ]
    ],
-   "sha256": "a2b84849909db2e80b72e7a9933542597c5c43beea01111892027608daf4a0f0",
+   "sha256": "4b6c31f4cfdb03bb9c3e7a4e5f730923719613b2fe4757cef4b9a36808678d08",
    "bounds_blender": [
     [
      -1.41,
@@ -13796,7 +16208,7 @@
      1.80428
     ]
    ],
-   "sha256": "1498c9b4177be195ed1723f4baf53964f42894be1f4859e9beed7b183fe426fa",
+   "sha256": "8cd477f09c5427083b0342420d2706a56c7ec2bd57b4972e3df6ae6b4c21a611",
    "bounds_blender": [
     [
      -1.366,
@@ -13891,7 +16303,7 @@
      1.80428
     ]
    ],
-   "sha256": "1a28c30174cacde6303f145843018924b5325919e0a885beb7a3b30304cb138b",
+   "sha256": "51b1e88cc7cf46204c1d7150ba925c14bd74bacd6d7855c45be1f34f9cfa2af5",
    "bounds_blender": [
     [
      -1.366,

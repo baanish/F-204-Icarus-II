@@ -35,7 +35,8 @@ BUDGET = {
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
     "stabilator": {"target": 2120, "cap": 2120, "objects": ("stabilator_visible",)},
     "fins": {"target": 1600, "cap": 1600, "objects": ("fin_skin", "ventral_fin")},
-    "structure_cores": {"target": 11000, "cap": 11000, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
+    # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole.
+    "structure_cores": {"target": 11200, "cap": 11600, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
     "fuel_cells": {"target": 5000, "cap": 5000, "objects": ("fuel_",)},
     "engine": {"target": 1500, "cap": 1500, "objects": ("engine_core",)},
