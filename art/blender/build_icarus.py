@@ -1034,6 +1034,8 @@ def _build(repo):
     checks.fuel_cell_clearance(TARGET)
     checks.internals_inside_skin(TARGET)
     checks.interior_visibility(TARGET)
+    checks.canopy_fit(TARGET)
+    checks.pilot_eye_leaks(TARGET)
     for module in modules():
         module.check(TARGET)
     import budget

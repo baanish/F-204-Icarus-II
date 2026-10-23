@@ -251,15 +251,18 @@ def _organise(p, icarus, internals, structure_mat):
     fus = O["fuselage"]
     # The canopy is its own loft on top of the body, so the body's top skin ran on under it as a floor across the
     # cockpit, and the frames there closed over the pilot as full rings. The cockpit opening is whatever of the skin
-    # and the frames lies inside the canopy's closed shape.
+    # lies inside the canopy's closed shape; the frames stop canopy.FRAME_CLEAR clear of it, room for the flanges
+    # under its foot.
     canopy_solid = interior.outward(canopy.build_canopy(p, structure_mat))
-    for obj in [fus] + [o for o in icarus.objects if o.name.startswith("frame_")]:
-        drop_inside(obj, canopy_solid)
+    drop_inside(fus, canopy_solid)
+    frame_cut = interior.grown(canopy_solid, canopy.FRAME_CLEAR)
+    for obj in [o for o in icarus.objects if o.name.startswith("frame_")]:
+        drop_inside(obj, frame_cut)
     # A stringer's faces run a frame bay or more, too long for drop_inside to clear the opening: cut it, 2 cm clear.
     stringer_cut = interior.grown(canopy_solid, 0.02)
     for obj in [o for o in icarus.objects if o.name.startswith("stringer_")]:
         interior.subtract(obj, [stringer_cut])
-    for o in (canopy_solid, stringer_cut):
+    for o in (canopy_solid, frame_cut, stringer_cut):
         bpy.data.objects.remove(o, do_unlink=True)
     side = lambda c: "L" if c.x >= 0 else "R"
     dorsal = lambda c: DORSAL[0] <= station(c) <= DORSAL[1] and c.z > DORSAL_Z and abs(c.x) < DORSAL_HALF_WIDTH
@@ -315,9 +318,10 @@ def _organise(p, icarus, internals, structure_mat):
     O["fin_skin"]["side_area_m2"] = round(side_area(O["fin_skin"]), 4)
     # The canopy's lower edge dips into the fuselage; keep the cockpit cell clear of it.
     solid = canopy.build_canopy(p, structure_mat)  # the closed canopy shape; the built hood and windscreen are open
-    # Grown 2 cm and thinned to a fifth of its faces: the cut takes on the cutter's faceting, and the full glass mesh
-    # would spend a thousand triangles of the cell on it.
-    canopy_cut = interior.grown(solid, 0.02)
+    # Grown as the frames are cut (canopy.FRAME_CLEAR), clear of the flanges under the glass's foot, and thinned to a
+    # fifth of its faces: the cut takes on the cutter's faceting, and the full glass mesh would spend a thousand
+    # triangles of the cell on it.
+    canopy_cut = interior.grown(solid, canopy.FRAME_CLEAR)
     canopy_cut.modifiers.new("coarse", "DECIMATE").ratio = 0.2
     interior.subtract(interior.outward(O["cockpit_cell"]), [canopy_cut])
     for o in (solid, canopy_cut):

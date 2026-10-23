@@ -759,6 +759,9 @@ class Space:
         self.inner_glass = bvh([O[canopy.GLASS_INNER], O[canopy.WINDSCREEN_INNER]])
         self.sill_objects = [O[n] for n in ("skin_forward_L", "skin_forward_R", "dorsal_cover")]
         self.sill = bvh(self.sill_objects)  # the cut skin under the seam
+        uncut = canopy.skin_solid(p)
+        self.uncut = bvh([uncut])  # the skin as if the canopy had cut no opening in it
+        canopy.remove(uncut)
         self._rings = {}
         self.internals = internals
 
@@ -778,6 +781,23 @@ class Space:
         psi = canopy.seam_psi(self.outer_glass, self.skin, f, 1)
         point, _, _ = canopy.glass_at(self.inner_glass, f, psi)
         return point.x, point.z
+
+    def skin_top(self, s, x, depth=0.0):
+        """z of the uncut skin's top at (s, x): over the opening, where the glass's foot meets it. With depth, the point
+        that far in under it, along its normal."""
+        q, n = must(hit(self.uncut, P(s, x, 3.0), -Z, 5.0), "the skin over s %.3f, x %.3f" % (s, x))
+        return q + n * depth if depth else q.z  # hit() turns the normal back up toward the ray's origin
+
+    def foot_x(self, s):
+        """|x| of the hood glass's foot at s, on the skin, out to its tail; 0 past the tail."""
+        points = self.internals.section_points(bpy.data.objects[canopy.GLASS_OUTER], s)
+        return max((abs(x) for x, _ in points), default=0.0)
+
+    def flange_z(self, s, x):
+        """z of the underside of the fixed sill's flange hanging inside the glass's foot at (s, |x| x) (canopy.FLANGE),
+        or of the skin there where no flange hangs."""
+        found = hit(self.sill, P(s, x, self.skin_top(s, x) - 0.12), Z, 0.2)  # from under the flange's reach
+        return must(found, "the sill over s %.3f, x %.3f" % (s, x))[0].z
 
     def skin_x(self, s, z, inset):
         """|x| of the skin's section pulled in by inset, at (s, z), on the left side."""
@@ -1148,21 +1168,30 @@ def tub(g, uv, kit, atlas, space):
         foot = [P(3.50, side * q, floor) for q in bi.spaced(0.20, space.wall_x(3.50, floor) - 0.003, 3)]
         head = [P(top_s, side * q, top_z) for q in bi.spaced(0.26, space.wall_x(top_s, top_z) - 0.003, 3)]
         g.put(grid_sheet(uv, [foot, [a.lerp(b, 0.5) for a, b in zip(foot, head)], head], atlas.chart("tub", "kick%d" % side)), None, "tub")
-    # the rear bulkhead behind the seat, up to the ledge line, and the deck aft of it under the hood's tail, closing
-    # the cockpit back to the aft bow at the seam line
+    # the rear bulkhead behind the seat, its sides out behind the lining, and from its top the deck aft under the hood's
+    # tail, closing the cockpit back to the tail. Under the fixed sill's flange, the inner frames and the aft bows the
+    # deck runs low, its edges out under the flange and the skin; behind them it rises to the skin's line across the
+    # opening, its edges out under the skin, to the tail.
     s0, s1 = LAYOUT["bulkhead"]
-    sx, sz = space.seam(s0)
     fs = bi.spaced(-1, 1, 7)
-    rows = []
-    for t in bi.spaced(0.0, 1.0, 5):
-        rows.append([P(s0, f * (space.wall_x(s0, floor) * (1 - t) + (sx - 0.020) * t),
-                       floor + (sz - 0.025 + 0.05 * (1 - f * f) - floor) * t) for f in fs])
-    g.put(grid_sheet(uv, rows, atlas.chart("back", "bulkhead")), None, "tub")
+    tail = max((o.matrix_world @ v.co).y for o in [bpy.data.objects[canopy.GLASS_OUTER]] for v in o.data.vertices) + bi.S0
     deck = []
-    for s in bi.spaced(s0, 5.03, 3):
-        sx, sz = space.seam(s)
-        deck.append([P(s, f * (sx - 0.020), sz - 0.025 + 0.05 * (1 - f * f)) for f in fs])
-    g.put(grid_sheet(uv, deck, atlas.chart("tub", "aft_deck")), None, "tub")
+    for s in (s0, 5.095):
+        w = space.foot_x(s)
+        low = min(space.flange_z(s, w - 0.0025), space.skin_top(s, w) - 0.03) - 0.004  # under the flange, out past it
+        deck.append([P(s, f * (w + 0.02), low + 0.15 * max(0.0, 1 - 1.5 * abs(f))) for f in fs])
+    for s in (5.10, 5.30, tail - 0.01):  # hugging the glass's foot, its edges out under the skin
+        w = space.foot_x(s)
+        xs = [-w - 0.012, -w + 0.002, -0.75 * w, 0.0, 0.75 * w, w - 0.002, w + 0.012]  # close by the foot, little sag
+        # 4.5 mm in at the foot where the canopy's shape ends (PROFILE's last section), not over it: the interior's rule
+        deck.append([space.skin_top(s, x, -(0.006 if abs(x) > w else 0.0045 if abs(x) > w / 2 and s < 5.11 else 0.002))
+                     for x in xs])
+    rows = []
+    for t in bi.spaced(0.0, 1.0, 5)[:-1]:
+        z = floor + (deck[0][0].z - floor) * t  # the side edge's height
+        rows.append([P(s0, f * (space.wall_x(s0, z) + 0.012), floor + (q.z - floor) * t) for f, q in zip(fs, deck[0])])
+    g.put(grid_sheet(uv, rows + deck[:1], atlas.chart("back", "bulkhead")), None, "tub")
+    g.put(grid_sheet(uv, deck, "structure"), None, "tub")  # behind the headbox, on a strip
     pedals(g, uv, kit)
 
 
@@ -1674,7 +1703,8 @@ def measure(icarus):
     w = area[ok]
     order = np.argsort(d)
     cw = np.cumsum(w[order])
-    out["px_per_m_median"] = float(d[order][np.searchsorted(cw, cw[-1] / 2)])
+    # to 0.1 px/m: float32 UVs put a chart drawn at exactly a band's edge (the tub's 300) a hair either side of it
+    out["px_per_m_median"] = round(float(d[order][np.searchsorted(cw, cw[-1] / 2)]), 1)
     out["swatch_area_share"] = float(w[d < 1.0].sum() / w.sum())
     flat = np.nonzero(ok)[0][d < 1.0]
     groups = LAST.get("face_groups", [])
@@ -1920,7 +1950,7 @@ def check(icarus):
     import internals
 
     body = internals.inner_solid(bi.PARAMS, 0.004, LAYOUT["coaming"][0] - 0.1, 5.4)
-    hood = internals.outward(canopy.build_canopy(None, bpy.data.materials[SLOT]))
+    hood = internals.outward(canopy.build_canopy(bi.PARAMS, bpy.data.materials[SLOT]))
     solids = [tree_of([body]), tree_of([hood])]
     for o in (body, hood):
         bpy.data.objects.remove(o, do_unlink=True)

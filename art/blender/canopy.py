@@ -1,11 +1,13 @@
 """The canopy: a fixed windscreen, the hood hinged along its left sill, their frames, and the design eye point the
 cockpit is fitted to.
 
-The glass is lofted from PROFILE and kept where it stands above the fuselage skin, in two layers: outer panes on
-fighter1_canopy, which the cockpit view hides, and inner panes GLASS_GAP inside them on fighter1_canopy_int, which the
-cockpit view draws and the game cracks. The hood's frame (sill rails and three bows) is the canopy part's mesh, on the
-skin. The windscreen's arch, posts and base rails, and the fixed sill beside the hood, merge into the forward skin
-panels, split at x = 0. Every frame straddles the glass, placed by raycasts against the panes and the uncut fuselage.
+The glass is lofted from PROFILE, its tail faired down into the spine, and cut off on the fuselage skin, in two layers:
+outer panes on fighter1_canopy, which the cockpit view hides, and inner panes GLASS_GAP inside them on
+fighter1_canopy_int, which the cockpit view draws and the game cracks. parts.organise cuts the skin with the same
+closed shape, so glass and skin share one edge. The hood's frame (sill rails and three bows) is the canopy part's mesh.
+The windscreen's arch, posts and base rails, and the fixed sill beside the hood, merge into the forward skin panels,
+split at x = 0. Every frame straddles the glass, placed by raycasts against the panes and the uncut fuselage, and comes
+down to the seam with its base set on the skin.
 
 The hood turns about its left sill line, which rises aft, so the joint between windscreen and hood lies in the plane
 square to that hinge: each point of the opening hood stays in its own such plane, and none swings forward into the
@@ -46,9 +48,20 @@ PROFILE = [
     (4.70, 0.390, 1.100, 0.700),
     (5.10, 0.310, 1.035, 0.820),
 ]
+# Behind the aft bow the last section runs on to TAIL_END and sinks into the spine, its sides first and its crown last
+# (tail_rings), so the hood fairs into the spine instead of ending in a step over it.
+TAIL_END, TAIL_ROWS = 5.40, 6
 WINDSCREEN_ROWS, HOOD_ROWS, RING = 4, 9, 40  # loft stations ahead of and behind windscreen_end_s; points per section
 GLASS_GAP = 0.004  # the inner panes sit this far inside the outer ones
 FRAME_HALF = 0.006  # frames straddle the glass by this much either side
+# Inside the opening, flanges drop FLANGE under the glass's foot from the windscreen's base rails and the fixed sills,
+# a wall behind the cockpit's sill ledge, which stands lower than the foot; the fuselage's frames stop FRAME_CLEAR clear
+# of the canopy's shape (parts.organise) to leave them room.
+FLANGE, FRAME_CLEAR = 0.04, 0.03
+# The clear field of the stock canopy texture (fighter1_canopy_int_b, alpha under 0.15) spans u 0.182 to 0.817 at
+# v 0.30 and u 0.225 to 0.777 at v 0.80, with an opaque tan border round it; tools/canopy_clear_window.py measures it.
+# The glass UVs stay inside this box, (u0, v0, u1, v1), at least 3% of the texture clear of that edge.
+CLEAR_UV = (0.25, 0.33, 0.75, 0.77)
 HINGE_CLEAR = 0.035  # the hinge line stands this far outboard of the left seam, at the fixed sill's outer edge
 SKIN = "Icarus_Body"
 # The design eye, (s, x, z) as in PARAMS: where the stock seat's pilot looks from. tools/export_blockout.py writes it to
@@ -92,37 +105,39 @@ def build(p, mats):
     skin = bvh([fuselage])
     solid = build_canopy(p, outer_mat)
     cut = cut_edge(fuselage, solid)
-    sheet = above_skin(solid, skin)
+    on_skin = skin_solid(p)
+    sheet = keep_faces("canopy_sheet", solid, lambda f: True)
+    import parts  # imports this module back
+
+    parts.drop_inside(sheet, on_skin)  # the glass ends on the skin's cut edge
+    over_skin = signed_distance(on_skin)
+    remove(on_skin)
     glass = bvh([solid])  # the frames are placed on the whole shape, which runs on under the skin
     bpy.data.objects.remove(solid, do_unlink=True)
 
     s0, s1 = CANOPY["windscreen_end_s"], PROFILE[-1][0]
     hood, rails = Solids(), {}
     for side in (1, -1):
-        rails[side] = sill_rail(hood, glass, skin, bi.spaced(s0, s1 - 0.004, 8), side)
+        rails[side] = sill_rail(hood, glass, skin, over_skin, bi.spaced(s0, s1 - 0.004, 8), side)
     a, u = hinge_line(rails[1])
-    for i, bow in enumerate(((joint(a, u, 0.003), joint(a, u, 0.035)), (station(4.07), station(4.13)),
-                             (station(5.05), station(s1 - 0.004)))):
+    for bow in ((joint(a, u, 0.003), joint(a, u, 0.035)), (station(4.07), station(4.13)),
+                (station(5.05), station(s1 - 0.004))):
         rows = []
         for f in bow:
-            left, right = seam_psi(glass, skin, f, 1), seam_psi(glass, skin, f, -1)
-            r = glass_at(glass, f, left)[2]
-            rows.append((f, bi.spaced(left + 0.004 / r, right - 0.004 / r, BOW_COLUMNS)))
-        glass_band(hood, glass, rows, SKIN, extend=0.010 if i == 2 else None)  # the aft bow overhangs the end cap
+            rows.append((f, bi.spaced(seam_psi(glass, skin, f, 1), seam_psi(glass, skin, f, -1), BOW_COLUMNS)))
+        glass_band(hood, glass, rows, SKIN, over_skin, lambda i, j: j in (0, BOW_COLUMNS - 1))
     if hood.tris() > BUDGET["hood_frame"]["cap"]:
         raise ValueError("canopy: hood frame is %d triangles, over %d" % (hood.tris(), BUDGET["hood_frame"]["cap"]))
 
     windscreen = split(sheet, WINDSCREEN, a, u, ahead=True)
     hood_glass = split(sheet, GLASS_OUTER, a, u, ahead=False)
     bpy.data.objects.remove(sheet, do_unlink=True)
-    windscreen_inner = inner_pane(WINDSCREEN_INNER, windscreen, inner_mat)
-    hood_inner = inner_pane(GLASS_INNER, hood_glass, inner_mat)
+    windscreen_inner = inner_pane(WINDSCREEN_INNER, windscreen, inner_mat, over_skin)
+    hood_inner = inner_pane(GLASS_INNER, hood_glass, inner_mat, over_skin)
     # Glass gets no collider or LOD1 hull; the windscreen, a part in TREE, takes its role from parts.organise.
     for obj, role in ((hood_glass, "visual"), (windscreen_inner, "cockpit_view"), (hood_inner, "cockpit_view")):
         obj["role"] = role
         obj["mass_kg"] = 0
-    import parts  # imports this module back
-
     parts.recentre(windscreen)  # organise recentres its parts: done here, that moves nothing, so the child stays put
     windscreen_inner.parent = windscreen
     windscreen_inner.matrix_parent_inverse = windscreen.matrix_world.inverted()
@@ -137,7 +152,7 @@ def build(p, mats):
 
     tris = {"windscreen_frame": 0, "fixed_sill": 0}
     for side, sd in ((1, "L"), (-1, "R")):
-        frame, sill = windscreen_frame(glass, skin, a, u, side), Solids()
+        frame, sill = windscreen_frame(glass, skin, over_skin, a, u, side), Solids()
         fixed_sill(sill, glass, skin, [(s, side * x) for s, x in cut if side * x > 0], s0, s1 - 0.004, side)
         tris["windscreen_frame"] += frame.tris()
         tris["fixed_sill"] += sill.tris()
@@ -150,8 +165,8 @@ def build(p, mats):
 
 
 def check(icarus):
-    """The glass within its caps, the eye geometry in Cockpit rule 27's bands, and the hood opening clear of the
-    windscreen."""
+    """The glass within its caps and its UVs in CLEAR_UV, the eye geometry in Cockpit rule 27's bands, and the hood
+    opening clear of the windscreen."""
     count = lambda name: sum(len(f.vertices) - 2 for f in bpy.data.objects[name].data.polygons)
     import budget
 
@@ -161,6 +176,13 @@ def check(icarus):
             over.append("%s glass %d > %d" % (layer, sum(map(count, names)), GLASS_CAP))
     if over:
         raise ValueError("canopy over budget: " + "; ".join(over))
+    u0, v0, u1, v1 = CLEAR_UV
+    stray = ["%s (%.3f, %.3f)" % (name, *uv) for name in (WINDSCREEN, WINDSCREEN_INNER, GLASS_OUTER, GLASS_INNER)
+             for uv in (d.uv for d in bpy.data.objects[name].data.uv_layers[0].data)
+             if not (u0 - 1e-6 <= uv[0] <= u1 + 1e-6 and v0 - 1e-6 <= uv[1] <= v1 + 1e-6)]
+    if stray:
+        raise ValueError("canopy: %d glass UVs outside the stock texture's clear window %s, first %s"
+                         % (len(stray), CLEAR_UV, stray[0]))
     eye = eye_geometry(EYE)
     misses = ["%s %.3f outside %.2f to %.2f" % (k, eye[k], *band) for k, band in EYE_BANDS.items()
               if not band[0] <= eye[k] <= band[1]]
@@ -202,17 +224,72 @@ def section(s, hw, top, bot):
 
 
 def build_canopy(p, mat):
-    """The closed canopy shape, faces outward; parts.organise cuts the cockpit opening with it. p is unused: the shape
-    is PROFILE."""
+    """The closed canopy shape, faces outward: PROFILE, then its tail; parts.organise cuts the cockpit opening with
+    it."""
     end = CANOPY["windscreen_end_s"]
     stations = bi.spaced(PROFILE[0][0], end, WINDSCREEN_ROWS) + bi.spaced(end, PROFILE[-1][0], HOOD_ROWS)[1:]
-    obj = bi.loft("canopy", [section(*row) for row in bi.resample(PROFILE, stations)], cap_back=True, cap_front=True)
+    rings = [section(*row) for row in bi.resample(PROFILE, stations)]
+    obj = bi.loft("canopy", rings + tail_rings(p, rings[-1]), cap_back=True, cap_front=True)
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(obj.data)
     bm.free()
     return bi.finish(obj, mat)
+
+
+def tail_rings(p, last):
+    """The rings behind PROFILE's last section (section()'s points): the crown arc's height over the skin shrinks to
+    nothing and below by TAIL_END, faster toward its sides, so the seam closes in to a point on the spine. Each point
+    under the arc keeps its depth under the arc point above it, so a ring cannot fold."""
+    on_skin = skin_solid(p)
+    skin = bvh([on_skin])
+    s_last = PROFILE[-1][0]
+    hw = PROFILE[-1][1]
+    skin_z = lambda s, x: must(hit(skin, bi.P(s, x, 3.0), -Z, 5.0), "the spine at s %.2f, x %.3f" % (s, x))[0].z
+    arc = lambda k: last[k if k <= RING // 2 else RING - k]  # the crown arc runs k 0 to RING / 2; k and RING - k share x
+    base = [(q.x, arc(k).z - skin_z(s_last, q.x), arc(k).z - q.z) for k, q in enumerate(last)]
+    rings = []
+    for s in bi.spaced(s_last, TAIL_END, TAIL_ROWS + 1)[1:]:
+        t = (s - s_last) / (TAIL_END - s_last)
+        rings.append([bi.P(s, x, skin_z(s, x) + h * (1 - t * t * (1.15 + 0.6 * (x / hw) ** 2)) - d) for x, h, d in base])
+    remove(on_skin)
+    return rings
+
+
+def skin_solid(p):
+    """The fuselage skin's own loft over the canopy's length, closed: its sides are the skin's faces, so the glass cut
+    off on it, and the frames seated on it, end on the edge the canopy cuts in the skin."""
+    import internals
+
+    stations = bi.fuselage_stations(p)
+    i0 = max(i for i, s in enumerate(stations) if s <= PROFILE[0][0] - 0.05)
+    i1 = min(i for i, s in enumerate(stations) if s >= TAIL_END + 0.05)
+    obj = bi.loft("skin_solid", [bi.blended_ring(p, s) for s in stations[i0:i1 + 1]], cap_back=True, cap_front=True)
+    return internals.outward(obj)
+
+
+def signed_distance(on_skin):
+    """How far a point stands out of the solid on_skin (skin_solid), negative inside it."""
+    from mathutils.bvhtree import BVHTree
+
+    bm = bmesh.new()
+    bm.from_mesh(on_skin.data)
+    bm.transform(on_skin.matrix_world)
+    bm.normal_update()
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+
+    def over(q):
+        at, n, _, dist = tree.find_nearest(q)
+        return dist if (q - at).dot(n) >= 0 else -dist
+    return over
+
+
+def remove(obj):
+    data = obj.data
+    bpy.data.objects.remove(obj, do_unlink=True)
+    bpy.data.meshes.remove(data)
 
 
 def centre_z(s):
@@ -251,12 +328,6 @@ def keep_faces(name, source, keep, cut=None):
     return obj
 
 
-def above_skin(solid, skin):
-    """The solid's faces with a corner above the fuselage skin (the end caps stay whole)."""
-    above = lambda v: hit(skin, v.co, Z) is None
-    return keep_faces("canopy_sheet", solid, lambda f: len(f.verts) > 4 or any(above(v) for v in f.verts))
-
-
 def split(sheet, name, a, u, ahead):
     """The windscreen (ahead) or the hood's pane: the sheet cut by the joint plane through a, square to the hinge u."""
     side = -1 if ahead else 1
@@ -265,14 +336,14 @@ def split(sheet, name, a, u, ahead):
     return obj
 
 
-def inner_pane(name, outer, mat):
-    """outer's twin GLASS_GAP inside it, facing in, on mat."""
+def inner_pane(name, outer, mat, over_skin):
+    """outer's twin GLASS_GAP inside it, facing in, on mat. Its edge on the skin stays on outer's."""
     me = outer.data.copy()
     me.name = name
     bm = bmesh.new()
     bm.from_mesh(me)
     bm.normal_update()
-    moved = [v.co - v.normal * GLASS_GAP for v in bm.verts]
+    moved = [v.co - v.normal * (0.0 if v.is_boundary and abs(over_skin(v.co)) < 1e-4 else GLASS_GAP) for v in bm.verts]
     for v, co in zip(bm.verts, moved):
         v.co = co
     bmesh.ops.reverse_faces(bm, faces=bm.faces)
@@ -288,17 +359,18 @@ def inner_pane(name, outer, mat):
 def unroll_uvs(obj):
     """UVs inside the clear window of the stock canopy texture both glass materials sample (fighter1_canopy_int_b,
     the Revoker hood's outline, clear inside and an opaque tan border outside, set to repeat): u round the section
-    with the crown at 0.5, v along the length from 0.30 (the outline's narrow nose lies below) to 0.95. UVs run past
-    0..1 sampled the border, which showed through the glass as a tan Y from the cockpit."""
+    with the crown at 0.5, v along the length, both held in CLEAR_UV. UVs past it sampled the border, which showed
+    through the glass as a tan tint."""
     me = obj.data
     layer = me.uv_layers.new(name="UVMap")
-    s0, s1 = PROFILE[0][0], PROFILE[-1][0]
+    s0, s1 = PROFILE[0][0], TAIL_END
+    u0, v0, u1, v1 = CLEAR_UV
     for loop in me.loops:
         co = me.vertices[loop.vertex_index].co
         s = co.y + bi.S0
         psi = math.atan2(co.x, co.z - centre_z(s))
-        layer.data[loop.index].uv = (0.5 + 0.4 * max(-1.0, min(1.0, psi / (math.pi / 2))),
-                                     0.30 + 0.65 * min(max((s - s0) / (s1 - s0), 0.0), 1.0))
+        layer.data[loop.index].uv = (u0 + (u1 - u0) * 0.5 * (1 + max(-1.0, min(1.0, psi / (math.pi / 2)))),
+                                     v0 + (v1 - v0) * min(max((s - s0) / (s1 - s0), 0.0), 1.0))
 
 
 def cut_edge(fuselage, solid):
@@ -379,27 +451,40 @@ def seam_psi(glass, skin, frame, side):
     for _ in range(22):
         mid = 0.5 * (lo + hi)
         lo, hi = (lo, mid) if under(mid) else (mid, hi)
-    return side * 0.5 * (lo + hi)
+    return side * (lo - 1e-5)  # a hair onto the glass, which ends on the skin there
 
 
-def glass_band(out, glass, rows, mat, extend=None, taper_end=False):
-    """A frame band straddling the glass: rows of (frame, [psi...]); extend shifts the last row aft (s) to overhang a
-    cap, and taper_end thins the last row to a sliver on the glass, so the band dies out with no end face to catch
-    light."""
-    outer, inner = [], []
-    for i, (frame, psis) in enumerate(rows):
-        o_row, i_row = [], []
-        last = i == len(rows) - 1
-        for psi in psis:
-            point, n, _ = glass_at(glass, frame, psi)
-            if extend and last:
-                point = point + Y * extend
-            half = 0.0005 if taper_end and last else FRAME_HALF
-            o_row.append(point + n * half)
-            i_row.append(point - n * half)
-        outer.append(o_row)
-        inner.append(i_row)
+def glass_band(out, glass, rows, mat, over_skin=None, base=lambda i, j: False):
+    """A frame band straddling the glass: rows of (frame, [psi...]). With over_skin (signed_distance), its outside
+    stands on the skin: the base points, base(row, column), go up or down in their plane onto it, and no other point stays
+    under it. Its inside, within the canopy, is the cockpit's."""
+    outer, inner = band_rows(glass, rows)
+    for i, row in enumerate(outer if over_skin else ()):
+        for j, q in enumerate(row):
+            if base(i, j) or over_skin(q) < 0:
+                row[j] = dropped(q, over_skin, rows[i][0][1])
     out.slab(outer, inner, mat)
+
+
+def band_rows(glass, rows):
+    """The outer and inner grids of a band FRAME_HALF either side of the glass, rows of (frame, [psi...])."""
+    outer, inner = [], []
+    for frame, psis in rows:
+        points = [glass_at(glass, frame, psi)[:2] for psi in psis]
+        outer.append([q + n * FRAME_HALF for q, n in points])
+        inner.append([q - n * FRAME_HALF for q, n in points])
+    return outer, inner
+
+
+def dropped(q, over_skin, up):
+    """q moved along up (its frame plane's, so it stays in that plane) onto the skin, from within 5 cm of it."""
+    lo, hi = -0.05, 0.05
+    if not over_skin(q - up * lo) > 0 > over_skin(q - up * hi):
+        raise ValueError("canopy: %s is more than 5 cm off the skin" % (tuple(round(c, 3) for c in q),))
+    for _ in range(30):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if over_skin(q - up * mid) > 0 else (lo, mid)
+    return q - up * 0.5 * (lo + hi)
 
 
 def smooth(values, passes=2):
@@ -409,66 +494,85 @@ def smooth(values, passes=2):
     return v
 
 
-def sill_rail(out, glass, skin, stations, side):
+def sill_rail(out, glass, skin, over_skin, stations, side):
     """The hood's sill rail on one side, from its seam up the glass; returns the seam point at each station."""
     frames = [station(s) for s in stations]
-    psis = smooth([seam_psi(glass, skin, f, side) for f in frames])
+    raw = [seam_psi(glass, skin, f, side) for f in frames]
     rows, seam = [], []
-    for f, psi in zip(frames, psis):
+    for f, psi, foot in zip(frames, smooth(raw), raw):
         point, _, r = glass_at(glass, f, psi)
         seam.append(point)
-        rows.append((f, [psi + side * 0.004 / r, psi - side * 0.0175 / r, psi - side * 0.035 / r]))
-    glass_band(out, glass, rows, SKIN)
+        rows.append((f, [foot, psi - side * 0.0175 / r, psi - side * 0.035 / r]))  # the base on the seam itself
+    glass_band(out, glass, rows, SKIN, over_skin, lambda i, j: j == 0)
     return seam
 
 
-def windscreen_frame(glass, skin, a, u, side):
+def windscreen_frame(glass, skin, over_skin, a, u, side):
     """One half of the windscreen's frame: the arch from the seam to the crown just ahead of the joint, the post at 40
-    degrees and the base rail along the seam, both running back under the arch."""
+    degrees from under the arch forward to where it meets the skin, the base rail along the seam with its flange,
+    back under the arch, and the wall under the glass's front edge."""
     out = Solids()
     rows = []
     for f in (joint(a, u, -0.035), joint(a, u, -0.003)):
-        seam = seam_psi(glass, skin, f, side)
-        r = glass_at(glass, f, seam)[2]
-        rows.append((f, bi.spaced(seam + side * 0.004 / r, 0.0, ARCH_COLUMNS)))
-    glass_band(out, glass, rows, SKIN)
+        rows.append((f, bi.spaced(seam_psi(glass, skin, f, side), 0.0, ARCH_COLUMNS)))
+    glass_band(out, glass, rows, SKIN, over_skin, lambda i, j: j == 0)
     psi = side * math.radians(40)
     under_arch = glass_at(glass, joint(a, u, -0.02), psi)[0].y + bi.S0
-    start = next(s for s in bi.spaced(PROFILE[0][0], under_arch, 40) if hit(glass, *ray(station(s), psi)) is not None) + 0.03
-    rows = []
-    for s in bi.spaced(under_arch, start, 5):  # aft to front: the post thins out onto the glass at its front
+    on = lambda s: glass_at(glass, station(s), psi)[0]
+    lo, hi = PROFILE[0][0], under_arch  # where the post's line on the glass goes under the skin, ahead
+    for _ in range(30):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if over_skin(on(mid)) < 0 else (lo, mid)
+    stations, rows = bi.spaced(under_arch, hi, 5), []
+    for s in stations:  # aft to front: the post comes down onto the skin at its front
         r = glass_at(glass, station(s), psi)[2]
         rows.append((station(s), [psi - 0.015 / r, psi + 0.015 / r]))
-    glass_band(out, glass, rows, SKIN, taper_end=True)
-    base = [station(s) for s in bi.spaced(PROFILE[0][0] + 0.04, CANOPY["windscreen_end_s"] - 0.01, 6)]
+    glass_band(out, glass, rows, SKIN, over_skin, lambda i, j: i == len(rows) - 1)
+    base = [station(s) for s in bi.spaced(PROFILE[0][0] + 0.005, CANOPY["windscreen_end_s"] - 0.01, 6)]
     rows = []
-    for f, psi in zip(base, smooth([seam_psi(glass, skin, f, side) for f in base])):
+    raw = [seam_psi(glass, skin, f, side) for f in base]
+    for f, psi, foot in zip(base, smooth(raw), raw):
         r = glass_at(glass, f, psi)[2]
-        rows.append((f, [psi + side * 0.004 / r, psi - side * 0.025 / r]))
-    glass_band(out, glass, rows, SKIN)
+        rows.append((f, [foot, foot, psi - side * 0.025 / r]))
+    # the base rail's first column is its flange, FLANGE straight down from its inside at the foot, 3 mm thick
+    outer, inner = band_rows(glass, rows)
+    for i, (frame, _) in enumerate(rows):
+        outer[i][1] = dropped(outer[i][1], over_skin, frame[1])
+        inner[i][0] = inner[i][1] - Z * FLANGE
+        outer[i][0] = inner[i][0] + (outer[i][1] - inner[i][1]).normalized() * 0.003
+    out.slab(outer, inner, SKIN)
+    # the front wall: under the glass's front edge, the canopy's own front section closes the nose off from the
+    # cockpit, from the section's foot up to the skin, 3 mm thick inside the canopy's shape
+    s_front, hw, top, bot = PROFILE[0]
+    zmid = bot + 0.02
+    cols = [side * hw * 0.995 * k / 6 for k in range(7)]
+    foot = [zmid - (zmid - bot) * (1 - (x / hw) ** 4) ** 0.25 + 0.002 for x in cols]
+    edge = [dropped(bi.P(s_front, x, zmid + (top - zmid) * math.sqrt(1 - (x / hw) ** 2)), over_skin, Z).z + 0.0015  # over the chords' sag
+            for x in cols]
+    wall = lambda s: [[bi.P(s, x, z) for x, z in zip(cols, zs)] for zs in (foot, edge)]
+    out.slab(wall(s_front + 0.001), wall(s_front + 0.004), SKIN)
     return out
 
 
 def fixed_sill(out, glass, skin, cut, s0, s1, side):
-    """The fixed sill on the fuselage, 8 mm proud, across the skin's cut edge beside the hood. The cut steps ring by
-    ring (whole skin faces are dropped), so the sill's outer edge lies past the outermost cut point within a skin ring
-    either way, smoothed, and its inner edge clears the hood's sill rail or, where the cut leaves skin inside the hood's
-    wall, covers it. Inboard of the skin the top runs on the skin's tangent line, which a convex skin stays under, and a
-    3 cm flange drops from the inner edge so nothing stepped shows with the hood open. cut holds (s, distance out from
-    the centreline) on this side."""
+    """The fixed sill on the fuselage, 8 mm proud, across the skin's cut edge beside the hood: its outer edge past the
+    outermost cut point within a skin ring either way, smoothed, its inner edge 4 mm inside the glass's foot. Its
+    underside lies on the skin's tangent line, which a convex skin stays under, and a flange
+    drops from its inner edge, inside the opening, FLANGE under the glass's foot, so nothing stepped shows with the
+    hood open and the cockpit's ledge, lower than the foot, has a wall behind it. cut holds (s, distance out from the centreline) on this side."""
     ss = sorted({round(s, 3) for s, _ in cut if s0 - 0.3 < s < s1 + 0.3})
     ring = max(b - a for a, b in zip(ss, ss[1:]))
     samples = bi.spaced(s0, s1, 3 * SILL_ROWS - 2)
     outer = smooth([max(u for t, u in cut if abs(t - s) <= ring) for s in samples], 3)[::3]
     rows = samples[::3]
-    inner = []
+    inner, foot = [], []
     for s in rows:
         f = station(s)
-        wall = side * glass_at(glass, f, seam_psi(glass, skin, f, side))[0].x
-        inside = [u for t, u in cut if abs(t - s) <= ring and wall - 0.05 < u]
-        inner.append(min([wall + 0.010] + [u - 0.004 for u in inside]))  # the rail stands 6 mm off the glass
+        seam = glass_at(glass, f, seam_psi(glass, skin, f, side))[0]
+        inner.append(side * seam.x - 0.004)  # the skin's cut edge is the glass's foot: just inside it
+        foot.append(seam.z)
     top, low = [], []
-    for s, u_edge, u_in in zip(rows, outer, smooth(inner, 3)):
+    for s, u_edge, u_in, z_foot in zip(rows, outer, smooth(inner, 3), foot):
         zc = centre_z(s)
         u_out = max(u_edge + 0.004, u_in + 0.012)
         sk = [must(hit(skin, bi.P(s, side * u, zc + 0.5), -Z, 0.75), "the sill at s %.2f" % s)[0]
@@ -477,9 +581,12 @@ def fixed_sill(out, glass, skin, cut, s0, s1, side):
         n = Vector((-side * slope, 0.0, 1.0)).normalized()
         on_line = lambda u: bi.P(s, side * u, sk[0].z + slope * (u - u_out))
         lip, mid = on_line(u_in), on_line(0.5 * (u_in + u_out))
-        step = X * side * 0.006
-        top.append([lip - Z * 0.03, lip + Z * 0.008, mid + n * 0.008] + [q + n * 0.008 for q in sk])
-        low.append([lip - Z * 0.03 + step, lip - Z * 0.003 + step, mid - n * 0.003] + [q - n * 0.003 for q in sk])
+        step = X * side * 0.003
+        # FLANGE under the glass's foot, wherever the top is, within the room the frames leave round the canopy
+        under = must(hit(glass, bi.P(s, side * u_in, z_foot - 0.2), Z, 0.4), "the canopy over the flange at s %.2f" % s)[0]
+        flange = bi.P(s, side * u_in, max(min(lip.z, z_foot) - FLANGE, under.z - FRAME_CLEAR + 0.002))
+        top.append([flange, lip + Z * 0.008, mid + n * 0.008] + [q + n * 0.008 for q in sk])
+        low.append([flange + step, lip - Z * 0.003 + step, mid] + sk)
     out.slab(top, low, SKIN)
 
 

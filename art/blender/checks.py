@@ -2,13 +2,16 @@
 
 Fuel cells must not touch anything but structure: not the skin (a cell showing through it), not an intake duct or
 shock cone, not the wing roots buried in the fuselage, not the engine or another cell. No internal part may cut
-through the skin.
+through the skin. The canopy's glass and frames meet the skin on one edge, and from the design eye nothing but the
+glass shows the sky.
 """
 import bmesh
 import bpy
 import math
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
+
+Z = Vector((0, 0, 1))
 
 
 def tree(obj, slot=None):
@@ -206,13 +209,18 @@ def interior_visibility(icarus, allow_openings=True):
                 # gives no clearance and must fail too; checking intersections alone misses open skin gaps.
                 hit, _, _, distance = ray_cast(q + origin, inward, 30.0001)
                 if hit is None or distance >= 29.9999:
+                    tangent = direction.cross(Vector((0, 0, 1)))
+                    tangent = tangent.normalized() if tangent.length > .1 else Vector((1, 0, 0))
+                    across = direction.cross(tangent)
+                    offsets = (Vector(), tangent * 1e-5, tangent * -1e-5, across * 1e-5, across * -1e-5)
+                    # A ray down a shell seam, through a vertex seen end on, can slip between the faces that share
+                    # it: the sample is covered if a ray a hair to one side meets the shell before it.
+                    beside = [ray_cast(q + origin + offset, inward, 30.0001) for offset in offsets[1:]]
+                    if any(h[0] is not None and h[3] < 29.9999 for h in beside):
+                        continue
                     # A well rim may lie on an opening's edge; unlike an enclosed compartment it needs no gap
                     # to this virtual patch. The real shell still requires an earlier, occluding hit.
                     if openings:
-                        tangent = direction.cross(Vector((0, 0, 1)))
-                        tangent = tangent.normalized() if tangent.length > .1 else Vector((1, 0, 0))
-                        across = direction.cross(tangent)
-                        offsets = (Vector(), tangent * 1e-5, tangent * -1e-5, across * 1e-5, across * -1e-5)
                         if any(openings.ray_cast(q + direction * 30 + offset, -direction, 30.0001)[0] is not None
                                for offset in offsets):
                             continue
@@ -228,3 +236,182 @@ def interior_visibility(icarus, allow_openings=True):
         raise ValueError(message + "; " + "; ".join(failures))
     print(message + ": PASS", flush=True)
     return len(inside)
+
+
+# What the game hides in the cockpit view (IcarusAuthor.Cockpit.cs exteriorRenderers, with the canopy's outer panes),
+# and the inner panes it draws there, seen through.
+COCKPIT_HIDDEN = ("cockpit_cell", "avionics_tray", "radar_tray", "gear_leg_N_visible", "canopy_glass_outer", "windscreen",
+                  "cockpit_proxy", "canopy_frame_proxy")
+COCKPIT_GLASS = ("canopy_glass_inner", "windscreen_inner")
+EYE_RAYS = 200000  # about 0.5 degrees apart
+# A leak deeper than this under the glass's foot at its station leaves through the cockpit tub (its consoles, lining
+# and bulkhead), which the closed-tub job is to close: pilot_eye_leaks reports those and fails on the rest, round the
+# canopy, its sills, its rear arch and the coaming.
+TUB_DEPTH = 0.15
+FIT_TOLERANCE = 0.001
+
+
+def eye_directions(n):
+    """n directions spread evenly over the sphere (a Fibonacci lattice)."""
+    golden = math.pi * (3 - math.sqrt(5))
+    for i in range(n):
+        z = 1 - 2 * (i + 0.5) / n
+        r = math.sqrt(1 - z * z)
+        yield Vector((r * math.cos(golden * i), r * math.sin(golden * i), z))
+
+
+def pilot_eye_leaks(icarus):
+    """Cast from the design eye in every direction through what the cockpit view draws, as the game draws it: back
+    faces culled, the inner glass seen through. A ray that meets no front face reaches the sky, and must leave through
+    the glass: the last surface it crossed is an inner pane. Through the back of the skin or anything else, or past
+    nothing at all, is a leak, unless rays a hair either side of it are stopped (it ran down a seam between two
+    meshes). Leaks leaving more than TUB_DEPTH under the glass's foot are the tub's, reported; any other fails. The
+    stock seat, stick and throttle are not in the build and stop nothing here."""
+    import build_icarus as bi
+    import canopy
+
+    meshes = [o for o in icarus.all_objects if o.type == "MESH" and o.name not in COCKPIT_HIDDEN]
+    verts, polys, owner = [], [], []
+    for o in meshes:
+        base = len(verts)
+        verts += [o.matrix_world @ v.co for v in o.data.vertices]
+        for f in o.data.polygons:
+            polys.append(tuple(base + i for i in f.vertices))
+            owner.append(o.name)
+    ray_cast = BVHTree.FromPolygons(verts, polys).ray_cast
+    eye = bi.P(*canopy.EYE)
+    O = bpy.data.objects
+    panes = welded([O[canopy.WINDSCREEN], O[canopy.GLASS_OUTER]])
+    foot = [tuple((v.co.y + bi.S0, v.co.z) for v in e.verts) for e in panes.edges if e.is_boundary]
+    panes.free()
+
+    def foot_z(s):
+        """The lowest point of the glass's edge across station s, or None off the glass's length."""
+        across = [za + (zb - za) * (s - sa) / (sb - sa) for (sa, za), (sb, zb) in foot if min(sa, sb) <= s <= max(sa, sb)
+                  and sa != sb]
+        return min(across) if across else None
+
+    def leak(at, d):
+        """Where the ray from at along d leaves for the sky other than through the glass, and through what."""
+        last, out = None, None
+        for _ in range(64):
+            q, n, i, _ = ray_cast(at, d, 60.0)
+            if q is None:
+                return None if last in COCKPIT_GLASS else (last or "nothing", out)
+            if owner[i] not in COCKPIT_GLASS and n.dot(d) < 0:
+                return None  # an opaque front face: the view stops on it
+            last, out = owner[i], q
+            at = q + d * 1e-5
+        return None
+
+    leaks, tub = {}, 0
+    for d in eye_directions(EYE_RAYS):
+        found = leak(eye, d)
+        if found is None:
+            continue
+        side = d.cross(Z if abs(d.z) < 0.9 else Vector((1, 0, 0))).normalized() * 1e-5
+        if any(leak(eye + o, d) is None for o in (side, -side, side.cross(d), -side.cross(d))):
+            continue
+        name, out = found
+        level = foot_z(out.y + bi.S0) if out is not None else None
+        if level is not None and out.z < level - TUB_DEPTH:
+            tub += 1
+            continue
+        leaks.setdefault(name, []).append(d)
+    note = ("; %d more leave through the cockpit tub, over %.2f m under the glass's foot, for the closed-tub job"
+            % (tub, TUB_DEPTH)) if tub else ""
+    if leaks:
+        found = []
+        for name, ds in sorted(leaks.items(), key=lambda kv: -len(kv[1])):
+            az = [math.degrees(math.atan2(d.x, -d.y)) for d in ds]  # 0 ahead, + to the left
+            el = [math.degrees(math.asin(max(-1.0, min(1.0, d.z)))) for d in ds]
+            found.append("%d through %s (azimuth %.0f to %.0f deg, elevation %.0f to %.0f deg)"
+                         % (len(ds), name, min(az), max(az), min(el), max(el)))
+        total = sum(map(len, leaks.values()))
+        raise ValueError("pilot eye leaks: %d of %d rays from the eye escape other than through the glass: %s%s"
+                         % (total, EYE_RAYS, "; ".join(found), note))
+    print("pilot eye leaks: %d rays from the eye (s %.3f, z %.3f) through %d drawn meshes: none escape round the "
+          "canopy but through the glass%s: PASS" % (EYE_RAYS, canopy.EYE[0], canopy.EYE[2], len(meshes), note), flush=True)
+
+
+def welded(objs):
+    """objs' faces in one world-space bmesh, coincident vertices merged (panel splits close up)."""
+    bm = bmesh.new()
+    for o in objs:
+        me = o.data.copy()
+        me.transform(o.matrix_world)
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    return bm
+
+
+def canopy_fit(icarus):
+    """Seen from outside, glass, frames and skin meet on one edge, within FIT_TOLERANCE of the fuselage's own loft
+    (uncut, so nothing can hide under the hole): every edge of the outer panes but their joint lies on the skin and no
+    glass runs under it; the skin's cut edge lies on the glass; no frame lies buried, under the skin but not under the
+    canopy (under it is the cockpit); and wherever a frame's outside, out of the canopy's shape, comes down to within
+    3 cm of the skin, in 2 cm steps along the cockpit either side, it stands on it."""
+    import build_icarus as bi
+    import canopy
+    import internals
+
+    O = bpy.data.objects
+    solid = canopy.skin_solid(bi.PARAMS)
+    over_skin = canopy.signed_distance(solid)
+    canopy.remove(solid)
+    solid = internals.outward(canopy.build_canopy(bi.PARAMS, None))
+    over_canopy = canopy.signed_distance(solid)
+    shape = tree(solid)
+    canopy.remove(solid)
+    opening = lambda q: shape.ray_cast(q, Vector((0, 0, 1)), 2.0)[0] is not None  # under the canopy: the cockpit
+    where = lambda q: "(s %.3f, x %.3f, z %.3f)" % (q.y + bi.S0, q.x, q.z)
+    region = lambda q: canopy.PROFILE[0][0] - 0.1 <= q.y + bi.S0 <= canopy.TAIL_END + 0.1 and q.z > 0.35
+    problems = []
+
+    def report(what, found, of):
+        found = sorted(found, key=lambda t: -t[0])
+        if found:
+            problems.append("%d of %d %s, worst %.1f mm at %s" % (len(found), of, what, 1000 * found[0][0], where(found[0][1])))
+
+    hinge = O["canopy"]
+    a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
+    panes = welded([O[canopy.WINDSCREEN], O[canopy.GLASS_OUTER]])
+    joint = lambda e: all(abs((v.co - a).dot(u)) < FIT_TOLERANCE for v in e.verts)
+    edge = {v for e in panes.edges if e.is_boundary and not joint(e) for v in e.verts}
+    report("glass edge points off the skin", [(abs(over_skin(v.co)), v.co.copy()) for v in edge
+                                              if abs(over_skin(v.co)) > FIT_TOLERANCE], len(edge))
+    report("glass points under the skin", [(-over_skin(v.co), v.co.copy()) for v in panes.verts
+                                           if over_skin(v.co) < -FIT_TOLERANCE], len(panes.verts))
+    glass = BVHTree.FromBMesh(panes)
+    panes.free()
+    skins = welded([o for o in icarus.all_objects if o.type == "MESH" and o.get("role") == "skin"])
+    seam = {v for e in skins.edges if e.is_boundary for v in e.verts if region(v.co)}
+    report("skin cut-edge points off the glass", [(glass.find_nearest(v.co)[3], v.co.copy()) for v in seam
+                                                  if glass.find_nearest(v.co)[3] > FIT_TOLERANCE], len(seam))
+    # the frames: the hood's, and the windscreen frame and fixed sills merged into the skin panels, off the skin; their
+    # outsides, the points outside the canopy's shape
+    points = {}
+    for f in skins.faces:
+        if all(region(v.co) for v in f.verts) and any(abs(over_skin(v.co)) > FIT_TOLERANCE for v in f.verts):
+            points.update((v.index, v.co.copy()) for v in f.verts)
+    skins.free()
+    points = list(points.values())
+    hood = welded([O[canopy.FRAME]])
+    points += [v.co.copy() for v in hood.verts]
+    hood.free()
+    report("frame points buried under the skin", [(-h, q) for h, q in ((over_skin(q), q) for q in points)
+                                                  if h < -FIT_TOLERANCE and not opening(q)], len(points))
+    outside = [(over_skin(q), q) for q in points if over_canopy(q) > FIT_TOLERANCE]
+    lowest = {}
+    for h, q in outside:
+        key = (round((q.y + bi.S0) / 0.02), q.x > 0)
+        if h < lowest.get(key, (math.inf,))[0]:
+            lowest[key] = (h, q)
+    report("2 cm steps where a frame stands off the skin", [t for t in lowest.values() if FIT_TOLERANCE < t[0] < 0.03],
+           len(lowest))
+    message = ("canopy fit: %d glass edge points, %d skin cut-edge points, %d frame points, within %.0f mm of the skin"
+               % (len(edge), len(seam), len(points), 1000 * FIT_TOLERANCE))
+    if problems:
+        raise ValueError(message + ": " + "; ".join(problems))
+    print(message + ": PASS", flush=True)
