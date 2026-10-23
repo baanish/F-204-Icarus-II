@@ -10,6 +10,8 @@ import bpy
 from mathutils import Vector
 from mathutils.kdtree import KDTree
 
+import cycles_device
+
 ATLAS_SIZE = 2048
 TEXEL_DENSITY = 150  # Highest density allowed by rule 6; the current skin cannot cover 60% at 128 px/m.
 MARGIN_PX = 4
@@ -399,6 +401,7 @@ def render_review(icarus, out_dir):
         stream.write("\n")
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
+    cycles_device.use_gpu(scene)
     scene.cycles.samples = 24
     scene.render.film_transparent = False
     scene.render.image_settings.file_format = "PNG"

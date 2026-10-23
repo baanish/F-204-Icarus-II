@@ -11,7 +11,9 @@ OUT = ROOT / '.cache/review/wave2/p9b/02'
 
 def bake_ao(canonical):
     import uvs
+    import cycles_device
     scene = bpy.context.scene
+    cycles_device.use_gpu(scene)
     # Each bake texel evaluates 128 AO probes once, rather than multiplying 128 by 128.
     scene.cycles.samples = 1
     scene.render.bake.use_clear = True
@@ -101,21 +103,10 @@ def review_maps(livery_id=None):
     bpy.ops.wm.open_mainfile(filepath=str(OUT / 'skin.blend'))
     from mathutils import Vector
     bpy.data.objects['Skin_sun'].rotation_euler = Vector((6, -8, 12)).to_track_quat('Z', 'Y').to_euler()
-    cache = OUT / 'optix-cache'
-    cache.mkdir(exist_ok=True)
-    os.environ['OPTIX_CACHE_PATH'] = str(cache)
+    import cycles_device
     scene = bpy.context.scene
     scene.cycles.samples = 32
-    prefs = bpy.context.preferences.addons['cycles'].preferences
-    try:
-        prefs.compute_device_type = 'OPTIX'
-        prefs.get_devices()
-        for device in prefs.devices:
-            device.use = device.type == 'OPTIX'
-        if any(device.use for device in prefs.devices):
-            scene.cycles.device = 'GPU'
-    except (TypeError, RuntimeError):
-        scene.cycles.device = 'CPU'
+    cycles_device.use_gpu(scene)
     bake.VIEWS.update({'intake': ((4, -4, 1.5), (.6, -.5, .3), 3.8),
                        'wing': ((6, -2, 5), (1.9, 1.8, -.2), 4.8),
                        'belly': ((10, 0, -15), (0, 0, 0), 18)})

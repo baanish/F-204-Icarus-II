@@ -10,6 +10,7 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "art/blender"))
+import cycles_device
 import uvs
 
 OUT = ROOT / ".cache/review/wave2/p9b/02"
@@ -40,6 +41,7 @@ def render(name, view):
 def preview():
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
+    cycles_device.use_gpu(scene)
     scene.cycles.samples = 32
     scene.cycles.use_denoising = True
     scene.render.resolution_x = 1600
@@ -128,6 +130,7 @@ def prepare():
     target = nodes.new("ShaderNodeTexImage")
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
+    cycles_device.use_gpu(scene)
     scene.cycles.samples = 1
     scene.render.bake.margin = 0
     scene.render.bake.use_clear = True

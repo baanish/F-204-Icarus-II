@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_icarus as bi  # noqa: E402
 import canopy  # noqa: E402
 import cockpit_atlas  # noqa: E402
+import cycles_device  # noqa: E402
 import materials  # noqa: E402
 from solids import X, Y, Z, bvh, hit, must  # noqa: E402
 
@@ -1521,8 +1522,7 @@ def bake_ao(atlas, objs):
     """Cycles-bake ambient occlusion into the atlas's charts from the built aircraft: the interior and the inner
     frames bake (their charted faces only: the rest map, for the bake, to a corner off the sheet), and everything the
     cockpit view draws occludes: not the glass, the cell or the proxies the view hides, the colliders, LOD1 or the
-    references. CPU with a fixed seed, so the same build bakes the
-    same."""
+    references. A fixed seed, on the GPU through OptiX when there is one (cycles_device)."""
     scene = bpy.context.scene
     keep = (scene.render.engine, scene.cycles.device, scene.cycles.samples, scene.cycles.seed, scene.world)
     hidden = []
@@ -1558,7 +1558,7 @@ def bake_ao(atlas, objs):
         uv2[off] = (1.5, 1.5)
         layer.foreach_set("uv", uv2.ravel())
     scene.render.engine = "CYCLES"
-    scene.cycles.device = "CPU"
+    cycles_device.use_gpu(scene)
     scene.cycles.samples = AO_BAKE["samples"]
     scene.cycles.seed = AO_BAKE["seed"]
     world = bpy.data.worlds.new("CockpitAOBake")
