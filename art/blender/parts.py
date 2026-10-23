@@ -110,6 +110,14 @@ ROLE = {"fuel_": "fuel_tank", "skin_": "skin", "dorsal": "skin", "wing_skin": "s
 # Fuselage skin panels by station: radome ahead of RADOME_END, then forward, mid and aft panels per side; the
 # dorsal cover is the spine strip between DORSAL s range above DORSAL_Z.
 RADOME_END, FORWARD_END, MID_END = 1.6, 5.6, 11.0
+# The structure cores' origins, Blender world space, pinned rather than read off their bounds (recentre): the
+# hardpoints are placed relative to fuselage_mid's (Unity A5 checks them against measured positions), the joints
+# and the children of each core hang off its origin, and the skin atlas packs from those children's world
+# coordinates, so an origin that drifted with the frames, stringers and walls inside a core would move all of them.
+# The values are the cores' bounding-box centres when the keel set their length (stations 3.6, 8.375 and 13.0), as
+# float32 literals so they land bit for bit. check() fails if a core's origin is anything else.
+CORE_ORIGINS = {"fuselage_forward": (0.0, -4.3999996, 0.25242168), "fuselage_mid": (0.0, 0.375, 0.26522803),
+                "fuselage_aft": (-0.00024959445, 5.0, 0.34087268)}
 DORSAL = (5.0, 12.4)
 DORSAL_Z, DORSAL_HALF_WIDTH = 0.80, 0.30
 
@@ -191,26 +199,14 @@ def rename(obj, name):
     return obj
 
 
-def keel(name, s0, s1, p, mat):
-    """A thin keel member along the inside of the belly, so a structure core has something solid to hit. It follows
-    the belly 6 cm above it, area-rule waist included, in ten straight pieces."""
-    rings = []
-    for i in range(11):
-        s = s0 + (s1 - s0) * i / 10
-        z0 = min(v.z for v in bi.blended_ring(p, s) if abs(v.x) < 0.06) + 0.06
-        rings.append([bi.P(s, x, z) for x, z in ((-0.05, z0), (0.05, z0), (0.05, z0 + 0.08), (-0.05, z0 + 0.08))])
-    obj = bi.loft(name, rings, cap_back=True, cap_front=True)
-    obj.data.materials.append(mat)
-    return obj
-
-
 def recentre(obj):
-    """Move a part's origin to its bounding-box centre, keeping the geometry where it is."""
+    """Move a part's origin to its bounding-box centre, or a structure core's to its pinned CORE_ORIGINS, keeping
+    the geometry where it is."""
     if obj.type != "MESH" or not obj.data.vertices:
         return
     lo = Vector([min(v.co[i] for v in obj.data.vertices) for i in range(3)])
     hi = Vector([max(v.co[i] for v in obj.data.vertices) for i in range(3)])
-    c = (lo + hi) / 2
+    c = Vector(CORE_ORIGINS[obj.name]) if obj.name in CORE_ORIGINS else (lo + hi) / 2
     obj.data.transform(Matrix.Translation(-c))
     obj.matrix_world = obj.matrix_world @ Matrix.Translation(c)
 
@@ -242,7 +238,12 @@ def _organise(p, icarus, internals, structure_mat):
     canopy_solid = interior.outward(canopy.build_canopy(p, structure_mat))
     for obj in [fus] + [o for o in icarus.objects if o.name.startswith("frame_")]:
         drop_inside(obj, canopy_solid)
-    bpy.data.objects.remove(canopy_solid, do_unlink=True)
+    # A stringer's faces run a frame bay or more, too long for drop_inside to clear the opening: cut it, 2 cm clear.
+    stringer_cut = interior.grown(canopy_solid, 0.02)
+    for obj in [o for o in icarus.objects if o.name.startswith("stringer_")]:
+        interior.subtract(obj, [stringer_cut])
+    for o in (canopy_solid, stringer_cut):
+        bpy.data.objects.remove(o, do_unlink=True)
     side = lambda c: "L" if c.x >= 0 else "R"
     dorsal = lambda c: DORSAL[0] <= station(c) <= DORSAL[1] and c.z > DORSAL_Z and abs(c.x) < DORSAL_HALF_WIDTH
     radome = subset("radome_skin", fus, lambda c: station(c) < RADOME_END)
@@ -257,9 +258,9 @@ def _organise(p, icarus, internals, structure_mat):
 
     for name, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),
                        ("fuselage_aft", MID_END, 99.0)):
-        frames = [o for o in icarus.objects if o.name.startswith(("frame_", "bulkhead_"))]  # joined ones are gone
+        # joined members are gone from the list
+        frames = [o for o in icarus.objects if o.name.startswith(("frame_", "stringer_", "bulkhead_"))]
         members = [f for f in frames if a <= station(f.matrix_world @ f.data.vertices[0].co) < b]
-        members.append(keel(name + "_keel", max(a, 1.7), min(b, 15.0), p, structure_mat))
         # gear wells belong to the structure they are cut into
         members += [o for o in icarus.objects if o.name.startswith(("nose_gear_bay", "main_gear_bay"))
                     and a <= station(o.matrix_world @ o.data.vertices[0].co) < b]
@@ -349,6 +350,12 @@ def check(icarus):
     over = budget.over_caps(icarus, BUDGET)
     if over:
         raise ValueError("parts: over the triangle caps: " + "; ".join(over))
+    # within the float noise of parenting (forward and aft hang off mid), far under any real drift
+    moved = ["%s at %s" % (name, tuple(bpy.data.objects[name].matrix_world.translation))
+             for name, origin in CORE_ORIGINS.items()
+             if (bpy.data.objects[name].matrix_world.translation - Vector(origin)).length > 1e-5]
+    if moved:
+        raise ValueError("parts: structure core origins off their CORE_ORIGINS pins: " + "; ".join(moved))
     print(surface_sweep(icarus))
 
 
@@ -417,7 +424,8 @@ def open_bays(icarus):
     """Open the gear wells to view from below, in the structure cores' render meshes only (their hulls are built).
     The internals build each bay as a closed box clipped to the inside of the skin and joined into its core, so from
     below a bay read as shut, its walls facing away from anyone looking in. The floor under the shut doors goes, the
-    rest of the bay turns to face inward, and the frames and keel running through the bay are cut back to its walls."""
+    rest of the bay turns to face inward, and the frames and stringers running through the bay are cut back to its
+    walls."""
     O = bpy.data.objects
     nose, main = interior.INTERNALS["nose_gear_bay"], interior.INTERNALS["main_gear_bay"]
     wells = {"fuselage_forward": ([nose["box"] + (0.0,)], ("gear_door_N_L", "gear_door_N_R")),
@@ -444,10 +452,7 @@ def open_bays(icarus):
             cutter = bpy.data.objects.new("bay_cutter", me)
             icarus.objects.link(cutter)
             cutters.append(cutter)
-            mod = members.modifiers.new("bay", "BOOLEAN")
-            mod.operation, mod.solver, mod.object = "DIFFERENCE", "EXACT", cutter
-        bpy.context.view_layer.update()
-        cut = bpy.data.meshes.new_from_object(members.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+        cut = cut_shells(members, cutters)
         # the bay: its faces turned to face in, less the floor under each door (a ray out of it meets the shut door)
         bm = bmesh.new()
         bm.from_mesh(core.data)
@@ -472,6 +477,57 @@ def open_bays(icarus):
             bpy.data.objects.remove(o)
             bpy.data.meshes.remove(me)
         bpy.data.meshes.remove(cut)
+
+
+def cut_shells(obj, cutters):
+    """obj's mesh less the cutters (identity-placed), as a new mesh in obj's space, one closed shell at a time. The
+    exact boolean reads a mesh of overlapping shells (stringers running through frames) as one broken solid and
+    leaves cutter faces in it; its self-intersection mode cuts every shell against every other instead, doubling
+    the triangles. A shell clear of every cutter's bounds is kept as it is."""
+    boxes = [(Vector([min(v.co[i] for v in c.data.vertices) for i in range(3)]),
+              Vector([max(v.co[i] for v in c.data.vertices) for i in range(3)])) for c in cutters]
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.transform(obj.matrix_world)
+    seen, out = set(), bmesh.new()
+    for start in bm.faces:
+        if start in seen:
+            continue
+        shell, todo = [], [start]
+        seen.add(start)
+        while todo:
+            f = todo.pop()
+            shell.append(f)
+            for g in {g for v in f.verts for g in v.link_faces} - seen:
+                seen.add(g)
+                todo.append(g)
+        verts = list({v for f in shell for v in f.verts})
+        index = {v: i for i, v in enumerate(verts)}
+        me = bpy.data.meshes.new("shell")
+        me.from_pydata([v.co for v in verts], [], [[index[v] for v in f.verts] for f in shell])
+        for poly, f in zip(me.polygons, shell):
+            poly.material_index = f.material_index
+        lo = Vector([min(v.co[i] for v in verts) for i in range(3)])
+        hi = Vector([max(v.co[i] for v in verts) for i in range(3)])
+        if any(all(lo[i] < b[i] and hi[i] > a[i] for i in range(3)) for a, b in boxes):
+            shell_obj = bpy.data.objects.new("shell", me)
+            obj.users_collection[0].objects.link(shell_obj)
+            for c in cutters:
+                mod = shell_obj.modifiers.new("bay", "BOOLEAN")
+                mod.operation, mod.solver, mod.object = "DIFFERENCE", "EXACT", c
+            bpy.context.view_layer.update()
+            cut = bpy.data.meshes.new_from_object(shell_obj.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+            bpy.data.objects.remove(shell_obj)
+            bpy.data.meshes.remove(me)
+            me = cut
+        out.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    bm.free()
+    out.transform(obj.matrix_world.inverted())
+    result = bpy.data.meshes.new(obj.name + "_cut")
+    out.to_mesh(result)
+    out.free()
+    return result
 
 
 def merge_details(icarus):

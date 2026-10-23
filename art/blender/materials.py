@@ -53,7 +53,7 @@ def build():
         "seal": material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4),
         "strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
         "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9),
-        # Hidden structure on the stock trims (Exterior rule 4): keels, spars and ribs on aircraft_structure;
+        # Hidden structure on the stock trims (Exterior rule 4): spars and ribs on aircraft_structure;
         # equipment, tanks, bays and the coves of moving surfaces on jet_mechanical.
         "structure": stock("aircraft_structure"),
         "mechanical": stock("jet_mechanical"),

@@ -39,7 +39,19 @@ INTERNALS = {
     # z0 is the axis height at the face, z1 at the nozzle; the face sits high enough for the stowed main wheels below.
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.35, "z1": 0.37, "mass_kg": 1450},
-    "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "points": 48, "mass_kg_each": 9},
+    # The fuselage's semi-monocoque grid, laid on the skin's own columns (bi.RING round each section) so frames and
+    # stringers meet at shared points and follow the skin exactly. Frames: an L section, a flange along the skin and
+    # a web standing in from it, through every stringer's column and whatever others keep its straight runs within
+    # tolerance of the skin (more round the intake fillets, few on the round top). Stringers: on every sixth column,
+    # 16 round the body, about 0.25 m apart at the widest, so the bays between them and the 0.6 m frames read as
+    # skin panels, about 2.5 to 1, as on a real fuselage. The four at 45 degrees off the vertical, where a fuselage
+    # carries its corner longerons, are heavier. Each stringer runs inside one structure core, wall to wall (runs),
+    # straight between the fewest skin stations that keep it within tolerance of its column.
+    "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "tolerance": 0.02, "flange": 0.05, "web": 0.08,
+               "thickness": 0.008, "mass_kg_each": 9},
+    "stringers": {"column_step": 6, "size": (0.015, 0.025), "tolerance": 0.01,
+                  "longerons": (12, 36, 60, 84), "longeron_size": (0.03, 0.04),
+                  "runs": ((1.6, 5.57), (5.92, 10.97), (11.03, 14.8))},
     # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0 and the tail end at 14.8), so
     # a section that comes away shows a closed, shaded face instead of open frames against the sky. Each is cut clear
     # of whatever runs through it and has a torn rim. Stations (centres): 5.57 and 10.97 ahead of their joints,
@@ -71,11 +83,7 @@ def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None, count=None):
     and x_lo <= x <= x_hi (a true polygon cut, so the result never leaves the skin); clipped or given a count, it is
     resampled to count points evenly round its outline, so neighbouring sections loft cleanly."""
     ring = bi.skin_ring(p, s)
-    cz = sum(v.z for v in ring) / len(ring)
-    out = []
-    for v in ring:
-        d = Vector((v.x, 0.0, v.z - cz))
-        out.append(v - d.normalized() * inset if d.length > inset else Vector((0.0, v.y, cz)))
+    out = pulled(ring, inset)
     if floor is None and x_lo is None and count is None:
         return out
     y = out[0].y
@@ -86,6 +94,16 @@ def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None, count=None):
         pts = clip(pts, lambda q: q[0] - x_lo)
         pts = clip(pts, lambda q: x_hi - q[0])
     return [Vector((x, y, z)) for x, z in resample_outline(pts, count or len(ring) // 2)]
+
+
+def pulled(ring, inset):
+    """A skin ring's columns pulled inset toward its centre line (x = 0, its mean z)."""
+    cz = sum(v.z for v in ring) / len(ring)
+    out = []
+    for v in ring:
+        d = Vector((v.x, 0.0, v.z - cz))
+        out.append(v - d.normalized() * inset if d.length > inset else Vector((0.0, v.y, cz)))
+    return out
 
 
 def clip(poly, inside):
@@ -460,11 +478,18 @@ def _build(p, mats):
     s = fr["s0"]
     k = 0
     while s <= fr["s1"] + 1e-9:
-        outer = ring_at(p, s, fr["inset"], count=fr["points"])
-        inner = ring_at(p, s, fr["inset"] + fr["depth"], count=fr["points"])
-        aft = Vector((0, 0.025, 0))
-        # outer band, aft face, inner band, front face: the fifth ring closes the frame's cross-section
-        rings = [outer, [v + aft for v in outer], [v + aft for v in inner], inner, outer]
+        skin = bi.skin_ring(p, s)  # pulled whole, about the same centre as the stringers
+        n = len(skin)
+        line = pulled(skin, fr["inset"]) + [pulled(skin, fr["inset"])[0]]
+        needed = simplified(line, 0, n // 2, fr["tolerance"]) | simplified(line, n // 2, n, fr["tolerance"])
+        columns = sorted({c % n for c in needed} | set(range(0, n, I["stringers"]["column_step"])))
+        outer, web, inner = ([ring[c] for c in columns] for ring in
+                             (pulled(skin, fr["inset"] + d) for d in (0.0, fr["thickness"], fr["web"])))
+        aft = lambda ring, dy: [v + Vector((0, dy, 0)) for v in ring]
+        # the L section, round from the flange's skin face: flange, its edge, the web's aft face, the web's inner
+        # edge, its front face back to the skin; the last ring closes it
+        rings = [outer, aft(outer, fr["flange"]), aft(web, fr["flange"]), aft(web, fr["thickness"]),
+                 aft(inner, fr["thickness"]), inner, outer]
         obj = bi.finish(bi.loft("frame_%02d" % k, rings), mats["frame"], smooth=False)
         parts.append(tag(obj, "structure", "fuselage", fr["mass_kg_each"]))
         s += fr["pitch"]
@@ -498,4 +523,48 @@ def _build(p, mats):
     for s in bh["at"]:
         wall = bulkhead(p, "bulkhead_%05.2f" % s, s, crossing)
         parts.append(tag(bi.finish(wall, mats["frame"], smooth=False), "structure", "fuselage"))
+    for obj in stringers(p):
+        parts.append(tag(bi.finish(obj, mats["frame"], smooth=False), "structure", "fuselage"))
     return parts
+
+
+def stringers(p):
+    """INTERNALS["stringers"]: each a box section along its skin column, one object per run."""
+    st, inset = INTERNALS["stringers"], INTERNALS["frames"]["inset"]
+    skin_stations = bi.fuselage_stations(p)
+    rings = {}
+
+    def ring(s):
+        if s not in rings:
+            rings[s] = bi.skin_ring(p, s)
+        return rings[s]
+
+    out = []
+    for run, (s0, s1) in enumerate(st["runs"]):
+        stations = [s0] + [s for s in skin_stations if s0 < s < s1] + [s1]
+        for c in range(0, bi.RING, st["column_step"]):
+            width, depth = st["longeron_size"] if c in st["longerons"] else st["size"]
+            line = [pulled(ring(s), inset)[c] for s in stations]
+            keep = sorted(simplified(line, 0, len(line) - 1, st["tolerance"]) | {0, len(line) - 1})
+            sections = []
+            for i in keep:
+                skin = ring(stations[i])
+                side = (skin[(c + 1) % bi.RING] - skin[c - 1]).normalized() * (width / 2)
+                face, back = pulled(skin, inset)[c], pulled(skin, inset + depth)[c]
+                sections.append([face - side, face + side, back + side, back - side])
+            out.append(bi.loft("stringer_%02d_%d" % (c, run), sections, cap_back=True, cap_front=True))
+    return out
+
+
+def simplified(line, i, j, tolerance):
+    """The indices between i and j that a polyline needs to stay within tolerance of line (Douglas-Peucker)."""
+    a, b = line[i], line[j]
+    far, at = 0.0, None
+    for k in range(i + 1, j):
+        t = max(0.0, min(1.0, (line[k] - a).dot(b - a) / max((b - a).length_squared, 1e-12)))
+        d = (line[k] - a.lerp(b, t)).length
+        if d > far:
+            far, at = d, k
+    if at is None or far <= tolerance:
+        return set()
+    return {at} | simplified(line, i, at, tolerance) | simplified(line, at, j, tolerance)
