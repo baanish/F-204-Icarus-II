@@ -61,13 +61,21 @@ Aircraft context, for interpretation only:
     print(json.dumps(call))
 
 
+def portable(path):
+    """A generated image's original path without the user's home: codex:generated_images/... for Codex outputs, which
+    the repo's public check would otherwise reject, and the posix path for anything else."""
+    path = Path(path).resolve()
+    codex = (Path.home() / '.codex' / 'generated_images').resolve()
+    return 'codex:generated_images/' + path.relative_to(codex).as_posix() if path.is_relative_to(codex) else path.as_posix()
+
+
 def record(name, original, output):
     target = Path(output)
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists():
         raise ValueError('Refusing to overwrite a native output: ' + target.as_posix())
     shutil.copy2(original, target)
-    provenance = {'tool': 'image_gen.imagegen built-in', 'original': Path(original).as_posix(),
+    provenance = {'tool': 'image_gen.imagegen built-in', 'original': portable(original),
                   'output': target.as_posix(), 'sha256': hashlib.sha256(target.read_bytes()).hexdigest(),
                   'native_size': list(Image.open(target).size), 'transparent_background': False}
     (OUT / (name + '.generation.json')).write_text(json.dumps(provenance, indent=2))

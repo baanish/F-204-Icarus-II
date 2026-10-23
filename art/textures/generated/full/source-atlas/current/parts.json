@@ -9,7 +9,7 @@
   "input_sha256": {
     ".cache/review/wave2/p9b/02/geometry_maps.npz": "8872c81cf292b4076cb1be191271b4e17c903b535bcd3015bc417befb28b6e7d",
     ".cache/review/wave2/p9b/02/atlas_triangles.json": "b2d1da21d55d7e7d8aa3096bd4326def882836a106732b699ae0a709730667ad",
-    "art/textures/generated/full/source-atlas/native/parts.json": "3afbac43ceb471ed9411e8daf027c269a851c4d0b2c50afe74f2e96dea2abb61",
+    "art/textures/generated/full/source-atlas/native/parts.json": "bf6f8711388e8074159d263d929a6605d26638875a55e488f04e9255fc7faca4",
     "art/textures/generated/full/source-atlas/native/coverage.json": "bef98eae4ca0089c34a572f399a6b267bffe9533333b42519fa66403f3059576",
     "art/textures/generated/full/source-atlas/native/ownership.npz": "9d0924a19e70e449d78155180a62b8d066417178268c2d971c75c76b3777cd32",
     "art/textures/generated/full/source-atlas/current/aileron_L_visible.source-transfer.npz": "abf1fcea8e1cdced3ea8d14f1816dd0963d4d7ba51767a4cafc4db713d4a9b2a",
