@@ -26,8 +26,6 @@ namespace Icarus.Editor
         // The forward section's Revoker "fuselage" armour keeps two thirds of its joint at 0 HP (structuralThreshold -200);
         // the Vagrant's sections keep half (-100).
         private const float ForwardSectionThreshold = -100f;
-        // Extra joints between parts whose colliders touch (BraceTouchingParts), as weak as a panel's.
-        private const float BraceForce = 10000f;
         // The Revoker runs 6 to 8; the light skins and dry tanks hang off cores ten to sixty times their mass.
         private const int JointSolverIterations = 12;
 
@@ -302,66 +300,10 @@ namespace Icarus.Editor
             b.Report.Add("damage: armour from " + string.Join("; ", b.Specs.GroupBy(s => s.Armour).Select(g => (g.Key == "" ? "Fighter1" : g.Key) + " -> " + string.Join(", ", g.Select(s => s.Name)))));
         }
 
-        // Parts whose colliders touch but share no joint collide with each other, which blows an aircraft apart; a brace
-        // joint (as stock cross joints do) holds each such pair. Each is reported, so the art can inset what shouldn't touch.
-        private static void BraceTouchingParts(Build b)
-        {
-            Physics.SyncTransforms();
-            var aeroType = GameType("AeroPart");
-            var probe = b.Root.GetComponent<MeshCollider>();
-            if (probe == null || !Physics.ComputePenetration(probe, probe.transform.position, probe.transform.rotation, probe, probe.transform.position + Vector3.up * 0.05f, probe.transform.rotation, out _, out _))
-                throw new InvalidDataException("A12: the overlap check can't see a hull overlapping a copy of itself; it would miss real overlaps.");
-            var colliders = b.Root.GetComponentsInChildren<Collider>(true)
-                .Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null))
-                .Select(c => (collider: c, part: c.GetComponentInParent(aeroType, true))).Where(c => c.part != null).ToArray();
-            var name = b.Parts.ToDictionary(p => (Object)p.Value.GetComponent(aeroType), p => p.Key);
-            bool Linked(string x, string y) => b.Joints.TryGetValue(x, out var a) && a.Contains(y) || b.Joints.TryGetValue(y, out var c) && c.Contains(x);
-            var braces = new List<string>();
-            var blocking = new List<string>();
-            for (var i = 0; i < colliders.Length; i++)
-                for (var j = i + 1; j < colliders.Length; j++)
-                {
-                    var (a, pa) = colliders[i];
-                    var (c, pc) = colliders[j];
-                    if (pa == pc || !a.bounds.Intersects(c.bounds))
-                        continue;
-                    var (na, nc) = (name[pa], name[pc]);
-                    if (Linked(na, nc))
-                        continue;
-                    if (Physics.ComputePenetration(a, a.transform.position, a.transform.rotation, c, c.transform.position, c.transform.rotation, out _, out var depth) && depth > 0.005f)
-                    {
-                        // The brace goes on the part further from the root, so a shed panel takes its braces with it.
-                        var (child, other) = Depth(b.Parts[na].transform) >= Depth(b.Parts[nc].transform) ? (na, nc) : (nc, na);
-                        if (!b.Joints.ContainsKey(child))
-                            throw new InvalidDataException($"{child} overlaps {other} by {depth:F3} m and can't be braced; it is the root");
-                        b.Joints[child].Add(other);
-                        braces.Add($"{child}->{other} ({depth:F3} m)");
-                        if (!Shelters(na) && !Shelters(nc))
-                            blocking.Add($"{na} / {nc} {depth:F3} m");
-                    }
-                }
-            b.Report.Add($"braces: {braces.Count} touching pairs jointed, {braces.Count - blocking.Count} of them a part inside a structure core or against a skin panel (intended); " +
-                $"{blocking.Count} where one part's collider would block hits on another: {string.Join(", ", blocking)}");
-        }
-
-        // The structure cores (frame shells and spars), the thin skin panels and the intake ducts the fuel cells wrap, which
-        // other parts sit inside or against by design: a hit passes through them to what is underneath. A cell's one hull
-        // fills its duct cut-out (art/blender/hulls.py).
-        private static bool Shelters(string part) => part == "fuselage_forward" || part == RootPart || part == "fuselage_aft"
-            || part.StartsWith("wing_spar_", StringComparison.Ordinal) || part == "fin_spar"
-            || part.StartsWith("skin_", StringComparison.Ordinal) || part.StartsWith("wing_skin_", StringComparison.Ordinal) || part == "fin_skin" || part == "dorsal_cover"
-            || part == "radome" || part.StartsWith("intake_duct_", StringComparison.Ordinal);
-
-        private static int Depth(Transform t)
-        {
-            var depth = 0;
-            for (; t.parent != null; t = t.parent)
-                depth++;
-            return depth;
-        }
-
-        // Serialized PartJoints: the first to the parent part (AeroPart.Awake reads joints[0]), then braces. Each is pinned
-        // where its two parts' colliders meet.
+        // Serialized PartJoints: one per part, to its parent part (AeroPart.Awake reads joints[0]), pinned where their colliders
+        // meet. No cross joints brace touching neighbours: the Icarus's parts ignore one another's colliders at spawn
+        // (src/Icarus/SelfCollision.cs), so a neighbour can't push them apart, and a section shed in a breakup takes nothing
+        // but its children with it.
         private static void WriteJoints(Build b)
         {
             var aeroType = GameType("AeroPart");
@@ -377,10 +319,10 @@ namespace Icarus.Editor
                 joints.arraySize = list.Count;
                 for (var i = 0; i < list.Count; i++)
                 {
-                    var force = i == 0 ? JointForces[spec[entry.Key].Joint] : BraceForce;
+                    var force = JointForces[spec[entry.Key].Joint];
                     var joint = joints.GetArrayElementAtIndex(i);
                     joint.FindPropertyRelative("connectedPart").objectReferenceValue = b.Part(list[i]);
-                    joint.FindPropertyRelative("tensor").objectReferenceValue = i == 0 ? null : b.Part(BraceTensor(spec, entry.Key, list[i]));
+                    joint.FindPropertyRelative("tensor").objectReferenceValue = null;
                     joint.FindPropertyRelative("solverIterations").intValue = JointSolverIterations;
                     joint.FindPropertyRelative("breakForce").floatValue = force;
                     joint.FindPropertyRelative("breakTorque").floatValue = force;
@@ -390,21 +332,7 @@ namespace Icarus.Editor
                 }
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
-            b.Report.Add("joints: " + string.Join(", ", Enum.GetValues(typeof(JointClass)).Cast<JointClass>().Select(c => $"{c} {JointForces[c] / 1000:0} kN")) + $", braces {BraceForce / 1000:0} kN, {JointSolverIterations} solver iterations");
-        }
-
-        // A brace's tensor, by the stock cross joints' rule: the brace owner's ancestor directly under the lowest common
-        // ancestor of the two parts it joins. The brace lets go when that ancestor's own joint breaks
-        // (AeroPart.Part_OnTensorBreak), so a section that breaks off takes its braces with it instead of hanging on them.
-        private static string BraceTensor(Dictionary<string, PartSpec> spec, string owner, string other)
-        {
-            var above = new HashSet<string>();
-            for (var p = other; p != null; p = spec[p].Parent)
-                above.Add(p);
-            var tensor = owner;
-            while (spec[tensor].Parent != null && !above.Contains(spec[tensor].Parent))
-                tensor = spec[tensor].Parent;
-            return tensor;
+            b.Report.Add("joints: " + string.Join(", ", Enum.GetValues(typeof(JointClass)).Cast<JointClass>().Select(c => $"{c} {JointForces[c] / 1000:0} kN")) + $", {JointSolverIterations} solver iterations");
         }
 
         // Where two parts meet: the middle of their colliders' common bounds, or of the gap between them.

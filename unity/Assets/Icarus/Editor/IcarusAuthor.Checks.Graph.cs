@@ -87,11 +87,9 @@ namespace Icarus.Editor
                     var (c, pc) = colliders[j];
                     if (pa == pc || linked.Contains((pa, pc)) || !a.bounds.Intersects(c.bounds))
                         continue;
+                    // Counted, not failed: the plugin has the Icarus's parts ignore one another's colliders (SelfCollision.cs).
                     if (Physics.ComputePenetration(a, a.transform.position, a.transform.rotation, c, c.transform.position, c.transform.rotation, out _, out var depth) && depth > 0.005f)
-                    {
                         overlaps++;
-                        p.Add($"unjointed overlap {depth:F3} m: {PathOf(a.transform, b.Root.transform)} and {PathOf(c.transform, b.Root.transform)}");
-                    }
                 }
             return $"{parts.Length} AeroParts, {mass:0} kg, every part jointed to its parent and collidable, convex hulls, {colliders.Length} colliders " +
                 $"({pieces.Length} mesh hulls, {pieces.Sum(c => c.sharedMesh.triangles.Length / 3)} triangles) with {overlaps} unjointed overlaps, {dangling} dangling references, " +

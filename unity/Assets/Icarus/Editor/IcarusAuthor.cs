@@ -316,7 +316,7 @@ namespace Icarus.Editor
             public Object Parameters;
             public readonly Dictionary<string, GameObject> Parts = new Dictionary<string, GameObject>();
             public readonly Dictionary<string, Transform> Visuals = new Dictionary<string, Transform>();
-            public readonly Dictionary<string, List<string>> Joints = new Dictionary<string, List<string>>(); // part -> parent, then braces
+            public readonly Dictionary<string, List<string>> Joints = new Dictionary<string, List<string>>(); // part -> parent
             public readonly List<Renderer> Lod1 = new List<Renderer>();
             public readonly HashSet<Transform> Placed = new HashSet<Transform>(); // effects and markers moved off donor offsets
             public readonly List<string> Report = new List<string>();
@@ -359,7 +359,6 @@ namespace Icarus.Editor
                 AddLods(b);
                 ListLiveryRenderers(b);
                 FinishRoot(b);
-                BraceTouchingParts(b);
                 WriteJoints(b);
                 RunChecks(b, definition, parameters);
                 foreach (var line in b.Report)
