@@ -258,7 +258,7 @@ def _organise(p, icarus, internals, structure_mat):
 
     for name, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),
                        ("fuselage_aft", MID_END, 99.0)):
-        frames = [o for o in icarus.objects if o.name.startswith("frame_")]  # joined frames are gone
+        frames = [o for o in icarus.objects if o.name.startswith(("frame_", "bulkhead_"))]  # joined ones are gone
         members = [f for f in frames if a <= station(f.matrix_world @ f.data.vertices[0].co) < b]
         members.append(keel(name + "_keel", max(a, 1.7), min(b, 15.0), p, structure_mat))
         # gear wells belong to the structure they are cut into

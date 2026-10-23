@@ -1,0 +1,38 @@
+// Breakup under a missile hit: the owner saw the Icarus lose its wings to a missile while the fuselage came down whole,
+// its forward and aft sections still at 100 HP when their joints broke on the ground. The Icarus holds 10 km at 400 m/s
+// over Ignus and a Boscali AAM2 is spawned 3 km behind and 1.5 km to the left. Pass: the missile hits, and the forward or
+// aft fuselage section detaches in the air (within 20 s of the hit, the aircraft still above 1,000 m). The [Icarus]
+// joint-break lines in the run's log give each section's HP when its joint broke.
+// From the repo root: no-agentic run tests/scenarios/breakup_missile_hit.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 4,
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 120, "pitch_deg": 10 } },
+    { "spawn": { "kind": "missile", "type": "AAM2", "faction": "Boscali", "back_m": 3000, "left_m": 1500, "speed_mps": 600, "name": "m1" } },
+    { "mark": { "label": "launched" } },
+    { "wait": { "event": "missile_end", "since": "launched" }, "timeout": 40, "label": "the missile ends" },
+    { "check": { "event": "missile_end", "since": "launched", "result": "hit" }, "label": "the missile hits the Icarus" },
+    { "mark": { "label": "hit" } },
+    { "screenshot": { "name": "hit" } },
+    { "check": { "all": [
+        { "path": "own.alt_msl_m", "gt": 1000 },
+        { "any": [ { "event": "part_detached", "since": "launched", "part": "fuselage_forward" },
+                   { "event": "part_detached", "since": "launched", "part": "fuselage_aft" } ] } ] },
+      "within": 20, "label": "a fuselage section detaches in the air" },
+    { "screenshot": { "name": "breakup" } },
+    { "record": { "event": "part_detached", "field": "part", "since": "launched" }, "label": "parts detached after the hit" },
+  ],
+}

@@ -26,7 +26,7 @@ namespace Icarus.Editor
             ("Icarus_Int_Structure", new Color32(219, 221, 224, 255), 0.6f, 0.5f),
             ("Icarus_Int_Avionics", new Color32(124, 180, 149, 255), 0.1f, 0.4f),
             ("Icarus_Int_Bay", new Color32(89, 89, 92, 255), 0f, 0.2f),
-            ("Icarus_Frame", new Color32(124, 126, 129, 255), 0.6f, 0.5f),
+            ("Icarus_Frame", new Color32(50, 52, 55, 255), 0.6f, 0.5f),
             ("Icarus_Strut", new Color32(219, 220, 221, 255), 1f, 0.75f),
             ("Icarus_Tyre", new Color32(49, 49, 49, 255), 0f, 0.1f),
         };

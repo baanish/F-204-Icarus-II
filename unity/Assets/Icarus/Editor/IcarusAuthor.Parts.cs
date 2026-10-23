@@ -12,14 +12,20 @@ namespace Icarus.Editor
     {
         // Joint strength classes, after the Revoker's own joints (fuselage 100 kN, wing roots 50, wingtips 35, ailerons 30,
         // flaps and cheeks 10; torque equal to force): frames and spars hold, panels shed. The game multiplies them by 10
-        // on the simulating peer and weakens them with the part's hit points.
-        private enum JointClass { Frame, Spar, Primary, Surface, Flap, Panel }
+        // on the simulating peer and weakens them with the part's hit points. The fuselage sections break apart at the VT-7
+        // Vagrant's strength (its cockpit and rear fuselage joints, 50 kN): the forward section at 60, the cockpit and
+        // the aft section at 50.
+        private enum JointClass { Frame, ForwardSection, Section, Spar, Primary, Surface, Flap, Panel }
 
         private static readonly Dictionary<JointClass, float> JointForces = new Dictionary<JointClass, float>
         {
-            { JointClass.Frame, 100000f }, { JointClass.Spar, 60000f }, { JointClass.Primary, 40000f },
+            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 60000f }, { JointClass.Section, 50000f },
+            { JointClass.Spar, 60000f }, { JointClass.Primary, 40000f },
             { JointClass.Surface, 30000f }, { JointClass.Flap, 15000f }, { JointClass.Panel, 10000f },
         };
+        // The forward section's Revoker "fuselage" armour keeps two thirds of its joint at 0 HP (structuralThreshold -200);
+        // the Vagrant's sections keep half (-100).
+        private const float ForwardSectionThreshold = -100f;
         // Extra joints between parts whose colliders touch (BraceTouchingParts), as weak as a panel's.
         private const float BraceForce = 10000f;
         // The Revoker runs 6 to 8; the light skins and dry tanks hang off cores ten to sixty times their mass.
@@ -42,8 +48,8 @@ namespace Icarus.Editor
         private static readonly PartSpec[] Tree =
         {
             P(RootPart, null, JointClass.Frame, "", ""),
-            P("fuselage_forward", RootPart, JointClass.Frame, "fuselage", "fuselage"),
-            P("cockpit_cell", "fuselage_forward", JointClass.Frame, "fuselage/cockpit", "fuselage/cockpit"),
+            P("fuselage_forward", RootPart, JointClass.ForwardSection, "fuselage", "fuselage"),
+            P("cockpit_cell", "fuselage_forward", JointClass.Section, "fuselage/cockpit", "fuselage/cockpit"),
             P("radome", "cockpit_cell", JointClass.Panel, "fuselage/cockpit/nose", "fuselage/cockpit/nose"),
             P("radar_tray", "cockpit_cell", JointClass.Primary, "fuselage/cockpit/nose"),
             P("canopy", "cockpit_cell", JointClass.Panel, "fuselage/cockpit/nose"),
@@ -52,7 +58,7 @@ namespace Icarus.Editor
             P("fuel_aux", "fuselage_forward", JointClass.Primary, "wing1b_L"),
             P("skin_forward_L", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("skin_forward_R", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("fuselage_aft", RootPart, JointClass.Frame, "tail", "tail"),
+            P("fuselage_aft", RootPart, JointClass.Section, "tail", "tail"),
             P("engine_core", "fuselage_aft", JointClass.Spar, "tail"),
             P("nozzle", "engine_core", JointClass.Primary, "tail"),
             P("fin_spar", "fuselage_aft", JointClass.Spar, "vstab1"),
@@ -217,10 +223,11 @@ namespace Icarus.Editor
             Debug.Log($"[Icarus] check R13 tree PASS: {Tree.Length} R13 parts and {b.Specs.Count - Tree.Length} extra fuel cells [{string.Join(", ", b.Specs.Skip(Tree.Length).Select(s => s.Name + " on " + s.Parent))}], {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
         }
 
-        // The fuselage cores carry only a keel-strip hull (art/blender/hulls.py), and Unity takes a Rigidbody's inertia from
-        // its colliders, so a core spun on its keel: the main tyres' side force, a metre and a half below the root, flipped
-        // the root's roll every physics step and the jet reared up on the runway. A box over the core's whole section, on
-        // the game's IgnoreCollisions layer (no hits, no ground cast, no contacts), gives it a fuselage section's inertia.
+        // The fuselage cores' hulls are frame shells carved round what they hold (art/blender/hulls.py), and Unity takes a
+        // Rigidbody's inertia from its colliders, so a core with hulls on only part of its section spins wrong: the main
+        // tyres' side force, a metre and a half below the root, flipped the root's roll every physics step and the jet
+        // reared up on the runway. A box over the core's whole section, on the game's IgnoreCollisions layer (no hits, no
+        // ground cast, no contacts), gives it a fuselage section's inertia.
         private static readonly string[] StructureCores = { RootPart, "fuselage_forward", "fuselage_aft" };
         internal const int IgnoreCollisionsLayer = 15; // PhysicsLayers.IgnoreCollisions
 
@@ -282,6 +289,8 @@ namespace Icarus.Editor
                 var so = new SerializedObject(b.Part(spec.Name));
                 foreach (var value in b.Donor.Armour[spec.Armour])
                     Prop(so, value.Key).floatValue = value.Value;
+                if (spec.Name == "fuselage_forward")
+                    Prop(so, "structuralThreshold").floatValue = ForwardSectionThreshold;
                 Num(so, "hitPoints", 100f);
                 var critical = Prop(so, "criticalPart");
                 if (critical.propertyType == SerializedPropertyType.Boolean)
@@ -335,7 +344,7 @@ namespace Icarus.Editor
                 $"{blocking.Count} where one part's collider would block hits on another: {string.Join(", ", blocking)}");
         }
 
-        // The structure cores (keel strips and spars), the thin skin panels and the intake ducts the fuel cells wrap, which
+        // The structure cores (frame shells and spars), the thin skin panels and the intake ducts the fuel cells wrap, which
         // other parts sit inside or against by design: a hit passes through them to what is underneath. A cell's one hull
         // fills its duct cut-out (art/blender/hulls.py).
         private static bool Shelters(string part) => part == "fuselage_forward" || part == RootPart || part == "fuselage_aft"
@@ -371,7 +380,7 @@ namespace Icarus.Editor
                     var force = i == 0 ? JointForces[spec[entry.Key].Joint] : BraceForce;
                     var joint = joints.GetArrayElementAtIndex(i);
                     joint.FindPropertyRelative("connectedPart").objectReferenceValue = b.Part(list[i]);
-                    joint.FindPropertyRelative("tensor").objectReferenceValue = null;
+                    joint.FindPropertyRelative("tensor").objectReferenceValue = i == 0 ? null : b.Part(BraceTensor(spec, entry.Key, list[i]));
                     joint.FindPropertyRelative("solverIterations").intValue = JointSolverIterations;
                     joint.FindPropertyRelative("breakForce").floatValue = force;
                     joint.FindPropertyRelative("breakTorque").floatValue = force;
@@ -382,6 +391,20 @@ namespace Icarus.Editor
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
             b.Report.Add("joints: " + string.Join(", ", Enum.GetValues(typeof(JointClass)).Cast<JointClass>().Select(c => $"{c} {JointForces[c] / 1000:0} kN")) + $", braces {BraceForce / 1000:0} kN, {JointSolverIterations} solver iterations");
+        }
+
+        // A brace's tensor, by the stock cross joints' rule: the brace owner's ancestor directly under the lowest common
+        // ancestor of the two parts it joins. The brace lets go when that ancestor's own joint breaks
+        // (AeroPart.Part_OnTensorBreak), so a section that breaks off takes its braces with it instead of hanging on them.
+        private static string BraceTensor(Dictionary<string, PartSpec> spec, string owner, string other)
+        {
+            var above = new HashSet<string>();
+            for (var p = other; p != null; p = spec[p].Parent)
+                above.Add(p);
+            var tensor = owner;
+            while (spec[tensor].Parent != null && !above.Contains(spec[tensor].Parent))
+                tensor = spec[tensor].Parent;
+            return tensor;
         }
 
         // Where two parts meet: the middle of their colliders' common bounds, or of the gap between them.

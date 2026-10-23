@@ -45,12 +45,15 @@ def build():
         "glass": material("Icarus_Glass", (0.10, 0.16, 0.22, 0.6), 0.0, 0.05),
         "duct": material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8),
         "metal": material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35),
-        "frame": material("Icarus_Frame", (0.20, 0.21, 0.22, 1.0), 0.6, 0.5),
+        # The fuselage frames and break walls: dark, as stock shows structure at a break (the Vagrant's closed,
+        # self-shadowed jet_mechanical and Matte_black), since open frames lit by the sky read white on a light trim.
+        # Not jet_mechanical itself: parts.open_bays finds the gear bays' faces by that slot.
+        "frame": material("Icarus_Frame", (0.032, 0.034, 0.038, 1.0), 0.6, 0.5),
         "petal": material("Icarus_Petal", (0.46, 0.44, 0.42, 1.0), 0.85, 0.3),
         "seal": material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4),
         "strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
         "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9),
-        # Hidden structure on the stock trims (Exterior rule 4): frames, keels, spars and ribs on aircraft_structure;
+        # Hidden structure on the stock trims (Exterior rule 4): keels, spars and ribs on aircraft_structure;
         # equipment, tanks, bays and the coves of moving surfaces on jet_mechanical.
         "structure": stock("aircraft_structure"),
         "mechanical": stock("jet_mechanical"),

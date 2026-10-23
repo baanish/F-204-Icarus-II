@@ -39,6 +39,15 @@ INTERNALS = {
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "points": 48, "mass_kg_each": 9},
+    # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0 and the tail end at 14.8), so
+    # a section that comes away shows a closed, shaded face instead of open frames against the sky. Each is cut clear
+    # of whatever runs through it and has a torn rim. Stations (centres): 5.57 and 10.97 ahead of their joints,
+    # 11.03 behind its joint, 14.76 inside the last frame; the mid section's front wall stands at 5.92, behind the
+    # aux cell (to 5.90), which leaves with the forward section and would hole a wall at the joint down to its floor.
+    # The radome break at 1.6 needs none: the nose avionics box fills the section there.
+    "bulkheads": {"at": (5.57, 5.92, 10.97, 11.03, 14.76), "thickness": 0.02, "inset": 0.035, "points": 20,
+                  "tear": (0.0, 0.6, 0.15, 1.0, 0.35, 0.0, 0.8, 0.25, 0.5, 0.05), "tear_depth": 0.03,
+                  "clearance": 0.015, "hole_points": 12},
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
     "spars": {"front_f": 0.175, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
     "nose_gear_bay": {"box": (3.70, 5.15, 0.17, -0.48, -0.06), "mass_kg": 0},  # the nose leg folds forward into it
@@ -263,6 +272,95 @@ def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
     return obj
 
 
+def section_points(obj, s):
+    """Where obj's mesh crosses the station plane at s, as (x, z) points; empty if it does not."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.transform(obj.matrix_world)
+    cut = bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], dist=1e-6,
+                                 plane_co=bi.P(s, 0.0, 0.0), plane_no=Vector((0, 1, 0)))
+    pts = [(v.co.x, v.co.z) for v in cut["geom_cut"] if isinstance(v, bmesh.types.BMVert)]
+    bm.free()
+    return pts
+
+
+def inside(q, poly):
+    """Even-odd test of the (x, z) point q against a closed polygon."""
+    hit = False
+    for (x1, z1), (x2, z2) in zip(poly[-1:] + poly[:-1], poly):
+        if (z1 > q[1]) != (z2 > q[1]) and q[0] < x1 + (q[1] - z1) * (x2 - x1) / (z2 - z1):
+            hit = not hit
+    return hit
+
+
+def hull_2d(pts):
+    """Convex hull of (x, z) points, counter-clockwise (monotone chain)."""
+    pts = sorted(set(pts))
+    if len(pts) < 3:
+        return pts
+    cross = lambda o, a, b: (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for q in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], q) <= 0:
+            lower.pop()
+        lower.append(q)
+    for q in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], q) <= 0:
+            upper.pop()
+        upper.append(q)
+    return lower[:-1] + upper[:-1]
+
+
+def grown_hull(hull, by):
+    """A counter-clockwise convex polygon pushed out by `by` along its edge normals."""
+    out = []
+    for i, b in enumerate(hull):
+        a, c = hull[i - 1], hull[(i + 1) % len(hull)]
+        n1 = Vector((b[1] - a[1], -(b[0] - a[0]))).normalized()
+        n2 = Vector((c[1] - b[1], -(c[0] - b[0]))).normalized()
+        bis = (n1 + n2).normalized()
+        d = by / max(bis.dot(n1), 0.3)
+        out.append((b[0] + bis.x * d, b[1] + bis.y * d))
+    return out
+
+
+def bulkhead(p, name, s, crossing):
+    """A thin wall across the fuselage at s with a torn rim, holed clear of every object in crossing that runs
+    through it. A hole is the grown convex hull of that object's section inside the skin, kept to a few points: the
+    wall is seen at a break, not inspected."""
+    b = INTERNALS["bulkheads"]
+    ring = ring_at(p, s, b["inset"], count=b["points"])
+    cx = sum(v.x for v in ring) / len(ring)
+    cz = sum(v.z for v in ring) / len(ring)
+    rim = [v - Vector((v.x - cx, 0.0, v.z - cz)).normalized() * b["tear_depth"] * b["tear"][k % len(b["tear"])]
+           for k, v in enumerate(ring)]
+    half = Vector((0.0, b["thickness"] / 2, 0.0))
+    wall = outward(bi.loft(name, [[v - half for v in rim], [v + half for v in rim]], cap_back=True, cap_front=True))
+    skin = [(v.x, v.z) for v in ring_at(p, s, 0.01)]
+    cutters = []
+    for obj in crossing:
+        hull = hull_2d([q for q in section_points(obj, s) if inside(q, skin)])
+        if len(hull) < 3:
+            continue
+        if len(hull) > b["hole_points"]:
+            hull = hull_2d(resample_outline(hull, b["hole_points"]))
+        hole = grown_hull(hull, b["clearance"])
+        cutters.append(outward(bi.loft(obj.name + "_hole", [[bi.P(s + d, x, z) for x, z in hole] for d in (-0.1, 0.1)],
+                                       cap_back=True, cap_front=True)))
+    if cutters:
+        subtract(wall, cutters)
+        for c in cutters:
+            bpy.data.objects.remove(c, do_unlink=True)
+    bm = bmesh.new()  # as for the tanks: no boolean n-gons
+    bm.from_mesh(wall.data)
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+    bm.to_mesh(wall.data)
+    bm.free()
+    if not wall.data.polygons:
+        raise ValueError("%s: nothing left of the wall at station %.2f" % (name, s))
+    return wall
+
+
 def cylinder_loft(name, profile, segments=32):
     """profile: (s, x, z, r) rows along the part."""
     rings = [[bi.P(s, x + r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / segments for k in range(segments)]]
@@ -363,7 +461,7 @@ def _build(p, mats):
         aft = Vector((0, 0.025, 0))
         # outer band, aft face, inner band, front face: the fifth ring closes the frame's cross-section
         rings = [outer, [v + aft for v in outer], [v + aft for v in inner], inner, outer]
-        obj = bi.finish(bi.loft("frame_%02d" % k, rings), mats["structure"], smooth=False)
+        obj = bi.finish(bi.loft("frame_%02d" % k, rings), mats["frame"], smooth=False)
         parts.append(tag(obj, "structure", "fuselage", fr["mass_kg_each"]))
         s += fr["pitch"]
         k += 1
@@ -387,4 +485,13 @@ def _build(p, mats):
                 obj.data.flip_normals()
             bi.finish(obj, mats["structure"], smooth=False)
             parts.append(tag(obj, "structure", "wing" + suffix, sp["mass_kg_side"] / len(pieces)))
+
+    bh = I["bulkheads"]
+    # Everything built so far that may run through a wall, less the skin and the fin, whose root organise trims
+    # back to the skin.
+    crossing = [o for o in list(bpy.data.collections["Icarus"].objects) + list(bi.TARGET.objects)
+                if o.type == "MESH" and o.name not in ("fuselage", "fin") and not o.name.startswith("frame_")]
+    for s in bh["at"]:
+        wall = bulkhead(p, "bulkhead_%05.2f" % s, s, crossing)
+        parts.append(tag(bi.finish(wall, mats["frame"], smooth=False), "structure", "fuselage"))
     return parts
