@@ -353,6 +353,7 @@ namespace Icarus.Editor
                 BuildGear(b);
                 BuildCockpit(b);
                 PlaceSystems(b);
+                BuildAircraftSounds(b);
                 AttachLeftovers(b); // the pylon blades and plugs, which BuildStations shows and hides
                 BuildStations(b);
                 BuildTacScreen(b);

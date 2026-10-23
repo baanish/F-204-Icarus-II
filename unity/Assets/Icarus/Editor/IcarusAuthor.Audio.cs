@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Icarus.Editor
 {
@@ -24,6 +25,29 @@ namespace Icarus.Editor
         // ReheatGain (src/Icarus) scales this GameObject's samples, so the reheat source lives alone on it: the dry
         // roar's source shares thrust_vector with the JetNozzle.
         private const string ReheatAudioName = "afterburner_audio";
+
+        // The owner's aircraft sounds (audio research, aircraft pass): new gear travel, gear lock and belly scrape,
+        // Earshot v0.4.0 renders of CC0 recordings (Audio/CREDITS.md). By the owner's choice, flare release, tyre roll
+        // and skid, speed-brake airflow and canopy jettison keep the Revoker's stock clips (StockAircraftClips).
+        private const string GearTravelClipPath = AudioFolder + "/gear_fold_icarus.wav";
+        private const string GearLockClipPath = AudioFolder + "/gear_latch_icarus.wav";
+        private const string ScrapeClipPath = AudioFolder + "/runway_scrape_icarus.wav";
+        private static readonly string[] DonorAircraftClips = { "gearfold", "latch1", "runway scrape" };
+        // LandingGear plays fold and latch at these volumes (stock 0.3 each). The travel file matches the donor
+        // gearfold's loudness, so 0.379 sits 2.0 dB over the donor in game, as the owner asked. The lock file is
+        // 1.88 LU under the donor latch1 with its peak already at -1 dBTP, so 0.373 brings it level. Aircraft drives the
+        // scrape source's volume to 1 in code, so the scrape file carries the donor's loudness itself.
+        private const float GearTravelVolume = 0.379f, GearLockVolume = 0.373f;
+        // A leg opens its doors for 1 s before extending and closes them for 1 s after retracting, then latches, which
+        // stops the travel clip (LandingGear.cs:369-446). The clip must last the slowest leg's cycle, 1 s +
+        // foldDegrees / foldSpeed (the nose: 1 + 90 / 30 = 4 s), or the leg goes quiet before its lock.
+        private const float GearDoorSeconds = 1f;
+        // The kept stock clips, by component and field: the owner heard the new ones and chose these.
+        private static readonly (string type, string field, string clip)[] StockAircraftClips =
+        {
+            ("LandingGear", "tireNoiseSound", "wheelRollingRoad"), ("LandingGear", "tireSkidSound", "wheelSlidingRoad"),
+            ("Airbrake", "airbrakeSound", "airbrake"), ("Canopy", "ejectSound", "canopyJettison"), ("FlareEjector", "ejectionSound", "flare1"),
+        };
 
         private static void BuildEngineAudio(Build b)
         {
@@ -52,14 +76,29 @@ namespace Icarus.Editor
             b.Report.Add($"engine audio: {Path.GetFileName(TurbineClipPath)}, {Path.GetFileName(DryClipPath)}, {Path.GetFileName(ReheatClipPath)} on thrust_vector/{ReheatAudioName}");
         }
 
+        private static void BuildAircraftSounds(Build b)
+        {
+            var travel = ImportEngineClip(GearTravelClipPath);
+            var lockClip = ImportEngineClip(GearLockClipPath);
+            foreach (var gear in b.Root.GetComponentsInChildren(GameType("LandingGear"), true))
+            {
+                Set(gear, "foldSound", travel);
+                Set(gear, "foldVolume", GearTravelVolume);
+                Set(gear, "latchSound", lockClip);
+                Set(gear, "latchVolume", GearLockVolume);
+            }
+            Set(b.Aircraft, "scrapeSound", ImportEngineClip(ScrapeClipPath));
+            b.Report.Add($"aircraft sounds: {Path.GetFileName(GearTravelClipPath)} at {GearTravelVolume}, {Path.GetFileName(GearLockClipPath)} at {GearLockVolume}, {Path.GetFileName(ScrapeClipPath)}");
+        }
+
         // PCM, decompressed on load: the loops are seamless and the reheat sits at its clean -1.2 dBTP ceiling, so no
-        // lossy re-encode.
+        // lossy re-encode. The aircraft sounds load the same way.
         private static AudioClip ImportEngineClip(string path)
         {
             if (!(AssetImporter.GetAtPath(path) is AudioImporter importer))
             {
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
-                importer = AssetImporter.GetAtPath(path) as AudioImporter ?? throw new FileNotFoundException("Engine loop missing; see Audio/CREDITS.md", path);
+                importer = AssetImporter.GetAtPath(path) as AudioImporter ?? throw new FileNotFoundException("Icarus clip missing; see Audio/CREDITS.md", path);
             }
             var settings = importer.defaultSampleSettings;
             if (settings.loadType != AudioClipLoadType.DecompressOnLoad || settings.compressionFormat != AudioCompressionFormat.PCM
@@ -102,6 +141,53 @@ namespace Icarus.Editor
                 if (s.compressionFormat != AudioCompressionFormat.PCM || s.loadType != AudioClipLoadType.DecompressOnLoad) p.Add(Path.GetFileName(path) + " isn't PCM decompressed on load");
             }
             return "turbine, dry roar and reheat play the round 7 take A loops at the stock gain laws, no donor engine clip, reheat alone on " + ReheatAudioName;
+        }
+
+        private static string CheckAircraftSounds(Build b, List<string> p)
+        {
+            static string ClipName(Object o) => o == null ? "nothing" : o.name;
+            static bool IsStock(Object o, string stock) => o != null && o.name.StartsWith(stock + "_PLACEHOLDER", StringComparison.Ordinal);
+            var donor = b.Root.GetComponentsInChildren<Component>(true).Where(c => c != null && !(c is Transform))
+                .SelectMany(c => { var it = new SerializedObject(c).GetIterator(); var refs = new List<string>();
+                    while (it.Next(true)) if (it.propertyType == SerializedPropertyType.ObjectReference && it.objectReferenceValue is AudioClip clip
+                        && DonorAircraftClips.Any(n => IsStock(clip, n))) refs.Add($"{c.name}.{it.propertyPath} = {clip.name}");
+                    return refs; }).ToArray();
+            p.AddRange(donor.Select(d => "donor aircraft clip: " + d));
+
+            var travel = Load<AudioClip>(GearTravelClipPath);
+            var gears = b.Root.GetComponentsInChildren(GameType("LandingGear"), true);
+            if (gears.Length != 3) p.Add($"{gears.Length} LandingGear, expected 3");
+            var slowest = 0f;
+            foreach (var gear in gears)
+            {
+                if (AssetDatabase.GetAssetPath(GetRef(gear, "foldSound")) != GearTravelClipPath) p.Add($"{gear.name} foldSound is {ClipName(GetRef(gear, "foldSound"))}");
+                if (AssetDatabase.GetAssetPath(GetRef(gear, "latchSound")) != GearLockClipPath) p.Add($"{gear.name} latchSound is {ClipName(GetRef(gear, "latchSound"))}");
+                if (GetFloat(gear, "foldVolume") != GearTravelVolume || GetFloat(gear, "latchVolume") != GearLockVolume)
+                    p.Add($"{gear.name} fold/latch volume {GetFloat(gear, "foldVolume")}/{GetFloat(gear, "latchVolume")}, expected {GearTravelVolume}/{GearLockVolume}");
+                slowest = Mathf.Max(slowest, GearDoorSeconds + Mathf.Abs(GetFloat(gear, "foldDegrees")) / GetFloat(gear, "foldSpeed"));
+            }
+            if (travel.length <= slowest) p.Add($"gear travel clip {travel.length:F2} s ends before the slowest leg's {slowest:F2} s cycle");
+            if (AssetDatabase.GetAssetPath(GetRef(b.Aircraft, "scrapeSound")) != ScrapeClipPath) p.Add("scrapeSound is " + ClipName(GetRef(b.Aircraft, "scrapeSound")));
+
+            var kept = 0;
+            foreach (var (type, field, stock) in StockAircraftClips)
+            {
+                var holders = b.Root.GetComponentsInChildren(GameType(type), true);
+                if (holders.Length == 0) p.Add($"no {type} left to keep the stock {stock}");
+                foreach (var c in holders)
+                {
+                    var r = GetRef(c, field);
+                    var clip = r is AudioSource source ? source.clip : r;
+                    if (!IsStock(clip, stock)) p.Add($"{type}.{field} on {c.name} plays {ClipName(clip)}, not the kept stock {stock}");
+                    else kept++;
+                }
+            }
+            foreach (var path in new[] { GearTravelClipPath, GearLockClipPath, ScrapeClipPath })
+            {
+                var s = ((AudioImporter)AssetImporter.GetAtPath(path)).defaultSampleSettings;
+                if (s.compressionFormat != AudioCompressionFormat.PCM || s.loadType != AudioClipLoadType.DecompressOnLoad) p.Add(Path.GetFileName(path) + " isn't PCM decompressed on load");
+            }
+            return $"{gears.Length} legs play the Icarus travel ({travel.length:F2} s, slowest cycle {slowest:F2} s) at {GearTravelVolume} and lock at {GearLockVolume}, Icarus scrape, {kept} kept stock slots, no donor gearfold, latch1 or runway scrape";
         }
     }
 }
