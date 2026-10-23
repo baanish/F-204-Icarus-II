@@ -5,7 +5,7 @@
     "Path": "Terrain_naval"
   },
   "missionSettings": {
-    "description": "Icarus - gun kills. Fly a Primeva KR-67 Ifrit at 8,000 m MSL, heading 000, 330 m/s, with only the internal 27 mm gun and 540 rounds. Four Boscali F-204 Icarus II targets start level at 8,000 m and 200 m/s, in trail 1 km apart, the first 1.8 km ahead. They follow a distant same-altitude northbound waypoint along western Ignus, with two GPO-500 bombs each and all other stations empty. The bombs prevent the unarmed AI's return to base without giving it an air-to-air weapon. Starting at the AI's 8,000 m AGL cap avoids the usual sustained climb over sea. Saved missions cannot enforce an exact MSL altitude or speed: terrain following, radar warnings, avoidance and damage can change flight, and cruise throttle can accelerate the targets. Approach promptly with radar off. No escorts or reinforcements. Restart to repeat. Level flight is a source-based best effort, not a flight-tested guarantee.",
+    "description": "Icarus - gun kills. Fly a Primeva KR-67 Ifrit at 8,000 m MSL, heading 000, 330 m/s, in its standard loadout: the 27 mm gun with 540 rounds, six AAM-29 Scythes and two IRM-S2s. Four Boscali F-204 Icarus II targets start level at 8,000 m and 200 m/s, in trail 1 km apart, the first 1.8 km ahead. They follow a distant same-altitude northbound waypoint along western Ignus, with two GPO-500 bombs each and all other stations empty. The bombs prevent the unarmed AI's return to base without giving it an air-to-air weapon. Starting at the AI's 8,000 m AGL cap avoids the usual sustained climb over sea. Saved missions cannot enforce an exact MSL altitude or speed: terrain following, radar warnings, avoidance and damage can change flight, and cruise throttle can accelerate the targets. Approach promptly with radar off. No escorts or reinforcements. Restart to repeat. Level flight is a source-based best effort, not a flight-tested guarantee.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",
@@ -85,13 +85,13 @@
             "Key": "autocannon_27mm_internal"
           },
           {
-            "Key": ""
+            "Key": "AAM2_triple_internal"
           },
           {
-            "Key": ""
+            "Key": "AAM2_triple_internal"
           },
           {
-            "Key": ""
+            "Key": "AAM3_single_internal"
           },
           {
             "Key": ""
