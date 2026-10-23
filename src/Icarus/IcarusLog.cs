@@ -8,7 +8,7 @@ namespace Icarus;
 /// <summary>
 /// Every line the mod writes starts with "[Icarus]", so it greps out of LogOutput.log and player.log alike.
 /// Info, Warning and Error are unbounded: for startup and one-shot lines only. Stage lines are bounded to one line per key
-/// per second, with a 60 s summary of how often each key fired.
+/// per second, with a 60 s summary of how often each key fired. Opt-in bullet diagnostics keep every hit.
 /// </summary>
 public sealed class IcarusLog
 {
@@ -37,7 +37,7 @@ public sealed class IcarusLog
 
     public void Error(string message) => source.LogError("[Icarus] " + message);
 
-    public void Stage(string key, string message)
+    public void Stage(string key, string message, bool everyOccurrence = false)
     {
         if (!StageEnabled)
         {
@@ -52,7 +52,7 @@ public sealed class IcarusLog
 
         stage.Count++;
         float now = Time.unscaledTime;
-        if (now - stage.LastLoggedAt < KeyIntervalS)
+        if (!everyOccurrence && now - stage.LastLoggedAt < KeyIntervalS)
         {
             stage.Suppressed++;
             return;

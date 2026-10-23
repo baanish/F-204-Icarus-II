@@ -123,8 +123,10 @@ namespace Icarus.Editor
                 rb.ResetInertiaTensor();
                 // UnitPart.ModifyMass, from a tank's fuel.
                 var com = (Transform)Prop(so, "centerOfMass").objectReferenceValue;
-                if (fuel.ContainsKey(p.Part) && com != null)
+                var fuelled = fuel.ContainsKey(p.Part) && com != null;
+                if (fuelled)
                     rb.centerOfMass = com.localPosition;
+                SectionInertia.Pin(rb, SectionInertia.BoxesUnder(new[] { p.Part }), automaticCenter: !fuelled);
                 p.Rb = rb;
             }
             // The Icarus's parts ignore one another (src/Icarus/SelfCollision.cs); stock parts sit apart.

@@ -34,6 +34,19 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<EjectLog>();
         }
 
+        if (!__instance.TryGetComponent<SectionInertia>(out var sections))
+        {
+            sections = __instance.gameObject.AddComponent<SectionInertia>();
+            sections.Boxes = SectionInertia.BoxesUnder(Parts(__instance));
+            if (sections.Boxes.Length == 0)
+            {
+                IcarusPlugin.Log.Error("section inertia: no *_inertia boxes; the fuselage cores carry their hulls' inertia only");
+            }
+        }
+
+        // SetLocalSim has just made the bodies; pin them before the first step.
+        sections.PinAll();
+
         Turbojet? engine = Engine(__instance);
         JetNozzle? nozzle = engine == null ? null : Nozzle(engine);
         Transform? reheat = nozzle == null ? null : nozzle.transform.Find("afterburner_audio");
@@ -46,7 +59,7 @@ static class IcarusSystems
             reheat.gameObject.AddComponent<ReheatGain>();
         }
 
-        IcarusPlugin.Log.Stage("spawn", $"Icarus {__instance.persistentID} seen, local sim {localSim}");
+        IcarusPlugin.Log.Stage("spawn", $"Icarus {__instance.persistentID} seen, local sim {localSim}, {sections.Boxes.Length} section inertia boxes");
         Tuning.Track(__instance);
     }
 

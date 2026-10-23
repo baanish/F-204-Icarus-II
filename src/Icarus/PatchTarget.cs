@@ -11,7 +11,7 @@ namespace Icarus;
 /// </summary>
 public sealed class PatchTarget
 {
-    public PatchTarget(string feature, Type type, string method, Type[]? parameters = null, MethodInfo? prefix = null, MethodInfo? postfix = null)
+    public PatchTarget(string feature, Type type, string method, Type[]? parameters = null, MethodInfo? prefix = null, MethodInfo? postfix = null, MethodInfo? transpiler = null)
     {
         Feature = feature;
         Type = type;
@@ -19,6 +19,7 @@ public sealed class PatchTarget
         Parameters = parameters;
         Prefix = prefix;
         Postfix = postfix;
+        Transpiler = transpiler;
     }
 
     public string Feature { get; }
@@ -27,6 +28,7 @@ public sealed class PatchTarget
     public Type[]? Parameters { get; }
     public MethodInfo? Prefix { get; }
     public MethodInfo? Postfix { get; }
+    public MethodInfo? Transpiler { get; }
 
     string Name => Type.Name + "." + Method;
 
@@ -50,7 +52,8 @@ public sealed class PatchTarget
                 harmony.Patch(
                     original,
                     target.Prefix == null ? null : new HarmonyMethod(target.Prefix),
-                    target.Postfix == null ? null : new HarmonyMethod(target.Postfix));
+                    target.Postfix == null ? null : new HarmonyMethod(target.Postfix),
+                    target.Transpiler == null ? null : new HarmonyMethod(target.Transpiler));
                 log.Info($"patch {target.Feature}: {target.Name} found/patched");
             }
             catch (Exception e)
@@ -60,7 +63,7 @@ public sealed class PatchTarget
                 {
                     var entry = installed[i];
                     if (entry.Target.Feature != target.Feature) continue;
-                    foreach (MethodInfo? patch in new[] { entry.Target.Prefix, entry.Target.Postfix })
+                    foreach (MethodInfo? patch in new[] { entry.Target.Prefix, entry.Target.Postfix, entry.Target.Transpiler })
                     {
                         if (patch != null) harmony.Unpatch(entry.Original, patch);
                     }

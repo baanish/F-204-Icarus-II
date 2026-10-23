@@ -24,7 +24,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Seconds between a mission starting and the supply repair and stock-mission supply, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(SelfCollision.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(GunTargetTestSupport.PatchTargets).Concat(BareMetalLivery.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(BulletHitLog.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(SelfCollision.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(GunTargetTestSupport.PatchTargets).Concat(BareMetalLivery.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 
@@ -40,11 +40,12 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     {
         Log = new IcarusLog(Logger);
         stageLogging = Config.Bind("Diagnostics", "StageLogging", true,
-            "Log each stage the mod crosses (spawn, nozzle, tuning file), at most one line per key per second");
+            "Log each stage the mod crosses (spawn, nozzle, tuning file), at most one line per key per second except opt-in BulletHits");
         Log.StageEnabled = stageLogging.Value;
         stageLogging.SettingChanged += (_, _) => Log.StageEnabled = stageLogging.Value;
         Log.Info($"F-204 Icarus II {Version} ({Guid}); Diagnostics.StageLogging={stageLogging.Value}");
         Tuning.Install(Config, Log);
+        BulletHitLog.Install(Config);
         StockMissionSupply.Install(Config, Log);
         harmony = new Harmony(Guid);
         FeaturesOff = PatchTarget.InstallAll(harmony, PatchTargets, Log);

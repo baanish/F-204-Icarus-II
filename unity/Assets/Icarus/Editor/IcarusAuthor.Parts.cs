@@ -236,18 +236,20 @@ namespace Icarus.Editor
         // The fuselage cores' hulls are frame shells carved round what they hold (art/blender/hulls.py), and Unity takes a
         // Rigidbody's inertia from its colliders, so a core with hulls on only part of its section spins wrong: the main
         // tyres' side force, a metre and a half below the root, flipped the root's roll every physics step and the jet
-        // reared up on the runway. A box over the core's whole section, on the game's IgnoreCollisions layer (no hits, no
-        // ground cast, no contacts), gives it a fuselage section's inertia.
+        // reared up on the runway. A box over the core's whole section gives it a fuselage section's inertia. The box ships
+        // disabled, since an enabled one stops bullets and blasts on any layer but 13, which the AI's terrain checks hit;
+        // src/Icarus/SectionInertia.cs enables it only while Unity computes the body's mass properties, then pins them.
         private static readonly string[] StructureCores = { RootPart, "fuselage_forward", "fuselage_aft" };
         internal const int IgnoreCollisionsLayer = 15; // PhysicsLayers.IgnoreCollisions
 
         private static void AddSectionInertia(GameObject part, Bounds section)
         {
-            var box = new GameObject(part.name + "_inertia") { layer = IgnoreCollisionsLayer };
+            var box = new GameObject(part.name + SectionInertia.BoxSuffix) { layer = IgnoreCollisionsLayer };
             box.transform.SetParent(part.transform, false);
             var collider = box.AddComponent<BoxCollider>();
             collider.center = section.center;
             collider.size = section.size;
+            collider.enabled = false;
         }
 
         // The export's convex pieces, in the part's own frame (the part sits where its mesh does).

@@ -1,0 +1,38 @@
+// Run only after B0 passes: no-agentic run tests/scenarios/bullet_hits.scenario.jsonc
+// A gun-only Ifrit starts 180 m behind a clean Icarus, both northbound at 220 m/s, 8,000 m MSL.
+// The target follows a straight AI route. The player's combat AI aims its gun, then act fires a one-second burst.
+// A missing hit is a setup failure, not evidence that the collider fix failed. Every observed Icarus hit must have
+// a same-object damage receiver. Log lines include visual-only rounds, and are never suppressed within a burst.
+{
+  "mission": "bullet_hits.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus"
+  ],
+  "config": {
+    "baanish.icarus": { "Diagnostics": { "StageLogging": true, "BulletHits": true } }
+  },
+  "timeout": 120,
+  "sample_hz": 20,
+  "steps": [
+    { "require": { "path": "own.alive", "eq": true }, "label": "the Ifrit is alive" },
+    { "fly": { "mode": "hold", "alt_msl_m": 8000, "hdg_deg": 0, "throttle": 0.4 } },
+    { "act": { "station": 0 } },
+    { "require": { "path": "own.station.ammo", "gt": 0 }, "label": "the gun is loaded" },
+    { "ai": { "path": "BulletTarget", "points": "-74000,70000,8000" } },
+    { "require": { "path": "contacts.BulletTarget.live", "eq": true }, "within": 10, "label": "the Icarus target has a live track" },
+    { "require": { "path": "contacts.BulletTarget.range_m", "lt": 400 }, "label": "the target is close enough for a rear gun pass" },
+    { "act": { "target": "BulletTarget" } },
+    { "mark": { "label": "gun-pass" } },
+    { "fly": { "mode": "ai", "target": "BulletTarget" } },
+    { "act": { "fire": 1 } },
+    { "require": { "log": "bullet-hit: aircraft=BulletTarget .* damageable=true", "since": "gun-pass" }, "within": 12,
+      "label": "gate: at least one round actually hits the Icarus" },
+    { "check": { "not": { "log": "bullet-hit: aircraft=BulletTarget .* damageable=false", "since": "gun-pass" } }, "for": 2,
+      "label": "no bullet vanishes into a non-damageable Icarus collider" },
+    { "fly": { "mode": "hold", "alt_msl_m": 8000, "hdg_deg": 0, "throttle": 0.4 } },
+    { "config": { "guid": "baanish.icarus", "section": "Diagnostics", "key": "BulletHits", "value": false } }
+  ]
+}

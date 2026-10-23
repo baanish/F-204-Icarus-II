@@ -55,6 +55,8 @@ namespace Icarus.Editor
             Item("A16", "stock-mission supply keys", p => CheckStockSupply(definition, p));
             Item("A17", "engine and aircraft audio", p => CheckEngineAudio(b, p) + "; " + CheckAircraftSounds(b, p));
             Item("A18", "tail stiffness under flight loads", p => CheckTailStiffness(b, p));
+            Item("A19", "bullet collider ownership", p => CheckBulletColliders(b, p));
+            Item("A20", "section inertia pinned with the boxes disabled", p => CheckSectionInertia(b, p));
             if (failures.Count > 0)
                 throw new InvalidDataException("Icarus authoring checks failed:\n  " + string.Join("\n  ", failures));
         }
