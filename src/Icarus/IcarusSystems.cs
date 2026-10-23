@@ -34,6 +34,18 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<EjectLog>();
         }
 
+        Turbojet? engine = Engine(__instance);
+        JetNozzle? nozzle = engine == null ? null : Nozzle(engine);
+        Transform? reheat = nozzle == null ? null : nozzle.transform.Find("afterburner_audio");
+        if (reheat == null)
+        {
+            IcarusPlugin.Log.Error("reheat gain: no thrust_vector/afterburner_audio; reheat plays 9.5 dB under its mix");
+        }
+        else if (!reheat.TryGetComponent<ReheatGain>(out _))
+        {
+            reheat.gameObject.AddComponent<ReheatGain>();
+        }
+
         IcarusPlugin.Log.Stage("spawn", $"Icarus {__instance.persistentID} seen, local sim {localSim}");
         Tuning.Track(__instance);
     }

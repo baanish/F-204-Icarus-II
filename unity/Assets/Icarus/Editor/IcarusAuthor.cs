@@ -348,6 +348,7 @@ namespace Icarus.Editor
                 BuildSurfaces(b);
                 SetAero(b);
                 BuildEngine(b);
+                BuildEngineAudio(b);
                 AuthorDamage(b);
                 BuildGear(b);
                 BuildCockpit(b);
