@@ -255,8 +255,8 @@ MonoBehaviour:
   RequestRearmLevel: 0.5
   Safety: 0
   railDirection: 1
-  railLength: 0
-  railSpeed: 0
+  railLength: 1.5
+  railSpeed: 6
   railDelay: 0
   deploySound: {fileID: 8300000, guid: 371550a2e35be5242aff150952185715, type: 3}
   deployParticles: {fileID: 0}
