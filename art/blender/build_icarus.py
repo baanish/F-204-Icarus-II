@@ -10,6 +10,7 @@ given as station `s` (metres aft of the radome tip), lateral `x` and height `z` 
 """
 import math
 import os
+from functools import lru_cache
 
 import sys
 
@@ -18,6 +19,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # so internals.py imports in a headless run
+import geometry_cache
 
 # Station 0 (the radome tip) sits this far ahead of the origin.
 S0 = 8.0
@@ -372,6 +374,7 @@ def fuselage_shapes(p, s):
     return shapes, zmid
 
 
+@geometry_cache.ring
 def blended_ring(p, s, angles=None):
     shapes, zc = fuselage_shapes(p, s)
     # At the lip the intake meets the body almost sharply, so it reads as a slice of a circle; the fillet fades in
@@ -396,6 +399,7 @@ def blended_ring(p, s, angles=None):
     u = (s - ar["centre_s"]) / ar["half_length"]
     squeeze = 1.0 - ar["depth"] * math.cos(0.5 * math.pi * u) ** 2 if abs(u) < 1 else 1.0
 
+    @lru_cache(maxsize=None)
     def radius(a, sample):
         c, sn = math.cos(a), math.sin(a)
         r_out, step, r = 0.0, 0.02, 0.0
@@ -457,6 +461,7 @@ def fuselage_stations(p):
             + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, p["fuselage"][-1][0], 50)[1:])
 
 
+@geometry_cache.ring
 def skin_ring(p, s):
     """Section of the rendered loft, so internal fits cannot bridge a differently sampled SDF contour."""
     stations = fuselage_stations(p)
@@ -954,10 +959,19 @@ def build(repo=None, overrides=None):
     base = PARAMS
     if overrides:
         PARAMS = dict(base, **overrides)
+    geometry_cache.clear()
     try:
         return _build(repo)
     finally:
         PARAMS = base
+        geometry_cache.clear()
+
+
+def build_cached(repo=None, overrides=None):
+    """Reuse a checked aircraft in a fresh script; build() always regenerates it."""
+    import build_cache
+
+    return build_cache.load_or_build(repo, overrides)
 
 
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
@@ -1041,4 +1055,4 @@ if __name__ == "__main__":
     # so TARGET and PARAMS are the ones they read.
     import build_icarus
 
-    print("icarus:", build_icarus.build())
+    print("icarus:", build_icarus.build_cached())

@@ -2227,7 +2227,7 @@ if __name__ == "__main__":
     cube = bpy.data.objects.get("Cube")  # the factory-startup scene's default cube would sit in every render
     if cube is not None:
         bpy.data.objects.remove(cube, do_unlink=True)
-    print("icarus:", {k: v for k, v in bi.build().items() if k != "references"})
+    print("icarus:", {k: v for k, v in bi.build_cached().items() if k != "references"})
     import cockpit  # the copy the build used, not this __main__
 
     print("cockpit renders:", cockpit.render_review(out))

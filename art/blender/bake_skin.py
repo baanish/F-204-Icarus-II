@@ -77,7 +77,7 @@ def prepare():
 
     for obj in list(bpy.data.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
-    metrics = build_icarus.build()
+    metrics = build_icarus.build_cached()
     icarus = bpy.data.collections["Icarus"]
     report = uvs.check(icarus)
     (OUT / "geometry_checks.json").write_text(json.dumps({"build": metrics, "uv": report}, indent=2))

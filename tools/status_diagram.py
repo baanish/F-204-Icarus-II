@@ -44,7 +44,7 @@ def blender_main(out):
     import build_icarus
     import stations
 
-    build_icarus.build()
+    build_icarus.build_cached()
     objects = list(bpy.data.collections["Icarus"].all_objects)
     parts = {o.name.removesuffix("_visible") for o in objects if o.type == "MESH" and o.get("mass_kg", 0) > 0}
     depsgraph = bpy.context.evaluated_depsgraph_get()

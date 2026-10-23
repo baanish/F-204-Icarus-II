@@ -132,7 +132,7 @@ def main():
     parser.add_argument("--out", type=Path, default=REPO / "art/export")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     out = args.out.resolve()
-    build_icarus.build()
+    build_icarus.build_cached()
     coll = bpy.data.collections.get("Icarus")
     if coll is None:
         raise ValueError("generator did not create the Icarus collection")

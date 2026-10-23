@@ -524,6 +524,6 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import build_icarus
 
-    build_icarus.build()
+    build_icarus.build_cached()
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     render_review(bpy.data.collections["Icarus"], os.path.abspath(args[0] if args else ".cache/review/wave2/p9a/01"))

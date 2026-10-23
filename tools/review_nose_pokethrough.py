@@ -28,7 +28,7 @@ def main():
     if args.blend:
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
     if not args.blend:
-        bi.build()
+        bi.build_cached()
     col = bpy.data.collections["Icarus"]
     bi.TARGET = col
     for name in ("References", "Colliders", "LOD1"):

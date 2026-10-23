@@ -46,7 +46,7 @@ def main():
     cube = bpy.data.objects.get("Cube")
     if cube:
         bpy.data.objects.remove(cube, do_unlink=True)
-    bi.build()
+    bi.build_cached()
     root = paths.load()["game_export"]
     index = asset_index(root, "Mesh")
     mount, _ = load_mount(root, index, "AAM1_single")

@@ -156,6 +156,8 @@ def interior_visibility(icarus, allow_openings=True):
     directions = [Vector(v).normalized() for v in
                   ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1))
                   + tuple((x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1))]
+    rays = [(direction, direction * 30, -direction) for direction in directions]
+    ray_cast = shell.ray_cast
     failures, total = [], 0
     for obj in inside:
         points = surface_samples(obj)
@@ -164,10 +166,10 @@ def interior_visibility(icarus, allow_openings=True):
             q = Vector(point)
             if openings and openings.find_nearest(q)[3] <= 1e-5:
                 continue  # Well rims lie on the intentional opening, with micrometre rounding after joining.
-            for direction in directions:
+            for direction, origin, inward in rays:
                 # Aim at the sample from well outside the entire aircraft. A shell hit at the sample itself
                 # gives no clearance and must fail too; checking intersections alone misses open skin gaps.
-                hit, _, _, distance = shell.ray_cast(q + direction * 30, -direction, 30.0001)
+                hit, _, _, distance = ray_cast(q + origin, inward, 30.0001)
                 if hit is None or distance >= 29.9999:
                     # A well rim may lie on an opening's edge; unlike an enclosed compartment it needs no gap
                     # to this virtual patch. The real shell still requires an earlier, occluding hit.

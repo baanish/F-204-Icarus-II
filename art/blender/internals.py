@@ -78,6 +78,7 @@ def box(name, s0, s1, hw, z0, z1, x=0.0):
     return bi.mesh_object(name, v, faces)
 
 
+@bi.geometry_cache.ring
 def ring_at(p, s, inset, floor=None, x_lo=None, x_hi=None, count=None):
     """The skin section at s pulled inward by inset. With floor or x limits, the section is clipped to z >= floor
     and x_lo <= x <= x_hi (a true polygon cut, so the result never leaves the skin); clipped or given a count, it is

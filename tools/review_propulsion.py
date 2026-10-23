@@ -100,7 +100,10 @@ def main():
     if args.baseline:
         source = subprocess.check_output(["git", "show", "82cb1ab:art/blender/propulsion.py"], cwd=REPO)
         exec(compile(source, "baseline_propulsion.py", "exec"), propulsion.__dict__)
-    bi.build()
+    if args.baseline:
+        bi.build()  # This mode executes historical source in memory.
+    else:
+        bi.build_cached()
     report = measurements()
     name = "baseline-measurements.json" if args.baseline else "measurements.json"
     (args.out / name).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

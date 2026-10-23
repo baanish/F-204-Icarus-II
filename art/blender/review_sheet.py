@@ -125,5 +125,5 @@ def render(out_dir, repo=None):
 
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    build_icarus.build()
+    build_icarus.build_cached()
     print("icarus review:", render(args[0] if args else os.path.abspath(".cache/review/latest")))
