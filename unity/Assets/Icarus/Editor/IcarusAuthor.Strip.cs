@@ -19,7 +19,6 @@ namespace Icarus.Editor
             public float PitchSense, RollSense, YawSense;
             public Vector3 Eye;
             public float GroundY; // the Revoker's ground line under its root, from its definition's spawnOffset
-            public float NoseZ; // the Revoker's nose tip ahead of its root
             public Material FormationLit; // the Revoker's formation strips' lit material and switching
             public int FormationState;
         }
@@ -75,7 +74,6 @@ namespace Icarus.Editor
             CalibrateSurfaceSigns(b, capture);
             capture.Eye = ((Transform)GetRef(b.Aircraft, "cockpitViewPoint")).position;
             capture.GroundY = -Prop(new SerializedObject(Load<Object>(DonorDefinition)), "spawnOffset").vector3Value.y;
-            capture.NoseZ = b.Root.GetComponentsInChildren<MeshRenderer>(true).Where(r => r.gameObject.layer != 3).Max(r => r.bounds.max.z);
             return capture;
         }
 

@@ -151,8 +151,10 @@ namespace Icarus.Editor
         }).ToArray();
 
         // Spawns the aircraft already sitting on its springs, as every geared stock definition does: the empty mass at the
-        // CG shared by lever arm between the nose and main legs, each shortened by its load over springRate. The nose sits
-        // where the Revoker's did relative to the spawn point, so the hangars the Revoker uses fit it the same way.
+        // CG shared by lever arm between the nose and main legs, each shortened by its load over springRate. The airframe's
+        // length is centred on the spawn point, as the Revoker's is to within 0.15 m: a shelter1's spawn point sits midway
+        // between its doors, 19.5 m apart, and with the nose where the Revoker's sat the 2 m longer Icarus put its
+        // stabilator into the shut rear door.
         private static void SetRestPose(Build b, Object definition)
         {
             var legs = Contacts(b);
@@ -189,10 +191,8 @@ namespace Icarus.Editor
                 .Where(r => r.TryGetComponent<MeshFilter>(out var f) && icarus.Contains(f.sharedMesh)).ToArray();
             var bounds = renderers.Select(r => r.bounds).Aggregate((x, y) => { x.Encapsulate(y); return x; });
             b.Size = new Vector3(bounds.size.x, bounds.max.y + height, bounds.size.z);
-            var donor = new SerializedObject(Load<Object>(DonorDefinition));
-            var donorNose = Prop(donor, "spawnOffset").vector3Value.z + b.Donor.NoseZ;
             var def = new SerializedObject(definition);
-            Prop(def, "spawnOffset").vector3Value = new Vector3(0, height, donorNose - bounds.max.z);
+            Prop(def, "spawnOffset").vector3Value = new Vector3(0, height, -bounds.center.z);
             Prop(def, "restRotation").vector3Value = new Vector3(-noseUp, 0, 0);
             Num(def, "length", bounds.size.z);
             Num(def, "width", bounds.size.x);
