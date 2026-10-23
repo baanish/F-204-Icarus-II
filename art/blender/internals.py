@@ -36,8 +36,9 @@ INTERNALS = {
     "fuel_aft_R": {"tank": (7.75, 9.30, 0.04, -0.15, -0.92, -0.26)},
     "strake_tank": {"x": (1.10, 1.88), "f": (0.06, 0.70)},  # each strake: span and chord fraction, ahead of the flap
     "wing_tank": {"x": (1.95, 3.05), "f": (0.17, 0.68)},  # the box between the spars, outboard of the crank
+    # z0 is the axis height at the face, z1 at the nozzle; the face sits high enough for the stowed main wheels below.
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
-               "z0": 0.31, "z1": 0.37, "mass_kg": 1450},
+               "z0": 0.35, "z1": 0.37, "mass_kg": 1450},
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "depth": 0.05, "points": 48, "mass_kg_each": 9},
     # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0 and the tail end at 14.8), so
     # a section that comes away shows a closed, shaded face instead of open frames against the sky. Each is cut clear
@@ -50,8 +51,11 @@ INTERNALS = {
                   "clearance": 0.015, "hole_points": 12},
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
     "spars": {"front_f": 0.175, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
-    "nose_gear_bay": {"box": (3.70, 5.15, 0.17, -0.48, -0.06), "mass_kg": 0},  # the nose leg folds forward into it
-    "main_gear_bay": {"box": (9.35, 11.15, 0.20, -0.42, -0.04), "x": 0.36, "mass_kg": 0},
+    # The nose leg folds forward into its bay under the cockpit floor; the bay's roof stays under fuel_aux's floor.
+    "nose_gear_bay": {"box": (4.06, 5.32, 0.31, -0.55, -0.23), "mass_kg": 0},
+    # Each main leg folds inboard and its oleo and wheel fold again into a bay from the keel to the lobe; the bay's
+    # roof runs on into the engine and the wing root, which close it.
+    "main_gear_bay": {"box": (9.62, 11.15, 0.41, -0.50, 0.25), "x": 0.45, "mass_kg": 0},
 }
 
 

@@ -7,8 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Aircraft_wheels
+    second: {fileID: 2100000, guid: 478295d1ddffcd741870adb8316e96bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: CockpitWarningLight
     second: {fileID: 2100000, guid: 9b435de6ceaaedc46855a819ed75e0a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Fighter1_gear
+    second: {fileID: 2100000, guid: 34b6350e54e1d3f4dbca1d7358d91d9b, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -64,6 +74,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Matte_black
     second: {fileID: 2100000, guid: 9eb01ebd73517014fac228bfed656b62, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mirror
+    second: {fileID: 2100000, guid: d1916a610560cdb4c8d03ffda1027951, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

@@ -20,6 +20,7 @@ from mathutils.bvhtree import BVHTree
 import build_icarus as bi
 import canopy
 import checks
+import gear
 import internals as interior
 import lights
 import stations
@@ -217,8 +218,8 @@ def recentre(obj):
 
 
 def full_tree():
-    """Every part: TREE, then the parts the canopy, light and station modules list."""
-    return {**TREE, **canopy.TREE, **lights.TREE, **stations.TREE}
+    """Every part: TREE, then the parts the canopy, light, station and gear modules list."""
+    return {**TREE, **canopy.TREE, **lights.TREE, **stations.TREE, **gear.TREE}
 
 
 def organise(p, icarus, internals, structure_mat):
@@ -423,7 +424,7 @@ def open_bays(icarus):
     for core_name, (boxes, doors) in wells.items():
         core = O[core_name]
         bay_slot = [m.name for m in core.data.materials].index("jet_mechanical")
-        door_trees = [checks.tree(O[d + "_visible"]) for d in doors]
+        door_trees = [checks.tree(O[d + "_visible"]) for d in doors] + gear.bay_doors(core_name)
         # the structure members, less the bay boxes run on down through the skin
         members = core.copy()
         members.data = core.data.copy()
@@ -518,5 +519,14 @@ def face_outward(obj):
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    if obj.name.startswith(("skin_", "radome", "dorsal")):
+        # An open panel has no inside for recalc to find, and with a door cut out its guess can come out inside out:
+        # the panel faces away from the body's axis.
+        rot = obj.matrix_world.to_3x3()
+        axis = lambda c: Vector((0.0, c.y, 0.3))
+        inward = sum((rot @ f.normal).dot(obj.matrix_world @ f.calc_center_median() - axis(obj.matrix_world @ f.calc_center_median())) < 0
+                     for f in bm.faces)
+        if inward > len(bm.faces) / 2:
+            bmesh.ops.reverse_faces(bm, faces=bm.faces)
     bm.to_mesh(obj.data)
     bm.free()

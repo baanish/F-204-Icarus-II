@@ -10,9 +10,12 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The gear is the export's own: each leg a hinge (the gear_leg part) with its strut, a nested wheel hinge and its
-        // tyre, plus hinged doors. The Revoker's LandingGear keeps its suspension, brakes, steering, audio and chocks and
-        // drives the Icarus hinges. The bump stop sits GearStroke above the free wheel's centre, straight up.
+        // The gear is the export's own: each leg a hinge (the gear_leg part) with its sprung mesh, a second fold under it
+        // (gear_wheel: the main gear's knee, the nose gear's twist) that LandingGear turns through movingParts, and hinged
+        // doors. What rides the second fold: the main gear's oleo (gear_arm), the bump stop, the unsprung transform with
+        // the piston, axle and fork (gear_unsprung) and the wheel. The Revoker's LandingGear keeps its suspension, brakes,
+        // steering, audio and chocks and drives the Icarus hinges. The bump stop sits GearStroke above the free wheel's
+        // centre, straight up.
         private const float GearStroke = 0.3f, GearMaxCompression = 0.5f, GearHingeBox = 0.15f;
         // The share of a leg's carrier mass that leaves with it when the wheel breaks off: LandingGear.BreakWheel takes
         // LandingGear.mass from the carrier's Rigidbody and gives it to the falling leg, so it must stay under the carrier's.
@@ -25,9 +28,9 @@ namespace Icarus.Editor
         };
         private static readonly (string Leg, string Rig, string[] Leftovers, string Wheel, string[] Doors)[] Legs =
         {
-            ("gear_leg_N", "gearHinge_F", new[] { "gear_F_armTarget" }, "gear_wheel_N", new[] { "gear_door_N_L", "gear_door_N_R" }),
-            ("gear_leg_L", "gearMount_L", new[] { "gear_armtarget_L" }, "gear_wheel_L", new[] { "gear_door_main_L" }),
-            ("gear_leg_R", "gearMount_R", new[] { "gear_armtarget_R" }, "gear_wheel_R", new[] { "gear_door_main_R" }),
+            ("gear_leg_N", "gearHinge_F", new[] { "gear_F_armTarget" }, "gear_wheel_N", new[] { "gear_door_N_L", "gear_door_N_R", "gear_door_N2_L", "gear_door_N2_R" }),
+            ("gear_leg_L", "gearMount_L", new[] { "gear_armtarget_L" }, "gear_wheel_L", new[] { "gear_door_main_L", "gear_door_flap_L" }),
+            ("gear_leg_R", "gearMount_R", new[] { "gear_armtarget_R" }, "gear_wheel_R", new[] { "gear_door_main_R", "gear_door_flap_R" }),
         };
         // The F-104G's height to the stabilator top, which the stance should come out near.
         private const float F104Height = 4.12f;
@@ -91,6 +94,34 @@ namespace Icarus.Editor
             return Quaternion.LookRotation(Vector3.Cross(axle, up), up);
         }
 
+        private const string Unsprung = "gear_unsprung_", Arm = "gear_arm_";
+
+        // The export gives each fold's travel_deg and where the wheel lies stowed (gear_wheel's stowed_wheel, Blender
+        // world space); which way each turn goes in Unity's frames is taken from that: the senses of the leg's fold and
+        // the second fold that put the wheel nearest it. Returns the signed fold about the leg hinge's X and the second
+        // fold's turn about its own X.
+        private static (float Fold, float Second) FoldSenses(Build b, Transform legFrame, string leg, string wheelName, Vector3 centre)
+        {
+            var stowed = (List<object>)b.Blockout.Parts[wheelName].Props["stowed_wheel"];
+            var target = new Vector3(-Convert.ToSingle(stowed[0]), Convert.ToSingle(stowed[2]), -Convert.ToSingle(stowed[1])) - b.Blockout.Origin;
+            var fold = b.Blockout.Parts[leg].Number("travel_deg");
+            var second = b.Blockout.Parts[wheelName].Number("travel_deg");
+            var pivot = b.Blockout.Local(wheelName);
+            var secondAxis = b.Blockout.Rotation(wheelName) * Vector3.right;
+            var best = (Miss: float.MaxValue, Fold: 0f, Second: 0f);
+            foreach (var s1 in new[] { 1f, -1f })
+                foreach (var s2 in new[] { 1f, -1f })
+                {
+                    var p = pivot + Quaternion.AngleAxis(s2 * second, secondAxis) * (centre - pivot);
+                    p = legFrame.position + Quaternion.AngleAxis(s1 * fold, legFrame.right) * (p - legFrame.position);
+                    if ((p - target).magnitude < best.Miss)
+                        best = ((p - target).magnitude, s1 * fold, s2 * second);
+                }
+            if (best.Miss > 0.01f)
+                throw new InvalidDataException($"{leg}: no sense of its two folds stows the wheel where the export does ({best.Miss:F3} m off)");
+            return (best.Fold, best.Second);
+        }
+
         private static void BuildGear(Build b)
         {
             var lines = new List<string>();
@@ -103,7 +134,7 @@ namespace Icarus.Editor
                 probe.SetPositionAndRotation(b.Blockout.Local(tyreName), b.Blockout.Rotation(tyreName));
                 var (centre, axle, radius) = WheelOf(probe, b.Meshes[tyreName].Render);
                 Object.DestroyImmediate(probe.gameObject);
-                var (fold, foldKept) = Travel(b, part, centre, leg, p => p.y); // stowed is up
+                var (fold, knee) = FoldSenses(b, part, leg, wheelName, centre);
                 // LandingGear reads the hinge back through localEulerAngles.x and breaks the wheel above 10 degrees
                 // (LandingGear.cs:620), so a negative fold, read as about 359 near full extension, would break a leg
                 // touching down just before it locks: a leg that stows the other way turns about its reversed axis.
@@ -135,12 +166,21 @@ namespace Icarus.Editor
                 var effects = new[] { "dust", "tireNoiseSound", "tireSkidSound" }.Select(f => Prop(so, f).objectReferenceValue as Component)
                     .Where(c => c != null).Select(c => c.transform).ToArray();
 
-                // The Revoker's sprung leg, bump stop, unsprung, axle, wheels and chocks move onto the Icarus hinge; its strut,
-                // tyre and arm meshes go.
+                // The Revoker's sprung leg moves onto the Icarus hinge, and its bump stop, unsprung, axle, wheels and chocks
+                // onto the second fold under it; its strut, tyre and arm meshes go.
                 var travel = radius + GearStroke;
                 gear.transform.SetParent(hinge, false);
                 gear.transform.SetPositionAndRotation(part.position, Quaternion.identity);
-                bump.SetParent(gear.transform, false);
+                var foldFrame = new GameObject(wheelName) { layer = part.gameObject.layer }.transform;
+                foldFrame.SetParent(gear.transform, false);
+                foldFrame.SetPositionAndRotation(b.Blockout.Local(wheelName), b.Blockout.Rotation(wheelName));
+                b.Visuals[wheelName] = foldFrame;
+                var secondFold = new GameObject(wheelName + "_hinge") { layer = part.gameObject.layer }.transform;
+                secondFold.SetParent(foldFrame, false);
+                var arm = Arm + leg.Substring(leg.Length - 1);
+                if (b.Blockout.HasMesh(arm))
+                    MeshVisual(b, arm, secondFold);
+                bump.SetParent(secondFold, false);
                 bump.SetPositionAndRotation(centre + Vector3.up * (travel - radius), Quaternion.identity);
                 if (cast != null)
                 {
@@ -153,18 +193,14 @@ namespace Icarus.Editor
                 unsprung.position = centre;
                 axleT.SetParent(unsprung, false);
                 axleT.SetPositionAndRotation(centre, AxleFrame(axle));
-                var wheelFrame = new GameObject(wheelName) { layer = part.gameObject.layer }.transform;
-                wheelFrame.SetParent(unsprung, false);
-                wheelFrame.SetPositionAndRotation(b.Blockout.Local(wheelName), b.Blockout.Rotation(wheelName));
-                var wheelFold = new GameObject(wheelName + "_hinge") { layer = part.gameObject.layer }.transform;
-                wheelFold.SetParent(wheelFrame, false);
+                // The piston, axle and fork slide with the suspension (LandingGear moves unsprung up its bump stop).
+                MeshVisual(b, Unsprung + leg.Substring(leg.Length - 1), unsprung);
                 foreach (var wheel in wheels)
                 {
-                    wheel.SetParent(wheelFold, false);
+                    wheel.SetParent(unsprung, false);
                     wheel.SetPositionAndRotation(centre, AxleFrame(axle));
                 }
                 MeshVisual(b, tyreName, wheels[0]);
-                b.Visuals[wheelName] = wheelFrame;
                 foreach (var effect in effects.Where(e => !wheels.Contains(e) && e != unsprung && e != axleT && e != bump))
                 {
                     effect.SetParent(unsprung, false);
@@ -184,7 +220,7 @@ namespace Icarus.Editor
                     doomed.AddRange(t.GetComponents<MeshRenderer>());
                     doomed.AddRange(t.GetComponents<MeshFilter>());
                     // Revoker children of the kept transforms (arms, struts) that nothing above keeps.
-                    doomed.AddRange(t.Cast<Transform>().Where(c => !kept.Contains(c) && c != wheelFrame && !b.Visuals.ContainsValue(c)).Select(c => (Object)c.gameObject));
+                    doomed.AddRange(t.Cast<Transform>().Where(c => !kept.Contains(c) && !b.Visuals.ContainsValue(c)).Select(c => (Object)c.gameObject));
                 }
                 DestroyWithReferences(b, doomed);
 
@@ -203,10 +239,13 @@ namespace Icarus.Editor
                 {
                     var host = b.Parts[b.Blockout.Parts[door].BlenderParent].transform;
                     var (frame, doorHinge, panel) = HingeRig(b, door, host);
-                    var (open, _) = Travel(b, frame, panel.bounds.center, door, p => -p.y); // open hangs down
+                    // The export opens each door to open_centre (Blender world space): a main door and the nose doors
+                    // hang down, a main flap folds up against the lobe.
+                    var opened = (List<object>)b.Blockout.Parts[door].Props["open_centre"];
+                    var target = new Vector3(-Convert.ToSingle(opened[0]), Convert.ToSingle(opened[2]), -Convert.ToSingle(opened[1])) - b.Blockout.Origin;
+                    var (open, _) = Travel(b, frame, panel.bounds.center, door, p => -(p - target).magnitude);
                     doors.Add((doorHinge, open));
                 }
-                var wheelTravel = b.Blockout.Parts[wheelName].Number("travel_deg") * (foldKept ? 1f : -1f);
 
                 // LandingGear pushes its suspension on attachedPart alone, so as on the Revoker (mains on a 300 kg wing root,
                 // nose on the 350 kg cockpit) that is the heavy part the leg hangs on, not the light leg part: on the leg,
@@ -229,13 +268,12 @@ namespace Icarus.Editor
                 Prop(so, "extendedDrag").floatValue = extendedDrag;
                 Prop(so, "mass").floatValue = GearBreakShare * b.Mass[leg];
                 var moving = Prop(so, "movingParts");
-                moving.arraySize = wheelTravel != 0 ? 1 : 0;
-                if (wheelTravel != 0)
+                moving.arraySize = 1;
                 {
                     var entry = moving.GetArrayElementAtIndex(0);
-                    entry.FindPropertyRelative("transform").objectReferenceValue = wheelFold;
+                    entry.FindPropertyRelative("transform").objectReferenceValue = secondFold;
                     entry.FindPropertyRelative("target").objectReferenceValue = null;
-                    entry.FindPropertyRelative("foldAngles").vector3Value = new Vector3(wheelTravel, 0, 0);
+                    entry.FindPropertyRelative("foldAngles").vector3Value = new Vector3(knee, 0, 0);
                 }
                 var gearDoors = Prop(so, "gearDoors");
                 gearDoors.arraySize = doors.Count;
@@ -247,7 +285,7 @@ namespace Icarus.Editor
                     entry.FindPropertyRelative("openAngle").vector3Value = new Vector3(doors[i].Open, 0, 0);
                 }
                 so.ApplyModifiedPropertiesWithoutUndo();
-                lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg about {(foldKept ? "the export's axis" : "the reversed axis")}, breaks off with {GearBreakShare * b.Mass[leg]:0} of its {b.Mass[leg]:0} kg, wheel fold {wheelTravel}, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], pushes on {carrier}, its drag down {extendedDrag}");
+                lines.Add($"{leg}: tyre r {radius:F3} m at {centre}, axle {axle}, travel {travel:F2} m, fold {fold:+0.0;-0.0} deg, second fold {knee:+0.0;-0.0} deg, breaks off with {GearBreakShare * b.Mass[leg]:0} of its {b.Mass[leg]:0} kg, doors [{string.Join(", ", doors.Select(d => d.Hinge.name + " " + d.Open.ToString("+0;-0")))}], pushes on {carrier}, its drag down {extendedDrag}");
             }
             b.Report.Add("gear: the Icarus hinges on the Revoker's LandingGear; " + string.Join("; ", lines));
         }

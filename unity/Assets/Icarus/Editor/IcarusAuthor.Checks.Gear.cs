@@ -40,12 +40,33 @@ namespace Icarus.Editor
                 if (Prop(so, "mass").floatValue <= 0f || Prop(so, "mass").floatValue >= carrier)
                     p.Add($"{g.name} breaks off with {Prop(so, "mass").floatValue} kg of its {carrier} kg carrier");
                 if (leg.Doors == null || Prop(so, "gearDoors").arraySize != leg.Doors.Length) p.Add($"{g.name} lists {Prop(so, "gearDoors").arraySize} doors");
-                // Stowing must carry the wheel up into the airframe.
-                var down = wheels[0].position;
-                hinge.localRotation = Quaternion.Euler(Prop(so, "foldDegrees").floatValue, 0, 0);
-                var up = wheels[0].position;
-                hinge.localRotation = Quaternion.identity;
-                if (up.y - down.y < 0.2f) p.Add($"{g.name} stows its wheel {up.y - down.y:F2} m higher, not up into the airframe");
+                // The second fold (the main gear's knee, the nose gear's twist) carries the bump stop, so the unsprung and the
+                // wheel ride it; the unsprung mesh slides with LandingGear's unsprung; the strut rotation stays unused.
+                var moving = Prop(so, "movingParts").arraySize;
+                var second = moving == 1 ? Prop(so, "movingParts").GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue as Transform : null;
+                var bumpStop = ((GameObject)Prop(so, "bumpStop").objectReferenceValue).transform;
+                var unsprungT = ((GameObject)Prop(so, "unsprung").objectReferenceValue).transform;
+                if (second == null || !bumpStop.IsChildOf(second) || !second.IsChildOf(hinge)) p.Add($"{g.name}'s bump stop doesn't ride one second fold under its hinge");
+                var tag = leg.Leg.Substring(leg.Leg.Length - 1);
+                if (b.Visuals.TryGetValue(Unsprung + tag, out var uns) == false || uns.parent != unsprungT) p.Add($"{g.name}'s {Unsprung + tag} isn't under its unsprung transform");
+                if (b.Visuals.TryGetValue(Arm + tag, out var armT) && (second == null || armT.parent != second)) p.Add($"{g.name}'s {Arm + tag} doesn't ride its second fold");
+                if (!b.Visuals.TryGetValue(leg.Leg + "_visible", out var sprung) || sprung.parent != hinge) p.Add($"{g.name}'s sprung mesh isn't on its hinge");
+                if (Prop(so, "strutRotationTransform").objectReferenceValue != null || Prop(so, "strutRotation").floatValue != 0f) p.Add($"{g.name} uses the strut rotation");
+                // Stowing must put the wheel where the export stows it, up in its bay.
+                if (second != null)
+                {
+                    var stowed = (List<object>)b.Blockout.Parts[leg.Wheel].Props["stowed_wheel"];
+                    var target = new Vector3(-Convert.ToSingle(stowed[0]), Convert.ToSingle(stowed[2]), -Convert.ToSingle(stowed[1])) - b.Blockout.Origin;
+                    var axleT = (Transform)Prop(so, "axle").objectReferenceValue;
+                    var down = axleT.position;
+                    hinge.localRotation = Quaternion.Euler(Prop(so, "foldDegrees").floatValue, 0, 0);
+                    second.localEulerAngles = Prop(so, "movingParts").GetArrayElementAtIndex(0).FindPropertyRelative("foldAngles").vector3Value;
+                    var up = axleT.position;
+                    hinge.localRotation = Quaternion.identity;
+                    second.localRotation = Quaternion.identity;
+                    if ((up - target).magnitude > 0.01f) p.Add($"{g.name} stows its wheel {(up - target).magnitude:F3} m from the export's stowed wheel");
+                    if (up.y - down.y < 0.2f) p.Add($"{g.name} stows its wheel {up.y - down.y:F2} m higher, not up into the airframe");
+                }
             }
             // Each leg's ground cast, castPoint down suspensionTravel, must meet no collider of the aircraft.
             Physics.SyncTransforms();
@@ -69,7 +90,7 @@ namespace Icarus.Editor
                     links.Add(it.objectReferenceValue);
             if (links.Count == 0 || links.Any(l => l != noseGear)) p.Add("ControlsFilter's nose gear link isn't the nose LandingGear");
             var contacts = Contacts(b);
-            return $"{gears.Length} Revoker LandingGears driving the Icarus gear_leg hinges, wheels stow upward, doors listed, nose steering linked, {b.Size.y:F2} m tall at rest; free contacts {string.Join(", ", contacts.Select(c => c.Name + " " + c.Contact.ToString("F2")))}";
+            return $"{gears.Length} Revoker LandingGears driving the Icarus gear_leg hinges and second folds, unsprung meshes on the suspension, wheels stow where the export does, doors listed, nose steering linked, {b.Size.y:F2} m tall at rest; free contacts {string.Join(", ", contacts.Select(c => c.Name + " " + c.Contact.ToString("F2")))}";
         }
     }
 }
