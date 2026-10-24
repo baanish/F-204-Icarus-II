@@ -303,11 +303,10 @@ def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
             fields[s] = stations.carve_shapes(p, s)
         return any(f(q.x, q.z) < -tolerance for f in fields[s])
 
-    reach = max(abs(m["centre"]) + max(-m["body"][0][0], m["body"][-1][0]) for m in stations.MOUNTS.values())
-    reach += stations.RUNOUT
+    ramps = stations.ramp_stations(p)
+    s0, s1 = min(lo for lo, _, _ in ramps), max(hi for _, hi, _ in ramps)
     c = stations.CONFORMAL
-    volumes.append(("conformal trough", bi.P(c["s"] - reach, -c["x"] - 0.3, -1.0), bi.P(c["s"] + reach, c["x"] + 0.3, c["z"] + 0.3),
-                    in_trough))
+    volumes.append(("conformal trough", bi.P(s0, -c["x"] - 0.3, -1.0), bi.P(s1, c["x"] + 0.3, c["z"] + 0.3), in_trough))
     found, sampled = {}, 0
     for core in (o for o in icarus.all_objects if o.name in ("fuselage_forward", "fuselage_mid", "fuselage_aft")):
         slots = [m.name if m else "" for m in core.data.materials]

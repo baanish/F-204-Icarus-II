@@ -13,7 +13,7 @@ stock mounts' launch rails would hold a missile 0.04 to 0.11 m under the hardpoi
 Icarus's own mounts (MOUNTS): the stock missile, its stock definition, mass, drag and RCS, on a low shoe. Each mount
 sits its missile at its own place fore and aft, ahead of the stowed main wheel; the trough's top is as high as the
 intake ducts (over s 6.9 to 7.5) and the aft fuel cells' floor (behind s 7.75) allow, each DUCT_CLEARANCE away. The
-trough is the union of every mount's body envelope grown by GAP,
+trough is the union of every mount's body envelope grown by GAP, with a NACA submerged-inlet ramp at each end,
 cut out of the skin through build_icarus.blended_ring, so the skin, the fuel cells and the frames all follow it. The
 missiles' X fins pass through the skin into the trough's sides, as an F-4's Sparrow fins do; only their bodies and
 colliders are kept clear. tools/trough_sections.py draws the sections and measures the fins against the ducts.
@@ -41,9 +41,24 @@ INSET = 0.005
 # and a chord between two rays cuts up to 8 mm into a concave cut where it turns (96 rays a ring).
 CLEAR, GAP = 0.02, 0.028
 DUCT_CLEARANCE = 0.03
-# The trough runs on past each missile's ends, narrowing RUNOUT_TAPER per metre, so the skin's ring spacing doesn't cut
-# them short.
-RUNOUT, RUNOUT_TAPER = 0.15, 0.15
+# The trough's ends are NACA submerged-inlet ramps, the standard curved-diverging ramp of NACA RM A8F21 (figure 4), at
+# each end of the store reaching furthest that way. From the trough's full section there the floor rises at the ramp's
+# angle to the skin, and each wall closes in by NACA_WALL of the half-width at tenths of the ramp's length from its
+# deep end, to 0.083 of it at the tip (91.7 per cent divergence). Over the first RAMP_FLATTEN of the ramp the store's
+# round arch opens into a flat floor with RAMP_CORNER corners, inside the arch (sinking RAMP_SINK as fast as the floor
+# rises, blended over RAMP_BLEND), so the walls start from the arch's own lips on the skin and the edge runs on. Past
+# each tip the skin's lip columns ease back to even angles over the ramp's fade (build_icarus.blended_ring); it must end
+# before the gear doors' rings (gear.GEAR["doors"]: the nose doors end at s 5.23, the main doors start at 9.62), where
+# a door takes its outline from the columns, and run long enough that it opens no fan of thin faces and doesn't twist
+# the wing root's fillet. RAMP_ENDS, by the ramp's way along s: the angle and the fade. The report tested 5, 7 and 9.5
+# degree ramps. Aft, 9.5 leaves 0.18 m for the fade; forward, where the side of the body is steep and the columns have
+# far to go, the ramp is shortened to 14 degrees to leave 0.15 m before the nose doors.
+NACA_WALL = (0.0, 0.004, 0.084, 0.234, 0.386, 0.534, 0.612, 0.688, 0.764, 0.842, 0.917)
+RAMP_CORNER, RAMP_FLATTEN, RAMP_BLEND, RAMP_SINK = 0.015, 0.15, 0.01, 0.5
+RAMP_ENDS = {-1: {"deg": 14.0, "fade": 0.15}, 1: {"deg": 9.5, "fade": 0.18}}
+# The loft's rings over each ramp, as fractions of its length from the deep end, and past its tip, as fractions of its
+# fade.
+RAMP_RINGS, FADE_RINGS = (0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0), (1 / 3, 2 / 3, 1.0)
 # Half-width of the trough's flat ceiling over the station line, where the shoe bears and the Unity author finds the
 # hardpoint: a round top meets the trough's outboard wall close to that line, and a mesh triangulated across that
 # corner lands the raycast millimetres off.
@@ -207,14 +222,157 @@ def carve_shapes(p, s):
     f = FLAT * min(1.0, max(0.0, 1.0 - reach / FLAT_FADE))
     for m in MOUNTS.values():
         t, a = missile_axis(m, s)
-        r = max(envelope(m["body"], t + RUNOUT * k / 3) - RUNOUT_TAPER * RUNOUT * abs(k) / 3 for k in range(-3, 4))
+        r = envelope(m["body"], t)
         if r <= 0:
             continue
         w = r + GAP
         for side in (1, -1):
             x0 = side * CONFORMAL["x"]
             out.append(lambda x, z, x0=x0, a=a, w=w: segment_to_core((0.0, zc), (x, z), x0, a, f) - w)
+    for r in ramps(p):
+        section = ramp_section(p, r, s)
+        if section:
+            out += [ramp_field(r, section, side, zc) for side in (1, -1)]
     return out
+
+
+# --- the trough's NACA ramps ---------------------------------------------------------------------------------------
+
+_RAMPS = {}
+
+
+def ramps(p):
+    """The trough's two NACA ramps, forward end first (ramp)."""
+    if _RAMPS.get("p") is not p:  # PARAMS, or a variant build's own copy
+        _RAMPS.update(p=p, ramps=[ramp(p, -1), ramp(p, 1)])
+    return _RAMPS["ramps"]
+
+
+def skin_crossing(skin, x, z, n):
+    """How far along n (unit, inward) from (x, z) the uncut skin lies; negative when (x, z) is inside it."""
+    lo, hi = -0.4, 0.4
+    for _ in range(40):
+        mid = 0.5 * (lo + hi)
+        if skin(x + mid * n[0], z + mid * n[1]) < 0:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+
+def ramp(p, way):
+    """The ramp at one end of the trough (way -1 forward, 1 aft), left side: the store reaching furthest that way, the
+    junction station s where its body last has 0.9 of its full radius and the ramp leaves its arch, the arch's axis
+    height a and radius w there, the skin's inward normal n under the station line (x, z), the arch's depth below the
+    skin, its lips on the skin as distances along the skin's tangent (n turned a quarter, outboard positive) from the
+    point under the axis, and the ramp's length at its angle (RAMP_ENDS)."""
+    def end(m):
+        return CONFORMAL["s"] - m["centre"] - (m["body"][-1][0] if way < 0 else m["body"][0][0])
+
+    m = max(MOUNTS.values(), key=lambda m: way * end(m))
+    full = [t for t, r in m["body"] if r >= 0.9 * radius(m)]
+    t = max(full) if way < 0 else min(full)
+    s = CONFORMAL["s"] - m["centre"] - t
+    w = envelope(m["body"], t) + GAP
+    skin, zc = bi.skin_field(p, s)
+    x0, a = CONFORMAL["x"], missile_axis(m, s)[1]
+    e = 1e-4
+    n = -Vector((skin(x0 + e, a) - skin(x0 - e, a), skin(x0, a + e) - skin(x0, a - e))).normalized()
+    h = skin_crossing(skin, x0, a, n)  # the store's axis stands h outside the skin
+    if not abs(h) < w:
+        raise ValueError("trough ramp: the store's axis at s %.2f is %.3f m from the skin, beyond its arch" % (s, h))
+    ox, oz, tx, tz = x0 + h * n.x, a + h * n.y, n.y, -n.x
+
+    def in_arch(y):  # the uncut skin's point y along the tangent from under the axis lies inside the arch
+        px, pz = ox + y * tx, oz + y * tz
+        q = skin_crossing(skin, px, pz, n)
+        return segment_to_core((0.0, zc), (px + q * n.x, pz + q * n.y), x0, a, 0.0) < w
+
+    lips = []
+    for side in (-1, 1):
+        inside, outside = 0.0, side * w
+        for _ in range(30):
+            mid = 0.5 * (inside + outside)
+            inside, outside = (mid, outside) if in_arch(mid) else (inside, mid)
+        lips.append(0.5 * (inside + outside))
+    depth = w - h
+    return {"mount": m, "s": s, "way": way, "a": a, "w": w, "n": (n.x, n.y), "depth": depth, "lips": lips,
+            "length": depth / math.tan(math.radians(RAMP_ENDS[way]["deg"]))}
+
+
+def naca_wall(f):
+    """How far each ramp wall has closed in, as a fraction of the half-width, at fraction f of the ramp from its deep
+    end: NACA_WALL through its tenths on a monotone spline, so the wall bends where the table's straight pieces
+    meet."""
+    return bi.pchip([i / 10 for i in range(11)], NACA_WALL, f)
+
+
+def ramp_section(p, r, s):
+    """A ramp's section at station s, left side, or None off it: the point on the uncut skin under the store's axis
+    (along the skin's normal at the junction), the normal, the floor's depth below the skin, the walls on the skin as
+    distances along its tangent from that point (inboard, outboard) and the floor's corner radius. The arch's own
+    section is the one at the junction."""
+    u = (s - r["s"]) * r["way"]
+    if not 0 < u < r["length"]:
+        return None
+    k = min(1.0, u / (RAMP_FLATTEN * r["length"]))
+    corner = r["w"] + (RAMP_CORNER - r["w"]) * k * k * (3 - 2 * k)
+    n, a = r["n"], missile_axis(r["mount"], s)[1]
+    h = skin_crossing(bi.skin_field(p, s)[0], CONFORMAL["x"], a, n)
+    origin = (CONFORMAL["x"] + h * n[0], a + h * n[1])
+    closing = 1.0 - naca_wall(u / r["length"])
+    return (origin, n, r["depth"] * (1 - u / r["length"]),
+            tuple(lip * closing for lip in r["lips"]), corner)
+
+
+def ramp_field(r, section, side, zc):
+    """The carve field of a ramp r's section (ramp_section) on one side, as carve_shapes' fields: a slot across the
+    skin's normal, its floor depth below the skin between its walls on it, rounded by the corner radius, with what
+    lies behind it seen from the ring's centre at height zc; and never outside the arch's section at the junction,
+    sunk along the normal RAMP_SINK of the way the floor has risen and blended over RAMP_BLEND, which holds the
+    trough's clearance to the ducts and fuel cells."""
+    (ox, oz), (nx, nz), depth, (inboard, outboard), corner = section
+    ox, nx = side * ox, side * nx
+    tx, tz = nz, -nx  # outboard on the left side, inboard on the right
+    mid, half = side * (inboard + outboard) / 2, (outboard - inboard) / 2
+    a = depth - corner  # the core's top, along the normal from the skin
+    f = max(0.0, half - (math.sqrt(corner * corner - a * a) if a < 0 else corner))
+
+    def local(x, z):
+        return (x - ox) * tx + (z - oz) * tz, (x - ox) * nx + (z - oz) * nz
+
+    sink = RAMP_SINK * (r["depth"] - depth)
+    centre, arch = local(0.0, zc), (side * CONFORMAL["x"] - sink * nx, r["a"] - sink * nz)
+    return lambda x, z: -bi.smin(corner - segment_to_core(centre, local(x, z), mid, a, f),
+                                 r["w"] - segment_to_core((0.0, zc), (x, z), arch[0], arch[1], 0.0), RAMP_BLEND)
+
+
+def ramp_stations(p):
+    """Each ramp's stretch of the fuselage loft, from its deep end to its fade's end past its tip (RAMP_ENDS), as
+    (lowest s, highest s, the rings it takes)."""
+    out = []
+    for r in ramps(p):
+        fade = RAMP_ENDS[r["way"]]["fade"]
+        reach = [r["length"] * f for f in RAMP_RINGS] + [r["length"] + fade * f for f in FADE_RINGS]
+        rings = [r["s"] + r["way"] * u for u in reach]
+        out.append((min(rings), max(rings), rings))
+    return out
+
+
+def ramp_lips(p, s):
+    """Where the skin's trough lip columns go at station s on a ramp or past its tip, left side, where the ring finds
+    no lips of its own: the walls' two edges on the skin (past the tip, the tip's), how far the columns follow them (1
+    on the ramp, easing to 0 over its fade past the tip, RAMP_ENDS), and how far along the ramp and its fade s lies (0
+    at the deep end, 1 at the fade's end); None away from the ramps."""
+    for r in ramps(p):
+        fade, u = RAMP_ENDS[r["way"]]["fade"], (s - r["s"]) * r["way"]
+        if not 0 < u < r["length"] + fade - 1e-9:
+            continue
+        at = min(s, r["s"] + r["way"] * r["length"] * 0.999, key=lambda q: (q - r["s"]) * r["way"])
+        (ox, oz), (nx, nz), _, walls, _ = ramp_section(p, r, at)
+        hold = min(1.0, 1.0 - (u - r["length"]) / fade)
+        return [(ox + y * nz, oz - y * nx) for y in walls], hold, u / (r["length"] + fade)
+    return None
 
 
 def collider_splits():

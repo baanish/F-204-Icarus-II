@@ -172,6 +172,9 @@ def wing_sections(w):
 
 RING = 96  # vertices around a fuselage section; the intakes span only a fraction of each ring
 TROUGH_LIP_COLUMNS = (19 * RING // 24, 23 * RING // 24)  # 16 spans across each arch keep its chords clear of the stores
+# Over the trough's ramps the keel's columns inboard of TROUGH_KEEL_COLUMN keep their even angles, and the body side's
+# beyond TROUGH_SIDE_COLUMN ease back to theirs (blended_ring).
+TROUGH_KEEL_COLUMN, TROUGH_SIDE_COLUMN = 3 * RING // 4 + RING // 48, 23 * RING // 24 + RING // 48
 CHORD = 22  # points along each airfoil surface over the full chord; a piece of the chord takes its share, at least 6
 SPAN_STEP = 0.4  # most metres between the span stations of a lifting-surface piece
 
@@ -377,25 +380,32 @@ def fuselage_shapes(p, s):
     return shapes, zmid
 
 
-@geometry_cache.ring
-def blended_ring(p, s, angles=None):
+def skin_field(p, s):
+    """The outer skin's field at station s before the trough is cut (negative inside), and the ring centre's z."""
     shapes, zc = fuselage_shapes(p, s)
     # At the lip the intake meets the body almost sharply, so it reads as a slice of a circle; the fillet fades in
     # behind it.
     behind_lip = s - p["intake"][0][0]
     k = p["blend"] * (0.12 + 0.88 * min(1.0, behind_lip / 1.2)) if behind_lip >= 0 else p["blend"]
-    import stations
 
-    carves = stations.carve_shapes(p, s)  # the conformal trough, cut out of the union
-
-    def skin_field(x, z):
+    def field(x, z):
         d = shapes[0](x, z)
         for f in shapes[1:]:
             d = smin(d, f(x, z), k)
         return d
 
+    return field, zc
+
+
+@geometry_cache.ring
+def blended_ring(p, s, angles=None):
+    skin, zc = skin_field(p, s)
+    import stations
+
+    carves = stations.carve_shapes(p, s)  # the conformal trough, cut out of the union
+
     def field(x, z):
-        d = skin_field(x, z)
+        d = skin(x, z)
         return max(d, -min(c(x, z) for c in carves)) if carves else d
 
     ar = p["area_rule"]
@@ -423,29 +433,46 @@ def blended_ring(p, s, angles=None):
         return r_out
 
     sample_angles = angles if angles is not None else [2 * math.pi * i / RING for i in range(RING)]
-    if carves and angles is None:
+    if angles is None:
         # Fixed lip columns stop the trough wandering between angular samples from ring to ring.
         def on_skin(a):
-            r = radius(a, skin_field)
+            r = radius(a, skin)
             return min(c(r * math.cos(a), zc + r * math.sin(a)) for c in carves)
 
-        samples = [(sample_angles[i], on_skin(sample_angles[i])) for i in range(3 * RING // 4, RING)]
-        samples.append((2 * math.pi, on_skin(2 * math.pi)))
         lips = []
-        for (a, da), (b, db) in zip(samples, samples[1:]):
-            if (da < 0) != (db < 0):
-                for _ in range(20):
-                    mid = (a + b) / 2
-                    if (on_skin(mid) < 0) == (da < 0):
-                        a = mid
-                    else:
-                        b = mid
-                lips.append((a + b) / 2)
+        if carves:
+            samples = [(sample_angles[i], on_skin(sample_angles[i])) for i in range(3 * RING // 4, RING)]
+            samples.append((2 * math.pi, on_skin(2 * math.pi)))
+            for (a, da), (b, db) in zip(samples, samples[1:]):
+                if (da < 0) != (db < 0):
+                    for _ in range(20):
+                        mid = (a + b) / 2
+                        if (on_skin(mid) < 0) == (da < 0):
+                            a = mid
+                        else:
+                            b = mid
+                    lips.append((a + b) / 2)
+        ramp = stations.ramp_lips(p, s)
+        if ramp and len(lips) != 2:
+            # Near a ramp's tip and past it the lip columns follow its walls' edges, easing back to their even
+            # angles, so the ramp ends without a fan of skewed faces.
+            edges, hold, _ = ramp
+            angle = lambda q: math.atan2(q[1] - zc, q[0]) % (2 * math.pi)
+            evens = sorted(2 * math.pi * i / RING for i in TROUGH_LIP_COLUMNS)
+            lips = sorted(even + hold * (angle(q) - even) for even, q in zip(evens, sorted(edges, key=angle)))
         if len(lips) == 2:
             # End the redistribution at the body side. Moving its upper skin columns with the trough lips
-            # twists the intake fairing when the trough ends and those columns return to uniform angles.
+            # twists the intake fairing when the trough ends and those columns return to uniform angles. Over the
+            # ramps the keel's columns keep their even angles: the nose gear doors take their outline from them
+            # (gear.door_patch). The body side's columns ease back to theirs along the whole ramp, not only past its
+            # tip, where they would twist the wing root's fillet.
             anchors = [(3 * RING // 4, 1.5 * math.pi), (TROUGH_LIP_COLUMNS[0], lips[0]),
                        (TROUGH_LIP_COLUMNS[1], lips[1]), (RING, 2 * math.pi)]
+            if ramp:
+                even = 2 * math.pi * TROUGH_SIDE_COLUMN / RING
+                side = (lips[1] + 2 * math.pi) / 2
+                anchors[1:1] = [(TROUGH_KEEL_COLUMN, 2 * math.pi * TROUGH_KEEL_COLUMN / RING)]
+                anchors[-1:-1] = [(TROUGH_SIDE_COLUMN, side + ramp[2] * (even - side))]
             for (i0, a), (i1, b) in zip(anchors, anchors[1:]):
                 for i in range(i0, i1):
                     angle = a + (b - a) * (i - i0) / (i1 - i0)
@@ -463,6 +490,10 @@ def fuselage_stations(p):
     lip = p["intake"][0][0]
     out = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
            + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, p["fuselage"][-1][0], 50)[1:])
+    import stations
+
+    for lo, hi, rings in stations.ramp_stations(p):  # the trough's ramps take their own rings
+        out = sorted([s for s in out if not lo - 0.06 < s < hi + 0.06] + rings)
     for edge in (p["speed_brake"]["s0"], p["speed_brake"]["s1"]):  # the brakes' holes are whole skin faces
         out[min(range(len(out)), key=lambda i: abs(out[i] - edge))] = edge
     return out

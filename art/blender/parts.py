@@ -28,9 +28,9 @@ import stations
 SKIN = "Icarus_Body"
 # Triangles per component: target and cap (budget.py sums them). Caps are ceilings; the references sit lower.
 BUDGET = {
-    # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores): the
-    # skin is near 17,000.
-    "fuselage_skin": {"target": 19100, "cap": 19400, "objects": ("radome", "skin_", "dorsal_cover")},
+    # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores); the
+    # conformal trough's NACA ramp rings brought the skin to about 19,800.
+    "fuselage_skin": {"target": 19800, "cap": 19800, "objects": ("radome", "skin_", "dorsal_cover")},
     "wing_box_L": {"target": 2000, "cap": 2000, "objects": ("wing_skin_L",)},
     "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
