@@ -57,6 +57,7 @@ namespace Icarus.Editor
             Item("A18", "tail stiffness under flight loads", p => CheckTailStiffness(b, p));
             Item("A19", "bullet collider ownership", p => CheckBulletColliders(b, p));
             Item("A20", "section inertia pinned with the boxes disabled", p => CheckSectionInertia(b, p));
+            Item("A21", "map and HUD icons", p => CheckIcons(definition, p));
             if (failures.Count > 0)
                 throw new InvalidDataException("Icarus authoring checks failed:\n  " + string.Join("\n  ", failures));
         }
@@ -80,6 +81,32 @@ namespace Icarus.Editor
             if (Prop(def, "aircraftParameters").objectReferenceValue != parameters) p.Add("definition.aircraftParameters isn't the Icarus parameters");
             if (!AssetDatabase.GetAssetPath(parameters).StartsWith(ModFolder, StringComparison.Ordinal)) p.Add("parameters outside the mod");
             return $"one Aircraft and NetworkIdentity, {JsonKey} -> {Path.GetFileName(AssetDatabase.GetAssetPath(parameters))}";
+        }
+
+        // The stock HUD marker every stock aircraft carries as both friendlyIcon and hostileIcon, by its Blueprinter
+        // placeholder. Any other _donotship sprite on the definition is a borrowed stand-in.
+        private const string StockHudIcon = Stock + "Sprite/hudIcon_aircraft_PLACEHOLDER.asset";
+
+        private static string CheckIcons(Object definition, List<string> p)
+        {
+            var def = new SerializedObject(definition);
+            var map = Prop(def, "mapIcon").objectReferenceValue as Sprite;
+            var mapPath = AssetDatabase.GetAssetPath(map);
+            if (mapPath != MapIconPath) p.Add($"mapIcon is {(mapPath.Length > 0 ? mapPath : "unset")}, not the Icarus's {MapIconPath}");
+            foreach (var field in new[] { "friendlyIcon", "hostileIcon" })
+            {
+                var path = AssetDatabase.GetAssetPath(Prop(def, field).objectReferenceValue);
+                if (path != StockHudIcon) p.Add($"{field} is {(path.Length > 0 ? path : "unset")}, not the stock {StockHudIcon}");
+            }
+            if (map != null && map.rect != new Rect(0, 0, 256, 256)) p.Add("mapIcon rect " + map.rect + ", not the whole 256 px square");
+            if (AssetImporter.GetAtPath(MapIconPath) is TextureImporter t)
+            {
+                if (t.spriteImportMode != SpriteImportMode.Single || t.spritePixelsPerUnit != 100f || t.spritePivot != new Vector2(0.5f, 0.5f))
+                    p.Add($"mapIcon sprite {t.spriteImportMode}, {t.spritePixelsPerUnit} ppu, pivot {t.spritePivot}");
+                if (!t.mipmapEnabled || t.filterMode != FilterMode.Bilinear || t.wrapMode != TextureWrapMode.Clamp || !t.sRGBTexture || !t.alphaIsTransparency)
+                    p.Add("mapIcon texture settings differ from mapIcon_revoker's");
+            }
+            return $"mapIcon {Path.GetFileName(mapPath)} {map?.rect.width} px, HUD markers the stock hudIcon_aircraft";
         }
 
         private static string CheckEngine(Build b, List<string> p)

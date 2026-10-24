@@ -238,6 +238,8 @@ namespace Icarus.Editor
             Num(so, "mass", EmptyMass);
             Num(so, "manpower", 1);
             Prop(so, "aircraftParameters").objectReferenceValue = parameters;
+            // The HUD markers (friendlyIcon, hostileIcon) stay the donor's hudIcon_aircraft, which every stock aircraft shares.
+            Prop(so, "mapIcon").objectReferenceValue = MapIconSprite();
             var info = Prop(so, "aircraftInfo");
             Num(info.FindPropertyRelative("emptyWeight"), EmptyMass);
             Num(info.FindPropertyRelative("maxWeight"), MaxWeight);
@@ -247,6 +249,38 @@ namespace Icarus.Editor
             // length, width, height, spawnOffset and restRotation come from the authored prefab (SetRestPose).
             so.ApplyModifiedPropertiesWithoutUndo();
             return SaveAsset(definition, DefinitionPath);
+        }
+
+        // The map and plane select icon, drawn from the built aircraft by tools/map_icon.py. Imported as the game build holds
+        // the Revoker's mapIcon_revoker: one sprite at 100 pixels per unit with a centre pivot, mipmapped, bilinear,
+        // clamped, sRGB and block compressed with its alpha (DXT5).
+        private const string MapIconPath = ModFolder + "/Icons/Icarus_mapIcon.png";
+
+        private static Sprite MapIconSprite()
+        {
+            if (!(AssetImporter.GetAtPath(MapIconPath) is TextureImporter importer))
+            {
+                AssetDatabase.ImportAsset(MapIconPath, ImportAssetOptions.ForceSynchronousImport);
+                importer = AssetImporter.GetAtPath(MapIconPath) as TextureImporter ?? throw new FileNotFoundException("Run tools/map_icon.py first.", MapIconPath);
+            }
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spritePixelsPerUnit = 100f;
+            settings.spriteAlignment = (int)SpriteAlignment.Center;
+            settings.spriteMeshType = SpriteMeshType.Tight;
+            importer.SetTextureSettings(settings);
+            importer.mipmapEnabled = true;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.anisoLevel = 1;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.sRGBTexture = true;
+            importer.alphaSource = TextureImporterAlphaSource.FromInput;
+            importer.alphaIsTransparency = true;
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            importer.SaveAndReimport();
+            return Load<Sprite>(MapIconPath);
         }
 
         // The hangars the Revoker uses, and every stock mount on the sets that offer it.

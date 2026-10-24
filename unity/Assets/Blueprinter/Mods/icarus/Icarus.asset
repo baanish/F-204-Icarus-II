@@ -35,7 +35,7 @@ MonoBehaviour:
   radarSize: 0.25
   friendlyIcon: {fileID: 21300000, guid: 4f6ab362b0ed9ba4c92e493d590fb488, type: 2}
   hostileIcon: {fileID: 21300000, guid: 4f6ab362b0ed9ba4c92e493d590fb488, type: 2}
-  mapIcon: {fileID: 21300000, guid: 6bbbe8741d8cb6f498e2bff16df14b38, type: 2}
+  mapIcon: {fileID: 21300000, guid: aeaea4232e36e5a4bbb6c28a08e3d747, type: 3}
   mapOrient: 1
   IsObstacle: 1
   iconSize: 1
