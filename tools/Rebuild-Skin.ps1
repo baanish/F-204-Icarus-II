@@ -29,6 +29,7 @@ try {
     Invoke-SkinStep 'python' @('art/textures/full_skin_guides.py', 'check')
     Invoke-SkinStep 'python' @('art/textures/full_skin_registration.py')
     Invoke-SkinStep 'python' @('art/textures/compose_skin.py', 'compose')
+    Invoke-SkinStep 'python' @('art/textures/panel_checks.py')
 
     $reviewTextures = Join-Path $reviewRoot 'art/export/textures'
     New-Item -ItemType Directory -Force $reviewTextures | Out-Null

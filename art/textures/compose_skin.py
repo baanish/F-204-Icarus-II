@@ -14,7 +14,7 @@ from rasterize import (ROOT, OUT, SOURCE, EXPORT, SIZE, PAINT_SIZE, PX_PER_M, GU
                        save_map, sample, smoothstep, triplanar, upsample)
 from liveries import PAINT_GRAIN, SOURCE_BLUR_PX, specifications, paint, paint_grain, soften
 from insignia import sources, place_decals
-from panels import layout_fields, surface_height, tangent_normal
+from panels import bare_aft, layout_fields, surface_height, tangent_normal
 from damage import compose_damage
 
 REGIONS = {'nw': (0, 0), 'ne': (896, 0), 'sw': (0, 896), 'se': (896, 896)}
@@ -84,8 +84,8 @@ def compose(part_manifest=None):
     Image.fromarray(np.uint8(generated * 255 + .5)).save(OUT / 'generated_base_assembled.png')
     residual = upsample(paint_grain(generated, paint_used), paint_used) * fade
     extended_pos, extended_normal, extended_part, domain, dx, dy = extend_geometry(pos, normal, part)
-    fields, layout_report = layout_fields(extended_pos, extended_normal, extended_part, names, domain,
-                                          json.loads(STRUCTURE.read_text()))
+    structure = json.loads(STRUCTURE.read_text())
+    fields, layout_report = layout_fields(extended_pos, extended_normal, extended_part, names, domain, structure)
     height = surface_height(fields, PX_PER_M)
     seam, fastener = fields['seam'], np.maximum(fields['rivet'], fields['screw'])
     relief = np.maximum(seam, fastener)
@@ -96,8 +96,8 @@ def compose(part_manifest=None):
     # The saved float32 fields, multiplied in float64, reproduce these bytes exactly in full_skin_checks.
     ao = np.clip(baked_ao.astype(np.float64) * cavity, 0, 1)
     save_map(EXPORT / 'Icarus_skin_ao.png', np.repeat(ao[..., None], 3, axis=-1), used)
-    # Unpainted aft fuselage on every livery; a 3 cm blend keeps its edge free of texel steps.
-    bare = smoothstep((pos[..., 1] - 5.1) / .03) * smoothstep((.6 - pos[..., 2]) / .03)
+    # Unpainted aft fuselage on every livery, bounded by its panel seams.
+    bare = bare_aft(pos, part, names, structure)
     metallic = np.zeros((*part.shape, 4), np.float32)
     metallic[..., 0] = bare
     metallic[..., 3] = .4 + .2 * bare - .12 * seam - .05 * fastener

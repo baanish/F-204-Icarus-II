@@ -52,7 +52,7 @@ def structure():
     # Skin panel layout follows the airframe: frames, spars, ribs, optional stringers and the fuselage sections.
     data = {'frames': internals.INTERNALS['frames'], 'spars': internals.INTERNALS['spars'],
             'stringers': internals.INTERNALS.get('stringers'), 'fuselage_sections': sections,
-            'wing_sections': bi.wing_sections(bi.PARAMS['wing']), 'S0': bi.S0,
+            'wing_sections': bi.wing_sections(bi.PARAMS['wing']), 'wing_surfaces': bi.PARAMS['wing_surfaces'], 'S0': bi.S0,
             'wing_profile': [list(bi.section_at(bi.wing_sections(bi.PARAMS['wing']), float(x), 'x'))
                              for x in np.linspace(.58, 3.4, 1001)],
             'objects': objects, 'views': VIEWS}

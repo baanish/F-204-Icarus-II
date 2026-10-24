@@ -9,13 +9,22 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '.cache/review/wave2/p9b/02'
 
 
+AO_SAMPLES = 4
+
+
 def bake_ao(canonical):
     import uvs
     import cycles_device
     scene = bpy.context.scene
     cycles_device.use_gpu(scene)
-    # Each bake texel evaluates 128 AO probes once, rather than multiplying 128 by 128.
-    scene.cycles.samples = 1
+    # Each bake texel evaluates 128 AO probes per sample, AO_SAMPLES times. The default pattern's blue noise
+    # correlates the probes in blocks of about 8 texels, which upsample into blurry rectangles in the paint; a
+    # fully scrambled Sobol sequence leaves fine, uncorrelated grain instead.
+    pattern = (scene.cycles.sampling_pattern, scene.cycles.auto_scrambling_distance, scene.cycles.scrambling_distance)
+    scene.cycles.sampling_pattern = 'TABULATED_SOBOL'
+    scene.cycles.auto_scrambling_distance = False
+    scene.cycles.scrambling_distance = 1.0
+    scene.cycles.samples = AO_SAMPLES
     scene.render.bake.use_clear = True
     hidden = {o: o.hide_render for o in scene.objects if o.type == 'MESH'}
     groups = {s: [o.name for o in canonical if o.name.startswith('skin_' + s)] + ['fuselage_' + s]
@@ -84,14 +93,15 @@ def bake_ao(canonical):
         assembly = np.clip(arrays['assembly'] / np.maximum(arrays['self'], 1e-5), 0, 1)
         np.savez_compressed(OUT / 'ao_maps.npz', self=arrays['self'], assembly=assembly,
                             combined=arrays['self'] * assembly)
-        (OUT / 'ao_policy.json').write_text(json.dumps({'samples': 128, 'distance_m': .6,
-            'cycles_samples': 1, 'ao_probes_per_sample': 128,
+        (OUT / 'ao_policy.json').write_text(json.dumps({'samples': 128 * AO_SAMPLES, 'distance_m': .6,
+            'cycles_samples': AO_SAMPLES, 'ao_probes_per_sample': 128, 'sampling_pattern': 'TABULATED_SOBOL, scrambling 1',
             'bake_copy_separation_m': 30, 'stable_groups': groups,
             'self_only': [o.name for o in canonical if not any(o.name in group for group in groups.values())]}, indent=2))
     finally:
         for obj, hide in hidden.items():
             obj.hide_render = hide
         scene.cycles.samples = 32
+        scene.cycles.sampling_pattern, scene.cycles.auto_scrambling_distance, scene.cycles.scrambling_distance = pattern
 
 
 def review_maps(livery_id=None):

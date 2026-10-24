@@ -34,6 +34,7 @@ import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 from mathutils.kdtree import KDTree
+import numpy as np
 
 import build_icarus as bi
 import checks
@@ -107,7 +108,6 @@ class Patch:
             raise ValueError("speed brakes: the ring columns of the deg0..deg1 band do not run in order")
         self.s = [st[j] for j in range(j0, j1 + 1)]
         self.grid = [[r[k] for k in cols] for r in rings]
-        self.edge_deg = (self.angle(mid[cols[0]]), self.angle(mid[cols[-1]]))
         self.arc = [0.0]
         for c in range(1, len(cols)):
             self.arc.append(self.arc[-1] + sum((g[c] - g[c - 1]).length for g in self.grid) / len(self.grid))
@@ -571,36 +571,41 @@ def posed_tree(obj, matrix):
 
 def panel_lines(p):
     """The fuselage's panel lines round the brakes as art/textures/panels.py draws them: butt joints (seams), the
-    riveted frames between them, the lap joints' angles, and the fastener rows' offset from a joint."""
+    riveted frames between them, the lap joints' planes (signed distances, positive above, at a point), the fastener
+    rows' offset from a joint and the seam's half width."""
     import internals
     import parts
 
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "textures"))
     import panels
 
-    fr = internals.INTERNALS["frames"]
-    frames = [fr["s0"] + fr["pitch"] * i for i in range(int(round((fr["s1"] - fr["s0"]) / fr["pitch"])) + 1)]
-    breaks = (parts.RADOME_END, parts.FORWARD_END, parts.MID_END)
-    clear = [f for f in frames if min(abs(f - b) for b in breaks) > .15]
-    joints = [f for i, f in enumerate(frames) if i % panels.JOINT_EVERY == 1 and f in clear]
-    return joints, [f for f in clear if f not in joints], panels.FUSELAGE_SEAMS_DEG, panels.ROW_OFFSET
+    table = p["fuselage"]
+    # The body centre heights pilot2_skin.py writes to structure.json for panels.py.
+    sections = [[float(s), bi.fuselage_shapes(p, float(s))[1]] for s in np.arange(table[0][0], table[-1][0], .05)]
+    lines = panels.fuselage_lines({"frames": internals.INTERNALS["frames"], "fuselage_sections": sections},
+                                  (parts.RADOME_END, parts.FORWARD_END, parts.MID_END, table[-1][0]))
+    laps = lambda v: [float(d) for d in panels.lap_distances(abs(v.x), v.y + bi.S0, v.z, lines)]
+    return lines["joints"], lines["plain"], laps, panels.ROW_OFFSET, panels.SEAM_HALF_WIDTH
 
 
 def outline_on_panel_lines(p, patch):
     """Each brake is its own skin panel: its front edge on a butt joint, its aft edge one fastener row ahead of a
-    riveted frame, its lower edge on a lap joint, and no joint, riveted frame or lap joint crossing the hole."""
-    joints, riveted, laps, row = panel_lines(p)
+    riveted frame, its lower edge within the lower lap joint's groove all along, and no joint, riveted frame or lap
+    joint crossing the hole."""
+    joints, riveted, laps, row, half_width = panel_lines(p)
     s0, s1 = patch.s[0], patch.s[-1]
-    deg0, deg1 = patch.edge_deg
     problems = []
     if min(abs(s0 - j) for j in joints) > 1e-4:
         problems.append("front edge s %.4f is on no butt joint %s" % (s0, joints))
     if min(abs(s1 + row - f) for f in riveted) > 1e-4:
         problems.append("aft edge s %.4f is not %.3f m ahead of a riveted frame %s" % (s1, row, riveted))
-    if min(abs(deg0 - d) for d in laps) > 0.05:
-        problems.append("lower edge at %.2f deg is on no lap joint %s" % (deg0, laps))
+    lower = max(abs(laps(r[0])[1]) for r in patch.grid)
+    if lower > half_width:
+        problems.append("lower edge strays %.1f mm from the lower lap joint" % (lower * 1000))
     problems += ["s %.3f line crosses the hole" % s for s in joints + riveted if s0 + 1e-4 < s < s1 - 1e-4]
-    problems += ["%.1f deg lap joint crosses the hole" % d for d in laps if deg0 + 0.05 < d < deg1 - 0.05]
+    distances = [laps(v) for r in patch.grid for v in r]
+    if max(d[0] for d in distances) > -half_width or min(d[1] for d in distances) < -half_width:
+        problems.append("a lap joint crosses the hole")
     return problems
 
 
