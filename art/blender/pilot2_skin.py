@@ -49,13 +49,20 @@ def structure():
         # The main body lobe only: intake and wing-fillet lobes are separate surfaces in the panel layout.
         hw, top, bot = [bi.pchip([r[0] for r in table], [r[i] for r in table], float(s)) for i in (1, 2, 3)]
         sections.append([float(s), bi.fuselage_shapes(bi.PARAMS, float(s))[1], hw, bot, top])
+    # The formation lenses and rims set on the skin, which decals keep clear of (art/textures/decal_checks.py).
+    fittings = {}
+    for obj in bpy.data.objects:
+        if obj.get('light') == 'formation':
+            obj.data.calc_loop_triangles()
+            fittings[obj.name] = [[list(obj.matrix_world @ obj.data.vertices[i].co) for i in tri.vertices]
+                                  for tri in obj.data.loop_triangles]
     # Skin panel layout follows the airframe: frames, spars, ribs, optional stringers and the fuselage sections.
     data = {'frames': internals.INTERNALS['frames'], 'spars': internals.INTERNALS['spars'],
             'stringers': internals.INTERNALS.get('stringers'), 'fuselage_sections': sections,
             'wing_sections': bi.wing_sections(bi.PARAMS['wing']), 'wing_surfaces': bi.PARAMS['wing_surfaces'], 'S0': bi.S0,
             'wing_profile': [list(bi.section_at(bi.wing_sections(bi.PARAMS['wing']), float(x), 'x'))
                              for x in np.linspace(.58, 3.4, 1001)],
-            'objects': objects, 'views': VIEWS}
+            'objects': objects, 'fittings': fittings, 'views': VIEWS}
     (OUT / 'structure.json').write_text(json.dumps(data))
     print('PILOT STRUCTURE PASS', [o['name'] for o in objects], flush=True)
 

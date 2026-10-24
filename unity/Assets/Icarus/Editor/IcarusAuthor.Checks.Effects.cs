@@ -22,12 +22,14 @@ namespace Icarus.Editor
             var donor = Load<GameObject>(DonorPrefab);
             var formationOff = donor.GetComponentsInChildren<MeshRenderer>(true)
                 .First(r => r.name.StartsWith("slimelights", StringComparison.Ordinal)).sharedMaterial;
+            // art/blender/lights.py: two forward lenses of 16 triangles, each in a 24 triangle rim; a fin strip of 8 in 20.
+            var lensTriangles = new Dictionary<string, (int Lens, int All)> { ["light_formation_"] = (32, 80), ["light_fin_"] = (8, 28) };
             foreach (var side in new[] { "L", "R" })
             {
-                foreach (var formation in new[] { false, true })
+                foreach (var (name, owner) in FormationLenses(side).Prepend(("navlight_" + side, "wing_skin_" + side)))
                 {
-                    var name = formation ? "light_formation_" + side : "navlight_" + side;
-                    var parent = b.Parts[(formation ? "skin_forward_" : "wing_skin_") + side].transform;
+                    var formation = !name.StartsWith("navlight_", StringComparison.Ordinal);
+                    var parent = b.Parts[owner].transform;
                     var lamp = parent.Find(name);
                     if (lamp == null) { p.Add(name + " is not on its skin part"); continue; }
                     var renderer = lamp.GetComponent<MeshRenderer>();
@@ -42,9 +44,9 @@ namespace Icarus.Editor
                     var triangles = mesh.triangles.Length / 3;
                     if (formation)
                     {
-                        // art/blender/lights.py: two lenses of 16 triangles, each in a 24 triangle rim.
-                        if (mesh != b.Meshes[name].Render || triangles != 80 || mesh.subMeshCount != 2 || mesh.GetSubMesh(0).indexCount != 96)
-                            p.Add(name + " must use its generated two lenses (submesh 0, 32 triangles) and rims (48 triangles)");
+                        var expected = lensTriangles[name.Substring(0, name.Length - side.Length)];
+                        if (mesh != b.Meshes[name].Render || triangles != expected.All || mesh.subMeshCount != 2 || mesh.GetSubMesh(0).indexCount != 3 * expected.Lens)
+                            p.Add($"{name} must use its generated lenses (submesh 0, {expected.Lens} triangles) and rims ({expected.All - expected.Lens} triangles)");
                         if (renderer.sharedMaterials.Length != 2 || renderer.sharedMaterials[1] != b.Meshes[name].Materials[1])
                             p.Add(name + " lost its rim material");
                         if (renderer.sharedMaterial != formationOff || entry.FindPropertyRelative("litMaterial").objectReferenceValue != b.Donor.FormationLit
@@ -82,7 +84,7 @@ namespace Icarus.Editor
                 while (it.Next(true) && !SerializedProperty.EqualContents(it, end))
                     if (it.propertyType == SerializedPropertyType.ObjectReference && it.objectReferenceValue == null && it.objectReferenceInstanceIDValue != 0) p.Add("a dead vapour emitter");
             }
-            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "light_formation_L", "light_formation_R",
+            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "light_formation_L", "light_formation_R", "light_fin_L", "light_fin_R",
                 "flareEjectorL", "flareEjectorR", "heat_haze", "afterburner_flame", "afterburner_nozzle_glow", "gearlight_F", "ladder" };
             foreach (var name in effects)
             {

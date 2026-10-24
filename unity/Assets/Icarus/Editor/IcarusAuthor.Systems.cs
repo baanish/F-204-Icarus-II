@@ -15,6 +15,10 @@ namespace Icarus.Editor
         // TargetCam renders from 2 m out: its mounts sit 2.5 m clear of every mesh (Centurion's measured margin).
         private const float CameraClearance = 2.5f;
 
+        // art/blender/lights.py: one side's generated formation lenses and the skin part each rides on.
+        private static (string Name, string Owner)[] FormationLenses(string side) =>
+            new[] { ("light_formation_" + side, "skin_forward_" + side), ("light_fin_" + side, "fin_skin") };
+
         private static void PlaceSystems(Build b)
         {
             var root = b.Root.transform;
@@ -53,9 +57,9 @@ namespace Icarus.Editor
             }
             ejector.ApplyModifiedPropertiesWithoutUndo();
 
-            // Keep the stock nav lenses by reference. Formation lenses use our surface-following mesh, the Revoker's
-            // off material and switching on the lens (slot 0, the one NavLights swaps) and the rim's own slot, so the
-            // wing and skin parts carry their own lights away.
+            // Keep the stock nav lenses by reference. Formation lenses and fin strips use our surface-following mesh,
+            // the Revoker's off material and switching on the lens (slot 0, the one NavLights swaps) and the rim's own
+            // slot, so the wing, skin and fin parts carry their own lights away.
             var navLights = new SerializedObject(b.Root.GetComponent(GameType("NavLights")));
             var formationOff = Load<GameObject>(DonorPrefab).GetComponentsInChildren<MeshRenderer>(true)
                 .First(r => r.name.StartsWith("slimelights", StringComparison.Ordinal)).sharedMaterial;
@@ -73,27 +77,29 @@ namespace Icarus.Editor
                 NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
                 lights.Add($"{nav.name} at light_nav_{side}");
 
-                var formationName = "light_formation_" + side;
-                var formation = new GameObject(formationName) { layer = b.Root.layer }.transform;
-                formation.SetParent(b.Parts["skin_forward_" + side].transform, true);
-                formation.SetPositionAndRotation(b.Blockout.Local(formationName), b.Blockout.Rotation(formationName));
-                formation.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes[formationName].Render;
-                var formationRenderer = formation.gameObject.AddComponent<MeshRenderer>();
-                var formationMaterials = (Material[])b.Meshes[formationName].Materials.Clone();
-                formationMaterials[0] = formationOff;
-                formationRenderer.sharedMaterials = formationMaterials;
-                b.Visuals[formationName] = formation;
-                var entries = Prop(navLights, "navLights");
-                entries.arraySize++;
-                var entry = entries.GetArrayElementAtIndex(entries.arraySize - 1);
-                entry.FindPropertyRelative("renderer").objectReferenceValue = formationRenderer;
-                entry.FindPropertyRelative("objects").arraySize = 0;
-                entry.FindPropertyRelative("litMaterial").objectReferenceValue = b.Donor.FormationLit;
-                entry.FindPropertyRelative("part").objectReferenceValue = b.Part("skin_forward_" + side);
-                entry.FindPropertyRelative("gear").objectReferenceValue = null;
-                entry.FindPropertyRelative("controlState").intValue = b.Donor.FormationState;
-                b.Placed.Add(formation);
-                lights.Add($"{formation.name} on skin_forward_{side}");
+                foreach (var (formationName, owner) in FormationLenses(side))
+                {
+                    var formation = new GameObject(formationName) { layer = b.Root.layer }.transform;
+                    formation.SetParent(b.Parts[owner].transform, true);
+                    formation.SetPositionAndRotation(b.Blockout.Local(formationName), b.Blockout.Rotation(formationName));
+                    formation.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes[formationName].Render;
+                    var formationRenderer = formation.gameObject.AddComponent<MeshRenderer>();
+                    var formationMaterials = (Material[])b.Meshes[formationName].Materials.Clone();
+                    formationMaterials[0] = formationOff;
+                    formationRenderer.sharedMaterials = formationMaterials;
+                    b.Visuals[formationName] = formation;
+                    var entries = Prop(navLights, "navLights");
+                    entries.arraySize++;
+                    var entry = entries.GetArrayElementAtIndex(entries.arraySize - 1);
+                    entry.FindPropertyRelative("renderer").objectReferenceValue = formationRenderer;
+                    entry.FindPropertyRelative("objects").arraySize = 0;
+                    entry.FindPropertyRelative("litMaterial").objectReferenceValue = b.Donor.FormationLit;
+                    entry.FindPropertyRelative("part").objectReferenceValue = b.Part(owner);
+                    entry.FindPropertyRelative("gear").objectReferenceValue = null;
+                    entry.FindPropertyRelative("controlState").intValue = b.Donor.FormationState;
+                    b.Placed.Add(formation);
+                    lights.Add($"{formation.name} on {owner}");
+                }
 
                 var tipVertices = WorldVertices(skin, b.Meshes["wing_skin_" + side].Render);
                 var outer = tipVertices.Max(v => Mathf.Abs(v.x));

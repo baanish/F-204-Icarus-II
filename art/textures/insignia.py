@@ -7,6 +7,23 @@ from rasterize import ROOT, SOURCE, OUT, sample
 
 SUBSAMPLES = 4  # per texel axis: 16 world-space samples per texel box-filter the decal edges
 PAD = 6  # transparent source pixels around every decal so supersamples past its edge read clear
+SIDE_FACING = .45  # |normal x| above which a texel takes side decals
+FORWARD = ('skin_forward_L', 'skin_forward_R')
+# label, source, parts, centre y (aft), centre z, width, height, in world metres; mirrored onto both sides.
+# decal_checks.py holds each one clear of the canopy, physical edges, panel seams and light fittings.
+# Forward: each inside one skin panel between the butt joints at s 2.2, 3.4 and 4.6 (y -5.8, -4.6, -3.4), the modex
+# in the first, RESCUE above the gun-port panel and NO STEP above the forward formation lens in the second, the
+# roundel in the third ahead of the Bare Metal band. Fin: one above another on the panel between the front spar joint
+# and the rudder hinge, each centred in that swept panel at its height, the formation strip ahead of the joint.
+PLACEMENTS = (
+    ('nose_modex', 'modex', FORWARD, -5.2, .14, 1.05, .43),
+    ('roundel', 'roundel', FORWARD, -3.08, .20, .50, .50),
+    ('rescue', 'rescue', FORWARD, -3.95, .37, .52, .10),
+    ('no_step', 'no_step', FORWARD, -4.35, -.13, .38, .07),
+    ('fin_flash', 'flash', ('fin_skin',), 6.60, 2.05, .35, .66),
+    ('fin_modex', 'modex', ('fin_skin',), 6.156, 1.47, .90, .36),
+    ('pala', 'pala', ('fin_skin',), 5.95, 1.135, .68, .17),
+)
 
 
 def palette(pixels, count, iterations=12):
@@ -23,7 +40,7 @@ def palette(pixels, count, iterations=12):
     return centres
 
 
-def flat_print(rgb, count, ellipse=False, solid=False):
+def flat_print(rgb, count, ellipse=False, solid=False, stripes=False):
     """Crop to the ink, snap each pixel to one of `count` print colours, drop wear specks, antialias edges.
 
     The generated sheets carry painted wear; on the aircraft it reads as pixel damage, so it is removed here.
@@ -54,6 +71,10 @@ def flat_print(rgb, count, ellipse=False, solid=False):
     opaque = alpha > .5
     colours = palette(rgb[opaque], count)
     nearest = np.argmin(((rgb[..., None, :] - colours) ** 2).sum(-1), axis=-1)
+    if stripes:
+        # A fin flash is plain vertical stripes: each column takes its majority colour, which drops the sheet's
+        # painted chevron and tears.
+        nearest[:] = [np.bincount(column, minlength=count).argmax() for column in nearest.T]
     # A 3 px majority vote removes wear specks inside each colour field; edges between colours stay sharp.
     if ellipse:
         # The outer ring is one colour; the sheet's white background must not bleed into its rim.
@@ -69,7 +90,7 @@ def sources():
     sheet = np.asarray(Image.open(SOURCE / 'mark.png').convert('RGB'))
     split = int(sheet.shape[1] * 0.61)
     decals = {'roundel': flat_print(sheet[:, :split], 2, ellipse=True),
-              'flash': flat_print(sheet[:, split:], 3, solid=True),
+              'flash': flat_print(sheet[:, split:], 3, solid=True, stripes=True),
               'modex': flat_print(np.asarray(Image.open(SOURCE / 'digit.png').convert('RGB')), 1)}
     sheet = np.asarray(Image.open(SOURCE / 'stencils.png').convert('RGB'))
     h = sheet.shape[0]
@@ -89,27 +110,39 @@ def sources():
     return decals
 
 
+def projection(placement, decal):
+    """World y, z and side (+1 left, -1 right) to the placement's decal u, v; the padded source keeps the ink box at
+    the requested size."""
+    _, _, _, cy, cz, width, height = placement
+    ph, pw = decal.shape[:2]
+    su, sv = width * pw / (pw - 2 * PAD), height * ph / (ph - 2 * PAD)
+    return lambda y, z, side: ((y - cy) * side / su + .5, .5 - (z - cz) / sv)
+
+
+def covered(position, normal, part, names, placement, decal):
+    """Side-facing texels of the placement's parts inside its box, each side's mirror image, with their side."""
+    to_uv = projection(placement, decal)
+    eligible = np.isin(part, [names.index(s) + 1 for s in placement[2]]) & (abs(normal[..., 0]) > SIDE_FACING)
+    side = np.where(position[..., 0] >= 0, 1, -1)
+    u, v = to_uv(position[..., 1], position[..., 2], side)
+    return eligible & (u >= 0) & (u <= 1) & (v >= 0) & (v <= 1), side, to_uv
+
+
 def place_decals(colour, position, normal, part, names, decals, spec, paint_coverage, dx, dy):
     """Box-filter each decal over every texel's world footprint (dx, dy: world step per texel)."""
     mask = np.zeros(part.shape, bool)
     report = []
     offsets = (np.arange(SUBSAMPLES) + .5) / SUBSAMPLES - .5
-    def place(name, allowed, cy, cz, width, height):
+    for placement in PLACEMENTS:
+        label, name, allowed, cy, cz, width, height = placement
         decal = decals[name]
-        # The padded source keeps the ink box at the requested size.
-        ph, pw = decal.shape[:2]
-        su, sv = width * pw / (pw - 2 * PAD), height * ph / (ph - 2 * PAD)
-        eligible = np.isin(part, [names.index(s) + 1 for s in allowed]) & (abs(normal[..., 0]) > .45)
-        side = np.where(position[..., 0] >= 0, 1, -1)
-        u = (position[..., 1] - cy) * side / su + .5
-        v = .5 - (position[..., 2] - cz) / sv
-        selected = eligible & (u >= 0) & (u <= 1) & (v >= 0) & (v <= 1)
+        selected, side, to_uv = covered(position, normal, part, names, placement, decal)
         p, ddx, ddy, flip = position[selected], dx[selected], dy[selected], side[selected]
         ink = np.zeros((len(p), 4), np.float32)
         for oy in offsets:
             for ox in offsets:
                 q = p + ddx * ox + ddy * oy
-                ink += sample(decal, (q[:, 1] - cy) * flip / su + .5, .5 - (q[:, 2] - cz) / sv)
+                ink += sample(decal, *to_uv(q[:, 1], q[:, 2], flip))
         ink /= SUBSAMPLES ** 2
         alpha = ink[:, 3:4]
         rgb = ink[:, :3] / np.maximum(alpha, 1e-6)
@@ -124,20 +157,12 @@ def place_decals(colour, position, normal, part, names, decals, spec, paint_cove
         visible_ink[selected] = alpha[:, 0] > .01
         ink_counts = [int((visible_ink & ((position[..., 0] >= 0) if s else (position[..., 0] < 0))).sum()) for s in (1, 0)]
         if min(counts) == 0:
-            raise ValueError('Decal misses one side: ' + name)
+            raise ValueError('Decal misses one side: ' + label)
         if min(ink_counts) == 0:
-            raise ValueError('Decal has no visible ink on one side: ' + name)
-        report.append({'source': name, 'parts': allowed, 'centre_yz': [cy, cz], 'size_m': [width, height],
-                       'left_right_texels': counts, 'left_right_ink_texels': ink_counts,
+            raise ValueError('Decal has no visible ink on one side: ' + label)
+        report.append({'label': label, 'source': name, 'parts': list(allowed), 'centre_yz': [cy, cz],
+                       'size_m': [width, height], 'left_right_texels': counts, 'left_right_ink_texels': ink_counts,
                        'supersamples_per_texel': SUBSAMPLES ** 2})
-    forward = ['skin_forward_L', 'skin_forward_R']
-    place('modex', forward, -5.5, .14, 1.05, .43)
-    place('roundel', forward, -3.3, .22, .56, .56)
-    place('rescue', forward, -3.3, .67, .52, .10)
-    place('no_step', forward, -4.5, -.15, .38, .07)
-    place('flash', ['fin_skin'], 6.25, 2.13, .38, .72)
-    place('modex', ['fin_skin'], 6.25, 1.43, 1.0, .40)
-    place('pala', ['fin_skin'], 6.18, 1.08, .76, .19)
     actual = sorted(names[i - 1] for i in np.unique(part[mask]))
     if any(n.endswith('_visible') or n.startswith(('wing_', 'pylon_', 'intake_')) for n in actual):
         raise ValueError('Decals touched mirrored islands: ' + str(actual))
