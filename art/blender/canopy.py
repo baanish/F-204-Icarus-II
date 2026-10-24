@@ -69,7 +69,12 @@ SKIN = "Icarus_Body"
 EYE = (4.365, 0.0, 0.885)
 # Cockpit rule 27, from the eye to the inner glass and the cockpit cell's sill: (low, high) metres.
 EYE_BANDS = {"overhead": (0.23, 0.36), "side": (0.35, 0.46), "sill": (0.27, 0.35)}
-OVER_NOSE_SLOPE = 0.2876  # the glare shield stays under this 16 degree line down from the eye
+# The glare shield's top runs under this 6 degree line down from the eye, so it meets the airframe's own over-nose
+# line (6.4 to 6.9 degrees across the windscreen's front) and the view goes from sky straight to the glare shield, as
+# the stock cockpits do:
+# their glare shields stand on the airframe's line at 11.3 (Revoker), 9.0 (Vortex) and 11.2 (Ifrit) degrees, 0.1
+# degree under the last sky ray. The coaming between the glare shield and the windscreen hides under its sight line.
+OVER_NOSE_SLOPE = 0.10510
 # Object names the other modules and the Unity author build against.
 FRAME = "canopy_visible"  # the hood's frame, under the "canopy" hinge
 GLASS_OUTER, GLASS_INNER = "canopy_glass_outer", "canopy_glass_inner"  # the hood's panes, under the hinge too

@@ -275,10 +275,6 @@ COCKPIT_HIDDEN = ("cockpit_cell", "avionics_tray", "radar_tray", "gear_leg_N_vis
                   "cockpit_proxy", "canopy_frame_proxy")
 COCKPIT_GLASS = ("canopy_glass_inner", "windscreen_inner")
 EYE_RAYS = 200000  # about 0.5 degrees apart
-# A leak deeper than this under the glass's foot at its station leaves through the cockpit tub (its consoles, lining
-# and bulkhead), which the closed-tub job is to close: pilot_eye_leaks reports those and fails on the rest, round the
-# canopy, its sills, its rear arch and the coaming.
-TUB_DEPTH = 0.15
 FIT_TOLERANCE = 0.001
 
 
@@ -296,8 +292,8 @@ def pilot_eye_leaks(icarus):
     faces culled, the inner glass seen through. A ray that meets no front face reaches the sky, and must leave through
     the glass: the last surface it crossed is an inner pane. Through the back of the skin or anything else, or past
     nothing at all, is a leak, unless rays a hair either side of it are stopped (it ran down a seam between two
-    meshes). Leaks leaving more than TUB_DEPTH under the glass's foot are the tub's, reported; any other fails. The
-    stock seat, stick and throttle are not in the build and stop nothing here."""
+    meshes); every other leak fails, the tub's (consoles, lining, floor, bulkhead) as much as the canopy's. The stock
+    seat, stick and throttle are not in the build and stop nothing here."""
     import build_icarus as bi
     import canopy
 
@@ -311,16 +307,6 @@ def pilot_eye_leaks(icarus):
             owner.append(o.name)
     ray_cast = BVHTree.FromPolygons(verts, polys).ray_cast
     eye = bi.P(*canopy.EYE)
-    O = bpy.data.objects
-    panes = welded([O[canopy.WINDSCREEN], O[canopy.GLASS_OUTER]])
-    foot = [tuple((v.co.y + bi.S0, v.co.z) for v in e.verts) for e in panes.edges if e.is_boundary]
-    panes.free()
-
-    def foot_z(s):
-        """The lowest point of the glass's edge across station s, or None off the glass's length."""
-        across = [za + (zb - za) * (s - sa) / (sb - sa) for (sa, za), (sb, zb) in foot if min(sa, sb) <= s <= max(sa, sb)
-                  and sa != sb]
-        return min(across) if across else None
 
     def leak(at, d):
         """Where the ray from at along d leaves for the sky other than through the glass, and through what."""
@@ -335,7 +321,7 @@ def pilot_eye_leaks(icarus):
             at = q + d * 1e-5
         return None
 
-    leaks, tub = {}, 0
+    leaks = {}
     for d in eye_directions(EYE_RAYS):
         found = leak(eye, d)
         if found is None:
@@ -343,14 +329,7 @@ def pilot_eye_leaks(icarus):
         side = d.cross(Z if abs(d.z) < 0.9 else Vector((1, 0, 0))).normalized() * 1e-5
         if any(leak(eye + o, d) is None for o in (side, -side, side.cross(d), -side.cross(d))):
             continue
-        name, out = found
-        level = foot_z(out.y + bi.S0) if out is not None else None
-        if level is not None and out.z < level - TUB_DEPTH:
-            tub += 1
-            continue
-        leaks.setdefault(name, []).append(d)
-    note = ("; %d more leave through the cockpit tub, over %.2f m under the glass's foot, for the closed-tub job"
-            % (tub, TUB_DEPTH)) if tub else ""
+        leaks.setdefault(found[0], []).append(d)
     if leaks:
         found = []
         for name, ds in sorted(leaks.items(), key=lambda kv: -len(kv[1])):
@@ -359,10 +338,10 @@ def pilot_eye_leaks(icarus):
             found.append("%d through %s (azimuth %.0f to %.0f deg, elevation %.0f to %.0f deg)"
                          % (len(ds), name, min(az), max(az), min(el), max(el)))
         total = sum(map(len, leaks.values()))
-        raise ValueError("pilot eye leaks: %d of %d rays from the eye escape other than through the glass: %s%s"
-                         % (total, EYE_RAYS, "; ".join(found), note))
-    print("pilot eye leaks: %d rays from the eye (s %.3f, z %.3f) through %d drawn meshes: none escape round the "
-          "canopy but through the glass%s: PASS" % (EYE_RAYS, canopy.EYE[0], canopy.EYE[2], len(meshes), note), flush=True)
+        raise ValueError("pilot eye leaks: %d of %d rays from the eye escape other than through the glass: %s"
+                         % (total, EYE_RAYS, "; ".join(found)))
+    print("pilot eye leaks: %d rays from the eye (s %.3f, z %.3f) through %d drawn meshes: none escape but through the "
+          "glass: PASS" % (EYE_RAYS, canopy.EYE[0], canopy.EYE[2], len(meshes)), flush=True)
 
 
 def welded(objs):

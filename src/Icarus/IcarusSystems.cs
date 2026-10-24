@@ -29,6 +29,11 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<NozzleDriver>();
         }
 
+        if (!__instance.TryGetComponent<StandbyInstruments>(out _))
+        {
+            __instance.gameObject.AddComponent<StandbyInstruments>();
+        }
+
         if (!__instance.TryGetComponent<EjectLog>(out _))
         {
             __instance.gameObject.AddComponent<EjectLog>();

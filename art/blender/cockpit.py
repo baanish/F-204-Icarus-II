@@ -42,6 +42,9 @@ FRAMES_INNER = ("windscreen_frame_inner", "canopy_frame_inner")
 TAC_SCREEN, WARNING_LAMPS = "cockpit_tac_screen", "cockpit_warning_lamps"
 PROXIES = ("cockpit_proxy", "canopy_frame_proxy")
 PIVOTS = ("cockpit_stick_pivot", "cockpit_throttle_pivot")  # empties the stock stick and throttle hang from
+# The instruments' moving parts, each its own renderer with its origin on its pivot (cockpit_front.MOVERS); the plugin
+# turns them (StandbyInstruments.cs).
+INSTRUMENTS = ("cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute")
 SEAT = "cockpit_seat"  # an empty where the stock seat's origin goes
 SLOT = "Icarus_Cockpit"
 # Triangles per renderer: target and cap (budget.py sums them). The cockpit's hard limit is 35,000 in all; the stock
@@ -52,6 +55,7 @@ BUDGET = {
     "canopy_frame_inner": {"target": 2600, "cap": 8000, "objects": ("canopy_frame_inner",), "cockpit": True},
     "windscreen_frame_inner": {"target": 1000, "cap": 1000, "objects": ("windscreen_frame_inner",), "cockpit": True},
     "tac_screen": {"target": 120, "cap": 120, "objects": (TAC_SCREEN,), "cockpit": True},
+    "instruments": {"target": 520, "cap": 700, "objects": INSTRUMENTS, "cockpit": True},
     "stock_hotas": {"target": 2770, "cap": 2770, "objects": (), "cockpit": True},
     "proxies": {"target": 940, "cap": 2930, "objects": PROXIES},
 }
@@ -64,8 +68,9 @@ RULES = {
     "fasteners": (50, 95),
     "px_per_m_median": (300, 650),
     "panel_px_per_m": (1300, 1700),
-    # display_width: the main pair side by side, as the F-16M's MFDs, the canvas split so each shows one set
-    "display_dist": (0.73, 0.98), "display_below": (0.25, 0.43), "display_width": (0.37, 0.52),
+    # display_width: the main pair side by side with the 20 mm column between them, as the F-16M's MFDs, the canvas
+    # split so each shows one set; to 0.55 for the larger stores display (owner, 2026-10-23), each glass under 0.37
+    "display_dist": (0.73, 0.98), "display_below": (0.25, 0.43), "display_width": (0.37, 0.55),
     "screen_px_per_m": (1800, 2600),
     "overhead": (0.23, 0.36), "side": (0.35, 0.46), "sill": (0.27, 0.35), "panel_ahead": (0.60, 0.90),
     "front_office": (0.37, 0.74), "consoles": (0.08, 0.31), "tub": (0.12, 0.47),
@@ -106,7 +111,7 @@ LAYOUT = {
     # the coaming under the windscreen: from its front (s0) back to where the hood takes over (s1), its sides this far
     # inside the skin
     "coaming": (2.36, 3.00, 0.008),
-    "console": {"s0": 3.785, "s1": 4.84, "inner": 0.278, "top_z": 0.322},
+    "console": {"s0": 3.785, "s1": 4.88, "inner": 0.278, "top_z": 0.322},  # aft to the bulkhead: no trough between
     "pedals": {"s": 3.28, "x": 0.12, "bar": (3.18, 0.36)},
     "bulkhead": (4.88, 4.92),
     # The lining stands this far inside the skin, inboard of the fuselage frames' outer part; a rib covers the rest
@@ -123,7 +128,7 @@ LAYOUT = {
 # C: heading, airspeed, radar altitude, climb rate, the horizon, AOA and VSI ladders. D: the system status list.
 DISPLAYS = {
     "A": {"canvas": (0, 150, 590, 512), "px_per_m": 2050, "title": "TAC"},
-    "B": {"canvas": (592, 150, 1024, 512), "px_per_m": 2050, "title": "STORES / ENGINE"},
+    "B": {"canvas": (592, 150, 1024, 512), "px_per_m": 1850, "title": "STORES / ENGINE"},  # under A's density: 11 % larger (owner, 2026-10-23)
     "C": {"canvas": (788, 4, 996, 148), "px_per_m": 1810, "title": "FLT INST"},
     "D": {"canvas": (438, 0, 606, 149), "px_per_m": 1850, "title": "SYS STATUS"},
 }
@@ -594,6 +599,13 @@ class Kit:
                  ring_circle(2.05 * MM, 1.65 * MM, 6, ry=2.15 * MM)]
         return stack(self.uv, rings, "metal", top_uv=self.atlas.tile("fastener_top"), bottom_hidden=True)
 
+    def screw(self):
+        """Small panel screw for narrow plates: six-sided head, 5.0 x 4.3 x 1.2 mm (the Ifrit's small 28-tri head),
+        no underside. 28 tris."""
+        rings = [ring_circle(2.5 * MM, 0.0, 6, ry=2.15 * MM), ring_circle(2.5 * MM, 0.45 * MM, 6, ry=2.15 * MM),
+                 ring_circle(1.55 * MM, 1.2 * MM, 6, ry=1.35 * MM)]
+        return stack(self.uv, rings, "metal", top_uv=self.atlas.tile("fastener_top"), bottom_hidden=True)
+
     def placard(self, rect, lift=0.3 * MM, size=None):
         """A textured quad of rect's size (or size), lift above the surface, facing +Z. Two tris."""
         w, h = (size or (rect.w_m, rect.h_m))
@@ -655,6 +667,7 @@ def offset_outline(pts, d):
 # --- faces and plates -----------------------------------------------------------------------------------------------
 
 PLATE = {"depth": 0.004, "chamfer": 0.0015}  # plates sit this far into their face, edges chamfered
+SMALL_PLATE = 0.050  # plates narrower than this take Kit.screw at their corners, not the 7 mm fastener
 
 
 def plane_sheet(chart, outline, holes=(), lift=0.0):
@@ -714,6 +727,10 @@ class Face:
         throttle slot). Returns the plate's top as a placement maker."""
         d, c = PLATE["depth"], PLATE["chamfer"]
         hole = rect(x0, y0, x1, y1)
+        # a plate past its face's edge breaks the face's tessellation round every hole, hiding other plates
+        if not all(_inside(self.outline, p) for p in hole):
+            raise ValueError("cockpit: plate %s (%.4f, %.4f, %.4f, %.4f) passes the %s face's outline"
+                             % (title, x0, y0, x1, y1, self.name))
         self.holes.append(hole)
         self.plates.append((title, x0, y0, x1, y1))
         g.put(walls(hole, 0.0, -d - c, "bezel_dark", uv), self.m, group)
@@ -727,14 +744,15 @@ class Face:
             ring.add(quad, [(0, 1, 2, 3)], [[self.chart.point(v.x, v.y) for v in quad]])
         g.put(ring, self.m, group)
         g.put(plane_sheet(self.chart, inner, floor_holes, lift=-d), self.m, group)
-        e = 0.0065
+        small = min(x1 - x0, y1 - y0) < SMALL_PLATE  # narrow plates take the small screw, nearer their corners
+        e = 0.0045 if small else 0.0065
         spots = [(x0 + e, y0 + e), (x1 - e, y0 + e), (x1 - e, y1 - e), (x0 + e, y1 - e)]
         if fasteners >= 6:
             spots += [((x0 + x1) / 2, y0 + e), ((x0 + x1) / 2, y1 - e)]
         if fasteners >= 8:
             spots += [(x0 + e, (y0 + y1) / 2), (x1 - e, (y0 + y1) / 2)]
         for x, y in spots[:fasteners]:
-            g.put(kit.fastener(), self.at(x, y, -d), group)
+            g.put(kit.screw() if small else kit.fastener(), self.at(x, y, -d), group)
         if title:
             lab = kit.atlas.label(title, cap_mm=3.5)
             g.put(kit.placard(lab), self.at((x0 + x1) / 2, y1 - 0.0035 - lab.h_m / 2, -d), group)
@@ -875,7 +893,8 @@ GROUPS = ("front", "console", "tub")
 
 # Console plates, front to back: (title, s0, s1, controls); a control is (kind, ds, dx, legend), ds aft of the plate's
 # centre, dx outboard of the console's centre line. The left console carries the throttle with the engine, fuel and
-# radio; the right the stick with the sensors, electrics, lights and oxygen (owner, 2026-10-22).
+# radio; the right the stick with the sensors, electrics, exterior lights and oxygen (owner, 2026-10-22). The cockpit's
+# own lighting is on the pedestal (cockpit_front.pedestal), not repeated here.
 CONSOLES = {
     1: [("ENGINE", 4.065, 4.205, [("guarded", -0.030, -0.030, "ENG MASTER"), ("button", -0.030, 0.034, "START"),
                                   ("toggle", 0.035, -0.030, "IGN"), ("button", 0.035, 0.034, "AB")]),
@@ -891,9 +910,9 @@ CONSOLES = {
                                     ("button", 0.034, -0.034, "ECM"), ("button", 0.034, 0.030, "EMCON")]),
          ("ELEC", 4.235, 4.375, [("toggle", -0.030, -0.035, "BATT"), ("toggle", -0.030, 0.0, "GEN"),
                                  ("button", -0.030, 0.035, "APU"), ("guarded", 0.034, 0.0, "EMER PWR")]),
-         ("LIGHTS", 4.385, 4.585, [("knob", -0.048, -0.035, "CSL"), ("knob", -0.048, 0.035, "INST"),
-                                   ("button", 0.010, -0.035, "POS"), ("button", 0.010, 0.035, "FORM"),
-                                   ("button", 0.060, 0.0, "BCN")]),
+         ("EXT LIGHTS", 4.385, 4.585, [("button", -0.048, -0.035, "LDG"), ("button", -0.048, 0.035, "TAXI"),
+                                       ("button", 0.010, -0.035, "POS"), ("button", 0.010, 0.035, "FORM"),
+                                       ("button", 0.060, 0.0, "BCN")]),
          ("OXYGEN", 4.595, 4.775, [("knob", -0.040, 0.0, "REG"), ("blinker", 0.035, -0.030, "FLOW"),
                                    ("button", 0.035, 0.030, "100%")])],
 }
@@ -906,6 +925,14 @@ def console_x(space, side, s):
     """(inner, centre, outer) |x| of the console top at s: the inner edge clear of the seat, the outer at the lip."""
     inner = LAYOUT["console"]["inner"]
     outer = space.wall_x(s, LAYOUT["console"]["top_z"]) - 0.002 - CONSOLE_LIP[0]
+    return inner, (inner + outer) / 2, outer
+
+
+def console_span(space, side, s0, s1):
+    """(inner, centre, outer) |x| a plate from s0 to s1 may span on the console top: the outer edge where the console
+    is narrowest over that run, so the plate's hole stays inside the face's outline (the lining narrows aft)."""
+    inner = LAYOUT["console"]["inner"]
+    outer = min(console_x(space, side, s)[2] for s in bi.spaced(s0, s1, 4))
     return inner, (inner + outer) / 2, outer
 
 
@@ -945,19 +972,38 @@ def consoles(g, uv, kit, atlas, space):
         rings = []
         for s in stations:
             x = console_x(space, side, s)[2]
+            # its outer skirt ends 3 mm behind the lining, so no slot opens between the two under the lip's edge
             sec = [(x, top), (x, top + h - 0.004), (x + 0.004, top + h), (x + w - 0.002, top + h), (x + w, top + h - 0.002),
-                   (x + w, top - 0.002)]
+                   (x + w, top - 0.002), (space.wall_x(s, top - 0.010) + 0.003, top - 0.010)]
             rings.append([P(s, side * q, z) for q, z in sec])
         g.put(grid_sheet(uv, rings, atlas.chart("console", "lip%d" % side)),
               None, "console")
         # the inner wall, facing the seat, and the front, facing forward
         wall = [[P(s, side * c["inner"], z) for s in stations] for z in (top, (top + floor) / 2, floor)]
         g.put(grid_sheet(uv, wall, atlas.chart("tub", "console_wall%d" % side)), None, "console")
+        # a scuff plate along the wall's foot, where the pilot's boots meet it
+        g.put(loft_piece(uv, [[P(s, side * x, z) for x, z in ((c["inner"], floor), (c["inner"] - 0.004, floor),
+                                                              (c["inner"] - 0.004, floor + 0.030), (c["inner"], floor + 0.030))]
+                              for s in stations], "metal", along=Y), None, "tub")
         s0 = c["s0"]
         front = [P(s0, side * c["inner"], floor), P(s0, side * (space.wall_x(s0, floor + 0.01) - 0.002), floor),
                  P(s0, side * (space.wall_x(s0, top) - 0.002), top + h), P(s0, side * c["inner"], top)]
         g.put(sheet(uv, front, "structure"), None, "console")
     return faces
+
+
+def _inside(poly, p, tol=1e-6):
+    """Whether point p lies in the polygon poly (2D points), its edges included."""
+    x, y = p
+    n, hit = len(poly), False
+    for i in range(n):
+        (ax, ay), (bx, by) = poly[i], poly[(i + 1) % n]
+        if abs((bx - ax) * (y - ay) - (by - ay) * (x - ax)) < tol * max(1e-9, math.hypot(bx - ax, by - ay)) \
+                and min(ax, bx) - tol <= x <= max(ax, bx) + tol and min(ay, by) - tol <= y <= max(ay, by) + tol:
+            return True
+        if (ay > y) != (by > y) and x < ax + (bx - ax) * (y - ay) / (by - ay):
+            hit = not hit
+    return hit
 
 
 def _area(pts):
@@ -966,8 +1012,7 @@ def _area(pts):
 
 def sub_panel(g, uv, kit, atlas, space, face, side, title, s0, s1, controls):
     """A plate set into the console top, fasteners at its corners, its controls and legends."""
-    _, cx, _ = console_x(space, side, (s0 + s1) / 2)
-    inner, _, outer = console_x(space, side, s0)
+    inner, cx, outer = console_span(space, side, s0, s1)
     hw = (outer - inner) / 2 - 0.007
     sc = (s0 + s1) / 2
     inv = face.m.inverted()
@@ -1012,7 +1057,7 @@ def throttle_quadrant(g, uv, kit, atlas, space, face):
     st = STOCK["throttle"]
     c = LAYOUT["console"]
     s0, s1 = c["s0"] + 0.008, 4.055
-    inner, cx, outer = console_x(space, 1, (s0 + s1) / 2)
+    inner, cx, outer = console_span(space, 1, s0, s1)
     travel = (st[0][5] - STOCK["throttle_pivot"][2]) * math.sin(math.radians(STOCK["throttle_deg"]))
     xs = (st[0][2] + st[0][3]) / 2
     a, b = STOCK["throttle_pivot"][0] - travel - 0.012, STOCK["throttle_pivot"][0] + travel + 0.012
@@ -1043,7 +1088,7 @@ def stick_base(g, uv, kit, atlas, space, face):
     """The plate the stock side stick stands on, its boot ring, and the trim knob ahead of it."""
     c = LAYOUT["console"]
     s0, s1 = c["s0"] + 0.008, 4.055
-    inner, cx, outer = console_x(space, -1, (s0 + s1) / 2)
+    inner, cx, outer = console_span(space, -1, s0, s1)
     inv = face.m.inverted()
     L = lambda s, x: inv @ P(s, x, c["top_z"])
     p0, p1 = L(s1, -(inner + 0.006)), L(s0, -(outer - 0.006))
@@ -1107,7 +1152,7 @@ def ledge_tree(rows, side):
 
 
 def tub(g, uv, kit, atlas, space):
-    """Lining sheets on both walls up to the sill ledge, the ledge itself, frame ribs, wiring looms, the floor, the
+    """Lining sheets on both walls up to the sill ledge, the ledge itself, frame ribs, the floor, the
     footwell's front wall and kick panels, the rear bulkhead, the rudder pedals."""
     floor = LAYOUT["floor_z"]
     s_front, s_back = LAYOUT["footwell_s"], LAYOUT["bulkhead"][0]
@@ -1121,11 +1166,20 @@ def tub(g, uv, kit, atlas, space):
         # behind the console, on a strip
         k = next(i for i, r in enumerate(rows) if r[0] >= LAYOUT["console"]["s0"])
         cz = LAYOUT["console"]["top_z"]
-        wall = lambda cols, z0, name, spec: g.put(grid_sheet(uv, [
-            [P(s, side * space.wall_x(s, z0 + (top - 0.030 - z0) * f), z0 + (top - 0.030 - z0) * f) for s, _, _, top in cols]
-            for f in (0.0, 0.25, 0.5, 0.75, 1.0)], spec), None, "tub")
-        wall(rows[:k + 1], floor, "fwd", atlas.chart("tub", "lining_fwd%d" % side))
-        wall(rows[k:], cz - 0.004, "aft", atlas.chart("tub", "lining_aft%d" % side))
+        # Rows at fractions of the floor-to-ledge height; the top row on the ledge's inner bottom edge itself (the
+        # solver lowers a ledge without moving it in, so the lining's own x there would leave a sliver under the sill).
+        # Over the console the lining starts at the console's top; the full lining carries a row there too and the two
+        # share their upper rows, so they meet on one polyline at the console's front column instead of a slit between
+        # two chords of the curved wall.
+        def knot(s, x_in, top, f):
+            z = floor + (top - 0.030 - floor) * f if f is not None else cz - 0.004
+            if f == 0.75:  # above the console-top knot both sheets share
+                z = max(z, cz + 0.010)
+            return P(s, side * (x_in if f == 1.0 else space.wall_x(s, z)), z)
+        wall = lambda cols, fs, spec: g.put(grid_sheet(uv, [[knot(s, x_in, top, f) for s, x_in, _, top in cols]
+                                                            for f in fs], spec), None, "tub")
+        wall(rows[:k + 1], (0.0, 0.25, 0.5, None, 0.75, 1.0), atlas.chart("tub", "lining_fwd%d" % side))
+        wall(rows[k:], (None, 0.75, 1.0), atlas.chart("tub", "lining_aft%d" % side))
         for rs in LAYOUT["ribs"]:
             top = float(np.interp(rs, [r[0] for r in rows], [r[3] for r in rows])) - 0.032
             # over a console the rib starts above the throttle and the stick
@@ -1134,15 +1188,7 @@ def tub(g, uv, kit, atlas, space):
             rings = [[P(rs + ds, side * x, z) for x, z in pts] + [P(rs + ds, side * (x - 0.026), z) for x, z in pts[::-1]]
                      for ds in (-0.0165, 0.0165)]
             g.put(loft_piece(uv, rings, "structure", along=Z), None, "tub")
-        # two wiring looms along the lining under the ledge, in the footwell and aft of the throttle and stick
-        for s0, s1 in ((s_front + 0.05, 3.70),):  # in the footwell; aft, the consoles cover the wall
-            for drop in (0.020, 0.045):
-                pts = []
-                for s in bi.spaced(s0, s1, 4):
-                    top = float(np.interp(s, [r[0] for r in rows], [r[3] for r in rows])) - 0.030
-                    z = top - drop
-                    pts.append(P(s, side * (space.wall_x(s, z) - 0.014), z))
-                g.put(tube(uv, pts, 0.011, 6, "knurl"), None, "tub")
+
         breakers(g, uv, kit, atlas, space, side)
         # a data plate on the left wall over the breakers, the seat's warning on the right, on the lining
         s, z = 3.36, 0.315
@@ -1157,8 +1203,9 @@ def tub(g, uv, kit, atlas, space):
     for s in bi.spaced(s_front, s_back, 13):
         w = space.wall_x(s, floor + 0.005)
         grid.append([P(s, f * w, floor) for f in xs])
-    # charted ahead of the seat, where it is seen; under the seat on a strip
-    g.put(grid_sheet(uv, grid[:6], atlas.chart("floor", "floor")), None, "tub")
+    # charted between the pedals and the seat's front, where it is seen; the rest on a strip
+    g.put(grid_sheet(uv, grid[2:6], atlas.chart("floor", "floor")), None, "tub")
+    g.put(grid_sheet(uv, grid[:3], "structure"), None, "tub")
     g.put(grid_sheet(uv, grid[5:], "structure"), None, "tub")
     zs = bi.spaced(floor, 0.45, 5)
     wall = [[P(s_front, f * space.wall_x(s_front, z), z) for f in xs] for z in zs]
@@ -1509,6 +1556,9 @@ def build(p, mats):
     proxy = cockpit_proxy(uv, atlas, space)
     screen = tac_screen(screens)
     lamp = front.lamp_mesh(lenses)
+    movers = dict(front.MOVERS)
+    if set(movers) != set(INSTRUMENTS):
+        raise ValueError("cockpit: the instruments built %s, expected %s" % (sorted(movers), sorted(INSTRUMENTS)))
     atlas.pack()
     LAST["atlas"], LAST["groups"] = atlas, {k: interior.tris(k) for k in GROUPS}
     LAST["frame_shell"] = hood_inner.tris("frame")
@@ -1521,8 +1571,15 @@ def build(p, mats):
     cell, hinge = O["cockpit_cell"], O["canopy"]
     import parts  # imports this module back
 
+    for name in INSTRUMENTS:
+        g, pivot = movers[name]
+        obj = g.object([SLOT])
+        obj.data.transform(Matrix.Translation(-pivot))  # the origin on the pivot it turns about
+        obj.matrix_world = Matrix.Translation(pivot)
+        made.append(obj)
     for obj in made:
-        parts.recentre(obj)
+        if obj.name not in INSTRUMENTS:
+            parts.recentre(obj)
         world = obj.matrix_world.copy()
         obj.parent = hinge if obj.name in ("canopy_frame_inner", "canopy_frame_proxy") else cell
         obj.matrix_world = world
@@ -1776,7 +1833,12 @@ def measure(icarus):
         n /= np.linalg.norm(n)
         if np.dot(n, eye - cen) < 0:
             n = -n
-        u = np.cross(n, [0, 0, 1.0])
+        # across the quad along its own first edge (tac_screen winds each from its bottom left along the canvas's u),
+        # which leans with a wing panel's turn
+        corner = [O[TAC_SCREEN].matrix_world @ O[TAC_SCREEN].data.vertices[k].co
+                  for k in O[TAC_SCREEN].data.polygons[pi].vertices[:2]]
+        u = np.array(tuple(corner[1] - corner[0]))
+        u -= n * np.dot(u, n)
         u /= np.linalg.norm(u)
         wv = np.cross(n, u)
         lu, lw = (v - cen) @ u, (v - cen) @ wv
@@ -1799,8 +1861,9 @@ def measure(icarus):
     out["windscreen_frame_inner"] = count("windscreen_frame_inner")
     out["lamps"] = count(WARNING_LAMPS)
     out["proxy_interior"], out["proxy_frame"] = count("cockpit_proxy"), count("canopy_frame_proxy")
+    out["instruments"] = sum(count(n) for n in INSTRUMENTS)
     out["cockpit_tris"] = sum(count(n) for n in (INTERIOR, "canopy_frame_inner", "windscreen_frame_inner", TAC_SCREEN,
-                                                  canopy.GLASS_INNER, canopy.WINDSCREEN_INNER)) + 1890 + 880
+                                                  canopy.GLASS_INNER, canopy.WINDSCREEN_INNER) + INSTRUMENTS) + 1890 + 880
     return out
 
 
@@ -1870,6 +1933,108 @@ def stock_keepout():
         travel = (z1 - STOCK["throttle_pivot"][2]) * math.sin(math.radians(STOCK["throttle_deg"]))
         boxes.append((s0 - travel, s1, x0, x1, z0 - 0.008, z1))
     return boxes
+
+
+def front_cast(tree, origin, d, reach=5.0):
+    """The first face turned toward the ray (back faces culled, as the game draws): (point, normal, index, distance)."""
+    at, travelled = origin, 0.0
+    for _ in range(32):
+        q, n, i, dist = tree.ray_cast(at, d, reach - travelled)
+        if q is None:
+            return None
+        if n.dot(d) < 0:
+            return q, n, i, travelled + dist
+        travelled += dist + 1e-5
+        at = q + d * 1e-5
+    return None
+
+
+COVER_STEP = 0.012  # the panel-cover check's sample pitch on each face, metres
+
+
+def panels_covered(interior):
+    """From the eye, no panel's face covers another's: a sample every COVER_STEP over each face (not its plates'
+    holes) is seen on that face, or on a control standing on it, never on another face's plane. Returns the problems."""
+    from mathutils.geometry import intersect_point_tri_2d
+    tree = tree_of([interior])
+    eye = eye_point()
+    faces = LAST["faces"]
+    frames = [(f, f.m.inverted(), [Vector((x, y)) for x, y in f.outline]) for f in faces]
+
+    def inside(poly, p):
+        return any(intersect_point_tri_2d(p, poly[0], poly[k], poly[k + 1]) for k in range(1, len(poly) - 1))
+
+    def holed(f, p):
+        return any(inside([Vector(q) for q in h], p) for h in f.holes)
+    covered = {}
+    for f, inv, poly in frames:
+        xs, ys = [p.x for p in poly], [p.y for p in poly]
+        for x in np.arange(min(xs) + 0.004, max(xs) - 0.004, COVER_STEP):
+            for y in np.arange(min(ys) + 0.004, max(ys) - 0.004, COVER_STEP):
+                p = Vector((x, y))
+                if not inside(poly, p) or holed(f, p):
+                    continue
+                target = f.m @ Vector((x, y, 0.0))
+                ray = target - eye
+                if (f.m.to_3x3() @ Vector((0, 0, 1))).dot(ray) >= 0:
+                    continue  # the face turned away from the eye
+                hit = front_cast(tree, eye, ray.normalized(), ray.length + 0.01)
+                if hit is None or hit[3] > ray.length - 0.002:
+                    continue
+                for g, ginv, gpoly in frames:
+                    if g is f:
+                        continue
+                    local = ginv @ hit[0]
+                    if abs(local.z) < 0.0015 and inside(gpoly, local.xy) and not holed(g, local.xy):
+                        covered.setdefault((g.name, f.name), []).append(target)
+                        break
+    return ["the %s panel covers the %s panel's face from the eye at %d samples, first at s %.3f x %.3f z %.3f"
+            % (g, f, len(pts), *sxz(pts[0])) for (g, f), pts in sorted(covered.items())]
+
+
+SKY_NEAR = 1.0  # metres from the eye: the front office's rim and face stand nearer, the coaming and windscreen beyond
+SKY_GAP = 0.15  # degrees: the most of anything beyond SKY_NEAR the eye may see between the sky and the front office
+
+
+def sky_to_console(icarus):
+    """Looking down ahead from the eye (azimuth -15 to 15 degrees, as the cockpit view draws), the view goes from the
+    sky straight to the front office's rim: no band over SKY_GAP of the coaming or the airframe beyond SKY_NEAR
+    shows between them, as on the stock cockpits. The canopy's and windscreen's frames stand in the sky as the stock
+    ones do, so they count as sky. Returns (the widest band in degrees, a problem or None)."""
+    import checks
+    meshes = [o for o in icarus.all_objects if o.type == "MESH" and o.name not in checks.COCKPIT_HIDDEN
+              and o.name not in checks.COCKPIT_GLASS]
+    tree = tree_of(meshes)
+    frame_faces = set()
+    base = 0
+    for o in meshes:
+        if o.name in FRAMES_INNER + (canopy.FRAME,):
+            frame_faces.update(range(base, base + len(o.data.polygons)))
+        base += len(o.data.polygons)
+    eye = eye_point()
+    widest, worst = 0.0, None
+    for az in range(-15, 16):
+        b = math.radians(az)
+        seen = None
+        for k in range(40, 600):
+            el = math.radians(k / 20)
+            d = Vector((math.sin(b) * math.cos(el), -math.cos(b) * math.cos(el), -math.sin(el)))
+            hit = front_cast(tree, eye, d, 30.0)
+            if hit is None or hit[2] in frame_faces:
+                seen = None
+                continue
+            if hit[3] <= SKY_NEAR:
+                band = 0.0 if seen is None else k / 20 - seen[0]
+                if band > widest:
+                    widest, worst = band, (az, seen[0], k / 20, seen[1])
+                break
+            if seen is None:
+                seen = (k / 20, sxz(hit[0]))
+    if widest > SKY_GAP:
+        az, e0, e1, at = worst
+        return widest, ("at azimuth %d deg the eye sees %.2f deg (%.2f to %.2f deg down) beyond %.1f m between the "
+                        "sky and the front office, first at s %.3f x %.3f z %.3f" % (az, widest, e0, e1, SKY_NEAR, *at))
+    return widest, None
 
 
 def check(icarus):
@@ -1992,6 +2157,11 @@ def check(icarus):
         if blocked:
             problems.append("display %s: %d of 25 eye rays blocked" % ("ABCD"[k], blocked))
 
+    problems += panels_covered(inside_obj)
+    m["sky_to_console"], band = sky_to_console(icarus)
+    if band:
+        problems.append(band)
+
     # the stock seat's headbox clear of the hood, shut and through the opening
     m["head_gap"] = head_gap(hinge, hood_objs)
     if m["head_gap"] < HEAD_GLASS_GAP:
@@ -2008,14 +2178,14 @@ def check(icarus):
     print("cockpit measured: interior %d tris, %d items (%.0f%% of tris), %d fasteners, %.0f px/m median (panel %.0f), "
           "%d repeated UV tris; regions front %.0f%% consoles %.0f%% tub %.0f%%; display A %.3f x %.3f m at %.3f m, %.3f "
           "below; rings %s; eye overhead %.3f side %.3f sill %.3f panel %.3f; frames %d (shell %d) + %d, lamps %d, proxies %d + %d; "
-          "cockpit renderers %d" % (
+          "cockpit renderers %d; sky to the front office through a band of %.2f deg" % (
               m["interior_tris"], m["items"], 100 * m["small_share"], m["fasteners"], m["px_per_m_median"],
               m["panel_px_per_m"], m["repeated_uv_tris"], 100 * m["front_office"], 100 * m["consoles"], 100 * m["tub"],
               a["size"][0], a["size"][1], a["dist"], a["below"],
               ", ".join("%s %d tris %.1f mm %.0f px/m" % (k, d["ring_tris"], d["bezel_mm"], d["px_per_m"])
                         for k, d in zip(DISPLAYS, m["displays"])),
               m["overhead"], m["side"], m["sill"], m["panel_ahead"], m["frame_inner"], m["frame_shell"], m["windscreen_frame_inner"],
-              m["lamps"], m["proxy_interior"], m["proxy_frame"], m["cockpit_tris"]))
+              m["lamps"], m["proxy_interior"], m["proxy_frame"], m["cockpit_tris"], m["sky_to_console"]))
     print("cockpit items: " + ", ".join(m["top_classes"]) + "; regions %s; hud zone %d; seat headbox %.4f m from the hood"
           % (m["regions"], m["hud"], m["head_gap"]))
     if problems:

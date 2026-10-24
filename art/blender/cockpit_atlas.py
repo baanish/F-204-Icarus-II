@@ -90,7 +90,7 @@ ChartPoint = namedtuple("ChartPoint", "chart x y")
 TILES = {  # name -> (w, h) px
     "knob_top": (48, 48), "knob_top_large": (64, 64), "fastener_top": (24, 24), "lens_green": (32, 32),
     "lens_amber": (32, 32), "lens_red": (32, 32), "lens_clear": (32, 32), "lens_off": (32, 32), "hatch": (64, 64),
-    "standby": (128, 128), "dial_fuel": (128, 128), "dial_clock": (128, 128), "dial_alt": (128, 128),
+    "standby_ring": (128, 128), "standby_ball": (160, 224), "needle": (8, 8), "dial_fuel": (128, 128), "dial_clock": (128, 128), "dial_alt": (128, 128),
     "dial_asi": (128, 128), "pedal": (96, 128), "breaker_top": (24, 24), "toggle_ball": (24, 24),
 }
 # Full-width strips along the bottom, top to bottom: name -> (height px, px per metre along U and V).
@@ -357,36 +357,52 @@ def _dial(layer, ticks, needle_deg, numerals=None, start=0.0, step=30.0, name=No
         h, w = mask.shape
         x, y = int(c - w / 2), int(c + 0.12 * layer.w)
         layer.albedo[y:y + h, x:x + w] = layer.albedo[y:y + h, x:x + w] * (1 - mask[..., None]) + _rgb("white") * mask[..., None]
-    d = (ang - needle_deg + 180) % 360 - 180
-    needle = (np.abs(d) < 3.0 * (1 - r / (0.45 * layer.w)) + 0.6) & (r < 0.40 * layer.w)
-    layer.fill(needle, "white")
-    layer.fill(r < 0.05 * layer.w, "metal")
+    if needle_deg is not None:  # painted; a live dial's needle is its own mesh (cockpit_front.NEEDLES)
+        d = (ang - needle_deg + 180) % 360 - 180
+        needle = (np.abs(d) < 3.0 * (1 - r / (0.45 * layer.w)) + 0.6) & (r < 0.40 * layer.w)
+        layer.fill(needle, "white")
+        layer.fill(r < 0.05 * layer.w, "metal")
     layer.smooth[r < 0.47 * layer.w] = 0.88  # the cover glass
     layer.ao *= np.clip(0.55 + 0.45 * (1 - np.clip((r - 0.40 * layer.w) / (0.08 * layer.w), 0, 1)), 0.55, 1.0)
 
 
-def paint_standby(layer):
-    """An attitude indicator: sky over ground, horizon and pitch ladder, a roll scale, the aircraft symbol."""
+STANDBY_OPENING = 0.77  # the standby indicator's window: its radius over the face ring's outer radius
+
+
+def paint_standby_ring(layer):
+    """The mask round the standby attitude indicator's window: matt black, the roll scale (10, 20, 30, 45 and 60
+    degrees either side) and the zero index over the window."""
     yy, xx = layer.grid()
     c = (layer.w - 1) / 2
-    r = np.hypot(xx - c, yy - c)
+    r = np.hypot(xx - c, yy - c) / (layer.w / 2)
     layer.fill(np.ones_like(r, bool), "recess")
-    ball = r < 0.42 * layer.w
-    layer.albedo[ball & (yy <= c)] = (0.26, 0.42, 0.56)
-    layer.albedo[ball & (yy > c)] = (0.36, 0.25, 0.15)
-    white = _rgb("white")
-    k = layer.w / 96
-    layer.albedo[ball & (np.abs(yy - c) < 0.9 * k)] = white
-    for p, half in ((9, 8), (18, 12), (-9, 8), (-18, 12)):
-        layer.albedo[ball & (np.abs(yy - c - p * k) < 0.6 * k) & (np.abs(xx - c) < half * k)] = white
     ang = np.degrees(np.arctan2(xx - c, c - yy))
-    for a in (-60, -45, -30, -20, -10, 0, 10, 20, 30, 45, 60):
-        layer.albedo[(np.abs(ang - a) < 1.6) & (r > 0.44 * layer.w) & (r < 0.49 * layer.w)] = white
-    amber = np.array([0.85, 0.55, 0.10], np.float32)
-    layer.albedo[(np.abs(yy - c) < 1.2 * k) & (np.abs(xx - c) > 7 * k) & (np.abs(xx - c) < 20 * k)] = amber
-    layer.albedo[(r < 1.6 * k)] = amber
-    layer.smooth[r < 0.49 * layer.w] = 0.88
-    layer.ao *= np.clip(0.6 + 0.4 * (1 - np.clip((r - 0.40 * layer.w) / (0.08 * layer.w), 0, 1)), 0.6, 1.0)
+    for a in (-60, -45, -30, -20, -10, 10, 20, 30, 45, 60):
+        long = abs(a) in (30, 60)
+        layer.fill((np.abs(ang - a) < 1.8) & (r > STANDBY_OPENING + 0.03) & (r < (0.99 if long else 0.93)), "white")
+    layer.fill((np.abs(ang) < 6 * (1 - (r - STANDBY_OPENING) / 0.2)) & (r > STANDBY_OPENING) & (r < 0.97), "white")
+    layer.smooth[:] = 0.88  # under the cover glass
+
+
+def paint_standby_ball(layer):
+    """The standby attitude indicator's ball, unrolled: u across longitude -90 to 90 degrees (the back half mirrors
+    it), 0 facing the pilot; v up latitude -90 to 90. Sky over ground, the horizon, a pitch line every 10 degrees,
+    longer every 30, and 5 degree ticks, all near the face toward the pilot (cockpit_front.standby_ball)."""
+    yy, xx = layer.grid()
+    lat = 90.0 - 180.0 * (yy + 0.5) / layer.h
+    lon = 180.0 * (xx + 0.5) / layer.w - 90.0
+    sky = lat > 0
+    layer.albedo[sky] = (0.20, 0.42, 0.66)
+    layer.albedo[~sky] = (0.40, 0.25, 0.12)
+    white = _rgb("white")
+    px = 180.0 / layer.h  # degrees of latitude a row spans
+    layer.albedo[np.abs(lat) < 0.9 * px] = white
+    for p in range(-80, 81, 5):
+        if p == 0:
+            continue
+        half = 16.0 if p % 30 == 0 else 10.0 if p % 10 == 0 else 4.0
+        layer.albedo[(np.abs(lat - p) < 0.55 * px) & (np.abs(lon) < half)] = white
+    layer.smooth[:] = 0.70
 
 
 def paint_pedal(layer):
@@ -448,13 +464,15 @@ def paint_structure(layer):
 
 TILE_PAINTERS = {
     "knob_top": paint_knob_top, "knob_top_large": paint_knob_top, "fastener_top": paint_fastener_top,
-    "hatch": paint_hatch, "standby": paint_standby, "pedal": paint_pedal, "breaker_top": paint_breaker_top,
+    "hatch": paint_hatch, "standby_ring": paint_standby_ring, "standby_ball": paint_standby_ball,
+    "needle": lambda l: l.fill(np.ones((l.h, l.w), bool), "white"), "pedal": paint_pedal, "breaker_top": paint_breaker_top,
     "toggle_ball": paint_toggle_ball,
     "lens_green": paint_lens("lens_green"), "lens_amber": paint_lens("lens_amber"), "lens_red": paint_lens("lens_red"),
     "lens_clear": paint_lens("lens_clear"), "lens_off": paint_lens("lens_off"),
-    "dial_fuel": lambda l: _dial(l, list(range(-135, 136, 45)), 40, ["0", "2", "4", "6", "8", "10", "12"], -135, 45,
+    # live dials: their needles and hands are meshes the plugin turns (StandbyInstruments.cs)
+    "dial_fuel": lambda l: _dial(l, [-135.0, -67.5, 0.0, 67.5, 135.0], None, ["E", "1/4", "1/2", "3/4", "F"], -135, 67.5,
                                  "FUEL"),
-    "dial_clock": lambda l: _dial(l, list(range(0, 331, 30)), 110, ["12", "3", "6", "9"], 0, 90),
+    "dial_clock": lambda l: _dial(l, list(range(0, 331, 30)), None, ["12", "3", "6", "9"], 0, 90),
     "dial_alt": lambda l: _dial(l, list(range(0, 325, 36)), 200, [str(i) for i in range(10)], 0, 36, "ALT"),
     "dial_asi": lambda l: _dial(l, list(range(-150, 151, 30)), -40, ["0", "100", "200", "300", "400", "500", "600"],
                                 -150, 50, "KT"),

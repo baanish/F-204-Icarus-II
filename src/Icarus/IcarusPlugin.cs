@@ -10,7 +10,7 @@ namespace Icarus;
 
 /// <summary>
 /// The F-204 Icarus II plugin: config (BepInEx/config/baanish.icarus.cfg), the "[Icarus]" logger, the Harmony install,
-/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver and the live tuning knobs.
+/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver, the cockpit's live instruments and the live tuning knobs.
 /// </summary>
 [BepInPlugin(Guid, "F-204 Icarus II", Version)]
 public sealed class IcarusPlugin : BaseUnityPlugin

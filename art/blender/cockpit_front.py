@@ -1,13 +1,13 @@
 """The front office of the cockpit (cockpit.py builds the rest): the display face with the two main displays, the
 standby stem under it, the angled wing panels either side of the stem, the hood over the displays with its rounded rim
-running down both sides as cheeks to the console fronts, the coaming forward to the windscreen's foot, the missile
-warning lamps on the cheeks, and the lower pedestal between the knees.
+running down both sides as cheeks to the console fronts, the coaming forward to the windscreen's foot under the rim's
+sight line, the missile warning lamps, and the lower pedestal between the knees.
 
 The layout follows fighter practice and the stock Vortex, Ifrit and Revoker (owner, 2026-10-22):
-- hood and cheeks: the missile warning lamps, two groups of two, just outboard of the main displays' top corners, as
-  the Vortex, Ifrit and OA-27 place theirs; the master warning (left) and master caution (right) under them;
-- display face: A, the tactical display (radar or targeting camera), and B, stores and engine, side by side;
-- stem: the standby attitude indicator and C, the flight instruments;
+- display face, under the rim: the missile warning lamps, two groups of two over the main displays' top outboard
+  corners, as the Vortex, Ifrit and OA-27 place theirs, the master warning (left) and master caution (right) inboard
+  of them; then A, the tactical display (radar or targeting camera), and B, stores and engine, side by side;
+- stem: the standby attitude indicator (a working ball) and C, the flight instruments;
 - left wing: armament, gear, flaps; right wing: D, the system status display, the caution panel, fuel and the clock;
 - pedestal: lighting and anti-ice.
 Every group sits on its own plate, set into its face, with fasteners and a legend.
@@ -33,19 +33,31 @@ TILT = math.radians(25.0)  # the display face leans back this far, so it faces t
 FACE_N = Vector((0.0, math.cos(TILT), math.sin(TILT)))
 FACE_UP = Vector((0.0, -math.sin(TILT), math.cos(TILT)))
 FRONT = {
-    # the main displays' glass top edge: the hood's rim clears the sight line to it by 25 mm
-    "glass_top": (3.5846, 0.596),
+    # the main displays' glass top edge, 12.5 degrees under the eye as the stock main displays' (12.2 to 13.2): low
+    # enough that display A's centre stays 0.25 m under the eye (Cockpit rule 16); the face above it, under the rim,
+    # carries the warning lamps. Raised from under the 16 degree line along the face's own slope, so the cheeks and
+    # wings stay as far forward of the stock throttle's sweep as they stood.
+    "glass_top": (3.5361, 0.700),
     "half_width": 0.300,  # the display face, between the cheeks
     "stem_half_width": 0.130,
-    "face_bottom_z": 0.385,  # the display face's bottom edge; the stem runs on down
-    "stem_bottom_z": 0.245,  # clear of the stock seat's front edge (s 3.75)
+    "face_bottom_z": 0.479,  # the display face's bottom edge; the stem runs on down
+    "stem_bottom_z": 0.307,  # the wings hinge on the stem's sides, so its height is theirs
     # the top frame narrow: it stands under the rim, which hides most of it from the eye
     "bezel": {"side": 0.024, "top": 0.012, "bottom": 0.026, "column": 0.020, "height": 0.006, "step": 0.0025},
     "rim": {"depth": 0.074, "behind": 0.05, "thickness": 0.026, "radius": 0.010, "corner": 0.045, "seg": 6},
     "margin": 0.005,  # under the over-nose line
-    "wing": {"yaw": 18.0, "tilt": 20.0, "z": (0.200, 0.375), "recess": 0.045},
+    # the wings turn about the stem's side edges, their outer edges toward the eye, to land on the cheeks' inner faces
+    "wing_yaw": 14.0,
     "pedestal": {"s0": 3.58, "half_width": 0.105},
 }
+# The coaming deck between the windscreen and the rim runs under this line (the old 16 degree over-nose line): the rim,
+# on the over-nose line, hides it from the eye, so it stays low and clear of the windscreen and the hood's front bow.
+DECK_SLOPE = 0.2876
+
+
+def deck_z(s):
+    """The coaming deck's line at station s."""
+    return EYE[2] - DECK_SLOPE * (EYE[0] - s)
 
 
 def face_frame():
@@ -287,6 +299,13 @@ def dual_bezel(uv, lay, bz):
         piece.add(pts, [(0, 1, 2)], [uv("bezel", pts)])
     for w in wells:
         n = len(w)
+        floor = ring(w, 0.0005)  # under the screen quad, closing the 2 mm ring round it
+        tris = tessellate_polygon([floor])
+        for t in tris:
+            pts = [floor[i] for i in t]
+            if _normal_z(pts) < 0:
+                pts = pts[::-1]
+            piece.add(pts, [(0, 1, 2)], [uv("bezel_dark", pts)])
         top = ring(w, hgt)
         mid = ring(w, hgt - step)
         inner = ring([(x * 1.0, y * 1.0) for x, y in w], 0.0005)
@@ -314,15 +333,105 @@ def stem(g, kit, atlas, uv):
     face = Face("stem", m, rect(-sw, y0, sw, y1), atlas.chart("panel", "stem"))
     # C, the flight instruments, with its frame, right of centre; the standby attitude indicator on the left
     cx, cy = 0.044, (y0 + y1) / 2 - 0.006
-    top = face.pocket(g, kit, uv, -sw + 0.008, y0 + 0.010, sw - 0.008, y1 - 0.004, "STBY INSTR", 4,
-                      floor_holes=[display_hole("C", cx, cy)])
-    screens = [small_display(g, kit, uv, top, "C", cx, cy)]
     ax, ay = -0.070, cy + 0.004
-    g.put(kit.dial("standby", 0.030), top(ax, ay), "front")
+    sb = STANDBY
+    window = [(ax + p[0], ay + p[1]) for p in ring_circle(sb["opening"] + 0.0005, 0.0, 16)]
+    top = face.pocket(g, kit, uv, -sw + 0.008, y0 + 0.010, sw - 0.008, y1 - 0.004, "STBY INSTR", 4,
+                      floor_holes=[display_hole("C", cx, cy), window])
+    screens = [small_display(g, kit, uv, top, "C", cx, cy)]
+    standby(g, kit, atlas, uv, top(ax, ay))
     for dx in (-0.022, 0.022):  # cage and brightness
         g.put(kit.knob(small=True), top(ax + dx, ay - 0.045), "front")
     face.close(g)
     return face, screens
+
+
+# The standby attitude indicator: a working ball behind a black mask with the roll scale, in the bezel the painted dial
+# had. The ball is world-steady in pitch and roll about the case's own axes (StandbyInstruments.cs turns it); at rest its
+# horizon crosses the window's centre. Metres: the bezel's radius, the window's, the ball's, how deep its centre sits
+# under the plate.
+STANDBY = {"r": 0.030, "opening": 0.020, "ball": 0.0235, "centre": -0.0215, "tube": -0.012, "lon": 20, "lat": 12}
+# The live dials' needles and hands: (object, the dial's tile, length and width at the hub over the dial face's radius,
+# height over it). The plugin turns each about the dial's axis from straight up: fuel over the 270 degree scale,
+# hours and minutes from the game's time of day.
+NEEDLES = {"dial_fuel": [("cockpit_fuel_needle", 0.82, 0.075, 0.0003)],
+           "dial_clock": [("cockpit_clock_hour", 0.55, 0.085, 0.0003), ("cockpit_clock_minute", 0.82, 0.060, 0.0007)]}
+MOVERS = {}  # object name -> (Gather, pivot): the instruments' moving parts, each its own renderer (cockpit.build)
+
+
+def standby(g, kit, atlas, uv, m):
+    """The standby indicator at placement m (on its plate): the bezel, the mask over the ball with the roll scale, a
+    short tube from the mask's window down past the ball's edge, the fixed amber aircraft symbol, and the ball."""
+    sb = STANDBY
+    r, o = sb["r"], sb["opening"]
+    face = r - 4 * MM
+    rings = [ring_circle(r, 0.0, 24), ring_circle(r, 6 * MM, 24), ring_circle(r - 3 * MM, 6 * MM, 24),
+             ring_circle(face, 3 * MM, 24), ring_circle(o, 3 * MM, 24), ring_circle(o, sb["tube"], 24)]
+    specs = ["bezel", "bezel", "recess", atlas.tile("standby_ring"), "recess"]
+    piece = Piece(sheet=True, keep=True)
+    rings = [[Vector(p) for p in ring] for ring in rings]
+    for a, b, spec in zip(rings, rings[1:], specs):
+        for i in range(len(a)):
+            quad = [a[i], a[(i + 1) % len(a)], b[(i + 1) % len(a)], b[i]]
+            mapped = uv(spec, quad, box=(-face, -face, face, face)) if not isinstance(spec, str) else \
+                uv(spec, quad, along=quad[1] - quad[0])
+            piece.add(quad, [(0, 1, 2, 3)], [mapped])
+    g.put(piece, m, "front")
+    amber = atlas.tile("lens_amber")
+    for x, hw, hh in ((-0.0085, 0.0045, 0.0007), (0.0085, 0.0045, 0.0007), (0.0, 0.0011, 0.0011)):
+        g.put(stack(uv, [ring_rect(hw, hh, 2.3 * MM), ring_rect(hw, hh, 2.9 * MM)], "guard", top_uv=amber),
+              m @ Matrix.Translation((x, 0.0, 0.0)), "front")
+    MOVERS["cockpit_standby_ball"] = (standby_ball(atlas, m @ Matrix.Translation((0.0, 0.0, sb["centre"]))),
+                                      m @ Vector((0.0, 0.0, sb["centre"])))
+
+
+def standby_ball(atlas, m):
+    """The ball at placement m: polar axis up the case (local Y), longitude 0 toward the pilot (local Z), unrolled
+    onto the standby_ball tile with its back half mirrored."""
+    sb = STANDBY
+    tile = atlas.tile("standby_ball")
+    g = ck.Gather("cockpit_standby_ball")
+    nl, nt = sb["lon"], sb["lat"]
+
+    def point(i, j):
+        lat, lon = math.pi * (j / nt - 0.5), 2 * math.pi * i / nl - math.pi
+        return Vector((sb["ball"] * math.cos(lat) * math.sin(lon), sb["ball"] * math.sin(lat),
+                       sb["ball"] * math.cos(lat) * math.cos(lon))), (math.degrees(lat), math.degrees(lon))
+
+    def tex(lat, lon):
+        fold = lon if abs(lon) <= 90 else math.copysign(180, lon) - lon
+        return tile.frac((fold + 90) / 180, (lat + 90) / 180)
+    piece = Piece()
+    for j in range(nt):
+        for i in range(nl):
+            corners = [point(i, j), point(i + 1, j), point(i + 1, j + 1), point(i, j + 1)]
+            if j == 0:
+                corners = [corners[0], corners[2], corners[3]]
+                corners[0] = (corners[0][0], (corners[0][1][0], (point(i, j)[1][1] + point(i + 1, j)[1][1]) / 2))
+            elif j == nt - 1:
+                corners = corners[:3]
+                corners[2] = (corners[2][0], (corners[2][1][0], (point(i, j)[1][1] + point(i + 1, j)[1][1]) / 2))
+            piece.add([c[0] for c in corners], [tuple(range(len(corners)))], [[tex(*c[1]) for c in corners]])
+    g.put(piece, m, "ball")
+    return g
+
+
+def needles(atlas, m, dial, r):
+    """The needle or hands of a live dial of face radius r at placement m, pointing straight up, each its own
+    Gather in MOVERS, pivoting on the dial's centre."""
+    tile = atlas.tile("needle")
+    for name, length, width, lift in NEEDLES.get(dial, []):
+        L, w = length * r, width * r
+        z = 3 * MM + lift  # over the dial's face (Kit.dial)
+        blade = [(-w / 2, -0.12 * L), (w / 2, -0.12 * L), (w / 6, L), (0.0, L + 0.6 * w), (-w / 6, L)]
+        hub = [(0.55 * w * math.cos(a), 0.55 * w * math.sin(a)) for a in [2 * math.pi * k / 8 for k in range(8)]]
+        piece = Piece(sheet=True, keep=True)
+        for outline, dz in ((blade, 0.0), (hub, 0.0001)):
+            pts = [Vector((x, y, z + dz)) for x, y in outline]
+            piece.add(pts, [tuple(range(len(pts)))], [ck.rect_uvs(pts, tile)])
+        g = ck.Gather(name)
+        g.put(piece, m, "needle")
+        MOVERS[name] = (g, m @ Vector((0.0, 0.0, 0.0)))
 
 
 SUNK = 0.0035  # the small displays' wells run this far under their plates; the screen 2 mm above the well's floor
@@ -355,32 +464,31 @@ def small_display(g, kit, uv, top, name, x, y, title=True, keys_below=True):
 
 
 def wing_frame(side):
-    """A wing panel's placement: through its inner top corner, yawed toward the eye, leaning back. side +1 for the
-    pilot's left."""
-    w = FRONT["wing"]
-    yaw, tilt = math.radians(w["yaw"]), math.radians(w["tilt"])
-    n = Vector((-side * math.sin(yaw) * math.cos(tilt), math.cos(yaw) * math.cos(tilt), math.sin(tilt)))
-    z_top = w["z"][1]
-    s_face = FRONT["glass_top"][0] + (FRONT["glass_top"][1] - z_top) * math.tan(TILT)
-    corner = P(s_face - w["recess"], side * FRONT["stem_half_width"], z_top)
-    return frame(corner, Z, n), n, corner
+    """A wing panel's placement, side +1 for the pilot's left: origin at its inner top corner, the stem's outer top
+    corner, local Y up the stem's side edge (the display face's up), the face turned about that edge by wing_yaw so
+    its outer edge comes toward the eye. The wing and the stem share that edge."""
+    m = face_frame()
+    corner = m @ Vector((-side * FRONT["stem_half_width"], face_y(FRONT["face_bottom_z"]), 0.0))
+    turn = Matrix.Rotation(math.radians(FRONT["wing_yaw"]), 3, FACE_UP)
+    if (turn @ Vector((side, 0.0, 0.0))).y < 0:  # the outer edge comes aft (+Y), toward the eye
+        turn = Matrix.Rotation(-math.radians(FRONT["wing_yaw"]), 3, FACE_UP)
+    n = turn @ FACE_N
+    return frame(corner, FACE_UP, n), n, corner
+
+
+def wing_size():
+    """(width, height) of a wing: across from the stem's edge to the cheek's inner face, and the stem's height."""
+    width = (FRONT["half_width"] - FRONT["stem_half_width"]) / math.cos(math.radians(FRONT["wing_yaw"]))
+    return width, face_y(FRONT["face_bottom_z"]) - face_y(FRONT["stem_bottom_z"])
 
 
 def wing_outline(side):
-    """The wing's outline in its own frame: inner edge at the stem, outer edge at the cheek, top and bottom at the
-    wing's heights."""
-    m, n, corner = wing_frame(side)
-    inv = m.inverted()
-    out = []
-    for x, z in ((FRONT["stem_half_width"], FRONT["wing"]["z"][0]), (FRONT["half_width"], FRONT["wing"]["z"][0]),
-                 (FRONT["half_width"], FRONT["wing"]["z"][1]), (FRONT["stem_half_width"], FRONT["wing"]["z"][1])):
-        # the point on the plane with this x and z
-        p = Vector((side * x, 0.0, z))
-        s = corner.y - (n.x * (p.x - corner.x) + n.z * (p.z - corner.z)) / n.y
-        q = inv @ Vector((p.x, s, p.z))
-        out.append((q.x, q.y))
-    if side > 0:  # counter-clockwise seen from the pilot
-        out = [out[1], out[0], out[3], out[2]]
+    """The wing's outline in its own frame, counter-clockwise seen from the pilot: inner edge on the stem's, outer
+    edge on the cheek's inner face, top edge from the face's bottom corner, bottom edge level with the stem's."""
+    m, _, _ = wing_frame(side)
+    w, h = wing_size()
+    x = -side * w  # local X is the pilot's right
+    out = [(min(0.0, x), -h), (max(0.0, x), -h), (max(0.0, x), 0.0), (min(0.0, x), 0.0)]
     return m, out
 
 
@@ -392,15 +500,15 @@ WINGS = {
           ("button", 0.030, -0.022, "A/G")]),
         ("GEAR", -0.084, -0.018, -0.006, 0.088, 6,
          [("lamp_green", -0.020, 0.032, "N"), ("lamp_green", -0.020, 0.012, "L"), ("lamp_green", -0.020, -0.008, "R"),
-          ("lamp_red", -0.020, -0.030, "TRANS"), ("gear", 0.018, 0.000, None)]),
+          ("lamp_red", -0.020, -0.030, "TRANS"), ("gear", 0.022, -0.014, None)]),
         ("FLAPS", 0.002, -0.086, 0.084, -0.002, 4,
          [("toggle3", -0.010, -0.004, "UP\nTO\nLDG"), ("lamp_green", 0.024, 0.010, "FLAP")]),
         ("HOOK", -0.084, -0.086, -0.006, -0.026, 4, [("toggle", 0.0, -0.004, "HOOK")])],
-    -1: [("SYS STATUS", -0.078, -0.030, 0.044, 0.088, 4, [("display", -0.002, -0.003, "D")]),
-         ("CAUTION", 0.047, -0.030, 0.088, 0.088, 4, [("caution", 0.0, -0.004, None)]),
+    -1: [("SYS STATUS", -0.080, -0.030, 0.042, 0.088, 4, [("display", -0.002, -0.003, "D")]),
+         ("CAUTION", 0.045, -0.030, 0.084, 0.088, 4, [("caution", 0.0, -0.004, None)]),
          ("FUEL", -0.084, -0.090, 0.000, -0.035, 4, [("dial", -0.014, -0.001, "dial_fuel"), ("key", 0.026, 0.010, "FWD"),
                                                        ("key", 0.026, -0.010, "AFT")]),
-         ("CLOCK", 0.004, -0.090, 0.086, -0.035, 4, [("dial", -0.012, -0.001, "dial_clock"), ("knob", 0.026, -0.006, "SET")])],
+         ("CLOCK", 0.004, -0.090, 0.084, -0.035, 4, [("dial", -0.012, -0.001, "dial_clock"), ("knob", 0.026, -0.006, "SET")])],
 }
 
 
@@ -455,6 +563,7 @@ def control(g, kit, atlas, top, kind, x, y, legend):
         g.put(kit.key(legend), top(x, y), "front")
     elif kind == "dial":
         g.put(kit.dial(legend, 0.0235), top(x, y), "front")
+        needles(atlas, top(x, y), legend, 0.0235 - 4 * MM)
     elif kind == "gear":
         gear_handle(g, kit, top, x, y)
 
@@ -476,33 +585,37 @@ def gear_handle(g, kit, top, x, y):
         g.put(kit.placard(lab), top(x - 0.020, y + dy), "front")
 
 
-def closures(g, uv):
-    """The boxes behind the faces' edges: the display face's sides and the brow under it, the stem's sides back to
-    the wings, the wings' bottoms. None faces the eye; they close the front office from the footwell."""
+def closures(g, atlas, uv):
+    """The mitres and boxes round the wings: each wing's top edge meets the display face's bottom edge in a triangular
+    mitre turned to the eye (the two share the stem's corner, the wing's outer corner stands aft of the face's on the
+    cheek); under each wing its bottom closes back toward the footwell, out of the eye's sight."""
     m = face_frame()
-    hw, sw = FRONT["half_width"], FRONT["stem_half_width"]
-    y_bot, y_stem = face_y(FRONT["face_bottom_z"]), face_y(FRONT["stem_bottom_z"])
+    hw = FRONT["half_width"]
+    y_bot = face_y(FRONT["face_bottom_z"])
     back = 0.07
+    faces = []
     for side in (1, -1):
         wm, outline = wing_outline(side)
-        # the brow: from the face's bottom edge back to the wing's top edge, between the stem and the cheek
-        wing_top = [wm @ Vector((x, y, 0.0)) for x, y in outline]
-        wt = sorted(wing_top, key=lambda v: -v.z)[:2]
-        wt.sort(key=lambda v: abs(v.x))
-        face_bot = [m @ Vector((-side * sw, y_bot, 0.0)), m @ Vector((-side * hw, y_bot, 0.0))]
-        quad = [face_bot[0], face_bot[1], wt[1], wt[0]]
-        g.put(ck.sheet(uv, quad, "structure"), None, "front")
-        # the stem's side, from the face back to the wing's inner edge
-        inner = sorted([v for v in [wm @ Vector((x, y, 0.0)) for x, y in outline] if abs(abs(v.x) - sw) < 1e-4],
-                       key=lambda v: v.z)
-        stem_edge = [m @ Vector((-side * sw, y_stem, 0.0)), m @ Vector((-side * sw, y_bot, 0.0))]
-        if len(inner) == 2:
-            quad = [stem_edge[0], stem_edge[1], inner[1], inner[0]]
-            g.put(ck.sheet(uv, quad, "structure"), None, "front")
+        w, h = wing_size()
+        corner = wm @ Vector((0.0, 0.0, 0.0))
+        face_out = m @ Vector((-side * hw, y_bot, 0.0))
+        wing_out = wm @ Vector((-side * w, 0.0, 0.0))
+        # the mitre's own frame: X along the face's bottom edge, Y up toward the wing's outer corner
+        n = (face_out - corner).cross(wing_out - corner).normalized()
+        if n.dot(eye_point() - corner) < 0:
+            n = -n
+        bm = frame(corner, (wing_out - corner), n)
+        inv = bm.inverted()
+        tri = [tuple((inv @ p).xy) for p in (corner, face_out, wing_out)]
+        if ck._area(tri) < 0:
+            tri = tri[::-1]
+        face = Face("mitre_L" if side > 0 else "mitre_R", bm, tri, atlas.chart("panel", "mitre%d" % side))
+        faces.append(face.close(g))
         # the wing's bottom, back toward the footwell
-        bottom = sorted([wm @ Vector((x, y, 0.0)) for x, y in outline], key=lambda v: v.z)[:2]
+        bottom = [wm @ Vector((0.0, -h, 0.0)), wm @ Vector((-side * w, -h, 0.0))]
         quad = [bottom[0], bottom[1], bottom[1] + Vector((0.0, -back, 0.0)), bottom[0] + Vector((0.0, -back, 0.0))]
         g.put(ck.sheet(uv, quad, "structure"), None, "front")
+    return faces
 
 
 def pedestal(g, kit, atlas, uv):
@@ -547,13 +660,14 @@ SIDE_PANELS = {
     1: ("BRAKES", [("button", 0.0, 0.118, "ANTI\nSKID"), ("button", -0.012, 0.072, "NWS"), ("button", 0.016, 0.072, "PARK")]),
     -1: ("ECS", [("knob", 0.0, 0.118, "TEMP"), ("button", -0.012, 0.066, "DEFOG"), ("button", 0.016, 0.066, "RAM")]),
 }
-SIDE_PANEL = {"low": (3.775, 0.322), "high": (3.680, 0.470), "inner": 0.339}
+SIDE_PANEL = {"low": (ck.LAYOUT["console"]["s0"], ck.LAYOUT["console"]["top_z"]), "high": (3.680, 0.470), "inner": 0.339}
 
 
 def side_panels(g, kit, atlas, uv, space):
     """Outboard of each cheek, the console kicks up toward the panel: a sloped face from the console's front edge up
-    to the cheek's height, between the cheek and the wall, facing the eye, with its own plate. It closes the bare
-    wall the eye saw there."""
+    to the cheek's height, between the cheek and the lining, facing the eye, with its own plate. It closes the bare
+    wall the eye saw there: its bottom edge on the console top's front edge, its outer edge along the lining, which
+    stands wider low down than at the top."""
     (s0, z0), (s1, z1) = SIDE_PANEL["low"], SIDE_PANEL["high"]
     up = (P(s1, 0.0, z1) - P(s0, 0.0, z0)).normalized()
     normal = Vector((0.0, -up.z, up.y)) if up.z > 0 else Vector((0.0, up.z, -up.y))
@@ -567,7 +681,14 @@ def side_panels(g, kit, atlas, uv, space):
         xc = (x_in + x_out) / 2
         m = frame(P(s0, side * xc, z0), up, normal)
         hw = (x_out - x_in) / 2
-        face = Face("side%d" % side, m, rect(-hw, 0.0, hw, length), atlas.chart("console", "side_panel%d" % side))
+        inv = m.inverted()
+        edge = [inv @ P(s0 + (s1 - s0) * f, side * (space.wall_x(s0 + (s1 - s0) * f, z0 + (z1 - z0) * f) - 0.002),
+                          z0 + (z1 - z0) * f) for f in bi.spaced(0.0, 1.0, 5)]
+        inner = [inv @ P(s, side * x_in, z) for s, z in ((s1, z1), (s0, z0))]
+        outline = [tuple(p.xy) for p in edge + inner]
+        if ck._area(outline) < 0:
+            outline = outline[::-1]
+        face = Face("side%d" % side, m, outline, atlas.chart("console", "side_panel%d" % side))
         title, controls = SIDE_PANELS[side]
         top = face.pocket(g, kit, uv, -hw + 0.006, 0.040, hw - 0.006, length - 0.006, title, 4, "front")
         for kind, x, y, legend in controls:
@@ -586,12 +707,12 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     the rim's buried outer edge, so the two meet."""
     s0, s_coam, inset = ck.LAYOUT["coaming"]
     margin = FRONT["margin"]
-    deck = lambda s: over_nose_z(s) - margin
+    deck = lambda s: deck_z(s) - margin
     rows_s = sorted(set(bi.spaced(s0, s_coam, 8) + bi.spaced(3.08, 3.40, 5) + [canopy.CANOPY["windscreen_end_s"]]))
     foot = {s: row[3] - 0.010 for s, row in zip(rows_s, bi.resample(canopy.PROFILE, rows_s))}
     hood_w = FRONT["half_width"] + FRONT["rim"]["thickness"]
     skirt_z = 0.462
-    n = 13 if proxy else 29
+    n = 13 if proxy else 17  # the rim hides the deck from the eye: coarse, on a strip
     if proxy:
         rows_s = rows_s[::2]
     rows = []
@@ -621,8 +742,7 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     r = FRONT["rim"]
     edge = rim_rings(y_top, face_y(skirt_z), at_a=-r["behind"])
     rows.append(resample_line(edge, n))
-    chart = atlas.chart("deck" if not proxy else "hood", "shroud")
-    g.put(ck.grid_sheet(uv, rows, chart if not proxy else "structure"), None, group)
+    g.put(ck.grid_sheet(uv, rows, "structure"), None, group)
     # the front wall at the windscreen's front: the first section filled up to 5 mm over the skin's line over the top
     s, first = rows_s[0], rows[0]
     over, under = (space.internals.ring_at(space.p, s, d) for d in (-0.005, inset))
@@ -630,17 +750,16 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     arc.sort(key=lambda v: -math.atan2(v.x, v.z - foot[s]))
     arc = [first[0]] + [P(s, v.x, v.z) for v in arc] + [first[-1]]
     wall = resample_line(arc, n)
-    chart = atlas.chart("deck", "coaming_wall") if not proxy else "structure"
-    g.put(ck.grid_sheet(uv, [first, wall], chart), None, group)
+    g.put(ck.grid_sheet(uv, [first, wall], "structure"), None, group)
 
 
 WINDSCREEN_DECK = 0.004  # the coaming deck's top under the windscreen's foot line (PROFILE bottom less 10 mm)
 
 
 def windscreen_deck_z(s):
-    """The coaming deck's top ahead of the hood: under the windscreen's foot, or the over-nose line where higher."""
+    """The coaming deck's top ahead of the hood: under the windscreen's foot, or the deck line where higher."""
     foot = bi.resample(canopy.PROFILE, [s])[0][3] - 0.010
-    return max(over_nose_z(s) - FRONT["margin"], foot - WINDSCREEN_DECK)
+    return max(deck_z(s) - FRONT["margin"], foot - WINDSCREEN_DECK)
 
 
 def resample_line(points, n):
@@ -661,43 +780,42 @@ def resample_line(points, n):
 # --- the missile warning lamps --------------------------------------------------------------------------------------
 
 LAMPS = {
-    # two groups of two, one a side, just outboard of the main displays' top corners: the upper lamp level with the
-    # glass's top edge, the lower one pitch below, rectangular lenses in a dark housing with no legend, as the Ifrit's
-    # (17.5 x 10.6 mm, 21 mm apart) and the Vortex's (25.2 x 15.4 mm, 30 mm apart); .cache/board/lamps/
-    "lens": (0.020, 0.013), "pitch": 0.019, "housing": (0.028, 0.044, 0.007), "seg": 2,
+    # two groups of two, one over each of the main displays' top outboard corners, as the Vortex, Ifrit and OA-27 place
+    # theirs: rectangular lenses side by side in a dark housing with no legend, as the OA-27's (30.5 x 13.5 mm, 33 mm
+    # apart), at the Ifrit's lens size (17.5 x 10.6 mm); .cache/board/lamps/
+    "lens": (0.020, 0.013), "pitch": 0.023, "housing": (0.050, 0.024, 0.007), "seg": 2,
+    "inset": 0.034,  # the housing's centre in from the bezel's outboard edge
+    "master_inset": 0.084,  # the master warning (left) and caution (right) lamps' centres, inboard of the housings
 }
 
 
 def lamp_housings(g, kit, atlas, uv, y_top):
-    """The two lamp housings on the cheeks, turned to the eye, each with two dark red lenses (the lamps unlit), and the
-    master warning (left) and caution (right) push lamps under them. Returns the lens placements for the lamp mesh."""
+    """On the display face over the bezel, under the rim: over each outboard top corner a lamp housing with two dark
+    red lenses (the lamps unlit), and inboard of it the master warning (left) or caution (right) push lamp. Returns the
+    lens placements for the lamp mesh."""
     lw, lh = LAMPS["lens"]
     hw_, hh, hd = LAMPS["housing"]
     lenses = []
     m = face_frame()
-    r = FRONT["rim"]
-    eye = eye_point()
+    bz = FRONT["bezel"]
+    lay = main_glass()
+    bx = lay["B"][1] + bz["side"]  # the bezel's outboard edge, |face X|
+    y = bz["top"] + 0.003 + hh / 2  # just over the bezel's top
+    if y + hh / 2 > y_top - 0.002:
+        raise ValueError("cockpit: the warning lamps (to y %.3f) pass the display face's top (%.3f)" % (y + hh / 2, y_top))
     for side in (1, -1):
-        # on the cheek's lip, half its thickness out from the opening, at the glass's top edge
-        x = -side * (FRONT["half_width"] + r["thickness"] / 2)
-        y_up = -LAMPS["pitch"] / 2 - 0.016  # the rim lifts the housing 21 mm; the upper lens lands level with the glass top
-        base = m @ Vector((x, y_up, 0.0)) + A_DIR * (r["depth"] - 0.004)
-        toward = (eye - base).normalized()
-        hm = frame(base, Z, toward)
-        rings = [ring_rect(hw_ / 2, hh / 2, -0.004, 0.004, 2), ring_rect(hw_ / 2, hh / 2, hd - 0.0015, 0.004, 2),
+        hm = m @ Matrix.Translation((-side * (bx - LAMPS["inset"]), y, 0.0))
+        rings = [ring_rect(hw_ / 2, hh / 2, 0.0, 0.004, 2), ring_rect(hw_ / 2, hh / 2, hd - 0.0015, 0.004, 2),
                  ring_rect(hw_ / 2 - 0.0015, hh / 2 - 0.0015, hd, 0.0028, 2)]
         g.put(stack(uv, rings, "bezel", top_uv="bezel", bottom_hidden=True), hm, "front")
-        for dy in (LAMPS["pitch"] / 2, -LAMPS["pitch"] / 2):
-            lm = hm @ Matrix.Translation((0.0, dy, hd))
+        for dx in (LAMPS["pitch"] / 2, -LAMPS["pitch"] / 2):
+            lm = hm @ Matrix.Translation((dx, 0.0, hd))
             # the lens stands 0.6 mm proud of the housing's face, the lit lamp 0.5 mm over it
             lens = [ring_rect(lw / 2, lh / 2, -0.0012, 0.003, LAMPS["seg"]), ring_rect(lw / 2, lh / 2, 0.0006, 0.003, LAMPS["seg"])]
             g.put(stack(uv, lens, "bezel_dark", top_uv=atlas.tile("lens_off"), bottom_hidden=True), lm, "front")
             lenses.append(lm @ Matrix.Translation((0.0, 0.0, 0.0011)))
-        # the master warning (pilot's left) and caution (right) under the housing
-        mbase = m @ Vector((x, -0.072, 0.0)) + A_DIR * (r["depth"] - 0.002)
-        mm = frame(mbase, Z, (eye - mbase).normalized())
         g.put(kit.indicator("lens_red" if side > 0 else "lens_amber", "MASTER\nWARN" if side > 0 else "MASTER\nCAUT"),
-              mm, "front")
+              m @ Matrix.Translation((-side * (bx - LAMPS["master_inset"]), y, 0.0)), "front")
     return lenses
 
 
@@ -721,14 +839,18 @@ def lamp_mesh(lenses):
 def build(g, kit, atlas, uv, space):
     """Everything forward of the consoles; returns the screen quads (A, B, C, D in DISPLAYS' order), the lamp
     placements and the faces (for the layout plan)."""
+    MOVERS.clear()
     screens, y_top = display_face(g, kit, atlas, uv)
     y_rim_top, _ = rim(g, atlas)
     st, c_screen = stem(g, kit, atlas, uv)
     d_screen, faces = wings(g, kit, atlas, uv)
-    closures(g, uv)
+    faces += closures(g, atlas, uv)
     ped = pedestal(g, kit, atlas, uv)
     faces += side_panels(g, kit, atlas, uv, space)
     shroud(g, atlas, uv, space, y_top)
     lenses = lamp_housings(g, kit, atlas, uv, y_top)
     screens = screens + c_screen + d_screen
-    return screens, lenses, [st] + faces + [ped]
+    # the display face, for the panel-cover check: drawn round the bezel by display_face, not as a Face
+    hw = FRONT["half_width"]
+    shown = Face("display", face_frame(), rect(-hw, face_y(FRONT["face_bottom_z"]), hw, y_top), None)
+    return screens, lenses, [shown, st] + faces + [ped]

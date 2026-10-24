@@ -129,9 +129,11 @@ namespace Icarus.Editor
         }
 
         // The renderers the cockpit view draws (Cockpit rule 1): the joined interior, both inner frames, both inner panes, the
-        // tac screen, the stock stick and throttle.
+        // tac screen, the stock stick and throttle, and the instruments' moving parts (the standby ball, the fuel needle, the
+        // clock's hands), which the plugin turns and so cannot join the interior.
         private static readonly string[] CockpitViewRenderers =
-            { "canopy_frame_inner", "canopy_glass_inner", "cockpit_interior", "cockpit_tac_screen", "joystick", "throttle", "windscreen_frame_inner", "windscreen_inner" };
+            { "canopy_frame_inner", "canopy_glass_inner", "cockpit_clock_hour", "cockpit_clock_minute", "cockpit_fuel_needle", "cockpit_interior",
+              "cockpit_standby_ball", "cockpit_tac_screen", "joystick", "throttle", "windscreen_frame_inner", "windscreen_inner" };
 
         // A15: Cockpit rules 20 to 24 (lists, layers, serialized states, proxies in LOD0), the materials each renderer wears,
         // and the triangle bands of rules 2, 3, 20, 23 and 26.
@@ -149,7 +151,7 @@ namespace Icarus.Editor
             Material Stocked(string slot) => Load<Material>(Stock + "Material/" + slot + "_PLACEHOLDER.mat");
             int Count(Renderer r) => r.GetComponent<MeshFilter>().sharedMesh.triangles.Length / 3;
             Renderer Named(string n) => view.FirstOrDefault(r => r.name == n);
-            foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner" })
+            foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner" }.Concat(CockpitInstruments))
                 if (Named(n) != null && (Named(n).sharedMaterials.Length != 1 || Named(n).sharedMaterial.name != CockpitSlot)) p.Add(n + " isn't on the cockpit atlas");
             var cockpitUi = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
             var screen = GetRef(cockpitUi, "tacScreenRender") as Renderer;
