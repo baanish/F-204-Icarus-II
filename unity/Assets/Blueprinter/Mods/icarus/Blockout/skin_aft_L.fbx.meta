@@ -102,6 +102,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Icarus_WellDetail
+    second: {fileID: 2100000, guid: 5c089d8b8839a004ca43bf67eafa7be0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: LOD
     second: {fileID: 2100000, guid: 7d6ad621856f7a14695bf6cfe2bb81ba, type: 2}
   - first:

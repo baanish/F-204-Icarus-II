@@ -44,6 +44,9 @@ def build():
         "body": material("Icarus_Body", (0.56, 0.57, 0.59, 1.0), 1.0, 0.32),  # bare steel for the blockout
         "glass": material("Icarus_Glass", (0.10, 0.16, 0.22, 0.6), 0.0, 0.05),
         "duct": material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8),
+        # The speed brake wells' ribs, rivets, lines and anchor bracket: a step lighter than the dark walls they stand
+        # on, so they read in the well's shadow.
+        "well_detail": material("Icarus_WellDetail", (0.035, 0.036, 0.04, 1.0), 0.5, 0.65),
         "metal": material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35),
         # The fuselage frames and break walls: dark, as stock shows structure at a break (the Vagrant's closed,
         # self-shadowed jet_mechanical and Matte_black), since open frames lit by the sky read white on a light trim.

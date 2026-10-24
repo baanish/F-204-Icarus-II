@@ -28,15 +28,18 @@ import stations
 SKIN = "Icarus_Body"
 # Triangles per component: target and cap (budget.py sums them). Caps are ceilings; the references sit lower.
 BUDGET = {
-    "fuselage_skin": {"target": 20000, "cap": 20000, "objects": ("radome", "skin_", "dorsal_cover")},
+    # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores): the
+    # skin is near 17,000.
+    "fuselage_skin": {"target": 19100, "cap": 19400, "objects": ("radome", "skin_", "dorsal_cover")},
     "wing_box_L": {"target": 2000, "cap": 2000, "objects": ("wing_skin_L",)},
     "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
     "stabilator": {"target": 2120, "cap": 2120, "objects": ("stabilator_visible",)},
     "fins": {"target": 1600, "cap": 1600, "objects": ("fin_skin", "ventral_fin")},
-    # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole.
-    "structure_cores": {"target": 11200, "cap": 11600, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
+    # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole, and the speed
+    # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_aft) about 570, from the skin's.
+    "structure_cores": {"target": 12100, "cap": 12200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
     "fuel_cells": {"target": 5000, "cap": 5000, "objects": ("fuel_",)},
     "engine": {"target": 1500, "cap": 1500, "objects": ("engine_core",)},
@@ -446,13 +449,13 @@ def open_bays(icarus):
     """Open the gear wells to view from below, in the structure cores' render meshes only (their hulls are built).
     The internals build each bay as a closed box clipped to the inside of the skin and joined into its core, so from
     below a bay read as shut, its walls facing away from anyone looking in. The floor under the shut doors goes, the
-    rest of the bay turns to face inward, and the frames and stringers running through the bay are cut back to its
-    walls."""
+    rest of the bay turns to face inward, and the frames and stringers running through the bay, the aft core's
+    included, are cut back to its walls."""
     O = bpy.data.objects
     nose, main = interior.INTERNALS["nose_gear_bay"], interior.INTERNALS["main_gear_bay"]
+    main_boxes = [main["box"] + (side * main["x"],) for side in (1, -1)]
     wells = {"fuselage_forward": ([nose["box"] + (0.0,)], ("gear_door_N_L", "gear_door_N_R")),
-             "fuselage_mid": ([main["box"] + (side * main["x"],) for side in (1, -1)],
-                              ("gear_door_main_L", "gear_door_main_R"))}
+             "fuselage_mid": (main_boxes, ("gear_door_main_L", "gear_door_main_R"))}
     for core_name, (boxes, doors) in wells.items():
         core = O[core_name]
         bay_slot = [m.name for m in core.data.materials].index("jet_mechanical")
@@ -466,14 +469,7 @@ def open_bays(icarus):
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == bay_slot], context="FACES")
         bm.to_mesh(members.data)
         bm.free()
-        cutters = []
-        for s0, s1, hw, z0, z1, xc in boxes:
-            me = bpy.data.meshes.new("bay_cutter")
-            me.from_pydata([bi.P(s, xc + sx * hw, z) for s in (s0, s1) for sx in (-1, 1) for z in (z0 - 0.3, z1)], [],
-                           [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)])
-            cutter = bpy.data.objects.new("bay_cutter", me)
-            icarus.objects.link(cutter)
-            cutters.append(cutter)
+        cutters = bay_cutters(icarus, boxes)
         cut = cut_shells(members, cutters)
         # the bay: its faces turned to face in, less the floor under each door (a ray out of it meets the shut door)
         bm = bmesh.new()
@@ -499,6 +495,50 @@ def open_bays(icarus):
             bpy.data.objects.remove(o)
             bpy.data.meshes.remove(me)
         bpy.data.meshes.remove(cut)
+    # The main bays run on past MID_END into the aft core's break wall and first stringers.
+    cut_structure(icarus, O["fuselage_aft"], bay_cutters(icarus, main_boxes))
+
+
+def bay_cutters(icarus, boxes):
+    """A box cutter, world space, for each gear bay box (s0, s1, half width, z0, z1, centre x), run on down through
+    the skin."""
+    cutters = []
+    for s0, s1, hw, z0, z1, xc in boxes:
+        me = bpy.data.meshes.new("bay_cutter")
+        me.from_pydata([bi.P(s, xc + sx * hw, z) for s in (s0, s1) for sx in (-1, 1) for z in (z0 - 0.3, z1)], [],
+                       [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)])
+        cutter = bpy.data.objects.new("bay_cutter", me)
+        icarus.objects.link(cutter)
+        cutters.append(cutter)
+    return cutters
+
+
+def cut_structure(icarus, core, cutters):
+    """Cut a structure core's frames, stringers and break walls (its Icarus_Frame faces) back to the cutters (closed,
+    world space), its other faces kept as they are; the cutters are used up."""
+    frame = [m.name for m in core.data.materials].index("Icarus_Frame")
+    members = core.copy()
+    members.data = core.data.copy()
+    icarus.objects.link(members)
+    bm = bmesh.new()
+    bm.from_mesh(members.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index != frame], context="FACES")
+    bm.to_mesh(members.data)
+    bm.free()
+    cut = cut_shells(members, cutters)
+    for poly in cut.polygons:  # the members and the faces the cut adds are all structure
+        poly.material_index = frame
+    bm = bmesh.new()
+    bm.from_mesh(core.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == frame], context="FACES")
+    bm.from_mesh(cut)
+    bm.to_mesh(core.data)
+    bm.free()
+    for o in cutters + [members]:
+        me = o.data
+        bpy.data.objects.remove(o)
+        bpy.data.meshes.remove(me)
+    bpy.data.meshes.remove(cut)
 
 
 def cut_shells(obj, cutters):

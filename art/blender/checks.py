@@ -269,6 +269,86 @@ def interior_visibility(icarus, allow_openings=True):
     return len(inside)
 
 
+def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
+    """No frame, stringer or break wall (the structure cores' Icarus_Frame faces) inside a bay or well, where an open
+    door or panel would show it: the gear bays (parts.open_bays' boxes), the speed brake wells (speed_brakes.Patch's
+    voids) and the conformal trough (stations.carve_shapes). The faces are sampled every spacing; a sample counts once
+    it is more than tolerance inside, so members cut back to a bay's wall pass."""
+    import build_icarus as bi
+    import internals as interior
+    import speed_brakes
+    import stations
+
+    p = bi.PARAMS
+    volumes = []  # (name, lower corner, upper corner, inside(q))
+    nose, main = interior.INTERNALS["nose_gear_bay"], interior.INTERNALS["main_gear_bay"]
+    for name, (s0, s1, hw, z0, z1, xc) in [("nose gear bay", nose["box"] + (0.0,))] + [
+            ("main gear bay " + "LR"[side < 0], main["box"] + (side * main["x"],)) for side in (1, -1)]:
+        lo, hi = bi.P(s0, xc - hw, z0 - 0.3), bi.P(s1, xc + hw, z1)
+        volumes.append((name, lo, hi, lambda q, lo=lo, hi=hi: all(lo[i] + tolerance < q[i] < hi[i] - tolerance
+                                                                    for i in range(3))))
+    patch = speed_brakes.Patch(p)
+    for side in (1, -1):
+        verts, faces = patch.void(side)
+        shell = BVHTree.FromPolygons(verts, faces)
+        lo = Vector([min(v[i] for v in verts) for i in range(3)])
+        hi = Vector([max(v[i] for v in verts) for i in range(3)])
+        volumes.append(("speed brake well " + "LR"[side < 0], lo, hi,
+                        lambda q, shell=shell: inside_closed(shell, q) and shell.find_nearest(q)[3] > tolerance))
+    fields = {}
+
+    def in_trough(q):
+        s = round(q.y + bi.S0, 3)
+        if s not in fields:
+            fields[s] = stations.carve_shapes(p, s)
+        return any(f(q.x, q.z) < -tolerance for f in fields[s])
+
+    reach = max(abs(m["centre"]) + max(-m["body"][0][0], m["body"][-1][0]) for m in stations.MOUNTS.values())
+    reach += stations.RUNOUT
+    c = stations.CONFORMAL
+    volumes.append(("conformal trough", bi.P(c["s"] - reach, -c["x"] - 0.3, -1.0), bi.P(c["s"] + reach, c["x"] + 0.3, c["z"] + 0.3),
+                    in_trough))
+    found, sampled = {}, 0
+    for core in (o for o in icarus.all_objects if o.name in ("fuselage_forward", "fuselage_mid", "fuselage_aft")):
+        slots = [m.name if m else "" for m in core.data.materials]
+        mesh = core.data
+        mesh.calc_loop_triangles()
+        for tri in mesh.loop_triangles:
+            if slots[mesh.polygons[tri.polygon_index].material_index] != "Icarus_Frame":
+                continue
+            a, b, c3 = (core.matrix_world @ mesh.vertices[i].co for i in tri.vertices)
+            near = [v for v in volumes if all(min(a[i], b[i], c3[i]) < v[2][i] and max(a[i], b[i], c3[i]) > v[1][i]
+                                              for i in range(3))]
+            if not near:
+                continue
+            nb, nc = (max(1, math.ceil(e.length / spacing)) for e in (b - a, c3 - a))
+            for i in range(nb + 1):
+                for j in range(math.floor(nc * (1 - i / nb) + 1e-9) + 1):
+                    q = a + (b - a) * (i / nb) + (c3 - a) * (j / nc)
+                    sampled += 1
+                    for name, lo, hi, inside in near:
+                        if all(lo[k] <= q[k] <= hi[k] for k in range(3)) and inside(q):
+                            found.setdefault((name, core.name), []).append(q)
+    message = "structure clear of bays: %d samples of %s's frames near %d bays and wells" % (
+        sampled, "/".join(("forward", "mid", "aft")), len(volumes))
+    if found:
+        raise ValueError(message + ": " + "; ".join(
+            "%d in the %s from %s, first at s %.3f x %.3f z %.3f" % (len(qs), name, core, qs[0].y + bi.S0, qs[0].x, qs[0].z)
+            for (name, core), qs in found.items()))
+    print(message + ": PASS", flush=True)
+
+
+def inside_closed(shell, q, direction=Vector((0.5773, 0.5774, 0.5774))):
+    """Whether q lies inside the closed surface in shell: an odd number of crossings along a ray."""
+    crossings, origin = 0, q
+    while True:
+        hit = shell.ray_cast(origin, direction)[0]
+        if hit is None:
+            return crossings % 2 == 1
+        crossings += 1
+        origin = hit + direction * 1e-6
+
+
 # What the game hides in the cockpit view (IcarusAuthor.Cockpit.cs exteriorRenderers, with the canopy's outer panes),
 # and the inner panes it draws there, seen through.
 COCKPIT_HIDDEN = ("cockpit_cell", "avionics_tray", "radar_tray", "gear_leg_N_visible", "canopy_glass_outer", "windscreen",

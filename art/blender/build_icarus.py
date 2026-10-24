@@ -126,9 +126,12 @@ PARAMS = {
     # the speed brakes open outward.
     "surface_travel": {"aileron": 20, "rudder": 25, "stabilator": 15, "flap": 25, "lef": 20, "speed_brake": 60},
     "stabilator_pivot_s": 15.45,
-    # Speed brakes on the aft fuselage sides: s range and the height band of skin they cover; hinged at the front
-    # (speed_brakes.py builds them).
-    "speed_brake": {"s0": 12.55, "s1": 13.35, "z0": -0.18, "z1": 0.30},
+    # Speed brakes on the aft fuselage sides, hinged at the front (speed_brakes.py builds them), each its own skin
+    # panel with its edges on the panel lines (art/textures/panels.py): s0 on the butt joint at frame 13.0, s1 one
+    # fastener row (15 mm) ahead of frame 13.6's rivet row; deg0 on the lower lap joint, the ring column 45 degrees
+    # under the body lobe's centre, and deg1 the column just under the centre. The loft's nearest stations move onto
+    # s0 and s1 (fuselage_stations); speed_brakes.check holds the outline to the panel lines.
+    "speed_brake": {"s0": 13.0, "s1": 13.585, "deg0": -45.0, "deg1": -3.75},
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
     # with a small 45 degree cut at the tip's trailing corner. Left-hand sections; the stabilator is one piece, its
     # sides meeting behind the fin-tip fairing, notch_gap aft of the fairing's tail, and standing just outboard of
@@ -458,8 +461,11 @@ def blended_ring(p, s, angles=None):
 
 def fuselage_stations(p):
     lip = p["intake"][0][0]
-    return (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
-            + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, p["fuselage"][-1][0], 50)[1:])
+    out = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
+           + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, p["fuselage"][-1][0], 50)[1:])
+    for edge in (p["speed_brake"]["s0"], p["speed_brake"]["s1"]):  # the brakes' holes are whole skin faces
+        out[min(range(len(out)), key=lambda i: abs(out[i] - edge))] = edge
+    return out
 
 
 @geometry_cache.ring
@@ -1025,6 +1031,7 @@ def _build(repo):
 
     hull_count = hulls.build(TARGET)
     part_tree.open_bays(TARGET)  # render meshes only, after the hulls
+    speed_brakes.clear_wells(TARGET)
     import uvs
 
     uvs.unwrap(TARGET)
@@ -1034,6 +1041,7 @@ def _build(repo):
     checks.fuel_cell_clearance(TARGET)
     checks.internals_inside_skin(TARGET)
     checks.interior_visibility(TARGET)
+    checks.structure_clear_of_bays(TARGET)
     checks.canopy_fit(TARGET)
     checks.pilot_eye_leaks(TARGET)
     for module in modules():
