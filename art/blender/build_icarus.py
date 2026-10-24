@@ -134,16 +134,16 @@ PARAMS = {
     "speed_brake": {"s0": 13.0, "s1": 13.585, "deg0": -45.0, "deg1": -3.75},
     # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
     # with a small 45 degree cut at the tip's trailing corner. Left-hand sections; the stabilator is one piece, its
-    # sides meeting behind the fin-tip fairing, notch_gap aft of the fairing's tail, and standing just outboard of
-    # the fairing beside it, so it pivots clear.
+    # sides meeting behind the fin-tip fairing. Its root row stands surface_cove_gap outboard of the fairing's
+    # radius, and the cut-out between the roots follows the fairing's outline, the same gap clear through the whole
+    # travel (build_stabilator).
     "stabilator": {
-        "sections": [(14.804, 0.07, 2.82, 1.886), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
+        "sections": [(14.804, 0.063, 2.82, 1.886), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
         "thickness": 0.045,
-        "notch_gap": 0.02,
     },
     # The fin-tip fairing round the stabilator pivot, as on the F-104: a body of revolution about a fore-aft axis at
-    # height z, from s0 to s1, hiding the fin tip.
-    "fin_fairing": {"z": 2.83, "s0": 14.62, "s1": 15.75, "radius": 0.06},
+    # height z, from s0 to s1, hiding the fin tip, faired into the fin's sides below by a fillet of radius fillet.
+    "fin_fairing": {"z": 2.83, "s0": 14.62, "s1": 15.75, "radius": 0.06, "fillet": 0.05},
     "ventral_fin": {
         "sections": [(10.85, 0.0, -0.22, 2.25), (10.95, 0.0, -0.62, 2.05)],  # root buried above the rising belly
         "thickness": 0.05,
@@ -557,13 +557,14 @@ def strip(name, sections, stations, thickness, axis, count=None, clamp=False):
     """A closed piece of a lifting surface. stations: (u, f0, f1) along the span; each ring spans chord fractions
     f0..f1 of the full-chord airfoil, so neighbouring pieces share one airfoil, with count points a side (by default
     in proportion to the widest span of chord). Two stations at the same u with different fractions make the wall at
-    a cutout's end. With clamp, every ring samples the full chord and every station's ends, and pulls the points
-    outside its own f0..f1 onto those ends, so a ring cut short shares its points with the full rings beside it and
+    a cutout's end. With clamp, every ring samples the full chord and the ends of each such wall, and pulls the points
+    outside its own f0..f1 onto its own ends, so a ring cut short shares its points with the full rings beside it and
     one piece runs on through the cut."""
     count = count or max(6, round(CHORD * max(f1 - f0 for _, f0, f1 in stations)))
     full = [0.5 * (1 - math.cos(math.pi * i / (count - 1))) for i in range(count)]
     if clamp:
-        full = sorted(set(full) | {f for _, f0, f1 in stations for f in (f0, f1)})
+        span = [u for u, _, _ in stations]
+        full = sorted(set(full) | {f for u, f0, f1 in stations if span.count(u) > 1 for f in (f0, f1)})
     rings = []
     for u, f0, f1 in stations:
         s_le, x, z, chord = section_at(sections, u, axis)
@@ -845,41 +846,196 @@ def build_surfaces(p, mats):
 
 
 def build_stabilator(p, mats):
-    """The all-moving stabilator as one piece, tip to tip, notched round the fin-tip fairing: between the roots the
-    chord starts notch_gap behind the fairing's tail."""
-    st = p["stabilator"]
+    """The all-moving stabilator as one piece, tip to tip, cut round the fin-tip fairing. Its root wall stands beside
+    the fairing, and behind the fairing's tail the cut-out runs from the root to the centreline through span stations
+    at the corners of the fairing's outline offset by surface_cove_gap, each at the chord where the stabilator clears
+    the fairing by that gap through its whole travel; where the straight edge between two stations dips closer, both
+    move back."""
+    st, gap = p["stabilator"], p["surface_cove_gap"]
     sections = [(s, -x, z, c) for s, x, z, c in reversed(st["sections"])] + st["sections"]
     s_le, root_x, z, chord = st["sections"][0]
-    notch = (p["fin_fairing"]["s1"] + st["notch_gap"] - s_le) / chord
+    pivot = P(p["stabilator_pivot_s"], 0.0, z)
+    turns = [Matrix.Rotation(math.radians(a), 3, "X") for a in sweep_angles(surface_travel(p, "stabilator"))]
+    outline, axis_z = fairing_outline(p), p["fin_fairing"]["z"]
+
+    def clearance(x, s, skins=True):
+        """Least distance from the fairing, over the travel, of the stabilator's front edge at span x and chord
+        position s: its wall from skin to skin, and with skins, the skins just behind it."""
+        t = (s - s_le) / chord
+        lower, upper = [skin_point(sections, root_x, t, side, st["thickness"], "x") for side in (-1, 1)]
+        points = [lower.lerp(upper, i / 6) for i in range(7)]
+        if skins:
+            points += [skin_point(sections, root_x, t + 0.005 * i / chord, side, st["thickness"], "x")
+                       for i in range(1, 9) for side in (-1, 1)]
+        for v in points:
+            v.x = x
+        return min(fairing_distance(outline, axis_z, pivot + turn @ (v - pivot)) for turn in turns for v in points)
+
+    def least(clear, lo, hi):
+        """The least value in lo..hi at which clear holds, which it does at hi."""
+        if clear(lo):
+            return lo
+        for _ in range(32):
+            mid = (lo + hi) / 2
+            lo, hi = (lo, mid) if clear(mid) else (mid, hi)
+        return hi
+
+    widest = max(r for _, r in outline)
+    tail = outline[max(i for i, (_, r) in enumerate(outline) if r == widest):]  # from its widest point aft
+
+    def cut_at(u):
+        return least(lambda s: clearance(u, s) >= gap, tail[0][0], s_le + chord)
+
+    spans = [0.0] + [u for u in (miter(a, b, c, gap)[1] for a, b, c in zip(tail, tail[1:], tail[2:])) if u < root_x]
+    contour = [[u, cut_at(u)] for u in sorted(spans)] + [[root_x, cut_at(root_x - 1e-4)]]
+    for _ in range(20):
+        shorts = []
+        for a, b in zip(contour, contour[1:]):
+            short = gap - min(clearance(a[0] + (b[0] - a[0]) * i / 8, a[1] + (b[1] - a[1]) * i / 8)
+                              for i in range(1, 8))
+            shorts.append(short)
+            if short > 1e-5:
+                a[1], b[1] = a[1] + short + 1e-4, b[1] + short + 1e-4
+        if max(shorts) <= 1e-5:
+            break
+    else:
+        raise ValueError("stabilator cut-out: the edge between its stations stays closer than the gap to the fairing: "
+                         + ", ".join("(%.4f, %.4f)" % tuple(c) for c in contour) + " short by "
+                         + ", ".join("%.5f" % s for s in shorts))
+
+    def front(u):
+        """The chord fraction where the stabilator starts at span u inside its root."""
+        u = abs(u)
+        for (ua, sa), (ub, sb) in zip(contour, contour[1:]):
+            if ua <= u <= ub:
+                return (sa + (sb - sa) * (u - ua) / (ub - ua) - s_le) / chord
+        raise ValueError("span %.4f outside the stabilator's cut-out" % u)
+
     stations = []
-    for u in span_stations(sections, "x", -sections[-1][1], sections[-1][1]):
-        for f0 in dict.fromkeys([notch if abs(v) < root_x else 0.0 for v in (u - 1e-6, u + 1e-6)]):
-            stations.append((u, f0, 1.0))
-    obj = finish(strip("stabilator", sections, stations, st["thickness"], "x", clamp=True), mats["body"])
-    parts = hinged("stabilator", obj, Matrix.Translation(P(p["stabilator_pivot_s"], 0.0, z)))
+    tip = sections[-1][1]
+    for u in span_stations(sections, "x", -tip, tip, [w * u for u, _ in contour for w in (-1, 1)]):
+        if abs(abs(u) - root_x) < 1e-9:  # the root wall: the full ring outside it, the cut one inside
+            for f0 in ((0.0, front(u)) if u < 0 else (front(u), 0.0)):
+                stations.append((u, f0, 1.0))
+        else:
+            stations.append((u, front(u) if abs(u) < root_x else 0.0, 1.0))
+    obj = strip("stabilator", sections, stations, st["thickness"], "x", clamp=True)
+    wall_end, steps = contour[-1][1], math.ceil((contour[-1][1] - s_le) / 0.01)
+    if min(clearance(root_x, s_le + (wall_end - s_le) * i / steps, skins=False) for i in range(steps + 1)) < gap - 1e-6:
+        raise ValueError("stabilator root %.3f m out stands closer than %.3f m to the fin-tip fairing" % (root_x, gap))
+    print("stabilator cut-out (span, s): " + ", ".join("(%.4f, %.4f)" % (u, s) for u, s in contour))
+    obj = finish(obj, mats["body"])
+    parts = hinged("stabilator", obj, Matrix.Translation(pivot))
     parts[0]["deflection_deg"] = surface_travel(p, "stabilator")
     return parts
 
 
-def build_fin_fairing(p, mat):
-    """The fin-tip fairing: a round-ended body of revolution round the stabilator pivot, covering the fin tip. It is
-    detail of the fin skin and joins that part's mesh (parts.merge_details)."""
+def sweep_angles(travel, step=0.5):
+    """Angles from -travel to travel, at most step degrees apart."""
+    n = math.ceil(2 * travel / step)
+    return [-travel + 2 * travel * i / n for i in range(n + 1)]
+
+
+def miter(a, b, c, gap):
+    """The corner at b of the outline a-b-c, (s, radius) points, offset outward by gap: the point gap from both of
+    its edges."""
+    def normal(p, q):
+        ds, dr = q[0] - p[0], q[1] - p[1]
+        length = math.hypot(ds, dr)
+        return -dr / length, ds / length
+
+    (n1s, n1r), (n2s, n2r) = normal(a, b), normal(b, c)
+    ms, mr = n1s + n2s, n1r + n2r
+    scale = gap / (ms * n1s + mr * n1r)
+    return b[0] + ms * scale, b[1] + mr * scale
+
+
+def fairing_outline(p):
+    """The fin-tip fairing's outline, (s, radius) from its nose point on the axis to its tail point."""
     f = p["fin_fairing"]
-    zc, r, s0, s1 = f["z"], f["radius"], f["s0"], f["s1"]
+    r, s0, s1 = f["radius"], f["s0"], f["s1"]
     nose, tail = 0.10, 0.10
-    profile = [(s0 + nose * (1 - math.cos(math.radians(d))), 0.97 * r * math.sin(math.radians(d))) for d in (25, 50, 70, 90)]
-    profile += [(s0 + 0.38, 0.97 * r), (s0 + 0.53, r), (s1 - 0.25, r), (s1 - 0.13, 0.97 * r)]
-    profile += [(s1 - tail + tail * math.sin(math.radians(d)), 0.97 * r * math.cos(math.radians(d))) for d in (30, 55, 75)]
-    segments = 12
-    verts = [P(s0, 0.0, zc), P(s1, 0.0, zc)]
-    for s, rad in profile:
-        verts += [P(s, rad * math.cos(a), zc + rad * math.sin(a)) for a in [2 * math.pi * k / segments for k in range(segments)]]
-    ring = lambda j, k: 2 + j * segments + k % segments
-    faces = [(0, ring(0, k + 1), ring(0, k)) for k in range(segments)]
+    out = [(s0, 0.0)]
+    out += [(s0 + nose * (1 - math.cos(math.radians(d))), 0.97 * r * math.sin(math.radians(d))) for d in (25, 50, 70, 90)]
+    out += [(s0 + 0.38, 0.97 * r), (s0 + 0.53, r), (s1 - 0.25, r), (s1 - 0.13, 0.97 * r)]
+    out += [(s1 - tail + tail * math.sin(math.radians(d)), 0.97 * r * math.cos(math.radians(d))) for d in (30, 55, 75)]
+    return out + [(s1, 0.0)]
+
+
+def fairing_distance(outline, z, v):
+    """Distance from the point v to the fin-tip fairing's body of revolution, its outline about an axis at height z,
+    negative inside. Its sections are drawn inside their circles, and its fillets into the fin lie under it, closer in
+    than the stabilator reaches."""
+    s, rho = v.y + S0, math.hypot(v.x, v.z - z)
+    best, inside = math.inf, False
+    for (sa, ra), (sb, rb) in zip(outline, outline[1:]):
+        ds, dr = sb - sa, rb - ra
+        t = max(0.0, min(1.0, ((s - sa) * ds + (rho - ra) * dr) / (ds * ds + dr * dr)))
+        best = min(best, math.hypot(s - sa - t * ds, rho - ra - t * dr))
+        inside = inside or (sa <= s <= sb and rho < ra + dr * (s - sa) / ds)
+    return -best if inside else best
+
+
+FAIRING_INSET = 0.0015  # how far inside the fin's skin a fillet comes down, clear of the skin's faceting
+FAIRING_FOOT = 0.01  # how far below its fillet the fairing runs on down inside the fin
+FAIRING_TAPER = 0.35  # fin chord fraction over which a fillet grows from nothing at the fin's leading and trailing edges
+FAIRING_ROW = 0.12  # most metres between the fairing's sections
+
+
+def fin_chord(p, s, z):
+    """The fin's chord fraction and half thickness at (s, z), or None off its planform."""
+    fin = p["fin"]["sections"]
+    if not fin[0][2] <= z <= fin[-1][2]:
+        return None
+    s_le, _, _, chord = section_at(fin, z, "z")
+    t = (s - s_le) / chord
+    return (t, airfoil(t) * p["fin"]["thickness"] * chord) if 0.0 <= t <= 1.0 else None
+
+
+def fairing_ring(p, s, radius):
+    """The fin-tip fairing's section at s: a circle, and below it a fillet each side tangent to the circle and to the
+    fin's skin (FAIRING_INSET inside it), running on FAIRING_FOOT down into the fin. Behind the fin the fillets, feet
+    and the circle's lowest point are one point. Points run anticlockwise looking aft, from the left equator over the
+    top, down the right side, across inside the fin and up the left."""
+    f = p["fin_fairing"]
+    fin = fin_chord(p, s, f["z"] - radius)
+    t, half = fin if fin else (0.0, 0.0)
+    ramp = min(t, 1.0 - t, FAIRING_TAPER) / FAIRING_TAPER if fin else 0.0
+    k = f["fillet"] * ramp * ramp * (3 - 2 * ramp)
+    w = max(half - FAIRING_INSET, 0.0)
+    if w >= radius:
+        raise ValueError("the fin is thicker than the fin-tip fairing at s %.3f" % s)
+    cx = w + k
+    cy = -math.sqrt((radius + k) ** 2 - cx * cx)  # the fillet's centre, radius + k from the axis
+    a1 = math.atan2(cy, cx)  # where the fillet meets the circle
+    a0 = math.atan2(-cy, -cx)  # the same point, round the fillet's centre
+    side = [(radius * math.cos(a1 * i / 4), radius * math.sin(a1 * i / 4)) for i in range(1, 5)]
+    fillet = [(cx + k * math.cos(b), cy + k * math.sin(b)) for b in (a0 + (math.pi - a0) * i / 3 for i in (1, 2))]
+    lower = side + fillet + [(w, cy), (w, cy - min(FAIRING_FOOT, half))]
+    top = [(radius * math.cos(math.pi * i / 8), radius * math.sin(math.pi * i / 8)) for i in range(9)]
+    ring = top + [(-x, y) for x, y in lower] + list(reversed(lower))
+    return [P(s, x, f["z"] + y) for x, y in ring]
+
+
+def build_fin_fairing(p, mat):
+    """The fin-tip fairing: a round-ended body of revolution round the stabilator pivot, covering the fin tip and
+    faired into the fin by fillets (fairing_ring). It is detail of the fin skin and joins that part's mesh
+    (parts.merge_details)."""
+    f = p["fin_fairing"]
+    outline = fairing_outline(p)
+    rows = [outline[1]]
+    for (sa, ra), (sb, rb) in zip(outline[1:-2], outline[2:-1]):  # FAIRING_ROW apart, so the fillets follow the fin
+        n = math.ceil((sb - sa) / FAIRING_ROW - 1e-9)
+        rows += [(sa + (sb - sa) * i / n, ra + (rb - ra) * i / n) for i in range(1, n + 1)]
+    rings = [fairing_ring(p, s, radius) for s, radius in rows]
+    n = len(rings[0])
+    verts = [P(outline[0][0], 0.0, f["z"]), P(outline[-1][0], 0.0, f["z"])] + [v for r in rings for v in r]
+    ring = lambda j, k: 2 + j * n + k % n
+    faces = [(0, ring(0, k + 1), ring(0, k)) for k in range(n)]
     faces += [(ring(j, k), ring(j, k + 1), ring(j + 1, k + 1), ring(j + 1, k))
-              for j in range(len(profile) - 1) for k in range(segments)]
-    faces += [(1, ring(len(profile) - 1, k), ring(len(profile) - 1, k + 1)) for k in range(segments)]
-    obj = finish(mesh_object("fin_fairing", verts, faces), mat)
+              for j in range(len(rings) - 1) for k in range(n)]
+    faces += [(1, ring(len(rings) - 1, k), ring(len(rings) - 1, k + 1)) for k in range(n)]
+    obj = finish(welded(mesh_object("fin_fairing", verts, faces)), mat)
     obj["merge_into"] = "fin_skin"
     return obj
 

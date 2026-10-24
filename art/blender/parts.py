@@ -35,8 +35,8 @@ BUDGET = {
     "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
-    "stabilator": {"target": 2120, "cap": 2120, "objects": ("stabilator_visible",)},
-    "fins": {"target": 1600, "cap": 1600, "objects": ("fin_skin", "ventral_fin")},
+    "stabilator": {"target": 1700, "cap": 1700, "objects": ("stabilator_visible",)},
+    "fins": {"target": 2020, "cap": 2020, "objects": ("fin_skin", "ventral_fin")},
     # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole, and the speed
     # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_aft) about 570, from the skin's.
     "structure_cores": {"target": 12100, "cap": 12200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
