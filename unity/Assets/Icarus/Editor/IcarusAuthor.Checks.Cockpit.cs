@@ -162,7 +162,7 @@ namespace Icarus.Editor
                 || lamps[0].sharedMaterial != Stocked("CockpitWarningLight") || Count(lamps[0]) < 40 || Count(lamps[0]) > 80)
                 p.Add("CockpitWarningLights.lightRenderers isn't the Icarus lamp mesh, 40 to 80 triangles on CockpitWarningLight, layer 3, serialized off");
             var exterior = GetList(Prop(aircraft, "exteriorRenderers")).OfType<Renderer>().ToArray();
-            var lod0 = b.Root.GetComponent<LODGroup>().GetLODs()[0].renderers;
+            var lod0 = b.Root.GetComponentsInChildren<LODGroup>(true).SelectMany(g => g.GetLODs()[0].renderers).ToArray();
             var proxies = new[] { ("cockpit_proxy", 700, 1030), ("canopy_frame_proxy", 240, 1900) }.Select(e => (e, r: exterior.FirstOrDefault(x => x.name == e.Item1))).ToArray();
             foreach (var ((name, lo, hi), r) in proxies)
             {

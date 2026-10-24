@@ -113,9 +113,36 @@ namespace Icarus.Editor
                 if (texture != null && !textures.Add(texture)) p.Add("liveries share a texture");
                 if (Prop(so, "Colors").arraySize == 0) p.Add("livery " + i + " has no dominant paint");
             }
-            var lod = b.Root.GetComponent<LODGroup>();
-            var count = lod == null || lod.GetLODs().Length == 0 ? 0 : lod.GetLODs()[0].renderers.Length;
-            return $"{skinRenderers.Length} registered skin renderers, four Primeva liveries, exterior LOD0 {count} renderers";
+            var count = b.Root.GetComponentsInChildren<LODGroup>(true).Sum(g => g.GetLODs().Length == 0 ? 0 : g.GetLODs()[0].renderers.Length);
+            // LOD1 hulls wear their part's paint (art/blender/hulls.py paint_lods), so the livery and the Bare Metal swap
+            // reach them; on stock's flat grey LOD material every livery fell off at range. The skin renderer checks above
+            // cover slot 0, the damage list and the UV range; this adds that a hull wears what its part wears, on UVs
+            // that span the atlas rather than collapsing to one texel.
+            var skinHulls = 0;
+            foreach (var hull in b.Lod1)
+            {
+                var own = b.Meshes[hull.name.Substring(0, hull.name.Length - "_lod1".Length)].Materials;
+                var worn = hull.sharedMaterials;
+                if (worn.Length == 0 || worn.Any(m => m == null || !own.Contains(m)))
+                    p.Add($"{hull.name} wears [{string.Join(", ", worn.Select(m => m == null ? "none" : m.name))}], not its part's paint");
+                else if (own.Contains(b.Skin) && !worn.Contains(b.Skin))
+                    p.Add(hull.name + " lacks the skin its part wears");
+                if (!worn.Contains(b.Skin))
+                    continue;
+                skinHulls++;
+                var mesh = hull.GetComponent<MeshFilter>().sharedMesh;
+                var uv = mesh.uv;
+                var tris = mesh.GetIndices(System.Array.IndexOf(worn, b.Skin));
+                var spread = 0;
+                for (var i = 0; i < tris.Length && uv.Length == mesh.vertexCount; i += 3)
+                    if (Mathf.Abs((uv[tris[i + 1]].x - uv[tris[i]].x) * (uv[tris[i + 2]].y - uv[tris[i]].y) - (uv[tris[i + 2]].x - uv[tris[i]].x) * (uv[tris[i + 1]].y - uv[tris[i]].y)) > 2e-8f)
+                        spread++;
+                // hulls.py fits a face's UVs inside its island, which leaves a few on one texel (at most 5 of 24 today)
+                if (3 * spread < 2 * (tris.Length / 3))
+                    p.Add($"{hull.name}: {spread} of {tris.Length / 3} skin triangles span the atlas; the rest sample a point");
+            }
+            return $"{skinRenderers.Length} registered skin renderers, four Primeva liveries, exterior LOD0 {count} renderers, " +
+                $"{b.Lod1.Count} LOD1 hulls on their parts' paint ({skinHulls} on the skin)";
         }
     }
 }

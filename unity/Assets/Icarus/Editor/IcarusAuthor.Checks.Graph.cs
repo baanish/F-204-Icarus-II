@@ -57,9 +57,21 @@ namespace Icarus.Editor
             }
             foreach (var collider in b.Root.GetComponentsInChildren<MeshCollider>(true).Where(c => c.sharedMesh != null))
                 if (!collider.convex) p.Add(PathOf(collider.transform, b.Root.transform) + " has a concave MeshCollider");
-            var lod = b.Root.GetComponent<LODGroup>().GetLODs();
-            if (lod.SelectMany(l => l.renderers).Any(r => r == null || !r.transform.IsChildOf(b.Root.transform))) p.Add("a LOD renderer outside the prefab");
-            var hulls = lod[lod.Length - 1].renderers.Select(r => (r, tris: (int)r.GetComponent<MeshFilter>().sharedMesh.GetIndexCount(0) / 3)).ToArray();
+            // FinishRoot: every exterior renderer in exactly one LODGroup, its own part's, so debris picks its level by its own distance
+            var groups = b.Root.GetComponentsInChildren<LODGroup>(true);
+            var listed = groups.SelectMany(g => g.GetLODs().SelectMany(l => l.renderers)).ToArray();
+            if (listed.Any(r => r == null || !r.transform.IsChildOf(b.Root.transform))) p.Add("a LOD renderer outside the prefab");
+            if (listed.Length != listed.Distinct().Count()) p.Add("a renderer in two LOD levels or groups");
+            foreach (var g in groups)
+            {
+                var part = g.GetComponent(aeroType);
+                if (part == null || g.GetLODs().Length != 2) p.Add(g.name + "'s LODGroup isn't two levels on a part");
+                else if (g.GetLODs().SelectMany(l => l.renderers).Any(r => r != null && r.GetComponentInParent(aeroType, true) != part))
+                    p.Add(g.name + "'s LODGroup lists another part's renderer");
+            }
+            foreach (var r in b.Root.GetComponentsInChildren<Renderer>(true).Where(r => r.gameObject.layer != 3 && !(r is ParticleSystemRenderer)).Except(listed))
+                p.Add(r.name + " is in no LODGroup");
+            var hulls = groups.SelectMany(g => g.GetLODs().Last().renderers).Select(r => (r, tris: r.GetComponent<MeshFilter>().sharedMesh.triangles.Length / 3)).ToArray();
             foreach (var (r, tris) in hulls.Where(h => h.tris > Lod1PerHull))
                 p.Add($"LOD1 hull {r.name} has {tris} triangles, over {Lod1PerHull}");
             if (hulls.Sum(h => h.tris) > Lod1Total) p.Add($"LOD1 hulls have {hulls.Sum(h => h.tris)} triangles, over {Lod1Total}");
@@ -93,7 +105,7 @@ namespace Icarus.Editor
                 }
             return $"{parts.Length} AeroParts, {mass:0} kg, every part jointed to its parent and collidable, convex hulls, {colliders.Length} colliders " +
                 $"({pieces.Length} mesh hulls, {pieces.Sum(c => c.sharedMesh.triangles.Length / 3)} triangles) with {overlaps} unjointed overlaps, {dangling} dangling references, " +
-                $"LOD in the prefab, {hulls.Length} LOD1 hulls of {hulls.Sum(h => h.tris)} triangles (largest {hulls.Max(h => h.tris)})";
+                $"LOD in {groups.Length} part groups, {hulls.Length} LOD1 hulls of {hulls.Sum(h => h.tris)} triangles (largest {hulls.Max(h => h.tris)})";
         }
     }
 }

@@ -8,6 +8,11 @@ LOD1 is one hull per part seen from outside, its triangles capped by LOD1_TRIS s
 27's 56 per hull and 760 in all. The parts under the skin get none: at that distance the skin's hulls hide them. A
 hull over its cap keeps the points that reach furthest out (hull_mesh), so it never grows past the part.
 
+Each hull wears its part's paint (paint_lods, after uvs.unwrap): a face takes the material of the part surface under
+it and its corners the UVs of that surface's island, so the livery Unity puts on the skin, and the Bare Metal swap,
+reach the hull too. Stock LOD1 meshes wear one flat grey (the Revoker's carry no colour at all), which on the Icarus
+dropped every livery at range.
+
 A hit lands on the part whose collider it touches, so colliders follow what the part is, and only parts get them
 (the Unity author makes a part of every mesh with mass and of every fuel cell). Compact parts use their LOD1 hull, or
 one capped at COLLIDER_TRIS. Curved skin panels and the wing and fin skins get up to PATCHES thin patches, each split
@@ -25,12 +30,19 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
+from mathutils.geometry import barycentric_transform
 
 import build_icarus as bi
 import stations
 
 MAX_HULL = 255
-LOD_GREY = (0.14, 0.14, 0.14, 1.0)  # the colour the Unity author checks LOD1 meshes for
+# A LOD1 face whose corners land on so little of the atlas that the GPU samples one texel for it: counted by check().
+POINT_UV_AREA = 1e-8
+# Surface.fit: how far a LOD1 face's UVs are drawn toward its centre, in turn, until they lie on its island, to within
+# UV_SLACK (half a texel of the 4096 atlas).
+UV_SCALES = (1.0, 0.7, 0.5, 0.35, 0.25, 0.17, 0.12, 0.08, 0.05, 0.03)
+UV_SLACK = 0.5 / 4096
 # Animated petals and seals, and the pylon blades and plugs the game shows and hides by station: no collider or LOD,
 # since a LOD1 hull would stay drawn at a distance whichever of them is hidden.
 SKIP = ("nozzle_petal_", "nozzle_seal_", "pylon_")
@@ -79,6 +91,7 @@ COLLIDER_HULLS = 160  # the same three: 102 base hulls, 40 clearance cuts, 17 ne
 
 def check(icarus):
     import budget
+    from uvs import SKIN
 
     lods = [o for o in bpy.data.collections["LOD1"].objects]
     cols = [o for o in bpy.data.collections["Colliders"].objects]
@@ -88,10 +101,33 @@ def check(icarus):
         problems.append("LOD1 %d triangles in all" % sum(sizes))
     if problems:
         raise ValueError("hulls check: LOD1 over %d per hull or %d in all: %s" % (LOD1_PER_HULL, LOD1_TOTAL, "; ".join(problems)))
+    # paint_lods: each hull wears only its part's materials, the skin wherever the part does, with UVs if it has them
+    skin_faces = point_faces = 0
+    for o in lods:
+        own = [m.name for m in o.parent.data.materials if m]
+        worn = [m.name if m else None for m in o.data.materials]
+        if not worn or any(m not in own for m in worn):
+            problems.append("%s wears %s, not its part's %s" % (o.name, worn, own))
+        elif SKIN in own and SKIN not in worn:
+            problems.append("%s lacks its part's %s" % (o.name, SKIN))
+        if o.parent.data.uv_layers and not o.data.uv_layers:
+            problems.append("%s has no UVs" % o.name)
+        if SKIN not in worn or not o.data.uv_layers:
+            continue
+        uv = o.data.uv_layers[0].data
+        for f in o.data.polygons:
+            if o.data.materials[f.material_index].name != SKIN:
+                continue
+            a, b, c = (uv[i].uv for i in f.loop_indices[:3])
+            skin_faces += 1
+            point_faces += abs((b - a).cross(c - a)) / 2 < POINT_UV_AREA
+    if problems:
+        raise ValueError("hulls check: LOD1 paint: " + "; ".join(problems))
     col_tris = sum(budget.tris(o) for o in cols)
-    print("hulls check PASS: LOD1 %d hulls, %d triangles, largest %d; colliders %d hulls (provisional cap %d), %d "
-          "triangles (provisional cap %d)" % (len(lods), sum(sizes), max(sizes), len(cols), COLLIDER_HULLS, col_tris,
-                                              BUDGET["colliders"]["cap"]))
+    print("hulls check PASS: LOD1 %d hulls, %d triangles, largest %d, %d skin faces (%d on a point of the atlas); "
+          "colliders %d hulls (provisional cap %d), %d triangles (provisional cap %d)"
+          % (len(lods), sum(sizes), max(sizes), skin_faces, point_faces, len(cols), COLLIDER_HULLS, col_tris,
+             BUDGET["colliders"]["cap"]))
 
 
 def tris_of(bm):
@@ -171,12 +207,6 @@ def attach(name, mesh, owner, col):
     obj.matrix_parent_inverse.identity()
     obj.matrix_basis.identity()
     return obj
-
-
-def lod_material():
-    mat = bpy.data.materials.get("LOD") or bpy.data.materials.new("LOD")
-    mat.diffuse_color = LOD_GREY
-    return mat
 
 
 def lod_tris(name):
@@ -485,7 +515,6 @@ def shells(owner, others):
 def build(icarus):
     colliders = bi.collection("Colliders")
     lods = bi.collection("LOD1")
-    lod_mat = lod_material()
     count = {"colliders": 0, "lods": 0}
     report, owned, cores = [], {}, []
     for owner in [o for o in icarus.all_objects
@@ -526,10 +555,6 @@ def build(icarus):
             owned[owner] = kept
         if lod is None:  # a hidden part, or a flat one (an antenna blade seen edge-on) with no far stand-in
             continue
-        lod.materials.append(lod_mat)
-        attr = lod.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
-        for d in attr.data:
-            d.color = LOD_GREY
         attach(name + "_lod1", lod, owner, lods)
         count["lods"] += 1
     for core in cores:
@@ -551,3 +576,126 @@ def build(icarus):
         for obj in col.objects:
             obj.display_type = "WIRE"
     return count
+
+
+# --- LOD1 paint ---------------------------------------------------------------------------------------------------
+
+class Surface:
+    """A part's render mesh as triangles in its own space, for the hull faces to find their paint on: a BVH over all
+    of them, and per triangle its material slot, corner UVs and island. An island joins triangles of one slot across
+    edges whose UVs match, so its UVs are one connected stretch of the atlas."""
+
+    def __init__(self, owner):
+        bm = bmesh.new()
+        bm.from_mesh(owner.data)
+        bmesh.ops.triangulate(bm, faces=list(bm.faces))
+        bm.faces.ensure_lookup_table()
+        layer = bm.loops.layers.uv.active
+        self.corners = [[l.vert.co.copy() for l in f.loops] for f in bm.faces]
+        self.uvs = [[l[layer].uv.to_3d() for l in f.loops] for f in bm.faces] if layer else None
+        self.slots = [f.material_index for f in bm.faces]
+        self.normals = [f.normal.copy() for f in bm.faces]
+        parent = list(range(len(bm.faces)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+
+        for e in bm.edges:
+            if len(e.link_faces) != 2:
+                continue
+            a, b = e.link_faces
+            if a.material_index != b.material_index:
+                continue
+            if layer and any((next(l for l in a.loops if l.vert == v)[layer].uv
+                              - next(l for l in b.loops if l.vert == v)[layer].uv).length > 1e-5 for v in e.verts):
+                continue
+            parent[find(a.index)] = find(b.index)
+        self.island = [find(i) for i in range(len(parent))]
+        bm.free()
+        self.tree = self.bvh(range(len(self.corners)))
+        self.islands = {}
+
+    def bvh(self, tris, corners=None):
+        tris = list(tris)
+        verts = [co for t in tris for co in (corners or self.corners)[t]]
+        return BVHTree.FromPolygons(verts, [(3 * k, 3 * k + 1, 3 * k + 2) for k in range(len(tris))]), tris
+
+    def island_trees(self, island):
+        """The island's triangles as a BVH in the part's space and one in the atlas's (UV, 0)."""
+        if island not in self.islands:
+            tris = [t for t, k in enumerate(self.island) if k == island]
+            self.islands[island] = (self.bvh(tris), self.bvh(tris, self.uvs)[0])
+        return self.islands[island]
+
+    def under(self, c, n):
+        """The triangle a hull face (centre c, outward normal n) covers: the nearest that faces the same way, else the
+        first the face's normal meets going in, else the nearest."""
+        tree, _ = self.tree
+        loc, _, nearest, _ = tree.find_nearest(c)
+        if nearest is not None and self.normals[nearest].dot(n) > 0:
+            return nearest
+        _, _, hit, _ = tree.ray_cast(c + n * 1e-3, -n)
+        return hit if hit is not None else nearest
+
+    def uv_near(self, island, p):
+        """UV of the island's surface point nearest p."""
+        (tree, tris), _ = self.island_trees(island)
+        loc, _, k, _ = tree.find_nearest(p)
+        t = tris[k]
+        a, b, c = self.corners[t]
+        return barycentric_transform(loc, a, b, c, *self.uvs[t]).to_2d()
+
+    def fit(self, island, centre, corners):
+        """The corner UVs drawn toward centre (a UV on the island) until the triangle they span lies on the island, so
+        the face samples no gutter or neighbouring island: a straight UV triangle between three points of a curved or
+        notched island can leave it. Tested at the corners, edge thirds and inside to within half an atlas texel; None
+        where no scale fits."""
+        _, flat = self.island_trees(island)
+        for scale in UV_SCALES:
+            uvs = [centre.lerp(uv, scale) for uv in corners]
+            if all(flat.find_nearest((uvs[0] * i + uvs[1] * j + uvs[2] * (3 - i - j)).to_3d() / 3)[3] <= UV_SLACK
+                   for i in range(4) for j in range(4 - i)):
+                return uvs
+        return None
+
+
+def paint_lods():
+    """Give every LOD1 hull its part's paint. A face takes the material slot of the part triangle it covers (Surface.under)
+    and each corner, drawn a tenth of the way to the face centre, the UV of the nearest point on that triangle's
+    island, drawn in further where the triangle would leave the island (Surface.fit): the face maps onto one stretch
+    of the atlas, never across the gutters between islands. Runs after uvs.unwrap, on the final render meshes."""
+    report = []
+    for lod in bpy.data.collections["LOD1"].objects:
+        owner = lod.parent
+        surface = Surface(owner)
+        bm = bmesh.new()
+        bm.from_mesh(lod.data)
+        bm.normal_update()
+        layer = bm.loops.layers.uv.new("UVMap") if surface.uvs else None
+        centre = sum((v.co for v in bm.verts), Vector()) / len(bm.verts)
+        covered = []
+        for f in bm.faces:
+            c = f.calc_center_median()
+            covered.append((f, c, surface.under(c, f.normal if f.normal.dot(c - centre) >= 0 else -f.normal)))
+        slots = list(dict.fromkeys(surface.slots[t] for _, _, t in covered))
+        # the slots go on first: to_mesh clamps each face's material index to the mesh's slots
+        for slot in slots:
+            lod.data.materials.append(owner.data.materials[slot])
+        for f, c, t in covered:
+            f.material_index = slots.index(surface.slots[t])
+            if layer:
+                island = surface.island[t]
+                middle = surface.uv_near(island, c)
+                corners = [surface.uv_near(island, l.vert.co.lerp(c, 0.1)) for l in f.loops]
+                # a middle on the island's rim leaves no room to fit: then the covered triangle's own middle
+                uvs = (surface.fit(island, middle, corners)
+                       or surface.fit(island, (sum(surface.uvs[t], Vector()) / 3).to_2d(), corners))
+                for l, uv in zip(f.loops, uvs or [middle] * 3):
+                    l[layer].uv = uv
+        bm.to_mesh(lod.data)
+        bm.free()
+        report.append("%s %s" % (lod.name, "/".join(owner.data.materials[s].name for s in slots)))
+    print("hulls: LOD1 paint: " + "; ".join(report))

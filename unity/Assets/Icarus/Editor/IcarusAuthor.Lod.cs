@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -26,18 +27,30 @@ namespace Icarus.Editor
             }
         }
 
-        // Two levels as stock: the full meshes, then the LOD1 hulls down to 0.1% of the screen.
+        // Two levels as stock, in one LODGroup per part where stock has one on the root. Physics unparents every part
+        // (AeroPart.CreateRB), and the game never touches a LODGroup, so a part that breaks off stays in the group that
+        // lists it: in the root's, debris beside the camera turned to its hull, or vanished, by the distance of the
+        // fuselage it left. Every group is sized to the whole aircraft, so the intact aircraft changes level at once.
         private static void FinishRoot(Build b)
         {
             b.Root.GetComponent<Rigidbody>().mass = EmptyMass;
-            var lod = b.Root.GetComponent<LODGroup>();
-            var renderers = b.Root.GetComponentsInChildren<Renderer>(true).Where(r => r.gameObject.layer != 3 && !(r is ParticleSystemRenderer)).ToArray();
-            var hulls = b.Lod1.ToArray();
-            var full = renderers.Except(hulls).ToArray();
-            lod.SetLODs(new[] { new LOD(0.05f, full), new LOD(0.001f, hulls) });
-            lod.RecalculateBounds();
-            lod.size = Mathf.Max(b.Size.x, b.Size.z);
-            b.Report.Add($"LODGroup: {full.Length} renderers to 5% of the screen, {hulls.Length} LOD1 hulls to 0.1%, size {lod.size:F2} m");
+            var aeroType = GameType("AeroPart");
+            var hulls = new HashSet<Renderer>(b.Lod1);
+            var size = Mathf.Max(b.Size.x, b.Size.z);
+            var groups = b.Root.GetComponentsInChildren<Renderer>(true).Where(r => r.gameObject.layer != 3 && !(r is ParticleSystemRenderer))
+                .GroupBy(r => r.GetComponentInParent(aeroType, true)).ToArray();
+            foreach (var group in groups)
+            {
+                if (group.Key == null)
+                    throw new InvalidDataException(group.First().name + " has no part to take its LOD from");
+                var lod = group.Key.GetComponent<LODGroup>();
+                if (lod == null)
+                    lod = group.Key.gameObject.AddComponent<LODGroup>();
+                lod.SetLODs(new[] { new LOD(0.05f, group.Where(r => !hulls.Contains(r)).ToArray()), new LOD(0.001f, group.Where(hulls.Contains).ToArray()) });
+                lod.RecalculateBounds();
+                lod.size = size;
+            }
+            b.Report.Add($"LODGroup: one on each of {groups.Length} parts, {groups.Sum(g => g.Count()) - hulls.Count} renderers to 5% of the screen, {hulls.Count} LOD1 hulls to 0.1%, size {size:F2} m");
         }
     }
 }

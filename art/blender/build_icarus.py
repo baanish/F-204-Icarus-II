@@ -1230,6 +1230,7 @@ def _build(repo):
     import uvs
 
     uvs.unwrap(TARGET)
+    hulls.paint_lods()
     import checks
 
     checks.intake_wing_junction(TARGET)

@@ -9,7 +9,7 @@ them. Icarus_Body stays the skin, the only slot that takes a livery.
 import bpy
 
 STOCK = ("jet_mechanical", "aircraft_structure", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear",
-         "fighter1_canopy", "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats", "LOD",
+         "fighter1_canopy", "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats",
          "light_red_off", "light_green_off", "slimelight_on")
 
 

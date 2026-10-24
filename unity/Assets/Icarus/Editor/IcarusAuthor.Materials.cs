@@ -15,7 +15,6 @@ namespace Icarus.Editor
         // art/blender/uvs.py ATLAS_SIZE: every skin, livery and damage map is this square.
         private const int SkinSize = 4096;
         private const string GlassSlot = "Icarus_Glass";
-        private const string LodSlot = "LOD";
         private const string SkinPath = SkinFolder + "/Icarus_skin.mat";
         private static readonly (string Slot, Color32 Colour, float Metallic, float Smoothness)[] FlatSlots =
         {
@@ -37,7 +36,7 @@ namespace Icarus.Editor
         private static readonly string[] StockSlots =
         {
             "jet_mechanical", "aircraft_structure", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear", "fighter1_canopy",
-            "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats", "LOD", "light_red_off", "light_green_off",
+            "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats", "light_red_off", "light_green_off",
             "slimelight_on",
         };
         private static Material AuthorSkin()
@@ -61,7 +60,7 @@ namespace Icarus.Editor
         {
             var glass = donor.transform.Find("fuselage/cockpit/canopyHingea/canopyHingeb/canopyFrame/canopyGlass_exterior")?.GetComponent<MeshRenderer>()?.sharedMaterial
                 ?? throw new MissingReferenceException("The Revoker's canopyGlass_exterior has no material");
-            var map = new Dictionary<string, Material> { { SkinSlot, skin }, { GlassSlot, glass }, { LodSlot, Load<Material>(Stock + "Material/LOD_PLACEHOLDER.mat") } };
+            var map = new Dictionary<string, Material> { { SkinSlot, skin }, { GlassSlot, glass } };
             foreach (var (slot, colour, metallic, smoothness) in FlatSlots)
                 map[slot] = AuthorFlat(slot, colour, metallic, smoothness);
             foreach (var slot in StockSlots)

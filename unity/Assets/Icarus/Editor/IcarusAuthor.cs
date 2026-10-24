@@ -161,9 +161,9 @@ namespace Icarus.Editor
         private static Dictionary<string, PartMeshes> ImportBlockout(Blockout blockout, Dictionary<string, Material> slots)
         {
             var slotOf = slots.GroupBy(s => s.Value).ToDictionary(g => g.Key, g => g.Select(s => s.Key).ToArray());
-            // Remapped only where some export mesh wears the slot (LOD on the hulls): a remap makes its material a
-            // dependency of the model, and the bundle would carry every stock material whether a mesh uses it or not.
-            var worn = new HashSet<string>(blockout.Parts.Values.SelectMany(p => p.Materials)) { LodSlot };
+            // Remapped only where some export mesh wears the slot (a LOD1 hull wears its part's): a remap makes its
+            // material a dependency of the model, and the bundle would carry every stock material whether a mesh uses it or not.
+            var worn = new HashSet<string>(blockout.Parts.Values.SelectMany(p => p.Materials));
             var remaps = slots.Where(s => worn.Contains(s.Key)).ToDictionary(s => s.Key, s => s.Value);
             var meshParts = blockout.Parts.Values.Where(p => p.Fbx != null).ToArray();
             var wanted = new HashSet<string>(meshParts.Select(p => BlockoutFolder + "/" + p.Fbx));
@@ -243,6 +243,8 @@ namespace Icarus.Editor
                         throw new InvalidDataException($"{collider.name} has {points} points and {collider.triangles.Length / 3} triangles; the limit is 255.");
                 }
                 (meshes.Render, meshes.Materials) = SkinFirst(meshes.Render, meshes.Materials, slots[SkinSlot]);
+                if (meshes.Lod1 != null)
+                    (meshes.Lod1, meshes.Lod1Materials) = SkinFirst(meshes.Lod1, meshes.Lod1Materials, slots[SkinSlot]);
                 result[part.Name] = meshes;
             }
             Debug.Log($"[Icarus] stage: imported {result.Count} meshes, {result.Values.Sum(m => m.Colliders.Length)} collider pieces, {result.Values.Count(m => m.Lod1 != null)} LOD1 hulls");
