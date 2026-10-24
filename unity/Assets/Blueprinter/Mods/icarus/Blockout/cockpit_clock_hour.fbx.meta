@@ -42,6 +42,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Icarus_Strut
+    second: {fileID: 2100000, guid: 3e2a7fe0163fa5945954c783b219bf30, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Icarus_WellDetail
     second: {fileID: 2100000, guid: 5c089d8b8839a004ca43bf67eafa7be0, type: 2}
   - first:

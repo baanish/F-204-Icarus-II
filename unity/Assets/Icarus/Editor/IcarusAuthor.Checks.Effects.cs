@@ -27,7 +27,7 @@ namespace Icarus.Editor
                 foreach (var formation in new[] { false, true })
                 {
                     var name = formation ? "light_formation_" + side : "navlight_" + side;
-                    var parent = b.Parts[(formation ? "skin_mid_" : "wing_skin_") + side].transform;
+                    var parent = b.Parts[(formation ? "skin_forward_" : "wing_skin_") + side].transform;
                     var lamp = parent.Find(name);
                     if (lamp == null) { p.Add(name + " is not on its skin part"); continue; }
                     var renderer = lamp.GetComponent<MeshRenderer>();
@@ -42,14 +42,17 @@ namespace Icarus.Editor
                     var triangles = mesh.triangles.Length / 3;
                     if (formation)
                     {
-                        if (mesh != b.Meshes[name].Render || triangles < 2 || triangles > 8)
-                            p.Add(name + " must use its generated 2 to 8 triangle strip");
+                        // art/blender/lights.py: two lenses of 16 triangles, each in a 24 triangle rim.
+                        if (mesh != b.Meshes[name].Render || triangles != 80 || mesh.subMeshCount != 2 || mesh.GetSubMesh(0).indexCount != 96)
+                            p.Add(name + " must use its generated two lenses (submesh 0, 32 triangles) and rims (48 triangles)");
+                        if (renderer.sharedMaterials.Length != 2 || renderer.sharedMaterials[1] != b.Meshes[name].Materials[1])
+                            p.Add(name + " lost its rim material");
                         if (renderer.sharedMaterial != formationOff || entry.FindPropertyRelative("litMaterial").objectReferenceValue != b.Donor.FormationLit
                             || entry.FindPropertyRelative("controlState").intValue != b.Donor.FormationState)
                             p.Add(name + " lost the Revoker's formation materials or switching");
                         if (entry.FindPropertyRelative("gear").objectReferenceValue != null || entry.FindPropertyRelative("objects").arraySize != 0
                             || lamp.childCount != 0 || lamp.GetComponents<Collider>().Length != 0)
-                            p.Add(name + " must be a bare strip without gear gating, effect objects or colliders");
+                            p.Add(name + " must be bare lenses without gear gating, effect objects or colliders");
                         if (Vector3.Distance(lamp.position, b.Blockout.Local(name)) > 0.001f)
                             p.Add(name + " moved off its generated skin position");
                     }
@@ -89,7 +92,7 @@ namespace Icarus.Editor
             }
             var bayAudio = b.Root.GetComponentsInChildren<AudioSource>(true).Where(a => a.transform.name.StartsWith("weaponbay", StringComparison.Ordinal)).ToArray();
             if (bayAudio.Length > 0) p.Add("bay audio remains");
-            return $"{navLights.arraySize} nav lights with parts, stock 14 triangle lenses, generated formation strips with stock switching, {effects.Length} effects and markers placed, no beacons, separate antennas or bay audio";
+            return $"{navLights.arraySize} nav lights with parts, stock 14 triangle lenses, generated formation lenses with stock switching, {effects.Length} effects and markers placed, no beacons, separate antennas or bay audio";
         }
     }
 }

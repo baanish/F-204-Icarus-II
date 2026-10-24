@@ -53,8 +53,9 @@ namespace Icarus.Editor
             }
             ejector.ApplyModifiedPropertiesWithoutUndo();
 
-            // Keep the stock nav lenses by reference. Formation strips use our surface-following mesh and the
-            // Revoker's off material and switching, so the wing and skin parts carry their own lights away.
+            // Keep the stock nav lenses by reference. Formation lenses use our surface-following mesh, the Revoker's
+            // off material and switching on the lens (slot 0, the one NavLights swaps) and the rim's own slot, so the
+            // wing and skin parts carry their own lights away.
             var navLights = new SerializedObject(b.Root.GetComponent(GameType("NavLights")));
             var formationOff = Load<GameObject>(DonorPrefab).GetComponentsInChildren<MeshRenderer>(true)
                 .First(r => r.name.StartsWith("slimelights", StringComparison.Ordinal)).sharedMaterial;
@@ -74,11 +75,13 @@ namespace Icarus.Editor
 
                 var formationName = "light_formation_" + side;
                 var formation = new GameObject(formationName) { layer = b.Root.layer }.transform;
-                formation.SetParent(b.Parts["skin_mid_" + side].transform, true);
+                formation.SetParent(b.Parts["skin_forward_" + side].transform, true);
                 formation.SetPositionAndRotation(b.Blockout.Local(formationName), b.Blockout.Rotation(formationName));
                 formation.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes[formationName].Render;
                 var formationRenderer = formation.gameObject.AddComponent<MeshRenderer>();
-                formationRenderer.sharedMaterial = formationOff;
+                var formationMaterials = (Material[])b.Meshes[formationName].Materials.Clone();
+                formationMaterials[0] = formationOff;
+                formationRenderer.sharedMaterials = formationMaterials;
                 b.Visuals[formationName] = formation;
                 var entries = Prop(navLights, "navLights");
                 entries.arraySize++;
@@ -86,11 +89,11 @@ namespace Icarus.Editor
                 entry.FindPropertyRelative("renderer").objectReferenceValue = formationRenderer;
                 entry.FindPropertyRelative("objects").arraySize = 0;
                 entry.FindPropertyRelative("litMaterial").objectReferenceValue = b.Donor.FormationLit;
-                entry.FindPropertyRelative("part").objectReferenceValue = b.Part("skin_mid_" + side);
+                entry.FindPropertyRelative("part").objectReferenceValue = b.Part("skin_forward_" + side);
                 entry.FindPropertyRelative("gear").objectReferenceValue = null;
                 entry.FindPropertyRelative("controlState").intValue = b.Donor.FormationState;
                 b.Placed.Add(formation);
-                lights.Add($"{formation.name} on skin_mid_{side}");
+                lights.Add($"{formation.name} on skin_forward_{side}");
 
                 var tipVertices = WorldVertices(skin, b.Meshes["wing_skin_" + side].Render);
                 var outer = tipVertices.Max(v => Mathf.Abs(v.x));

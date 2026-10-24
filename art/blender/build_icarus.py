@@ -522,11 +522,19 @@ def inward_fix(obj, axis_point):
 
 
 def build_probe(p, mat):
+    """Pitot boom: a rounded tip, a straight boom, and a base that flares smoothly into the radome."""
     pr = p["probe"]
     z = p["fuselage"][0][2]
-    profile = [(-pr["length"], 0.008), (-pr["length"] + 0.05, pr["radius"]), (-pr["base_length"], pr["radius"]),
-               (-0.1, pr["base_radius"] * 0.5), (0.05, pr["base_radius"]), (0.30, pr["base_radius"])]
-    rings = [[P(s, r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / 24 for k in range(24)]]
+    tip = -pr["length"]
+    profile = [(tip, 0.008), (tip + 0.015, 0.016), (tip + 0.05, pr["radius"]), (-pr["base_length"], pr["radius"])]
+    flare = 6
+    for i in range(1, flare + 1):
+        t = i / flare
+        profile.append((-pr["base_length"] + t * (pr["base_length"] + 0.05),
+                        pr["radius"] + (pr["base_radius"] - pr["radius"]) * t * t * (3 - 2 * t)))
+    profile.append((0.30, pr["base_radius"]))
+    sides = 32
+    rings = [[P(s, r * math.cos(a), z + r * math.sin(a)) for a in [2 * math.pi * k / sides for k in range(sides)]]
              for s, r in profile]
     return finish(loft("probe", rings, tip_front=P(-pr["length"] - 0.02, 0.0, z)), mat)
 
@@ -1165,7 +1173,7 @@ def _build(repo):
     import stations
 
     fuselage = build_fuselage(p, mats["body"], mats["duct"])
-    parts = [fuselage, build_probe(p, mats["body"])]  # the radome part is all skin, probe included
+    parts = [fuselage, build_probe(p, mats["strut"])]  # a bare-metal boom in every livery
     parts += gear.cut_doors(fuselage)
     parts += canopy.build(p, mats)
     parts += propulsion.build(p, mats)
