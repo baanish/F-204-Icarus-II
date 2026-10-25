@@ -50,7 +50,7 @@ def build():
         "metal": material("Icarus_Nozzle", (0.25, 0.22, 0.20, 1.0), 0.9, 0.35),
         # The fuselage frames and break walls: dark, as stock shows structure at a break (the Vagrant's closed,
         # self-shadowed jet_mechanical and Matte_black), since open frames lit by the sky read white on a light trim.
-        # Not jet_mechanical itself: parts.open_bays finds the gear bays' faces by that slot.
+        # Not Icarus_Duct: parts.open_bays finds the gear bays' faces by that slot.
         "frame": material("Icarus_Frame", (0.032, 0.034, 0.038, 1.0), 0.6, 0.5),
         "petal": material("Icarus_Petal", (0.46, 0.44, 0.42, 1.0), 0.85, 0.3),
         "seal": material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4),
@@ -65,5 +65,8 @@ def build():
         "avionics": stock("jet_mechanical"),
         "radar": stock("jet_mechanical"),
         "cockpit": stock("jet_mechanical"),
-        "gear_bay": stock("jet_mechanical"),
+        # The gear wells' walls and roofs: the opaque dark of the duct backplates. A jet_mechanical face more than
+        # about 0.38 m across its trim strip reaches the stock texture's alpha-clipped lightening holes
+        # (trims.clipped), and a bay wall that wide showed the sky through the open doors.
+        "gear_bay": material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8),
     }

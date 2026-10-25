@@ -144,8 +144,7 @@ def build(p, mats):
             pos = bi.P(lamp_le + lamp_chord * 0.35, side * lamp_x,
                        lamp_z + bi.airfoil(0.35) * w["thickness"] * lamp_chord)
         else:
-            g = gear.GEAR["nose"]
-            pos = bi.P(g["wheel_s"] - 0.085, 0.0, gear.GEAR["ground_z"] + g["wheel_d"] + 0.15)
+            pos = gear.landing_lamp()
         obj = bi.empty(name, Matrix.Translation(pos))
         obj["light"], obj["colour"] = kind, colour
         made.append(obj)

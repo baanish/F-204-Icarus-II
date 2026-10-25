@@ -29,8 +29,9 @@ SKIN = "Icarus_Body"
 # Triangles per component: target and cap (budget.py sums them). Caps are ceilings; the references sit lower.
 BUDGET = {
     # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores); the
-    # conformal trough's NACA ramp rings brought the skin to about 19,800.
-    "fuselage_skin": {"target": 19800, "cap": 19800, "objects": ("radome", "skin_", "dorsal_cover")},
+    # conformal trough's NACA ramp rings brought the skin to about 19,800, the gear doors' holes and the ring kept
+    # short of the rear ramp's deep end (build_icarus.fuselage_stations) to about 20,300.
+    "fuselage_skin": {"target": 20300, "cap": 20300, "objects": ("radome", "skin_", "dorsal_cover")},
     "wing_box_L": {"target": 2000, "cap": 2000, "objects": ("wing_skin_L",)},
     "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
@@ -38,13 +39,18 @@ BUDGET = {
     "stabilator": {"target": 1700, "cap": 1700, "objects": ("stabilator_visible",)},
     "fins": {"target": 2020, "cap": 2020, "objects": ("fin_skin", "ventral_fin")},
     # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole, and the speed
-    # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_aft) about 570, from the skin's.
-    "structure_cores": {"target": 12100, "cap": 12200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
+    # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_aft) about 570, from the skin's. The
+    # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more.
+    "structure_cores": {"target": 14700, "cap": 14800, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
-    "fuel_cells": {"target": 5000, "cap": 5000, "objects": ("fuel_",)},
-    "engine": {"target": 1500, "cap": 1500, "objects": ("engine_core",)},
-    "radar_avionics_cockpit": {"target": 1500, "cap": 1500, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
+    # The gear wells' cuts through the aft and aux cells take about 1,200.
+    "fuel_cells": {"target": 6200, "cap": 6250, "objects": ("fuel_",)},
+    "engine": {"target": 600, "cap": 700, "objects": ("engine_core",)},
+    "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
 }
+BAY_CUT_GROW = 0.003  # structure cut back this far beyond each gear well box (bay_cutters)
+FRONT_HINGE_CLEAR = 0.03  # a gear well's floor opened this far ahead of a front-hinged door's hinge (open_bays)
+GEAR_DOOR_SPECS = {spec[0]: spec for spec in gear.GEAR["doors"]}
 # Review close-ups: name -> (camera location, look-at point), Blender axes.
 CLOSEUPS = {
     "nose": (Vector((1.6, -10.6, 0.6)), Vector((0.0, -7.3, 0.05))),
@@ -449,16 +455,15 @@ def open_bays(icarus):
     """Open the gear wells to view from below, in the structure cores' render meshes only (their hulls are built).
     The internals build each bay as a closed box clipped to the inside of the skin and joined into its core, so from
     below a bay read as shut, its walls facing away from anyone looking in. The floor under the shut doors goes, the
-    rest of the bay turns to face inward, and the frames and stringers running through the bay, the aft core's
-    included, are cut back to its walls."""
+    rest of the bay turns to face inward, and the frames and stringers running through the bay are cut back to its
+    walls."""
     O = bpy.data.objects
-    nose, main = interior.INTERNALS["nose_gear_bay"], interior.INTERNALS["main_gear_bay"]
-    main_boxes = [main["box"] + (side * main["x"],) for side in (1, -1)]
-    wells = {"fuselage_forward": ([nose["box"] + (0.0,)], ("gear_door_N_L", "gear_door_N_R")),
+    main_boxes = interior.bay_boxes("main_gear_bay", 1) + interior.bay_boxes("main_gear_bay", -1)
+    wells = {"fuselage_forward": (interior.bay_boxes("nose_gear_bay"), ("gear_door_N_L", "gear_door_N_R")),
              "fuselage_mid": (main_boxes, ("gear_door_main_L", "gear_door_main_R"))}
     for core_name, (boxes, doors) in wells.items():
         core = O[core_name]
-        bay_slot = [m.name for m in core.data.materials].index("jet_mechanical")
+        bay_slot = [m.name for m in core.data.materials].index("Icarus_Duct")  # materials: "gear_bay"
         door_trees = [checks.tree(O[d + "_visible"]) for d in doors] + gear.bay_doors(core_name)
         # the structure members, less the bay boxes run on down through the skin
         members = core.copy()
@@ -478,16 +483,42 @@ def open_bays(icarus):
         to_world, rot = core.matrix_world, core.matrix_world.to_3x3()
 
         def under_door(f):
-            o, n = to_world @ f.calc_center_median(), (rot @ f.normal).normalized()
-            return n.z < -0.25 and any(t.ray_cast(o, n, 0.12)[0] is not None for t in door_trees)
+            # cast from a little inside the face, at its centre and halfway to each corner (a face under a pair of
+            # doors has its centre over the seam between them): a well run out to the skin can lie just outside a
+            # door's skin
+            n = (rot @ f.normal).normalized()
+            c = f.calc_center_median()
+            starts = [to_world @ c] + [to_world @ ((c + v.co) / 2) for v in f.verts]
+            return n.z < -0.25 and any(t.ray_cast(o - n * 0.03, n, 0.15)[0] is not None for o in starts for t in door_trees)
 
-        bmesh.ops.delete(bm, geom=[f for f in bm.faces if under_door(f)], context="FACES")
+        def before_hinge(f):
+            # the floor just ahead of a front hinge, which its door's outer face sweeps as it swings past square
+            n = (rot @ f.normal).normalized()
+            p = to_world @ f.calc_center_median()
+            for o, u, t0, t1 in front_hinges:
+                along = (p - o).dot(u)
+                if p.y < o.y and t0 <= along <= t1 and (p - o - u * along).length < FRONT_HINGE_CLEAR:
+                    return n.z < -0.25
+            return False
+
+        front_hinges = []
+        for d in doors:
+            if GEAR_DOOR_SPECS[d[:-2] + "_L"][5] == "front":
+                h, door = O[d].matrix_world, O[d + "_visible"]
+                o, u = h.translation, h.col[0].xyz.normalized()
+                along = [(door.matrix_world @ v.co - o).dot(u) for v in door.data.vertices]
+                front_hinges.append((o, u, min(along), max(along)))
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if under_door(f) or before_hinge(f)], context="FACES")
         bmesh.ops.reverse_faces(bm, faces=bm.faces)
         before = len(bm.faces)
         bm.from_mesh(cut)  # appends the cut members, on the members' slots; the cut faces take the first, structure
         bm.faces.ensure_lookup_table()
         for f in bm.faces[before:]:
             f.material_index = min(f.material_index, len(core.data.materials) - 1)
+        # The well is exterior hardware: seen through the open doors, never an enclosed part (checks.interior_visibility).
+        hardware = bm.faces.layers.int.get("exterior_hardware") or bm.faces.layers.int.new("exterior_hardware")
+        for f in bm.faces:
+            f[hardware] = int(f.material_index == bay_slot)
         bm.to_mesh(core.data)
         bm.free()
         for o in cutters + [members]:
@@ -495,17 +526,19 @@ def open_bays(icarus):
             bpy.data.objects.remove(o)
             bpy.data.meshes.remove(me)
         bpy.data.meshes.remove(cut)
-    # The main bays run on past MID_END into the aft core's break wall and first stringers.
-    cut_structure(icarus, O["fuselage_aft"], bay_cutters(icarus, main_boxes))
+    # The nose well runs on past FORWARD_END into the mid core's first frame and stringers.
+    cut_structure(icarus, O["fuselage_mid"], bay_cutters(icarus, interior.bay_boxes("nose_gear_bay")))
 
 
 def bay_cutters(icarus, boxes):
-    """A box cutter, world space, for each gear bay box (s0, s1, half width, z0, z1, centre x), run on down through
-    the skin."""
+    """A box cutter, world space, for each gear bay box (s from, s to, x from, x to, z from, z to), run on down
+    through the skin. Each is BAY_CUT_GROW wider than its box: the well's own boxes grow by fractions of a millimetre
+    (internals.boxes_solid), and a member cut on the box's plane would end just inside the well's wall, in view."""
     cutters = []
-    for s0, s1, hw, z0, z1, xc in boxes:
+    g = BAY_CUT_GROW
+    for s0, s1, x0, x1, z0, z1 in ((s0 - g, s1 + g, x0 - g, x1 + g, z0, z1 + g) for s0, s1, x0, x1, z0, z1 in boxes):
         me = bpy.data.meshes.new("bay_cutter")
-        me.from_pydata([bi.P(s, xc + sx * hw, z) for s in (s0, s1) for sx in (-1, 1) for z in (z0 - 0.3, z1)], [],
+        me.from_pydata([bi.P(s, x, z) for s in (s0, s1) for x in (x0, x1) for z in (z0 - 0.3, z1)], [],
                        [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)])
         cutter = bpy.data.objects.new("bay_cutter", me)
         icarus.objects.link(cutter)

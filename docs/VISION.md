@@ -27,7 +27,7 @@ First-cut numbers, predicted offline from a replica of the game's flight model a
 | | First cut | Real F-104G |
 |---|---|---|
 | Empty mass | 5,800 kg | 6,348 kg |
-| Internal fuel | 2,400 kg | |
+| Internal fuel | 2,320 kg | |
 | Core thrust / afterburner | 65 kN / +45 kN | 44 kN / 70 kN total (J79-GE-11A) |
 | Wing area | 18.2 m² | 18.2 m² |
 | Level top speed | Mach 2.58 at 10 km, Mach 2.83 at 15 km | about Mach 2 |

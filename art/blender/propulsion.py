@@ -166,11 +166,10 @@ def check_actuation():
 
 def build_ducts(p, mats):
     """Intake ducts, faces pointing inward, from just inside the lip to the compressor face's dark backplate."""
-    rows = bi.resample(p["duct"], bi.spaced(p["duct"][0][0], p["duct"][-1][0], 16))
+    rows = bi.resample(p["duct"], bi.duct_stations(p, p["duct"][0][0], p["duct"][-1][0], 16))
     parts = []
     for side, name in ((1, "duct_L"), (-1, "duct_R")):
-        rings = [[bi.P(s, side * (cx + r * math.cos(a)), cz + r * math.sin(a))
-                  for a in [2 * math.pi * k / 32 for k in range(32)]] for s, cx, cz, r in rows]
+        rings = [[bi.P(s, side * x, z) for x, z in bi.duct_section(p, s, cx, cz, r)] for s, cx, cz, r in rows]
         obj = bi.loft(name, rings, cap_back=True)
         bi.inward_fix(obj, Vector((side * rows[0][1], rows[0][0] - bi.S0, rows[0][2])))
         parts.append(bi.finish(obj, mats["mechanical"]))
@@ -186,13 +185,17 @@ def compressor_faces(p, mats):
     spinner = [bi.P(s, cx + 0.085 * math.cos(a), cz + 0.085 * math.sin(a))
                for a in [2 * math.pi * k / 12 for k in range(12)]] + [bi.P(s - 0.15, cx, cz)]
     pieces = [(spinner, [(k, (k + 1) % 12, 12) for k in range(12)] + [tuple(range(12))])]
+    floor = min(z for _, z in bi.duct_section(p, s, cx, cz, r))  # the duct's flattened underside, if any
     for k in range(14):
         a = 2 * math.pi * (k + 0.5) / 14
         radial = Vector((math.cos(a), 0, math.sin(a)))
         frame = (Matrix.Translation(bi.P(s - 0.035, cx, cz)) @
                  Matrix((Vector((math.sin(a), 0, -math.cos(a))), Vector((0, 1, 0)), radial)).transposed().to_4x4() @
                  Matrix.Rotation(math.radians(25), 4, "Z"))
-        pieces.append(box(Vector((-0.002, -0.025, 0.08)), Vector((0.002, 0.025, r - 0.004)), frame))
+        reach = r - 0.004
+        if math.sin(a) < -1e-6:  # a vane below the axis stops 6 mm short of the floor across its 25 mm chord
+            reach = min(reach, (cz - floor - 0.006 - 0.025 * abs(math.cos(a))) / -math.sin(a))
+        pieces.append(box(Vector((-0.002, -0.025, 0.08)), Vector((0.002, 0.025, reach)), frame))
     verts, faces = joined(pieces)
     parts = []
     for side, sd in ((1, "L"), (-1, "R")):

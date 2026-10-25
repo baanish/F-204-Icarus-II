@@ -33,9 +33,11 @@ import build_icarus as bi
 # and tail, short enough that the rear hook stays under the tail's full width.
 PYLONS = {"inner": 0.45, "centre": 0.35, "length": 1.75, "depth": 0.08, "half": 0.053, "nose": 0.10, "tail": 0.12,
           "bury": 0.008, "plug": 0.03}
-# The conformal hardpoint (left; the right mirrors it), Blender (x, s, z): x and s held since P0, z raised onto the
-# trough floor, INSET above the skin there (Stores rule 9). The floor sits GAP above the highest body.
-CONFORMAL = {"x": 0.55, "s": 7.425, "z": -0.188}
+# The conformal hardpoint (left; the right mirrors it), Blender (x, s, z): x held since P0, s 0.22 m ahead of P0's
+# 7.425 so the missiles' tail fins, which stand up through the trough's sides into the belly, keep Stores rule 12's
+# 0.05 m from the main wheels stowed flat behind them (gear.GEAR["main"]), z raised onto the trough floor, INSET above
+# the skin there (Stores rule 9). The floor sits GAP above the highest body.
+CONFORMAL = {"x": 0.55, "s": 7.205, "z": -0.188}
 INSET = 0.005
 # The trough clears each body by CLEAR. It is cut GAP wide: blended_ring samples a section by rays from its centre,
 # and a chord between two rays cuts up to 8 mm into a concave cut where it turns (96 rays a ring).
@@ -47,15 +49,18 @@ DUCT_CLEARANCE = 0.03
 # deep end, to 0.083 of it at the tip (91.7 per cent divergence). Over the first RAMP_FLATTEN of the ramp the store's
 # round arch opens into a flat floor with RAMP_CORNER corners, inside the arch (sinking RAMP_SINK as fast as the floor
 # rises, blended over RAMP_BLEND), so the walls start from the arch's own lips on the skin and the edge runs on. Past
-# each tip the skin's lip columns ease back to even angles over the ramp's fade (build_icarus.blended_ring); it must end
-# before the gear doors' rings (gear.GEAR["doors"]: the nose doors end at s 5.23, the main doors start at 9.62), where
-# a door takes its outline from the columns, and run long enough that it opens no fan of thin faces and doesn't twist
-# the wing root's fillet. RAMP_ENDS, by the ramp's way along s: the angle and the fade. The report tested 5, 7 and 9.5
-# degree ramps. Aft, 9.5 leaves 0.18 m for the fade; forward, where the side of the body is steep and the columns have
-# far to go, the ramp is shortened to 14 degrees to leave 0.15 m before the nose doors.
+# each tip the skin's lip columns ease back to even angles over the ramp's fade (build_icarus.blended_ring); run long
+# enough that it opens no fan of thin faces and doesn't twist the wing root's fillet, it must stay clear of every gear
+# door that takes its outline from the columns it moves (gear.GEAR["doors"]): forward, the nose well's wide doors end
+# where the fade begins and only the keel's columns, which keep their even angles, open over it; aft, the main wheels'
+# forward door runs on the lobe outboard of the lip and steps in behind the ramp's tip over the fade's fan of faces
+# (gear.patch_cells), and their aft door starts where the fade ends. RAMP_ENDS, by the
+# ramp's way along s: the angle and the fade. The report tested 5, 7 and 9.5 degree ramps; forward, where the side of
+# the body is steep and the columns have far to go, 14 degrees; aft, 20 degrees and a 0.12 m fade end it by s 9.08,
+# where the main wheels' aft door begins, ahead of where the wheel, carrier and leg come in through the skin.
 NACA_WALL = (0.0, 0.004, 0.084, 0.234, 0.386, 0.534, 0.612, 0.688, 0.764, 0.842, 0.917)
 RAMP_CORNER, RAMP_FLATTEN, RAMP_BLEND, RAMP_SINK = 0.015, 0.15, 0.01, 0.5
-RAMP_ENDS = {-1: {"deg": 14.0, "fade": 0.15}, 1: {"deg": 9.5, "fade": 0.18}}
+RAMP_ENDS = {-1: {"deg": 14.0, "fade": 0.15}, 1: {"deg": 20.0, "fade": 0.12}}
 # The loft's rings over each ramp, as fractions of its length from the deep end, and past its tip, as fractions of its
 # fade.
 RAMP_RINGS, FADE_RINGS = (0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0), (1 / 3, 2 / 3, 1.0)
@@ -377,14 +382,16 @@ def ramp_lips(p, s):
 
 def collider_splits():
     """Planes (point, normal), Blender world space, that no skin collider patch may cross (hulls.groups): the
-    trough's centre line each side, and level planes through each body's axis and 45 degrees up its arch, so no
-    patch hull spans the trough or cuts the corner of its arch."""
+    trough's centre line each side, level planes through each body's axis and 45 degrees up its arch, and a cross
+    plane at each ramp's deep end, so no patch hull spans the trough, cuts the corner of its arch or takes in a ramp's
+    closing walls beside the stores."""
     levels = set()
     for m in MOUNTS.values():
         a = missile_axis(m, CONFORMAL["s"])[1]
         levels |= {round(a, 2), round(a + math.sqrt(0.5) * (radius(m) + GAP), 2)}
     return [(Vector((side * CONFORMAL["x"], 0, 0)), Vector((1, 0, 0))) for side in (1, -1)] + \
-        [(Vector((0, 0, z)), Vector((0, 0, 1))) for z in sorted(levels)]
+        [(Vector((0, 0, z)), Vector((0, 0, 1))) for z in sorted(levels)] + \
+        [(bi.P(rings[0], 0, 0), Vector((0, 1, 0))) for _, _, rings in ramp_stations(bi.PARAMS)]
 
 
 def body_points(m, side, step=0.05):

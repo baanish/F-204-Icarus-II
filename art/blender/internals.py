@@ -21,19 +21,25 @@ INTERNALS = {
     "radar": {"s": (0.30, 1.55), "dish_s": 0.95, "dish_r": 0.30, "mass_kg": 120},
     "avionics_nose": {"box": (1.55, 2.30, 0.30, -0.25, 0.42), "mass_kg": 90},  # s0, s1, half width, z0, z1
     "cockpit_tub": {"box": (2.35, 4.90, 0.38, -0.05, 0.78), "mass_kg": 260},
-    "avionics_aft": {"box": (4.95, 5.15, 0.42, 0.00, 0.70), "mass_kg": 140},  # above the nose gear bay  # a shelf; the gun bay holds fuel
+    # A shelf above the nose well, the gun bay holding fuel; its floor clears the nose leg's sleeve stowed.
+    "avionics_aft": {"box": (4.95, 5.15, 0.42, 0.06, 0.70), "mass_kg": 140},
     # Fuel, after the F-104S layout: an auxiliary cell in the old gun bay (as on the gunless F-104), the forward
     # main tank, three connected aft cells (the centre one between the intake ducts, the side ones wrapping round
     # them), and cells in the strakes and outboard wings. No fuel over or around the engine: a leak there is a fire. Each fuselage row: (s0, s1,
     # inset from the skin, z floor, x from, x to). A cell fills the skin section above its floor between its x
-    # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds.
-    "design_fuel_kg": 2400,
+    # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds: R7's 2,400 kg
+    # trimmed to what the cells hold round the F-104-style gear wells (the aft cells' run on to the engine face gives
+    # back about half of what the wells take).
+    "design_fuel_kg": 2320,
     "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct
-    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.22, -9.0, 9.0)},
+    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.215, -9.0, 9.0)},
     "fuel_forward_main": {"tank": (5.95, 7.70, 0.04, 0.05, -9.0, 9.0)},
-    "fuel_aft_center": {"tank": (7.75, 9.30, 0.04, -0.22, -0.24, 0.24)},
-    "fuel_aft_L": {"tank": (7.75, 9.30, 0.04, -0.15, 0.26, 0.92)},  # outboard of 0.92 is the strake cell
-    "fuel_aft_R": {"tank": (7.75, 9.30, 0.04, -0.15, -0.92, -0.26)},
+    # The aft cells run on to 9.55, short of the compressor faces at 9.60 (none round the engine); the gear wells
+    # cut their lower lobes, as the F-104's main wells lie under its aft centre cell.
+    "fuel_aft_center": {"tank": (7.75, 9.55, 0.04, -0.22, -0.24, 0.24)},
+    "fuel_aft_L": {"tank": (7.75, 9.55, 0.04, -0.15, 0.26, 0.92)},  # outboard of 0.92 is the strake cell
+    "fuel_aft_R": {"tank": (7.75, 9.55, 0.04, -0.15, -0.92, -0.26)},
+    "gear_cut": 0.015,  # a fuel cell's wall this far from a gear well's
     "strake_tank": {"x": (1.10, 1.88), "f": (0.06, 0.70)},  # each strake: span and chord fraction, ahead of the flap
     "wing_tank": {"x": (1.95, 3.05), "f": (0.17, 0.68)},  # the box between the spars, outboard of the crank
     # z0 is the axis height at the face, z1 at the nozzle; the face sits high enough for the stowed main wheels below.
@@ -63,11 +69,24 @@ INTERNALS = {
                   "clearance": 0.015, "hole_points": 12},
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
     "spars": {"front_f": 0.175, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
-    # The nose leg folds forward into its bay under the cockpit floor; the bay's roof stays under fuel_aux's floor.
-    "nose_gear_bay": {"box": (4.06, 5.32, 0.31, -0.55, -0.23), "mass_kg": 0},
-    # Each main leg folds inboard and its oleo and wheel fold again into a bay from the keel to the lobe; the bay's
-    # roof runs on into the engine and the wing root, which close it.
-    "main_gear_bay": {"box": (9.62, 11.15, 0.41, -0.50, 0.25), "x": 0.45, "mass_kg": 0},
+    # The gear wells, each a union of boxes (s from, s to, x from, x to, z from, z to) clipped to just inside the
+    # skin (bay_inset), round the stowed gear and the path it folds through (gear.GEAR). The nose well: the upright
+    # wheel between the cockpit floor's aft end and the aux cell, then a narrow slot back to the leg's trunnion under
+    # the aux cell, which gives way to it. Each main well, left side (the right mirrors it): the flat tyre under the
+    # duct's flattened underside, the carrier and leg along the keel back to the trunnion, the lobe's flank the wheel
+    # comes in through, and the leg's way down aft of the trough.
+    # A well runs out to the skin only over its doors' holes; elsewhere it stays clear of the skin.
+    "nose_gear_bay": {"boxes": [(4.60, 4.90, -0.28, 0.28, -0.56, -0.052), (4.90, 5.035, -0.28, 0.28, -0.56, 0.05),
+                                (5.025, 5.25, -0.105, 0.105, -0.56, 0.05), (5.025, 5.10, -0.25, 0.25, -0.56, 0.05),
+                                (5.025, 5.25, -0.17, 0.17, -0.475, 0.05),
+                                (5.025, 5.25, -0.25, 0.25, -0.40, 0.05), (5.25, 5.354, -0.105, 0.105, -0.56, 0.0),
+                                (5.354, 5.45, -0.105, 0.105, -0.56, 0.0), (5.45, 5.905, -0.105, 0.105, -0.56, -0.15)],
+                      "mass_kg": 0},
+    "main_gear_bay": {"boxes": [(8.77, 9.49, 0.0, 0.46, -0.27, 0.09), (8.77, 9.49, 0.46, 0.70, -0.17, 0.09),
+                                (8.785, 9.108, 0.50, 0.96, -0.56, 0.09), (8.80, 9.108, 0.40, 0.50, -0.56, 0.09),
+                                (9.06, 10.78, 0.55, 0.97, -0.56, 0.09), (9.06, 10.78, 0.17, 0.97, -0.56, -0.10)],
+                      "mass_kg": 0},
+    "bay_inset": 0.0005,  # the gear wells' walls this far inside the skin (the doors' own gap is gear.DOOR_GAP)
 }
 
 
@@ -76,6 +95,37 @@ def box(name, s0, s1, hw, z0, z1, x=0.0):
     # index = s*4 + side*2 + z
     faces = [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)]
     return bi.mesh_object(name, v, faces)
+
+
+def bay_boxes(name, side=1):
+    """A gear well's boxes (s from, s to, x from, x to, z from, z to), mirrored for the right main well."""
+    boxes = INTERNALS[name]["boxes"]
+    return boxes if side > 0 else [(s0, s1, -x1, -x0, z0, z1) for s0, s1, x0, x1, z0, z1 in boxes]
+
+
+def boxes_solid(name, boxes):
+    """One closed solid, the union of axis-aligned boxes (s from, s to, x from, x to, z from, z to). Each box is grown
+    by its own fraction of a millimetre, so no two share a face plane: the exact union leaves coplanar faces
+    non-manifold, and a cutter that is not closed corrupts what it cuts."""
+    objs = [outward(box(name, s0 - e, s1 + e, (x1 - x0) / 2 + e, z0 - e, z1 + e, x=(x0 + x1) / 2))
+            for i, (s0, s1, x0, x1, z0, z1) in enumerate(boxes) for e in [0.0003 * (i + 1)]]
+    first = objs[0]
+    for other in objs[1:]:
+        mod = first.modifiers.new("union", "BOOLEAN")
+        mod.operation, mod.solver, mod.object = "UNION", "EXACT", other
+    bpy.context.view_layer.update()
+    baked = bpy.data.meshes.new_from_object(first.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    old = first.data
+    first.modifiers.clear()
+    first.data = baked
+    bpy.data.meshes.remove(old)
+    for other in objs[1:]:
+        me = other.data
+        bpy.data.objects.remove(other, do_unlink=True)
+        bpy.data.meshes.remove(me)
+    first.name = baked.name = name
+    drop_degenerate(first)
+    return outward(first)
 
 
 @bi.geometry_cache.ring
@@ -158,11 +208,11 @@ def resample_outline(poly, n):
 
 def duct_cutter(p, clearance):
     """Closed solids around each intake duct and its shock cone, grown by clearance, to cut out of the fuel cells."""
-    rows = bi.resample(p["duct"], bi.spaced(p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 14))
+    rows = bi.resample(p["duct"], bi.duct_stations(p, p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 14))
     cutters = []
     for side in (1, -1):
-        rings = [[bi.P(s, side * (cx + (r + clearance) * math.cos(a)), cz + (r + clearance) * math.sin(a))
-                  for a in [2 * math.pi * k / 32 for k in range(32)]] for s, cx, cz, r in rows]
+        rings = [[bi.P(s, side * x, z) for x, z in bi.duct_section(p, s, cx, cz, r, grow=clearance)]
+                 for s, cx, cz, r in rows]
         cutters.append(outward(bi.loft("duct_cutter_%d" % side, rings, cap_back=True, cap_front=True)))
         sc = p["shock_cone"]
         zc = p["intake"][0][2]
@@ -455,26 +505,31 @@ def _build(p, mats):
     checks.compartment_clearance(parts, bpy.data.objects["fuselage"], I["compartment_inset"])
     bpy.data.objects.remove(inner, do_unlink=True)
     inner = inner_solid(p, I["compartment_inset"], 0.25, 5.35, step=0.25, count=48)
-    for name, role in (("cockpit_tub", "cockpit"), ("avionics_aft", "avionics"), ("nose_gear_bay", "gear_bay")):
+    for name, role in (("cockpit_tub", "cockpit"), ("avionics_aft", "avionics")):
         s0, s1, hw, z0, z1 = I[name]["box"]
         obj = bi.finish(clip_to(box(name, s0, s1, hw, z0, z1), inner), mats[role], smooth=False)
         parts.append(tag(obj, role, "fuselage", I[name]["mass_kg"]))
     bpy.data.objects.remove(inner, do_unlink=True)
-    mg = I["main_gear_bay"]
-    inner = inner_solid(p, I["compartment_inset"], mg["box"][0] - 0.15, mg["box"][1] + 0.15, step=0.15)
-    for side, suffix in ((1, "_L"), (-1, "_R")):
-        s0, s1, hw, z0, z1 = mg["box"]
-        obj = clip_to(box("main_gear_bay" + suffix, s0, s1, hw, z0, z1, x=side * mg["x"]), inner)
+    # The gear wells run out to just inside the skin: a well a compartment's inset short of it would leave a slot
+    # round the open doors that looks past the well's walls into the structure.
+    for name, side in (("nose_gear_bay", 1), ("main_gear_bay_L", 1), ("main_gear_bay_R", -1)):
+        boxes = bay_boxes(name[:13], side)
+        inner = compartment_solid(p, I["bay_inset"], min(b[0] for b in boxes) - 0.15, max(b[1] for b in boxes) + 0.15)
+        obj = clip_to(boxes_solid(name, boxes), inner)
         parts.append(tag(bi.finish(obj, mats["gear_bay"], smooth=False), "gear_bay", "fuselage"))
-    bpy.data.objects.remove(inner, do_unlink=True)
+        bpy.data.objects.remove(inner, do_unlink=True)
 
     cutters = duct_cutter(p, I["duct_clearance"])
     wing_cut = [grown(bpy.data.objects[n], 0.015) for n in ("wing_L", "wing_R")]  # wing roots buried in the body
+    g = I["gear_cut"]
+    wells = [boxes_solid("well_cut", [(s0 - g, s1 + g, x0 - g, x1 + g, z0 - g, z1 + g)
+                                      for s0, s1, x0, x1, z0, z1 in bay_boxes(name, side)])
+             for name, side in (("nose_gear_bay", 1), ("main_gear_bay", 1), ("main_gear_bay", -1))]
     for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R"):
         s0, s1, inset, floor, x_lo, x_hi = I[name]["tank"]
-        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mats["fuel_tank"], cutters + wing_cut)
+        obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mats["fuel_tank"], cutters + wing_cut + wells)
         parts.append(tag(obj, "fuel_tank", "fuselage"))
-    for c in cutters + wing_cut:
+    for c in cutters + wing_cut + wells:
         bpy.data.objects.remove(c, do_unlink=True)
     st = I["strake_tank"]
     wing_rows = bi.wing_sections(p["wing"])
@@ -507,6 +562,10 @@ def _build(p, mats):
     parts.append(tag(bi.finish(ab, mats["engine"]), "engine", "fuselage", e["mass_kg"] * 0.2))
 
     fr = I["frames"]
+    import stations
+
+    ramps = stations.ramp_stations(p)
+    trough_from, trough_to = ramps[0][0], ramps[-1][1]  # the trough with its ramps
     s = fr["s0"]
     k = 0
     while s <= fr["s1"] + 1e-9:
@@ -514,7 +573,11 @@ def _build(p, mats):
         n = len(skin)
         line = pulled(skin, fr["inset"]) + [pulled(skin, fr["inset"])[0]]
         needed = simplified(line, 0, n // 2, fr["tolerance"]) | simplified(line, n // 2, n, fr["tolerance"])
-        columns = sorted({c % n for c in needed} | set(range(0, n, I["stringers"]["column_step"])))
+        round_trough = set()
+        if trough_from <= s <= trough_to:  # every column round the trough: a straight run between two cuts into it
+            lip0, lip1 = bi.TROUGH_LIP_COLUMNS
+            round_trough = set(range(lip0, lip1 + 1)) | {(n // 2 - c) % n for c in range(lip0, lip1 + 1)}
+        columns = sorted({c % n for c in needed} | set(range(0, n, I["stringers"]["column_step"])) | round_trough)
         outer, web, inner = ([ring[c] for c in columns] for ring in
                              (pulled(skin, fr["inset"] + d) for d in (0.0, fr["thickness"], fr["web"])))
         aft = lambda ring, dy: [v + Vector((0, dy, 0)) for v in ring]

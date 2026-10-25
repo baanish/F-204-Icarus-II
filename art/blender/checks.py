@@ -141,15 +141,25 @@ def intake_and_tailpipe():
 
 
 def interior_visibility(icarus, allow_openings=True):
-    """Sample enclosed damage parts at 25 mm spacing from 14 outside directions.
+    """Sample enclosed damage parts at 25 mm spacing from 14 outside directions, twice: gear doors shut, then open
+    with the gear down, as the game leaves them on the ground.
 
-    The gear door patches and speed brake wells are deliberate openings. Close those exact patches for this fit
-    check; allow_openings=False also reports views through them for an art review. The intake mouths and the
-    tailpipe stay open: their ducts and backplates must hide the structure as the game draws them. A view entering
-    either passes back faces, which the game culls, and trim faces reaching the stock texture's alpha-clipped
-    lightening holes (trims.clipped). Well hinge fittings are exterior hardware even after joining a structure core.
-    Cockpit-view meshes cannot hide a failed fit.
+    The speed brake wells are deliberate openings, and so are the gear door patches while the doors are shut. Close
+    those exact patches for this fit check; allow_openings=False also reports views through them for an art review.
+    The intake mouths, the tailpipe and the open gear doors' holes stay open: the ducts, backplates and gear wells
+    must hide the structure as the game draws them. A view entering one passes back faces, which the game culls,
+    and trim faces reaching the stock texture's alpha-clipped lightening holes (trims.clipped). Well faces and hinge
+    fittings are exterior hardware even after joining a structure core: never sampled, they hide what lies behind
+    them as any drawn face does. Cockpit-view meshes cannot hide a failed fit.
     """
+    import gear
+
+    _interior_visibility(icarus, allow_openings, doors_open=False)
+    with gear.posed(gear.all_doors(1.0)):
+        _interior_visibility(icarus, allow_openings, doors_open=True)
+
+
+def _interior_visibility(icarus, allow_openings, doors_open):
     import trims
 
     meshes = [o for o in icarus.all_objects if o.type == "MESH"]
@@ -157,12 +167,17 @@ def interior_visibility(icarus, allow_openings=True):
               or o.name.startswith(("fuel_", "fuselage_", "wing_spar_"))]
     outside = [o for o in meshes if o not in inside and o.get("role") != "cockpit_view"]
     verts, faces, clipped = [], [], []
-    for obj in outside:
+    for obj in outside + inside:
+        hardware = obj.data.attributes.get("exterior_hardware")
+        if obj in inside and not hardware:
+            continue
+        drawn = [f for f in obj.data.polygons if obj in outside or hardware.data[f.index].value]
         offset = len(verts)
         verts.extend(obj.matrix_world @ v.co for v in obj.data.vertices)
-        faces.extend(tuple(offset + i for i in f.vertices) for f in obj.data.polygons)
-        clipped.extend(bool(obj.data.materials) and trims.clipped(obj, f) for f in obj.data.polygons)
+        faces.extend(tuple(offset + i for i in f.vertices) for f in drawn)
+        clipped.extend(bool(obj.data.materials) and trims.clipped(obj, f) for f in drawn)
     exterior_vertices, exterior_faces = len(verts), len(faces)
+    door_holes = []
     if allow_openings:
         import build_icarus as bi
         import gear
@@ -176,24 +191,18 @@ def interior_visibility(icarus, allow_openings=True):
             _, vid = gear.skin_grid(reference)
             patches, edges = [], {}
             for spec in gear.GEAR["doors"]:
-                j0, j1, k0, k1 = gear.door_patch(reference, spec)
-                k0 = edges.get(spec[1:4], k0)
-                edges[spec[1:3] + (spec[4],)] = k1
-                js, ks = gear.kept(j0, j1, spec[6]), gear.kept(k0, k1, spec[7])
-                hinge = k1 if spec[5] == "outer" else k0
+                j0, j1, k0, k1, _, _ = gear.hole(reference, spec, edges, vid)
+                cells = gear.patch_cells(reference, spec, j0, j1, k0, k1, vid)
                 for side in (1, -1):
                     vk = lambda k: k if side > 0 else bi.RING // 2 - k
-                    co = lambda j, k: reference.data.vertices[vid(j, vk(k))].co.copy()
-                    gear.snap_edges(reference, j0, j1, k0, k1, js, ks, lambda j, k: vid(j, vk(k)))
-                    gear.straighten(reference, [vid(j, vk(hinge)) for j in range(j0, j1 + 1)])
-                    gear.square_ends(reference, co(j0, hinge), co(j1, hinge),
-                                     [[vid(j, vk(k)) for k in range(k0, k1 + 1)] for j in (j0, j1)])
-                    patches.append({vid(j, vk(k))
-                                    for j in range(j0, j1 + 1) for k in range(k0, k1 + 1)})
-            offset = len(verts)
-            verts.extend(v.co.copy() for v in reference.data.vertices)
-            faces.extend(tuple(offset + i for i in f.vertices) for f in reference.data.polygons
-                         if any(set(f.vertices) <= patch for patch in patches))
+                    patches.append({vid(j, vk(k)) for j, k in cells})
+            holes = [tuple(f.vertices) for f in reference.data.polygons if any(set(f.vertices) <= q for q in patches)]
+            if doors_open:  # the holes are portals then, cast as the game draws what lies beyond them
+                door_holes = ([v.co.copy() for v in reference.data.vertices], holes)
+            else:
+                offset = len(verts)
+                verts.extend(v.co.copy() for v in reference.data.vertices)
+                faces.extend(tuple(offset + i for i in f) for f in holes)
             grid = speed_brakes.Patch(p)
             for side in (1, -1):
                 start = len(verts)
@@ -213,6 +222,7 @@ def interior_visibility(icarus, allow_openings=True):
                   + tuple((x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1))]
     rays = [(direction, direction * 30, -direction) for direction in directions]
     portals = intake_and_tailpipe()
+    doors = BVHTree.FromPolygons(*door_holes) if door_holes else None
 
     def drawn_cast(origin, direction, reach):
         """The first face the game draws across the ray: turned toward it and not cut out."""
@@ -237,7 +247,10 @@ def interior_visibility(icarus, allow_openings=True):
                 # Aim at the sample from well outside the entire aircraft. A shell hit at the sample itself
                 # gives no clearance and must fail too; checking intersections alone misses open skin gaps.
                 into = portals.ray_cast(q + origin, inward, 29.9999)[0] is not None
+                into = into or (doors is not None and doors.ray_cast(q + origin, inward, 29.9999)[0] is not None)
                 hit, _, _, distance = (drawn_cast if into else shell.ray_cast)(q + origin, inward, 30.0001)
+                if into and hit is not None and distance >= 29.9999 and (hit - q).length < 2e-4:
+                    continue  # a drawn well face lying on the sample: a frame cut flush with the well's wall
                 if hit is None or distance >= 29.9999:
                     tangent = direction.cross(Vector((0, 0, 1)))
                     tangent = tangent.normalized() if tangent.length > .1 else Vector((1, 0, 0))
@@ -262,7 +275,8 @@ def interior_visibility(icarus, allow_openings=True):
             bounds = [(min(p[0][i] for p in exposed), max(p[0][i] for p in exposed)) for i in range(3)]
             failures.append("%s: %d/%d exposed samples; first %s toward %s; bounds %s" %
                             (obj.name, len(exposed), len(points), exposed[0][0], exposed[0][1], bounds))
-    message = "interior visibility: %d enclosed parts, %d samples, 14 directions" % (len(inside), total)
+    message = "interior visibility, gear doors %s: %d enclosed parts, %d samples, 14 directions" % (
+        "open" if doors_open else "shut", len(inside), total)
     if failures:
         raise ValueError(message + "; " + "; ".join(failures))
     print(message + ": PASS", flush=True)
@@ -281,10 +295,10 @@ def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
 
     p = bi.PARAMS
     volumes = []  # (name, lower corner, upper corner, inside(q))
-    nose, main = interior.INTERNALS["nose_gear_bay"], interior.INTERNALS["main_gear_bay"]
-    for name, (s0, s1, hw, z0, z1, xc) in [("nose gear bay", nose["box"] + (0.0,))] + [
-            ("main gear bay " + "LR"[side < 0], main["box"] + (side * main["x"],)) for side in (1, -1)]:
-        lo, hi = bi.P(s0, xc - hw, z0 - 0.3), bi.P(s1, xc + hw, z1)
+    bays = [("nose gear bay", b) for b in interior.bay_boxes("nose_gear_bay")] + [
+        ("main gear bay " + "LR"[side < 0], b) for side in (1, -1) for b in interior.bay_boxes("main_gear_bay", side)]
+    for name, (s0, s1, x0, x1, z0, z1) in bays:
+        lo, hi = bi.P(s0, x0, z0 - 0.3), bi.P(s1, x1, z1)
         volumes.append((name, lo, hi, lambda q, lo=lo, hi=hi: all(lo[i] + tolerance < q[i] < hi[i] - tolerance
                                                                     for i in range(3))))
     patch = speed_brakes.Patch(p)

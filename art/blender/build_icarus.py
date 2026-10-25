@@ -84,6 +84,11 @@ PARAMS = {
     # The duct runs from just inside the lip to the engine face, narrowing and turning toward the centreline:
     # (s, centre x, centre z, radius).
     "duct": [(6.86, 0.515, 0.22, 0.386), (7.80, 0.47, 0.24, 0.37), (8.80, 0.38, 0.28, 0.33), (9.60, 0.30, 0.31, 0.30)],
+    # Over the main wheels' bay the ducts' undersides are flattened at this height (s, z), their tops kept, so the
+    # two flat tyres lie side by side beneath them (gear.GEAR["main"]); outside the table's ends, and where the floor
+    # is below a duct's bottom, the section stays round. The owner's call, over raising the ducts into the fuel.
+    "duct_floor": [(8.55, -0.12), (8.80, 0.065), (8.90, 0.086), (9.00, 0.098), (9.10, 0.105), (9.25, 0.105),
+                   (9.40, 0.094), (9.50, 0.072), (9.60, 0.045), (9.70, 0.0)],
     # Lifting surfaces: list of (s of leading edge, x, z, chord) from root to tip, plus thickness ratio.
     # No wing fence at the crank: considered and left off, since the strake and crank vortices and the leading-edge
     # flaps already keep the outboard panel's flow attached.
@@ -175,6 +180,23 @@ TROUGH_LIP_COLUMNS = (19 * RING // 24, 23 * RING // 24)  # 16 spans across each 
 # Over the trough's ramps the keel's columns inboard of TROUGH_KEEL_COLUMN keep their even angles, and the body side's
 # beyond TROUGH_SIDE_COLUMN ease back to theirs (blended_ring).
 TROUGH_KEEL_COLUMN, TROUGH_SIDE_COLUMN = 3 * RING // 4 + RING // 48, 23 * RING // 24 + RING // 48
+# From the front ramp back to NOSE_SLOT_KEEL's station the keel column holds its even angle (x about 0.08 m), easing to
+# the trough's spread over the last metres: the nose well's narrow doors hinge on it (gear.GEAR's N2), and a column
+# that spread at the ramp's junction would put a kink in their hinge line.
+NOSE_SLOT_KEEL = {"angle": 2 * math.pi * TROUGH_KEEL_COLUMN / RING, "to": 5.95, "ease": 0.30}
+
+
+def trough_keel_angle(s, on_ramp, lip):
+    """TROUGH_KEEL_COLUMN's angle at s in the trough (lip: the inner lip column's angle), or None where it takes its
+    share of the spread from the keel to the lip."""
+    k = NOSE_SLOT_KEEL
+    keel = 3 * RING // 4
+    spread = 1.5 * math.pi + (lip - 1.5 * math.pi) * (TROUGH_KEEL_COLUMN - keel) / (TROUGH_LIP_COLUMNS[0] - keel)
+    if s <= k["to"]:
+        return k["angle"]
+    if s < k["to"] + k["ease"] and not on_ramp:
+        return k["angle"] + (s - k["to"]) / k["ease"] * (spread - k["angle"])
+    return 2 * math.pi * TROUGH_KEEL_COLUMN / RING if on_ramp else None
 CHORD = 22  # points along each airfoil surface over the full chord; a piece of the chord takes its share, at least 6
 SPAN_STEP = 0.4  # most metres between the span stations of a lifting-surface piece
 
@@ -204,6 +226,28 @@ def pchip(xs, ys, x):
     t = (x - xs[i]) / h[i]
     h00, h10, h01, h11 = 2 * t**3 - 3 * t**2 + 1, t**3 - 2 * t**2 + t, -2 * t**3 + 3 * t**2, t**3 - t**2
     return h00 * ys[i] + h10 * h[i] * m[i] + h01 * ys[i + 1] + h11 * h[i] * m[i + 1]
+
+
+def duct_section(p, s, cx, cz, r, n=32, grow=0.0):
+    """A duct's section at s, left side (x outboard): a circle of radius r + grow round (cx, cz), its underside
+    flattened at PARAMS duct_floor less grow, from the bottom of the ring round."""
+    floor = None
+    table = p.get("duct_floor")
+    if table and table[0][0] < s < table[-1][0]:
+        floor = pchip([q[0] for q in table], [q[1] for q in table], s) - grow
+    pts = []
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        x, z = cx + (r + grow) * math.cos(a), cz + (r + grow) * math.sin(a)
+        pts.append((x, max(z, floor) if floor is not None else z))
+    return pts
+
+
+def duct_stations(p, s0, s1, n):
+    """n stations from s0 to s1, with every 0.1 m over the ducts' flattened underside (duct_floor) added."""
+    table = p.get("duct_floor") or []
+    extra = [table[0][0] + 0.1 * i for i in range(int((table[-1][0] - table[0][0]) / 0.1) + 1)] if table else []
+    return sorted(set(round(s, 4) for s in spaced(s0, s1, n) + [s for s in extra if s0 < s < s1]))
 
 
 def resample(table, stations):
@@ -463,16 +507,18 @@ def blended_ring(p, s, angles=None):
         if len(lips) == 2:
             # End the redistribution at the body side. Moving its upper skin columns with the trough lips
             # twists the intake fairing when the trough ends and those columns return to uniform angles. Over the
-            # ramps the keel's columns keep their even angles: the nose gear doors take their outline from them
-            # (gear.door_patch). The body side's columns ease back to theirs along the whole ramp, not only past its
-            # tip, where they would twist the wing root's fillet.
+            # ramps and the nose well's slot the keel's columns hold their angles (trough_keel_angle): the nose gear
+            # doors take their outline from them (gear.door_patch). The body side's columns ease back to theirs along
+            # the whole ramp, not only past its tip, where they would twist the wing root's fillet.
             anchors = [(3 * RING // 4, 1.5 * math.pi), (TROUGH_LIP_COLUMNS[0], lips[0]),
                        (TROUGH_LIP_COLUMNS[1], lips[1]), (RING, 2 * math.pi)]
             if ramp:
                 even = 2 * math.pi * TROUGH_SIDE_COLUMN / RING
                 side = (lips[1] + 2 * math.pi) / 2
-                anchors[1:1] = [(TROUGH_KEEL_COLUMN, 2 * math.pi * TROUGH_KEEL_COLUMN / RING)]
                 anchors[-1:-1] = [(TROUGH_SIDE_COLUMN, side + ramp[2] * (even - side))]
+            keel = trough_keel_angle(s, bool(ramp), lips[0])
+            if keel is not None:
+                anchors[1:1] = [(TROUGH_KEEL_COLUMN, keel)]
             for (i0, a), (i1, b) in zip(anchors, anchors[1:]):
                 for i in range(i0, i1):
                     angle = a + (b - a) * (i - i0) / (i1 - i0)
@@ -493,7 +539,12 @@ def fuselage_stations(p):
     import stations
 
     for lo, hi, rings in stations.ramp_stations(p):  # the trough's ramps take their own rings
-        out = sorted([s for s in out if not lo - 0.06 < s < hi + 0.06] + rings)
+        # A ring just short of a ramp's deep end (its first ring) moves out to 0.06 m from it rather than go: dropped,
+        # it leaves a facet long enough to sag into the stores' clearance there.
+        deep = rings[0]
+        near = [deep - 0.06 if deep == lo else deep + 0.06
+                for s in out if 0 < (deep - s) * (1 if deep == lo else -1) < 0.06]
+        out = sorted(set([s for s in out if not lo - 0.06 < s < hi + 0.06] + near) | set(rings))
     for edge in (p["speed_brake"]["s0"], p["speed_brake"]["s1"]):  # the brakes' holes are whole skin faces
         out[min(range(len(out)), key=lambda i: abs(out[i] - edge))] = edge
     return out

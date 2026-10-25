@@ -45,9 +45,11 @@ def bake_ao(canonical):
                 offset = 30 * (index + 4 if mode == 'self' or group is None else group)
                 base = len(verts)
                 verts.extend((p.x + offset, p.y, p.z) for p in (obj.matrix_world @ v.co for v in obj.data.vertices))
+                # A structure core with no textured trim carries no UVs; its faces only occlude, baked to the sink.
+                layer = obj.data.uv_layers.active
                 for face in obj.data.polygons:
                     faces.append([base + i for i in face.vertices])
-                    coords.extend(tuple(obj.data.uv_layers.active.data[i].uv) for i in face.loop_indices)
+                    coords.extend(tuple(layer.data[i].uv) if layer else (0.0, 0.0) for i in face.loop_indices)
                     slots.append(0 if obj.data.materials[face.material_index].name == uvs.SKIN else 1)
             mesh = bpy.data.meshes.new('Skin_AO_' + mode)
             mesh.from_pydata(verts, [], faces)

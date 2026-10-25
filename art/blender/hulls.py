@@ -82,11 +82,14 @@ SHELLS, SHELL_GAP = 8, 0.01
 # LOD1 and collider limits, by collection: triangles in total (budget.py sums them).
 BUDGET = {
     "lod1": {"target": 760, "cap": 760, "collection": "LOD1"},
-    # The base set (~2,950) plus the stations' clearance cuts (~1,100) and the section shells blast must reach (~560).
-    "colliders": {"target": 4700, "cap": 4700, "collection": "Colliders"},
+    # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
+    # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420).
+    "colliders": {"target": 5300, "cap": 5300, "collection": "Colliders"},
 }
 CLOSEUPS = {}
-COLLIDER_HULLS = 160  # the same three: 102 base hulls, 40 clearance cuts, 17 net for the section shells
+# The same three, 102 base hulls, 40 clearance cuts and 17 net for the section shells, and about 20 where the gear
+# doors' holes and the trough ramps' deep ends split the skin.
+COLLIDER_HULLS = 180
 
 
 def check(icarus):

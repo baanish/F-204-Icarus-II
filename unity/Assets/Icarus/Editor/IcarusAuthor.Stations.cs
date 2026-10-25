@@ -20,9 +20,10 @@ namespace Icarus.Editor
             { "hardpoint_wingtip_R", (new Vector3(3.395f, -0.562f, -2.7835f), 90f) },
             { "hardpoint_innerwing_L", (new Vector3(-1.849f, -0.4135f, -1.8800f), 0f) },
             { "hardpoint_innerwing_R", (new Vector3(1.849f, -0.4135f, -1.8800f), 0f) },
-            // Raised 0.057 m onto the trough floor for the Icarus's own conformal mounts (art/blender/stations.py).
-            { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.453f, 0.950f), 0f) },
-            { "hardpoint_conformal_R", (new Vector3(0.550f, -0.453f, 0.950f), 0f) },
+            // Raised 0.057 m onto the trough floor for the Icarus's own conformal mounts, and 0.22 m forward of P0's for the
+            // main wheels' wells (art/blender/stations.py).
+            { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.453f, 1.170f), 0f) },
+            { "hardpoint_conformal_R", (new Vector3(0.550f, -0.453f, 1.170f), 0f) },
         };
         private const float MeasuredTolerance = 0.001f;
         private const string MountFolder = ModFolder + "/Mounts";
