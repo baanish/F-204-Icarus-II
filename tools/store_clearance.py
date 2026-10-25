@@ -153,6 +153,9 @@ def main():
         m = max(1, math.ceil(reach_of(leg, leg["doors"], stowed) / STEP))
         leg["states"] += [(f"doors {1 - j / m:.2f}", leg_pose(leg, 0.0, 1.0, 1 - j / m)) for j in range(1, m + 1)]
         leg["posed"] = [(label, [(plane.meshes[t][0], plane.posed(t, pose)) for t in leg["meshes"]]) for label, pose in leg["states"]]
+        leg["clearance"] = [(label, [(name, mesh, bounds(mesh[0])) for name, mesh in meshes
+                                    if TYRE.match(name) or LEG.match(name) or DOOR.match(name)])
+                            for label, meshes in leg["posed"]]
         print(f"{leg['name']}: tyre r {leg['radius']:.3f} m, travel {leg['travel']:.3f} m, rest {leg['rest']:.3f} m, "
               f"bottomed {leg['max_compression']:.3f} m, fold {leg['fold']:.1f} deg in {n} steps, doors "
               f"{[round(d, 1) for _, d in leg['doors']]} deg closing in {m} steps; meshes "
@@ -178,17 +181,18 @@ def main():
                     mounts[key] = load_mount(root, index, key) if stock else plane.mount(key, stock_mesh)
                 (verts, tris), colliders = mounts[key]
                 store = (pos + verts @ rot.T, tris)
+                store_bounds = bounds(store[0])
                 angle = strike(store[0])
                 rule13.append((angle if angle is not None else math.inf, hp_name, key))
                 phases = {}
                 for leg in legs:
-                    if box_gap(bounds(store[0]), (leg["free"] - 3.0, leg["free"] + 3.0)) > 0:
+                    if box_gap(store_bounds, (leg["free"] - 3.0, leg["free"] + 3.0)) > 0:
                         continue  # nowhere near this leg in any pose
-                    for label, meshes in leg["posed"]:
+                    for label, meshes in leg["clearance"]:
                         phase = label.split()[0]
                         best = phases.get(phase, (REACH, None))
-                        for name, mesh in meshes:
-                            if not (TYRE.match(name) or LEG.match(name) or DOOR.match(name)):
+                        for name, mesh, mesh_bounds in meshes:
+                            if box_gap(store_bounds, mesh_bounds) >= best[0]:
                                 continue
                             d = mesh_distance(store, mesh, best[0])
                             if d < best[0]:

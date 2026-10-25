@@ -114,6 +114,22 @@ def _near(verts, tris, box, reach):
     return tris[keep]
 
 
+def _candidates(a, b, reach):
+    """Pairs of primitives whose boxes can be within reach, in batches of at most CHUNK pairs."""
+    alo, ahi = a.min(1), a.max(1)
+    blo, bhi = b.min(1), b.max(1)
+    # Round outwards so a pair on the distance boundary is still tested by the original formulas.
+    reach = np.nextafter(reach, np.inf)
+    for i, j in _pairs(len(a), len(b)):
+        keep = np.ones((j - i, len(b)), bool)
+        for axis in range(3):
+            keep &= ahi[i:j, axis, None] >= blo[:, axis] - reach
+            keep &= alo[i:j, axis, None] <= bhi[:, axis] + reach
+        rows, cols = np.nonzero(keep)
+        if len(rows):
+            yield rows + i, cols
+
+
 def mesh_distance(a, b, reach):
     """Exact distance between meshes a and b when it is under reach; otherwise a lower bound of at least reach."""
     (va, ta), (vb, tb) = a, b
@@ -124,18 +140,20 @@ def mesh_distance(a, b, reach):
     if len(ta) == 0 or len(tb) == 0:
         return reach
     best = reach
-    for (pv, pt), (qv, qt) in (((va, ta), (vb, tb)), ((vb, tb), (va, ta))):
-        points = pv[np.unique(pt)]
-        A, B, C = qv[qt[:, 0]], qv[qt[:, 1]], qv[qt[:, 2]]
-        for i, j in _pairs(len(points), len(qt)):
-            best = min(best, float(point_triangle(points[i:j], A, B, C).min()))
-        e = edges(pv, pt)
-        for i, j in _pairs(len(e), len(qt)):
-            if segments_cross(pv[e[i:j, 0]], pv[e[i:j, 1]], A, B, C).any():
-                return 0.0
     ea, eb = edges(va, ta), edges(vb, tb)
-    for i, j in _pairs(len(ea), len(eb)):
-        best = min(best, float(segment_segment(va[ea[i:j, 0]], va[ea[i:j, 1]], vb[eb[:, 0]], vb[eb[:, 1]]).min()))
+    for (pv, pt, e), (qv, qt) in (((va, ta, ea), (vb, tb)), ((vb, tb, eb), (va, ta))):
+        points = pv[np.unique(pt)]
+        triangles = qv[qt]
+        for rows, cols in _candidates(points[:, None, :], triangles, best):
+            A, B, C = (triangles[cols, k, None, :] for k in range(3))
+            best = min(best, float(point_triangle(points[rows], A, B, C).min()))
+        for rows, cols in _candidates(pv[e], triangles, best):
+            A, B, C = (triangles[cols, k, None, :] for k in range(3))
+            if segments_cross(pv[e[rows, 0]], pv[e[rows, 1]], A, B, C).any():
+                return 0.0
+    for rows, cols in _candidates(va[ea], vb[eb], best):
+        best = min(best, float(segment_segment(va[ea[rows, 0]], va[ea[rows, 1]],
+                                              vb[eb[cols, 0], None, :], vb[eb[cols, 1], None, :]).min()))
     return best
 
 
