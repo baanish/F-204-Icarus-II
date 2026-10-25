@@ -62,6 +62,7 @@ def swivels(w):
     xw = float(x @ w)
     if xw < -1e-9:
         return []
+    xw = max(xw, 0.0)
     a = (x + w) / np.linalg.norm(x + w)
     n = np.cross(x, w)
     n = n / np.linalg.norm(n) if np.linalg.norm(n) > 1e-9 else np.array([0, 0, 1.0])
@@ -169,16 +170,18 @@ def clearance_scene(nobp):
             "stores_box": (stores.min(0), stores.max(0)), "hard_box": (hard.min(0), hard.max(0))}
 
 
-def sweep_gaps(P, h, ang, t, scene, steps=60, coarse=False):
+def sweep_gaps(P, h, ang, t, scene, steps=60, coarse=False, pin=None):
     """Least gaps through the fold (0 to 1) of the tyre and leg line to the stores and to the hard airframe, and the
-    fold of each: (store gap, fold, hard gap, fold). Coarse takes every eighth tyre point, to rank candidates."""
+    fold of each: (store gap, fold, hard gap, fold). Coarse takes every eighth tyre point, to rank candidates. The
+    wheel swivels about an axis through pin (default its centre), where the leg ends."""
     C = scene["centre"]
+    Q = C if pin is None else pin
     points = scene["tyre"][::8] if coarse else scene["tyre"]
-    leg = P + np.linspace(0.05, 0.85, 12)[:, None] * (C - P)
+    leg = P + np.linspace(0.05, 0.85, 12)[:, None] * (Q - P)
     worst = [9.0, 0.0, 9.0, 0.0]
     for f in np.linspace(0.0, 1.0, steps + 1):
         H = rot(h, ang * f)
-        tyre = P + (H @ (C - P + (rot(t, 90 * f) @ points.T).T).T).T
+        tyre = P + (H @ (Q - P + (rot(t, 90 * f) @ (C - Q + points).T).T).T).T
         legs = P + (H @ (leg - P).T).T
         for key, slot in (("stores", 0), ("hard", 2)):
             lo, hi = scene[key + "_box"]
@@ -193,20 +196,87 @@ def sweep_gaps(P, h, ang, t, scene, steps=60, coarse=False):
     return tuple(worst)
 
 
+def own_leg_gap(P, pin, t, scene, steps=30, radius=0.035):
+    """The tyre's least gap to its own leg, pivot to pin (a beam radius about its line), as the wheel swivels about
+    the axis through pin: the leg's own frame, where the hinge drops out. (gap, fold)."""
+    C = scene["centre"]
+    leg = P + np.linspace(0.0, 1.0, 40)[:, None] * (pin - P)
+    from scipy.spatial import cKDTree
+
+    tree, worst = cKDTree(leg), (9.0, 0.0)
+    for f in np.linspace(0.0, 1.0, steps + 1):
+        tyre = pin + (rot(t, 90 * f) @ (C - pin + scene["tyre"]).T).T
+        d = tree.query(tyre)[0].min() - radius
+        worst = min(worst, (d, f))
+    return worst
+
+
+def pin_solutions(P, C, Q, stow, folds=(60.0, 140.0), near=None, cone=40.0, starts=12):
+    """Hinges, folds and 90 degree swivels about an axis through the pin Q (where the leg ends) that stow the wheel
+    centre at stow, (x, z) or (s, x, z), with its axle vertical, outboard face up: given only (x, z) a curve of
+    solutions, sampled by least squares from a grid of starts, the hinge within cone degrees of near if given; given
+    the station too, the points where the curve meets it. Returns (hinge, fold, swivel, stowed wheel centre)."""
+    from scipy.optimize import least_squares
+
+    def unpack(v):
+        h = np.array([math.cos(v[0]) * math.cos(v[1]), math.cos(v[0]) * math.sin(v[1]), math.sin(v[0])])
+        return h, v[2]
+
+    def stowed(v, which):
+        h, ang = unpack(v)
+        ts = swivels(rot(h, -ang) @ np.array([0, 0, 1.0]))
+        if len(ts) <= which:
+            return None, None, None
+        t = ts[which]
+        return P + rot(h, ang) @ (Q - P + rot(t, 90) @ (C - Q)), h, t
+
+    def residual(v, which):
+        w, _, _ = stowed(v, which)
+        if w is None:
+            return np.ones(len(stow))
+        return np.array([w[0] - stow[-2], w[2] - stow[-1]] + ([w[1] + 8 - stow[0]] if len(stow) == 3 else []))
+
+    out = []
+    for el in np.linspace(-1.4, 1.4, starts):
+        for az in np.linspace(-math.pi, math.pi, 2 * starts, endpoint=False):
+            h0 = np.array([math.cos(el) * math.cos(az), math.cos(el) * math.sin(az), math.sin(el)])
+            if near is not None and math.degrees(math.acos(np.clip(h0 @ near, -1, 1))) > cone:
+                continue
+            for ang0 in np.linspace(folds[0], folds[1], 5):
+                for which in (0, 1):
+                    r = least_squares(residual, [el, az, ang0], args=(which,), xtol=1e-10, ftol=1e-10)
+                    if np.abs(r.fun).max() > 1e-5 or not folds[0] <= r.x[2] <= folds[1]:
+                        continue
+                    w, h, t = stowed(r.x, which)
+                    if w is not None and not any(np.allclose(h, o[0], atol=2e-3) and abs(r.x[2] - o[1]) < 0.2
+                                                 for o in out):
+                        out.append((h, r.x[2], t, w))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pivot", required=True, help="s,x,z")
     ap.add_argument("--wheel", required=True, help="s,x,z of the wheel centre, gear down")
-    ap.add_argument("--stow", required=True, help="x,z of the stowed wheel centre (s follows from the leg length)")
+    ap.add_argument("--stow", required=True, help="x,z of the stowed wheel centre (s follows from the leg length); "
+                                                  "with --pin, s,x,z holds the station too")
     ap.add_argument("--fold", type=float, default=125.0, help="branch: fold degrees to stay near")
     ap.add_argument("--bundle", help="a built .nobp: sweep the solution against its stores and airframe")
     ap.add_argument("--scan", action="store_true", help="with --bundle, sweep every hinge in the family")
     ap.add_argument("--hinges", type=int, default=720, help="hinges in the family --scan tries")
     ap.add_argument("--branch", help="lo,hi: only folds in this range of degrees, each swept in full")
+    ap.add_argument("--pin", help="dx,dz: the swivel's pin, where the leg ends, from the wheel centre (x outboard, "
+                                  "z up), gear down; with --scan, solves hinges for a swivel about it")
+    ap.add_argument("--near", help="hx,hy,hz: with --pin, only hinges within --cone degrees of this one")
+    ap.add_argument("--cone", type=float, default=40.0)
+    ap.add_argument("--solution", help="hx,hy,hz,fold,tx,ty,tz: sweep this hinge, fold and swivel")
+    ap.add_argument("--axis-pin", help="lo,hi,n: with --solution, pins along the swivel axis inboard of the wheel, "
+                                       "lo to hi metres from its centre")
     a = ap.parse_args()
     ps, px, pz = (float(v) for v in a.pivot.split(","))
     ws, wx, wz = (float(v) for v in a.wheel.split(","))
-    sx, sz = (float(v) for v in a.stow.split(","))
+    stow = tuple(float(v) for v in a.stow.split(","))
+    sx, sz = stow[-2:]
     P, C = np.array([px, ps - 8, pz]), np.array([wx, ws - 8, wz])
     reach = np.sum((C - P) ** 2) - (sx - px) ** 2 - (sz - pz) ** 2
     C2 = np.array([sx, P[1] - math.sqrt(reach), sz])
@@ -217,6 +287,38 @@ def main():
         scene = clearance_scene(a.bundle)
         print("clearance scene in %.1f s; tyre centre s %.3f x %.3f z %.3f" % (
             time.time() - t0, scene["centre"][1] + 8, scene["centre"][0], scene["centre"][2]))
+    if a.solution and a.axis_pin:
+        v = [float(x) for x in a.solution.split(",")]
+        h, ang, t = np.array(v[:3]), v[3], np.array(v[4:])
+        h, t = h / np.linalg.norm(h), t / np.linalg.norm(t)
+        inboard = t if t[0] < 0 else -t
+        lo, hi, n = (float(x) for x in a.axis_pin.split(","))
+        for reach in np.linspace(lo, hi, int(n)):
+            Q = scene["centre"] + inboard * reach
+            sg, sf, hg, hf = sweep_gaps(P, h, ang, t, scene, 60, pin=Q)
+            og, of = own_leg_gap(P, Q, t, scene)
+            print("pin %.3f m along the axis (s %.3f x %.3f z %.3f): stores %.3f at %.2f, airframe %.3f at %.2f, "
+                  "own leg %.3f at %.2f" % (reach, Q[1] + 8, Q[0], Q[2], sg, sf, hg, hf, og, of), flush=True)
+        return
+    if a.scan and a.pin:
+        dx, dz = (float(v) for v in a.pin.split(","))
+        Q = C + np.array([dx, 0.0, dz])
+        lo, hi = (float(v) for v in (a.branch or "60,140").split(","))
+        near = np.array([float(v) for v in a.near.split(",")]) if a.near else None
+        t0 = time.time()
+        sols = pin_solutions(P, C, Q, stow, (lo, hi), near / np.linalg.norm(near) if near is not None else None,
+                             a.cone)
+        print("pin s %.3f x %.3f z %.3f: %d solutions in %.0f s" % (Q[1] + 8, Q[0], Q[2], len(sols), time.time() - t0))
+        rows = []
+        for h, ang, t, w in sols:
+            gaps = sweep_gaps(P, h, ang, t, scene, 60, pin=Q)
+            rows.append((gaps, own_leg_gap(P, Q, t, scene), h, ang, t, w))
+        rank = lambda r: -min(r[0][0] - STORE_GAP, r[0][2], r[1][0] - 0.018)
+        for (sg, sf, hg, hf), (og, of), h, ang, t, w in sorted(rows, key=rank)[:12]:
+            print('  stores %.3f at %.2f, airframe %.3f at %.2f, own leg %.3f at %.2f, stowed s %.3f: '
+                  '"hinge": (%.5f, %.5f, %.5f), "fold_deg": %.3f, "swivel": (%.5f, %.5f, %.5f)'
+                  % (sg, sf, hg, hf, og, of, w[1] + 8, *h, ang, *t))
+        return
     if a.scan:
         rows = []
         t0 = time.time()

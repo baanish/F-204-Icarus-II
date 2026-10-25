@@ -36,18 +36,13 @@ from speed_brakes import Shell, ring
 SEG_TYRE, SEG_HUB, SEG_LEG = 24, 12, 12
 GEAR = {
     "ground_z": -1.28,  # ground height below the radome-tip line, gear down, from the reference side view
-    # The F-104's nose leg retracts forward and its doors are worked by the strut (flight manual p. 1-47); its tyre is
-    # 18 x 5.5 (Lockheed "MAP F-104" brochure, 1963, p. 13). Wheel centre station and lateral offset, tyre diameter,
-    # width and rim radius. Its well lies behind the seat: the stock seat reaches down to z -0.21 from s 3.75 to 4.68,
-    # so the upright wheel stows between the cockpit's rear bulkhead and the aux cell, and the pivot (s, x, z) sits
-    # aft and low enough for a fold_deg turn forward about -X to carry it there; the leg rakes forward to its wheel.
-    # The piston stands beside the wheel on its right, the axle cantilevered into the hub, as on the F-104's single
-    # fork; "fork_s" puts it ahead of the axle, so it and the sleeve come in through the wide doors ahead of the
-    # trough's front ramp. "piston" and "sleeve" are the piston's exposed length and the sleeve above it. The leg runs
-    # in from the sleeve's top to the keel and back along it to the trunnion.
-    "nose": {"wheel_s": 5.18, "wheel_x": 0.0, "wheel_d": 0.457, "wheel_w": 0.14, "rim_r": 0.10,
-             "pivot": (5.84, 0.0, -0.465), "fold_deg": 54.385, "twist_deg": 0.0, "fork_s": -0.15, "fork_x": -0.125,
-             "piston": 0.10, "sleeve": 0.10},
+    # The nose tyre is the F-104's 18 x 5.5 (Lockheed "MAP F-104" brochure, 1963, p. 13). Wheel centre station and
+    # lateral offset, tyre diameter, width and rim radius. The nose leg's pivot (s, x, z) sits just ahead of the oleo,
+    # which stands on the wheel; fold_deg turns it forward about -X, twist_deg its piston, so the wheel stows flat under
+    # the cockpit floor, clear of the seat's lowest point (z -0.21) by about 0.09 m.
+    "nose": {"wheel_s": 5.20, "wheel_x": 0.0, "wheel_d": 0.457, "wheel_w": 0.14, "rim_r": 0.10,
+             "pivot": (5.13, 0.0, -0.30), "crown_gap": 0.035, "piston": 0.10, "oleo": 0.28,
+             "fold_deg": 90.0, "twist_deg": 90.0},
     # The main wheel is the F-104's 26 x 8.0-14 in diameter (0.66 m, MAP brochure p. 13) on today's 0.16 m width,
     # the owner's call: a 0.203 m tyre needs the ducts' undersides 0.04 m higher still. The leg retracts "forward and
     # inward" and "a linkage causes the wheels to rotate 90 degrees during retraction" (flight manual p. 1-47): it
@@ -60,14 +55,14 @@ GEAR = {
     # the F-104's lie about 1 m ahead, and the trunnion 0.63 m behind them; the leg rakes forward to its wheel. Of the
     # hinges that do it, this one (--scan) swings the wheel forward and inboard from the start, keeping the tyre 0.058 m
     # from the inner wing's twin racks (tools/store_clearance.py; Stores rule 12: 0.05 m) and 0.027 m from the
-    # trough's skin; the folds near 120 degrees lift it outboard into the twin racks' inboard missile first. The piston foot carries the axle "stub" metres inboard of
-    # the tyre's centre, the piston rises "piston" to the sleeve's gland and the sleeve "sleeve" above it; the
-    # carrier's swivel pin lies on the swivel axis level with the sleeve's top. The Liquid Spring strut runs from
-    # strut_at of the way down the leg, strut_offset along the hinge beside it, up to the trunnion's end.
+    # trough's skin; the folds near 120 degrees lift it outboard into the twin racks' inboard missile first. As on the F-104, the forged
+    # leg runs down to its foot, which holds the stub axle: the axle turns in the foot on the swivel axis and slides up
+    # the foot's housing with the suspension (main_points). The Liquid Spring strut runs from strut_at of the way down
+    # the leg, strut_offset along the hinge beside it, up to the trunnion's end.
     "main": {"wheel_s": 9.84, "wheel_x": 1.24, "wheel_d": 0.66, "wheel_w": 0.16, "rim_r": 0.178,
              "pivot": (10.47, 0.30, -0.20), "hinge": (-0.05276, -0.75163, -0.65747), "fold_deg": 93.818,
              "swivel": (0.88711, 0.01478, 0.46132), "swivel_deg": 90.0, "stowed": (9.1206, 0.335, -0.055),
-             "stub": 0.138, "piston": 0.12, "sleeve": 0.22, "strut_at": 0.45, "strut_offset": -0.05},
+             "strut_at": 0.45, "strut_offset": -0.05},
     # Door patches of the belly skin, left side: (name, s from, s to, x from, x to, hinge edge, rows, columns, degrees
     # open, opening[, (first ring point, last)]). The patch runs along the skin's own rings and ring points nearest
     # those limits; rows and columns are the resampled grid, all of the skin's where they exceed it. Two doors a side
@@ -76,15 +71,17 @@ GEAR = {
     # behind the ramp's end (patch_cells) over the skin the ramp's fade fans out, which the tyre passes through. The
     # aft door hinges inboard. The game holds every gear door open while the gear is down (LandingGear), where the
     # F-104's forward door recloses to a detent. The nose well's wide pair ends where the trough's front ramp
-    # begins to move the skin's columns (stations.ramp_stations); from there back to the leg's trunnion a narrow pair
-    # on the keel's columns, which hold their even angles there (build_icarus.NOSE_SLOT_KEEL), lets the wheel and leg
-    # through.
-    "doors": [("gear_door_N_L", 4.72, 5.025, 0.0, 0.28, "outer", 2, 3, 88, "down"),
-              ("gear_door_N2_L", 5.025, 5.92, 0.0, 0.085, "outer", 4, 2, 88, "down"),
+    # begins to move the skin's columns (stations.ramp_stations); behind it a narrow pair on the keel's columns, which
+    # hold their even angles there (build_icarus.NOSE_SLOT_KEEL), lets the oleo out.
+    "doors": [("gear_door_N_L", 4.08, 5.025, 0.0, 0.31, "outer", 4, 3, 88, "down"),
+              ("gear_door_N2_L", 5.025, 5.30, 0.0, 0.085, "outer", 3, 2, 88, "down"),
               ("gear_door_main_L", 8.80, 9.077, 0.0, 0.0, "front", 40, 40, 80, "down", (92, 94, 84)),
               ("gear_door_flap_L", 9.077, 10.77, 0.17, 0.97, "inner", 4, 4, 95, "down")],
 }
-PIN_REACH = 0.20  # the main carrier's swivel pin at least this far from the wheel centre (main_points)
+# The main leg's foot, along the swivel axis inboard of the wheel centre: tools/gear_fold_solve.py --solution ...
+# --axis-pin sweeps it; from 0.16 m out the tyre clears its own leg as it twists, 0.058 m here.
+PIN_REACH = 0.20
+FOOT_HOUSING = (-0.05, 0.11)  # the main foot's height round the axle: the suspension's rest rise is 0.061 m
 GEAR_STROKE = 0.30  # the bump stop above the free wheel (IcarusAuthor.Gear.cs GearStroke): the piston's slide
 DOOR_SKIN = 0.006  # the door's inner face sits this far inside its outer skin
 DOOR_GAP = 0.002  # and its free edges stand this far in from the hole's, so it swings clear of the skin
@@ -102,7 +99,7 @@ BUDGET = {
        for leg in LEGS},
     # Built to the speed brakes' standard (rim, ribs, stringer, hinge knuckles): the stock F-99's bay doors run 824
     # triangles each, the Ifrit's gear doors 2,266 in all.
-    "doors": {"target": 3800, "cap": 3900, "objects": ("gear_door_",)},
+    "doors": {"target": 3900, "cap": 4000, "objects": ("gear_door_",)},
 }
 DOOR_TRIS = (32, 860)  # each door, outer skin and inner trim (Exterior rule 22, raised for the detailed doors)
 # Stock wheel layout, measured on _donotship/Texture2D/aircraft_wheels_b_PLACEHOLDER.png (512 px): the tread strip
@@ -155,20 +152,15 @@ def mirrored(v, side):
 # --- the main legs -------------------------------------------------------------------------------------------------
 
 def main_points(side=1):
-    """The main leg's skeleton, gear down, world space: wheel centre C, piston foot F (the axle stub), gland G,
-    sleeve top T, the carrier's swivel pin A (on the swivel axis inboard of the wheel: level with T, or PIN_REACH
-    from C where that lies nearer, since a pin by the hub puts the leg in the tyre's way as it twists), pivot P, and
-    the hinge and swivel axes (a right leg turns the same angles about the mirrored axes reversed, since a mirror
-    reverses a rotation's sense)."""
+    """The main leg's skeleton, gear down, world space: wheel centre C, the leg's foot A on the swivel axis PIN_REACH
+    inboard of C (any point on that axis turns the wheel alike, so the foot takes the swivel and the stub axle runs
+    from it along the axis into the hub), pivot P, and the hinge and swivel axes (a right leg turns the same angles
+    about the mirrored axes reversed, since a mirror reverses a rotation's sense)."""
     g = GEAR["main"]
     C = bi.P(g["wheel_s"], g["wheel_x"], GEAR["ground_z"] + g["wheel_d"] / 2)
-    F = C - X * g["stub"]
-    G = F + Z * g["piston"]
-    T = G + Z * g["sleeve"]
     sw = Vector(g["swivel"]).normalized()
-    inboard = sw if sw.x < 0 else -sw
-    A = C + inboard * max(inboard.dot(T - C), PIN_REACH)
-    pts = {"C": C, "F": F, "G": G, "T": T, "A": A, "P": bi.P(*g["pivot"])}
+    A = C - sw * PIN_REACH * (1 if sw.x > 0 else -1)
+    pts = {"C": C, "A": A, "P": bi.P(*g["pivot"])}
     pts = {k: mirrored(v, side) for k, v in pts.items()}
     flip = lambda v: Vector(v).normalized() if side > 0 else -mirrored(Vector(v).normalized(), -1)
     pts["hinge"], pts["swivel"] = flip(g["hinge"]), flip(g["swivel"])
@@ -206,28 +198,28 @@ def strut_ends(k):
 
 def main_solids():
     """Left main leg meshes, gear down, world space, after the F-104's (flight manual LR1-14404-1, pp. 1-46 to 1-48;
-    MAP brochure p. 13; Brewczynski and Tora 2014, fig. 1): sprung (the forged leg from its keel trunnion to the
-    carrier's swivel at its foot, the Liquid Spring strut beside it, the wheel-positioning rod along it), arm (the
-    wheel carrier: swivel lug, link, sleeve, upper torque link, bellcrank), unsprung (piston on Mirror, foot, the
-    cantilever axle, brake, lower torque link) and wheel."""
+    MAP brochure p. 13; Brewczynski and Tora 2014, fig. 1): sprung (the forged leg from its keel trunnion to its foot,
+    the Liquid Spring strut beside it, the wheel-positioning rod along it), arm (the swivel's collar on the foot's
+    wheel side), unsprung (the stub axle from the foot along the swivel axis into the hub, the brake) and wheel. The
+    foot stands FOOT_HOUSING above the axle so the axle rises inside it with the suspension."""
     k = main_points()
     g = GEAR["main"]
-    P, A, T, G, F, C = k["P"], k["A"], k["T"], k["G"], k["F"], k["C"]
+    P, A, C = k["P"], k["A"], k["C"]
     h, sw = k["hinge"], k["swivel"]
     gear, chrome = "Fighter1_gear", "Mirror"
     leg = (A - P).normalized()
     up = (Z - h * h.dot(Z)).normalized()  # square to the hinge, toward the sky with the gear down
     up = (up - leg * leg.dot(up)).normalized()
+    out = sw if sw.x > 0 else -sw  # along the swivel axis toward the wheel
+    rise = (Z - out * out.dot(Z)).normalized()
     sprung = solids.Solids()
     solids.cylinder(sprung, P - h * 0.06, P + h * 0.06, 0.030, SEG_LEG, gear)  # trunnion pin
     for s in (-1, 1):  # its bearings, round about the hinge so they read as fixed while the leg turns
         solids.cylinder(sprung, P + h * (s * 0.040), P + h * (s * 0.060), 0.034, SEG_LEG, gear)
     root = P + leg * 0.03
-    tapered_beam(sprung, root, A - leg * 0.05, h, 0.062, 0.052, 0.05, 0.044, gear)
-    side_c = sw.cross(leg).normalized()
-    for c in (-1, 1):  # the swivel's clevis: cheeks either side of the carrier's lug, joined to the leg's end
-        solids.beam(sprung, A - leg * 0.06 + sw * (0.038 * c), A + sw * (0.038 * c), side_c, 0.045, 0.014, gear)
-    solids.cylinder(sprung, A - sw * 0.05, A + sw * 0.05, 0.014, 8, gear)  # swivel pin
+    tapered_beam(sprung, root, A + rise * 0.04, h, 0.062, 0.052, 0.054, 0.048, gear)
+    lo, hi = FOOT_HOUSING
+    solids.box(sprung, A + rise * (lo + hi) / 2, (out, rise.cross(out), rise), (0.03, 0.035, (hi - lo) / 2), gear)  # foot
     strut_lo, strut_hi = strut_ends(k)
     d = (strut_hi - strut_lo).normalized()
     solids.beam(sprung, strut_lo - h * g["strut_offset"], strut_lo, up, 0.03, 0.03, gear)  # its lug
@@ -238,28 +230,15 @@ def main_solids():
     for e in (strut_lo, strut_hi):
         solids.cylinder(sprung, e - h * 0.022, e + h * 0.022, 0.020, 8, gear)  # strut eyes
     side = h.cross(leg).normalized()
-    rod_a, rod_b = root + side * 0.05 + up * 0.03, A - leg * 0.06 + side * 0.045
-    solids.cylinder(sprung, rod_a, rod_b, 0.008, 6, gear)  # wheel-positioning rod
+    rod_a, rod_b = root + side * 0.05 + up * 0.03, A + rise * hi + side * 0.04
+    solids.cylinder(sprung, rod_a, rod_b, 0.008, 6, gear)  # wheel-positioning rod, down to the foot
     solids.beam(sprung, rod_a - side * 0.02, rod_a + side * 0.005, h, 0.02, 0.02, gear)
     arm = solids.Solids()
-    solids.cylinder(arm, A - sw * 0.03, A + sw * 0.03, 0.027, SEG_LEG, gear)  # swivel lug, in the clevis
-    solids.beam(arm, A, T + Z * 0.01, X, 0.04, 0.03, gear)  # the carrier's link from the lug down to the sleeve
-    solids.beam(arm, A + side * 0.045 - leg * 0.03, rod_b + leg * 0.01, h, 0.03, 0.016, gear)  # its bellcrank
-    length = (T - G).length
-    solids.lathe(arm, G, Z, [(0.0, 0.045), (0.03, 0.045), (0.03, 0.04), (length - 0.02, 0.04), (length, 0.026)],
-                 SEG_LEG, gear)  # sleeve, gland collar at its foot, slim enough to keep beside the tyre stowed
-    aft = Vector((0.0, 1.0, 0.0))  # the torque links trail the sleeve
-    eye = G + aft * 0.085 + Z * 0.03
-    solids.beam(arm, G + aft * 0.045 + Z * 0.03, eye, X, 0.02, 0.018, gear)  # upper torque link
-    solids.cylinder(arm, eye - Z * 0.011, eye + Z * 0.011, 0.013, 8, gear)
+    solids.cylinder(arm, A + out * 0.03, A + out * 0.045, 0.04, SEG_LEG, gear)  # the swivel's collar
     unsprung = solids.Solids()
-    solids.cylinder(unsprung, F, G + Z * 0.06, 0.03, SEG_LEG, chrome)  # piston
-    solids.box(unsprung, F, (X, Y, Z), (0.034, 0.045, 0.034), gear)  # foot
-    solids.cylinder(unsprung, F, C + X * 0.03, 0.025, SEG_LEG, gear)  # cantilever axle, through the hub
+    solids.cylinder(unsprung, A, C + out * 0.03, 0.028, SEG_LEG, chrome)  # stub axle, through the hub
     W = g["wheel_w"] / 2
     solids.cylinder(unsprung, C - X * (0.5 * W + 0.022), C - X * (0.5 * W - 0.002), 0.09, SEG_LEG, gear)  # brake, in the hub's dish
-    solids.beam(unsprung, F + aft * 0.03, F + aft * 0.085, X, 0.02, 0.026, gear)  # lower link lug
-    solids.cylinder(unsprung, F + aft * 0.085, Vector((F.x, eye.y, eye.z + 0.05)), 0.008, 6, gear)  # lower link rod
     wheel = wheel_solid(C, X, "main")
     return sprung, arm, unsprung, wheel
 
@@ -286,62 +265,57 @@ def main_leg(side):
 # --- the nose leg --------------------------------------------------------------------------------------------------
 
 def nose_points():
-    """The nose leg's skeleton, gear down: wheel centre C, piston foot F beside the wheel, gland G, sleeve top T,
-    pivot P, the hinge (-X: a positive turn folds it forward) and the second fold's axis (it does not turn)."""
+    """The nose leg's skeleton, gear down: wheel centre C, fork crown, gland G, oleo top T, pivot P, the hinge (-X: a
+    positive turn folds it forward) and the twist axis up the piston."""
     g = GEAR["nose"]
     C = bi.P(g["wheel_s"], g["wheel_x"], GEAR["ground_z"] + g["wheel_d"] / 2)
-    F = C + Y * g["fork_s"] + X * g["fork_x"]
-    G = F + Z * g["piston"]
-    T = G + Z * g["sleeve"]
-    return {"C": C, "F": F, "G": G, "T": T, "P": bi.P(*g["pivot"]), "hinge": -X, "twist": Z.copy()}
+    crown = C + Z * (g["wheel_d"] / 2 + g["crown_gap"] + 0.015)
+    G = crown + Z * (0.015 + g["piston"])
+    return {"C": C, "crown": crown, "G": G, "T": G + Z * g["oleo"], "P": bi.P(*g["pivot"]),
+            "hinge": -X, "twist": Z.copy()}
 
 
 def nose_stowed(point, k, twist=True):
-    return turn(point, k["P"], k["hinge"], GEAR["nose"]["fold_deg"])
+    g = GEAR["nose"]
+    if twist:
+        point = turn(point, k["C"], k["twist"], g["twist_deg"])
+    return turn(point, k["P"], k["hinge"], g["fold_deg"])
 
 
 def landing_lamp():
-    """The landing lamp's lens centre, gear down: low on the outboard side of the nose leg's sleeve, facing forward,
-    under the light_landing empty (lights.py). Ahead of the sleeve, it would rise into the cockpit's rear bulkhead as
-    the leg folds."""
-    k = nose_points()
-    return k["G"] - X * 0.07 - Z * 0.01
+    """The landing lamp's lens centre, gear down: just ahead of the oleo's gland collar, under the light_landing
+    empty (lights.py). Any further forward and it rises above the well's roof as the leg folds."""
+    g = GEAR["nose"]
+    return bi.P(g["wheel_s"] - 0.085, 0.0, GEAR["ground_z"] + g["wheel_d"] + 0.15)
 
 
 def nose_solids():
-    """Nose leg meshes, gear down, world space, after the F-104's (MAP brochure p. 13): sprung (trunnion, the raked
-    leg down to the sleeve, the sleeve, the landing lamp), unsprung (piston, foot, cantilever axle, lower link) and
-    wheel."""
+    """Nose leg meshes, gear down, world space: sprung (yoke, oleo, landing lamp), unsprung (piston, fork) and wheel."""
     g = GEAR["nose"]
     k = nose_points()
-    C, F, G, T, P = k["C"], k["F"], k["G"], k["T"], k["P"]
+    C, crown, G, T, P = k["C"], k["crown"], k["G"], k["T"], k["P"]
     gear, chrome = "Fighter1_gear", "Mirror"
     sprung = solids.Solids()
-    solids.cylinder(sprung, P - X * 0.09, P + X * 0.09, 0.03, SEG_LEG, gear)  # trunnion
-    for s in (-1, 1):
-        solids.cylinder(sprung, P + X * (s * 0.06), P + X * (s * 0.09), 0.034, SEG_LEG, gear)  # its bearings
-    K = Vector((P.x, T.y, T.z + 0.08))  # the leg's knee on the keel, above the sleeve's top, clear of the tyre
-    leg = (K - P).normalized()
-    tapered_beam(sprung, P + leg * 0.02, K, X, 0.06, 0.05, 0.05, 0.045, gear)  # the forged leg along the keel
-    tapered_beam(sprung, K + X * 0.02, T, Y, 0.045, 0.04, 0.04, 0.035, gear)  # and across to the sleeve
-    length = (T - G).length
-    solids.lathe(sprung, G, Z, [(0.0, 0.05), (0.03, 0.05), (0.03, 0.045), (length, 0.045), (length + 0.02, 0.03)],
-                 SEG_LEG, gear)  # sleeve, gland collar at its foot
-    eye = G + Y * 0.075 + Z * 0.03  # upper torque link, behind the sleeve
-    solids.beam(sprung, G + Y * 0.04 + Z * 0.03, eye, X, 0.02, 0.018, gear)
-    solids.cylinder(sprung, eye - Z * 0.011, eye + Z * 0.011, 0.012, 8, gear)
-    lamp = landing_lamp()
-    solids.lathe(sprung, lamp + Y * 0.03, -Y, [(0.0, 0.025), (0.0, 0.035), (0.04, 0.035), (0.045, 0.031)], 10, gear,
+    solids.cylinder(sprung, P - X * 0.10, P + X * 0.10, 0.03, SEG_LEG, gear)  # trunnion
+    solids.beam(sprung, P + Z * 0.01, T + Z * 0.02, X, 0.10, 0.05, gear)  # yoke from the trunnion to the oleo top
+    solids.lathe(sprung, G, Z, [(0.0, 0.056), (0.03, 0.056), (0.03, 0.05), ((T - G).length, 0.05),
+                                ((T - G).length + 0.03, 0.035)], SEG_LEG, gear)  # oleo, gland collar at its foot
+    eye = G - Y * 0.085 + Z * 0.03  # upper torque link, ahead of the oleo
+    solids.beam(sprung, G - Y * 0.045 + Z * 0.03, eye, X, 0.022, 0.02, gear)
+    solids.cylinder(sprung, eye - Z * 0.012, eye + Z * 0.012, 0.014, 8, gear)
+    lamp = landing_lamp()  # on a bracket, its lens on Mirror
+    solids.lathe(sprung, lamp + Y * 0.03, -Y, [(0.0, 0.03), (0.0, 0.045), (0.045, 0.045), (0.05, 0.04)], 10, gear,
                  cap_mats=(gear, chrome))
-    solids.beam(sprung, lamp + Y * 0.02, G - X * 0.04 + Y * 0.02, Y, 0.02, 0.016, gear)  # its bracket
+    solids.beam(sprung, G - Y * 0.04 + Z * 0.015, lamp + Y * 0.03, X, 0.02, 0.016, gear)
     unsprung = solids.Solids()
-    solids.cylinder(unsprung, F, G + Z * 0.05, 0.032, SEG_LEG, chrome)  # piston
-    solids.box(unsprung, F, (X, Y, Z), (0.036, 0.04, 0.03), gear)  # foot
-    axle_end = Vector((F.x, C.y, C.z))
-    solids.beam(unsprung, F, axle_end, X, 0.03, 0.03, gear)  # fork arm from the foot back to the axle
-    solids.cylinder(unsprung, axle_end, C + X * 0.06, 0.02, 8, gear)  # cantilever axle
-    solids.beam(unsprung, F + Y * 0.03, F + Y * 0.075, X, 0.02, 0.022, gear)  # lower link lug
-    solids.cylinder(unsprung, F + Y * 0.075, Vector((F.x, eye.y, eye.z + 0.05)), 0.007, 6, gear)
+    solids.cylinder(unsprung, crown + Z * 0.015, G + Z * 0.05, 0.037, SEG_LEG, chrome)  # piston
+    solids.box(unsprung, crown, (X, Y, Z), (0.11, 0.035, 0.015), gear)  # fork crown
+    for sx in (-1, 1):
+        x = sx * (g["wheel_w"] / 2 + 0.022)
+        solids.beam(unsprung, crown + X * x, Vector((x, C.y, C.z - 0.02)), Y, 0.035, 0.018, gear)  # fork arm
+    solids.cylinder(unsprung, C - X * 0.102, C + X * 0.102, 0.02, 8, gear)  # axle
+    solids.beam(unsprung, crown - Y * 0.035, crown - Y * 0.085, X, 0.02, 0.025, gear)  # lower link lug
+    solids.cylinder(unsprung, crown - Y * 0.085, Vector((0.0, eye.y, eye.z + 0.05)), 0.008, 6, gear)
     return sprung, unsprung, wheel_solid(C, X, "nose")
 
 
@@ -911,12 +885,12 @@ def members(leg, k):
     Liquid Spring strut, or the nose leg's trunnion, leg, sleeve and landing lamp."""
     if leg != "N":
         lo, hi = strut_ends(k)
+        foot_lo, foot_hi = (k["A"] + Z * z for z in FOOT_HOUSING)
         return [(k["P"] - k["hinge"] * 0.06, k["P"] + k["hinge"] * 0.06, 0.034), (k["P"], k["A"], 0.035),
-                (k["A"] - k["swivel"] * 0.05, k["A"] + k["swivel"] * 0.05, 0.03), (lo, hi, 0.05)]
+                (foot_lo, foot_hi, 0.06), (lo, hi, 0.05)]
     lamp = landing_lamp()
-    K = Vector((k["P"].x, k["T"].y, k["T"].z + 0.08))
-    return [(k["P"] - X * 0.09, k["P"] + X * 0.09, 0.034), (k["P"], K, 0.035), (K, k["T"], 0.03), (k["G"], k["T"], 0.05),
-            (lamp - Y * 0.02, lamp + Y * 0.05, 0.035)]
+    return [(k["P"] - X * 0.10, k["P"] + X * 0.10, 0.03), (k["P"], k["T"], 0.035), (k["G"], k["T"], 0.056),
+            (lamp - Y * 0.02, lamp + Y * 0.03, 0.045)]
 
 
 def structure_points(obj):

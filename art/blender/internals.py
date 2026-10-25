@@ -21,8 +21,7 @@ INTERNALS = {
     "radar": {"s": (0.30, 1.55), "dish_s": 0.95, "dish_r": 0.30, "mass_kg": 120},
     "avionics_nose": {"box": (1.55, 2.30, 0.30, -0.25, 0.42), "mass_kg": 90},  # s0, s1, half width, z0, z1
     "cockpit_tub": {"box": (2.35, 4.90, 0.38, -0.05, 0.78), "mass_kg": 260},
-    # A shelf above the nose well, the gun bay holding fuel; its floor clears the nose leg's sleeve stowed.
-    "avionics_aft": {"box": (4.95, 5.15, 0.42, 0.06, 0.70), "mass_kg": 140},
+    "avionics_aft": {"box": (4.95, 5.15, 0.42, 0.00, 0.70), "mass_kg": 140},  # a shelf; the gun bay holds fuel
     # Fuel, after the F-104S layout: an auxiliary cell in the old gun bay (as on the gunless F-104), the forward
     # main tank, three connected aft cells (the centre one between the intake ducts, the side ones wrapping round
     # them), and cells in the strakes and outboard wings. No fuel over or around the engine: a leak there is a fire. Each fuselage row: (s0, s1,
@@ -70,17 +69,12 @@ INTERNALS = {
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
     "spars": {"front_f": 0.175, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
     # The gear wells, each a union of boxes (s from, s to, x from, x to, z from, z to) clipped to just inside the
-    # skin (bay_inset), round the stowed gear and the path it folds through (gear.GEAR). The nose well: the upright
-    # wheel between the cockpit floor's aft end and the aux cell, then a narrow slot back to the leg's trunnion under
-    # the aux cell, which gives way to it. Each main well, left side (the right mirrors it): the flat tyre under the
+    # skin (bay_inset), round the stowed gear and the path it folds through (gear.GEAR). The nose well: the flat
+    # wheel and the folded leg under the cockpit floor, then a narrow slot back past the oleo. Each main well, left side (the right mirrors it): the flat tyre under the
     # duct's flattened underside, the carrier and leg along the keel back to the trunnion, the lobe's flank the wheel
     # comes in through, and the leg's way down aft of the trough.
     # A well runs out to the skin only over its doors' holes; elsewhere it stays clear of the skin.
-    "nose_gear_bay": {"boxes": [(4.60, 4.90, -0.28, 0.28, -0.56, -0.052), (4.90, 5.035, -0.28, 0.28, -0.56, 0.05),
-                                (5.025, 5.25, -0.105, 0.105, -0.56, 0.05), (5.025, 5.10, -0.25, 0.25, -0.56, 0.05),
-                                (5.025, 5.25, -0.17, 0.17, -0.475, 0.05),
-                                (5.025, 5.25, -0.25, 0.25, -0.40, 0.05), (5.25, 5.354, -0.105, 0.105, -0.56, 0.0),
-                                (5.354, 5.45, -0.105, 0.105, -0.56, 0.0), (5.45, 5.905, -0.105, 0.105, -0.56, -0.15)],
+    "nose_gear_bay": {"boxes": [(4.00, 5.035, -0.31, 0.31, -0.56, -0.23), (5.025, 5.31, -0.105, 0.105, -0.56, -0.23)],
                       "mass_kg": 0},
     "main_gear_bay": {"boxes": [(8.77, 9.49, 0.0, 0.46, -0.27, 0.09), (8.77, 9.49, 0.46, 0.70, -0.17, 0.09),
                                 (8.785, 9.108, 0.50, 0.96, -0.56, 0.09), (8.80, 9.108, 0.40, 0.50, -0.56, 0.09),
