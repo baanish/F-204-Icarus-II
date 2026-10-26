@@ -1,6 +1,10 @@
+# -Part blender runs only the three Blender bakes, -Part python only the rest. The Python half writes this
+# checkout's absolute paths into the skin metadata it commits, so it runs in the checkout being committed.
 param(
     [switch]$Render,
-    [switch]$BuildPlugin
+    [switch]$BuildPlugin,
+    [ValidateSet('all', 'blender', 'python')]
+    [string]$Part = 'all'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,12 +22,18 @@ function Invoke-SkinStep([string]$Executable, [string[]]$Arguments) {
 
 Push-Location $repoRoot
 try {
-    foreach ($mode in @('prepare', 'audit')) {
+    if ($Part -ne 'python') {
+        foreach ($mode in @('prepare', 'audit')) {
+            Invoke-SkinStep 'pwsh' @('-NoProfile', '-File', 'tools/Run-Blender.ps1', '--background', '--factory-startup',
+                '--python-exit-code', '1', '--python', 'art/blender/bake_skin.py', '--', $mode)
+        }
         Invoke-SkinStep 'pwsh' @('-NoProfile', '-File', 'tools/Run-Blender.ps1', '--background', '--factory-startup',
-            '--python-exit-code', '1', '--python', 'art/blender/bake_skin.py', '--', $mode)
+            '--python-exit-code', '1', '--python', 'art/blender/pilot2_skin.py', '--', 'structure')
+        if ($Part -eq 'blender') {
+            Write-Host 'SKIN BAKES PASS: run -Part python in the checkout being committed'
+            return
+        }
     }
-    Invoke-SkinStep 'pwsh' @('-NoProfile', '-File', 'tools/Run-Blender.ps1', '--background', '--factory-startup',
-        '--python-exit-code', '1', '--python', 'art/blender/pilot2_skin.py', '--', 'structure')
     Invoke-SkinStep 'python' @('art/textures/pilot2_parts.py', 'guides')
     Invoke-SkinStep 'python' @('art/textures/full_skin_guides.py', 'inventory')
     Invoke-SkinStep 'python' @('art/textures/full_skin_guides.py', 'check')

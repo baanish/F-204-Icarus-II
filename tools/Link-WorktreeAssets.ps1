@@ -1,8 +1,9 @@
 # Link-WorktreeAssets.ps1
 #
 # Lets B0 (tools/Build-Icarus.ps1) run in a git worktree. The game content B0 needs is gitignored, so a worktree lacks
-# it: this links the worktree's unity/Assets/Blueprinter/_donotship, unity/Packages/nuclearoption and
-# unity/Assets/Plugins/BepInEx to the main checkout's, as directory junctions, and puts copies of the game's two script
+# it: this links the worktree's unity/Assets/Blueprinter/_donotship, unity/Packages/nuclearoption,
+# unity/Assets/Plugins/BepInEx and unity/Assets/TextMesh Pro (without its settings, the HUD's text opens TextMesh Pro's
+# importer window mid-build) to the main checkout's, as directory junctions, and puts copies of the game's two script
 # assemblies in the worktree's unity/Library/ScriptAssemblies (see below). It deletes nothing: a path that is already
 # the right junction is left alone, and any other existing path fails the run.
 #
@@ -29,7 +30,8 @@ if (-not $Main) {
 $Main = [IO.Path]::GetFullPath($Main).TrimEnd('\')
 if ($Main -eq $worktree) { throw "$worktree is the main checkout; run this from a worktree" }
 
-foreach ($relative in 'unity/Assets/Blueprinter/_donotship', 'unity/Packages/nuclearoption', 'unity/Assets/Plugins/BepInEx') {
+foreach ($relative in 'unity/Assets/Blueprinter/_donotship', 'unity/Packages/nuclearoption', 'unity/Assets/Plugins/BepInEx',
+    'unity/Assets/TextMesh Pro') {
     $source = [IO.Path]::GetFullPath((Join-Path $Main $relative)).TrimEnd('\')
     $link = [IO.Path]::GetFullPath((Join-Path $worktree $relative)).TrimEnd('\')
     $item = Get-Item -LiteralPath $link -Force -ErrorAction SilentlyContinue
