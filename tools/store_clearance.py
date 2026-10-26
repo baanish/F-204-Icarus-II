@@ -51,14 +51,57 @@ STEP = 0.01  # largest gear vertex move between two poses of a sweep
 REACH = 0.5  # gaps beyond this are reported as "> REACH"
 TIP_INSET, TIP_CHORD, TIP_TOLERANCE = 0.005, 0.545, 0.001  # Stores rule 5
 EJECT_CLEAR = 1.0  # Stores rule 18
-LEG = re.compile(r"^gear_(leg|unsprung|arm)_[NLR](_visible)?$")
+LEG = re.compile(r"^gear_(leg|unsprung|arm|strut|piston)_[NLR](_visible)?$")
 TYRE = re.compile(r"^gear_wheel_[NLR]_visible$")
 DOOR = re.compile(r"^gear_door_\w+_visible$")
-NOT_AIRFRAME = re.compile(r"^gear_(leg|wheel|unsprung|arm)_|chock", re.I)
+NOT_AIRFRAME = re.compile(r"^gear_(leg|wheel|unsprung|arm|strut|piston)_|chock", re.I)
 
 
 def euler_x(degrees):
     return ("rot", axis_quat((1, 0, 0), degrees))
+
+
+def aim_basis(direction, up):
+    """Columns: direction, up made square to it, and their cross: the frame an AimConstraint holds a piece in."""
+    a = direction / np.linalg.norm(direction)
+    u = up - a * (a @ up)
+    u /= np.linalg.norm(u)
+    return np.column_stack([a, u, np.cross(a, u)])
+
+
+def suspension(plane, leg):
+    """A main leg's swing and strut, when it has them (IcarusAuthor.Gear.cs): the swing under the hinge, aimed at a
+    point on the unsprung and turning about its frame's X alone; the strut's cylinder (on the leg's mount) and piston
+    (on the swing), each aimed at the other's eye with its up held to the hinge axis at rest."""
+    swing = next((t for t, n in plane.nodes.items() if n["name"].endswith("_swing") and plane.under(t, leg["hinge"])), None)
+    if swing is None:
+        return None
+    target = next(t for t, n in plane.nodes.items() if n["name"].endswith("_swing_target") and plane.under(t, leg["unsprung"]))
+    piston = next(t for t, n in plane.nodes.items() if n["name"].startswith("gear_piston_") and plane.under(t, swing))
+    cylinder = plane.find("gear_strut_" + plane.nodes[piston]["name"][-1])
+    up = plane.world(leg["hinge"])[1][:, 0]
+    rest = {t: (plane.world(t)[1], aim_basis(plane.world(o)[0] - plane.world(t)[0], up))
+            for t, o in ((cylinder, piston), (piston, cylinder))}
+    return dict(swing=swing, target=target, pieces=((cylinder, piston), (piston, cylinder)), up=up, rest=rest)
+
+
+def suspended(plane, leg, pose):
+    """pose with a main leg's swing and strut added as the game's AimConstraints set them: the swing's local Euler X
+    of its aim at the target (asin of the aim's part across the hinge), each strut piece turned from rest so its eye
+    aims at the other's."""
+    s = leg["suspension"]
+    if s is None:
+        return pose
+    frame_pos, frame_rot, _ = plane.world(plane.nodes[s["swing"]]["parent"], pose)
+    aim = frame_rot.T @ (plane.world(s["target"], pose)[0] - frame_pos)
+    pose = dict(pose)
+    pose[s["swing"]] = euler_x(np.degrees(np.arcsin(np.clip(-aim[1] / np.linalg.norm(aim), -1, 1))))
+    for piece, other in s["pieces"]:
+        world_rot, basis = s["rest"][piece]
+        turned = aim_basis(plane.world(other, pose)[0] - plane.world(piece, pose)[0], s["up"]) @ basis.T @ world_rot
+        parent_rot = plane.world(plane.nodes[piece]["parent"], pose)[1]
+        pose[piece] = ("mat", parent_rot.T @ turned)
+    return pose
 
 
 def box_mesh(centre, rot, half):
@@ -103,8 +146,10 @@ def main():
         pos, rot, _ = plane.world(g["cast"])
         free = pos - rot[:, 1] * g["travel"]  # the tyre's bottom with the spring free
         rest = -height(free) / float(up @ rot[:, 1])  # compression that puts it on the ground at rest
-        meshes = [t for t in plane.meshes if plane.under(t, g["hinge"]) or any(plane.under(t, d) for d, _ in g["doors"])]
-        legs.append(dict(g, free=free, rest=rest, meshes=meshes))
+        found = suspension(plane, g)
+        meshes = [t for t in plane.meshes if plane.under(t, g["hinge"]) or any(plane.under(t, d) for d, _ in g["doors"])
+                  or found and t == found["pieces"][0][0]]
+        legs.append(dict(g, free=free, rest=rest, meshes=meshes, suspension=found))
     nose = max(legs, key=lambda l: l["free"][2])
     mains = [l for l in legs if l is not nose]
     contact = np.mean([l["free"] + plane.world(l["cast"])[1][:, 1] * l["rest"] for l in mains], axis=0)
@@ -128,7 +173,7 @@ def main():
                 leg["hinge"]: euler_x(leg["fold"] * fold)}
         pose.update({t: euler_x(angle * fold) for t, angle in leg["moving"]})
         pose.update({t: euler_x(angle * doors) for t, angle in leg["doors"]})
-        return pose
+        return suspended(plane, leg, pose)
 
     def reach_of(leg, joints, pose):
         """Largest arc any of leg's mesh vertices sweeps when each joint (transform, degrees) turns fully."""

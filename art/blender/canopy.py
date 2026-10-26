@@ -89,8 +89,8 @@ TREE = {
 # into; build() holds them to DETAIL_CAPS.
 BUDGET = {
     "hood_frame": {"target": 420, "cap": 480, "objects": (FRAME,)},
-    "hood_glass": {"target": 600, "cap": 1500, "objects": (GLASS_OUTER,)},
-    "windscreen_glass": {"target": 400, "cap": 1100, "exact": (WINDSCREEN,)},
+    "hood_glass": {"target": 600, "cap": 1300, "objects": (GLASS_OUTER,)},
+    "windscreen_glass": {"target": 400, "cap": 500, "exact": (WINDSCREEN,)},
     "hood_glass_inner": {"target": 600, "cap": 1500, "objects": (GLASS_INNER,), "cockpit": True},
 }
 GLASS_CAP = 2050

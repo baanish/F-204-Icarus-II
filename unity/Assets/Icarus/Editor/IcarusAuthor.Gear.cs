@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Animations;
 using Object = UnityEngine.Object;
 
 namespace Icarus.Editor
@@ -11,11 +12,16 @@ namespace Icarus.Editor
     public static partial class IcarusAuthor
     {
         // The gear is the export's own: each leg a hinge (the gear_leg part) with its sprung mesh, a second fold under it
-        // (gear_wheel: the main gear's knee, the nose gear's twist) that LandingGear turns through movingParts, and hinged
-        // doors. What rides the second fold: the main gear's oleo (gear_arm), the bump stop, the unsprung transform with
-        // the piston, axle and fork (gear_unsprung) and the wheel. The Revoker's LandingGear keeps its suspension, brakes,
-        // steering, audio and chocks and drives the Icarus hinges. The bump stop sits GearStroke above the free wheel's
-        // centre, straight up.
+        // (gear_wheel: the main gear's wheel carrier, the nose gear's twist) that LandingGear turns through movingParts,
+        // and hinged doors. The Revoker's LandingGear keeps its suspension, brakes, steering, audio and chocks and drives
+        // the Icarus hinges. The bump stop sits GearStroke above the free wheel's centre, straight up, and LandingGear
+        // slides its unsprung transform down from it. On the nose leg the bump stop rides the second fold, and the
+        // unsprung carries the piston and fork (gear_unsprung) and the wheel. Each main leg is one forging that swings
+        // up about its trunnion under load, as the F-104's does: its bump stop rides the hinge itself, and the leg, with
+        // the carrier (gear_arm) and wheel on its second fold, hangs from a swing that an AimConstraint turns about the
+        // hinge axis alone to aim at a point riding the unsprung (the export's swing_target), as the stock UtilityHelo1's
+        // gear arm aims at its unsprung. Its shock strut is two pieces aimed at each other's eyes: the cylinder on the
+        // leg's mount, the piston on the swing, as the stock trucks aim theirs.
         private const float GearStroke = 0.3f, GearMaxCompression = 0.5f, GearHingeBox = 0.15f;
         // The share of a leg's carrier mass that leaves with it when the wheel breaks off: LandingGear.BreakWheel takes
         // LandingGear.mass from the carrier's Rigidbody and gives it to the falling leg, so it must stay under the carrier's.
@@ -29,8 +35,8 @@ namespace Icarus.Editor
         private static readonly (string Leg, string Rig, string[] Leftovers, string Wheel, string[] Doors)[] Legs =
         {
             ("gear_leg_N", "gearHinge_F", new[] { "gear_F_armTarget" }, "gear_wheel_N", new[] { "gear_door_N_L", "gear_door_N_R", "gear_door_N2_L", "gear_door_N2_R" }),
-            ("gear_leg_L", "gearMount_L", new[] { "gear_armtarget_L" }, "gear_wheel_L", new[] { "gear_door_main_L", "gear_door_flap_L" }),
-            ("gear_leg_R", "gearMount_R", new[] { "gear_armtarget_R" }, "gear_wheel_R", new[] { "gear_door_main_R", "gear_door_flap_R" }),
+            ("gear_leg_L", "gearMount_L", new[] { "gear_armtarget_L" }, "gear_wheel_L", new[] { "gear_door_main_L", "gear_door_flap_L", "gear_door_flap_out_L" }),
+            ("gear_leg_R", "gearMount_R", new[] { "gear_armtarget_R" }, "gear_wheel_R", new[] { "gear_door_main_R", "gear_door_flap_R", "gear_door_flap_out_R" }),
         };
         // The F-104G's height to the stabilator top, which the stance should come out near.
         private const float F104Height = 4.12f;
@@ -94,7 +100,11 @@ namespace Icarus.Editor
             return Quaternion.LookRotation(Vector3.Cross(axle, up), up);
         }
 
-        private const string Unsprung = "gear_unsprung_", Arm = "gear_arm_";
+        private const string Unsprung = "gear_unsprung_", Arm = "gear_arm_", Strut = "gear_strut_", Piston = "gear_piston_";
+
+        // A Blender world point (export props) in Unity's frame.
+        private static Vector3 BlenderPoint(Build b, List<object> p) =>
+            new Vector3(-Convert.ToSingle(p[0]), Convert.ToSingle(p[2]), -Convert.ToSingle(p[1])) - b.Blockout.Origin;
 
         // The export gives each fold's travel_deg and where the wheel lies stowed (gear_wheel's stowed_wheel, Blender
         // world space); which way each turn goes in Unity's frames is taken from that: the senses of the leg's fold and
@@ -171,16 +181,49 @@ namespace Icarus.Editor
                 var travel = radius + GearStroke;
                 gear.transform.SetParent(hinge, false);
                 gear.transform.SetPositionAndRotation(part.position, Quaternion.identity);
+                var tag = leg.Substring(leg.Length - 1);
+                var swings = b.Blockout.Parts[leg].Props.ContainsKey("swing_target");
+                var legBody = gear.transform;
+                Transform swingTarget = null;
+                AimConstraint swingAim = null;
+                if (swings)
+                {
+                    // The swing turns about the hinge axis (its frame's X) to aim its Z, at rest at the target, at the
+                    // target as the unsprung slides; the export places the target square to the hinge from the trunnion.
+                    var target = BlenderPoint(b, (List<object>)b.Blockout.Parts[leg].Props["swing_target"]);
+                    var aim = (target - hinge.position).normalized;
+                    var swingFrame = new GameObject(leg + "_swing_frame") { layer = part.gameObject.layer }.transform;
+                    swingFrame.SetParent(hinge, false);
+                    swingFrame.SetPositionAndRotation(hinge.position, Quaternion.LookRotation(aim, Vector3.Cross(aim, hinge.right)));
+                    legBody = new GameObject(leg + "_swing") { layer = part.gameObject.layer }.transform;
+                    legBody.SetParent(swingFrame, false);
+                    strut.transform.SetParent(legBody, true);
+                    swingTarget = new GameObject(leg + "_swing_target") { layer = part.gameObject.layer }.transform;
+                    swingTarget.position = target;
+                    swingAim = legBody.gameObject.AddComponent<AimConstraint>();
+                    swingAim.AddSource(new ConstraintSource { sourceTransform = swingTarget, weight = 1f });
+                    swingAim.aimVector = Vector3.forward;
+                    swingAim.upVector = Vector3.right;
+                    swingAim.worldUpType = AimConstraint.WorldUpType.ObjectRotationUp;
+                    swingAim.worldUpObject = swingFrame;
+                    swingAim.worldUpVector = Vector3.right;
+                    swingAim.rotationAxis = Axis.X;
+                    swingAim.rotationAtRest = Vector3.zero;
+                    swingAim.rotationOffset = Vector3.zero;
+                    swingAim.weight = 1f;
+                    swingAim.locked = true;
+                    swingAim.constraintActive = true;
+                }
                 var foldFrame = new GameObject(wheelName) { layer = part.gameObject.layer }.transform;
-                foldFrame.SetParent(gear.transform, false);
+                foldFrame.SetParent(legBody, false);
                 foldFrame.SetPositionAndRotation(b.Blockout.Local(wheelName), b.Blockout.Rotation(wheelName));
                 b.Visuals[wheelName] = foldFrame;
                 var secondFold = new GameObject(wheelName + "_hinge") { layer = part.gameObject.layer }.transform;
                 secondFold.SetParent(foldFrame, false);
-                var arm = Arm + leg.Substring(leg.Length - 1);
+                var arm = Arm + tag;
                 if (b.Blockout.HasMesh(arm))
                     MeshVisual(b, arm, secondFold);
-                bump.SetParent(secondFold, false);
+                bump.SetParent(swings ? gear.transform : secondFold, false);
                 bump.SetPositionAndRotation(centre + Vector3.up * (travel - radius), Quaternion.identity);
                 if (cast != null)
                 {
@@ -193,14 +236,25 @@ namespace Icarus.Editor
                 unsprung.position = centre;
                 axleT.SetParent(unsprung, false);
                 axleT.SetPositionAndRotation(centre, AxleFrame(axle));
-                // The piston, axle and fork slide with the suspension (LandingGear moves unsprung up its bump stop).
-                MeshVisual(b, Unsprung + leg.Substring(leg.Length - 1), unsprung);
+                // The nose leg's piston and fork slide with the suspension (LandingGear moves unsprung up its bump stop);
+                // a main wheel rides its leg's carrier, and the point its leg aims at rides the unsprung.
+                if (b.Blockout.HasMesh(Unsprung + tag))
+                    MeshVisual(b, Unsprung + tag, unsprung);
+                if (swingTarget != null)
+                    swingTarget.SetParent(unsprung, true);
                 foreach (var wheel in wheels)
                 {
-                    wheel.SetParent(unsprung, false);
+                    wheel.SetParent(swings ? secondFold : unsprung, false);
                     wheel.SetPositionAndRotation(centre, AxleFrame(axle));
                 }
                 MeshVisual(b, tyreName, wheels[0]);
+                if (swings)
+                {
+                    var cylinder = MeshVisual(b, Strut + tag, mount).transform;
+                    var piston = MeshVisual(b, Piston + tag, legBody).transform;
+                    AimAtEye(cylinder, piston, mount, hinge.right);
+                    AimAtEye(piston, cylinder, mount, hinge.right);
+                }
                 foreach (var effect in effects.Where(e => !wheels.Contains(e) && e != unsprung && e != axleT && e != bump))
                 {
                     effect.SetParent(unsprung, false);
@@ -210,7 +264,7 @@ namespace Icarus.Editor
                 chocks.SetPositionAndRotation(centre - Vector3.up * radius, Quaternion.identity);
                 b.Placed.Add(chocks);
 
-                var kept = new HashSet<Transform>(new[] { gear.transform, bump, unsprung, axleT, chocks }.Concat(wheels).Concat(effects).Where(t => t != null));
+                var kept = new HashSet<Transform>(new[] { gear.transform, bump, unsprung, axleT, chocks, swingTarget }.Concat(wheels).Concat(effects).Where(t => t != null));
                 if (cast != null)
                     kept.Add(cast);
                 var doomed = new List<Object> { rig.gameObject };

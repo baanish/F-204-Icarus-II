@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8a041677694e0f24fa0a1404284715e5
+guid: d22130a078366a040964aae1cb27d49a
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -49,11 +49,6 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Icarus_WellDetail
     second: {fileID: 2100000, guid: 5c089d8b8839a004ca43bf67eafa7be0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: LOD
-    second: {fileID: 2100000, guid: 7d6ad621856f7a14695bf6cfe2bb81ba, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

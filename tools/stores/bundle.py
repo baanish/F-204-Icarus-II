@@ -203,8 +203,8 @@ class Aircraft:
         return next(t for t, n in self.nodes.items() if n["name"] == name and self._root_of(t) == self.root)
 
     def world(self, t, pose=None):
-        """(position, rotation matrix, scale) of transform t in the root frame under pose {transform: ("rot", q) or
-        ("pos", v)}."""
+        """(position, rotation matrix, scale) of transform t in the root frame under pose {transform: ("rot", q),
+        ("mat", local rotation matrix) or ("pos", v)}."""
         pose = pose or {}
         chain = []
         while t in self.nodes:
@@ -215,7 +215,7 @@ class Aircraft:
             n = self.nodes[node]
             kind, value = pose.get(node, (None, None))
             local_pos = value if kind == "pos" else n["pos"]
-            local_rot = quat_matrix(value if kind == "rot" else n["rot"])
+            local_rot = value if kind == "mat" else quat_matrix(value if kind == "rot" else n["rot"])
             pos = pos + rot @ (scale * local_pos)
             rot = rot @ local_rot
             scale = scale * n["scale"]

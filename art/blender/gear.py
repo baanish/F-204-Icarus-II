@@ -6,16 +6,23 @@ Each leg is the transform chain the game moves (IcarusAuthor.Gear.cs drives it w
   stowed), with the sprung mesh gear_leg_<leg>_visible on Fighter1_gear.
 - gear_wheel_<leg>, a child of the hinge, is the second fold the game turns through LandingGear.movingParts, geared
   linearly to the first: the main gear's wheel carrier swivelling the wheel flat, as the F-104's does; on the nose
-  leg it does not turn. What rides it: gear_arm_<leg> (the main gear's carrier: knuckle, neck and the shock strut's
-  cylinder), gear_unsprung_<leg> (the strut's piston on Mirror, axle, yoke, brake, torque guide: what slides with
-  LandingGear.suspensionTravel) and gear_wheel_<leg>_visible (tyre and hub on Aircraft_wheels).
+  leg it does not turn. What rides it: gear_arm_<leg> (the main gear's carrier: knuckle, stub axle, yoke and brake),
+  the nose leg's gear_unsprung_<leg> (piston and fork: what slides with LandingGear.suspensionTravel) and
+  gear_wheel_<leg>_visible (tyre and hub on Aircraft_wheels).
+- The main gear's shock strut: gear_strut_<leg>, its cylinder, hangs from the well's roof (on fuselage_mid) and
+  gear_piston_<leg> rides the hinge from a lug on the leg; each turns about its eye to aim at the other's.
 
-The built pose is gear down, doors shut. The game slides the unsprung straight up its bump stop, so every piston
-stands vertical when down. Both legs move as the F-104's do (F-104G flight manual LR1-14404-1, p. 1-47; sources in
-GEAR). Each main leg is an I-section forging on a trunnion at the keel, splayed out to its wheel, with its retraction
-actuator and hydraulic lines along it (MAIN_LEG). It swings forward and inward about an oblique hinge while the carrier
-at its foot, which holds the shock strut, turns the wheel 90 degrees, so the two tyres lie flat side by side across the belly, above the conformal
-troughs and under the ducts. The nose leg folds forward, its wheel upright, into a well behind the seat. Doors are
+The built pose is gear down, doors shut. Both legs move as the F-104's do (F-104G flight manual LR1-14404-1, p. 1-47;
+sources in GEAR). Each main leg is one I-section forging on a trunnion at the keel, splayed out to its wheel, with its
+retraction actuator and hydraulic lines along it (MAIN_LEG). It retracts forward and inward about an oblique hinge
+while the carrier at its foot turns the wheel 90 degrees, so the two tyres lie flat side by side across the belly,
+above the conformal troughs and under the ducts. Under load the whole leg swings up about the same trunnion and the
+diagonal shock strut, from the well's roof ahead of and inboard of the leg down to its lug, telescopes. The game only
+slides LandingGear.unsprung straight up its bump stop; in the Unity author the leg aims at a point riding the unsprung
+through an AimConstraint that turns it about the trunnion alone, and the strut's two halves aim at each other, as the
+stock UtilityHelo1's gear arm and shock mount and the stock trucks' cylinders and pistons do (swing_target, suspend).
+The nose leg's piston stands vertical and slides with the unsprung. The nose leg folds forward, its wheel upright,
+into a well behind the seat. Doors are
 patches of the fuselage skin, resampled to a coarse grid and built like the speed brakes: skin outside, on
 jet_mechanical a tray inside with a rim, ribs and a stringer, carved back where the stowed gear lies close, and hinge
 knuckles on a straight line just inside the skin, the ends square to it. The wells (internals: gear_bay) run out to
@@ -57,7 +64,7 @@ GEAR = {
     # from the inner wing's twin racks (tools/store_clearance.py; Stores rule 12: 0.05 m) and 0.027 m from the
     # trough's skin; the folds near 120 degrees lift it outboard into the twin racks' inboard missile first. As on the F-104, the forged
     # leg runs down to its foot, which holds the swivel: the wheel carrier turns in the foot on the swivel axis and
-    # carries the shock strut, whose piston carries the stub axle (main_points, MAIN_LEG).
+    # carries the stub axle (main_points, MAIN_LEG).
     "main": {"wheel_s": 9.84, "wheel_x": 1.24, "wheel_d": 0.66, "wheel_w": 0.16, "rim_r": 0.178,
              "pivot": (10.47, 0.30, -0.20), "hinge": (-0.05276, -0.75163, -0.65747), "fold_deg": 93.818,
              "swivel": (0.88711, 0.01478, 0.46132), "swivel_deg": 90.0, "stowed": (9.1206, 0.335, -0.055)},
@@ -69,14 +76,20 @@ GEAR = {
     # on the main bay, forward and aft as on the F-104 (p. 1-47), which hinges both outboard. Here the forward door
     # hinges at its front edge: its inner edge runs down the conformal trough's lip beside the rear ramp, then steps in
     # behind the ramp's end (patch_cells) over the skin the ramp's fade fans out, which the tyre passes through. The
-    # aft door hinges inboard. The game holds every gear door open while the gear is down (LandingGear), where the
-    # F-104's forward door recloses to a detent. The nose well's wide pair ends where the trough's front ramp
+    # aft opening is a clamshell split on the lower lap joint (x 0.44 to 0.47 along it, the skin's column within a
+    # centimetre): the inner half hinges inboard, the outer half outboard, so neither hangs near the ground with the
+    # gear compressed (door_ground), and it ends outboard on the column 0.05 to 0.09 m below the wing's lower skin,
+    # which still takes in where the folding tyre crosses the skin (out to x 0.84 at s 9.35). The outer half folds out
+    # 120 degrees toward the wing root: hanging lower it stands in the tyre's way up. The aft pair is cut before the
+    # forward door, which takes their squared front ends as its aft edge. The game holds every gear door open while
+    # the gear is down (LandingGear), where the F-104's forward door recloses to a detent. The nose well's wide pair ends where the trough's front ramp
     # begins to move the skin's columns (stations.ramp_stations); behind it a narrow pair on the keel's columns, which
     # hold their even angles there (build_icarus.NOSE_SLOT_KEEL), lets the oleo out.
     "doors": [("gear_door_N_L", 4.08, 5.025, 0.0, 0.31, "outer", 40, 40, 88, "down"),
               ("gear_door_N2_L", 5.025, 5.30, 0.0, 0.085, "outer", 40, 40, 88, "down"),
-              ("gear_door_main_L", 8.80, 9.077, 0.0, 0.0, "front", 40, 40, 80, "down", (92, 94, 84)),
-              ("gear_door_flap_L", 9.077, 10.77, 0.17, 0.97, "inner", 40, 40, 95, "down")],
+              ("gear_door_flap_L", 9.077, 10.77, 0.17, 0.47, "inner", 40, 40, 95, "down"),
+              ("gear_door_flap_out_L", 9.077, 10.77, 0.47, 0.84, "outer", 40, 40, 120, "out"),
+              ("gear_door_main_L", 8.80, 9.077, 0.0, 0.0, "front", 40, 40, 80, "down", (92, 94, 84))],
 }
 # The main leg's foot, along the swivel axis inboard of the wheel centre: tools/gear_fold_solve.py --solution ...
 # --axis-pin sweeps it; from 0.16 m out the tyre clears its own leg as it twists, 0.058 m here.
@@ -89,15 +102,14 @@ PIN_REACH = 0.20
 #   easing over the last third of the leg to (shift[2], 0), clear of the carrier as it swivels. From twist_from down the leg twists and flattens into a
 #   tongue square to the swivel axis, which the foot's boss (length along the axis, radius) can hold: the carrier
 #   turns against the boss's outboard face.
-# - Everything the carrier and the unsprung hold lies within about 0.04 m of the foot across the swivel axis (along X,
-#   gear down): stowed, that is height, between the well's floor (z -0.27) and the tyre over it. And as the carrier
-#   swivels its aft side turns up into the leg, so it holds its parts above and ahead of the axle.
-# - oleo: the shock strut stands on the carrier, its axis (dx, dy) from the foot, its gland and head heights above it,
-#   the piston on the unsprung. head is as tall as it can stand: stowed, it lies across the well toward the keel. So
-#   the piston shows `gland` less the clamp's height at full extension and is hidden in the cylinder for the first
-#   `head - gland` of the stroke; beyond, to the bump stop (GEAR_STROKE), its top comes out of the head.
-# - guide: the torque guide, a rod on the axle yoke sliding through an ear on the strut's gland: the game slides the
-#   unsprung straight up, so the links of a scissor, which would have to turn, cannot follow it.
+# - Everything the carrier holds lies within about 0.04 m of the foot across the swivel axis (along X, gear down):
+#   stowed, that is height, between the well's floor (z -0.27) and the tyre over it.
+# - strut: the shock strut, a cylinder hung by its ball end from a pad on the well's low roof at `top` (s, x, z) and a
+#   piston from an eye `lug` off the leg's surface at `at` of the way down, toward the top. Its top stays on the
+#   airframe through the fold, so the strut is shortest part way up; the cylinder and the piston are each STRUT_GAP
+#   shorter than that, so at full extension they overlap and folded neither meets the other's end (strut_lengths).
+#   The top was screened against the skin and every internal through the fold for the most clearance with the
+#   strut shortening visibly under load: aft of s 9.6 or outboard on the well's high roof it strikes the roof's step.
 # - actuator: the retraction actuator from a lug on the leg's forward edge at `at` of the way down to its airframe eye
 #   on the hinge line, `eye` past the trunnion, so it turns with the leg as one piece; r its cylinder's.
 MAIN_LEG = {
@@ -106,10 +118,15 @@ MAIN_LEG = {
     "flange": 0.016, "web": 0.012, "ribs": (0.30, 0.55, 0.78), "shift": (0.020, -0.030, 0.008), "foot": (0.036, 0.052),
     "twist_from": 0.70,
     "trunnion": {"pin": (-0.080, 0.070), "bore": (0.036, 0.040), "bearings": (0.040, 0.060, 0.034)},
-    "oleo": {"dx": 0.035, "dy": 0.040, "gland": 0.180, "head": 0.355, "r": 0.042, "piston_r": 0.026},
-    "guide": {"dx": 0.066, "dy": 0.0, "r": 0.009, "top": 0.25},
+    "strut": {"top": (9.56, 0.45, -0.145), "at": 0.40, "lug": 0.030, "ball": 0.040, "r": 0.036, "piston_r": 0.024,
+              "gland": 0.044, "pad": (0.005, 0.045)},
     "actuator": {"at": 0.50, "eye": 0.105, "r": 0.035},
 }
+STRUT_GAP = 0.02  # the strut's cylinder and piston each this much shorter than the strut at its shortest
+STRUT_OVERLAP = 0.04  # and together at least this much longer than at its longest
+SWING_TOL = 0.005  # the main tyre's bottom kept this near the ground the unsprung's slide puts it on (suspend)
+DOOR_GROUND = 0.10  # every open gear door this far above the ground at the bump stop (door_ground)
+STATIC_LIFT = 0.061  # the main legs' compression at rest, empty (the rest pose line IcarusAuthor.Systems.cs logs)
 GEAR_STROKE = 0.30  # the bump stop above the free wheel (IcarusAuthor.Gear.cs GearStroke): the piston's slide
 DOOR_SKIN = 0.006  # the door's inner face sits this far inside its outer skin
 DOOR_GAP = 0.002  # and its free edges stand this far in from the hole's, so it swings clear of the skin
@@ -117,20 +134,23 @@ DOOR_CLEAR = 0.004  # a door's tray kept this far from the stowed gear it closes
 CARVE_STEP = 0.005  # and looks for that gear this often across each cell: a corner of a main leg stows 4 mm inside the flap
 MIN_SKIN = 0.003  # the thinnest a door's skin gets where the gear lies against it
 # Object names the other modules and the Unity author build against, per leg N, L and R: the sprung leg is
-# gear_leg_<leg>_visible and the wheel gear_wheel_<leg>_visible; the piston and axle slide as gear_unsprung_<leg>,
-# and the main gear's carrier is gear_arm_<leg>.
-UNSPRUNG, ARM = "gear_unsprung_", "gear_arm_"
+# gear_leg_<leg>_visible and the wheel gear_wheel_<leg>_visible; the nose leg's piston and fork slide as
+# gear_unsprung_N; the main gear's carrier is gear_arm_<leg> and its shock strut gear_strut_<leg> (cylinder) and
+# gear_piston_<leg>.
+UNSPRUNG, ARM, STRUT, PISTON = "gear_unsprung_", "gear_arm_", "gear_strut_", "gear_piston_"
 LEGS = ("N", "L", "R")
-# Triangles per component: target and cap (budget.py sums them). A leg counts its sprung, unsprung, arm and wheel; the
-# main legs' caps take what the nose leg's leaves.
+# Triangles per component: target and cap (budget.py sums them). A leg counts its sprung, unsprung, arm, strut and
+# wheel; the main legs' caps take what the nose leg's leaves.
 BUDGET = {
     **{"leg_" + leg: {"target": target, "cap": cap,
-                      "objects": ("gear_leg_" + leg, "gear_wheel_" + leg, UNSPRUNG + leg, ARM + leg)}
+                      "objects": ("gear_leg_" + leg, "gear_wheel_" + leg, UNSPRUNG + leg, ARM + leg, STRUT + leg,
+                                  PISTON + leg)}
        for leg, target, cap in (("N", 1150, 1200), ("L", 1750, 1800), ("R", 1750, 1800))},
     # Built to the speed brakes' standard (rim, ribs, stringer, hinge knuckles): the stock F-99's bay doors run 824
     # triangles each, the Ifrit's gear doors 2,266 in all. Taking all of the skin's rings and columns added about 1,000,
-    # nearly all on the flaps; the intakes' caps gave up the 1,000.
-    "doors": {"target": 4950, "cap": 5000, "objects": ("gear_door_",)},
+    # nearly all on the flaps; the intakes' caps gave up the 1,000. Splitting the aft door into a clamshell added a
+    # second tray, rim and knuckles a side, about 800; the canopy glass's caps gave those up.
+    "doors": {"target": 5750, "cap": 5800, "objects": ("gear_door_",)},
 }
 DOOR_TRIS = (32, 1250)  # each door, outer skin and inner trim (Exterior rule 22, raised for the detailed doors)
 # Stock wheel layout, measured on _donotship/Texture2D/aircraft_wheels_b_PLACEHOLDER.png (512 px): the tread strip
@@ -258,14 +278,99 @@ def actuator_ends(k):
     return lo, k["P"] - k["hinge"] * m["actuator"]["eye"]
 
 
+def swing_angle(k, target, lift):
+    """How far (radians) the main leg swings up about its trunnion with the unsprung slid up by lift: the turn an
+    AimConstraint on the trunnion, aimed at target (riding the unsprung) and freed about the hinge axis alone, gives.
+    Unity reads that turn as the local Euler X of the full aim rotation, the asin of the aim's part across the hinge."""
+    h = k["hinge"]
+    f0 = (target - k["P"]).normalized()
+    f1 = (target + Z * lift - k["P"]).normalized()
+    return math.asin(max(-1.0, min(1.0, f1.dot(h.cross(f0)))))
+
+
+def swing_target(k):
+    """The point on the unsprung the main leg aims at (k = main_points(side)): in the plane through the trunnion square
+    to the hinge, so the aim needs no turn but about the hinge at rest, placed so the tyre's lowest point rises with
+    the slide over the stroke (least squares, coarse to fine over its radius and angle about the hinge)."""
+    P, C, h = k["P"], k["C"], k["hinge"]
+    key = tuple(P) + tuple(C) + tuple(h)
+    if key not in _TARGETS:
+        _TARGETS[key] = _fit_target(k, P, C, h)
+    return _TARGETS[key].copy()
+
+
+_TARGETS = {}
+
+
+def _fit_target(k, P, C, h):
+    e1 = (C - P) - h * h.dot(C - P)
+    e1.normalize()
+    e2 = h.cross(e1)
+    lifts = [GEAR_STROKE * i / 15 for i in range(1, 16)]
+    g = GEAR["main"]
+    tyre = tyre_profile(g["wheel_d"] / 2, g["wheel_w"] / 2, g["rim_r"])
+
+    def bottom(theta):
+        """The tyre's lowest point with the leg swung theta: the swing about the oblique trunnion cambers the wheel."""
+        turned = Matrix.Rotation(theta, 3, h)
+        c, axle = P + turned @ (C - P), turned @ X
+        return min(c.z + x * axle.z - r * math.sqrt(max(0.0, 1.0 - axle.z ** 2)) for x, r in tyre)
+
+    rest = bottom(0.0)
+
+    def miss(r, a):
+        q = P + (e1 * math.cos(a) + e2 * math.sin(a)) * r
+        return sum((bottom(swing_angle(k, q, d)) - rest - d) ** 2 for d in lifts)
+
+    best = (0.6, 0.0)
+    for step_r, step_a in ((0.1, 0.4), (0.02, 0.08), (0.004, 0.016), (0.0008, 0.0032), (0.00016, 0.00064)):
+        r0, a0 = best
+        best = min(((r0 + i * step_r, a0 + j * step_a) for i in range(-5, 6) for j in range(-5, 6) if r0 + i * step_r > 0.1),
+                   key=lambda ra: miss(*ra))
+    return P + (e1 * math.cos(best[1]) + e2 * math.sin(best[1])) * best[0]
+
+
+def strut_frame(at, toward, up):
+    """A strut piece's frame, as its AimConstraint holds it: origin at its eye, Y at the other piece's eye, X the
+    hinge axis made square to it."""
+    y = (toward - at).normalized()
+    x = (up - y * y.dot(up)).normalized()
+    return Matrix.Translation(at) @ Matrix((x, y, x.cross(y))).transposed().to_4x4()
+
+
+def strut_ends(k):
+    """The shock strut's eyes, left leg (k = main_points()): its top on the airframe, and its lug's eye off the leg's
+    surface at MAIN_LEG strut "at", toward the top."""
+    st = MAIN_LEG["strut"]
+    top = bi.P(*st["top"])
+    f, w, d = leg_station(st["at"])
+    c = leg_centre(k, f)
+    l, _, _ = leg_frame(k)
+    uf, vf = leg_axes(k, f)
+    out = (top - c) - l * l.dot(top - c)
+    out.normalize()
+    reach = min(w / max(abs(out.dot(vf)), 1e-6), d / max(abs(out.dot(uf)), 1e-6))
+    return top, c + out * (reach + st["lug"])
+
+
+def strut_lengths(k):
+    """The strut's length extended and its shortest and longest through the fold, compressed to the bump stop
+    included (left leg), and the cylinder's and the piston's lengths."""
+    top, lug = strut_ends(k)
+    target = swing_target(k)
+    n = [(turn(lug, k["P"], k["hinge"], GEAR["main"]["fold_deg"] * i / 60) - top).length for i in range(61)]
+    n += [(turn(lug, k["P"], k["hinge"], math.degrees(swing_angle(k, target, GEAR_STROKE * i / 10))) - top).length
+          for i in range(11)]
+    return n[0], min(n), max(n), min(n) - STRUT_GAP
+
+
 def main_solids():
     """Left main leg meshes, gear down, world space, after the F-104's (flight manual LR1-14404-1, pp. 1-46 to 1-48;
     MAP brochure p. 13; Brewczynski and Tora 2014, fig. 1), laid out by MAIN_LEG: sprung (the trunnion pin and its
     bearings, the forged I-section leg from its bore on the pin to the foot's boss round the swivel, its web pocketed
-    between ribs, the retraction actuator and two hydraulic lines down the leg), arm (the wheel carrier: its knuckle
-    in the foot, the neck up to the shock strut's gland, the strut's cylinder and the torque guide's ear), unsprung
-    (the stub axle and its yoke, the arm across to the strut's chrome piston, the torque guide's rod, the brake) and
-    wheel."""
+    between ribs, the shock strut's lug, the retraction actuator and two hydraulic lines down the leg), arm (the wheel
+    carrier: its knuckle in the foot, the stub axle and its yoke, the brake), wheel, and the shock strut: its cylinder
+    (ball end, barrel, gland nut; with the pad it hangs from) and its piston (eye and chrome rod)."""
     k = main_points()
     m = MAIN_LEG
     P, A, C = k["P"], k["A"], k["C"]
@@ -316,53 +421,120 @@ def main_solids():
         solids.tube(sprung, pts, 0.0055, 5, gear)
     uf, vf = leg_axes(k, 0.87)
     solids.box(sprung, centre(0.87) + uf * (web / 2 + 0.008) - vf * 0.005, (l, uf, vf), (0.014, 0.010, 0.022), gear)
+    st = m["strut"]
+    top, lug = strut_ends(k)
+    f_lug = leg_station(st["at"])[0]
+    for s in (-1, 1):  # the strut's lug: a cheek either side of its eye
+        solids.beam(sprung, centre(f_lug) + h * s * 0.019, lug + h * s * 0.019, h, 0.012, 0.034, gear)
+        solids.cylinder(sprung, lug + h * s * 0.013, lug + h * s * 0.025, 0.019, 8, gear)
 
     arm = solids.Solids()
-    ol, gd = m["oleo"], m["guide"]
-    O = A + X * ol["dx"] + Y * ol["dy"]  # the strut's axis at the foot's height
-    G = A + X * gd["dx"] + Y * gd["dy"]  # the torque guide's
     solids.cylinder(arm, A + out * 0.004, A + out * 0.050, 0.046, SEG_LEG, gear)  # knuckle, turning against the boss
-    solids.beam(arm, A + out * 0.025 + Z * 0.035 - Y * 0.012, O + Z * (ol["gland"] + 0.011) - Y * (ol["r"] + 0.004), X,
-                0.040, 0.022, gear)  # neck up the strut's forward side to its gland
-    lift = ol["head"] - ol["gland"]
-    solids.lathe(arm, O + Z * ol["gland"], Z, [(0.0, ol["piston_r"] + 0.002), (0.0, ol["r"] + 0.006),
-                                              (0.022, ol["r"] + 0.006), (0.022, ol["r"]), (lift - 0.016, ol["r"]),
-                                              (lift, ol["r"] - 0.008)], 10, gear)  # gland nut, cylinder, head
-    solids.beam(arm, O + Z * (ol["gland"] + 0.011), G + Z * (ol["gland"] + 0.011), Z, 0.016, 0.018, gear)  # guide ear
-    solids.cylinder(arm, G + Z * (ol["gland"] + 0.002), G + Z * (ol["gland"] + 0.020), 0.017, 8, gear)
-
-    unsprung = solids.Solids()
-    solids.cylinder(unsprung, A + out * 0.052, C + out * 0.03, 0.028, 8, chrome)  # stub axle, through the hub
+    solids.cylinder(arm, A + out * 0.050, C + out * 0.03, 0.028, 8, chrome)  # stub axle, through the hub
     yoke = A + out * 0.074
     a, rise, fwd = solids.basis(out, Z)
-    solids.box(unsprung, yoke + rise * 0.012, (a, rise, fwd), (0.022, 0.042, 0.038), gear)  # its yoke
-    solids.beam(unsprung, yoke + Y * 0.02 + Z * 0.03, O + Z * 0.03, Z, 0.03, 0.028, gear)  # arm across to the strut
-    solids.cylinder(unsprung, O + Z * 0.008, O + Z * 0.052, ol["piston_r"] + 0.010, 10, gear)  # piston clamp
-    solids.cylinder(unsprung, O + Z * 0.052, O + Z * (ol["gland"] + 0.012), ol["piston_r"], 10, chrome)  # piston
-    solids.cylinder(unsprung, G + Z * 0.06, G + Z * gd["top"], gd["r"], 6, chrome)  # torque guide rod
+    solids.box(arm, yoke + rise * 0.012, (a, rise, fwd), (0.022, 0.042, 0.038), gear)  # its yoke
     W = GEAR["main"]["wheel_w"] / 2
-    solids.cylinder(unsprung, C - X * (0.5 * W + 0.022), C - X * (0.5 * W - 0.002), 0.09, SEG_LEG, gear)  # brake, in the hub's dish
+    solids.cylinder(arm, C - X * (0.5 * W + 0.022), C - X * (0.5 * W - 0.002), 0.09, SEG_LEG, gear)  # brake, in the hub's dish
     wheel = wheel_solid(C, X, "main")
-    return sprung, arm, unsprung, wheel
+
+    # The strut along its axis from each eye: the cylinder from its ball, the piston from its eye; built in the
+    # frames its AimConstraints hold (strut_frame), so each is posed by moving its frame.
+    _, _, _, reach = strut_lengths(k)
+    up = strut_frame(top, lug, h).to_3x3()
+    ax, ay, az = up.col[0].xyz, up.col[1].xyz, up.col[2].xyz
+    cylinder = solids.Solids()
+    ball, r, gland = st["ball"], st["r"], st["gland"]
+    cap = [(-ball * math.cos(math.radians(a)), ball * math.sin(math.radians(a))) for a in (25, 70)]
+    solids.lathe(cylinder, top, ay, cap + [(0.03, r), (reach - gland, r), (reach - gland, r + 0.006), (reach, r + 0.006),
+                                           (reach, st["piston_r"] + 0.003)], 10, gear)
+    piston = solids.Solids()
+    pr = st["piston_r"]
+    solids.cylinder(piston, lug - ax * 0.012, lug + ax * 0.012, 0.018, 6, gear)  # eye between the lug's cheeks
+    solids.lathe(piston, lug, -ay, [(0.0, 0.010), (0.022, 0.010), (0.022, pr + 0.006), (0.06, pr + 0.006), (0.06, pr),
+                                    (reach, pr)], 8, chrome)  # a neck out of the eye, the end fitting and the rod
+    pad = solids.Solids()  # the airframe's, on the roof: its underside just clear of the ball's crown, up into the roof
+    pad_t, pad_r = st["pad"]
+    solids.cylinder(pad, top + Z * (ball + 0.002), top + Z * (ball + 0.002 + pad_t + 0.04), pad_r, 8, gear)
+    return sprung, arm, wheel, cylinder, piston, pad
 
 
 def main_leg(side):
     """One main leg's objects; the right leg is the left one mirrored."""
     sd = "L" if side > 0 else "R"
     k = main_points(side)
-    meshes = [mesh_from(s, side) for s in main_solids()]
+    sprung, arm, wheel, cylinder, piston, pad = [mesh_from(s, side) for s in main_solids()]
     g = GEAR["main"]
-    parts = bi.hinged("gear_leg_" + sd, rename(meshes[0], "gear_leg_" + sd), frame_on(k["P"], k["hinge"]))
+    parts = bi.hinged("gear_leg_" + sd, rename(sprung, "gear_leg_" + sd), frame_on(k["P"], k["hinge"]))
     parts[0]["travel_deg"] = g["fold_deg"]
-    swivel = bi.hinged("gear_wheel_" + sd, rename(meshes[3], "gear_wheel_" + sd), frame_on(k["A"], k["swivel"]),
+    parts[0]["swing_target"] = list(swing_target(k))  # IcarusAuthor.Gear.cs aims the leg at it
+    swivel = bi.hinged("gear_wheel_" + sd, rename(wheel, "gear_wheel_" + sd), frame_on(k["A"], k["swivel"]),
                        parent=parts[0])
     swivel[0]["travel_deg"] = g["swivel_deg"]
     swivel[0]["stowed_wheel"] = list(stowed(k["C"], k))  # IcarusAuthor.Gear.cs picks the turns' senses from it
-    for obj, name in ((meshes[1], ARM + sd), (meshes[2], UNSPRUNG + sd)):
-        ride(rename(obj, name), swivel[0])
-    for obj in meshes[1:]:
+    ride(rename(arm, ARM + sd), swivel[0])
+    top, lug = (mirrored(p, side) for p in strut_ends(main_points()))
+    for obj, name, eye, other in ((cylinder, STRUT + sd, top, lug), (piston, PISTON + sd, lug, top)):
+        rename(obj, name)
+        frame = strut_frame(eye, other, k["hinge"])
+        obj.data.transform(frame.inverted())
+        obj.matrix_world = frame
+    piston.parent = parts[0]
+    piston.matrix_world = strut_frame(lug, top, k["hinge"])
+    cylinder["parent_part"] = "fuselage_mid"  # parts.organise hangs it there, off the leg's hinge
+    rename(pad, "gear_strut_pad_" + sd)["merge_into"] = "fuselage_mid"
+    for obj in (wheel, arm, cylinder, piston):
         obj["role"] = "visual"  # no collider or LOD1 hull: these move against the part they belong to
-    return parts + swivel + meshes[1:3]
+    return parts + swivel + [arm, cylinder, piston, pad]
+
+
+def struts():
+    """(cylinder, piston, hinge axis at rest) of each main leg's shock strut."""
+    O = bpy.data.objects
+    return [(O[STRUT + sd], O[PISTON + sd], main_points(side)["hinge"]) for sd, side in (("L", 1), ("R", -1))
+            if STRUT + sd in O]
+
+
+def aim_struts():
+    """Aim each strut's halves at each other's eyes for the legs' current pose, as their AimConstraints do in game.
+    Update the view layer first."""
+    for cylinder, piston, up in struts():
+        top, lug = cylinder.matrix_world.translation.copy(), piston.matrix_world.translation.copy()
+        cylinder.matrix_world = strut_frame(top, lug, up)
+        piston.matrix_world = strut_frame(lug, top, up)
+
+
+@contextlib.contextmanager
+def suspend(lift):
+    """Compress every leg by lift for the length of a with-block, gear down, as the game does: the nose leg's unsprung
+    and wheel slide straight up; each main leg swings up about its trunnion as far as its aim at the unsprung's
+    target turns it (swing_angle), carrying its wheel and the strut's piston, and the strut re-aims."""
+    O = bpy.data.objects
+    moved = [O[UNSPRUNG + "N"], O["gear_wheel_N_visible"]]
+    turns = {}
+    for sd, side in (("L", 1), ("R", -1)):
+        hinge = O["gear_leg_" + sd]
+        k = dict(main_points(side), P=hinge.matrix_world.translation.copy(), hinge=hinge.matrix_world.col[0].xyz.normalized())
+        x = swing_angle(k, Vector(hinge["swing_target"]), lift)
+        swing = Matrix.Translation(k["P"]) @ Matrix.Rotation(x, 4, k["hinge"]) @ Matrix.Translation(-k["P"])
+        for name in ("gear_leg_%s_visible" % sd, "gear_wheel_" + sd, PISTON + sd):
+            turns[name] = swing
+    saved = {o.name: o.matrix_basis.copy() for o in moved + [O[n] for n in turns]}
+    for o in moved:
+        o.matrix_world = Matrix.Translation(Z * lift) @ o.matrix_world
+    for name, swing in turns.items():
+        O[name].matrix_world = swing @ O[name].matrix_world
+    bpy.context.view_layer.update()
+    aim_struts()
+    bpy.context.view_layer.update()
+    try:
+        yield
+    finally:
+        for name, basis in saved.items():
+            O[name].matrix_basis = basis
+        bpy.context.view_layer.update()
+        aim_struts()
+        bpy.context.view_layer.update()
 
 
 # --- the nose leg --------------------------------------------------------------------------------------------------
@@ -622,11 +794,17 @@ def stowed_tree():
         faces.extend(tuple(base + i for i in f) for f in fs)
 
     k = main_points()
-    sprung, arm, unsprung, wheel = main_solids()
+    sprung, arm, wheel, cylinder, piston, _ = main_solids()
+    top, lug = strut_ends(k)
+    up = stowed(lug, k, swivel=False)
+    aimed = {id(cylinder): strut_frame(top, up, k["hinge"]) @ strut_frame(top, lug, k["hinge"]).inverted(),
+             id(piston): strut_frame(up, top, k["hinge"]) @ strut_frame(lug, top, k["hinge"]).inverted()}
     for side in (1, -1):
         add(sprung, lambda v, side=side: mirrored(stowed(v, k, swivel=False), side))
-        for part in (arm, unsprung, wheel):
+        for part in (arm, wheel):
             add(part, lambda v, side=side: mirrored(stowed(v, k), side))
+        for part in (cylinder, piston):
+            add(part, lambda v, side=side, m=aimed[id(part)]: mirrored(m @ v, side))
     kn = nose_points()
     sprung, unsprung, wheel = nose_solids()
     add(sprung, lambda v: nose_stowed(v, kn, twist=False))
@@ -638,8 +816,9 @@ def stowed_tree():
 def hole(fuselage, spec, edges, vid):
     """Shape a door's hole in the skin, both sides: the patch (rings j0..j1, ring points k0..k1, a door starting where
     another ends sharing its edge through edges), its kept rows js and columns ks, the hole's edge snapped onto them,
-    the hinge edge put on a straight line and, for a hinge along a column, the ends squared to it. A "front" hinge
-    runs along the patch's first ring; its side edges keep the skin's columns. Returns j0, j1, k0, k1, js, ks."""
+    the hinge edge put on a straight line and, for a hinge along a column, the ends squared to it (edges["squared"]
+    keeps the points squared so far, for the doors after). A "front" hinge runs along the patch's first ring;
+    its side edges keep the skin's columns. Returns j0, j1, k0, k1, js, ks."""
     rows, cols, hinge_edge = spec[6], spec[7], spec[5]
     j0, j1, k0, k1 = door_patch(fuselage, spec)
     k0 = edges.get(spec[1:4], k0)
@@ -654,7 +833,8 @@ def hole(fuselage, spec, edges, vid):
             continue
         hinge_k = k1 if hinge_edge == "outer" else k0
         straighten(fuselage, [vid(j, vk(hinge_k)) for j in range(j0, j1 + 1)])
-        square_ends(fuselage, co(j0, hinge_k), co(j1, hinge_k), [[vid(j, vk(k)) for k in range(k0, k1 + 1)] for j in (j0, j1)])
+        square_ends(fuselage, co(j0, hinge_k), co(j1, hinge_k), [[vid(j, vk(k)) for k in range(k0, k1 + 1)] for j in (j0, j1)],
+                    edges.setdefault("squared", {}), spec[1:3])
     return j0, j1, k0, k1, js, ks
 
 
@@ -731,17 +911,23 @@ def straighten(obj, ids):
         verts[i].co = a + d * d.dot(verts[i].co - a)
 
 
-def square_ends(obj, a, b, ends):
+def square_ends(obj, a, b, ends, squared, stretch):
     """Put the hole's two end edges (vertex ids, the first at a's end) square to the hinge a-b: an end edge askew to
-    the hinge would sweep fore and aft through the skin as the door turns."""
+    the hinge would sweep fore and aft through the skin as the door turns. A corner an earlier door over the same
+    stretch (s from, s to) squared, a clamshell's split, stays where that door put it, so both halves are cut from one
+    hole edge: their hinges run nearly parallel, so the two end planes meet far off. squared maps each vertex id
+    squared so far to its door's stretch."""
     verts = obj.data.vertices
     d = (b - a).normalized()
     for ids, origin in zip(ends, (a, b)):
         for i in ids:
+            if squared.get(i) == stretch:
+                continue
             move = d * d.dot(verts[i].co - origin)
             if abs(verts[i].co.x) < 1e-5:  # shared by a left and a right door: it stays on the centreline
                 move.x = 0.0
             verts[i].co -= move
+            squared[i] = stretch
 
 
 def remove_faces(obj, inside):
@@ -755,14 +941,16 @@ def remove_faces(obj, inside):
 
 # part name -> (parent, dry mass kg); parts.full_tree adds these to its own
 TREE = {"gear_door_flap_L": ("fuselage_mid", 0), "gear_door_flap_R": ("fuselage_mid", 0),
+        "gear_door_flap_out_L": ("fuselage_mid", 0), "gear_door_flap_out_R": ("fuselage_mid", 0),
         "gear_door_N2_L": ("fuselage_forward", 0), "gear_door_N2_R": ("fuselage_forward", 0)}
 
 
 def bay_doors(core):
     """BVH trees of the doors that close a structure core's gear bays beyond those parts.open_bays lists: the main
-    bays' flaps and the aft nose doors, shut."""
-    door = {"fuselage_mid": "gear_door_flap_%s_visible", "fuselage_forward": "gear_door_N2_%s_visible"}.get(core)
-    return [tree(bpy.data.objects[door % sd]) for sd in ("L", "R")] if door else []
+    bays' aft doors and the aft nose doors, shut."""
+    doors = {"fuselage_mid": ("gear_door_flap_%s_visible", "gear_door_flap_out_%s_visible"),
+             "fuselage_forward": ("gear_door_N2_%s_visible",)}.get(core, ())
+    return [tree(bpy.data.objects[d % sd]) for d in doors for sd in ("L", "R")]
 
 
 def gapped(grid, hinge_edge):
@@ -786,7 +974,7 @@ def gapped(grid, hinge_edge):
 DOOR_SHAPE = {"frame_depth": 0.026, "sheet_depth": 0.005, "rim": 0.028, "rib": 0.014, "rib_pitch": 0.30, "cell": 0.15,
               "knuckle_r": 0.009, "knuckle_half": 0.016, "knuckle_inset": 0.07, "lug": 0.030}
 # A shallower tray for the nose well's narrow pairs: a deep rim on a door that narrow swings into the well's edge.
-DOOR_DEPTH = {"gear_door_N2": 0.010, "gear_door_flap": 0.012}
+DOOR_DEPTH = {"gear_door_N2": 0.010, "gear_door_flap": 0.012, "gear_door_flap_out": 0.012}
 
 
 class Grid:
@@ -945,6 +1133,8 @@ def posed(fractions):
     for n, f in fractions.items():
         O[n].matrix_basis = O[n].matrix_basis @ Matrix.Rotation(math.radians(O[n]["travel_deg"] * f), 4, "X")
     bpy.context.view_layer.update()
+    aim_struts()
+    bpy.context.view_layer.update()
     try:
         yield
     finally:
@@ -952,18 +1142,21 @@ def posed(fractions):
             for c, v in s:
                 setattr(O[n], c, v)
         bpy.context.view_layer.update()
+        aim_struts()
+        bpy.context.view_layer.update()
 
 
 def leg_meshes(leg):
     O = bpy.data.objects
-    names = ["gear_leg_%s_visible" % leg, "gear_wheel_%s_visible" % leg, UNSPRUNG + leg, ARM + leg]
+    names = ["gear_leg_%s_visible" % leg, "gear_wheel_%s_visible" % leg, UNSPRUNG + leg, ARM + leg, STRUT + leg,
+             PISTON + leg]
     return [O[n] for n in names if n in O]
 
 
 def doors_of(leg):
     if leg == "N":
         return ["gear_door_N_L", "gear_door_N_R", "gear_door_N2_L", "gear_door_N2_R"]
-    return ["gear_door_main_" + leg, "gear_door_flap_" + leg]
+    return ["gear_door_main_" + leg, "gear_door_flap_" + leg, "gear_door_flap_out_" + leg]
 
 
 def tree(obj):
@@ -986,8 +1179,9 @@ def members(leg, k):
     if leg != "N":
         kl, side = main_points(), -1 if leg == "R" else 1  # laid out on the left leg, mirrored
         P, A, h, out, pin = kl["P"], kl["A"], kl["hinge"], kl["swivel"], MAIN_LEG["trunnion"]["pin"]
+        lug = strut_ends(kl)[1]
         caps = [(P + h * pin[0], P + h * pin[1], 0.046), (P, A, 0.08), (A - out * MAIN_LEG["foot"][0], A, 0.056),
-                (*actuator_ends(kl), 0.03)]
+                (*actuator_ends(kl), 0.03), (P + (A - P) * MAIN_LEG["strut"]["at"], lug, 0.03)]
         return [(mirrored(a, side), mirrored(b, side), r) for a, b, r in caps]
     lamp = landing_lamp()
     return [(k["P"] - X * 0.10, k["P"] + X * 0.10, 0.03), (k["P"], k["T"], 0.035), (k["G"], k["T"], 0.056),
@@ -1055,14 +1249,16 @@ def check(icarus):
         if not DOOR_TRIS[0] <= t <= DOOR_TRIS[1]:
             problems.append("%s has %d triangles (%d to %d)" % (name, t, *DOOR_TRIS))
     stow, sweep, swing, own = stowed_check(icarus), retraction_sweep(icarus), door_swing(icarus), tyre_contact()
-    carrier = carrier_clear()
-    problems += stow + sweep["clashes"] + swing + own["clashes"] + carrier["clashes"]
+    carrier, strut, ride_, ground = carrier_clear(), strut_check(), swing_check(), door_ground()
+    problems += (stow + sweep["clashes"] + swing + own["clashes"] + carrier["clashes"] + strut["problems"]
+                 + ride_["problems"] + ground["problems"])
     for line in problems:
         print("gear problem:", line)
     print("gear check:", {"legs": report, "stowed_intrusions": len(stow), "sweep_poses": sweep["poses"],
                           "sweep_clashes": len(sweep["clashes"]), "least_gap_m": sweep["least"],
                           "tyre_to_own_leg_m": own["least"], "tyre_contact_poses": own["poses"],
-                          "tyre_to_own_leg_compressed_m": own["bump_stop_m"], "carrier_to_leg_m": carrier["least"]})
+                          "tyre_to_own_leg_compressed_m": own["bump_stop_m"], "carrier_to_leg_m": carrier["least"],
+                          "strut": strut["report"], "swing": ride_["report"], "door_ground_m": ground["report"]})
     if problems:
         raise ValueError("gear: " + "; ".join(problems[:30]) + (" (%d in all)" % len(problems) if len(problems) > 30 else ""))
 
@@ -1143,17 +1339,12 @@ def tyre_contact():
     clashes, least, poses, bump = [], 9.0, 0, {}
     for leg in LEGS:
         own = [m for m in leg_meshes(leg) if m.name != "gear_wheel_%s_visible" % leg]
-        slid = [O[UNSPRUNG + leg], O["gear_wheel_%s_visible" % leg]]
-        rest = slid[1].matrix_world.copy()
+        rest = O["gear_wheel_%s_visible" % leg].matrix_world.copy()
         n = max(1, math.ceil(reach(leg) / SWEEP_STEP))
         cases = [(0.0, c) for c in (0.0, GEAR_STROKE / 2, GEAR_STROKE)] + [(i / n, 0.0) for i in range(1, n + 1)]
         for fold, lift in cases:
-            with posed({"gear_leg_" + leg: fold, "gear_wheel_" + leg: fold}):
-                saved = [o.matrix_world.copy() for o in slid]
-                for o in slid:  # LandingGear slides the unsprung straight up its bump stop
-                    o.matrix_world = Matrix.Translation(Z * lift) @ o.matrix_world
-                bpy.context.view_layer.update()
-                pts = tyre_points(leg, Matrix.Translation(Z * lift) @ rest if fold == 0.0 else rest)
+            with posed({"gear_leg_" + leg: fold, "gear_wheel_" + leg: fold}), suspend(lift):
+                pts = tyre_points(leg, rest)
                 for m in own if fold == 0.0 else [O["gear_leg_%s_visible" % leg]]:
                     t = tree(m)
                     near = [(t.find_nearest(p), p) for p in pts]
@@ -1164,9 +1355,6 @@ def tyre_contact():
                     least = min(least, d)
                     if d < TYRE_CLEAR:
                         clashes.append("%s tyre %.3f m from %s at fold %.2f" % (leg, d, m.name, fold))
-                for o, mw in zip(slid, saved):
-                    o.matrix_world = mw
-                bpy.context.view_layer.update()
                 poses += 1
     return {"clashes": clashes, "least": round(least, 4), "poses": poses, "bump_stop_m": bump}
 
@@ -1182,11 +1370,85 @@ def carrier_clear():
         for i in range(n + 1):
             with posed({"gear_leg_" + leg: i / n, "gear_wheel_" + leg: i / n}):
                 t = tree(sprung)
-                for m in (O[ARM + leg], O[UNSPRUNG + leg]):
+                for m in (O[ARM + leg],):
                     if t.overlap(tree(m)):
                         clashes.append("%s passes into %s at fold %.2f" % (m.name, sprung.name, i / n))
                     least = min(least, min(t.find_nearest(m.matrix_world @ v.co)[3] for v in m.data.vertices))
     return {"clashes": clashes, "least": round(least, 4)}
+
+
+def strut_check():
+    """Each main shock strut through the fold and down its stroke: its halves stay engaged (the cylinder's end
+    STRUT_GAP short of the piston's eye at the strut's shortest, the two STRUT_OVERLAP longer than it at its
+    longest), and its aim stays well off the hinge axis its up vector holds to. Reports its length extended, at the
+    static load and at the bump stop, and its range."""
+    problems, report = [], {}
+    for cylinder, piston, up in struts():
+        halves = strut_lengths(main_points())[3]
+        sd = cylinder.name[-1]
+        n = max(1, math.ceil(reach(sd) / SWEEP_STEP))
+        lengths, worst_up = {}, 90.0
+        poses = [("fold", i / n, 0.0) for i in range(n + 1)] + [("lift", 0.0, GEAR_STROKE * i / 10) for i in range(11)]
+        poses.append(("lift", 0.0, STATIC_LIFT))
+        for kind, fold, lift in poses:
+            with posed({"gear_leg_" + sd: fold, "gear_wheel_" + sd: fold}), suspend(lift):
+                a, b = cylinder.matrix_world.translation, piston.matrix_world.translation
+                lengths[(kind, round(fold, 4), round(lift, 4))] = (b - a).length
+                worst_up = min(worst_up, math.degrees(math.acos(min(1.0, abs((b - a).normalized().dot(up))))))
+        lo, hi = min(lengths.values()), max(lengths.values())
+        if lo < halves + STRUT_GAP - 1e-4 or 2 * halves < hi + STRUT_OVERLAP - 1e-4:
+            problems.append("%s: halves of %.3f m don't span %.3f to %.3f m" % (cylinder.name, halves, lo, hi))
+        if worst_up < 15.0:
+            problems.append("%s aims within %.1f deg of its up vector" % (cylinder.name, worst_up))
+        n0 = lengths[("fold", 0.0, 0.0)]
+        report[sd] = {"length_m": round(n0, 3), "static_m": round(n0 - lengths[("lift", 0.0, STATIC_LIFT)], 4),
+                      "bump_stop_m": round(n0 - lengths[("lift", 0.0, GEAR_STROKE)], 4), "range_m": [round(lo, 3), round(hi, 3)],
+                      "halves_m": round(halves, 3), "least_off_up_deg": round(worst_up, 1)}
+    return {"problems": problems, "report": report}
+
+
+def swing_check():
+    """The main tyres down the stroke: each tyre's bottom must stay within SWING_TOL of the ground the unsprung's slide
+    puts it on, as the leg swings about its trunnion (swing_target). Reports the worst miss and the swing at the
+    static load and at the bump stop."""
+    O = bpy.data.objects
+    problems, report = [], {}
+    for sd in ("L", "R"):
+        wheel = O["gear_wheel_%s_visible" % sd]
+        floor = min((wheel.matrix_world @ v.co).z for v in wheel.data.vertices)
+        worst = 0.0
+        for lift in [GEAR_STROKE * i / 10 for i in range(1, 11)] + [STATIC_LIFT]:
+            with suspend(lift):
+                miss = min((wheel.matrix_world @ v.co).z for v in wheel.data.vertices) - floor - lift
+                worst = max(worst, abs(miss))
+        if worst > SWING_TOL:
+            problems.append("gear_leg_%s: the tyre misses the ground by %.4f m as it swings" % (sd, worst))
+        k = main_points(1 if sd == "L" else -1)
+        target = Vector(O["gear_leg_" + sd]["swing_target"])
+        report[sd] = {"worst_miss_m": round(worst, 4),
+                      "static_deg": round(math.degrees(swing_angle(k, target, STATIC_LIFT)), 2),
+                      "bump_stop_deg": round(math.degrees(swing_angle(k, target, GEAR_STROKE)), 2)}
+    return {"problems": problems, "report": report}
+
+
+def door_ground():
+    """Every gear door opening and open, gear down and compressed to the bump stop on level ground: its lowest point
+    must stay DOOR_GROUND above the ground, which then lies GEAR_STROKE above the free tyres' bottoms. Reports each
+    door's least gap."""
+    O = bpy.data.objects
+    ground = GEAR["ground_z"] + GEAR_STROKE
+    problems, report = [], {}
+    with suspend(GEAR_STROKE):
+        for f in (0.25, 0.5, 0.75, 1.0):
+            with posed(all_doors(f)):
+                for leg in LEGS:
+                    for d in doors_of(leg):
+                        gap = min(p.z for p in world_points(O[d + "_visible"])) - ground
+                        report[d] = round(min(report.get(d, 9.0), gap), 3)
+    for d, gap in report.items():
+        if gap < DOOR_GROUND:
+            problems.append("%s comes within %.3f m of the ground at the bump stop" % (d, gap))
+    return {"problems": problems, "report": report}
 
 
 def all_folds(fraction):

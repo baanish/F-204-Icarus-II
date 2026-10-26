@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(REPO / "art/blender"), str(REPO / "tools")]
@@ -62,14 +62,6 @@ def look(scene, kind):
         return
     engines = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
     scene.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines else "BLENDER_EEVEE"
-
-
-def slide(lift):
-    """Slide the unsprung and the wheel straight up, as LandingGear does along its bump stop."""
-    for name in ("gear_unsprung_" + LEG, "gear_wheel_%s_visible" % LEG):
-        o = bpy.data.objects[name]
-        o.matrix_world = Matrix.Translation(Vector((0, 0, lift))) @ o.matrix_world
-    bpy.context.view_layer.update()
 
 
 def shoot(scene, cam, view, path):
@@ -139,9 +131,8 @@ def main():
         look(scene, kind)
         for view in ("close", "front"):
             for pose, lift in (("extended", 0.0), ("compressed", stroke)):
-                slide(lift)
-                shoot(scene, cam, view, args.out / ("%s_%s_%s_%s.png" % (args.label, kind, view, pose)))
-                slide(-lift)
+                with gear.suspend(lift):  # the leg swings up about its trunnion and the strut telescopes, as in game
+                    shoot(scene, cam, view, args.out / ("%s_%s_%s_%s.png" % (args.label, kind, view, pose)))
     if args.skip_gif:
         return
     ease = lambda t: 0.5 - 0.5 * math.cos(math.pi * t)

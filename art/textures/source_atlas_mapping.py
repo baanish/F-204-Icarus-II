@@ -53,6 +53,8 @@ def donor_part(name, source_names):
         'gear_door_N2_R_visible': ('gear_door_N_L_visible', True),
         'gear_door_flap_L_visible': ('gear_door_main_L_visible', False),
         'gear_door_flap_R_visible': ('gear_door_main_L_visible', True),
+        'gear_door_flap_out_L_visible': ('gear_door_main_L_visible', False),
+        'gear_door_flap_out_R_visible': ('gear_door_main_L_visible', True),
     }
     return replacements.get(name)
 
