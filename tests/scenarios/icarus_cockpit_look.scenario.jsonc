@@ -1,0 +1,41 @@
+// Cockpit look-around of the Icarus parked on Sandrift's runway: the pilot's head turned through the game's own cockpit
+// view, ahead, down at the panel, at the floor and stick, at each side console, and back over each shoulder. The verdict
+// is read from the screenshots.
+// From the repo root: no-agentic run tests/scenarios/icarus_cockpit_look.scenario.jsonc
+{
+  "mission": "icarus_livery_1.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 150,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
+    { "camera": { "mode": "cockpit", "hdg_deg": 0, "pitch_deg": -15 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the view settles" },
+    { "screenshot": { "name": "look_ahead" } },
+    { "camera": { "mode": "cockpit", "hdg_deg": 0, "pitch_deg": -40 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the view settles" },
+    { "screenshot": { "name": "look_panel" } },
+    { "camera": { "mode": "cockpit", "hdg_deg": 0, "pitch_deg": -62 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the view settles" },
+    { "screenshot": { "name": "look_down" } },
+    { "camera": { "mode": "cockpit", "hdg_deg": -65, "pitch_deg": -40 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the view settles" },
+    { "screenshot": { "name": "look_left_console" } },
+    { "camera": { "mode": "cockpit", "hdg_deg": 65, "pitch_deg": -40 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the view settles" },
+    { "screenshot": { "name": "look_right_console" } },
+    { "camera": { "mode": "cockpit", "hdg_deg": -140, "pitch_deg": -5 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the view settles" },
+    { "screenshot": { "name": "look_left_shoulder" } },
+    { "camera": { "mode": "cockpit", "hdg_deg": 140, "pitch_deg": -5 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the view settles" },
+    { "screenshot": { "name": "look_right_shoulder" } },
+    { "camera": { "mode": "game" } },
+    { "check": { "path": "own.alive", "eq": true }, "label": "still alive after the shots" },
+  ],
+}
