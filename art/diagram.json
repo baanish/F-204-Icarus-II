@@ -8,7 +8,7 @@
     "sprite": "Icarus_status_aileron_L.png",
     "centre": [
      -39.81,
-     -56.69
+     -56.16
     ],
     "size": [
      18.98,
@@ -16,14 +16,14 @@
     ],
     "px": [
      325,
-     705
+     703
     ]
    },
    "aileron_R": {
     "sprite": "Icarus_status_aileron_R.png",
     "centre": [
      39.81,
-     -56.69
+     -56.16
     ],
     "size": [
      18.98,
@@ -31,14 +31,14 @@
     ],
     "px": [
      627,
-     705
+     703
     ]
    },
    "avionics_tray": {
     "sprite": "Icarus_status_avionics_tray.png",
     "centre": [
      0.0,
-     41.4
+     41.66
     ],
     "size": [
      13.71,
@@ -46,7 +46,7 @@
     ],
     "px": [
      486,
-     347
+     346
     ]
    },
    "canopy": {
@@ -83,7 +83,7 @@
     "sprite": "Icarus_status_dorsal_cover.png",
     "centre": [
      0.0,
-     -13.18
+     -12.92
     ],
     "size": [
      10.55,
@@ -91,14 +91,14 @@
     ],
     "px": [
      492,
-     354
+     353
     ]
    },
    "engine_core": {
     "sprite": "Icarus_status_engine_core.png",
     "centre": [
      0.0,
-     -67.24
+     -66.71
     ],
     "size": [
      14.77,
@@ -106,14 +106,14 @@
     ],
     "px": [
      484,
-     615
+     613
     ]
    },
    "fin_skin": {
     "sprite": "Icarus_status_fin_skin.png",
     "centre": [
      0.0,
-     -92.81
+     -92.02
     ],
     "size": [
      4.22,
@@ -121,14 +121,14 @@
     ],
     "px": [
      504,
-     766
+     763
     ]
    },
    "fin_spar": {
     "sprite": "Icarus_status_fin_spar.png",
     "centre": [
      0.0,
-     -94.13
+     -93.34
     ],
     "size": [
      3.16,
@@ -136,14 +136,14 @@
     ],
     "px": [
      506,
-     819
+     816
     ]
    },
    "flap_L": {
     "sprite": "Icarus_status_flap_L.png",
     "centre": [
      -22.68,
-     -54.84
+     -54.32
     ],
     "size": [
      15.82,
@@ -151,14 +151,14 @@
     ],
     "px": [
      396,
-     688
+     686
     ]
    },
    "flap_R": {
     "sprite": "Icarus_status_flap_R.png",
     "centre": [
      22.68,
-     -54.84
+     -54.32
     ],
     "size": [
      15.82,
@@ -166,14 +166,14 @@
     ],
     "px": [
      568,
-     688
+     686
     ]
    },
    "fuel_aft_L": {
     "sprite": "Icarus_status_fuel_aft_L.png",
     "centre": [
      -8.44,
-     -12.39
+     -11.87
     ],
     "size": [
      11.6,
@@ -181,14 +181,14 @@
     ],
     "px": [
      458,
-     505
+     503
     ]
    },
    "fuel_aft_R": {
     "sprite": "Icarus_status_fuel_aft_R.png",
     "centre": [
      8.44,
-     -12.39
+     -11.87
     ],
     "size": [
      11.6,
@@ -196,14 +196,14 @@
     ],
     "px": [
      522,
-     505
+     503
     ]
    },
    "fuel_aft_center": {
     "sprite": "Icarus_status_fuel_aft_center.png",
     "centre": [
      0.0,
-     -12.39
+     -11.87
     ],
     "size": [
      8.44,
@@ -211,29 +211,29 @@
     ],
     "px": [
      496,
-     505
+     503
     ]
    },
    "fuel_aux": {
     "sprite": "Icarus_status_fuel_aux.png",
     "centre": [
      0.0,
-     33.49
+     34.28
     ],
     "size": [
      18.98,
-     12.66
+     11.6
     ],
     "px": [
      476,
-     361
+     360
     ]
    },
    "fuel_forward_main": {
     "sprite": "Icarus_status_fuel_forward_main.png",
     "centre": [
      0.0,
-     15.03
+     15.29
     ],
     "size": [
      29.53,
@@ -241,14 +241,14 @@
     ],
     "px": [
      456,
-     403
+     402
     ]
    },
    "fuselage_aft": {
     "sprite": "Icarus_status_fuselage_aft.png",
     "centre": [
      0.0,
-     -74.88
+     -74.36
     ],
     "size": [
      27.42,
@@ -256,14 +256,14 @@
     ],
     "px": [
      460,
-     680
+     678
     ]
    },
    "fuselage_forward": {
     "sprite": "Icarus_status_fuselage_forward.png",
     "centre": [
      0.0,
-     62.75
+     63.02
     ],
     "size": [
      18.98,
@@ -271,29 +271,29 @@
     ],
     "px": [
      476,
-     158
+     157
     ]
    },
    "fuselage_mid": {
     "sprite": "Icarus_status_fuselage_mid.png",
     "centre": [
      0.0,
-     -8.7
+     -7.91
     ],
     "size": [
      32.7,
-     79.1
+     78.05
     ],
     "px": [
      450,
-     395
+     394
     ]
    },
    "gear_leg_L": {
     "sprite": "Icarus_status_gear_leg_L.png",
     "centre": [
      -11.34,
-     -33.22
+     -32.7
     ],
     "size": [
      17.93,
@@ -301,14 +301,14 @@
     ],
     "px": [
      435,
-     604
+     602
     ]
    },
    "gear_leg_N": {
     "sprite": "Icarus_status_gear_leg_N.png",
     "centre": [
      0.0,
-     39.02
+     39.29
     ],
     "size": [
      5.27,
@@ -316,14 +316,14 @@
     ],
     "px": [
      502,
-     348
+     347
     ]
    },
    "gear_leg_R": {
     "sprite": "Icarus_status_gear_leg_R.png",
     "centre": [
      11.34,
-     -33.22
+     -32.7
     ],
     "size": [
      17.93,
@@ -331,14 +331,14 @@
     ],
     "px": [
      521,
-     604
+     602
     ]
    },
    "intake_duct_L": {
     "sprite": "Icarus_status_intake_duct_L.png",
     "centre": [
      -6.86,
-     -0.79
+     -0.26
     ],
     "size": [
      14.77,
@@ -346,14 +346,14 @@
     ],
     "px": [
      458,
-     415
+     413
     ]
    },
    "intake_duct_R": {
     "sprite": "Icarus_status_intake_duct_R.png",
     "centre": [
      6.86,
-     -0.79
+     -0.26
     ],
     "size": [
      14.77,
@@ -361,7 +361,7 @@
     ],
     "px": [
      510,
-     415
+     413
     ]
    },
    "lef_L": {
@@ -372,11 +372,11 @@
     ],
     "size": [
      21.09,
-     17.93
+     18.98
     ],
     "px": [
      325,
-     602
+     600
     ]
    },
    "lef_R": {
@@ -387,18 +387,18 @@
     ],
     "size": [
      21.09,
-     17.93
+     18.98
     ],
     "px": [
      619,
-     602
+     600
     ]
    },
    "nozzle": {
     "sprite": "Icarus_status_nozzle.png",
     "centre": [
      0.0,
-     -112.85
+     -112.06
     ],
     "size": [
      13.71,
@@ -406,7 +406,7 @@
     ],
     "px": [
      486,
-     914
+     911
     ]
    },
    "radar_tray": {
@@ -443,7 +443,7 @@
     "sprite": "Icarus_status_rudder.png",
     "centre": [
      0.0,
-     -108.9
+     -108.11
     ],
     "size": [
      3.16,
@@ -451,14 +451,14 @@
     ],
     "px": [
      506,
-     893
+     890
     ]
    },
    "skin_aft_L": {
     "sprite": "Icarus_status_skin_aft_L.png",
     "centre": [
      -6.86,
-     -78.05
+     -77.52
     ],
     "size": [
      14.77,
@@ -466,14 +466,14 @@
     ],
     "px": [
      458,
-     684
+     682
     ]
    },
    "skin_aft_R": {
     "sprite": "Icarus_status_skin_aft_R.png",
     "centre": [
      6.86,
-     -78.05
+     -77.52
     ],
     "size": [
      14.77,
@@ -481,7 +481,7 @@
     ],
     "px": [
      510,
-     684
+     682
     ]
    },
    "skin_forward_L": {
@@ -517,53 +517,53 @@
    "skin_mid_L": {
     "sprite": "Icarus_status_skin_mid_L.png",
     "centre": [
-     -7.91,
-     -6.59
+     -7.65,
+     -6.33
     ],
     "size": [
      17.93,
      80.16
     ],
     "px": [
-     448,
-     385
+     449,
+     384
     ]
    },
    "skin_mid_R": {
     "sprite": "Icarus_status_skin_mid_R.png",
     "centre": [
-     7.91,
-     -6.59
+     7.65,
+     -6.33
     ],
     "size": [
      17.93,
      80.16
     ],
     "px": [
-     508,
-     385
+     507,
+     384
     ]
    },
    "stabilator": {
     "sprite": "Icarus_status_stabilator.png",
     "centre": [
      0.0,
-     -117.86
+     -117.6
     ],
     "size": [
      55.9,
-     29.53
+     30.59
     ],
     "px": [
      406,
-     903
+     900
     ]
    },
    "wing_skin_L": {
     "sprite": "Icarus_status_wing_skin_L.png",
     "centre": [
      -29.53,
-     -25.58
+     -25.05
     ],
     "size": [
      43.24,
@@ -571,14 +571,14 @@
     ],
     "px": [
      318,
-     463
+     461
     ]
    },
    "wing_skin_R": {
     "sprite": "Icarus_status_wing_skin_R.png",
     "centre": [
      29.53,
-     -25.58
+     -25.05
     ],
     "size": [
      43.24,
@@ -586,37 +586,37 @@
     ],
     "px": [
      542,
-     463
+     461
     ]
    },
    "wing_spar_L": {
     "sprite": "Icarus_status_wing_spar_L.png",
     "centre": [
      -29.27,
-     -26.1
+     -25.31
     ],
     "size": [
      42.19,
-     55.9
+     54.84
     ],
     "px": [
      321,
-     505
+     504
     ]
    },
    "wing_spar_R": {
     "sprite": "Icarus_status_wing_spar_R.png",
     "centre": [
      29.27,
-     -26.1
+     -25.31
     ],
     "size": [
      42.19,
-     55.9
+     54.84
     ],
     "px": [
      543,
-     505
+     504
     ]
    }
   }

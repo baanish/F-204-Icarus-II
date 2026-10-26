@@ -9,7 +9,7 @@ Each leg is the transform chain the game moves (IcarusAuthor.Gear.cs drives it w
   leg it does not turn. What rides it: gear_arm_<leg> (the main gear's carrier: knuckle, stub axle, yoke and brake),
   the nose leg's gear_unsprung_<leg> (piston and fork: what slides with LandingGear.suspensionTravel) and
   gear_wheel_<leg>_visible (tyre and hub on Aircraft_wheels).
-- The main gear's shock strut: gear_strut_<leg>, its cylinder, hangs from the well's roof (on fuselage_mid) and
+- The main gear's shock strut: gear_strut_<leg>, its cylinder, hangs from the well's keel wall (on fuselage_mid) and
   gear_piston_<leg> rides the hinge from a lug on the leg; each turns about its eye to aim at the other's.
 
 The built pose is gear down, doors shut. Both legs move as the F-104's do (F-104G flight manual LR1-14404-1, p. 1-47;
@@ -17,7 +17,7 @@ sources in GEAR). Each main leg is one I-section forging on a trunnion at the ke
 retraction actuator and hydraulic lines along it (MAIN_LEG). It retracts forward and inward about an oblique hinge
 while the carrier at its foot turns the wheel 90 degrees, so the two tyres lie flat side by side across the belly,
 above the conformal troughs and under the ducts. Under load the whole leg swings up about the same trunnion and the
-diagonal shock strut, from the well's roof ahead of and inboard of the leg down to its lug, telescopes. The game only
+diagonal shock strut, from the well's keel wall ahead of and inboard of the leg out to its lug, telescopes. The game only
 slides LandingGear.unsprung straight up its bump stop; in the Unity author the leg aims at a point riding the unsprung
 through an AimConstraint that turns it about the trunnion alone, and the strut's two halves aim at each other, as the
 stock UtilityHelo1's gear arm and shock mount and the stock trucks' cylinders and pistons do (swing_target, suspend).
@@ -75,7 +75,9 @@ GEAR = {
     # is snapped onto them, so the door reads as facets beside the smooth skin, open or shut. Two doors a side
     # on the main bay, forward and aft as on the F-104 (p. 1-47), which hinges both outboard. Here the forward door
     # hinges at its front edge: its inner edge runs down the conformal trough's lip beside the rear ramp, then steps in
-    # behind the ramp's end (patch_cells) over the skin the ramp's fade fans out, which the tyre passes through. The
+    # behind the ramp's end (patch_cells) over the skin the ramp's fade fans out, which the tyre passes through. Its
+    # outer column runs up inside the wing root, so the door stops WING_CLEAR under the wing's lower skin (under_wing)
+    # and skin closes the rest of its hole (skin_strip); the tyre crosses well below. The
     # aft opening is a clamshell split on the lower lap joint (x 0.44 to 0.47 along it, the skin's column within a
     # centimetre): the inner half hinges inboard, the outer half outboard, so neither hangs near the ground with the
     # gear compressed (door_ground), and it ends outboard on the column 0.05 to 0.09 m below the wing's lower skin,
@@ -104,12 +106,15 @@ PIN_REACH = 0.20
 #   turns against the boss's outboard face.
 # - Everything the carrier holds lies within about 0.04 m of the foot across the swivel axis (along X, gear down):
 #   stowed, that is height, between the well's floor (z -0.27) and the tyre over it.
-# - strut: the shock strut, a cylinder hung by its ball end from a pad on the well's low roof at `top` (s, x, z) and a
-#   piston from an eye `lug` off the leg's surface at `at` of the way down, toward the top. Its top stays on the
-#   airframe through the fold, so the strut is shortest part way up; the cylinder and the piston are each STRUT_GAP
-#   shorter than that, so at full extension they overlap and folded neither meets the other's end (strut_lengths).
-#   The top was screened against the skin and every internal through the fold for the most clearance with the
-#   strut shortening visibly under load: aft of s 9.6 or outboard on the well's high roof it strikes the roof's step.
+# - strut: the shock strut, a cylinder hung by its ball end at `top` (s, x, z) from a pad (length clear of the wall,
+#   radius) on the well's inboard wall, the keel's side at x 0.168, and a piston from an eye `lug` off the leg's
+#   surface at `at` of the way down, `face` degrees round the section from v toward u: the forward edge's inner corner.
+#   Its top stays on the airframe through the fold, so the strut is shortest part way up; the cylinder and the piston
+#   are each STRUT_GAP shorter than that, so at full extension they overlap and folded neither meets the other's end
+#   (strut_lengths). The fold turns the top about 190 degrees round the leg's section as the leg passes under it, so
+#   a strut from the well's roof crosses the forging wherever its lug sits. Low on the keel wall, inboard of the
+#   stowed leg, the top only swings round the leg's inner side: the strut stows along the leg's inboard face and keeps
+#   STRUT_CLEAR from it and the actuator through the fold and the stroke (strut_clear).
 # - actuator: the retraction actuator from a lug on the leg's forward edge at `at` of the way down to its airframe eye
 #   on the hinge line, `eye` past the trunnion, so it turns with the leg as one piece; r its cylinder's.
 MAIN_LEG = {
@@ -118,12 +123,15 @@ MAIN_LEG = {
     "flange": 0.016, "web": 0.012, "ribs": (0.30, 0.55, 0.78), "shift": (0.020, -0.030, 0.008), "foot": (0.036, 0.052),
     "twist_from": 0.70,
     "trunnion": {"pin": (-0.080, 0.070), "bore": (0.036, 0.040), "bearings": (0.040, 0.060, 0.034)},
-    "strut": {"top": (9.56, 0.45, -0.145), "at": 0.40, "lug": 0.030, "ball": 0.040, "r": 0.036, "piston_r": 0.024,
-              "gland": 0.044, "pad": (0.005, 0.045)},
+    "strut": {"top": (9.54, 0.245, -0.26), "at": 0.36, "face": 132.0, "lug": 0.075, "ball": 0.040, "r": 0.036,
+              "piston_r": 0.024, "gland": 0.044, "pad": (0.035, 0.045)},
     "actuator": {"at": 0.50, "eye": 0.105, "r": 0.035},
 }
-STRUT_GAP = 0.02  # the strut's cylinder and piston each this much shorter than the strut at its shortest
+STRUT_GAP = 0.04  # the strut's cylinder and piston each this much shorter than the strut at its shortest: the gland
+# stops this short of the piston's eye, clear of the lug's cheeks round it (strut_clear)
 STRUT_OVERLAP = 0.04  # and together at least this much longer than at its longest
+STRUT_CLEAR = 0.005  # the strut kept this far from every other gear part through the fold and the stroke (strut_clear)
+STRUT_SAMPLE = 0.002  # and measured from its axis this often
 SWING_TOL = 0.005  # the main tyre's bottom kept this near the ground the unsprung's slide puts it on (suspend)
 DOOR_GROUND = 0.10  # every open gear door this far above the ground at the bump stop (door_ground)
 STATIC_LIFT = 0.061  # the main legs' compression at rest, empty (the rest pose line IcarusAuthor.Systems.cs logs)
@@ -131,6 +139,7 @@ GEAR_STROKE = 0.30  # the bump stop above the free wheel (IcarusAuthor.Gear.cs G
 DOOR_SKIN = 0.006  # the door's inner face sits this far inside its outer skin
 DOOR_GAP = 0.002  # and its free edges stand this far in from the hole's, so it swings clear of the skin
 DOOR_CLEAR = 0.004  # a door's tray kept this far from the stowed gear it closes on
+WING_CLEAR = 0.010  # a gear door, its tray included, kept this far under the wing's lower skin, shut (under_wing)
 CARVE_STEP = 0.005  # and looks for that gear this often across each cell: a corner of a main leg stows 4 mm inside the flap
 MIN_SKIN = 0.003  # the thinnest a door's skin gets where the gear lies against it
 # Object names the other modules and the Unity author build against, per leg N, L and R: the sprung leg is
@@ -340,15 +349,13 @@ def strut_frame(at, toward, up):
 
 def strut_ends(k):
     """The shock strut's eyes, left leg (k = main_points()): its top on the airframe, and its lug's eye off the leg's
-    surface at MAIN_LEG strut "at", toward the top."""
+    surface at MAIN_LEG strut "at", "face" degrees round the section."""
     st = MAIN_LEG["strut"]
     top = bi.P(*st["top"])
     f, w, d = leg_station(st["at"])
     c = leg_centre(k, f)
-    l, _, _ = leg_frame(k)
     uf, vf = leg_axes(k, f)
-    out = (top - c) - l * l.dot(top - c)
-    out.normalize()
+    out = vf * math.cos(math.radians(st["face"])) + uf * math.sin(math.radians(st["face"]))
     reach = min(w / max(abs(out.dot(vf)), 1e-6), d / max(abs(out.dot(uf)), 1e-6))
     return top, c + out * (reach + st["lug"])
 
@@ -453,9 +460,9 @@ def main_solids():
     solids.cylinder(piston, lug - ax * 0.012, lug + ax * 0.012, 0.018, 6, gear)  # eye between the lug's cheeks
     solids.lathe(piston, lug, -ay, [(0.0, 0.010), (0.022, 0.010), (0.022, pr + 0.006), (0.06, pr + 0.006), (0.06, pr),
                                     (reach, pr)], 8, chrome)  # a neck out of the eye, the end fitting and the rod
-    pad = solids.Solids()  # the airframe's, on the roof: its underside just clear of the ball's crown, up into the roof
+    pad = solids.Solids()  # the airframe's, on the keel wall: its face just clear of the ball, back into the wall
     pad_t, pad_r = st["pad"]
-    solids.cylinder(pad, top + Z * (ball + 0.002), top + Z * (ball + 0.002 + pad_t + 0.04), pad_r, 8, gear)
+    solids.cylinder(pad, top - X * (ball + 0.002), top - X * (ball + 0.002 + pad_t + 0.04), pad_r, 8, gear)
     return sprung, arm, wheel, cylinder, piston, pad
 
 
@@ -772,6 +779,44 @@ def patch_row(spec, j, step, k0, ks, co):
     return [co(j, k0).lerp(co(j, k0 + 1), i / (n + 1)) for i in range(n + 1)] + [co(j, k) for k in range(k0 + 1, k1 + 1)]
 
 
+def wing_gap(p):
+    """How far a point lies under the wing's lower skin (either side), or None off the wing's planform."""
+    w = bi.PARAMS["wing"]
+    sections = bi.wing_sections(w)
+    x, s = abs(p.x), p.y + bi.S0
+    if not sections[0][1] <= x <= sections[-1][1]:
+        return None
+    s_le, _, _, chord = bi.section_at(sections, x, "x")
+    t = (s - s_le) / chord
+    if not 0.0 <= t <= 1.0:
+        return None
+    return bi.skin_point(sections, x, t, -1, w["thickness"], "x").z - p.z
+
+
+def under_wing(row, depth):
+    """A door row (skin points from its inner edge out) cut back along the skin where its outer end runs up into the
+    wing root, until the door there, its tray depth deep, keeps WING_CLEAR under the wing's lower skin: the points
+    past the cut close up, evenly, on the last segment before it, so the rest keep their columns."""
+    def ok(p, along):
+        """p and the tray's back behind it, square to the skin (along the row there and the station), clear."""
+        n = along.cross(Y).normalized()
+        n = n if n.dot(Vector((0.0, p.y, 0.3)) - p) > 0 else -n
+        return all(wing_gap(q) is None or wing_gap(q) >= WING_CLEAR for q in (p, p + n * depth))
+
+    cut = next((i for i, p in enumerate(row) if not ok(p, row[max(i, 1)] - row[max(i, 1) - 1])), None)
+    if cut is None:
+        return row
+    if cut == 0:
+        raise ValueError("a door row starts inside the wing at s %.3f" % (row[0].y + bi.S0))
+    a, b = row[cut - 1], row[cut]
+    lo, hi = 0.0, 1.0
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if ok(a.lerp(b, mid), b - a) else (lo, mid)
+    n = len(row) - cut
+    return row[:cut] + [a.lerp(b, lo * i / n) for i in range(1, n + 1)]
+
+
 def kept(a, b, n):
     """n + 1 indices from a to b, ends included."""
     return sorted({round(a + (b - a) * i / n) for i in range(n + 1)})
@@ -853,15 +898,24 @@ def cut_doors(fuselage):
         for side in (1, -1):
             vk = (lambda k: k) if side > 0 else (lambda k: bi.RING // 2 - k)
             co = lambda j, k: fuselage.data.vertices[vid(j, vk(k))].co.copy()
-            grid = [patch_row(spec, j, step, k0, ks, co) for j in js]
-            if len(grid) == 2:  # a door one ring long gets a middle row, on its straight side edges
-                grid.insert(1, [p.lerp(q, 0.5) for p, q in zip(*grid)])
-            if hinge_edge == "front":  # the grid turned, so its first column is the hinge
-                grid = [list(r) for r in zip(*grid)]
-            grid = gapped(grid, "outer" if hinge_edge == "outer" else "inner")
+            depth = DOOR_DEPTH.get(name[:-2], DOOR_SHAPE["frame_depth"])
+            rows = [patch_row(spec, j, step, k0, ks, co) for j in js]
+            grid = [under_wing(r, depth) for r in rows]
+            ends = [(j, r[-1]) for j, r in zip(js, grid)]
+            shaped = []
+            for g in (grid, rows):
+                if len(g) == 2:  # a door one ring long gets a middle row, on its straight side edges
+                    g.insert(1, [p.lerp(q, 0.5) for p, q in zip(*g)])
+                if hinge_edge == "front":  # the grid turned, so its first column is the hinge
+                    g = [list(r) for r in zip(*g)]
+                shaped.append(gapped(g, "outer" if hinge_edge == "outer" else "inner"))
+            grid, full = shaped
             remove_faces(fuselage, {vid(j, vk(k)) for j, k in cells})
+            skin_strip(fuselage, ends, lambda j: vid(j, vk(k1)))
             col = -1 if hinge_edge == "outer" else 0
             a, b = grid[0][col], grid[-1][col]
+            if hinge_edge == "front":  # the hinge keeps the skin's line, on a door cut back from the wing root
+                b = a + (rows[0][-1] - rows[0][0]).normalized() * (b - a).length
             # The hinge runs just inside the door's outer skin: on the skin itself, the door's thickness would swing
             # round into the skin beside the hinge.
             inside = Vector((0.0, a.y, 0.3))
@@ -869,7 +923,7 @@ def cut_doors(fuselage):
             inward = inward if inward.dot(inside - a) > 0 else -inward
             a, b = a + inward * DOOR_SKIN, b + inward * DOOR_SKIN
             door = door_panel(name.replace("_L", "_L" if side > 0 else "_R"), grid, len(grid[0]) - 1 if col else 0,
-                              (a, b), inside, gear_up)
+                              (a, b), inside, gear_up, metric=full)
             made = bi.hinged(door.name, door, frame_on(a, (b - a) * side))
             bpy.context.view_layer.update()  # opening_travel reads the door's matrix_local, stale until an update
             # hangs down (on a front hinge, swinging down and forward), or folds out and over to lie under the wing root
@@ -930,6 +984,30 @@ def square_ends(obj, a, b, ends, squared, stretch):
             squared[i] = stretch
 
 
+def skin_strip(obj, ends, edge):
+    """Skin back over a hole from where its door was cut back (under_wing) out to the hole's edge: ends are (ring, cut
+    point) on the door's rows, edge(ring) the hole's vertex there. The strip lies on the skin's own cells, so the well
+    behind it, just inside the skin, stays hidden."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.verts.ensure_lookup_table()
+    hole = {j: bm.verts[edge(j)] for j in range(ends[0][0], ends[-1][0] + 1)}
+    mat = next(f.material_index for f in hole[ends[0][0]].link_faces)
+    cut = {j: hole[j] if (hole[j].co - p).length < 1e-6 else bm.verts.new(p) for j, p in ends}
+    for (ja, _), (jb, _) in zip(ends, ends[1:]):
+        ring = [cut[ja], cut[jb]] + [hole[j] for j in range(jb, ja - 1, -1)]
+        ring = [v for i, v in enumerate(ring) if v not in ring[:i]]
+        if len(ring) >= 3:
+            f = bm.faces.new(ring)
+            f.material_index = mat
+            f.normal_update()
+            c = f.calc_center_median()
+            if f.normal.dot(c - Vector((0.0, c.y, 0.3))) < 0:  # facing out of the body, as the skin does
+                f.normal_flip()
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
 def remove_faces(obj, inside):
     """Delete the faces all of whose points are in `inside` (vertex indices)."""
     bm = bmesh.new()
@@ -982,15 +1060,18 @@ class Grid:
     from the first, v across its columns from the first (each the mean of the grid's lines). Points are bilinear over
     the grid's cells, so the door's outer face is the grid itself. inside is a point inside the body."""
 
-    def __init__(self, grid, inside):
+    def __init__(self, grid, inside, metric=None):
+        """metric: the grid to measure u and v on, where the door's grid is cut back from it (under_wing), so the
+        tray keeps the layout it has on the full door."""
         self.g, self.inside = grid, inside
+        m = metric or grid
         rows, cols = len(grid), len(grid[0])
         self.us = [0.0]
         for i in range(1, rows):
-            self.us.append(self.us[-1] + sum((grid[i][j] - grid[i - 1][j]).length for j in range(cols)) / cols)
+            self.us.append(self.us[-1] + sum((m[i][j] - m[i - 1][j]).length for j in range(cols)) / cols)
         self.vs = [0.0]
         for j in range(1, cols):
-            self.vs.append(self.vs[-1] + sum((grid[i][j] - grid[i][j - 1]).length for i in range(rows)) / rows)
+            self.vs.append(self.vs[-1] + sum((m[i][j] - m[i][j - 1]).length for i in range(rows)) / rows)
         self.length, self.width = self.us[-1], self.vs[-1]
 
     @staticmethod
@@ -1017,12 +1098,12 @@ def split(a, b, cell):
     return [a + (b - a) * i / n for i in range(n + 1)]
 
 
-def door_panel(name, grid, hinge_col, axis, inside, gear_up=None):
+def door_panel(name, grid, hinge_col, axis, inside, gear_up=None, metric=None):
     """The door, world space, from its outer skin grid (gapped): skin on the outer face and edges, on jet_mechanical a
     tray inside with a rim, ribs and a middle stringer carved clear of the stowed gear (gear_up, a BVH tree), and the
     hinge knuckles on axis (two points on the hinge line) with their lugs."""
     sh = dict(DOOR_SHAPE, frame_depth=DOOR_DEPTH.get(name[:-2], DOOR_SHAPE["frame_depth"]))
-    gd = Grid(grid, inside)
+    gd = Grid(grid, inside, metric)
     L, W = gd.length, gd.width
     rows, cols = len(grid), len(grid[0])
     panel = Shell()
@@ -1250,15 +1331,17 @@ def check(icarus):
             problems.append("%s has %d triangles (%d to %d)" % (name, t, *DOOR_TRIS))
     stow, sweep, swing, own = stowed_check(icarus), retraction_sweep(icarus), door_swing(icarus), tyre_contact()
     carrier, strut, ride_, ground = carrier_clear(), strut_check(), swing_check(), door_ground()
+    strut_gap, wing = strut_clear(), door_wing()
     problems += (stow + sweep["clashes"] + swing + own["clashes"] + carrier["clashes"] + strut["problems"]
-                 + ride_["problems"] + ground["problems"])
+                 + strut_gap["clashes"] + ride_["problems"] + ground["problems"] + wing["problems"])
     for line in problems:
         print("gear problem:", line)
     print("gear check:", {"legs": report, "stowed_intrusions": len(stow), "sweep_poses": sweep["poses"],
                           "sweep_clashes": len(sweep["clashes"]), "least_gap_m": sweep["least"],
                           "tyre_to_own_leg_m": own["least"], "tyre_contact_poses": own["poses"],
                           "tyre_to_own_leg_compressed_m": own["bump_stop_m"], "carrier_to_leg_m": carrier["least"],
-                          "strut": strut["report"], "swing": ride_["report"], "door_ground_m": ground["report"]})
+                          "strut": strut["report"], "strut_to_gear_m": strut_gap["least"], "swing": ride_["report"],
+                          "door_ground_m": ground["report"], "door_wing_m": wing["report"]})
     if problems:
         raise ValueError("gear: " + "; ".join(problems[:30]) + (" (%d in all)" % len(problems) if len(problems) > 30 else ""))
 
@@ -1296,6 +1379,29 @@ def door_swing(icarus):
                 if hits:
                     found.append("%s at %.2f open meets %s" % (d, 0.05 + 0.95 * i / 10, "; ".join(hits)))
     return found
+
+
+def door_wing():
+    """Every main gear door against its wing's skin, shut and through its swing with its leg's other doors: its points
+    must keep half of WING_CLEAR from it (the door's free edges are drawn in by DOOR_GAP and its facets run between the
+    skin's points), negative inside the wing. Reports each door's least gap."""
+    O = bpy.data.objects
+    problems, report = [], {}
+    for leg in ("L", "R"):
+        wing = tree(O["wing_skin_" + leg])
+        for i in range(11):
+            with posed({d: i / 10 for d in doors_of(leg)}):
+                for d in doors_of(leg):
+                    for p in world_points(O[d + "_visible"]):
+                        q, n, _, gap = wing.find_nearest(p)
+                        gap = -gap if (p - q).dot(n) < 0 else gap
+                        if gap < report.get(d, (9.0,))[0]:
+                            report[d] = (gap, i / 10, p)
+    for d, (gap, f, at) in report.items():
+        if gap < WING_CLEAR / 2:
+            problems.append("%s comes within %.4f m of the wing at %.1f open (s %.3f x %.3f z %.3f)"
+                            % (d, gap, f, at.y + bi.S0, at.x, at.z))
+    return {"problems": problems, "report": {d: round(g, 4) for d, (g, *_) in report.items()}}
 
 
 def line_gap(points, origin, axis):
@@ -1405,6 +1511,90 @@ def strut_check():
                       "bump_stop_m": round(n0 - lengths[("lift", 0.0, GEAR_STROKE)], 4), "range_m": [round(lo, 3), round(hi, 3)],
                       "halves_m": round(halves, 3), "least_off_up_deg": round(worst_up, 1)}
     return {"problems": problems, "report": report}
+
+
+def strut_profile(piece):
+    """A strut piece's outline about its own Y axis from its eye: (y, r) stations, r the farthest its vertices stand
+    off the axis there."""
+    prof = {}
+    for v in piece.data.vertices:
+        y = round(v.co.y, 4)
+        prof[y] = max(prof.get(y, 0.0), math.hypot(v.co.x, v.co.z))
+    return sorted(prof.items())
+
+
+def profile_gap(prof, y, rho):
+    """How far a point (y along the axis, rho off it) lies outside the solid a profile turns, negative inside."""
+    edge = [(prof[0][0], 0.0)] + prof + [(prof[-1][0], 0.0)]
+    gaps = []
+    for (y0, r0), (y1, r1) in zip(edge, edge[1:]):
+        dy, dr = y1 - y0, r1 - r0
+        t = max(0.0, min(1.0, ((y - y0) * dy + (rho - r0) * dr) / (dy * dy + dr * dr))) if dy or dr else 0.0
+        gaps.append(math.hypot(y - y0 - dy * t, rho - r0 - dr * t))
+    inside = prof[0][0] <= y <= prof[-1][0] and any(
+        y0 <= y <= y1 and rho <= r0 + (r1 - r0) * ((y - y0) / (y1 - y0) if y1 > y0 else 0.0)
+        for (y0, r0), (y1, r1) in zip(prof, prof[1:]))
+    return -min(gaps) if inside else min(gaps)
+
+
+def strut_clear(lifts=(0.0,)):
+    """Each main shock strut through the fold, doors open, at each of lifts, and down its stroke gear down: its cylinder
+    and piston must keep STRUT_CLEAR from every other gear mesh. The leg compresses only gear down, so the check folds
+    it with the wheel free; the clearance probe passes the bump stop too. Every STRUT_SAMPLE along a piece's axis the
+    nearest point of each other mesh is measured to the solid the piece's profile turns, negative inside it. The lug
+    the piston's eye turns in is the joint, not the piston's neighbour: its cheeks (the leg's faces within 0.04 m of the
+    line from its section centre to the eye) are cut from the leg the piston is measured against, and the cylinder,
+    which must clear them, is measured against the whole leg. Reports each piece's least gap and what it is to."""
+    O = bpy.data.objects
+    gear = [m for leg in LEGS for m in leg_meshes(leg)] + [O[d + "_visible"] for leg in LEGS for d in doors_of(leg)]
+    k = main_points()
+    least = {}
+    for cylinder, piston, _ in struts():
+        sd = cylinder.name[-1]
+        side = -1 if sd == "R" else 1
+        sprung = O["gear_leg_%s_visible" % sd]
+        c, lug = mirrored(leg_centre(k, MAIN_LEG["strut"]["at"]), side), mirrored(strut_ends(k)[1], side)
+        e = lug - c
+        near = [(q - c - e * max(0.0, min(1.0, (q - c).dot(e) / e.length_squared))).length < 0.04 for q in world_points(sprung)]
+        joint = [f.index for f in sprung.data.polygons if all(near[v] for v in f.vertices)]
+        profiles = {p: strut_profile(p) for p in (cylinder, piston)}
+        n = max(1, math.ceil(reach(sd) / SWEEP_STEP))
+        poses = [(i / n, lift) for i in range(n + 1) for lift in lifts]
+        poses += [(0.0, GEAR_STROKE * i / 10) for i in range(1, 11)] + [(0.0, STATIC_LIFT)]
+        for fold, lift in poses:
+            with posed({**all_folds(fold), **all_doors(1.0)}), suspend(lift):
+                trees = {m.name: tree(m) for m in gear if m not in (cylinder, piston)}
+                bm = bmesh.new()
+                bm.from_mesh(sprung.data)
+                bm.faces.ensure_lookup_table()
+                bmesh.ops.delete(bm, geom=[bm.faces[i] for i in joint], context="FACES")
+                bm.transform(sprung.matrix_world)
+                lugless = solids.BVHTree.FromBMesh(bm)
+                bm.free()
+                for piece, prof in profiles.items():
+                    to_local = piece.matrix_world.inverted()
+                    y0, y1 = prof[0][0], prof[-1][0]
+                    m = max(1, math.ceil((y1 - y0) / STRUT_SAMPLE))
+                    axis = [piece.matrix_world @ Vector((0.0, y0 + (y1 - y0) * i / m, 0.0)) for i in range(m + 1)]
+                    for name, t in trees.items():
+                        t = lugless if piece is piston and name == sprung.name else t
+                        gap, at = 9.0, None
+                        for a in axis:
+                            q = t.find_nearest(a)[0]
+                            lq = to_local @ q
+                            g = profile_gap(prof, lq.y, math.hypot(lq.x, lq.z))
+                            if g < gap:
+                                gap, at = g, q
+                        if gap < least.get((piece.name, name), (9.0,))[0]:
+                            least[(piece.name, name)] = (gap, fold, lift, at)
+    clashes = ["%s %.3f m from %s at fold %.2f lift %.2f (s %.3f x %.3f z %.3f)"
+               % (piece, gap, name, fold, lift, at.y + bi.S0, at.x, at.z)
+               for (piece, name), (gap, fold, lift, at) in sorted(least.items()) if gap < STRUT_CLEAR]
+    report = {}
+    for (piece, name), (gap, *_) in least.items():
+        if gap < report.get(piece, (9.0,))[0]:
+            report[piece] = (round(gap, 4), name)
+    return {"clashes": clashes, "least": report, "all": least}
 
 
 def swing_check():
