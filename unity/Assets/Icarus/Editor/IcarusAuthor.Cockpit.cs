@@ -64,11 +64,15 @@ namespace Icarus.Editor
             // The standby ball, the fuel needle and the clock's hands, each on its own pivot; the plugin turns them
             // (src/Icarus/StandbyInstruments.cs finds them by these names).
             var instruments = CockpitInstruments.Select(n => (Renderer)MeshVisual(b, n, interior)).ToArray();
+            // The lever from the grip down through the quadrant's gate rides the transform Cockpit.throttles turns, so it
+            // moves with the grip; its origin is the export's throttle pivot, where that transform stands.
+            var lever = MeshVisual(b, ThrottleLever, interior);
+            lever.transform.SetParent(throttle, true);
             var frames = new[] { MeshVisual(b, "windscreen_frame_inner", cockpit), MeshVisual(b, "canopy_frame_inner", hood) };
             var proxies = new[] { MeshVisual(b, "cockpit_proxy", cockpit), MeshVisual(b, "canopy_frame_proxy", hood) };
             var panes = new[] { "canopy_glass_inner", "windscreen_inner" }.Select(n => b.Visuals[n].GetComponent<MeshRenderer>());
             Renderer[] view = new Renderer[] { inside }.Concat(frames).Concat(panes)
-                .Concat(new[] { screen, stick.GetComponent<MeshRenderer>(), throttle.GetComponent<MeshRenderer>() }).Concat(instruments).ToArray();
+                .Concat(new[] { screen, stick.GetComponent<MeshRenderer>(), throttle.GetComponent<MeshRenderer>(), lever }).Concat(instruments).ToArray();
             // Drawn only by the cockpit camera, and only once the player is in the cockpit view (Aircraft.SetCockpitRenderers).
             foreach (var r in view.Append(lamps))
             {
@@ -91,7 +95,7 @@ namespace Icarus.Editor
                 .Concat(fit.Exterior).Concat(proxies).ToArray());
             aircraft.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add($"cockpit: eye at {fit.Eye}, the stock seat and pilot rig and the ladder moved {delta}, the seat and pilot a further {drop} to clear the hood glass, the stick and throttle on their " +
-                $"pivots ({drift * 1000:F1} mm from the Revoker's reach); interior {Tris(inside)}, frames {Tris(frames[0])} + {Tris(frames[1])}, " +
+                $"pivots ({drift * 1000:F1} mm from the Revoker's reach), the throttle lever ({Tris(lever)} triangles) on the throttle; interior {Tris(inside)}, frames {Tris(frames[0])} + {Tris(frames[1])}, " +
                 $"tac screen {Tris(screen)}, lamps {Tris(lamps)}, instruments {instruments.Sum(Tris)}, proxies {Tris(proxies[0])} + {Tris(proxies[1])} triangles; " +
                 $"hood opens {fit.Open:+0;-0} deg on its sill hinge ({(fit.Kept ? "export sign" : "export sign flipped")}) and ejects as its own part");
         }
@@ -101,5 +105,7 @@ namespace Icarus.Editor
         // The instruments' moving parts (art/blender/cockpit.py INSTRUMENTS).
         private static readonly string[] CockpitInstruments =
             { "cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute" };
+
+        private const string ThrottleLever = "cockpit_throttle_lever"; // art/blender/cockpit.py LEVER
     }
 }

@@ -129,11 +129,11 @@ namespace Icarus.Editor
         }
 
         // The renderers the cockpit view draws (Cockpit rule 1): the joined interior, both inner frames, both inner panes, the
-        // tac screen, the stock stick and throttle, and the instruments' moving parts (the standby ball, the fuel needle, the
-        // clock's hands), which the plugin turns and so cannot join the interior.
+        // tac screen, the stock stick and throttle, the throttle lever, and the instruments' moving parts (the standby ball, the
+        // fuel needle, the clock's hands); the lever and the instruments move, so they cannot join the interior.
         private static readonly string[] CockpitViewRenderers =
             { "canopy_frame_inner", "canopy_glass_inner", "cockpit_clock_hour", "cockpit_clock_minute", "cockpit_fuel_needle", "cockpit_interior",
-              "cockpit_standby_ball", "cockpit_tac_screen", "joystick", "throttle", "windscreen_frame_inner", "windscreen_inner" };
+              "cockpit_standby_ball", "cockpit_tac_screen", ThrottleLever, "joystick", "throttle", "windscreen_frame_inner", "windscreen_inner" };
 
         // A15: Cockpit rules 20 to 24 (lists, layers, serialized states, proxies in LOD0), the materials each renderer wears,
         // and the triangle bands of rules 2, 3, 20, 23 and 26.
@@ -151,9 +151,14 @@ namespace Icarus.Editor
             Material Stocked(string slot) => Load<Material>(Stock + "Material/" + slot + "_PLACEHOLDER.mat");
             int Count(Renderer r) => r.GetComponent<MeshFilter>().sharedMesh.triangles.Length / 3;
             Renderer Named(string n) => view.FirstOrDefault(r => r.name == n);
-            foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner" }.Concat(CockpitInstruments))
+            foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner", ThrottleLever }.Concat(CockpitInstruments))
                 if (Named(n) != null && (Named(n).sharedMaterials.Length != 1 || Named(n).sharedMaterial.name != CockpitSlot)) p.Add(n + " isn't on the cockpit atlas");
             var cockpitUi = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
+            var throttles = new SerializedObject(cockpitUi).FindProperty("throttles");
+            var turned = throttles.arraySize == 1 ? throttles.GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue as Transform : null;
+            var lever = Named(ThrottleLever);
+            if (turned == null || lever == null || lever.transform.parent != turned || lever.transform.localPosition.magnitude > 1e-4f)
+                p.Add(ThrottleLever + " doesn't stand on the pivot of the one transform Cockpit.throttles turns");
             var screen = GetRef(cockpitUi, "tacScreenRender") as Renderer;
             if (screen == null || screen.name != "cockpit_tac_screen" || screen.sharedMaterial != Stocked("tacScreenDisplay"))
                 p.Add("Cockpit.tacScreenRender isn't cockpit_tac_screen on tacScreenDisplay");
@@ -184,6 +189,7 @@ namespace Icarus.Editor
             if (Count(frame) < 1300 || Count(frame) > 8000) p.Add($"the hood's inner frame has {Count(frame)} triangles, outside 1,300 to 8,000");
             if (total > 35000) p.Add($"the cockpit renderers have {total} triangles, over 35,000");
             return $"{view.Length} cockpit renderers on layer 3 serialized off, {total} triangles (interior {Count(interior)}, inner frames {Count(frame)} + {Count(Named("windscreen_frame_inner"))}); " +
+                $"the throttle lever on {turned?.name}, the transform Cockpit.throttles turns; " +
                 $"tac screen on tacScreenDisplay, lamps {Count(lamps[0])} in CockpitWarningLights, proxies {Count(proxies[0].r)} + {Count(proxies[1].r)} in exteriorRenderers and LOD0, no cockpit Light";
         }
     }

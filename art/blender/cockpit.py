@@ -1,7 +1,8 @@
 """The cockpit, built on the canopy's design eye (canopy.EYE): one joined interior (front office, side consoles and
 tub), the inner frames of the hood and the windscreen, the tac-screen quads, the warning lamps, the exterior proxies,
-and the pivots the stock stick and throttle hang from. The stock seat, stick and throttle are not built here: the
-Unity author places them (IcarusAuthor.Cockpit.cs), and STOCK holds where they stand so the interior clears them.
+the throttle lever, and the pivots the stock stick and throttle hang from. The stock seat, stick and throttle are not
+built here: the Unity author places them (IcarusAuthor.Cockpit.cs), and hangs the lever from the stock throttle; STOCK
+holds where they stand so the interior clears them.
 
 Construction follows the stock cockpits (the cockpit digest's rules): controls modelled at the stock parts' sizes and
 triangle counts, lettering, dials and wear painted on one trim-sheet atlas (cockpit_atlas.py), every face on real
@@ -46,6 +47,7 @@ PIVOTS = ("cockpit_stick_pivot", "cockpit_throttle_pivot")  # empties the stock 
 # turns them (StandbyInstruments.cs).
 INSTRUMENTS = ("cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute")
 SEAT = "cockpit_seat"  # an empty where the stock seat's origin goes
+LEVER = "cockpit_throttle_lever"  # its origin on the throttle pivot; the Unity author hangs it from the stock throttle
 SLOT = "Icarus_Cockpit"
 # Triangles per renderer: target and cap (budget.py sums them). The cockpit's hard limit is 35,000 in all; the stock
 # stick (1,890) and throttle (880) count toward it but are not built here. The warning lamps (40 to 80) and the stock
@@ -56,6 +58,7 @@ BUDGET = {
     "windscreen_frame_inner": {"target": 1000, "cap": 1000, "objects": ("windscreen_frame_inner",), "cockpit": True},
     "tac_screen": {"target": 120, "cap": 120, "objects": (TAC_SCREEN,), "cockpit": True},
     "instruments": {"target": 520, "cap": 700, "objects": INSTRUMENTS, "cockpit": True},
+    "throttle_lever": {"target": 60, "cap": 80, "objects": (LEVER,), "cockpit": True},
     "stock_hotas": {"target": 2770, "cap": 2770, "objects": (), "cockpit": True},
     "proxies": {"target": 940, "cap": 2930, "objects": PROXIES},
 }
@@ -104,6 +107,18 @@ STOCK = {
     "throttle": [(3.927, 3.999, 0.292, 0.416, 0.357, 0.385), (3.871, 3.999, 0.276, 0.406, 0.385, 0.415),
                  (3.862, 3.969, 0.261, 0.395, 0.415, 0.455)],
     "throttle_deg": 6.5,
+}
+# The throttle quadrant on the left console and the lever under the stock grip. The stock cockpits turn their grip
+# about a pivot far under it (the Revoker's 1 m, Cockpit.throttles rotation) and stand it a little over a flat plate;
+# the Icarus's console sits lower under the Revoker's reach, so a lever carries the grip down through a slotted gate.
+# lever: its centre at idle, under the flat of the grip's underside, which lies at grip_foot (s 3.95 to 3.99); the
+# gate stands gate_h over the console top, under the grip's swept space (stock_keepout); clear: the least the slot's
+# edges keep from the lever at every setting. stops: the legends and their throttle settings: idle, full dry (the
+# engine's throttleRemap ends at 0.88, IcarusAuthor.Engine.cs) and full afterburner (from 0.90).
+THROTTLE = {
+    "lever": (3.965, 0.345), "lever_size": (0.014, 0.024), "grip_foot": 0.380, "below_gate": 0.005,
+    "gate_h": 0.024, "bevel": 0.014, "slot_depth": 0.008, "clear": 0.003,
+    "stops": (("IDLE", 0.0), ("MIL", 0.88), ("AB", 1.0)),
 }
 LAYOUT = {
     "floor_z": -0.05,
@@ -1051,34 +1066,110 @@ def sub_panel(g, uv, kit, atlas, space, face, side, title, s0, s1, controls):
         g.put(kit.placard(lab), top(x, y - LEGEND_AFT[kind] - lab.h_m / 2 + 0.004), "console")
 
 
+def lever_turn(t):
+    """Where throttle t (0 idle, 1 full afterburner) puts the stock grip and the lever riding it: Cockpit.Throttle
+    turns the stock transform t * throttle_deg about its x, so they swing forward about the pivot."""
+    pivot = P(*STOCK["throttle_pivot"])
+    return Matrix.Translation(pivot) @ Matrix.Rotation(math.radians(t * STOCK["throttle_deg"]), 4, "X") \
+        @ Matrix.Translation(-pivot)
+
+
+def lever_rings():
+    """The lever at idle, as rings bottom up in local placement and the placement: its shank from under the gate up
+    to the grip's underside, a collar flaring under the grip, its top up inside the grip."""
+    w, l = THROTTLE["lever_size"]
+    gate, foot = LAYOUT["console"]["top_z"] + THROTTLE["gate_h"], THROTTLE["grip_foot"]
+    rings = [ring_rect(w / 2, l / 2, gate - THROTTLE["below_gate"], 0.003, 1), ring_rect(w / 2, l / 2, foot - 0.006, 0.003, 1),
+             ring_rect(w / 2 + 0.003, l / 2 + 0.004, foot - 0.003, 0.004, 1),
+             ring_rect(w / 2 + 0.003, l / 2 + 0.004, foot + 0.006, 0.004, 1)]
+    return rings, on_top(*THROTTLE["lever"], 0.0)
+
+
+def throttle_lever(uv):
+    """The lever from the stock grip down through the quadrant's gate, its own renderer: the Unity author hangs it
+    from the stock throttle transform, so it turns with the grip."""
+    rings, m = lever_rings()
+    g = Gather(LEVER)
+    g.put(stack(uv, rings, ["bezel", "bezel", "bezel"], bottom_hidden=True), m, "lever")
+    return g
+
+
+LEVER_STEPS = 27  # throttle settings, idle to full afterburner, the lever's sweep is sampled at
+
+
+def lever_in_gate(t):
+    """The lever's shank below the gate at throttle t: its foot's corners and where its sides cross the gate's plane."""
+    rings, m = lever_rings()
+    gate = LAYOUT["console"]["top_z"] + THROTTLE["gate_h"]
+    turn = lever_turn(t) @ m
+    pts = []
+    for a, b in zip(rings[0], rings[1]):
+        a, b = turn @ Vector(a), turn @ Vector(b)
+        pts += [a, a.lerp(b, (gate - a.z) / (b.z - a.z))]
+    return pts
+
+
+def lever_sweep():
+    """The lever's reach in the gate through the throttle's travel, as (s0, s1, x0, x1)."""
+    pts = [p for t in np.linspace(0.0, 1.0, LEVER_STEPS) for p in lever_in_gate(t)]
+    s, x = [p.y + bi.S0 for p in pts], [p.x for p in pts]
+    return min(s), max(s), min(x), max(x)
+
+
+def stop_s(t):
+    """s where the lever's centre line crosses the gate's plane at throttle t."""
+    s, x = THROTTLE["lever"]
+    gate = LAYOUT["console"]["top_z"] + THROTTLE["gate_h"]
+    a, b = lever_turn(t) @ P(s, x, gate - 0.01), lever_turn(t) @ P(s, x, gate + 0.01)
+    return a.lerp(b, (gate - a.z) / (b.z - a.z)).y + bi.S0
+
+
 def throttle_quadrant(g, uv, kit, atlas, space, face):
-    """The plate the stock throttle stands over, its slot through the grip's travel, the detents and the friction
-    knob."""
-    st = STOCK["throttle"]
+    """The plate the stock throttle stands over and the quadrant housing on it: its gate slotted along the lever's
+    travel, the stops' legends on its inboard bevel, where the eye sees them under the grip, and the friction knob
+    aft of it."""
     c = LAYOUT["console"]
     s0, s1 = c["s0"] + 0.008, 4.055
     inner, cx, outer = console_span(space, 1, s0, s1)
-    travel = (st[0][5] - STOCK["throttle_pivot"][2]) * math.sin(math.radians(STOCK["throttle_deg"]))
-    xs = (st[0][2] + st[0][3]) / 2
-    a, b = STOCK["throttle_pivot"][0] - travel - 0.012, STOCK["throttle_pivot"][0] + travel + 0.012
+    top_z, floor = c["top_z"], c["top_z"] - PLATE["depth"]
+    gate, bevel, clear = top_z + THROTTLE["gate_h"], THROTTLE["bevel"], THROTTLE["clear"]
+    a, b, x0, x1 = lever_sweep()
+    slot = (a - clear, b + clear, x0 - clear, x1 + clear)
+    hs0, hs1, hx0, hx1 = slot[0] - 0.012, slot[1] + 0.012, inner + 0.018, slot[3] + 0.028
+    if hs0 < s0 + 0.013 or hx1 > outer - 0.019:
+        raise ValueError("cockpit: the throttle quadrant (s %.3f-%.3f, x to %.3f) passes its plate's fasteners"
+                         % (hs0, hs1, hx1))
     inv = face.m.inverted()
-    L = lambda s, x: inv @ P(s, x, c["top_z"])
+    L = lambda s, x: inv @ P(s, x, top_z)
+
+    def local_rect(sa, sb, xa, xb):
+        p, q = L(sa, xa), L(sb, xb)
+        return rect(min(p.x, q.x), min(p.y, q.y), max(p.x, q.x), max(p.y, q.y))
     p0, p1 = L(s1, inner + 0.006), L(s0, outer - 0.006)
-    slot = [L(b, xs - 0.012), L(a, xs - 0.012), L(a, xs + 0.012), L(b, xs + 0.012)]
-    slot = [(v.x, v.y) for v in slot]
-    if _area(slot) < 0:
-        slot = slot[::-1]
-    top = face.pocket(g, kit, uv, min(p0.x, p1.x), min(p0.y, p1.y), max(p0.x, p1.x), max(p0.y, p1.y), "THROTTLE", 4,
-                      "console", floor_holes=[slot])
-    g.put(walls(slot, -PLATE["depth"], -PLATE["depth"] - 0.025, "bezel_dark", uv), face.m, "console")
-    for ds, name in ((a + 0.010, "AB"), (b - 0.022, "IDLE")):
-        q = L(ds, xs + 0.020)
-        g.put(stack(uv, [ring_rect(0.004, 0.009, 0.0), ring_rect(0.004, 0.009, 0.004)], "metal", bottom_hidden=True),
-              top(q.x, q.y), "console")
-        lab = atlas.label(name, cap_mm=3.0)
-        r = L(ds, xs + 0.040)
-        g.put(kit.placard(lab), top(r.x, r.y), "console")
-    q = L(b + 0.020, inner + 0.032)
+    top = face.pocket(g, kit, uv, min(p0.x, p1.x), min(p0.y, p1.y), max(p0.x, p1.x), max(p0.y, p1.y), None, 4,
+                      "console", floor_holes=[local_rect(hs0, hs1, hx0, hx1)])
+    # the housing: its inboard side and bevel, its outboard side, its ends, its top round the gate's slot
+    side = lambda x, z: [P(s, x, z) for s in (hs0, hs1)]
+    inboard = [side(hx0, floor), side(hx0, gate - bevel), side(hx0 + bevel, gate)]
+    g.put(grid_sheet(uv, [list(r) for r in zip(*inboard)], atlas.chart("console", "quadrant_in"), keep=True), None, "console")
+    g.put(grid_sheet(uv, [list(r) for r in zip(side(hx1, gate), side(hx1, floor))], atlas.chart("console", "quadrant_out"),
+                     keep=True), None, "console")
+    for s, name in ((hs0, "quadrant_front"), (hs1, "quadrant_back")):
+        rows = [[P(s, x, floor) for x in (hx0, hx0 + bevel, hx1)], [P(s, hx0, gate - bevel), P(s, hx0 + bevel, gate), P(s, hx1, gate)]]
+        g.put(grid_sheet(uv, rows if s == hs0 else [r[::-1] for r in rows], atlas.chart("console", name), keep=True), None,
+              "console")
+    hole = local_rect(*slot)
+    g.put(plane_sheet(face.chart, local_rect(hs0, hs1, hx0 + bevel, hx1), [hole], lift=gate - top_z), face.m, "console")
+    g.put(walls(hole, gate - top_z, gate - top_z - THROTTLE["slot_depth"], "recess", uv), face.m, "console")
+    g.put(sheet(uv, [P(sa, xa, gate - THROTTLE["slot_depth"]) for sa, xa in ((slot[0], slot[2]), (slot[1], slot[2]),
+                                                                             (slot[1], slot[3]), (slot[0], slot[3]))],
+                "recess"), None, "console")
+    # the stops' legends along the bevel, each centred on where the lever crosses the gate there, reading forward
+    mid = P(0.0, hx0 + bevel / 2, gate - bevel / 2)
+    for name, t in THROTTLE["stops"]:
+        lab = atlas.label(name, cap_mm=3.0, box=True)
+        g.put(kit.placard(lab), frame(P(stop_s(t), mid.x, mid.z), Vector((1, 0, 1)), Vector((-1, 0, 1))), "console")
+    q = L(hs1 + 0.022, inner + 0.032)
     g.put(kit.knob(), top(q.x, q.y), "console")
     lab = atlas.label("FRICT", cap_mm=3.0)
     g.put(kit.placard(lab), top(q.x, q.y - LEGEND_AFT["knob"] - lab.h_m / 2 + 0.004), "console")
@@ -1556,6 +1647,7 @@ def build(p, mats):
     proxy = cockpit_proxy(uv, atlas, space)
     screen = tac_screen(screens)
     lamp = front.lamp_mesh(lenses)
+    lever = throttle_lever(uv)
     movers = dict(front.MOVERS)
     if set(movers) != set(INSTRUMENTS):
         raise ValueError("cockpit: the instruments built %s, expected %s" % (sorted(movers), sorted(INSTRUMENTS)))
@@ -1571,14 +1663,14 @@ def build(p, mats):
     cell, hinge = O["cockpit_cell"], O["canopy"]
     import parts  # imports this module back
 
-    for name in INSTRUMENTS:
-        g, pivot = movers[name]
+    for name in INSTRUMENTS + (LEVER,):
+        g, pivot = movers[name] if name in movers else (lever, P(*STOCK["throttle_pivot"]))
         obj = g.object([SLOT])
         obj.data.transform(Matrix.Translation(-pivot))  # the origin on the pivot it turns about
         obj.matrix_world = Matrix.Translation(pivot)
         made.append(obj)
     for obj in made:
-        if obj.name not in INSTRUMENTS:
+        if obj.name not in INSTRUMENTS + (LEVER,):
             parts.recentre(obj)
         world = obj.matrix_world.copy()
         obj.parent = hinge if obj.name in ("canopy_frame_inner", "canopy_frame_proxy") else cell
@@ -1595,9 +1687,9 @@ def build(p, mats):
     bake_ao(atlas, made[:3])
     atlas.write(os.path.join(REPO, "art", "export", "textures"))
     print("cockpit: interior %d (front %d, consoles %d, tub %d), hood frame %d, windscreen frame %d, screen %d, "
-          "lamps %d, proxies %d + %d; atlas %.0f%% laid out" % (
+          "lamps %d, throttle lever %d, proxies %d + %d; atlas %.0f%% laid out" % (
               interior.tris(), *[interior.tris(k) for k in GROUPS], hood_inner.tris(), windscreen_inner.tris(),
-              screen.tris(), lamp.tris(), proxy.tris(), frame_proxy.tris(), 100 * atlas.use))
+              screen.tris(), lamp.tris(), lever.tris(), proxy.tris(), frame_proxy.tris(), 100 * atlas.use))
     return made
 
 
@@ -1863,7 +1955,7 @@ def measure(icarus):
     out["proxy_interior"], out["proxy_frame"] = count("cockpit_proxy"), count("canopy_frame_proxy")
     out["instruments"] = sum(count(n) for n in INSTRUMENTS)
     out["cockpit_tris"] = sum(count(n) for n in (INTERIOR, "canopy_frame_inner", "windscreen_frame_inner", TAC_SCREEN,
-                                                  canopy.GLASS_INNER, canopy.WINDSCREEN_INNER) + INSTRUMENTS) + 1890 + 880
+                                                  canopy.GLASS_INNER, canopy.WINDSCREEN_INNER, LEVER) + INSTRUMENTS) + 1890 + 880
     return out
 
 
@@ -2112,6 +2204,17 @@ def check(icarus):
     pairs = interior.overlap(box_tree(stock_keepout()))
     if pairs:
         problems.append("interior enters the stock seat, stick or throttle space (%d pairs): %s" % (len(pairs), where(pairs)))
+    # the throttle lever, idle to full afterburner: never meets the interior, its shank clear of the gate's slot
+    lever = O[LEVER]
+    m["lever_clear"] = math.inf
+    for t in np.linspace(0.0, 1.0, LEVER_STEPS):
+        pairs = interior.overlap(tree_of([lever], lever_turn(t)))
+        if pairs:
+            problems.append("the throttle lever meets the interior at throttle %.2f: %s" % (t, where(pairs)))
+            break
+        m["lever_clear"] = min([m["lever_clear"]] + [interior.find_nearest(q)[3] for q in lever_in_gate(t)])
+    if m["lever_clear"] < THROTTLE["clear"] - 0.0005:
+        problems.append("the throttle lever comes %.4f m from the gate's slot, under %.3f" % (m["lever_clear"], THROTTLE["clear"]))
     import internals
 
     body = internals.inner_solid(bi.PARAMS, 0.004, LAYOUT["coaming"][0] - 0.1, 5.4)
@@ -2186,8 +2289,8 @@ def check(icarus):
                         for k, d in zip(DISPLAYS, m["displays"])),
               m["overhead"], m["side"], m["sill"], m["panel_ahead"], m["frame_inner"], m["frame_shell"], m["windscreen_frame_inner"],
               m["lamps"], m["proxy_interior"], m["proxy_frame"], m["cockpit_tris"], m["sky_to_console"]))
-    print("cockpit items: " + ", ".join(m["top_classes"]) + "; regions %s; hud zone %d; seat headbox %.4f m from the hood"
-          % (m["regions"], m["hud"], m["head_gap"]))
+    print("cockpit items: " + ", ".join(m["top_classes"]) + "; regions %s; hud zone %d; seat headbox %.4f m from the hood; "
+          "throttle lever %.4f m from its gate's slot, idle to full afterburner" % (m["regions"], m["hud"], m["head_gap"], m["lever_clear"]))
     if problems:
         raise ValueError("cockpit: " + "; ".join(problems))
     return m
