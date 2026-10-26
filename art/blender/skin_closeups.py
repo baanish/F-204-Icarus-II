@@ -80,7 +80,7 @@ def aim(camera, view):
     location, target, lens = VIEWS[view]
     camera.location = location
     camera.rotation_euler = (Vector(target) - Vector(location)).to_track_quat('-Z', 'Y').to_euler()
-    if view == 'top':
+    if view == 'top' or view.endswith('_top'):
         camera.rotation_euler.rotate_axis('Z', 1.5707963)
     camera.data.lens = lens
     camera.data.clip_start = .05

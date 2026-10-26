@@ -148,8 +148,7 @@ def compose(part_manifest=None):
         colour = np.clip(baseline * (1 + residual[..., None]), 0, 1)
         paint_coverage = None
         if spec['id'] == 4:
-            radome, glare = painted_parts(pos, normal, part, names)
-            colour[radome] *= .62
+            _, glare = painted_parts(pos, normal, part, names)
             colour = colour * (1 - glare[..., None]) + np.array([.035, .043, .045]) * glare[..., None]
             paint_coverage = np.zeros(part.shape, np.float32)
         save_map(OUT / ('unmarked_' + str(spec['id']) + '.png'), colour, used)
@@ -162,7 +161,7 @@ def compose(part_manifest=None):
             np.savez_compressed(OUT / 'bare_metal_masks.npz', **masks)
             report['bare_metal']['material'] = {'map': METALLIC_MAP, 'metal_red': .98,
                 'polished_alpha': [.82, .96], 'painted_alpha': .42, 'anti_glare_alpha': .18,
-                'glossiness': spec['glossiness'], 'paint_mask': 'same bands, anti-glare, radome and sampled decal alpha as livery compose',
+                'glossiness': spec['glossiness'], 'paint_mask': 'same bands, anti-glare and sampled decal alpha as livery compose; radome uses sheet metal',
                 'protected_texels': int((used & (masks['protected'] >= 1)).sum())}
         save_map(EXPORT / ('Icarus_livery_' + str(spec['id']) + '.png'), colour, used)
         Image.fromarray(mask.astype(np.uint8) * 255).save(OUT / ('decal_mask_' + str(spec['id']) + '.png'))

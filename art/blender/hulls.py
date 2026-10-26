@@ -670,6 +670,8 @@ def paint_lods():
     and each corner, drawn a tenth of the way to the face centre, the UV of the nearest point on that triangle's
     island, drawn in further where the triangle would leave the island (Surface.fit): the face maps onto one stretch
     of the atlas, never across the gutters between islands. Runs after uvs.unwrap, on the final render meshes."""
+    from uvs import SKIN
+
     report = []
     for lod in bpy.data.collections["LOD1"].objects:
         owner = lod.parent
@@ -696,6 +698,10 @@ def paint_lods():
                 # a middle on the island's rim leaves no room to fit: then the covered triangle's own middle
                 uvs = (surface.fit(island, middle, corners)
                        or surface.fit(island, (sum(surface.uvs[t], Vector()) / 3).to_2d(), corners))
+                # Nearest-point projection can collapse onto an island rim. Sample the covered skin triangle instead.
+                if owner.data.materials[surface.slots[t]].name == SKIN and (
+                        not uvs or abs((uvs[1] - uvs[0]).cross(uvs[2] - uvs[0])) / 2 <= POINT_UV_AREA):
+                    uvs = [uv.to_2d() for uv in surface.uvs[t]]
                 for l, uv in zip(f.loops, uvs or [middle] * 3):
                     l[layer].uv = uv
         bm.to_mesh(lod.data)

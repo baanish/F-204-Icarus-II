@@ -26,7 +26,22 @@ def verify_current_maps():
     maps = FULL / 'art/export/textures'
     with np.load(OUT / 'atlas_geometry.npz') as geometry:
         used = geometry['part'] > 0
+        part = geometry['part']
+        station = geometry['position'][..., 1] + read(FULL.parent / 'structure.json')['S0']
     shared = np.asarray(Image.open(maps / 'Icarus_skin_m.png'))
+    names = read(OUT / 'atlas_triangles.json')['parts']
+    fuselage = np.isin(part, [i + 1 for i, name in enumerate(names)
+                            if name.startswith(('skin_forward', 'skin_mid', 'skin_aft', 'dorsal_cover'))])
+    # Station 14.2 is the last butt joint. Only its final ring and the nozzle are hot metal.
+    cold = fuselage & (station < 14.19)
+    hot = fuselage & (station > 14.21)
+    brakes = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith('speed_brake_')])
+    nozzle = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith('nozzle')])
+    assert cold.any() and hot.any() and brakes.any() and nozzle.any()
+    assert np.all(shared[..., 0][cold] == 0), 'Livery must cover the fuselage ahead of station 14.2'
+    assert np.all(shared[..., 0][hot] == 255), 'The entire final fuselage ring must stay metal'
+    assert np.all(shared[..., 0][brakes & (station < 14.19)] == 0), 'Speed brakes ahead of the hot ring must take livery'
+    assert np.all(shared[..., 0][nozzle] == 255), 'The nozzle must stay metal'
     metallic = np.asarray(Image.open(maps / 'Icarus_livery_4_m.png'))
     assert metallic.shape == (*used.shape, 4)
     assert Image.open(maps / 'Icarus_livery_4.png').mode == 'RGB'
@@ -45,6 +60,9 @@ def verify_current_maps():
         assert error <= 1
         glare = used & (masks['anti_glare'] == 1)
         assert np.all(metallic[..., 3][glare] == 46)
+        radome_sheet = masks['radome'] & (masks['anti_glare'] == 0)
+        assert radome_sheet.any() and np.all(paint[radome_sheet] == 0), 'The radome must keep the bare sheet finish'
+        assert np.all(metallic[..., 0][radome_sheet] == 250), 'The radome must use the fuselage aluminium value'
         assert np.all((metallic[..., 3][unpainted] >= 209) & (metallic[..., 3][unpainted] <= 245))
         counts = {key: int((used & (masks[key] == 1)).sum()) for key in masks.files}
     report = {'status': 'pass', 'geometry_sha256': sha(OUT / 'atlas_geometry.npz'),

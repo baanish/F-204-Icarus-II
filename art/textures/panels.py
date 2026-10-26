@@ -34,9 +34,8 @@ FUSELAGE = ('skin_forward', 'skin_mid', 'skin_aft', 'dorsal_cover')
 # the next bay's on the butt joint.
 FUSELAGE_SEAMS_DEG = (45, -45)
 JOINT_EVERY = 2  # a skin butt joint at every second frame; the frames between carry one rivet row
-# Unpainted aft fuselage on every livery: the skin aft of this butt joint and below both upper lap joints (the
-# panels round the tailpipe and the speed brakes in them), and the nozzle.
-BARE_AFT_JOINT_S = 13.0
+# Only the final panel ring before the nozzle is hot metal on every livery. The speed brakes are ahead of it.
+BARE_AFT_JOINT_S = 14.2
 # (span axis, chord fractions with a joint, chord fractions with a fastener row only, rib pitch m or None)
 LIFTING = {'fin_skin': ('z', (.18,), (.92,), None),
            'stabilator_visible': ('x', (.2,), (.72,), None),
@@ -233,11 +232,12 @@ def wing(layout, where, pos, normal, structure, report):
                          (le_k[2] - le_k[1] + f * (chord_k[2] - chord_k[1])) / (knots_x[2] - knots_x[1]))
         plan.append((y - line) / np.hypot(1, slope))
     outboard = (x > rib_x).astype(np.int64)
+    side = (pos[:, 0] < 0).astype(np.int64)
     rear = abs(plan[1]) < abs(plan[0])
     across = np.where(rear, plan[1], plan[0])
-    layout.add_seam(where, across, 'spar_seam', 2 * rear + outboard)
+    layout.add_seam(where, across, 'spar_seam', 2 * rear + outboard + 4 * side)
     layout.add_row(where, across, x, (-ROW_OFFSET, ROW_OFFSET), 'screw', 'spar_screws')
-    layout.add_seam(where, x - rib_x, 'crank_rib_seam')
+    layout.add_seam(where, x - rib_x, 'crank_rib_seam', side)
     layout.add_row(where, x - rib_x, y, (-ROW_OFFSET, ROW_OFFSET), 'rivet', 'crank_rib_rivets')
     x0, x1 = .62, profile[-1, 1] - .06
     ribs = np.linspace(x0, x1, int((x1 - x0) / spars['rib_pitch']) + 1)
@@ -298,10 +298,10 @@ def layout_fields(position, normal, part, names, domain, structure):
     family = np.array([name.startswith(FUSELAGE) for name in [''] + list(names)])[ids]
     fuselage(layout, np.flatnonzero(family), pos[family], nrm[family], part_names[family], structure,
              breaks, report)
-    selected = part_names == 'wing_skin_L'
+    selected = np.isin(part_names, ('wing_skin_L', 'wing_skin_R'))
     wing(layout, np.flatnonzero(selected), pos[selected], nrm[selected], structure, report)
     for name in LIFTING:
-        selected = part_names == name
+        selected = np.isin(part_names, (name, name.replace('_L_', '_R_')))
         if selected.any():
             lifting(layout, np.flatnonzero(selected), pos[selected], name, report)
     seam = np.zeros(part.size, np.float32)
@@ -327,18 +327,15 @@ def layout_fields(position, normal, part, names, domain, structure):
 
 
 def bare_aft(position, part, names, structure):
-    """Weight 1 on the unpainted aft fuselage: the skin aft of the BARE_AFT_JOINT_S butt joint and below both upper
-    lap joints, the speed brakes (panels inside it) and the nozzle. Its edges are those seams, and the material
-    changes across the groove's width, so the edge sits in the joint with no texel step."""
+    """Metal on the final butt-joint ring and nozzle, blending across the bounding groove's width."""
     lines = fuselage_lines(structure, skin_breaks(position, part, names, structure['S0']))
-    if BARE_AFT_JOINT_S not in lines['joints']:
-        raise ValueError(f'The bare aft fuselage must start on a butt joint {lines["joints"]}')
-    x, s, z = abs(position[..., 0]), position[..., 1] + structure['S0'], position[..., 2]
-    upper = lap_distances(x, s, z, lines)[FUSELAGE_SEAMS_DEG.index(45)]
+    if BARE_AFT_JOINT_S != max(lines['joints']):
+        raise ValueError(f'The hot ring must start on the last butt joint {lines["joints"]}')
+    s = position[..., 1] + structure['S0']
     ramp = lambda d: (lambda t: t * t * (3 - 2 * t))(np.clip(d / (2 * SEAM_HALF_WIDTH) + .5, 0, 1))
-    skin = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith(FUSELAGE)])
-    whole = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith(('speed_brake_', 'nozzle'))])
-    return np.where(skin, ramp(s - BARE_AFT_JOINT_S) * ramp(-upper), whole.astype(np.float64))
+    skin = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith((*FUSELAGE, 'speed_brake_'))])
+    nozzle = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith('nozzle')])
+    return np.where(skin, ramp(s - BARE_AFT_JOINT_S), nozzle.astype(np.float64))
 
 
 def surface_height(fields, px_per_m):

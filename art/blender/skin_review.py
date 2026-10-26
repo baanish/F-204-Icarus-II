@@ -30,6 +30,8 @@ def bake_ao(canonical):
     groups = {s: [o.name for o in canonical if o.name.startswith('skin_' + s)] + ['fuselage_' + s]
               for s in ('forward', 'mid', 'aft')}
     groups['wing_left'] = ['wing_skin_L', 'wing_spar_L']
+    if any(o.name == 'wing_skin_R' for o in canonical):
+        groups['wing_right'] = ['wing_skin_R', 'wing_spar_R']
     contexts = [bpy.data.objects[name] for members in groups.values() for name in members
                 if name not in {o.name for o in canonical}]
     arrays = {}

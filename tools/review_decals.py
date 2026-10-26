@@ -1,11 +1,13 @@
-"""Decal and fin-strip review views: the owner's two screenshot angles, both full sides, the fin, and the fin strip
-with its lenses off and lit, in Navy and Bare Metal, from the saved skin scene.
+"""Matched decal and finish views in Navy and Bare Metal from the saved skin scene.
 
 Run through tools/Run-Blender.ps1 after compose:
     ... --background --factory-startup --python-exit-code 1 --python tools/review_decals.py -- --out <absolute folder>
 Writes <out>/livery_<n>_<view>.png at 2560 x 1440. Lit lenses take the Revoker's slimelight_on emission.
+Select close-ups with --views tail_side,wing_left_top,wing_right_top,nose_finish.
 """
 import argparse
+import hashlib
+import json
 from pathlib import Path
 import sys
 
@@ -24,6 +26,10 @@ VIEWS = {
     'side_right': ((-30, 0, 1.2), (0, 0, .7), 50),
     'fin_close': ((5.4, 6.1, 1.85), (0, 6.1, 1.85), 50),
     'fin_strip': ((2.6, 4.7, 2.1), (0, 5.55, 1.7), 50),
+    'tail_side': ((8, 5.2, .65), (0, 5.2, .65), 50),
+    'nose_finish': ((5, -10.5, 1.7), (0, -6.9, .15), 50),
+    'wing_left_top': ((1.98, 1.55, 8.4), (1.98, 1.55, 0), 50),
+    'wing_right_top': ((-1.98, 1.55, 8.4), (-1.98, 1.55, 0), 50),
 }
 STOCK_OFF = (0.473, 0.612, 0.537, 1)  # light_green_off _Color
 STOCK_ON = (0.047, 2.996, 0.329)  # slimelight_on _EmissionColor
@@ -51,6 +57,7 @@ def main():
     parser.add_argument('--out', required=True)
     parser.add_argument('--livery', type=int, action='append')
     parser.add_argument('--samples', type=int, default=96)
+    parser.add_argument('--views', help='Comma-separated view names; omit for the full review including lit lenses')
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -61,12 +68,18 @@ def main():
     for livery in args.livery or [1, 4]:
         skin_review.preview_material(livery)
         lens(False)
-        for view in VIEWS:
+        for view in args.views.split(',') if args.views else VIEWS:
             skin_closeups.render(scene, camera, view, out / f'livery_{livery}_{view}.png')
-        lens(True)
-        skin_closeups.render(scene, camera, 'fin_strip', out / f'livery_{livery}_fin_strip_lit.png')
-        skin_closeups.render(scene, camera, 'side_left', out / f'livery_{livery}_side_left_lit.png')
+        if not args.views:
+            lens(True)
+            skin_closeups.render(scene, camera, 'fin_strip', out / f'livery_{livery}_fin_strip_lit.png')
+            skin_closeups.render(scene, camera, 'side_left', out / f'livery_{livery}_side_left_lit.png')
     print('DECAL REVIEW PASS', out, 'fin strips' if strips else 'no fin strips', flush=True)
+    (out / 'render_settings.json').write_text(json.dumps({
+        'views': {name: VIEWS[name] for name in (args.views.split(',') if args.views else VIEWS)},
+        'resolution': skin_closeups.RESOLUTION, 'samples': args.samples,
+        'maps_sha256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                        for path in sorted((ROOT / 'art/export/textures').glob('*.png'))}}, indent=2) + '\n')
 
 
 if __name__ == '__main__':

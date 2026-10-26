@@ -45,10 +45,13 @@ def nearest_parent(target_positions, target_normals, source_positions, source_no
 
 
 def donor_part(name, source_names):
-    """New small doors inherit their corresponding accepted parent door paint."""
+    """Split wing UVs reuse reflected left paint; new small doors inherit accepted parent paint."""
     if name in source_names:
         return name, False
     replacements = {
+        'wing_skin_R': ('wing_skin_L', True),
+        'flap_R_visible': ('flap_L_visible', True),
+        'aileron_R_visible': ('aileron_L_visible', True),
         'gear_door_N2_L_visible': ('gear_door_N_L_visible', False),
         'gear_door_N2_R_visible': ('gear_door_N_L_visible', True),
         'gear_door_flap_L_visible': ('gear_door_main_L_visible', False),
@@ -283,8 +286,11 @@ def rebuild_inventory(bake, output):
             mirror = False
         else:
             donor, mirror = named_donor
-            decision = {'policy': 'same_physical_part' if name == donor else 'named_gear_door_parent',
-                        'matched_detail_claim': name == donor and not name.startswith(('gear_door_', 'speed_brake_'))}
+            split_wing = name in ('wing_skin_R', 'flap_R_visible', 'aileron_R_visible')
+            decision = {'policy': ('reflected_same_physical_part' if split_wing else
+                                   'same_physical_part' if name == donor else 'named_gear_door_parent'),
+                        'matched_detail_claim': (name == donor or split_wing) and
+                                                not name.startswith(('gear_door_', 'speed_brake_'))}
         source = np.flatnonzero(old_part == old_names.index(donor) + 1)
         query, query_normal = pos[target].copy(), normal[target].copy()
         if mirror:
@@ -294,7 +300,7 @@ def rebuild_inventory(bake, output):
         source = source[nearest]
         native = (distance <= POSITION_TOLERANCE_M) & (cosine >= NORMAL_COSINE)
         changed = name.startswith(('gear_door_', 'speed_brake_'))
-        if changed or name != donor:
+        if changed or not decision['matched_detail_claim']:
             native[:] = False
         reused.ravel()[target] = native
         owner.ravel()[target] = old_owner.ravel()[source]

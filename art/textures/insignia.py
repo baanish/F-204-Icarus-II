@@ -8,18 +8,22 @@ from rasterize import ROOT, SOURCE, OUT, sample
 SUBSAMPLES = 4  # per texel axis: 16 world-space samples per texel box-filter the decal edges
 PAD = 6  # transparent source pixels around every decal so supersamples past its edge read clear
 SIDE_FACING = .45  # |normal x| above which a texel takes side decals
+TOP_PARTS = ('wing_skin_L', 'wing_skin_R', 'flap_L_visible', 'flap_R_visible',
+             'aileron_L_visible', 'aileron_R_visible')
 FORWARD = ('skin_forward_L', 'skin_forward_R')
-# label, source, parts, centre y (aft), centre z, width, height, in world metres; mirrored onto both sides.
+# label, source, parts, centre y,z (side) or positive x,y (top), width, height, in world metres; both sides.
 # decal_checks.py holds each one clear of the canopy, physical edges, panel seams and light fittings.
 # Forward: each inside one skin panel between the butt joints at s 2.2, 3.4 and 4.6 (y -5.8, -4.6, -3.4), the modex
-# in the first, RESCUE above the gun-port panel and NO STEP above the forward formation lens in the second, the
+# in the first, RESCUE above the gun-port panel in the second, the
 # roundel in the third ahead of the Bare Metal band. Fin: one above another on the panel between the front spar joint
 # and the rudder hinge, each centred in that swept panel at its height, the formation strip ahead of the joint.
 PLACEMENTS = (
     ('nose_modex', 'modex', FORWARD, -5.2, .14, 1.05, .43),
     ('roundel', 'roundel', FORWARD, -3.08, .20, .50, .50),
     ('rescue', 'rescue', FORWARD, -3.95, .37, .52, .10),
-    ('no_step', 'no_step', FORWARD, -4.35, -.13, .38, .07),
+    ('no_step_wing_root', 'no_step', ('wing_skin_L', 'wing_skin_R'), 1.35, 1.60, .38, .07),
+    ('no_step_flap', 'no_step', ('flap_L_visible', 'flap_R_visible'), 1.55, 3.70, .38, .07),
+    ('no_step_aileron', 'no_step', ('aileron_L_visible', 'aileron_R_visible'), 2.65, 3.65, .38, .07),
     ('fin_flash', 'flash', ('fin_skin',), 6.60, 2.05, .35, .66),
     ('fin_modex', 'modex', ('fin_skin',), 6.156, 1.47, .90, .36),
     ('pala', 'pala', ('fin_skin',), 5.95, 1.135, .68, .17),
@@ -111,20 +115,31 @@ def sources():
 
 
 def projection(placement, decal):
-    """World y, z and side (+1 left, -1 right) to the placement's decal u, v; the padded source keeps the ink box at
-    the requested size."""
+    """World plane coordinates and side (+1 left, -1 right) to decal u,v, retaining the requested ink-box size.
+
+    Upper lettering reads in the same world x direction on both wings, using their separate UV islands.
+    """
     _, _, _, cy, cz, width, height = placement
     ph, pw = decal.shape[:2]
     su, sv = width * pw / (pw - 2 * PAD), height * ph / (ph - 2 * PAD)
+    if placement[2][0] in TOP_PARTS:
+        return lambda x, y, side: ((x - side * cy) / su + .5, .5 - (y - cz) / sv)
     return lambda y, z, side: ((y - cy) * side / su + .5, .5 - (z - cz) / sv)
 
 
+def projection_coordinates(position, placement):
+    """Upper wing lettering uses world x,y; side lettering uses y,z."""
+    return position[..., :2] if placement[2][0] in TOP_PARTS else position[..., 1:]
+
+
 def covered(position, normal, part, names, placement, decal):
-    """Side-facing texels of the placement's parts inside its box, each side's mirror image, with their side."""
+    """Texels facing the placement's side or upper projection, inside its box, with their side."""
     to_uv = projection(placement, decal)
-    eligible = np.isin(part, [names.index(s) + 1 for s in placement[2]]) & (abs(normal[..., 0]) > SIDE_FACING)
+    facing = normal[..., 2] if placement[2][0] in TOP_PARTS else abs(normal[..., 0])
+    eligible = np.isin(part, [names.index(s) + 1 for s in placement[2]]) & (facing > SIDE_FACING)
     side = np.where(position[..., 0] >= 0, 1, -1)
-    u, v = to_uv(position[..., 1], position[..., 2], side)
+    coordinates = projection_coordinates(position, placement)
+    u, v = to_uv(coordinates[..., 0], coordinates[..., 1], side)
     return eligible & (u >= 0) & (u <= 1) & (v >= 0) & (v <= 1), side, to_uv
 
 
@@ -142,7 +157,8 @@ def place_decals(colour, position, normal, part, names, decals, spec, paint_cove
         for oy in offsets:
             for ox in offsets:
                 q = p + ddx * ox + ddy * oy
-                ink += sample(decal, *to_uv(q[:, 1], q[:, 2], flip))
+                coordinates = projection_coordinates(q, placement)
+                ink += sample(decal, *to_uv(coordinates[:, 0], coordinates[:, 1], flip))
         ink /= SUBSAMPLES ** 2
         alpha = ink[:, 3:4]
         rgb = ink[:, :3] / np.maximum(alpha, 1e-6)
@@ -160,10 +176,12 @@ def place_decals(colour, position, normal, part, names, decals, spec, paint_cove
             raise ValueError('Decal misses one side: ' + label)
         if min(ink_counts) == 0:
             raise ValueError('Decal has no visible ink on one side: ' + label)
-        report.append({'label': label, 'source': name, 'parts': list(allowed), 'centre_yz': [cy, cz],
+        centre_key = 'centre_xy' if allowed[0] in TOP_PARTS else 'centre_yz'
+        report.append({'label': label, 'source': name, 'parts': list(allowed), centre_key: [cy, cz],
                        'size_m': [width, height], 'left_right_texels': counts, 'left_right_ink_texels': ink_counts,
                        'supersamples_per_texel': SUBSAMPLES ** 2})
     actual = sorted(names[i - 1] for i in np.unique(part[mask]))
-    if any(n.endswith('_visible') or n.startswith(('wing_', 'pylon_', 'intake_')) for n in actual):
+    if any((n.endswith('_visible') or n.startswith(('wing_', 'pylon_', 'intake_'))) and n not in TOP_PARTS
+           for n in actual):
         raise ValueError('Decals touched mirrored islands: ' + str(actual))
     return mask, report, actual

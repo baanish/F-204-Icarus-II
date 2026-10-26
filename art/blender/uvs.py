@@ -20,12 +20,9 @@ MARGIN_PX = 8
 # The generated paint registration (round-2 source atlas) and the AO bake stay at this size; compose upsamples them.
 PAINT_SIZE = 2048
 SKIN = "Icarus_Body"
-# The single tip-to-tip stabilator and every lettering-bearing part have unique islands.
+# The stabilator and lettering-bearing parts, including both wing skins, flaps and ailerons, have unique islands.
 MIRROR_PAIRS = (
-    ("wing_skin_L", "wing_skin_R"),
     ("lef_L_visible", "lef_R_visible"),
-    ("flap_L_visible", "flap_R_visible"),
-    ("aileron_L_visible", "aileron_R_visible"),
     ("speed_brake_L_visible", "speed_brake_R_visible"),
     ("intake_duct_L", "intake_duct_R"),
     ("gear_door_N_L_visible", "gear_door_N_R_visible"),
@@ -191,7 +188,8 @@ def unwrap(icarus):
         bpy.context.view_layer.objects.active = scratch[0][1]
         unwrap_islands(scratch)
         bpy.ops.object.mode_set(mode="EDIT")
-        bpy.ops.uv.pack_islands(rotate=True, scale=False, margin_method="ADD", margin=MARGIN_PX / ATLAS_SIZE,
+        # Fit the extra lettering islands inside the atlas; check() still enforces density and margin limits.
+        bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="ADD", margin=MARGIN_PX / ATLAS_SIZE,
                                 shape_method="CONCAVE")
         bpy.ops.object.mode_set(mode="OBJECT")
         for obj, temp, faces in scratch:

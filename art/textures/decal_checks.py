@@ -3,7 +3,7 @@
 Run from the repository root after `compose_skin.py compose`:  python art/textures/decal_checks.py
 
 Each placement in insignia.PLACEMENTS, on each side, must be:
-- whole: every inked source pixel lands on a side-facing texel of its parts, so no edge, crease or leading edge
+- whole: every inked source pixel lands on a side-facing or upper-facing texel of its parts, so no edge, crease or leading edge
   clips it;
 - clear of physical edges: inked texels stay EDGE_CLEAR_M from every edge of their skin sheet (the canopy cut and
   sill, control-surface gaps, the fin root), found as in panel_checks.py: island rims with no surface across them;
@@ -24,7 +24,7 @@ from scipy.ndimage import label
 from scipy.spatial import cKDTree
 
 from bare_metal import visibility_bands
-from insignia import PLACEMENTS, SIDE_FACING, covered, sources
+from insignia import PLACEMENTS, SIDE_FACING, TOP_PARTS, covered, projection_coordinates, sources
 from panel_checks import JOIN_M, STRUCTURE, groups_of
 from panels import FASTENERS, ROW_OFFSET, layout_fields
 from rasterize import OUT, extend_geometry, sample
@@ -77,18 +77,19 @@ def fitting_points(structure, step=.005):
 
 
 def whole(position, side_mask, placement, decal, to_uv, side):
-    """Inked source pixels with no side-facing texel of the placement under them (side projection)."""
+    """Inked source pixels with no eligible texel under them in the placement's projection."""
     _, _, _, cy, cz, width, height = placement
     ph, pw = decal.shape[:2]
     stride = max(1, int(.003 / max(width / pw, height / ph)))  # source pixels about 3 mm apart
     v, u = np.mgrid[:ph:stride, :pw:stride]
     ink = decal[v, u, 3] > .5
     u, v = u[ink] / (pw - 1), v[ink] / (ph - 1)
-    # Invert the projection: u, v are linear in y, z.
-    u0, v0 = to_uv(np.array([cy, cy + 1]), np.array([cz, cz + 1]), side)
-    y = cy + (u - u0[0]) / (u0[1] - u0[0])
+    # Invert the same projection used by the compositor, including the right wing's signed x centre.
+    centre = cy * side if placement[2][0] in TOP_PARTS else cy
+    u0, v0 = to_uv(np.array([centre, centre + 1]), np.array([cz, cz + 1]), side)
+    y = centre + (u - u0[0]) / (u0[1] - u0[0])
     z = cz + (v - v0[0]) / (v0[1] - v0[0])
-    texels = position[side_mask][:, 1:]
+    texels = projection_coordinates(position[side_mask], placement)
     if not len(texels):
         return len(y), [cy, cz]
     distance, _ = cKDTree(texels).query(np.stack((y, z), -1), distance_upper_bound=WHOLE_TOLERANCE_M)
@@ -121,7 +122,9 @@ def check(write=True):
         label_, source, allowed, cy, cz, width, height = placement
         decal = decals[source]
         selected, side, to_uv = covered(pos, normal, part, names, placement, decal)
-        u, v = to_uv(pos[..., 1], pos[..., 2], side)
+        top = allowed[0] in TOP_PARTS
+        coordinates = projection_coordinates(pos, placement)
+        u, v = to_uv(coordinates[..., 0], coordinates[..., 1], side)
         alpha = np.zeros(part.shape, np.float32)
         alpha[selected] = sample(decal, u[selected], v[selected])[:, 3]
         sheet = tuple(sorted({int(sheets[names.index(n) + 1]) for n in allowed}))
@@ -130,7 +133,8 @@ def check(write=True):
         edge_tree = edges_by_sheet[sheet]
         own = np.isin(sheets[part], list(sheet)) & used
         reach = max(width, height) / 2 + .1
-        near = used & ~own & (abs(pos[..., 1] - cy) < reach) & (abs(pos[..., 2] - cz) < reach)
+        across = abs(coordinates[..., 0]) if top else coordinates[..., 0]
+        near = used & ~own & (abs(across - cy) < reach) & (abs(coordinates[..., 1] - cz) < reach)
         others = pos[near].astype(np.float64)
         other_tree = cKDTree(others) if len(others) else None
         allowed_seams = set(PAINT_OVER.get(label_, ()))
@@ -153,7 +157,8 @@ def check(write=True):
             nearest = seam_pieces[ids[np.argmin(distance)]] if len(distance) and ids[np.argmin(distance)] >= 0 else None
             fitting = float(fitting_tree.query(p)[0].min()) if fitting_tree is not None and len(p) else None
             bands = int((visibility_bands(pos[ink]) > 0).sum())
-            entry[name] = {'ink_texels': int(ink.sum()), 'missing_ink_px': missing, 'missing_at_yz': where,
+            missing_key = 'missing_at_xy' if top else 'missing_at_yz'
+            entry[name] = {'ink_texels': int(ink.sum()), 'missing_ink_px': missing, missing_key: where,
                            'edge_clear_m': round(edge, 4), 'covered_texels': cover,
                            'seam_clear_m': round(float(distance.min()), 4) if len(distance) else None,
                            'nearest_seam': nearest, 'seams_crossed': crossed,
@@ -163,7 +168,8 @@ def check(write=True):
                 problems.append(f'{where_text} prints no ink')
                 continue
             if missing:
-                problems.append(f'{where_text} is clipped: {missing} inked px off its skin near y,z {where}')
+                problems.append(f'{where_text} is clipped: {missing} inked px off its skin near '
+                                f'{"x,y" if top else "y,z"} {where}')
             if edge < EDGE_CLEAR_M:
                 problems.append(f'{where_text} is {edge * 1000:.0f} mm from a physical edge (min {EDGE_CLEAR_M * 1000:.0f})')
             if cover:
@@ -175,13 +181,14 @@ def check(write=True):
                 problems.append(f'{where_text} is {fitting * 1000:.0f} mm from a light fitting (min {FITTING_CLEAR_M * 1000:.0f})')
             if bands:
                 problems.append(f'{where_text} reaches the Bare Metal bands on {bands} texels')
-        report[label_] = {'source': source, 'parts': list(allowed), 'centre_yz': [cy, cz], 'size_m': [width, height],
+        centre_key = 'centre_xy' if top else 'centre_yz'
+        report[label_] = {'source': source, 'parts': list(allowed), centre_key: [cy, cz], 'size_m': [width, height],
                           'paint_over': sorted(allowed_seams), **entry}
     result = {'placements': report, 'fittings': sorted(structure.get('fittings', {})),
               'thresholds': {'ink_alpha': INK, 'edge_clear_m': EDGE_CLEAR_M, 'seam_clear_m': SEAM_CLEAR_M,
                              'cover_heights_m': COVER_M, 'cover_radius_m': COVER_RADIUS_M,
                              'fitting_clear_m': FITTING_CLEAR_M, 'whole_tolerance_m': WHOLE_TOLERANCE_M,
-                             'side_facing_normal_x': SIDE_FACING}, 'problems': problems}
+                             'side_facing_normal_x': SIDE_FACING, 'upper_facing_normal_z': SIDE_FACING}, 'problems': problems}
     if write:
         (OUT / 'decal_checks.json').write_text(json.dumps(result, indent=2) + '\n')
     for label_, entry in report.items():

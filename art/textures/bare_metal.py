@@ -13,6 +13,7 @@ def visibility_bands(position):
 
 
 def painted_parts(position, normal, part, names):
+    """Radome diagnostic mask and anti-glare paint. The radome itself keeps the livery's sheet finish."""
     x, y = abs(position[..., 0]), position[..., 1]
     radome = part == names.index('radome') + 1 if 'radome' in names else np.zeros(part.shape, bool)
     glare = (smoothstep((y + 7.7) / .06) * smoothstep((-5.8 - y) / .06)
@@ -26,7 +27,7 @@ def surface_map(shared, position, normal, part, names, decal_coverage, sheet_ton
     `protected` is that weight: 1 keeps the shared exhaust values verbatim, 0 is polished sheet.
     """
     radome, glare = painted_parts(position, normal, part, names)
-    paint = 1 - (1 - visibility_bands(position)) * (1 - glare) * (~radome) * (1 - decal_coverage)
+    paint = 1 - (1 - visibility_bands(position)) * (1 - glare) * (1 - decal_coverage)
     protected_ids = [i + 1 for i, name in enumerate(names)
                      if name == 'nozzle' or name.startswith(('nozzle_petal_', 'nozzle_seal_'))]
     protected = np.maximum(shared[..., 0], np.isin(part, protected_ids))

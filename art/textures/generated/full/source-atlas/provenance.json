@@ -6,8 +6,8 @@
     "art/textures/generated/full/source-atlas/native/generation-inputs/old-pilot/parts.json": "a1fe6585d8c127866e0515d356bd2c3bc09b0f2dc61875f025dc4afbd3a5c347",
     "art/textures/round2_style.txt": "a9707cda546b70022cce3a9a912a88614baa5db7c85f130e5ed988910b1b81cd"
   },
-  "current_geometry_sha256": "3a1eb159494ecdfbfe7cdf487d0b0d2fcd3061084a9fe64a6aba2791419d700f",
-  "current_atlas_triangles_sha256": "70d7871b61e528bb08d94736ee530bd42d0ba658a40315e4a60f0da65555f26d",
+  "current_geometry_sha256": "8ef659e18db6a070fea0a75b97e2c89d08e0e40e438c2a8c1daef87d73b05ec0",
+  "current_atlas_triangles_sha256": "659ad46ac1371d904b633cbddfe65e288728fb10de2d8720fb083e7e76d13cfc",
   "native_registration_gates": {
     "normalized_silhouette_iou_min": 0.7,
     "native_px_per_m_min": 180

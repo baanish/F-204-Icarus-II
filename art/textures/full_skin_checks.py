@@ -329,7 +329,14 @@ def current_coverage_checks(manifest, alignment, coverage, stitch, full, part, n
                     int((~matched).sum()) == rule['unmatched_surface_texels'], f'Transfer counts differ: {name}')
             require(rule['match_tolerance_m'] == .015 and rule['normal_cosine_min'] == .95,
                     f'World reuse thresholds changed: {name}')
-            if name.startswith(('gear_door_', 'speed_brake_')) or name != rule['source_part']:
+            split_wing = name in ('wing_skin_R', 'flap_R_visible', 'aileron_R_visible')
+            if split_wing:
+                require(rule['source_part'] == name.replace('_R', '_L') and rule['reflect_world_x'] is True,
+                        f'Split wing must reuse its reflected physical twin: {name}')
+                require(np.all(data['distance_m'][matched] <= .015) and
+                        np.all(data['normal_cosine'][matched] >= .95),
+                        f'Reflected wing reuse exceeds world tolerances: {name}')
+            if name.startswith(('gear_door_', 'speed_brake_')) or (name != rule['source_part'] and not split_wing):
                 require(not matched.any(), f'Replaced surface claims native mechanical detail: {name}')
             mask = pixels(resolve(rule['target_mask'], full), 'L') > 0
             require(mask.shape == part.shape and int(mask.sum()) == len(target) and
@@ -415,7 +422,10 @@ def mapping_geometry_checks(coverage, full, current_bake, source_bake, report):
             require(len(distance) > 0 and np.isfinite(distance).all() and np.isfinite(cosine).all(),
                     f'Nonfinite or empty mapping geometry: {name}')
             matched = (distance <= .015) & (cosine >= .95)
-            parent_paint = name.startswith(('gear_door_', 'speed_brake_')) or name != rule['source_part']
+            reflected_twin = (name in ('wing_skin_R', 'flap_R_visible', 'aileron_R_visible') and
+                              rule['source_part'] == name.replace('_R', '_L') and rule['reflect_world_x'] is True)
+            parent_paint = (name.startswith(('gear_door_', 'speed_brake_')) or
+                            (name != rule['source_part'] and not reflected_twin))
             if parent_paint:
                 matched[:] = False
             parts[name] = {'texels': len(distance), 'native_reuse_texels': int(matched.sum()),
