@@ -43,8 +43,8 @@ BUDGET = {
     # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more.
     "structure_cores": {"target": 14700, "cap": 14800, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
-    # The gear wells' cuts through the aft and aux cells take about 1,200.
-    "fuel_cells": {"target": 6200, "cap": 6250, "objects": ("fuel_",)},
+    # Coarse cells (internals.INTERNALS cell_mesh) come to about 2,920; the cap is what the finer cells took.
+    "fuel_cells": {"target": 3000, "cap": 6250, "objects": ("fuel_",)},
     "engine": {"target": 600, "cap": 700, "objects": ("engine_core",)},
     "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
 }
@@ -302,7 +302,7 @@ def _organise(p, icarus, internals, structure_mat):
     join("engine_core", [O["engine_core"], O["engine_afterburner"]])
     rename(O["nozzle_shroud"], "nozzle")
     for sd in ("L", "R"):
-        join("intake_duct_" + sd, [O["duct_" + sd], O["shock_cone_" + sd], O["shock_cone_%s_bleed" % sd]])
+        join("intake_duct_" + sd, [O["duct_" + sd], O["shock_cone_" + sd]])
         spar = [o for o in icarus.objects if o.name.startswith(("spar_front_" + sd, "spar_rear_" + sd))
                 or (o.name.startswith("rib_") and o.name.endswith("_" + sd))]
         # The wing is too thin for separate tank parts: a skin or spar hull would swallow them. As on stock

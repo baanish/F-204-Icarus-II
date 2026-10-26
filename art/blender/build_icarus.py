@@ -77,25 +77,27 @@ PARAMS = {
     "area_rule": {"centre_s": 10.8, "half_length": 2.6, "depth": 0.10},  # smooth-union radius between body, intakes and fillets
     "wing_fillet": {"reach": 0.30, "half_thickness": 0.07},  # beyond the body side, along the wing root
     "probe": {"length": 1.15, "radius": 0.022, "base_radius": 0.07, "base_length": 0.40},
-    # Two cone angles, like the F-104's "double-shock" centre body: a fine tip, then a steeper base. A full cone
-    # sunk into the body side, with a dark bleed slot ring near its base.
-    "shock_cone": {"apex_s": 6.15, "break_s": 6.90, "break_r": 0.132, "base_s": 7.40, "radius": 0.30, "x": 0.58,
-                   "bleed_s": 7.22},
+    # The F-104's centre body, cut back to what shows outside the lip: a fine cone, sunk into the body side, from its
+    # tip to its base just inside the lip, closed there by a short elliptical cap cap metres long. The game does not
+    # simulate the inlet's airflow, so no cone body runs down the duct.
+    "shock_cone": {"apex_s": 6.15, "base_s": 6.90, "radius": 0.132, "cap": 0.10, "x": 0.58},
     # One Y-shaped duct: each intake's branch runs inboard from just inside the lip and merges with its twin into one
     # round duct ahead of the engine face (duct_field). Rows are the left branch's circle, (s, centre x, centre z,
-    # radius). Up to the shock cone's base (7.40) the branch is unchanged round the cone, where the flow area narrows to
-    # the throat (0.168 m2 a side); behind the base it closes in onto that throat, and from its neck at 8.20 (0.377 m2
-    # for both) the area grows on a smoothstep to the engine face's 0.563 m2 at 9.60, widening over the flattened floor
-    # rather than dipping. tools/y_duct_design.py solves the radii for that schedule; propulsion.check holds it.
-    "duct": [(6.86, 0.5150, 0.2200, 0.3860), (7.13, 0.5029, 0.2254, 0.3818), (7.40, 0.4910, 0.2306, 0.3777),
-             (7.50, 0.4775, 0.2338, 0.3720), (7.60, 0.4545, 0.2379, 0.3570), (7.70, 0.4269, 0.2427, 0.3357),
-             (7.80, 0.4000, 0.2480, 0.3113), (7.90, 0.3733, 0.2536, 0.2869), (8.00, 0.3445, 0.2592, 0.2657),
-             (8.10, 0.3160, 0.2648, 0.2506), (8.20, 0.2900, 0.2700, 0.2449), (8.30, 0.2668, 0.2749, 0.2440),
-             (8.40, 0.2451, 0.2797, 0.2467), (8.50, 0.2246, 0.2844, 0.2537), (8.60, 0.2050, 0.2892, 0.2637),
-             (8.70, 0.1868, 0.2941, 0.2762), (8.80, 0.1698, 0.2991, 0.3036), (8.90, 0.1529, 0.3044, 0.3303),
-             (9.00, 0.1350, 0.3100, 0.3533), (9.10, 0.1161, 0.3160, 0.3754), (9.20, 0.0963, 0.3225, 0.3938),
-             (9.30, 0.0750, 0.3293, 0.4108), (9.40, 0.0512, 0.3363, 0.4239), (9.50, 0.0256, 0.3432, 0.4280),
-             (9.60, 0.0000, 0.3500, 0.4217)],
+    # radius). The branch holds the lip's ring past the mouth (6.90), then closes round the shock cone's cap onto a
+    # constant tube by 7.30 (0.337 m2 for both, the old cone-and-diffuser duct's throat), which holds through the
+    # merge and, widening, over the flattened floor, to 9.20; from there it grows on a smoothstep to the engine face's
+    # 0.563 m2 at 9.60.
+    # tools/y_duct_design.py solves the radii for that schedule; propulsion.check holds it.
+    "duct": [(6.86, 0.5150, 0.2200, 0.3860), (6.90, 0.5122, 0.2207, 0.3860), (7.00, 0.5057, 0.2224, 0.3619),
+             (7.10, 0.4988, 0.2240, 0.3088), (7.20, 0.4900, 0.2257, 0.2557), (7.30, 0.4773, 0.2276, 0.2315),
+             (7.40, 0.4606, 0.2300, 0.2316), (7.50, 0.4410, 0.2332, 0.2315), (7.60, 0.4200, 0.2373, 0.2316),
+             (7.70, 0.3954, 0.2422, 0.2316), (7.80, 0.3667, 0.2476, 0.2316), (7.90, 0.3371, 0.2533, 0.2315),
+             (8.00, 0.3100, 0.2591, 0.2316), (8.10, 0.2855, 0.2647, 0.2316), (8.20, 0.2620, 0.2700, 0.2312),
+             (8.30, 0.2400, 0.2749, 0.2293), (8.40, 0.2200, 0.2797, 0.2309), (8.50, 0.2023, 0.2845, 0.2339),
+             (8.60, 0.1863, 0.2892, 0.2374), (8.70, 0.1712, 0.2941, 0.2415), (8.80, 0.1565, 0.2992, 0.2496),
+             (8.90, 0.1413, 0.3044, 0.2607), (9.00, 0.1250, 0.3100, 0.2713), (9.10, 0.1077, 0.3160, 0.2818),
+             (9.20, 0.0896, 0.3225, 0.2896), (9.30, 0.0700, 0.3293, 0.3206), (9.40, 0.0479, 0.3363, 0.3726),
+             (9.50, 0.0240, 0.3432, 0.4122), (9.60, 0.0000, 0.3500, 0.4217)],
     # The fillet radii of the smooth unions (bi.smin): the crotch where the branches meet, and the floor's corners.
     "duct_blend": (0.10, 0.04),
     # Over the main wheels' bay the ducts' undersides are flattened at this height (s, z), their tops kept, so the
@@ -329,10 +331,11 @@ def duct_merge_s(p, grow=0.0):
     return hi
 
 
-def duct_stations(p, s0, s1, n):
-    """n stations from s0 to s1, with every 0.1 m over the ducts' flattened underside (duct_floor) added."""
+def duct_stations(p, s0, s1, n, floor_step=0.1):
+    """n stations from s0 to s1, with every floor_step over the ducts' flattened underside (duct_floor) added."""
     table = p.get("duct_floor") or []
-    extra = [table[0][0] + 0.1 * i for i in range(int((table[-1][0] - table[0][0]) / 0.1) + 1)] if table else []
+    extra = ([table[0][0] + floor_step * i for i in range(int((table[-1][0] - table[0][0]) / floor_step) + 1)]
+             if table else [])
     return sorted(set(round(s, 4) for s in spaced(s0, s1, n) + [s for s in extra if s0 < s < s1]))
 
 

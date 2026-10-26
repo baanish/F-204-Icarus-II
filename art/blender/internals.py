@@ -27,11 +27,19 @@ INTERNALS = {
     # them), and cells in the strakes and outboard wings. No fuel over or around the engine: a leak there is a fire. Each fuselage row: (s0, s1,
     # inset from the skin, z floor, x from, x to). A cell fills the skin section above its floor between its x
     # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds: what they
-    # hold round the F-104-style gear wells and the Y-duct, whose branches merge into one round duct ahead of the engine
-    # face and leave the aft cells the room the two round ducts took (R7's 2,400 kg, trimmed by the wells to 2,320).
-    "design_fuel_kg": 2650,
+    # hold round the F-104-style gear wells and the Y-duct, one constant tube from just behind the lips to the engine
+    # face, with the shock cones cut back to their tips (R7's 2,400 kg, trimmed by the wells to 2,320).
+    "design_fuel_kg": 3013,
     "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct
-    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.215, -9.0, 9.0)},
+    # The fuel cells' mesh, coarse since they show only when a section breaks away: points round each section,
+    # stations every step metres (lip_step within 0.3 m of the intake lip), and the duct cutter that shapes them,
+    # duct_points round each of its rings on duct_stations stations, with floor_step between those over the
+    # flattened floor. Coarser cuts the cells' sections across the lobe's crease into the skin, or the cutter's chords
+    # inside the duct's clearance.
+    "cell_mesh": {"points": 16, "step": 0.4, "lip_step": 0.3,
+                  "duct_points": 16, "duct_stations": 11, "floor_step": 0.3},
+    # The aux cell's floor keeps its coarse section DUCT_CLEARANCE off the store trough (stations.trough_clearance).
+    "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.20, -9.0, 9.0)},
     "fuel_forward_main": {"tank": (5.95, 7.70, 0.04, 0.05, -9.0, 9.0)},
     # The aft cells run on to 9.55, short of the compressor faces at 9.60 (none round the engine); the gear wells
     # cut their lower lobes, as the F-104's main wells lie under its aft centre cell.
@@ -201,16 +209,19 @@ def resample_outline(poly, n):
     return out
 
 
-def duct_cutter(p, clearance):
+def duct_cutter(p, clearance, n=28, count=18, floor_step=0.1):
     """Closed solids around the Y-duct and each shock cone, grown by clearance, to cut out of the fuel cells. The duct's
     is one solid: each half lofted up to the centre plane, the faces on the plane dropped and the halves welded there.
     Two halves overlapping across the plane would share the trunk's wall there, and the exact boolean fails on faces
     that nearly coincide."""
     # A ring just behind where the grown branches merge closes the wedge of fuel between them there, well ahead of
-    # the duct's own crotch.
-    stations = sorted(bi.duct_stations(p, p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 18)
-                      + [round(bi.duct_merge_s(p, clearance) + 0.002, 4)])
-    n = 28  # about the two round ducts' cutters' density, which the fuel cells' triangle cap allows
+    # the duct's own crotch; one on each of the duct's rows up to its tube keeps the loft on its quick close behind
+    # the lip.
+    import propulsion
+
+    stations = sorted(set(bi.duct_stations(p, p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, count, floor_step)
+                          + [round(bi.duct_merge_s(p, clearance) + 0.002, 4)]
+                          + [row[0] for row in p["duct"] if row[0] <= propulsion.DUCT_AREAS["tube_s"][0]]))
     half = [[bi.P(s, x, z) for x, z in bi.duct_ring(p, s, n, clearance, 0.0, closed=True)] for s in stations]
     loop = [(j * n + k, j * n + (k + 1) % n, (j + 1) * n + (k + 1) % n, (j + 1) * n + k)
             for j in range(len(half) - 1) for k in range(n)]
@@ -233,7 +244,8 @@ def duct_cutter(p, clearance):
         r = sc["radius"] + clearance
         cone = bi.loft("cone_cutter_%d" % side,
                        [[bi.P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
-                         for a in [2 * math.pi * k / 32 for k in range(32)]] for s in (sc["apex_s"] - 0.05, sc["base_s"] + 0.05)],
+                         for a in [2 * math.pi * k / 32 for k in range(32)]]
+                        for s in (sc["apex_s"] - 0.05, sc["base_s"] + sc["cap"] + 0.05)],
                        cap_back=True, cap_front=True)
         cutters.append(outward(cone))
     return cutters
@@ -366,12 +378,13 @@ def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
     # Stations every 0.2 m, but every 0.1 m within 0.3 m of the intake lip and either side of it, where the skin
     # changes fastest: a coarser cell bridges straight across a quick change in the skin and pokes through it.
     lip = p["intake"][0][0]
+    mesh = INTERNALS["cell_mesh"]
     stations, s = [s0], s0
     while s < s1 - 1e-6:
-        s = min(s1, s + (0.1 if abs(s - lip) < 0.3 else 0.2))
+        s = min(s1, s + (mesh["lip_step"] if abs(s - lip) < 0.3 else mesh["step"]))
         stations.append(round(s, 4))
     stations = sorted(set(stations) | {x for x in (lip - 0.02, lip + 0.06) if s0 < x < s1})  # clear of the lip's step
-    rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=32) for s in stations]
+    rings = [ring_at(p, s, inset, floor, x_lo, x_hi, count=mesh["points"]) for s in stations]
     obj = bi.finish(outward(bi.loft(name, rings, cap_back=True, cap_front=True)), mat, smooth=False)
     subtract(obj, cutters)  # the cells are separate from the intake ducts, with clearance for the duct walls
     # Boolean n-gons cast broken Workbench stencil shadows through the skin. Match the export's triangulation.
@@ -533,7 +546,8 @@ def _build(p, mats):
         parts.append(tag(bi.finish(obj, mats["gear_bay"], smooth=False), "gear_bay", "fuselage"))
         bpy.data.objects.remove(inner, do_unlink=True)
 
-    cutters = duct_cutter(p, I["duct_clearance"])
+    mesh = I["cell_mesh"]
+    cutters = duct_cutter(p, I["duct_clearance"], mesh["duct_points"], mesh["duct_stations"], mesh["floor_step"])
     wing_cut = [grown(bpy.data.objects[n], 0.015) for n in ("wing_L", "wing_R")]  # wing roots buried in the body
     g = I["gear_cut"]
     # The main wells as one solid, their keel boxes as one box across the centre line: two wells cut one after the

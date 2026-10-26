@@ -84,7 +84,7 @@ def capture():
     stations = bi.fuselage_stations(p)
     ahead = bi.blended_ring(p, stations[stations.index(lip) - 1])
     sc = p["shock_cone"]
-    cone_r = sc["break_r"] * (lip - sc["apex_s"]) / (sc["break_s"] - sc["apex_s"])
+    cone_r = propulsion.cone_radius(sc, lip)
     seen = annulus = 0
     x = cx - r
     while x < cx + r:
@@ -256,7 +256,6 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     bi.build_cached()
     stations = [round(6.90 + 0.05 * i, 3) for i in range(51)]
-    stations = [s for s in stations if not 7.20 <= s <= 7.27]  # the bleed band's loose ring
     report = {"capture_per_side": capture(), "sections": duct_areas(stations), "fuel": fuel(),
               "duct_to_gear": duct_to_gear(), "triangles": triangles()}
     e = internals.INTERNALS["engine"]

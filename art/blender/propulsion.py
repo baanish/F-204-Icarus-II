@@ -57,12 +57,11 @@ ACTUATION = {
 }
 # The Y-duct's mesh: rings from the lip to the engine face, and points along each half's wall (bi.duct_ring).
 DUCT = {"stations": 35, "points": 33}
-# The Y-duct's flow areas, both sides, m2 (check_duct_areas): at the cones' bases, the neck the duct closes onto
-# behind them, and the engine face (internals.INTERNALS engine radius 0.46 less 8%, 0.563 m2).
-DUCT_AREAS = {"throat": 0.3368, "neck": 0.3770, "face": 0.5628, "neck_s": 8.20}
-# The reference establishes the cone's undercut but gives no dimensioned section; this metre value is a silhouette
-# assumption, not a measured F-104 dimension. The owner had the splitter plate and stand-off removed.
-MOUTH = {"undercut": 0.03}
+# The Y-duct's flow area, both sides, m2 (check_duct_areas): one constant tube from tube_s's first station to its
+# second, the old cone-and-diffuser duct's throat, so the duct is nowhere narrower than it was; then a short blend to
+# the engine face (internals.INTERNALS engine radius 0.46 less 8%, 0.563 m2) at face_s. merge_s: the branches meet
+# no further aft than the cone-and-diffuser duct's did.
+DUCT_AREAS = {"tube": 0.337, "face": 0.5628, "tube_s": (7.30, 9.20), "face_s": 9.60, "merge_s": 8.29}
 # Review close-ups: name -> (camera location, look-at point), Blender axes.
 CLOSEUPS = {
     "intake": (Vector((3.2, -6.6, 1.0)), Vector((0.8, -1.2, 0.2))),
@@ -72,7 +71,7 @@ CLOSEUPS = {
 
 def build(p, mats):
     parts = build_nozzle(p, mats)
-    parts += build_shock_cones(p, mats["body"], mats["mechanical"])
+    parts += build_shock_cones(p, mats["body"])
     parts += build_ducts(p, mats)
     parts += build_mouth(p, mats)
     parts += compressor_faces(p, mats)
@@ -109,11 +108,7 @@ def duct_area(p, s, step=0.004):
     """The Y-duct's flow area at s, both sides: inside the wall (bi.duct_field), outside the shock cones."""
     sc = p["shock_cone"]
     zc = p["intake"][0][2]
-    cone = 0.0
-    if sc["apex_s"] < s <= sc["base_s"]:
-        a, b = (sc["apex_s"], sc["break_s"]) if s <= sc["break_s"] else (sc["break_s"], sc["base_s"])
-        r0, r1 = (0.0, sc["break_r"]) if s <= sc["break_s"] else (sc["break_r"], sc["radius"])
-        cone = r0 + (r1 - r0) * (s - a) / (b - a)
+    cone = cone_radius(sc, s)
     field, (cx, cz, r) = bi.duct_field(p, s)
     reach = r + 0.1
     count = sum(1 for i in range(int((cx + reach) / step)) for j in range(int(2 * reach / step))
@@ -123,24 +118,29 @@ def duct_area(p, s, step=0.004):
 
 
 def check_duct_areas(p):
-    """The Y-duct reads as an inlet and a subsonic diffuser: the flow area narrows round the shock cones to the
-    throat at their bases, the duct closes in behind them onto a neck no smaller than that throat, and from the neck
-    to the engine face the area never shrinks, growing to the face's. Pinned to the values build_icarus.PARAMS["duct"]
-    was solved for (tools/y_duct_design.py), 5 cm2 either way: the grid's sampling error is under 1 cm2."""
-    throat, neck, face = duct_area(p, 7.40), duct_area(p, DUCT_AREAS["neck_s"]), duct_area(p, p["duct"][-1][0])
-    stations = [DUCT_AREAS["neck_s"] + 0.05 * i for i in range(int((p["duct"][-1][0] - DUCT_AREAS["neck_s"]) / 0.05) + 1)]
-    schedule = [duct_area(p, s) for s in stations]
-    problems = ["area falls %.4f m2 from s %.2f" % (a - b, s) for s, a, b in zip(stations[1:], schedule, schedule[1:])
-                if b < a - 0.002]
-    for name, got in (("throat", throat), ("neck", neck), ("face", face)):
-        if abs(got - DUCT_AREAS[name]) > 0.0005:
-            problems.append("%s area %.4f m2, pinned %.4f" % (name, got, DUCT_AREAS[name]))
-    if neck < throat:
-        problems.append("neck %.4f m2 narrower than the throat %.4f" % (neck, throat))
+    """The Y-duct is one constant tube: from just inside the lips, through the merge, to the blend before the engine
+    face, the flow area stays at DUCT_AREAS tube, with no bulge and no waist; over the blend it never shrinks, and it
+    ends at the face's area. Pinned to the values build_icarus.PARAMS["duct"] was solved for (tools/y_duct_design.py),
+    the tube 20 cm2 either way (its rows' interpolation between solved stations), the face 5 cm2: the grid's sampling
+    error is under 1 cm2."""
+    (s0, s1), s_face = DUCT_AREAS["tube_s"], DUCT_AREAS["face_s"]
+    if abs(p["duct"][-1][0] - s_face) > 1e-9:
+        raise ValueError("propulsion: the Y-duct must end at the engine face's s %.2f" % s_face)
+    tube = [(s, duct_area(p, s)) for s in [s0 + 0.05 * i for i in range(int(round((s1 - s0) / 0.05)) + 1)]]
+    blend = [(s, duct_area(p, s)) for s in [s1 + 0.05 * i for i in range(int(round((s_face - s1) / 0.05)) + 1)]]
+    problems = ["tube area %.4f m2 at s %.2f, pinned %.4f" % (a, s, DUCT_AREAS["tube"]) for s, a in tube
+                if abs(a - DUCT_AREAS["tube"]) > 0.002]
+    problems += ["area falls %.4f m2 from s %.2f" % (a - b, s) for (s, a), (_, b) in zip(blend, blend[1:])
+                 if b < a - 0.002]
+    if abs(blend[-1][1] - DUCT_AREAS["face"]) > 0.0005:
+        problems.append("face area %.4f m2, pinned %.4f" % (blend[-1][1], DUCT_AREAS["face"]))
+    merge = bi.duct_merge_s(p)
+    if merge > DUCT_AREAS["merge_s"]:
+        problems.append("the branches merge at s %.3f, aft of %.2f" % (merge, DUCT_AREAS["merge_s"]))
     if problems:
         raise ValueError("propulsion: Y-duct area schedule: " + "; ".join(problems))
-    return ("Y-duct flow area %.3f m2 at the cones' throat, %.3f at the neck (s %.2f), rising to %.3f at the face; "
-            "the branches merge at s %.3f" % (throat, neck, DUCT_AREAS["neck_s"], face, bi.duct_merge_s(p)))
+    return ("Y-duct flow area %.3f to %.3f m2 from s %.2f to %.2f, rising to %.3f at the face; the branches merge at "
+            "s %.3f" % (min(a for _, a in tube), max(a for _, a in tube), s0, s1, blend[-1][1], merge))
 
 
 def check_actuation():
@@ -268,42 +268,39 @@ def compressor_faces(p, mats):
     return parts
 
 
-def build_shock_cones(p, mat, duct_mat):
+def cone_radius(sc, s):
+    """The shock cone's radius at s: the cone from its apex to its base, then the elliptical cap; 0 outside both."""
+    if sc["apex_s"] < s <= sc["base_s"]:
+        return sc["radius"] * (s - sc["apex_s"]) / (sc["base_s"] - sc["apex_s"])
+    t = (s - sc["base_s"]) / sc["cap"]
+    return sc["radius"] * math.sqrt(1 - t * t) if 0 < t < 1 else 0.0
+
+
+def build_shock_cones(p, mat):
+    """Each shock cone from its tip to its cap's point, the cap's rings evenly round its ellipse."""
     sc = p["shock_cone"]
     zc = p["intake"][0][2]
+    n = 48
+    stations = [sc["apex_s"] + (sc["base_s"] - sc["apex_s"]) * i / 6 for i in range(1, 7)]
+    stations += [sc["base_s"] + sc["cap"] * math.sin(math.pi / 2 * i / 5) for i in range(1, 5)]
+    tail = sc["base_s"] + sc["cap"]
+    faces = [(0, 1 + (k + 1) % n, 1 + k) for k in range(n)]
+    faces += [(1 + j * n + k, 1 + j * n + (k + 1) % n, 1 + (j + 1) * n + (k + 1) % n, 1 + (j + 1) * n + k)
+              for j in range(len(stations) - 1) for k in range(n)]
+    last = 1 + (len(stations) - 1) * n
+    faces += [(last + k, last + (k + 1) % n, last + n) for k in range(n)]
     parts = []
     for side, name in ((1, "shock_cone_L"), (-1, "shock_cone_R")):
-        profile = [(sc["apex_s"] + (sc["break_s"] - sc["apex_s"]) * i / 6, sc["break_r"] * i / 6) for i in range(1, 7)]
-        profile += [(sc["break_s"] + (sc["base_s"] - sc["break_s"]) * i / 5,
-                     sc["break_r"] + (sc["radius"] - sc["break_r"]) * i / 5) for i in range(1, 6)]
-        # The bleed is a real recess, with the rear ramp overhanging its floor.
-        radius = lambda s: sc["break_r"] + (sc["radius"] - sc["break_r"]) * (s - sc["break_s"]) / (sc["base_s"] - sc["break_s"])
-        a, b = sc["bleed_s"], sc["bleed_s"] + 0.035
-        profile = [row for row in profile if not a <= row[0] <= b]
-        profile += [(a, radius(a)), (a, radius(a) - MOUTH["undercut"]),
-                    (b, radius(b) - MOUTH["undercut"]), (b, radius(b))]
-        profile.sort(key=lambda row: row[0])
-        rings = [[bi.P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
-                  for a in [2 * math.pi * k / 48 for k in range(48)]] for s, r in profile]
-        cone = bi.finish(bi.loft(name, rings, tip_front=bi.P(sc["apex_s"], side * sc["x"], zc), cap_back=True), mat)
-        parts.append(cone)
-        cone.data.materials.append(duct_mat)
+        verts = [bi.P(sc["apex_s"], side * sc["x"], zc)]
+        for s in stations:
+            r = cone_radius(sc, s)
+            verts += [bi.P(s, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
+                      for a in [2 * math.pi * k / n for k in range(n)]]
+        cone = bi.finish(bi.mesh_object(name, verts + [bi.P(tail, side * sc["x"], zc)], faces), mat)
         import parts as part_tree
 
         part_tree.face_outward(cone)
-        for poly in cone.data.polygons:
-            if a - 1e-5 <= poly.center.y + bi.S0 <= b + 1e-5:
-                poly.material_index = 1
-        r0 = radius(a) - MOUTH["undercut"] + 0.001
-        band = []
-        for ds in (0.0, 0.035):
-            r = r0 + (sc["radius"] - sc["break_r"]) * ds / (sc["base_s"] - sc["break_s"]) + 0.003
-            band.append([bi.P(sc["bleed_s"] + ds, side * (sc["x"] + r * math.cos(a)), zc + r * math.sin(a))
-                         for a in [2 * math.pi * k / 48 for k in range(48)]])
-        slot = bi.loft(name + "_bleed", band)
-        if side < 0:
-            slot.data.flip_normals()
-        parts.append(bi.finish(slot, duct_mat))
+        parts.append(cone)
     return parts
 
 

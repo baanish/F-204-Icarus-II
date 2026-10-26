@@ -78,16 +78,12 @@ def render(out):
 
 
 def section_data():
-    p, m = bi.PARAMS, propulsion.MOUTH
+    p = bi.PARAMS
     s, cx, cz, radius = p["duct"][0]
     sc = p["shock_cone"]
-    at = lambda t: (sc["break_r"] * (t - sc["apex_s"]) / (sc["break_s"] - sc["apex_s"]) if t <= sc["break_s"]
-                    else sc["break_r"] + (sc["radius"] - sc["break_r"]) * (t - sc["break_s"]) / (sc["base_s"] - sc["break_s"]))
-    a, b = sc["bleed_s"], sc["bleed_s"] + 0.035
-    return {"mouth": m, "duct": [cx, cz, radius], "cone_x": sc["x"], "cone_radius_at_lip": at(6.85),
-            "cone_profile": [[sc["apex_s"], 0], [sc["break_s"], sc["break_r"]], [a, at(a)],
-                             [a, at(a) - m["undercut"]], [b, at(b) - m["undercut"]], [b, at(b)],
-                             [sc["base_s"], sc["radius"]]],
+    profile = [sc["apex_s"] + (sc["base_s"] + sc["cap"] - sc["apex_s"]) * i / 40 for i in range(41)]
+    return {"duct": [cx, cz, radius], "cone_x": sc["x"], "cone_radius_at_lip": propulsion.cone_radius(sc, 6.85),
+            "cone_profile": [[t, propulsion.cone_radius(sc, t)] for t in profile],
             "lip_edge_x_z": [[v.x, v.z] for v in propulsion.lip_edge(p, bpy.data.objects["skin_mid_L"])]}
 
 

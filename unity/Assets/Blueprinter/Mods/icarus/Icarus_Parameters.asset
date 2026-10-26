@@ -939,7 +939,7 @@ MonoBehaviour:
   turningRadius: 2500
   cornerSpeed: 250
   approachSpeed: 85
-  landingSpeed: 96.36461
+  landingSpeed: 97.46668
   shortLandingSpeed: 75
   cruiseThrottle: 0.85
   minimumRadarAlt: 50
