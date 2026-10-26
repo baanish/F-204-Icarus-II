@@ -26,10 +26,10 @@ INTERNALS = {
     # main tank, three connected aft cells (the centre one between the intake ducts, the side ones wrapping round
     # them), and cells in the strakes and outboard wings. No fuel over or around the engine: a leak there is a fire. Each fuselage row: (s0, s1,
     # inset from the skin, z floor, x from, x to). A cell fills the skin section above its floor between its x
-    # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds: R7's 2,400 kg
-    # trimmed to what the cells hold round the F-104-style gear wells (the aft cells' run on to the engine face gives
-    # back about half of what the wells take).
-    "design_fuel_kg": 2320,
+    # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds: what they
+    # hold round the F-104-style gear wells and the Y-duct, whose branches merge into one round duct ahead of the engine
+    # face and leave the aft cells the room the two round ducts took (R7's 2,400 kg, trimmed by the wells to 2,320).
+    "design_fuel_kg": 2650,
     "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct
     "fuel_aux": {"tank": (5.20, 5.90, 0.04, -0.215, -9.0, 9.0)},
     "fuel_forward_main": {"tank": (5.95, 7.70, 0.04, 0.05, -9.0, 9.0)},
@@ -97,12 +97,13 @@ def bay_boxes(name, side=1):
     return boxes if side > 0 else [(s0, s1, -x1, -x0, z0, z1) for s0, s1, x0, x1, z0, z1 in boxes]
 
 
-def boxes_solid(name, boxes):
+def boxes_solid(name, boxes, steps=None):
     """One closed solid, the union of axis-aligned boxes (s from, s to, x from, x to, z from, z to). Each box is grown
-    by its own fraction of a millimetre, so no two share a face plane: the exact union leaves coplanar faces
-    non-manifold, and a cutter that is not closed corrupts what it cuts."""
+    by its own fraction of a millimetre (steps: each box's, by default its index), so no two share a face plane: the
+    exact union leaves coplanar faces non-manifold, and a cutter that is not closed corrupts what it cuts. Boxes that
+    never touch may share a step."""
     objs = [outward(box(name, s0 - e, s1 + e, (x1 - x0) / 2 + e, z0 - e, z1 + e, x=(x0 + x1) / 2))
-            for i, (s0, s1, x0, x1, z0, z1) in enumerate(boxes) for e in [0.0003 * (i + 1)]]
+            for i, (s0, s1, x0, x1, z0, z1) in enumerate(boxes) for e in [0.0003 * ((steps or range(len(boxes)))[i] + 1)]]
     first = objs[0]
     for other in objs[1:]:
         mod = first.modifiers.new("union", "BOOLEAN")
@@ -201,13 +202,32 @@ def resample_outline(poly, n):
 
 
 def duct_cutter(p, clearance):
-    """Closed solids around each intake duct and its shock cone, grown by clearance, to cut out of the fuel cells."""
-    rows = bi.resample(p["duct"], bi.duct_stations(p, p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 14))
-    cutters = []
+    """Closed solids around the Y-duct and each shock cone, grown by clearance, to cut out of the fuel cells. The duct's
+    is one solid: each half lofted up to the centre plane, the faces on the plane dropped and the halves welded there.
+    Two halves overlapping across the plane would share the trunk's wall there, and the exact boolean fails on faces
+    that nearly coincide."""
+    # A ring just behind where the grown branches merge closes the wedge of fuel between them there, well ahead of
+    # the duct's own crotch.
+    stations = sorted(bi.duct_stations(p, p["duct"][0][0] - 0.3, p["duct"][-1][0] + 0.3, 18)
+                      + [round(bi.duct_merge_s(p, clearance) + 0.002, 4)])
+    n = 28  # about the two round ducts' cutters' density, which the fuel cells' triangle cap allows
+    half = [[bi.P(s, x, z) for x, z in bi.duct_ring(p, s, n, clearance, 0.0, closed=True)] for s in stations]
+    loop = [(j * n + k, j * n + (k + 1) % n, (j + 1) * n + (k + 1) % n, (j + 1) * n + k)
+            for j in range(len(half) - 1) for k in range(n)]
+    loop += [tuple(range(n))[::-1], tuple((len(half) - 1) * n + k for k in range(n))]
+    verts = [v for ring in half for v in ring]
+    faces = loop + [tuple(len(verts) + i for i in f[::-1]) for f in loop]  # the right half, mirrored
+    duct = bi.mesh_object("duct_cutter", verts + [Vector((-v.x, v.y, v.z)) for v in verts], faces)
+    bm = bmesh.new()
+    bm.from_mesh(duct.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if all(abs(v.co.x) < 1e-9 for v in f.verts)], context="FACES")
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-7)
+    if any(not e.is_manifold for e in bm.edges):
+        raise ValueError("internals: the Y-duct's cutter is not closed")
+    bm.to_mesh(duct.data)
+    bm.free()
+    cutters = [outward(duct)]
     for side in (1, -1):
-        rings = [[bi.P(s, side * x, z) for x, z in bi.duct_section(p, s, cx, cz, r, grow=clearance)]
-                 for s, cx, cz, r in rows]
-        cutters.append(outward(bi.loft("duct_cutter_%d" % side, rings, cap_back=True, cap_front=True)))
         sc = p["shock_cone"]
         zc = p["intake"][0][2]
         r = sc["radius"] + clearance
@@ -516,9 +536,17 @@ def _build(p, mats):
     cutters = duct_cutter(p, I["duct_clearance"])
     wing_cut = [grown(bpy.data.objects[n], 0.015) for n in ("wing_L", "wing_R")]  # wing roots buried in the body
     g = I["gear_cut"]
-    wells = [boxes_solid("well_cut", [(s0 - g, s1 + g, x0 - g, x1 + g, z0 - g, z1 + g)
-                                      for s0, s1, x0, x1, z0, z1 in bay_boxes(name, side)])
-             for name, side in (("nose_gear_bay", 1), ("main_gear_bay", 1), ("main_gear_bay", -1))]
+    # The main wells as one solid, their keel boxes as one box across the centre line: two wells cut one after the
+    # other would each leave a face on the same plane over the keel, where the Y-duct's cutter meets them, and the
+    # exact boolean fails there. Each mirrored pair of boxes shares a step; they never touch.
+    grow = lambda boxes: [(s0 - g, s1 + g, x0 - g, x1 + g, z0 - g, z1 + g) for s0, s1, x0, x1, z0, z1 in boxes]
+    main = bay_boxes("main_gear_bay")
+    if main[0][2] != 0.0 or any(b[2] <= 0.0 for b in main[1:]):
+        raise ValueError("internals: only the main well's first box may reach the keel")
+    keel = (*main[0][:2], -main[0][3], main[0][3], *main[0][4:])
+    wells = [boxes_solid("well_cut", grow(bay_boxes("nose_gear_bay"))),
+             boxes_solid("well_cut", grow([keel] + main[1:] + bay_boxes("main_gear_bay", -1)[1:]),
+                         [0] + list(range(1, len(main))) * 2)]
     for name in ("fuel_aux", "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R"):
         s0, s1, inset, floor, x_lo, x_hi = I[name]["tank"]
         obj = tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mats["fuel_tank"], cutters + wing_cut + wells)

@@ -37,10 +37,10 @@ namespace Icarus.Editor
 
         public const string JsonKey = "baanish_icarus";
         private const string RootPart = "fuselage_mid";
-        // .internal research R7: the first-cut empty and internal fuel masses, which the export's mass_kg and fuel_kg
-        // props must add up to; the fuel trimmed from R7's 2,400 kg to what the cells hold round the gear wells
-        // (internals.py design_fuel_kg).
-        private const float EmptyMass = 5800f, FuelMass = 2320f;
+        // .internal research R7: the first-cut empty mass, which the export's mass_kg props must add up to, and the
+        // internal fuel the fuel_kg props must: what the cells hold round the gear wells and the Y-duct (internals.py
+        // design_fuel_kg).
+        private const float EmptyMass = 5800f, FuelMass = 2650f;
 
         private static string RepoRoot => Directory.GetParent(Application.dataPath).Parent.FullName;
         private static string ExportFolder => Path.Combine(RepoRoot, "art", "export");

@@ -81,9 +81,23 @@ PARAMS = {
     # sunk into the body side, with a dark bleed slot ring near its base.
     "shock_cone": {"apex_s": 6.15, "break_s": 6.90, "break_r": 0.132, "base_s": 7.40, "radius": 0.30, "x": 0.58,
                    "bleed_s": 7.22},
-    # The duct runs from just inside the lip to the engine face, narrowing and turning toward the centreline:
-    # (s, centre x, centre z, radius).
-    "duct": [(6.86, 0.515, 0.22, 0.386), (7.80, 0.47, 0.24, 0.37), (8.80, 0.38, 0.28, 0.33), (9.60, 0.30, 0.31, 0.30)],
+    # One Y-shaped duct: each intake's branch runs inboard from just inside the lip and merges with its twin into one
+    # round duct ahead of the engine face (duct_field). Rows are the left branch's circle, (s, centre x, centre z,
+    # radius). Up to the shock cone's base (7.40) the branch is unchanged round the cone, where the flow area narrows to
+    # the throat (0.168 m2 a side); behind the base it closes in onto that throat, and from its neck at 8.20 (0.377 m2
+    # for both) the area grows on a smoothstep to the engine face's 0.563 m2 at 9.60, widening over the flattened floor
+    # rather than dipping. tools/y_duct_design.py solves the radii for that schedule; propulsion.check holds it.
+    "duct": [(6.86, 0.5150, 0.2200, 0.3860), (7.13, 0.5029, 0.2254, 0.3818), (7.40, 0.4910, 0.2306, 0.3777),
+             (7.50, 0.4775, 0.2338, 0.3720), (7.60, 0.4545, 0.2379, 0.3570), (7.70, 0.4269, 0.2427, 0.3357),
+             (7.80, 0.4000, 0.2480, 0.3113), (7.90, 0.3733, 0.2536, 0.2869), (8.00, 0.3445, 0.2592, 0.2657),
+             (8.10, 0.3160, 0.2648, 0.2506), (8.20, 0.2900, 0.2700, 0.2449), (8.30, 0.2668, 0.2749, 0.2440),
+             (8.40, 0.2451, 0.2797, 0.2467), (8.50, 0.2246, 0.2844, 0.2537), (8.60, 0.2050, 0.2892, 0.2637),
+             (8.70, 0.1868, 0.2941, 0.2762), (8.80, 0.1698, 0.2991, 0.3036), (8.90, 0.1529, 0.3044, 0.3303),
+             (9.00, 0.1350, 0.3100, 0.3533), (9.10, 0.1161, 0.3160, 0.3754), (9.20, 0.0963, 0.3225, 0.3938),
+             (9.30, 0.0750, 0.3293, 0.4108), (9.40, 0.0512, 0.3363, 0.4239), (9.50, 0.0256, 0.3432, 0.4280),
+             (9.60, 0.0000, 0.3500, 0.4217)],
+    # The fillet radii of the smooth unions (bi.smin): the crotch where the branches meet, and the floor's corners.
+    "duct_blend": (0.10, 0.04),
     # Over the main wheels' bay the ducts' undersides are flattened at this height (s, z), their tops kept, so the
     # two flat tyres lie side by side beneath them (gear.GEAR["main"]); outside the table's ends, and where the floor
     # is below a duct's bottom, the section stays round. The owner's call, over raising the ducts into the fuel.
@@ -228,19 +242,91 @@ def pchip(xs, ys, x):
     return h00 * ys[i] + h10 * h[i] * m[i] + h01 * ys[i + 1] + h11 * h[i] * m[i + 1]
 
 
-def duct_section(p, s, cx, cz, r, n=32, grow=0.0):
-    """A duct's section at s, left side (x outboard): a circle of radius r + grow round (cx, cz), its underside
-    flattened at PARAMS duct_floor less grow, from the bottom of the ring round."""
-    floor = None
+def duct_field(p, s, grow=0.0):
+    """The Y-duct's section at s as a field, negative inside, and the left branch's (centre x, centre z, radius): that
+    branch's circle smooth-unioned with its mirror over PARAMS duct_blend's crotch radius, so the two meet in a filleted
+    crotch and run on as one round duct, the underside lifted onto duct_floor with its floor fillet. grow pushes the
+    wall out."""
+    _, cx, cz, r = resample(p["duct"], [s])[0]
+    crotch, fillet = p["duct_blend"]
     table = p.get("duct_floor")
-    if table and table[0][0] < s < table[-1][0]:
-        floor = pchip([q[0] for q in table], [q[1] for q in table], s) - grow
-    pts = []
-    for k in range(n):
-        a = 2 * math.pi * k / n
-        x, z = cx + (r + grow) * math.cos(a), cz + (r + grow) * math.sin(a)
-        pts.append((x, max(z, floor) if floor is not None else z))
-    return pts
+    floor = pchip([q[0] for q in table], [q[1] for q in table], s) if table and table[0][0] < s < table[-1][0] else None
+
+    def field(x, z):
+        d = smin(math.hypot(x - cx, z - cz) - r, math.hypot(x + cx, z - cz) - r, crotch)
+        if floor is not None:
+            d = -smin(-d, z - floor, fillet)
+        return d - grow
+
+    return field, (cx, cz, r)
+
+
+def duct_exit(field, origin, angle, clip_x):
+    """Along the ray at angle from origin, inside the field, the first point on its wall or on the plane x = clip_x:
+    (point, whether the plane came first)."""
+    (ox, oz), dx, dz = origin, math.cos(angle), math.sin(angle)
+    limit = (clip_x - ox) / dx if dx < -1e-9 else math.inf
+    t = 0.0
+    while True:
+        t1 = min(t + 0.01, limit)
+        if field(ox + dx * t1, oz + dz * t1) > 0:
+            for _ in range(40):
+                mid = (t + t1) / 2
+                t, t1 = (t, mid) if field(ox + dx * mid, oz + dz * mid) > 0 else (mid, t1)
+            return (ox + dx * t1, oz + dz * t1), False
+        if t1 >= limit:
+            return (clip_x, oz + dz * limit), True
+        if t1 > 2.0:
+            raise ValueError("duct section at angle %.3f never closes" % angle)
+        t = t1
+
+
+def duct_ring(p, s, n, grow=0.0, clip_x=0.0, closed=False):
+    """The left half of the Y-duct's wall at s, n (x, z) points evenly along it round the outboard side, from where it
+    meets the plane x = clip_x above to where it meets it below; while the branches are apart, the whole loop from its
+    innermost point back to it. Rays from inside the branch find the wall, so every section is star-shaped from there.
+    closed (a cutter's outline): the last n // 8 points close it up the plane from the bottom corner to the top one,
+    the same points on every ring, so a loft's faces on the plane lie flat in it; while the branches are apart they
+    all sit on the loop's innermost point, for the loft to weld."""
+    field, (cx, cz, r) = duct_field(p, s, grow)
+    origin = (max(cx, 0.35 * r), cz)  # inside the branch, clear of the centre line where the trunk is one round duct
+    merged = duct_exit(field, origin, math.pi, clip_x)[1]
+
+    def crossing(free, cut):  # the angle between a ray that meets the wall and one that meets the plane
+        for _ in range(40):
+            mid = (free + cut) / 2
+            free, cut = (free, mid) if duct_exit(field, origin, mid, clip_x)[1] else (mid, cut)
+        return cut
+
+    top, bottom = (crossing(math.pi / 2, math.pi), crossing(-math.pi / 2, -math.pi)) if merged else (math.pi, -math.pi)
+    dense = [duct_exit(field, origin, top + (bottom - top) * i / 480, clip_x)[0] for i in range(481)]
+    if not merged:
+        dense[-1] = dense[0]
+    plane = n // 8 if closed else 0
+    m = n - plane
+    lengths = [math.dist(a, b) for a, b in zip(dense, dense[1:])]
+    total, out, i, run = sum(lengths), [dense[0]], 0, 0.0
+    for k in range(1, m - 1):
+        target = total * k / (m - 1)
+        while run + lengths[i] < target:
+            run += lengths[i]
+            i += 1
+        t = (target - run) / lengths[i]
+        out.append(tuple(a + (b - a) * t for a, b in zip(dense[i], dense[i + 1])))
+    out.append(dense[-1])
+    (_, z0), (_, z1) = dense[-1], dense[0]
+    return out + [(dense[0][0], z0 + (z1 - z0) * k / (plane + 1)) for k in range(1, plane + 1)]
+
+
+def duct_merge_s(p, grow=0.0):
+    """The station of the Y-duct's crotch, where the branches (grown by grow) first meet on the centre line."""
+    def merged(s):
+        field, (_, cz, _) = duct_field(p, s, grow)
+        return field(0.0, cz) <= 0
+    lo, hi = p["duct"][0][0], p["duct"][-1][0]
+    for _ in range(30):
+        lo, hi = (lo, (lo + hi) / 2) if merged((lo + hi) / 2) else ((lo + hi) / 2, hi)
+    return hi
 
 
 def duct_stations(p, s0, s1, n):

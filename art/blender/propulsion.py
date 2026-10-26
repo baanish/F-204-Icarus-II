@@ -55,6 +55,11 @@ ACTUATION = {
     "vector_deg": 4.0,
     "link_error": 0.004,  # the most a link may miss its clevis eye: the rigid ring fits 16 petals by least squares
 }
+# The Y-duct's mesh: rings from the lip to the engine face, and points along each half's wall (bi.duct_ring).
+DUCT = {"stations": 35, "points": 33}
+# The Y-duct's flow areas, both sides, m2 (check_duct_areas): at the cones' bases, the neck the duct closes onto
+# behind them, and the engine face (internals.INTERNALS engine radius 0.46 less 8%, 0.563 m2).
+DUCT_AREAS = {"throat": 0.3368, "neck": 0.3770, "face": 0.5628, "neck_s": 8.20}
 # The reference establishes the cone's undercut but gives no dimensioned section; this metre value is a silhouette
 # assumption, not a measured F-104 dimension. The owner had the splitter plate and stand-off removed.
 MOUTH = {"undercut": 0.03}
@@ -95,8 +100,47 @@ def check(icarus):
         if abs(min(ys)) > 1e-6 or abs(max(ys) - bi.PARAMS["nozzle"]["petal_length"]) > 1e-6:
             raise ValueError("propulsion: petal length changed " + vis.name)
     actuation = check_actuation()
-    print("propulsion check PASS: 32 X hinges with skin/trim visuals; " + actuation + "; " + ", ".join(
+    areas = check_duct_areas(bi.PARAMS)
+    print("propulsion check PASS: 32 X hinges with skin/trim visuals; " + actuation + "; " + areas + "; " + ", ".join(
         "%s %d/%d triangles" % (key, budget.measure(icarus, item), item["cap"]) for key, item in BUDGET.items()))
+
+
+def duct_area(p, s, step=0.004):
+    """The Y-duct's flow area at s, both sides: inside the wall (bi.duct_field), outside the shock cones."""
+    sc = p["shock_cone"]
+    zc = p["intake"][0][2]
+    cone = 0.0
+    if sc["apex_s"] < s <= sc["base_s"]:
+        a, b = (sc["apex_s"], sc["break_s"]) if s <= sc["break_s"] else (sc["break_s"], sc["base_s"])
+        r0, r1 = (0.0, sc["break_r"]) if s <= sc["break_s"] else (sc["break_r"], sc["radius"])
+        cone = r0 + (r1 - r0) * (s - a) / (b - a)
+    field, (cx, cz, r) = bi.duct_field(p, s)
+    reach = r + 0.1
+    count = sum(1 for i in range(int((cx + reach) / step)) for j in range(int(2 * reach / step))
+                for x, z in [((i + 0.5) * step, cz - reach + (j + 0.5) * step)]
+                if field(x, z) <= 0 and (x - sc["x"]) ** 2 + (z - zc) ** 2 > cone * cone)
+    return 2 * count * step * step
+
+
+def check_duct_areas(p):
+    """The Y-duct reads as an inlet and a subsonic diffuser: the flow area narrows round the shock cones to the
+    throat at their bases, the duct closes in behind them onto a neck no smaller than that throat, and from the neck
+    to the engine face the area never shrinks, growing to the face's. Pinned to the values build_icarus.PARAMS["duct"]
+    was solved for (tools/y_duct_design.py), 5 cm2 either way: the grid's sampling error is under 1 cm2."""
+    throat, neck, face = duct_area(p, 7.40), duct_area(p, DUCT_AREAS["neck_s"]), duct_area(p, p["duct"][-1][0])
+    stations = [DUCT_AREAS["neck_s"] + 0.05 * i for i in range(int((p["duct"][-1][0] - DUCT_AREAS["neck_s"]) / 0.05) + 1)]
+    schedule = [duct_area(p, s) for s in stations]
+    problems = ["area falls %.4f m2 from s %.2f" % (a - b, s) for s, a, b in zip(stations[1:], schedule, schedule[1:])
+                if b < a - 0.002]
+    for name, got in (("throat", throat), ("neck", neck), ("face", face)):
+        if abs(got - DUCT_AREAS[name]) > 0.0005:
+            problems.append("%s area %.4f m2, pinned %.4f" % (name, got, DUCT_AREAS[name]))
+    if neck < throat:
+        problems.append("neck %.4f m2 narrower than the throat %.4f" % (neck, throat))
+    if problems:
+        raise ValueError("propulsion: Y-duct area schedule: " + "; ".join(problems))
+    return ("Y-duct flow area %.3f m2 at the cones' throat, %.3f at the neck (s %.2f), rising to %.3f at the face; "
+            "the branches merge at s %.3f" % (throat, neck, DUCT_AREAS["neck_s"], face, bi.duct_merge_s(p)))
 
 
 def check_actuation():
@@ -165,13 +209,27 @@ def check_actuation():
 
 
 def build_ducts(p, mats):
-    """Intake ducts, faces pointing inward, from just inside the lip to the compressor face's dark backplate."""
-    rows = bi.resample(p["duct"], bi.duct_stations(p, p["duct"][0][0], p["duct"][-1][0], 16))
+    """The Y-duct, faces pointing inward, from just inside the lip to the compressor face's dark backplate, as two
+    mirrored halves: each intake's branch, and its half of the trunk the branches merge into, open on the centre line
+    where it meets its twin. While the branches are apart each ring is a closed loop, its ends welded."""
+    s0, s1 = p["duct"][0][0], p["duct"][-1][0]
+    stations = bi.spaced(s0, s1, DUCT["stations"])
+    rings = [[(x, s, z) for x, z in bi.duct_ring(p, s, DUCT["points"])] for s in stations]
+    n = DUCT["points"]
+    faces = [(j * n + k, j * n + k + 1, (j + 1) * n + k + 1, (j + 1) * n + k)
+             for j in range(len(rings) - 1) for k in range(n - 1)]
+    faces.append(tuple((len(rings) - 1) * n + k for k in range(n)))  # the backplate, closed along the centre line
     parts = []
     for side, name in ((1, "duct_L"), (-1, "duct_R")):
-        rings = [[bi.P(s, side * x, z) for x, z in bi.duct_section(p, s, cx, cz, r)] for s, cx, cz, r in rows]
-        obj = bi.loft(name, rings, cap_back=True)
-        bi.inward_fix(obj, Vector((side * rows[0][1], rows[0][0] - bi.S0, rows[0][2])))
+        verts = [bi.P(s, side * x, z) for ring in rings for x, s, z in ring]
+        obj = bi.mesh_object(name, verts, faces)
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-7)  # the closed loops' seams
+        bm.to_mesh(obj.data)
+        bm.free()
+        _, cx, cz, _ = p["duct"][1]
+        bi.inward_fix(obj, bi.P(stations[0], side * cx, cz))
         parts.append(bi.finish(obj, mats["mechanical"]))
         obj.data.materials.append(mats["duct"])
         obj.data.polygons[-1].material_index = 1  # the cap at the engine face
@@ -179,22 +237,24 @@ def build_ducts(p, mats):
 
 
 def compressor_faces(p, mats):
-    """In front of each duct's backplate, the engine's compressor face: a spinner and a ring of 14 inlet guide
-    vanes, each set 25 degrees to the duct axis. Trim, joined into the intake duct."""
+    """In front of the trunk's backplate, the engine's compressor face: a spinner and a ring of 14 inlet guide vanes,
+    each set 25 degrees to the duct axis. Trim, its left half joined into intake_duct_L and the mirror into _R: half
+    the spinner and the seven vanes outboard of the centre line, none on it."""
     s, cx, cz, r = p["duct"][-1]
-    spinner = [bi.P(s, cx + 0.085 * math.cos(a), cz + 0.085 * math.sin(a))
-               for a in [2 * math.pi * k / 12 for k in range(12)]] + [bi.P(s - 0.15, cx, cz)]
-    pieces = [(spinner, [(k, (k + 1) % 12, 12) for k in range(12)] + [tuple(range(12))])]
-    floor = min(z for _, z in bi.duct_section(p, s, cx, cz, r))  # the duct's flattened underside, if any
-    for k in range(14):
-        a = 2 * math.pi * (k + 0.5) / 14
+    half = [2 * math.pi * k / 12 for k in range(-3, 4)]  # bottom round the outboard side to the top
+    spinner = [bi.P(s, cx + 0.085 * math.cos(a), cz + 0.085 * math.sin(a)) for a in half] + [bi.P(s - 0.15, cx, cz)]
+    pieces = [(spinner, [(k, k + 1, 7) for k in range(6)] + [tuple(range(7))])]
+    field, _ = bi.duct_field(p, s)
+    for k in (-3, -2, -1, 0, 1, 2, 3):
+        a = 2 * math.pi * k / 14
         radial = Vector((math.cos(a), 0, math.sin(a)))
+        across = Vector((-math.sin(a), 0, math.cos(a)))
         frame = (Matrix.Translation(bi.P(s - 0.035, cx, cz)) @
                  Matrix((Vector((math.sin(a), 0, -math.cos(a))), Vector((0, 1, 0)), radial)).transposed().to_4x4() @
                  Matrix.Rotation(math.radians(25), 4, "Z"))
-        reach = r - 0.004
-        if math.sin(a) < -1e-6:  # a vane below the axis stops 6 mm short of the floor across its 25 mm chord
-            reach = min(reach, (cz - floor - 0.006 - 0.025 * abs(math.cos(a))) / -math.sin(a))
+        # Each vane stops 6 mm short of the wall across its 25 mm chord, the flattened floor included.
+        starts = [(cx + 0.025 * d * across.x, cz + 0.025 * d * across.z) for d in (-1, 0, 1)]
+        reach = min(math.dist(o, bi.duct_exit(field, o, a, -9.0)[0]) for o in starts) - 0.006
         pieces.append(box(Vector((-0.002, -0.025, 0.08)), Vector((0.002, 0.025, reach)), frame))
     verts, faces = joined(pieces)
     parts = []
