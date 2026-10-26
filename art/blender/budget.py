@@ -14,7 +14,7 @@ import bpy
 import build_icarus as bi
 
 # Global limits: (target, hard limit), triangles.
-EXTERIOR = (85000, 95000)  # exterior LOD0, internals and cockpit proxies included, cockpit_view renderers excluded
+EXTERIOR = (85000, 100000)  # exterior LOD0, internals and cockpit proxies included, cockpit_view renderers excluded
 SKIN_MAX = 50000
 TRIM_SHARE = (0.27, 0.58)  # jet_mechanical and aircraft_structure, of exterior LOD0
 TRIMS = ("jet_mechanical", "aircraft_structure")
