@@ -142,6 +142,37 @@ namespace Icarus.Editor
                 vapour.position = AreaCentroid(skin, b.Meshes["wing_skin_" + side].Render);
                 b.Placed.UnionWith(new[] { nav, vortex, vapour });
             }
+            var tailReference = Load<GameObject>(Stock + "GameObject/AttackHelo1_PLACEHOLDER.prefab");
+            var stockTail = tailReference.GetComponentsInChildren<MeshRenderer>(true).Single(r => r.name == "taillight");
+            var stockTailEntry = NavLightEntry(new SerializedObject(tailReference.GetComponent(GameType("NavLights"))), stockTail);
+            var aft = new GameObject("navlight_aft") { layer = b.Root.layer }.transform;
+            aft.SetParent(b.Parts["stabilator"].transform, true);
+            aft.SetPositionAndRotation(b.Blockout.Local("light_nav_aft"), b.Blockout.Rotation("light_nav_aft"));
+            aft.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes["light_nav_aft"].Render;
+            var aftRenderer = aft.gameObject.AddComponent<MeshRenderer>();
+            aftRenderer.sharedMaterial = Load<Material>(Stock + "Material/Matte_black_PLACEHOLDER.mat");
+            var aftEntries = Prop(navLights, "navLights");
+            aftEntries.arraySize++;
+            var aftEntry = aftEntries.GetArrayElementAtIndex(aftEntries.arraySize - 1);
+            aftEntry.FindPropertyRelative("renderer").objectReferenceValue = aftRenderer;
+            aftEntry.FindPropertyRelative("part").objectReferenceValue = b.Part("stabilator");
+            aftEntry.FindPropertyRelative("gear").objectReferenceValue = null;
+            aftEntry.FindPropertyRelative("litMaterial").objectReferenceValue = stockTailEntry.FindPropertyRelative("litMaterial").objectReferenceValue;
+            aftEntry.FindPropertyRelative("controlState").intValue = NavLightEntry(navLights, b.Parts["wing_skin_L"].transform.Find("navlight_L").GetComponent<Renderer>())
+                .FindPropertyRelative("controlState").intValue;
+            var stockTailObjects = stockTailEntry.FindPropertyRelative("objects");
+            var aftObjects = aftEntry.FindPropertyRelative("objects");
+            aftObjects.arraySize = stockTailObjects.arraySize;
+            for (var i = 0; i < aftObjects.arraySize; i++)
+            {
+                var effect = Object.Instantiate((GameObject)stockTailObjects.GetArrayElementAtIndex(i).objectReferenceValue, aft);
+                effect.transform.localPosition = new Vector3(0f, 0f, -0.04f);
+                effect.transform.localRotation = Quaternion.identity;
+                aftObjects.GetArrayElementAtIndex(i).objectReferenceValue = effect;
+            }
+            b.Visuals["light_nav_aft"] = aft;
+            b.Placed.Add(aft);
+            lights.Add("navlight_aft on stabilator with stock white tail-lamp switching");
             var landingLight = root.Find("gearlight_F") ?? throw new MissingReferenceException("rescued gearlight_F");
             landingLight.SetParent(FindDeep(b.Root.transform, "gear_leg_N_hinge"), true);
             landingLight.SetPositionAndRotation(b.Blockout.Local("light_landing"), Quaternion.LookRotation(new Vector3(0f, -0.07f, 1f), Vector3.up));

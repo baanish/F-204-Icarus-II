@@ -1,6 +1,7 @@
 """Sample installed position-light visibility using the local stock meshes.
 
-14 CFR 25.1387(b,c): ahead to 110 degrees outboard. 25.1389(b)(2)
+14 CFR 25.1385(c), 25.1387(b,c,d): ahead to 110 degrees outboard for the
+wing lamps, and 70 degrees either side of dead aft for the white rear lamp. 25.1389(b)(2)
 references 25.1393: vertical coverage extends to 90 degrees above and below.
 https://www.ecfr.gov/current/title-14/section-25.1387
 https://www.ecfr.gov/current/title-14/section-25.1393
@@ -14,7 +15,7 @@ from pathlib import Path
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
 import solids
@@ -28,6 +29,99 @@ from stores.mounts import load_mount
 from stores.prefab_tree import asset_index
 
 STEP_DEG = 1
+STABILATOR_STEP_DEG = 0.5
+
+
+def aft_occluders(icarus):
+    """Fixed airframe plus the union of the rudder and nozzle extreme poses.
+
+    The stabilator and its fitting are checked separately at every half degree.
+    Unioning the other controls is deliberately conservative: a clear ray must
+    clear all their sampled poses, so combinations cannot hide an obstruction.
+    """
+    import build_icarus as bi
+    import propulsion
+
+    objects = [o for o in icarus.all_objects if o.type == "MESH" and o.get("role") != "cockpit_view"]
+    stabilator = icarus.all_objects["stabilator"]
+    moving = set(stabilator.children_recursive)
+    rudder = icarus.all_objects["rudder"]
+    moving.update(rudder.children_recursive)
+    nozzle_names = {"nozzle_sync_ring"}
+    nozzle_names.update(o.name for o in objects if o.name.startswith(("nozzle_petal_", "nozzle_seal_", "nozzle_link_", "nozzle_ram_")))
+    fixed = solids.bvh([o for o in objects if o not in moving and o.name not in nozzle_names])
+    vertices, faces = [], []
+
+    def add(obj, matrix):
+        base = len(vertices)
+        vertices.extend(matrix @ v.co for v in obj.data.vertices)
+        faces.extend(tuple(base + i for i in p.vertices) for p in obj.data.polygons)
+
+    travel = float(rudder["deflection_deg"])
+    for angle in (-travel, 0, travel):
+        turn = rudder.matrix_world @ Matrix.Rotation(math.radians(angle), 4, "X") @ rudder.matrix_world.inverted()
+        for obj in objects:
+            if obj in rudder.children_recursive:
+                add(obj, turn @ obj.matrix_world)
+    for pose in propulsion.envelope():
+        matrices = propulsion.actuation_matrices(bi.PARAMS, **pose)
+        for kind in ("petal", "seal"):
+            for i in range(bi.PARAMS["nozzle"]["petals"]):
+                hinge = icarus.all_objects["nozzle_%s_%02d" % (kind, i)]
+                obj = icarus.all_objects[hinge.name + "_visible"]
+                matrices[obj.name] = propulsion.nozzle_hinge_matrix(bi.PARAMS, kind, i, **pose) @ hinge.matrix_world.inverted() @ obj.matrix_world
+        for name, matrix in matrices.items():
+            obj = icarus.all_objects[name]
+            if obj.type == "MESH":
+                add(obj, matrix)
+    return [fixed, BVHTree.FromPolygons(vertices, faces)]
+
+
+def measure_aft(icarus):
+    lamp = icarus.all_objects["light_nav_aft"]
+    hinge = icarus.all_objects["stabilator"]
+    occluders = aft_occluders(icarus)
+    attached = [o for o in hinge.children_recursive if o.type == "MESH"]
+    travel = float(hinge["deflection_deg"])
+    samples = []
+    for az in range(-70, 71, STEP_DEG):
+        for el in range(-90, 91, STEP_DEG):
+            a, e = math.radians(az), math.radians(el)
+            samples.append((az, el, Vector((math.sin(a) * math.cos(e), math.cos(a) * math.cos(e), math.sin(e)))))
+    lamp.data.calc_loop_triangles()
+    emitters = []
+    for tri in lamp.data.loop_triangles:
+        points = [lamp.matrix_world @ lamp.data.vertices[i].co for i in tri.vertices]
+        emitters.append((sum(points, Vector()) / 3, (points[1] - points[0]).cross(points[2] - points[0]).normalized()))
+    rows = []
+    attached_tree = solids.bvh(attached)
+    for k in range(-round(travel / STABILATOR_STEP_DEG), round(travel / STABILATOR_STEP_DEG) + 1):
+        angle = k * STABILATOR_STEP_DEG
+        turn = hinge.matrix_world @ Matrix.Rotation(math.radians(angle), 4, "X") @ hinge.matrix_world.inverted()
+        inverse = turn.inverted()
+        # Rays against the attached meshes stay in their rest pose. Other meshes
+        # stay in aircraft space. No scene transforms are changed by the check.
+        posed = [(turn @ point, turn.to_3x3() @ normal) for point, normal in emitters]
+        blocked = []
+        for az, el, direction in samples:
+            clear = False
+            for point, normal in posed:
+                if normal.dot(direction) <= 1e-7:
+                    continue
+                start = point + direction * 0.00001
+                if (all(tree.ray_cast(start, direction, 40)[0] is None for tree in occluders)
+                        and attached_tree.ray_cast(inverse @ start, inverse.to_3x3() @ direction, 40)[0] is None):
+                    clear = True
+                    break
+            if not clear:
+                blocked.append([az, el])
+        row = dict(stabilator_deg=angle, total=len(samples), blocked=len(blocked), fraction=len(blocked) / len(samples), examples=blocked[:8])
+        rows.append(row)
+    worst = max(rows, key=lambda row: row["fraction"])
+    print("aft nav visibility: %d poses, worst %+g deg, %d/%d blocked (%.6f%%), examples %s" %
+          (len(rows), worst["stabilator_deg"], worst["blocked"], worst["total"], 100 * worst["fraction"], worst["examples"]), flush=True)
+    return dict(azimuth_deg=[-70, 70], elevation_deg=[-90, 90], step_deg=STEP_DEG,
+                stabilator_step_deg=STABILATOR_STEP_DEG, worst_fraction=worst["fraction"], results=rows)
 
 
 def blender(v):
@@ -122,5 +216,8 @@ def check(icarus):
     result = measure(icarus)
     if any(r["blocked"] for r in result["results"]):
         raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store")
-    print("nav visibility PASS: zero blocked directions for every allowed tip store")
+    result["aft"] = measure_aft(icarus)
+    if result["aft"]["worst_fraction"]:
+        raise ValueError("lights: rear position-light sector has blocked rays across stabilator travel")
+    print("nav visibility PASS: zero blocked directions for every allowed tip store and rear lamp pose")
     return result

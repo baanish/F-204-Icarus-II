@@ -7221,6 +7221,78 @@
    },
    "bounds_unity": null
   },
+  "light_nav_aft": {
+   "fbx": "light_nav_aft.fbx",
+   "blender_parent": "stabilator",
+   "pivot_blender": [
+    0.0,
+    8.724,
+    2.82
+   ],
+   "pivot_unity": [
+    -0.0,
+    2.82,
+    -8.724
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "role": "visual",
+    "light": "nav_aft",
+    "colour": "white",
+    "mass_kg": 0
+   },
+   "bounds_unity": [
+    [
+     -0.02402,
+     -0.02402,
+     -0.019
+    ],
+    [
+     0.02402,
+     0.02402,
+     0.019
+    ]
+   ],
+   "sha256": "d95a80574cf8a193f726dd3580569b16c807bc5bfee457c41c9033cfb4cb8436",
+   "bounds_blender": [
+    [
+     -0.02402,
+     -0.019,
+     -0.02402
+    ],
+    [
+     0.02402,
+     0.019,
+     0.02402
+    ]
+   ],
+   "tris": 24,
+   "materials": [
+    [
+     "Matte_black",
+     24
+    ]
+   ],
+   "uv_layers": [],
+   "colliders": [],
+   "lod1": null
+  },
   "light_nav_lower_L": {
    "fbx": null,
    "blender_parent": "wing_skin_L",
@@ -7435,6 +7507,78 @@
     [
      "Icarus_NavFairing",
      44
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [],
+   "lod1": null
+  },
+  "light_tail_fairing": {
+   "fbx": "light_tail_fairing.fbx",
+   "blender_parent": "stabilator",
+   "pivot_blender": [
+    0.0,
+    8.5675,
+    2.82
+   ],
+   "pivot_unity": [
+    -0.0,
+    2.82,
+    -8.5675
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "role": "visual",
+    "mass_kg": 0
+   },
+   "bounds_unity": [
+    [
+     -0.05543,
+     -0.02494,
+     -0.1375
+    ],
+    [
+     0.05543,
+     0.02494,
+     0.1375
+    ]
+   ],
+   "sha256": "df2ed015f9b4f34f365fd40ae3864f120f773f7717c81f7add3923c43a857250",
+   "bounds_blender": [
+    [
+     -0.05543,
+     -0.1375,
+     -0.02494
+    ],
+    [
+     0.05543,
+     0.1375,
+     0.02494
+    ]
+   ],
+   "tris": 32,
+   "materials": [
+    [
+     "Icarus_NavFairing",
+     32
     ]
    ],
    "uv_layers": [

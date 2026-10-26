@@ -88,6 +88,40 @@ namespace Icarus.Editor
                     }
                 }
             }
+            var aft = b.Parts["stabilator"].transform.Find("navlight_aft");
+            var aftRenderer = aft != null ? aft.GetComponent<MeshRenderer>() : null;
+            var aftMesh = aft != null ? aft.GetComponent<MeshFilter>()?.sharedMesh : null;
+            if (aftRenderer == null || aftMesh != b.Meshes["light_nav_aft"].Render || aftMesh.triangles.Length / 3 != 24)
+                p.Add("rear nav light must use the generated 24 triangle dome on the stabilator");
+            else
+            {
+                var entries = Enumerable.Range(0, navLights.arraySize).Select(navLights.GetArrayElementAtIndex)
+                    .Where(e => e.FindPropertyRelative("renderer").objectReferenceValue == aftRenderer).ToArray();
+                if (entries.Length != 1) p.Add("rear nav light must have exactly one switched entry");
+                else
+                {
+                    var entry = entries[0];
+                    var wing = NavLightEntry(new SerializedObject(b.Root.GetComponent(GameType("NavLights"))),
+                        b.Parts["wing_skin_L"].transform.Find("navlight_L").GetComponent<Renderer>());
+                    if (entry.FindPropertyRelative("part").objectReferenceValue != b.Part("stabilator")
+                        || entry.FindPropertyRelative("gear").objectReferenceValue != null
+                        || entry.FindPropertyRelative("controlState").intValue != wing.FindPropertyRelative("controlState").intValue
+                        || entry.FindPropertyRelative("litMaterial").objectReferenceValue != Load<Material>(Stock + "Material/gearLight_PLACEHOLDER.mat")
+                        || aftRenderer.sharedMaterial != Load<Material>(Stock + "Material/Matte_black_PLACEHOLDER.mat"))
+                        p.Add("rear nav light lost its stabilator binding, stock white material or wingtip switching");
+                    var objects = entry.FindPropertyRelative("objects");
+                    if (objects.arraySize != 1 || !(objects.GetArrayElementAtIndex(0).objectReferenceValue is GameObject effect)
+                        || !effect.transform.IsChildOf(aft))
+                        p.Add("rear nav light lost its own switched stock tail effect");
+                }
+                if (Vector3.Distance(aft.position, b.Blockout.Local("light_nav_aft")) > 0.001f
+                    || Quaternion.Angle(aft.rotation, b.Blockout.Rotation("light_nav_aft")) > 0.01f)
+                    p.Add("rear nav light moved off its generated trailing-edge position");
+            }
+            var tailFairing = b.Parts["stabilator"].transform.Find("light_tail_fairing");
+            if (tailFairing == null || tailFairing.GetComponent<MeshRenderer>()?.sharedMaterial != b.Skin
+                || tailFairing.GetComponent<MeshFilter>()?.sharedMesh?.triangles.Length / 3 != 32)
+                p.Add("rear nav fairing must use 32 triangles and stabilator paint");
             if (b.Root.GetComponentsInChildren<Transform>(true).Any(t => t.name.StartsWith("light_beacon_", StringComparison.Ordinal)
                 || t.name.StartsWith("antenna_", StringComparison.Ordinal))) p.Add("beacon or separate antenna remains");
             foreach (var global in All(b, "SetGlobalParticles"))
@@ -100,7 +134,7 @@ namespace Icarus.Editor
                 while (it.Next(true) && !SerializedProperty.EqualContents(it, end))
                     if (it.propertyType == SerializedPropertyType.ObjectReference && it.objectReferenceValue == null && it.objectReferenceInstanceIDValue != 0) p.Add("a dead vapour emitter");
             }
-            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "navlight_lower_L", "navlight_lower_R", "light_formation_L", "light_formation_R", "light_fin_L", "light_fin_R",
+            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "navlight_lower_L", "navlight_lower_R", "navlight_aft", "light_formation_L", "light_formation_R", "light_fin_L", "light_fin_R",
                 "flareEjectorL", "flareEjectorR", "heat_haze", "afterburner_flame", "afterburner_nozzle_glow", "gearlight_F", "ladder" };
             foreach (var name in effects)
             {
@@ -110,7 +144,7 @@ namespace Icarus.Editor
             }
             var bayAudio = b.Root.GetComponentsInChildren<AudioSource>(true).Where(a => a.transform.name.StartsWith("weaponbay", StringComparison.Ordinal)).ToArray();
             if (bayAudio.Length > 0) p.Add("bay audio remains");
-            return $"{navLights.arraySize} nav lights with parts, stock 14 triangle lenses, generated formation lenses with stock switching, {effects.Length} effects and markers placed, no beacons, separate antennas or bay audio";
+            return $"{navLights.arraySize} nav lights with parts, stock 14 triangle wing lenses, white rear dome and generated formation lenses with stock switching, {effects.Length} effects and markers placed, no beacons, separate antennas or bay audio";
         }
     }
 }
