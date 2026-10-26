@@ -116,15 +116,17 @@ def main():
         snapshot = json.loads(Path(sys.argv[2]).read_text())
         root = LOCAL["game_export"]
         index = asset_index(root, "Mesh")
-        lamps = [("navlight_" + side, stock_lens(index, side, anchor)) for side, anchor in snapshot["nav_anchors"].items()]
+        lamps = ([(name, (np.asarray(m["vertices"]), np.asarray(m["triangles"]))) for name, m in snapshot["lamps"].items()]
+                 if "lamps" in snapshot else
+                 [("navlight_" + side, stock_lens(index, side, anchor)) for side, anchor in snapshot["nav_anchors"].items()])
         stations = [(name, np.asarray(t["position"]), quat_matrix(t["rotation"])) for name, t in snapshot["tip_stations"].items()]
         mounts = {key: load_mount(root, index, key) for key in wingtip_keys(paths.REPO)}
         print("Blender geometry and source Wingtip options; stock 14 triangle lens, centred as PlaceSystems places it")
         passed = check_tip_lamps(stations, lamps, mounts)
-        for side, anchor in snapshot["nav_anchors"].items():
-            verts, _ = stock_lens(index, side, anchor)
+        for name, (verts, _) in lamps:
+            side = name[-1]
             tip_gap = snapshot["tip_faces"][side] - np.abs(verts[:, 0]).max()
-            print(f"navlight_{side} tip face {'PASS' if tip_gap > 0.00001 else 'FAIL'}: {tip_gap:.6f} m inboard")
+            print(f"{name} tip face {'PASS' if tip_gap > 0.00001 else 'FAIL'}: {tip_gap:.6f} m inboard")
             passed &= tip_gap > 0.00001
         sys.exit(0 if passed else 1)
     builds = sorted(Path(paths.REPO / "build").glob("*.nobp"), key=lambda p: p.stat().st_mtime)
@@ -324,10 +326,12 @@ def main():
     tip_stations = [(name, *plane.world(hp)[:2]) for set_name, hardpoints in plane.sets if set_name == "Wingtip" for name, hp in hardpoints]
     lamps = []
     for side in ("L", "R"):
-        name = "navlight_" + side
-        pos, rot, scale = plane.world(plane.find(name))
-        verts, tris = stock_lens(index, side)
-        lamps.append((name, (pos + (verts * scale) @ rot.T, tris)))
+        for name in ("navlight_" + side, "navlight_lower_" + side):
+            pos, rot, scale = plane.world(plane.find(name))
+            verts, tris = stock_lens(index, side)
+            lamps.append((name, (pos + (verts * scale) @ rot.T, tris)))
+        name = "light_nav_mount_" + side
+        lamps.append((name, plane.posed(plane.find(name))))
     tip_mounts = {key: mounts[key] for i, (name, _) in enumerate(plane.sets) if name == "Wingtip" for key in plane.mounts[i]}
     failed |= not check_tip_lamps(tip_stations, lamps, tip_mounts)
     gap, hp, key, where = min(rule12)

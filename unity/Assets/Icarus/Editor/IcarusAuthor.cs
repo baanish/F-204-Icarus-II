@@ -188,7 +188,9 @@ namespace Icarus.Editor
                     File.WriteAllBytes(target, bytes);
                     AssetDatabase.ImportAsset(target, ImportAssetOptions.ForceSynchronousImport);
                 }
-                ConfigureModelImporter(target, remaps);
+                var modelRemaps = remaps.Where(s => s.Key != NavFairingSlot || part.Materials.Contains(s.Key))
+                    .ToDictionary(s => s.Key, s => s.Value);
+                ConfigureModelImporter(target, modelRemaps);
 
                 var assets = AssetDatabase.LoadAllAssetsAtPath(target).OfType<Mesh>().ToArray();
                 // Blender suffixes a node whose name is taken in its scene (".001"); the FBX is still that node.

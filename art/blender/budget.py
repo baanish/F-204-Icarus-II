@@ -40,6 +40,8 @@ def measure(icarus, item):
         col = bpy.data.collections.get(item["collection"])
         return sum(tris(o) for o in col.objects if o.type == "MESH") if col else 0
     prefixes, exact = tuple(item.get("objects", ())), set(item.get("exact", ()))
+    if item.get("reference_triangles"):
+        return sum(o.get("reference_triangles", 0) for o in icarus.all_objects if o.name.startswith(prefixes))
     if "face_attribute" in item:
         total = 0
         for obj in meshes(icarus):

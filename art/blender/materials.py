@@ -4,7 +4,7 @@ views and the review renders.
 
 The flat Icarus_* slots are the blockout's own. The stock slots carry the names of the game materials Blueprinter
 patches in, each mapped to Assets/Blueprinter/_donotship/Material/<name>_PLACEHOLDER.mat; packages move geometry onto
-them. Icarus_Body stays the skin, the only slot that takes a livery.
+them. Icarus_Body packs the skin atlas. Icarus_NavFairing projects the wing's existing UVs and uses the same livery.
 """
 import bpy
 
@@ -42,6 +42,7 @@ def build():
         stock(name)
     return {
         "body": material("Icarus_Body", (0.56, 0.57, 0.59, 1.0), 1.0, 0.32),  # bare steel for the blockout
+        "nav_fairing": material("Icarus_NavFairing", (0.56, 0.57, 0.59, 1.0), 1.0, 0.32),
         "glass": material("Icarus_Glass", (0.10, 0.16, 0.22, 0.6), 0.0, 0.05),
         "duct": material("Icarus_Duct", (0.02, 0.02, 0.02, 1.0), 0.0, 0.8),
         # The speed brake wells' ribs, rivets, lines and anchor bracket: a step lighter than the dark walls they stand

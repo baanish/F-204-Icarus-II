@@ -1281,6 +1281,7 @@ def _build(repo):
     import uvs
 
     uvs.unwrap(TARGET)
+    lights.project_nav_paint(TARGET)
     hulls.paint_lods()
     import checks
 

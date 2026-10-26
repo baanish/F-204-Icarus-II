@@ -3,6 +3,8 @@ import math
 
 import bpy
 from mathutils import Matrix, Vector
+from mathutils.bvhtree import BVHTree
+from mathutils.geometry import barycentric_transform
 
 import build_icarus as bi
 import gear
@@ -12,6 +14,8 @@ import stations
 LIGHTS = (
     ("light_nav_L", "nav", "red"),
     ("light_nav_R", "nav", "green"),
+    ("light_nav_lower_L", "nav", "red"),
+    ("light_nav_lower_R", "nav", "green"),
     ("light_landing", "landing", "white"),
 )
 # name, station, height, chord, surface, skin owner
@@ -23,6 +27,10 @@ ANTENNAS = (
 TREE = {
     "light_nav_L": ("wing_skin_L", 0),
     "light_nav_R": ("wing_skin_R", 0),
+    "light_nav_lower_L": ("wing_skin_L", 0),
+    "light_nav_lower_R": ("wing_skin_R", 0),
+    "light_nav_mount_L": ("wing_skin_L", 0),
+    "light_nav_mount_R": ("wing_skin_R", 0),
     "light_formation_L": ("skin_forward_L", 0),
     "light_formation_R": ("skin_forward_R", 0),
     "light_fin_L": ("fin_skin", 0),
@@ -55,11 +63,18 @@ STOCK_FIN_LENS_AREA = 0.0713  # m2 a side, the Revoker's fin strip
 FIN_COLUMNS, FIN_ROWS = 5, 2
 FIN_LENS_TRIS = 2 * (FIN_COLUMNS - 1) * (FIN_ROWS - 1)
 FIN_RIM_TRIS = 2 * 2 * (FIN_COLUMNS + FIN_ROWS - 2)
+# The paired stock lenses clear the loaded tip missile above and below the wing.
+NAV_HEIGHT = 0.074  # lowest clear centre height at 1 mm steps; 0.073 blocks the IRM-S1
+# A separate slot keeps these projected wing UVs out of the packed skin atlas.
+# Unity maps it to the same livery material as Icarus_Body.
+NAV_PAINT = "Icarus_NavFairing"
 # The nav lenses stay stock references in Unity, 14 triangles each.
 BUDGET = {
+    "nav_lenses": {"target": 56, "cap": 56, "objects": ("light_nav_",), "reference_triangles": True},
+    "nav_mounts": {"target": 88, "cap": 88, "objects": ("light_nav_mount_",)},
     "formation_lenses": {"target": 160, "cap": 160, "objects": ("light_formation_",)},
     "fin_strips": {"target": 56, "cap": 56, "objects": ("light_fin_",)},
-    "antennas": {"target": 36, "cap": 180, "objects": ("dorsal_cover", "skin_mid_L"),
+    "antennas": {"target": 36, "cap": 36, "objects": ("dorsal_cover", "skin_mid_L"),
                  "face_attribute": "antenna"},
 }
 CLOSEUPS = {
@@ -133,6 +148,108 @@ def lens_mesh(spots, f, columns, rows):
     return verts, uvs, faces, slots
 
 
+def nav_fairing(wing, side, paint, lens, height=NAV_HEIGHT):
+    """Two open fairings: skin-following foot, fillet, and the stock lens's eight-edge aperture."""
+    w = bi.PARAMS["wing"]
+    x = w["planform"][-1][1] - 0.075
+    leading, z, chord = stations.wing_at(w, x)
+    s = leading + chord * 0.35
+    skin = solids.bvh([wing])
+    footprint = ((-0.065, -0.075), (-0.012, -0.20), (0.0287, -0.075),
+                 (0.0287, 0.105), (-0.012, 0.25), (-0.065, 0.105))
+    fillet = ((-0.040, -0.103), (0.025, -0.103), (0.025, 0.103), (-0.040, 0.103))
+    base_y = min(v[1] for v in lens[0])
+    foot = [Vector((-v[0], -v[2], v[1])) for v in lens[0] if abs(v[1] - base_y) < 0.000002]
+    if len(foot) != 8:
+        raise ValueError("nav fairing: expected the stock lens's eight-edge aperture")
+    verts, faces, roots, surfaces = [], [], [], []
+    for up in (1, -1):
+        rings = []
+        for outline, gap in ((footprint, 0.0001), (fillet, 0.006)):
+            ring = []
+            for dx, ds in outline:
+                at, normal = solids.must(solids.hit(skin, bi.P(s + ds, side * (x + dx), up * 2),
+                                                   Vector((0, 0, -up))), "nav fairing foot")
+                ring.append((at + normal * gap, normal))
+            rings.append(ring)
+        rings.append([(bi.P(s + v.y, side * (x + v.x), z + up * (height + v.z)), None) for v in foot])
+        indices = []
+        for level, ring in enumerate(rings):
+            # Equal angles connect directly; the remaining corners form triangles.
+            ring.sort(key=lambda item: math.atan2(item[0].y - bi.P(s, 0, 0).y, side * item[0].x - x))
+            indices.append(list(range(len(verts), len(verts) + len(ring))))
+            for point, normal in ring:
+                if level == 0:
+                    roots.append(len(verts))
+                verts.append(point)
+                surfaces.append(up)
+        for outer, inner in zip(indices, indices[1:]):
+            angles = lambda ids: [math.atan2(verts[i].y - bi.P(s, 0, 0).y, side * verts[i].x - x) for i in ids]
+            oa, ia = angles(outer), angles(inner)
+            i = j = 0
+            while i < len(outer) or j < len(inner):
+                advance_outer = j == len(inner) or (i < len(outer) and oa[(i + 1) % len(outer)] + (2 * math.pi if i + 1 == len(outer) else 0)
+                                                   <= ia[(j + 1) % len(inner)] + (2 * math.pi if j + 1 == len(inner) else 0))
+                if advance_outer:
+                    face = (outer[i % len(outer)], outer[(i + 1) % len(outer)], inner[j % len(inner)])
+                    i += 1
+                else:
+                    face = (outer[i % len(outer)], inner[(j + 1) % len(inner)], inner[j % len(inner)])
+                    j += 1
+                faces.append(face if side * up > 0 else face[::-1])
+    suffix = "L" if side == 1 else "R"
+    obj = bi.mesh_object("light_nav_mount_" + suffix, verts, faces)
+    obj.data.materials.append(paint)
+    obj.data.shade_smooth()
+    obj["role"] = "visual"
+    obj["_nav_root_indices"], obj["_nav_surface_sides"] = roots, surfaces
+    return obj
+
+
+def project_nav_paint(icarus, check=False):
+    """Continue the wing paint and root normals across each fairing without repacking the atlas."""
+    worst = 0.0
+    for side in ("L", "R"):
+        wing = icarus.all_objects["wing_skin_" + side]
+        obj = icarus.all_objects["light_nav_mount_" + side]
+        wing.data.calc_loop_triangles()
+        triangles = list(wing.data.loop_triangles)
+        points = [[wing.matrix_world @ wing.data.vertices[i].co for i in t.vertices] for t in triangles]
+        tree = BVHTree.FromPolygons([v for tri in points for v in tri],
+                                   [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(len(triangles))], all_triangles=True)
+        source = wing.data.uv_layers["UVMap"].data
+        wing_normals = wing.data.corner_normals
+        normal_matrix = wing.matrix_world.to_3x3().inverted().transposed()
+        target = obj.data.uv_layers.get("UVMap") or obj.data.uv_layers.new(name="UVMap")
+        normals = [n.vector.copy() for n in obj.data.corner_normals]
+        roots = set(obj["_nav_root_indices"])
+        for loop in obj.data.loops:
+            point = obj.matrix_world @ obj.data.vertices[loop.vertex_index].co
+            up = obj["_nav_surface_sides"][loop.vertex_index]
+            at, normal, index, _ = tree.ray_cast(Vector((point.x, point.y, up * 2)), Vector((0, 0, -up)), 5)
+            if at is None:
+                raise ValueError("nav fairing paint projection missed the wing")
+            uv_points = [Vector((*source[i].uv, 0)) for i in triangles[index].loops]
+            uv = barycentric_transform(at, *points[index], *uv_points)
+            skin_normals = [normal_matrix @ wing_normals[i].vector for i in triangles[index].loops]
+            root_normal = barycentric_transform(at, *points[index], *skin_normals).normalized()
+            if check:
+                worst = max(worst, (target.data[loop.index].uv - Vector((uv.x, uv.y))).length)
+                if loop.vertex_index in roots and abs((point - at).length - 0.0001) > 0.00005:
+                    raise ValueError("nav fairing fillet moved off the wing skin")
+                if loop.vertex_index in roots and (obj.matrix_world.to_3x3().inverted().transposed() @ normals[loop.index]).normalized().dot(root_normal) < 0.99999:
+                    raise ValueError("nav fairing fillet no longer follows the wing shading normal")
+            else:
+                target.data[loop.index].uv = uv.xy
+                if loop.vertex_index in roots:
+                    normals[loop.index] = (obj.matrix_world.to_3x3().transposed() @ root_normal).normalized()
+        if not check:
+            obj.data.normals_split_custom_set(normals)
+    if check and worst > 0.000001:
+        raise ValueError("nav fairing paint no longer matches the wing UVs")
+    return worst
+
+
 def build(p, mats):
     w = p["wing"]
     lamp_x = w["planform"][-1][1] - 0.075
@@ -141,13 +258,21 @@ def build(p, mats):
     for name, kind, colour in LIGHTS:
         if kind == "nav":
             side = 1 if name.endswith("_L") else -1
-            pos = bi.P(lamp_le + lamp_chord * 0.35, side * lamp_x,
-                       lamp_z + bi.airfoil(0.35) * w["thickness"] * lamp_chord)
+            up = -1 if "lower" in name else 1
+            pos = bi.P(lamp_le + lamp_chord * 0.35, side * lamp_x, lamp_z + up * NAV_HEIGHT)
         else:
             pos = gear.landing_lamp()
-        obj = bi.empty(name, Matrix.Translation(pos))
+        rotation = Matrix.Rotation(math.pi, 4, "Y") if kind == "nav" and up < 0 else Matrix.Identity(4)
+        obj = bi.empty(name, Matrix.Translation(pos) @ rotation)
         obj["light"], obj["colour"] = kind, colour
+        if kind == "nav":
+            obj["reference_triangles"] = 14
         made.append(obj)
+
+    import nav_visibility
+    _, lenses = nav_visibility.stock_geometry()
+    for side, suffix in ((1, "L"), (-1, "R")):
+        made.append(nav_fairing(bpy.data.objects["wing_" + suffix], side, mats["nav_fairing"], lenses[suffix]))
 
     skin = solids.bvh([bpy.data.objects["fuselage"]])
     fin = solids.bvh([bpy.data.objects["fin"]])
@@ -194,8 +319,21 @@ def build(p, mats):
 
 def check(icarus):
     import budget
+    import nav_visibility
 
     objects = {o.name: o for o in icarus.all_objects}
+    anchors = [o for o in objects.values() if o.get("light") == "nav"]
+    for side in ("L", "R"):
+        fairing = objects["light_nav_mount_" + side]
+        if [m.name for m in fairing.data.materials] != [NAV_PAINT] or budget.tris(fairing) != 44:
+            raise ValueError("lights: each paired fairing must have 44 wing-painted triangles")
+    if len(anchors) != 4 or sum(o.get("reference_triangles", 0) for o in anchors) != 56:
+        raise ValueError("lights: expected four stock 14 triangle nav lenses")
+    for side in ("L", "R"):
+        for name in ("light_nav_" + side, "light_nav_lower_" + side):
+            obj = objects[name]
+            if obj.parent != objects["wing_skin_" + side] or obj["colour"] != ("red" if side == "L" else "green"):
+                raise ValueError("lights: nav lens has the wrong wing owner or colour: " + name)
     if any(n.startswith(("light_beacon_", "antenna_")) for n in objects):
         raise ValueError("lights: beacons or separate antenna parts remain")
     for index, (name, _, _, _, _, owner) in enumerate(ANTENNAS, 1):
@@ -249,9 +387,11 @@ def check(icarus):
     over = budget.over_caps(icarus, BUDGET)
     if over:
         raise ValueError("lights: " + "; ".join(over))
-    print("lights.check PASS: nav anchors preserved; 3 merged skin antennas, %d triangles; formation lenses %d "
+    paint_error = project_nav_paint(icarus, check=True)
+    nav_visibility.check(icarus)
+    print("lights.check PASS: four stock nav lenses, 56 triangles, fairings 88, projected wing paint error %.8f; 3 merged skin antennas, %d triangles; formation lenses %d "
           "triangles, lens area %.4f m2 a side (Revoker %.4f); fin strips %d triangles, lens area %.4f m2 a side "
           "(Revoker %.4f); max skin gap %.4f m"
-          % (budget.measure(icarus, BUDGET["antennas"]), budget.measure(icarus, BUDGET["formation_lenses"]),
+          % (paint_error, budget.measure(icarus, BUDGET["antennas"]), budget.measure(icarus, BUDGET["formation_lenses"]),
              areas["light_formation"], STOCK_LENS_AREA, budget.measure(icarus, BUDGET["fin_strips"]),
              areas["light_fin"], STOCK_FIN_LENS_AREA, worst))

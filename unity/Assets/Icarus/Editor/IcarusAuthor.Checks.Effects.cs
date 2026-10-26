@@ -26,7 +26,11 @@ namespace Icarus.Editor
             var lensTriangles = new Dictionary<string, (int Lens, int All)> { ["light_formation_"] = (32, 80), ["light_fin_"] = (8, 28) };
             foreach (var side in new[] { "L", "R" })
             {
-                foreach (var (name, owner) in FormationLenses(side).Prepend(("navlight_" + side, "wing_skin_" + side)))
+                var fairing = b.Parts["wing_skin_" + side].transform.Find("light_nav_mount_" + side);
+                if (fairing == null || fairing.GetComponent<MeshRenderer>()?.sharedMaterial != b.Skin
+                    || fairing.GetComponent<MeshFilter>()?.sharedMesh?.triangles.Length / 3 != 44)
+                    p.Add("nav fairings must have 44 triangles per wing and share its livery material");
+                foreach (var (name, owner) in FormationLenses(side).Concat(NavLenses(side).Select(l => (l.Name, "wing_skin_" + side))))
                 {
                     var formation = !name.StartsWith("navlight_", StringComparison.Ordinal);
                     var parent = b.Parts[owner].transform;
@@ -60,12 +64,24 @@ namespace Icarus.Editor
                     }
                     else
                     {
-                        var stock = donor.GetComponentsInChildren<MeshFilter>(true).Single(f => f.name == name);
+                        var stock = donor.GetComponentsInChildren<MeshFilter>(true).Single(f => f.name == "navlight_" + side);
+                        var anchor = NavLenses(side).Single(l => l.Name == name).Anchor;
                         if (mesh != stock.sharedMesh || triangles != 14) p.Add(name + " must reference the stock 14 triangle lens");
-                        if (Quaternion.Angle(lamp.rotation, Quaternion.identity) > 0.01f || Vector3.Distance(lamp.lossyScale, Vector3.one) > 0.0001f)
-                            p.Add(name + " must keep the stock lens orientation and size");
-                        if (Vector3.Distance(renderer.bounds.center, b.Blockout.Local("light_nav_" + side)) > 0.001f)
-                            p.Add(name + " moved off its upper-tip anchor");
+                        if (Quaternion.Angle(lamp.rotation, b.Blockout.Rotation(anchor)) > 0.01f || Vector3.Distance(lamp.lossyScale, Vector3.one) > 0.0001f)
+                            p.Add(name + " must keep its generated orientation and stock size");
+                        if (Vector3.Distance(renderer.bounds.center, b.Blockout.Local(anchor)) > 0.001f)
+                            p.Add(name + " moved off its tip anchor");
+                        var stockEntry = NavLightEntry(new SerializedObject(donor.GetComponent(GameType("NavLights"))), stock.GetComponent<Renderer>());
+                        if (renderer.sharedMaterial != stock.GetComponent<Renderer>().sharedMaterial
+                            || entry.FindPropertyRelative("litMaterial").objectReferenceValue != stockEntry.FindPropertyRelative("litMaterial").objectReferenceValue
+                            || entry.FindPropertyRelative("controlState").intValue != stockEntry.FindPropertyRelative("controlState").intValue
+                            || entry.FindPropertyRelative("gear").objectReferenceValue != null)
+                            p.Add(name + " lost the stock nav materials or switching");
+                        var effectObjects = entry.FindPropertyRelative("objects");
+                        if (effectObjects.arraySize != stockEntry.FindPropertyRelative("objects").arraySize
+                            || Enumerable.Range(0, effectObjects.arraySize).Any(i =>
+                                !(effectObjects.GetArrayElementAtIndex(i).objectReferenceValue is GameObject effect) || !effect.transform.IsChildOf(lamp)))
+                            p.Add(name + " lost its own switched stock effects");
                         var wing = b.Parts["wing_skin_" + side].GetComponent<MeshRenderer>().bounds;
                         if (Mathf.Max(Mathf.Abs(renderer.bounds.min.x), Mathf.Abs(renderer.bounds.max.x)) >= Mathf.Max(Mathf.Abs(wing.min.x), Mathf.Abs(wing.max.x)))
                             p.Add(name + " reaches the tip face");
@@ -84,7 +100,7 @@ namespace Icarus.Editor
                 while (it.Next(true) && !SerializedProperty.EqualContents(it, end))
                     if (it.propertyType == SerializedPropertyType.ObjectReference && it.objectReferenceValue == null && it.objectReferenceInstanceIDValue != 0) p.Add("a dead vapour emitter");
             }
-            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "light_formation_L", "light_formation_R", "light_fin_L", "light_fin_R",
+            var effects = new[] { "vaporCone", "downwash", "contactSparks", "wingVapor_L", "wingVapor_R", "wingtipvortex_L", "wingtipvortex_R", "navlight_L", "navlight_R", "navlight_lower_L", "navlight_lower_R", "light_formation_L", "light_formation_R", "light_fin_L", "light_fin_R",
                 "flareEjectorL", "flareEjectorR", "heat_haze", "afterburner_flame", "afterburner_nozzle_glow", "gearlight_F", "ladder" };
             foreach (var name in effects)
             {

@@ -9,9 +9,9 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The generator's material slots (art/blender/materials.py), remapped by name on import. Icarus_Body is the skin,
-        // the only slot that takes a livery; the internals keep their stock trim materials.
+        // The generator's slots are remapped by name. Fairings share the wing paint; internals keep stock trims.
         private const string SkinSlot = "Icarus_Body";
+        private const string NavFairingSlot = "Icarus_NavFairing";
         // art/blender/uvs.py ATLAS_SIZE: every skin, livery and damage map is this square.
         private const int SkinSize = 4096;
         private const string GlassSlot = "Icarus_Glass";
@@ -61,6 +61,7 @@ namespace Icarus.Editor
             var glass = donor.transform.Find("fuselage/cockpit/canopyHingea/canopyHingeb/canopyFrame/canopyGlass_exterior")?.GetComponent<MeshRenderer>()?.sharedMaterial
                 ?? throw new MissingReferenceException("The Revoker's canopyGlass_exterior has no material");
             var map = new Dictionary<string, Material> { { SkinSlot, skin }, { GlassSlot, glass } };
+            map[NavFairingSlot] = skin;
             foreach (var (slot, colour, metallic, smoothness) in FlatSlots)
                 map[slot] = AuthorFlat(slot, colour, metallic, smoothness);
             foreach (var slot in StockSlots)

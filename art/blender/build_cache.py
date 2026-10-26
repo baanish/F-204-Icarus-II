@@ -93,6 +93,10 @@ def load_or_build(repo=None, overrides=None):
         for name in TEXTURES:
             shutil.copyfile(folder / key / name, textures / name)
         bpy.context.view_layer.update()
+        # Store choices and the local stock meshes are outside the scene fingerprint.
+        import lights
+
+        lights.check(bi.TARGET)
         print("BUILD CACHE HIT " + key + ": all build checks passed", flush=True)
         return record["metrics"]
 

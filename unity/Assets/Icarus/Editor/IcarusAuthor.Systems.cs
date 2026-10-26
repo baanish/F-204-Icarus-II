@@ -19,6 +19,9 @@ namespace Icarus.Editor
         private static (string Name, string Owner)[] FormationLenses(string side) =>
             new[] { ("light_formation_" + side, "skin_forward_" + side), ("light_fin_" + side, "fin_skin") };
 
+        private static (string Name, string Anchor)[] NavLenses(string side) =>
+            new[] { ("navlight_" + side, "light_nav_" + side), ("navlight_lower_" + side, "light_nav_lower_" + side) };
+
         private static void PlaceSystems(Build b)
         {
             var root = b.Root.transform;
@@ -71,11 +74,37 @@ namespace Icarus.Editor
                 var skin = b.Parts["wing_skin_" + side].transform;
                 var nav = root.Find("navlight_" + side);
                 nav.SetParent(skin, true);
-                nav.rotation = Quaternion.identity;
+                nav.rotation = b.Blockout.Rotation("light_nav_" + side);
                 nav.localScale = Vector3.one;
                 nav.position = Lamp(nav, "light_nav_" + side);
                 NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
                 lights.Add($"{nav.name} at light_nav_{side}");
+
+                var lower = Object.Instantiate(nav.gameObject, skin).transform;
+                lower.name = "navlight_lower_" + side;
+                lower.rotation = b.Blockout.Rotation("light_nav_lower_" + side);
+                lower.position = Lamp(lower, "light_nav_lower_" + side);
+                var navEntries = Prop(navLights, "navLights");
+                var sourceIndex = Enumerable.Range(0, navEntries.arraySize).Single(i =>
+                    navEntries.GetArrayElementAtIndex(i).FindPropertyRelative("renderer").objectReferenceValue == nav.GetComponent<Renderer>());
+                navEntries.InsertArrayElementAtIndex(sourceIndex);
+                var lowerEntry = navEntries.GetArrayElementAtIndex(sourceIndex);
+                var sourceEntry = navEntries.GetArrayElementAtIndex(sourceIndex + 1);
+                lowerEntry.FindPropertyRelative("renderer").objectReferenceValue = lower.GetComponent<Renderer>();
+                lowerEntry.FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
+                lowerEntry.FindPropertyRelative("litMaterial").objectReferenceValue = sourceEntry.FindPropertyRelative("litMaterial").objectReferenceValue;
+                lowerEntry.FindPropertyRelative("controlState").intValue = sourceEntry.FindPropertyRelative("controlState").intValue;
+                lowerEntry.FindPropertyRelative("gear").objectReferenceValue = null;
+                var lowerObjects = lowerEntry.FindPropertyRelative("objects");
+                var sourceObjects = sourceEntry.FindPropertyRelative("objects");
+                lowerObjects.arraySize = sourceObjects.arraySize;
+                for (var i = 0; i < lowerObjects.arraySize; i++)
+                {
+                    var effect = (GameObject)sourceObjects.GetArrayElementAtIndex(i).objectReferenceValue;
+                    lowerObjects.GetArrayElementAtIndex(i).objectReferenceValue = lower.Find(AnimationUtility.CalculateTransformPath(effect.transform, nav)).gameObject;
+                }
+                b.Placed.Add(lower);
+                lights.Add($"{lower.name} at light_nav_lower_{side}");
 
                 foreach (var (formationName, owner) in FormationLenses(side))
                 {
