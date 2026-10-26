@@ -103,6 +103,19 @@ if (Test-Path -LiteralPath $lock) {
     catch [IO.IOException] { Fail 'an editor holds unity/Temp/UnityLockfile; close it first' }
 }
 
+# The game's components resolve only once its two script assemblies sit in Library/ScriptAssemblies. A fresh
+# worktree's first import rebuilds that folder without them (tools/Link-WorktreeAssets.ps1 copies them in), so the
+# build then finds every stock prefab with missing scripts; putting them back and running once more fixes it.
+$scriptAssemblies = Join-Path $project 'Library/ScriptAssemblies'
+function Get-MissingGameAssemblies {
+    foreach ($name in 'Assembly-CSharp.dll', 'Assembly-CSharp-firstpass.dll') {
+        $source = Join-Path $project "Packages/nuclearoption/$name"
+        $target = Join-Path $scriptAssemblies $name
+        if (-not (Test-Path -LiteralPath $target) -or (Get-FileHash -LiteralPath $source).Hash -ne (Get-FileHash -LiteralPath $target).Hash) { $name }
+    }
+}
+$restoredAssemblies = $false
+
 for ($attempt = 1; ; $attempt++) {
     $log = Join-Path $logs ('unity-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ') + "-try$attempt.log")
     $arguments = @('-batchmode', '-quit', '-projectPath', "`"$project`"", '-executeMethod', $ExecuteMethod, '-logFile', "`"$log`"")
@@ -118,6 +131,18 @@ for ($attempt = 1; ; $attempt++) {
     $exitCode = $unity.ExitCode
     Write-Output "unity: exit $exitCode after $([int]$unityClock.Elapsed.TotalSeconds) s"
     $licensed = -not (Select-String -LiteralPath $log -SimpleMatch $licenseFailure -Quiet)
+    $missingAssemblies = @(Get-MissingGameAssemblies)
+    if ($exitCode -ne 0 -and $licensed -and $missingAssemblies -and -not $restoredAssemblies) {
+        foreach ($name in $missingAssemblies) {
+            $target = Join-Path $scriptAssemblies $name
+            if (Test-Path -LiteralPath $target) { Set-ItemProperty -LiteralPath $target -Name IsReadOnly -Value $false }
+            Copy-Item -LiteralPath (Join-Path $project "Packages/nuclearoption/$name") -Destination $target -Force
+            Set-ItemProperty -LiteralPath $target -Name IsReadOnly -Value $true
+        }
+        $restoredAssemblies = $true
+        Write-Output "unity: the import dropped $($missingAssemblies -join ', ') from Library/ScriptAssemblies; restored, retrying"
+        continue
+    }
     if ($exitCode -eq 0 -or $licensed -or $attempt -gt $maxLicenseRetries) { break }
     Write-Output "unity: license check failed, retrying in 30 s ($attempt of $maxLicenseRetries retries)"
     Start-Sleep -Seconds 30
