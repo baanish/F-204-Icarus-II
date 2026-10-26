@@ -303,12 +303,12 @@ def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
                                                                     for i in range(3))))
     patch = speed_brakes.Patch(p)
     for side in (1, -1):
-        verts, faces = patch.void(side)
-        shell = BVHTree.FromPolygons(verts, faces)
-        lo = Vector([min(v[i] for v in verts) for i in range(3)])
-        hi = Vector([max(v[i] for v in verts) for i in range(3)])
-        volumes.append(("speed brake well " + "LR"[side < 0], lo, hi,
-                        lambda q, shell=shell: inside_closed(shell, q) and shell.find_nearest(q)[3] > tolerance))
+        for name, (verts, faces) in zip(("well", "channel"), patch.voids(side)):
+            shell = BVHTree.FromPolygons(verts, faces)
+            lo = Vector([min(v[i] for v in verts) for i in range(3)])
+            hi = Vector([max(v[i] for v in verts) for i in range(3)])
+            volumes.append(("speed brake %s %s" % (name, "LR"[side < 0]), lo, hi,
+                            lambda q, shell=shell: inside_closed(shell, q) and shell.find_nearest(q)[3] > tolerance))
     fields = {}
 
     def in_trough(q):

@@ -112,6 +112,12 @@ namespace Icarus.Editor
             return authored;
         }
 
+        // The shoe's UVs: a 0.2 scale of its own metres, centred on the plain dark patch of the jet_mechanical atlas
+        // (u 0.66 to 0.83, v 0.34 to 0.42, flat in its normal and occlusion maps). The shoe stays on the trough floor after
+        // launch, as every stock rail stays on its pylon (MountedMissile.RailLaunch hides only the missile), and unscaled
+        // metres would wrap it onto the atlas's ribbed top edge, which reads as an open grille in the empty trough.
+        private static Vector2 ShoeUV(Vector3 v) => new Vector2(0.745f + 0.2f * v.z, 0.38f + 0.2f * (v.y + v.x));
+
         // A box from its eight corners (bottom four then top four, each -x then +x, at the back then the front), flat
         // shaded, every face turned out from the centre.
         private static Mesh ShoeMesh(string name, Vector3[] c)
@@ -134,7 +140,7 @@ namespace Icarus.Editor
             var mesh = new Mesh { name = name };
             mesh.SetVertices(vertices);
             mesh.SetTriangles(triangles, 0);
-            mesh.SetUVs(0, vertices.Select(v => new Vector2(v.z, v.y + v.x)).ToList());
+            mesh.SetUVs(0, vertices.Select(ShoeUV).ToList());
             mesh.RecalculateNormals();
             mesh.RecalculateTangents();
             mesh.RecalculateBounds();
