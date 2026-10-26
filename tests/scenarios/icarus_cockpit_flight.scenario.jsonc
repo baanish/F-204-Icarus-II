@@ -1,0 +1,23 @@
+// Cockpit shots of the Icarus in flight on the Sandrift approach, 19 km out: the game's own camera, which starts in the
+// cockpit, holding its course, then in a bank. The verdict is read from the screenshots.
+// From the repo root: no-agentic run tests/scenarios/icarus_cockpit_flight.scenario.jsonc
+{
+  "mission": "icarus_sandrift_final_19km.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 150,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "camera": { "mode": "game" } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 8, "hold": 4, "label": "the camera settles" },
+    { "screenshot": { "name": "cockpit_approach" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 1200, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "any": [ { "path": "own.roll_deg", "between": [20, 80] }, { "path": "own.roll_deg", "between": [-80, -20] } ] }, "timeout": 15, "label": "banking into the turn" },
+    { "screenshot": { "name": "cockpit_bank" } },
+    { "check": { "path": "own.alive", "eq": true }, "label": "still alive after the shots" },
+  ],
+}

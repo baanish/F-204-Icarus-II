@@ -1,0 +1,24 @@
+// Cockpit shots of the Icarus parked on Sandrift's runway: the game's own camera, which starts in the cockpit, a few
+// seconds apart so the panel's lamps and screens have settled. The verdict is read from the screenshots.
+// From the repo root: no-agentic run tests/scenarios/icarus_cockpit_parked.scenario.jsonc
+{
+  "mission": "icarus_livery_1.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
+    { "camera": { "mode": "game" } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles" },
+    { "screenshot": { "name": "cockpit_parked" } },
+    { "act": { "hold": "Throttle", "dir": "+", "seconds": 1.5 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "throttle up, lamps and needles move" },
+    { "screenshot": { "name": "cockpit_parked_throttle" } },
+    { "check": { "path": "own.alive", "eq": true }, "label": "still alive after the shots" },
+  ],
+}
