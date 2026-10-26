@@ -476,11 +476,25 @@ def open_bays(icarus):
         bm.free()
         cutters = bay_cutters(icarus, boxes)
         cut = cut_shells(members, cutters)
-        # the bay: its faces turned to face in, less the floor under each door (a ray out of it meets the shut door)
+        # the bay: its faces turned to face in, less the floor under each door (a ray out of it meets the shut door, or
+        # the skin of a front-hinged door cuts it away from the hinge: that door is cut back off the skin's columns
+        # under the wing root, so it ends partway across the floor's faces there)
         bm = bmesh.new()
         bm.from_mesh(core.data)
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index != bay_slot], context="FACES")
         to_world, rot = core.matrix_world, core.matrix_world.to_3x3()
+        bm.verts.index_update()
+        bm.faces.index_update()
+        bay = BVHTree.FromPolygons([to_world @ v.co for v in bm.verts], [[v.index for v in f.verts] for f in bm.faces])
+        cut_by_door = set()
+        for d in (d for d in doors if GEAR_DOOR_SPECS[d[:-2] + "_L"][5] == "front"):
+            door, h = O[d + "_visible"], O[d].matrix_world
+            o, u = h.translation, h.col[0].xyz.normalized()
+            pts = [door.matrix_world @ v.co for v in door.data.vertices]
+            body = door.data.materials.find("Icarus_Body")
+            skin = [list(f.vertices) for f in door.data.polygons if f.material_index == body]
+            skin = [f for f in skin if gear.line_gap([pts[v] for v in f], o, u) > gear.DOOR_SKIN + 0.003]
+            cut_by_door |= {i for i, _ in bay.overlap(BVHTree.FromPolygons(pts, skin))}
 
         def under_door(f):
             # cast from a little inside the face, at its centre and halfway to each corner (a face under a pair of
@@ -489,7 +503,8 @@ def open_bays(icarus):
             n = (rot @ f.normal).normalized()
             c = f.calc_center_median()
             starts = [to_world @ c] + [to_world @ ((c + v.co) / 2) for v in f.verts]
-            return n.z < -0.25 and any(t.ray_cast(o - n * 0.03, n, 0.15)[0] is not None for o in starts for t in door_trees)
+            return n.z < -0.25 and (f.index in cut_by_door or any(t.ray_cast(o - n * 0.03, n, 0.15)[0] is not None
+                                                                for o in starts for t in door_trees))
 
         def before_hinge(f):
             # the floor just ahead of a front hinge, which its door's outer face sweeps as it swings past square

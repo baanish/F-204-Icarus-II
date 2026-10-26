@@ -170,6 +170,7 @@ WHEEL_UV = {"tread": (0.0, 0.40),
 TYRE_TOL, BOX_TOL = 0.001, 0.03  # the tyre's centre and radius, and the leg's break-off box (gear.check)
 STOW_TOL = 0.001  # the main wheel's stowed centre (m) and axle (radians off vertical) against GEAR["main"]["stowed"]
 SWEEP_STEP = 0.01  # largest vertex move between two poses of the retraction sweep
+DOOR_SWING_STEP = 0.01  # of the doors' travel between two poses of the door swing: a crossing can last 2% of it
 TYRE_CLEAR = 0.01  # least gap from a tyre's tread and sidewalls to the rest of its own leg
 CLOSEUPS = {}
 
@@ -1053,6 +1054,11 @@ DOOR_SHAPE = {"frame_depth": 0.026, "sheet_depth": 0.005, "rim": 0.028, "rib": 0
               "knuckle_r": 0.009, "knuckle_half": 0.016, "knuckle_inset": 0.07, "lug": 0.030}
 # A shallower tray for the nose well's narrow pairs: a deep rim on a door that narrow swings into the well's edge.
 DOOR_DEPTH = {"gear_door_N2": 0.010, "gear_door_flap": 0.012, "gear_door_flap_out": 0.012}
+# The forward main door's tray stops this short of its aft edge, the edge's skin bevelled in to it. Its hinge runs along
+# its front ring just inside the skin, and the tray stands deeper still, so opening, the tray's aft edge first swings
+# aft: into the outer aft door's front end by that door's hinge, where it turns least, and the skin outboard of it.
+# 0.016 is the least door_swing passes.
+DOOR_BEVEL = {"gear_door_main": 0.018}
 
 
 class Grid:
@@ -1119,9 +1125,10 @@ def door_panel(name, grid, hinge_col, axis, inside, gear_up=None, metric=None):
     cuts = [rim] + [x for c in rib_us for x in (c - rib, c + rib)] + [L - rim, L]
     for a, b in zip([0.0] + cuts[:-1], cuts):
         us += split(a, b, sh["cell"])[1:]
-    mid = W / 2
+    T = W - DOOR_BEVEL.get(name[:-2], 0.0) if hinge_col == 0 else W  # the tray's width
+    mid = T / 2
     vs = [0.0]
-    for a, b in zip([0.0, rim, mid - rib, mid + rib, W - rim], [rim, mid - rib, mid + rib, W - rim, W]):
+    for a, b in zip([0.0, rim, mid - rib, mid + rib, T - rim], [rim, mid - rib, mid + rib, T - rim, T]):
         vs += split(a, b, sh["cell"])[1:]
     at = lambda marks, x: min(range(len(marks)), key=lambda i: abs(marks[i] - x))  # split() rounds its ends
     frame_u = {0, len(us) - 2} | {at(us, c - rib) for c in rib_us}
@@ -1347,18 +1354,21 @@ def check(icarus):
 
 
 def door_swing(icarus):
-    """Each leg's doors from just off shut to open together (LandingGear moves them as one), gear down, each against
-    everything but the gear and itself: a door must swing clear of the airframe and the other doors."""
+    """Each leg's doors from one DOOR_SWING_STEP off shut to open together (LandingGear moves them as one), gear down,
+    each against everything but the gear and itself: a door must swing clear of the airframe and the other doors.
+    Shut, a door's free edges stand only DOOR_GAP from the hole's, inside the 3 mm it is tried by."""
     gear = {o.name for leg in LEGS for o in leg_meshes(leg)}
+    meshes = [o for o in icarus.all_objects if o.type == "MESH" and o.name not in gear and o.data.polygons]
     found = []
+    n = round(1 / DOOR_SWING_STEP)
     for leg in LEGS:
-        for d in doors_of(leg):
-            door = bpy.data.objects[d + "_visible"]
-            others = [o for o in icarus.all_objects if o.type == "MESH" and o.name not in gear and o is not door
-                      and o.data.polygons]
-            hinge = bpy.data.objects[d]
-            for i in range(1, 11):
-                with posed({e: 0.05 + 0.95 * i / 10 for e in doors_of(leg)}):
+        doors = [bpy.data.objects[d + "_visible"] for d in doors_of(leg)]
+        fixed = {o.name: tree(o) for o in meshes if o not in doors}  # what the leg's doors swing past stays put
+        for i in range(1, n + 1):
+            with posed({e: i / n for e in doors_of(leg)}):
+                trees = dict(fixed, **{o.name: tree(o) for o in doors})
+                for d, door in zip(doors_of(leg), doors):
+                    hinge = bpy.data.objects[d]
                     # The door's edges ride the hole's (its hinge edge on the skin's), so the door is tried 3 mm off its
                     # hinge line and 3 mm in from every edge: what it meets then, it cuts.
                     origin, axis = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
@@ -1374,10 +1384,10 @@ def door_swing(icarus):
                     near_hinge = lambda o, f: line_gap([o.matrix_world @ o.data.vertices[v].co  # skin on the hinge line
                                                         for v in o.data.polygons[f].vertices], origin, axis) < DOOR_SKIN + 0.003
                     hits = ["%s at s %.3f x %.3f z %.3f" % (o.name, *where(o, pairs[0][1]))
-                            for o in others for pairs in [[q for q in t.overlap(tree(o)) if not near_hinge(o, q[1])]]
-                            if pairs]
-                if hits:
-                    found.append("%s at %.2f open meets %s" % (d, 0.05 + 0.95 * i / 10, "; ".join(hits)))
+                            for o in meshes if o is not door
+                            for pairs in [[q for q in t.overlap(trees[o.name]) if not near_hinge(o, q[1])]] if pairs]
+                    if hits:
+                        found.append("%s at %.2f open meets %s" % (d, i / n, "; ".join(hits)))
     return found
 
 
