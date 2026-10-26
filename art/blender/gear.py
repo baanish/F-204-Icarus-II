@@ -63,7 +63,9 @@ GEAR = {
              "swivel": (0.88711, 0.01478, 0.46132), "swivel_deg": 90.0, "stowed": (9.1206, 0.335, -0.055)},
     # Door patches of the belly skin, left side: (name, s from, s to, x from, x to, hinge edge, rows, columns, degrees
     # open, opening[, (first ring point, last)]). The patch runs along the skin's own rings and ring points nearest
-    # those limits; rows and columns are the resampled grid, all of the skin's where they exceed it. Two doors a side
+    # those limits; rows and columns are the resampled grid, all of the skin's where they exceed it. Every door takes
+    # all of them: a coarser grid's chords stand off the skin's curve (a 4 by 4 flap by up to 33 mm) and the hole's edge
+    # is snapped onto them, so the door reads as facets beside the smooth skin, open or shut. Two doors a side
     # on the main bay, forward and aft as on the F-104 (p. 1-47), which hinges both outboard. Here the forward door
     # hinges at its front edge: its inner edge runs down the conformal trough's lip beside the rear ramp, then steps in
     # behind the ramp's end (patch_cells) over the skin the ramp's fade fans out, which the tyre passes through. The
@@ -71,10 +73,10 @@ GEAR = {
     # F-104's forward door recloses to a detent. The nose well's wide pair ends where the trough's front ramp
     # begins to move the skin's columns (stations.ramp_stations); behind it a narrow pair on the keel's columns, which
     # hold their even angles there (build_icarus.NOSE_SLOT_KEEL), lets the oleo out.
-    "doors": [("gear_door_N_L", 4.08, 5.025, 0.0, 0.31, "outer", 4, 3, 88, "down"),
-              ("gear_door_N2_L", 5.025, 5.30, 0.0, 0.085, "outer", 3, 2, 88, "down"),
+    "doors": [("gear_door_N_L", 4.08, 5.025, 0.0, 0.31, "outer", 40, 40, 88, "down"),
+              ("gear_door_N2_L", 5.025, 5.30, 0.0, 0.085, "outer", 40, 40, 88, "down"),
               ("gear_door_main_L", 8.80, 9.077, 0.0, 0.0, "front", 40, 40, 80, "down", (92, 94, 84)),
-              ("gear_door_flap_L", 9.077, 10.77, 0.17, 0.97, "inner", 4, 4, 95, "down")],
+              ("gear_door_flap_L", 9.077, 10.77, 0.17, 0.97, "inner", 40, 40, 95, "down")],
 }
 # The main leg's foot, along the swivel axis inboard of the wheel centre: tools/gear_fold_solve.py --solution ...
 # --axis-pin sweeps it; from 0.16 m out the tyre clears its own leg as it twists, 0.058 m here.
@@ -112,6 +114,7 @@ GEAR_STROKE = 0.30  # the bump stop above the free wheel (IcarusAuthor.Gear.cs G
 DOOR_SKIN = 0.006  # the door's inner face sits this far inside its outer skin
 DOOR_GAP = 0.002  # and its free edges stand this far in from the hole's, so it swings clear of the skin
 DOOR_CLEAR = 0.004  # a door's tray kept this far from the stowed gear it closes on
+CARVE_STEP = 0.005  # and looks for that gear this often across each cell: a corner of a main leg stows 4 mm inside the flap
 MIN_SKIN = 0.003  # the thinnest a door's skin gets where the gear lies against it
 # Object names the other modules and the Unity author build against, per leg N, L and R: the sprung leg is
 # gear_leg_<leg>_visible and the wheel gear_wheel_<leg>_visible; the piston and axle slide as gear_unsprung_<leg>,
@@ -125,10 +128,11 @@ BUDGET = {
                       "objects": ("gear_leg_" + leg, "gear_wheel_" + leg, UNSPRUNG + leg, ARM + leg)}
        for leg, target, cap in (("N", 1150, 1200), ("L", 1750, 1800), ("R", 1750, 1800))},
     # Built to the speed brakes' standard (rim, ribs, stringer, hinge knuckles): the stock F-99's bay doors run 824
-    # triangles each, the Ifrit's gear doors 2,266 in all.
-    "doors": {"target": 3900, "cap": 4000, "objects": ("gear_door_",)},
+    # triangles each, the Ifrit's gear doors 2,266 in all. Taking all of the skin's rings and columns added about 1,000,
+    # nearly all on the flaps; the intakes' caps gave up the 1,000.
+    "doors": {"target": 4950, "cap": 5000, "objects": ("gear_door_",)},
 }
-DOOR_TRIS = (32, 860)  # each door, outer skin and inner trim (Exterior rule 22, raised for the detailed doors)
+DOOR_TRIS = (32, 1250)  # each door, outer skin and inner trim (Exterior rule 22, raised for the detailed doors)
 # Stock wheel layout, measured on _donotship/Texture2D/aircraft_wheels_b_PLACEHOLDER.png (512 px): the tread strip
 # runs down the left edge (u from, u to), and each hub face maps onto one of the drawn hubs (centre px, radius px).
 WHEEL_UV = {"tread": (0.0, 0.40),
@@ -865,8 +869,7 @@ def door_panel(name, grid, hinge_col, axis, inside, gear_up=None):
         """A cell's depth: the rim, ribs and stringer stand frame_depth deep and the sheet sheet_depth, each carved
         back where the stowed gear lies close (the F-104G's main doors bulge for its tyres; these give way inside)."""
         d = sh["frame_depth"] if i in frame_u or k in frame_v else sh["sheet_depth"]
-        free = min(room(u, v) for u in (us[i], us[i + 1], (us[i] + us[i + 1]) / 2)
-                   for v in (vs[k], vs[k + 1], (vs[k] + vs[k + 1]) / 2))
+        free = min(room(u, v) for u in split(us[i], us[i + 1], CARVE_STEP) for v in split(vs[k], vs[k + 1], CARVE_STEP))
         return round(max(min(d, free), MIN_SKIN), 4)
 
     depths = {(i, k): depth(i, k) for i in range(len(us) - 1) for k in range(len(vs) - 1)}
@@ -926,9 +929,7 @@ def door_panel(name, grid, hinge_col, axis, inside, gear_up=None):
         far = gd.at(u, hinge_v + into * (sh["lug"] + rim * 0.5), d)
         panel.box(lambda i, j, k: c + ax * (-0.010, 0.010)[i] + up * (-0.006, 0.006)[j] * 1.0
                   + (far - c) * (0.0, 1.0)[k] + side * 0.0, 1)
-    obj = panel.realise(name, (bpy.data.materials["Icarus_Body"], bpy.data.materials["jet_mechanical"]))
-    obj.data.shade_flat()
-    return obj
+    return panel.realise(name, (bpy.data.materials["Icarus_Body"], bpy.data.materials["jet_mechanical"]))
 
 
 # --- poses and checks ----------------------------------------------------------------------------------------------
@@ -1091,15 +1092,29 @@ def door_swing(icarus):
                         v.co += (r.normalized() * 0.003 if r.length > 1e-6 else Vector()) + (mid - v.co).normalized() * 0.003
                     t = solids.BVHTree.FromBMesh(bm)
                     bm.free()
-                    off = lambda c: (c - origin - axis * axis.dot(c - origin)).length
-                    near_hinge = lambda o, f: min(off(o.matrix_world @ o.data.vertices[v].co)  # skin on the hinge line
-                                                  for v in o.data.polygons[f].vertices) < DOOR_SKIN + 0.003
+                    near_hinge = lambda o, f: line_gap([o.matrix_world @ o.data.vertices[v].co  # skin on the hinge line
+                                                        for v in o.data.polygons[f].vertices], origin, axis) < DOOR_SKIN + 0.003
                     hits = ["%s at s %.3f x %.3f z %.3f" % (o.name, *where(o, pairs[0][1]))
                             for o in others for pairs in [[q for q in t.overlap(tree(o)) if not near_hinge(o, q[1])]]
                             if pairs]
                 if hits:
                     found.append("%s at %.2f open meets %s" % (d, 0.05 + 0.95 * i / 10, "; ".join(hits)))
     return found
+
+
+def line_gap(points, origin, axis):
+    """How near a flat convex face (its points) comes to the line through origin along axis (unit): its nearest point,
+    not its nearest corner, since a face can cross close by the line between corners well clear of it."""
+    ps = [p - origin - axis * axis.dot(p - origin) for p in points]  # square to the line, which is the point 0 there
+    turns = [a.cross(b).dot(axis) for a, b in zip(ps, ps[1:] + ps[:1])]
+    if abs(sum(turns)) > 1e-12 and (min(turns) >= 0 or max(turns) <= 0):
+        return 0.0
+    gaps = []
+    for a, b in zip(ps, ps[1:] + ps[:1]):
+        e = b - a
+        t = max(0.0, min(1.0, -a.dot(e) / e.length_squared)) if e.length_squared > 1e-12 else 0.0
+        gaps.append((a + e * t).length)
+    return min(gaps)
 
 
 def tyre_points(leg, rest):

@@ -16,10 +16,10 @@ from mathutils import Matrix, Vector
 
 import build_icarus as bi
 
-# Triangles per component: target and cap (budget.py sums them).
+# Triangles per component: target and cap (budget.py sums them). 500 of each intake's cap went to the gear doors.
 BUDGET = {
-    "intake_L": {"target": 3500, "cap": 4600, "objects": ("intake_duct_L",)},
-    "intake_R": {"target": 3500, "cap": 4600, "objects": ("intake_duct_R",)},
+    "intake_L": {"target": 3500, "cap": 4100, "objects": ("intake_duct_L",)},
+    "intake_R": {"target": 3500, "cap": 4100, "objects": ("intake_duct_R",)},
     # The owner asked for visible mechanical detail: a bell-crank horn, spine and ribs on each of the 16 petals, and
     # eight ram mounts with gussets, pins and hydraulic lines on the shroud.
     "nozzle": {"target": 6100, "cap": 6600, "exact": ("nozzle",), "objects": ("nozzle_petal_", "nozzle_seal_")},
