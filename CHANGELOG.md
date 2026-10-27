@@ -2,7 +2,8 @@
 
 ## 0.1.1 (unreleased)
 
-- The Icarus no longer falls apart in a Boscali hangar's aircraft preview, and Boscali players can fly it from the aircraft menu. With no Boscali livery, the menu failed before it set the preview up; a Boscali Icarus now wears PALA Navy there, as it already did in missions.
+- The Icarus no longer falls apart in a Boscali hangar's aircraft preview, and Boscali players can fly it from the aircraft menu. With no Boscali livery, the menu failed before it set the preview up; Boscali players now get all four PALA liveries there.
+- The aircraft menu picks the Bare Metal livery for the Icarus by default, on both sides, instead of a random one.
 
 ## 0.1.0 (2026-10-27)
 
