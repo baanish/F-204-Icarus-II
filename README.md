@@ -35,7 +35,7 @@ The mod contains no game files. It needs your own copy of the game, whose assets
 
 1. Get the two files that make up the mod: `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle. Until there is a packaged release, build them from this repository as [BUILD.md](BUILD.md) describes.
 2. Close the game.
-3. Copy both files into `BepInEx/plugins/baanish.icarus/` in the game folder. They only work as a pair, so always replace both together.
+3. Copy both files into `BepInEx/plugins/baanish.icarus/` in the game folder. They only work as a pair, so always replace both together. Keep a single copy: with a second `icarus_<version>.nobp` anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
 4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.0.1 (baanish.icarus)`.
 
 ### Mod managers
