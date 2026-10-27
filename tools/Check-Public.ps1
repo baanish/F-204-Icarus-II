@@ -71,7 +71,8 @@ try {
     if ((Read-GitBytes @('ls-files', '-u')).Length) { throw 'resolve unmerged index entries first' }
     $paths = @(Read-GitPaths @('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z'))
     $rules = [ordered]@{
-        'private username' = [regex]::Escape(('own' + 'er'))
+        # The account name as a whole word, so longer words that contain it don't match.
+        'private username' = '(?<![A-Za-z])' + [regex]::Escape(('own' + 'er')) + '(?![A-Za-z])'
         'private email' = [regex]::Escape(('owner' + '@example.test'))
         'Steam ID' = '(?<!\d)7656119\d{10}(?!\d)'
         'absolute user path' = '(?:[A-Z]:[\\/]+Users[\\/]+|/(?:Users|home|root)/|\\\\[^\\\s]+\\(?:Users|home)\\)'

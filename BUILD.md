@@ -32,13 +32,13 @@ From the repository root:
 pwsh -NoProfile -File tools/Build-Icarus.ps1
 ```
 
-It checks every export against `art/export-manifest.json`, builds the plugin, copies it and BepInEx's assemblies into the Unity project, authors the aircraft from the pinned exports on the Revoker, checks the result against the donor strip checklist (A1 to A12, one `[Icarus] check` line each in the Unity log), and builds the bundle. The last line is the verdict, `B0 PASS: build/icarus_<version>.nobp ...` or `B0 FAIL: <why>`. Unity's logs stay in `build/logs`. Pass `-UnityPath <Unity.exe>` if it can't find Unity 2022.3.62f2.
+It checks every export against `art/export-manifest.json`, builds the plugin, copies it and BepInEx's assemblies into the Unity project, authors the aircraft from the pinned exports on the Revoker, checks the result against the authoring checklist (A1 to A21: the donor strip, stations, gear, cockpit, audio, structure and icons, one `[Icarus] check` line each in the Unity log), and builds the bundle. The last line is the verdict, `B0 PASS: build/icarus_<version>.nobp ...` or `B0 FAIL: <why>`. Unity's logs stay in `build/logs`. Pass `-UnityPath <Unity.exe>` if it can't find Unity 2022.3.62f2.
 
 The build rewrites the authored assets under `unity/Assets/Blueprinter/Mods/icarus`; Unity regenerates their object IDs.
 
 ## Install your build
 
-Close the game, then copy `build/Icarus.dll` and `build/icarus_<version>.nobp` into `BepInEx/plugins/baanish.icarus/` in the game folder. Blueprinter 2.0.1 or later must be installed and enabled. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II <version> (baanish.icarus)`.
+Close the game, then copy `build/Icarus.dll` and `build/icarus_<version>.nobp` into `BepInEx/plugins/baanish.icarus/` in the game folder. Blueprinter 2.1.1 or later must be installed and enabled; 2.1.1 is the version the current build is tested with. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II <version> (baanish.icarus)`.
 
 The flight-model knobs live in `BepInEx/config/baanish.icarus.cfg` under `[Tuning.*]`. A value below 0 is the shipped value; saving the file applies the rest to every Icarus in flight. While another player is connected, every knob reads its shipped value.
 

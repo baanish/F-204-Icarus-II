@@ -1,6 +1,6 @@
 # F-204 Icarus II: vision
 
-The F-204 Icarus II is a flyable aircraft mod for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): the F-104 Starfighter, rebuilt for the game's near future. It keeps the Starfighter's shape and its reason to exist, a manned missile that climbs and runs faster than anything it chases, and gives it newer materials, a modern afterburning turbojet, and the sensors and datalink every aircraft in the game carries.
+The F-204 Icarus II is a flyable aircraft mod for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): the F-104 Starfighter, rebuilt for the game's near future. It keeps the Starfighter's shape and its reason to exist, a manned missile that climbs and runs faster than anything it chases, and gives it newer materials, a modern afterburning turbojet with a thrust-vectoring iris nozzle, and the sensors and datalink every aircraft in the game carries.
 
 The game has no Starfighter. This fills that slot.
 
@@ -18,71 +18,74 @@ The mod is also a demonstration of building game content with AI agents. Claude 
 
 ### Performance
 
-The Icarus is a rocket sled. It reaches Mach 2.5 and beyond at altitude, and pays for it: about five minutes of fuel on full afterburner, and an inefficient cruise without it, because it is still a turbojet, only a better one.
+The Icarus is a rocket sled. It reaches Mach 2.5 and beyond at altitude, and pays for it: a little over six minutes of fuel on full afterburner, and an inefficient cruise without it, because it is still a turbojet, only a better one.
 
 Below transonic speed it handles better than the real Starfighter but is still not a dogfighter. A cranked wing and automatic leading-edge flaps keep it controllable and bring the approach down to about 270 km/h at low fuel; it bleeds energy in a sustained turn and wins on speed and climb.
 
-First-cut numbers, predicted offline from a replica of the game's flight model and not yet flown:
+The first-cut numbers came from a replica of the game's flight model, which predicts the stock FS-12 Revoker's top speed within 0.2 km/h of the published figure. The jet has flown since, and the table now gives the current values. All of them are provisional and will move in playtest.
 
-| | First cut | Real F-104G |
+| | Icarus II, current | Real F-104G |
 |---|---|---|
+| Length | 16.69 m, the F-104's | 16.69 m |
+| Wingspan | about 6.8 m without tip stores | 6.69 m |
+| Wing area | 20.8 m² | 18.2 m² |
 | Empty mass | 5,800 kg | 6,348 kg |
-| Internal fuel | 2,320 kg | |
+| Internal fuel | 3,082 kg (design load) | |
 | Core thrust / afterburner | 65 kN / +45 kN | 44 kN / 70 kN total (J79-GE-11A) |
-| Wing area | 18.2 m² | 18.2 m² |
-| Level top speed | Mach 2.58 at 10 km, Mach 2.83 at 15 km | about Mach 2 |
-| Full afterburner endurance | about 300 s | |
-| Approach | 76 m/s at 20% fuel | |
+| Level top speed | Mach 2.50 at 10 km, Mach 2.78 at 15 km, measured in game | about Mach 2 |
+| Full afterburner endurance | about 385 s (6.4 min), estimated | |
+| Approach | 75 m/s at 20% fuel, design target | |
 
-The same replica predicts the stock FS-12 Revoker's top speed within 0.2 km/h of the published figure, which is the reason to trust it for a starting point. Every number above is a tuning knob (see [Tuning](#tuning)) and will move in playtest.
+The top speeds were measured in game on 22 October 2026, before the tail was reshaped and the fuel grew from 2,320 kg to 3,082 kg. The endurance is an estimate: the full fuel load divided by the engine's full-afterburner burn of about 8 kg a second. It has not been flown at this fuel load.
 
 ### Shape
 
-Largely faithful to the F-104, with changes so it is not a one-to-one copy, each to be judged in live iterations rather than fixed up front:
+Largely faithful to the F-104, with changes so it is not a one-to-one copy, each judged in live iterations rather than fixed up front:
 
 - a cranked-arrow wing in place of the straight trapezoid
 - the strake carried forward to the side of the intake
-- a squared-off tail
+- the F-104's T-tail, with a squared-off stabilator
 - leading-edge flaps, in the spirit of the A-19 Brawler's slats
 - a waisted fuselage at the wing root. In Nuclear Option this is a look only: drag comes from each part's drag area plus one global bump around Mach 1, with no cross-section term, so area ruling buys nothing in the flight model.
+- an iris nozzle of 16 petals and 16 seals, which opens for afterburner and turns up to 4 degrees in pitch and yaw for thrust vectoring
 
 ### Cockpit
 
-A custom cockpit: a modernized US-style layout with Primeva components in it, modelled and textured to the level of the stock cockpits (how their buttons, panels and labels are actually built), and driven by the game's own display, HUD and instrument scripts rather than a new UI framework.
+A custom cockpit: a modernized US-style layout with Primeva components in it, modelled and textured to the level of the stock cockpits (how their buttons, panels and labels are actually built), and driven by the game's own display, HUD and instrument scripts rather than a new UI framework. The one addition is a small plugin script that turns the standby attitude ball, the fuel gauge needle and the clock hands, which the stock scripts have no driver for.
 
 ## How it is built
 
 - **Exterior art** is a Blender Python generator, written from the first iteration. An AI model runs it inside a live Blender session through Blender MCP, so each change is a parameter edit visible in seconds. Every iteration also reruns on an empty scene, and the mesh that ships always comes from a clean background run, so the approved look can be rebuilt from the repo alone.
-- **In game**, Unity editor scripts author the aircraft onto a stock donor prefab, the FS-12 Revoker, and strip what the Icarus does not have: thrust vectoring, canards, the internal cannon and the weapon bays. The build produces a Blueprinter bundle and a BepInEx plugin.
+- **In game**, Unity editor scripts author the aircraft onto a stock donor prefab, the FS-12 Revoker, and strip what the Icarus does not have: canards, the internal cannon and the weapon bays. The Revoker's thrust vectoring stays and drives the iris nozzle. The build produces a Blueprinter bundle and a BepInEx plugin.
 - **Factions and supply**: the plugin adds the Icarus to Primeva's aircraft supply in stock missions and lets factories produce it, behind a setting that is on by default.
 
 ### Tuning
 
-One tuning file in `BepInEx/config` holds the flight model and engine values, and the plugin applies it to the jet you are flying when the file is saved. The Configuration Manager menu (F1) exposes the most-used knobs.
+The plugin's config file, `BepInEx/config/baanish.icarus.cfg`, holds the flight-model scalars the game reads live, in its `[Tuning.*]` sections. Saving the file applies them to every Icarus in flight. Each value is also an ordinary BepInEx setting, so a configuration manager plugin, if you have one installed, can change it in game. A value below 0 means the shipped value.
 
-What can change in flight follows how the game stores each value:
-
-| Change | Applies |
+| Live now | Values |
 |---|---|
-| Thrust, engine speed limit, altitude curve, fuel burn, afterburner | in flight |
-| Wing and drag areas | in flight |
-| Control-surface rates, centre of lift, flap areas | in flight, written into the game's physics data |
-| Mass and fuel capacity | on respawn |
-| Airfoil lift and drag curves | on mission restart |
+| Engine | thrust, speed limit, minimum air density, spool rate, idle and full fuel burn, altitude thrust curve |
+| Afterburner | thrust, fuel burn |
+| Thrust vectoring | pitch and yaw limits, airspeed cutoff |
+| Aero | total wing area, total drag area |
+| AI | corner, landing and takeoff speeds, turning radius |
 
-The Unity build bakes the same file into the aircraft, so shipped values have one source. Once another player is connected, every machine uses the shipped values, so everyone flies the same jet.
+The first plan made more of the flight model live: control-surface rates, centre of lift and flap areas in flight, mass and fuel capacity on respawn, and airfoil curves on mission restart. None of that is built. It stays on the list for later.
+
+The Unity build bakes its own values, set in the authoring scripts, into the aircraft. It does not read the tuning file. The file only overrides the baked values at runtime. Once another player is connected, every machine uses the shipped values, so everyone flies the same jet.
 
 ## Stages
 
 1. Research (done)
-2. Exterior silhouette
-3. Rough blockout in game: scale, eye point, gear, camera, the donor strip, and a first flight-model check against the targets above
-4. Freeze the wing planform
-5. Exterior detail
-6. Cockpit
-7. Full in-game build, multiplayer on two PCs
-8. Flight model
-9. Polish
-10. Custom audio
+2. Exterior silhouette (done)
+3. Rough blockout in game: scale, eye point, gear, camera, the donor strip, and a first flight-model check against the targets above (done)
+4. Freeze the wing planform (done)
+5. Exterior detail (done)
+6. Cockpit (done)
+7. Full in-game build (done); multiplayer tested on two PCs (not yet: so far host and client have run only on one PC)
+8. Flight model (first in-game tuning done; to fly again after the latest fuel and tail changes)
+9. Polish (in progress)
+10. Custom audio (done: engine, gear travel and lock, belly scrape)
 
-Stretch goal: droppable tip tanks on the wingtip stations.
+Being added now: droppable tip tanks, carried on the wingtip stations in place of a missile.
