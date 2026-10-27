@@ -52,6 +52,8 @@ static class IcarusSystems
         // SetLocalSim has just made the bodies; pin them before the first step.
         sections.PinAll();
 
+        InnerGlass.RemoveGrime(__instance);
+
         Turbojet? engine = Engine(__instance);
         JetNozzle? nozzle = engine == null ? null : Nozzle(engine);
         Transform? reheat = nozzle == null ? null : nozzle.transform.Find("afterburner_audio");

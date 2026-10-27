@@ -153,6 +153,14 @@ namespace Icarus.Editor
             Renderer Named(string n) => view.FirstOrDefault(r => r.name == n);
             foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner", ThrottleLever }.Concat(CockpitInstruments))
                 if (Named(n) != null && (Named(n).sharedMaterials.Length != 1 || Named(n).sharedMaterial.name != CockpitSlot)) p.Add(n + " isn't on the cockpit atlas");
+            // The inner panes are the Canopy's glassRenderers on the stock inner glass alone: the plugin takes their grime off
+            // through that list (src/Icarus/InnerGlass.cs), and the game cracks them through it.
+            var canopy = b.Parts["canopy"].GetComponent(GameType("Canopy"));
+            var cracked = canopy == null ? new Object[0] : GetList(Prop(new SerializedObject(canopy), "glassRenderers"));
+            var panes = new[] { "canopy_glass_inner", "windscreen_inner" }.Select(n => (Object)Named(n)).ToArray();
+            if (panes.Any(r => r == null) || !cracked.OrderBy(r => r.name).SequenceEqual(panes.OrderBy(r => r.name))
+                || panes.Cast<Renderer>().Any(r => r.sharedMaterials.Length != 1 || r.sharedMaterial != Stocked("fighter1_canopy_int")))
+                p.Add("the Canopy's glassRenderers aren't canopy_glass_inner and windscreen_inner on fighter1_canopy_int alone");
             var cockpitUi = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
             var throttles = new SerializedObject(cockpitUi).FindProperty("throttles");
             var turned = throttles.arraySize == 1 ? throttles.GetArrayElementAtIndex(0).FindPropertyRelative("transform").objectReferenceValue as Transform : null;
@@ -190,7 +198,7 @@ namespace Icarus.Editor
             if (total > 35000) p.Add($"the cockpit renderers have {total} triangles, over 35,000");
             return $"{view.Length} cockpit renderers on layer 3 serialized off, {total} triangles (interior {Count(interior)}, inner frames {Count(frame)} + {Count(Named("windscreen_frame_inner"))}); " +
                 $"the throttle lever on {turned?.name}, the transform Cockpit.throttles turns; " +
-                $"tac screen on tacScreenDisplay, lamps {Count(lamps[0])} in CockpitWarningLights, proxies {Count(proxies[0].r)} + {Count(proxies[1].r)} in exteriorRenderers and LOD0, no cockpit Light";
+                $"inner panes the Canopy's glass on fighter1_canopy_int, tac screen on tacScreenDisplay, lamps {Count(lamps[0])} in CockpitWarningLights, proxies {Count(proxies[0].r)} + {Count(proxies[1].r)} in exteriorRenderers and LOD0, no cockpit Light";
         }
     }
 }
