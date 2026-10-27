@@ -74,8 +74,9 @@ sealed class TailFlexProbe : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Simple physics merges every part back onto the root, which leaves nothing to flex.
-        if (aircraft == null || parts == null || parts[0].rb == aircraft.rb) return;
+        // Simple physics merges every part back onto the root, which leaves nothing to flex. With stage logging off
+        // nothing reads the samples, so none are taken.
+        if (!IcarusPlugin.Log.StageEnabled || aircraft == null || parts == null || parts[0].rb == aircraft.rb) return;
         for (int i = 0; i < parts.Length; i++)
         {
             if (parts[i] == null || parts[i].IsDetached()) continue;

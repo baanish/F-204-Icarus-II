@@ -26,7 +26,7 @@ static class PartContactLog
 
     static void BeforeCollision(AeroPart __instance, Collision collision)
     {
-        if (IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
+        if (!IcarusPlugin.Log.StageEnabled || IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
         UnitPart? other = collision.collider.GetComponentInParent<UnitPart>();
         bool self = other != null && other.parentUnit == __instance.parentUnit;
         string with = other != null ? other.name : collision.collider.name;
@@ -39,7 +39,7 @@ static class PartContactLog
 
     static void BeforeTakeDamage(UnitPart __instance, float pierceDamage, float blastDamage, float fireDamage, float impactDamage)
     {
-        if (IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
+        if (!IcarusPlugin.Log.StageEnabled || IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
         var caller = new System.Diagnostics.StackTrace(2, false).GetFrame(0)?.GetMethod();
         IcarusPlugin.Log.Stage($"damage {__instance.name}",
             $"pierce {pierceDamage:0.0}, blast {blastDamage:0.0}, fire {fireDamage:0.0}, impact {impactDamage:0.0}, hp {__instance.hitPoints:0}, from {caller?.DeclaringType?.Name}.{caller?.Name}");
@@ -47,7 +47,7 @@ static class PartContactLog
 
     static void BeforeJointBreak(UnitPart __instance, float breakForce)
     {
-        if (IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
+        if (!IcarusPlugin.Log.StageEnabled || IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
         var joints = new System.Text.StringBuilder();
         if (__instance is AeroPart aero)
         {
