@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.1 (unreleased)
+## 0.1.0 (2026-10-27)
 
 The first version of the F-204 Icarus II, a Primeva interceptor based on the F-104 Starfighter.
 

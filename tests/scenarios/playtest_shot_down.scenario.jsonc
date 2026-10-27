@@ -4,7 +4,7 @@
   "plugins": [
     "installed:com.nikkorap.blueprinter",
     "../../.cache/build-staging/dotnet",
-    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=AAM1_single,AAM4_single,baanish_icarus,baanish_icarus_AAM2_conformal"
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=AAM1_single,AAM4_single,baanish_icarus,baanish_icarus_AAM2_conformal"
   ],
   "measure": true,
   "timeout": 18000,

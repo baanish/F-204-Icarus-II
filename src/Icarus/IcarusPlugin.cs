@@ -16,7 +16,7 @@ namespace Icarus;
 public sealed class IcarusPlugin : BaseUnityPlugin
 {
     public const string Guid = "baanish.icarus";
-    public const string Version = "0.0.1";
+    public const string Version = "0.1.0";
 
     /// <summary>AircraftDefinition.jsonKey of the Icarus (IcarusAuthor.JsonKey).</summary>
     public const string JsonKey = "baanish_icarus";

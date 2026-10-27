@@ -4,7 +4,7 @@ A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.c
 
 ![The Icarus II in the Bare Metal livery](docs/img/icarus-bare-metal.jpg)
 
-Version 0.0.1, an early build. It flies, fights and comes apart in game, and it is still being tuned and polished. There is no packaged release yet.
+Version 0.1.0, an early prerelease. It flies, fights and comes apart in game, and it is still being tuned and polished.
 
 ## What you get
 
@@ -33,10 +33,10 @@ The mod contains no game files. It needs your own copy of the game, whose assets
 
 ### Manual install
 
-1. Get the two files that make up the mod: `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle. Until there is a packaged release, build them from this repository as [BUILD.md](BUILD.md) describes.
+1. Download `Icarus-v<version>-plugin-only.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). It holds the two files that make up the mod, `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle, in `BepInEx/plugins/baanish.icarus/`. To build them yourself instead, follow [BUILD.md](BUILD.md).
 2. Close the game.
-3. Copy both files into `BepInEx/plugins/baanish.icarus/` in the game folder. They only work as a pair, so always replace both together. Keep only one copy. If a second `icarus_<version>.nobp` sits anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
-4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.0.1 (baanish.icarus)`.
+3. Extract the ZIP into the game folder, so both files land in `BepInEx/plugins/baanish.icarus/`. They only work as a pair, so always replace both together. Keep only one copy. If a second `icarus_<version>.nobp` sits anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
+4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.1.0 (baanish.icarus)`.
 
 ### Mod managers
 

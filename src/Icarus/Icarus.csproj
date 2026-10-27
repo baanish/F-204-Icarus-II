@@ -5,7 +5,7 @@
     <AssemblyName>Icarus</AssemblyName>
     <RootNamespace>Icarus</RootNamespace>
     <!-- Must match unity/Assets/Blueprinter/Mods/icarus/modinfo.json; tools/Build-Icarus.ps1 checks it. -->
-    <Version>0.0.1</Version>
+    <Version>0.1.0</Version>
     <Authors>baanish</Authors>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

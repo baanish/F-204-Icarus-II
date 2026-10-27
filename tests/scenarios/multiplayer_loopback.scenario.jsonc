@@ -17,7 +17,7 @@
       "plugins": [
         "installed:com.nikkorap.blueprinter",
         "../../.cache/build-staging/dotnet",
-        "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+        "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
       ],
       "config": { "baanish.icarus": { "Tuning.Engine": { "MaxThrust": 30000 } } },
     },
@@ -26,7 +26,7 @@
       "plugins": [
         "installed:com.nikkorap.blueprinter",
         "../../.cache/build-staging/dotnet",
-        "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+        "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
       ],
       "config": { "baanish.icarus": { "Tuning.Engine": { "MaxThrust": 30000 } } },
     },

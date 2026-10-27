@@ -147,7 +147,7 @@ def artifacts():
         scenario = {
             "mission": f"{stem}.mission.json", "mods": "mirror",
             "plugins": ["installed:com.nikkorap.blueprinter", "../../.cache/build-staging/dotnet",
-                        "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=" + ",".join(sorted(keys))],
+                        "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=" + ",".join(sorted(keys))],
             "measure": True, "timeout": 18000,
             "steps": [{"record": {"path": "own.alt_msl_m"}, "label": "Record the player's starting altitude"}],
         }

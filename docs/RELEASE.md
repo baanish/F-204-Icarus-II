@@ -45,7 +45,7 @@ Full Unity rebuilds are not byte-reproducible: authoring regenerates prefab obje
 Verify a release without Unity:
 
 ```powershell
-pwsh -NoProfile -File tools/Verify-Release.ps1 -Directory <package-directory> -Tag v0.0.1
+pwsh -NoProfile -File tools/Verify-Release.ps1 -Directory <package-directory> -Tag v0.1.0
 ```
 
 For `-LOCAL` outputs, add `-AllowLocal` and keep the numeric tag. Verification checks checksums, exact paths, fixed timestamps, entry order, paired payloads, credits, dependency metadata and the embedded commit.
@@ -57,7 +57,7 @@ Keep releases as prereleases until multiplayer is tested on two PCs. Packaging c
 Push the reviewed source and tag that exact commit `v<version>`. The repository must be public with matching unobfuscated source before publication. Then, after the owner authorizes publishing:
 
 ```powershell
-pwsh -NoProfile -File tools/Publish-Release.ps1 -Directory <package-directory> -Tag v0.0.1
+pwsh -NoProfile -File tools/Publish-Release.ps1 -Directory <package-directory> -Tag v0.1.0
 ```
 
 The publisher verifies local assets, checks that the existing remote tag matches `meta.json`'s source commit, creates a draft prerelease, and uploads the NOMM ZIP first. It checks every uploaded size and SHA-256 digest and the full returned asset order before publishing. Asset names sort with the NOMM ZIP first for catalog discovery. A failed upload or draft check leaves the draft unpublished for inspection.
