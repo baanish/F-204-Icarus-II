@@ -1,0 +1,17 @@
+// Playtest in a mirror of the live install: the owner's own mods as installed, with this build's Icarus in place of
+// any installed one, parked on Sandrift's runway. Made for `launch` with input on, which ignores the steps; `run` only
+// checks that the Icarus loads as the player's aircraft.
+// From the repo root: no-agentic launch tests/scenarios/playtest_mirror.scenario.jsonc --input --show --monitor primary
+{
+  "mission": "icarus_runway.mission.json",
+  "mods": "mirror",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 600,
+  "steps": [
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+  ],
+}
