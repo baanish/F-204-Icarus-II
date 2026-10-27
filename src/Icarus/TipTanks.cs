@@ -44,6 +44,8 @@ sealed class TipTanks : MonoBehaviour
             postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterGetFuelLevel))),
         new("tip-tanks", typeof(Aircraft), nameof(Aircraft.GetFuelQuantity), Type.EmptyTypes,
             postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterGetFuelQuantity))),
+        new("tip-tanks", typeof(Missile), "StartMissile", Type.EmptyTypes,
+            postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterStartMissile))),
     };
 
     static readonly AccessTools.FieldRef<Weapon, Hardpoint> HardpointOf = AccessTools.FieldRefAccess<Weapon, Hardpoint>("hardpoint");
@@ -256,21 +258,40 @@ sealed class TipTanks : MonoBehaviour
         AeroPart[] parts = IcarusSystems.Parts(aircraft);
         foreach (Tank t in tanks)
         {
-            if (!t.Attached) continue;
-            AeroPart? wing = parts.FirstOrDefault(p => p != null && p.name == "wing_skin_" + t.Side);
-            if (wing == null) continue;
-            Renderer? upper = wing.transform.Find("navlight_" + t.Side)?.GetComponent<Renderer>();
-            Renderer? lower = wing.transform.Find("navlight_lower_" + t.Side)?.GetComponent<Renderer>();
-            if (t.Top != null && upper != null) t.Top.sharedMaterial = upper.sharedMaterial;
-            if (t.Bottom != null && lower != null) t.Bottom.sharedMaterial = lower.sharedMaterial;
-            Material? skin = wing.GetComponent<Renderer>()?.sharedMaterial;
-            if (t.Skin == null || skin == null) continue;
-            t.Skin.GetPropertyBlock(paint);
-            if (skin.HasProperty(LiveryId) && skin.GetTexture(LiveryId) is Texture livery) paint.SetTexture(LiveryId, livery);
-            if (skin.HasProperty(MetallicId) && skin.GetTexture(MetallicId) is Texture metallic) paint.SetTexture(MetallicId, metallic);
-            if (skin.HasProperty(GlossId)) paint.SetFloat(GlossId, skin.GetFloat(GlossId));
-            t.Skin.SetPropertyBlock(paint);
+            if (t.Attached) DressStore(parts, t.Side, t.Skin, t.Top, t.Bottom, paint);
         }
+    }
+
+    static void DressStore(AeroPart[] parts, string side, Renderer? skin, Renderer? top, Renderer? bottom, MaterialPropertyBlock block)
+    {
+        AeroPart? wing = parts.FirstOrDefault(p => p != null && p.name == "wing_skin_" + side);
+        if (wing == null) return;
+        Renderer? upper = wing.transform.Find("navlight_" + side)?.GetComponent<Renderer>();
+        Renderer? lower = wing.transform.Find("navlight_lower_" + side)?.GetComponent<Renderer>();
+        if (top != null && upper != null) top.sharedMaterial = upper.sharedMaterial;
+        if (bottom != null && lower != null) bottom.sharedMaterial = lower.sharedMaterial;
+        Material? livery = wing.GetComponent<Renderer>()?.sharedMaterial;
+        if (skin == null || livery == null) return;
+        skin.GetPropertyBlock(block);
+        if (livery.HasProperty(LiveryId) && livery.GetTexture(LiveryId) is Texture paint) block.SetTexture(LiveryId, paint);
+        if (livery.HasProperty(MetallicId) && livery.GetTexture(MetallicId) is Texture metallic) block.SetTexture(MetallicId, metallic);
+        if (livery.HasProperty(GlossId)) block.SetFloat(GlossId, livery.GetFloat(GlossId));
+        skin.SetPropertyBlock(block);
+    }
+
+    // A released tank falls as its own round, a fresh copy of the round prefab the game spawns on every peer
+    // (Spawner.SpawnMissile), not the store that hung: it takes the livery and lens state of the wing it left, as the
+    // store had them. StartMissile runs on every peer once the round knows its owner.
+    static void AfterStartMissile(Missile __instance)
+    {
+        if (IcarusPlugin.FeaturesOff.Contains("tip-tanks") || __instance.definition == null || __instance.definition.jsonKey != RoundKey
+            || __instance.owner is not Aircraft aircraft) return;
+        string side = aircraft.transform.InverseTransformPoint(__instance.transform.position).x < 0 ? "L" : "R";
+        Renderer[] renderers = __instance.GetComponentsInChildren<Renderer>(true);
+        DressStore(IcarusSystems.Parts(aircraft), side, __instance.GetComponent<Renderer>(),
+            renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
+            new MaterialPropertyBlock());
+        IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery", everyOccurrence: true);
     }
 
     static void AfterGetFuelLevel(Aircraft __instance, ref float __result)
