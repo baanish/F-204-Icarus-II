@@ -11,6 +11,15 @@ SIDE_FACING = .45  # |normal x| above which a texel takes side decals
 TOP_PARTS = ('wing_skin_L', 'wing_skin_R', 'flap_L_visible', 'flap_R_visible',
              'aileron_L_visible', 'aileron_R_visible')
 FORWARD = ('skin_forward_L', 'skin_forward_R')
+# 38 mm (1.5 in) capitals: T.O. 1-1-4 sets stencilled instructions 1/2 to 2 in high, and at the wing's 3.5 mm texels
+# this is the smallest height whose strokes (about 6 mm) still span two texels. The width keeps the stencil sheet's ink
+# aspect, 4.42.
+NO_STEP_HEIGHT = .038
+NO_STEP_WIDTH = .168
+# Upper lettering reads for someone standing behind the trailing edge: along world -X, tops forward, on both wings.
+# Placements named here turn a quarter to read for someone outboard facing the fuselage: aft on the left wing, forward
+# on the right, tops inboard.
+FACING_FUSELAGE = ('no_step_wing_root',)
 # label, source, parts, centre y,z (side) or positive x,y (top), width, height, in world metres; both sides.
 # decal_checks.py holds each one clear of the canopy, physical edges, panel seams and light fittings.
 # Forward: each inside one skin panel between the butt joints at s 2.2, 3.4 and 4.6 (y -5.8, -4.6, -3.4), the modex
@@ -21,9 +30,9 @@ PLACEMENTS = (
     ('nose_modex', 'modex', FORWARD, -5.2, .14, 1.05, .43),
     ('roundel', 'roundel', FORWARD, -3.08, .20, .50, .50),
     ('rescue', 'rescue', FORWARD, -3.95, .37, .52, .10),
-    ('no_step_wing_root', 'no_step', ('wing_skin_L', 'wing_skin_R'), 1.35, 1.60, .38, .07),
-    ('no_step_flap', 'no_step', ('flap_L_visible', 'flap_R_visible'), 1.55, 3.70, .38, .07),
-    ('no_step_aileron', 'no_step', ('aileron_L_visible', 'aileron_R_visible'), 2.65, 3.65, .38, .07),
+    ('no_step_wing_root', 'no_step', ('wing_skin_L', 'wing_skin_R'), 1.35, 1.60, NO_STEP_WIDTH, NO_STEP_HEIGHT),
+    ('no_step_flap', 'no_step', ('flap_L_visible', 'flap_R_visible'), 1.55, 3.70, NO_STEP_WIDTH, NO_STEP_HEIGHT),
+    ('no_step_aileron', 'no_step', ('aileron_L_visible', 'aileron_R_visible'), 2.65, 3.65, NO_STEP_WIDTH, NO_STEP_HEIGHT),
     ('fin_flash', 'flash', ('fin_skin',), 6.60, 2.05, .35, .66),
     ('fin_modex', 'modex', ('fin_skin',), 6.156, 1.47, .90, .36),
     ('pala', 'pala', ('fin_skin',), 5.95, 1.135, .68, .17),
@@ -117,13 +126,15 @@ def sources():
 def projection(placement, decal):
     """World plane coordinates and side (+1 left, -1 right) to decal u,v, retaining the requested ink-box size.
 
-    Upper lettering reads in the same world x direction on both wings, using their separate UV islands.
+    Upper lettering reads as FACING_FUSELAGE says, using the wings' separate UV islands.
     """
-    _, _, _, cy, cz, width, height = placement
+    label, _, _, cy, cz, width, height = placement
     ph, pw = decal.shape[:2]
     su, sv = width * pw / (pw - 2 * PAD), height * ph / (ph - 2 * PAD)
     if placement[2][0] in TOP_PARTS:
-        return lambda x, y, side: ((x - side * cy) / su + .5, .5 - (y - cz) / sv)
+        if label in FACING_FUSELAGE:
+            return lambda x, y, side: (.5 + (y - cz) * side / su, .5 + (x * side - cy) / sv)
+        return lambda x, y, side: (.5 - (x - side * cy) / su, .5 + (y - cz) / sv)
     return lambda y, z, side: ((y - cy) * side / su + .5, .5 - (z - cz) / sv)
 
 

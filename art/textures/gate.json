@@ -1,8 +1,8 @@
 {
   "pipeline_accepted": false,
-  "geometry_commit": "8db405bf672bc07765db613cf9fae2e00f3914a1",
+  "geometry_commit": "0b7eccaef62acd1d413b1cc588fd84da7b490685",
   "inputs": {
-    "art/export-manifest.json": "1c7c064bc8e63c082e6976c8831bdc21e16b95c99fe818bbea1339958d191673",
+    "art/export-manifest.json": "ad5343c6eca050fb9eafd43d21449aca9ad263a3416e131312b85428da9f9d45",
     ".cache/review/wave2/p9b/02/geometry_maps.npz": "e8c6191c2f066897fc168b78208fced4d8c7ff2a84009a4194d68b42826af202",
     ".cache/review/wave2/p9b/02/atlas_geometry.npz": "4eca86628d0f5c531db782e8bacd7e4f167aa156c74c01166d405792ffd895e9",
     ".cache/review/wave2/p9b/02/ao_maps.npz": "0ec5e90b0920e54ef8601fd2224435cca7ff7a6a980dc8073bff67f6109f4a64",
@@ -12,14 +12,14 @@
     "art/textures/companion_maps.py": "eb9bc1b59def51aae147cd760d03b9e9f9ca5a4b28d19c08ee31f5fe6c28e730",
     "art/textures/compose_skin.py": "3009443692583ce0905aa72cbd4a01542346cd6093db9e9a111f08363e5b715b",
     "art/textures/damage.py": "9dfd85c2f22046387c69432ff2065c7fa177020647d3ffc7112c228e65c64148",
-    "art/textures/decal_checks.py": "64a7a94891b60a59e259c9ca4e1a9efaca76b13aa3b56e70598f2746d21829b1",
+    "art/textures/decal_checks.py": "74861f10c7c8b88179efa1a0fd41501260f7c32809f6ce9da86404260f432cf3",
     "art/textures/full_skin_calls.py": "2919b8191723c02f5893672f755d3898222be8bf81ea3cab248be02b1f60fa7f",
     "art/textures/full_skin_checks.py": "02cfd4a7f056aa69720a021bf71b94298446a3f277470bff939edd42a44037e4",
     "art/textures/full_skin_compose.py": "3b78c6d9e4cf7630a02ca61cc01e15cf6f1b1d3f8707a19f8b62ccce71cb16c9",
     "art/textures/full_skin_guides.py": "638cc242f054b72d0c44f3f745da635fdfe70b71d5b60eb9653f16a8a2680e2e",
     "art/textures/full_skin_registration.py": "ec3fa07eff4b2ff93b64a561216cd1bfdf5737a388322dc0bbfc01b707eeeaf6",
     "art/textures/full_skin_source_stitch.py": "5cc48a48793704377453f14d52341a1fcaacb0ef18fa1d6e08f582e339e55ce0",
-    "art/textures/insignia.py": "a50eab00f2e44b67e91a8ea771816171dc73a842c6a77660177ddaf0eaf9f29c",
+    "art/textures/insignia.py": "6fd1123d93c8d6c0f3069eee829f82df9af81960bc9c9087c2c29d4b02cb5c11",
     "art/textures/liveries.py": "df77998da1e092031fe44b4667510333493b8f9be0467171a5aff1293f4db358",
     "art/textures/measure_trims.py": "bb9eb33902e645c7f2eb2108c41da712afbd167106301727d1155446faf74564",
     "art/textures/panel_checks.py": "04344b1353e913f3420ab2d7d3f7a05b0d63c7e858d15545404ed2cccf2f7d1d",
@@ -1322,10 +1322,10 @@
     "Icarus_skin_ao.png": "92f763837aae20c07603fd8c4bcf707f20f802d296afd3d8214b3617abce082e",
     "Icarus_skin_dmg_b.png": "2c30ccad20e4d673fd917b565f577387b040244b403c5a730542205c2c365d37",
     "Icarus_skin_dmg_n.png": "33ffabc203abeda9fe1f2236e3befb5223075b4eef4ac7bce3df6aff3b00568e",
-    "Icarus_livery_1.png": "23cd7acd7f492aa03f79e12a69276c1384f4d7dda2589afd618e5ae8e26da60f",
-    "Icarus_livery_2.png": "236c13b05d6822ebca0d1e7f00f175416e15e4a6ff5ed48f1017d0b4a251d8f9",
-    "Icarus_livery_3.png": "3929ab5bc169d387a733af7d935b7ee63f3d2db2b1bf9ad4765ad7b550ac7ecc",
-    "Icarus_livery_4.png": "0520ca4e9d0b1d6243a9bcbe89fc969eef59701fdb2843f146a3237a4dcc36a8",
-    "Icarus_livery_4_m.png": "37f4e40eccf6719daf4c395189b282fd983b692ecb5e78f0f6890fd487b20e9d"
+    "Icarus_livery_1.png": "15ca5c1afd4c311fe568ed2e0c2879e87be6fce21b4b732ad6861c1cf941f68b",
+    "Icarus_livery_2.png": "e760a08ad73038a102849e248bd014452cef93e3ab2d25b8bf106bb9661c5ce0",
+    "Icarus_livery_3.png": "bc2202e7b77cbede18a70659937e73a8c02b276b180b7db79e179991d7a33347",
+    "Icarus_livery_4.png": "7c338a40375ee4e31284ecc54bd0cfdbfec80b5c5cd851b746eea9a43b1f9a34",
+    "Icarus_livery_4_m.png": "b0808fa145e7dd74fbedb08d2567e1c599ed67c2c673d215ca47a292a97beefb"
   }
 }

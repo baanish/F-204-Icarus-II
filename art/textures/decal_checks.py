@@ -84,11 +84,12 @@ def whole(position, side_mask, placement, decal, to_uv, side):
     v, u = np.mgrid[:ph:stride, :pw:stride]
     ink = decal[v, u, 3] > .5
     u, v = u[ink] / (pw - 1), v[ink] / (ph - 1)
-    # Invert the same projection used by the compositor, including the right wing's signed x centre.
+    # Invert the same affine projection used by the compositor, including the right wing's signed x centre and the
+    # quarter-turned lettering, whose u follows the second coordinate.
     centre = cy * side if placement[2][0] in TOP_PARTS else cy
-    u0, v0 = to_uv(np.array([centre, centre + 1]), np.array([cz, cz + 1]), side)
-    y = centre + (u - u0[0]) / (u0[1] - u0[0])
-    z = cz + (v - v0[0]) / (v0[1] - v0[0])
+    u0, v0 = to_uv(np.array([centre, centre + 1, centre]), np.array([cz, cz, cz + 1]), side)
+    step = np.array([[u0[1] - u0[0], u0[2] - u0[0]], [v0[1] - v0[0], v0[2] - v0[0]]])
+    y, z = np.array([[centre], [cz]]) + np.linalg.solve(step, np.stack((u - u0[0], v - v0[0])))
     texels = projection_coordinates(position[side_mask], placement)
     if not len(texels):
         return len(y), [cy, cz]
