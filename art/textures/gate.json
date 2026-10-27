@@ -1,8 +1,8 @@
 {
   "pipeline_accepted": false,
-  "geometry_commit": "0b7eccaef62acd1d413b1cc588fd84da7b490685",
+  "geometry_commit": "ed342dbce71d9fb5bcf787daf3a47e1406d1c553",
   "inputs": {
-    "art/export-manifest.json": "ad5343c6eca050fb9eafd43d21449aca9ad263a3416e131312b85428da9f9d45",
+    "art/export-manifest.json": "7a17734d3ddcad6fb215fe2f925f2ab786dbed31d047228769a397fd81fa8966",
     ".cache/review/wave2/p9b/02/geometry_maps.npz": "e8c6191c2f066897fc168b78208fced4d8c7ff2a84009a4194d68b42826af202",
     ".cache/review/wave2/p9b/02/atlas_geometry.npz": "4eca86628d0f5c531db782e8bacd7e4f167aa156c74c01166d405792ffd895e9",
     ".cache/review/wave2/p9b/02/ao_maps.npz": "0ec5e90b0920e54ef8601fd2224435cca7ff7a6a980dc8073bff67f6109f4a64",
@@ -663,7 +663,7 @@
     "art/textures/generated/full/wing_upper_roughness.generation.json": "51df49027cc943e03f0c3a83a1fc2f46b55a2b09ecbd27ce771f9e87e3115bf3",
     "art/textures/generated/full/wing_upper_roughness.png": "6575e14079aa9077476c78525b3f8dfdd90a666ab025ff16b5d8ff2185c46d32",
     "art/textures/generated/full/wing_upper_roughness.prompt.txt": "d5201c3bb4a8ba410617b95109d625079db078d180fe499287f774ac79ed9ab6",
-    "art/textures/generated/full/source-atlas/provenance.json": "5bdbb63c9f0e9f5f6218a75eaa147addf53fc9350184388006b22f99a44c7a64",
+    "art/textures/generated/full/source-atlas/provenance.json": "a074645e32123711c2886b23614140f640a20cac5da48d95011ad8533e40421d",
     "art/textures/generated/full/source-atlas/README.md": "d66d050bc85e24ee0df85cb0e17d9c65e660bdc8a401a20abb6a64d93965334c",
     "art/textures/generated/full/source-atlas/current/aileron_L_all.mask.png": "662d2f772a93567192d7ef3f4eff8e7ae11918c5fe5b30c0688b49f7cbe96aa2",
     "art/textures/generated/full/source-atlas/current/aileron_L_visible.source-transfer.mask.png": "2b3d660e7571aae02e4613969b0893bf0988d32761ab82dfdd51e65b13dbcba8",

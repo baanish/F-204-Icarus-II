@@ -90,6 +90,7 @@ INTERNALS = {
                                 (9.06, 10.78, 0.55, 0.97, -0.56, 0.09), (9.06, 10.78, 0.17, 0.97, -0.56, -0.10)],
                       "mass_kg": 0},
     "bay_inset": 0.0005,  # the gear wells' walls this far inside the skin (the doors' own gap is gear.DOOR_GAP)
+    "bay_duct_gap": 0.01,  # the main wells' roofs this far below the ducts' walls
 }
 
 
@@ -539,13 +540,21 @@ def _build(p, mats):
         parts.append(tag(obj, role, "fuselage", I[name]["mass_kg"]))
     bpy.data.objects.remove(inner, do_unlink=True)
     # The gear wells run out to just inside the skin: a well a compartment's inset short of it would leave a slot
-    # round the open doors that looks past the well's walls into the structure.
+    # round the open doors that looks past the well's walls into the structure. The main wells' roofs stand above the
+    # ducts' flattened floor where it dips at the wells' ends; cut clear of the ducts, as the frames are, or they stand
+    # inside the intakes. Over the middle the floor stands only 8 to 15 mm above the roof, so a wider clearance
+    # would cut the whole roof down.
+    ducts = duct_cutter(p, I["bay_duct_gap"])
     for name, side in (("nose_gear_bay", 1), ("main_gear_bay_L", 1), ("main_gear_bay_R", -1)):
         boxes = bay_boxes(name[:13], side)
         inner = compartment_solid(p, I["bay_inset"], min(b[0] for b in boxes) - 0.15, max(b[1] for b in boxes) + 0.15)
         obj = clip_to(boxes_solid(name, boxes), inner)
+        if name.startswith("main"):
+            subtract(obj, ducts)
         parts.append(tag(bi.finish(obj, mats["gear_bay"], smooth=False), "gear_bay", "fuselage"))
         bpy.data.objects.remove(inner, do_unlink=True)
+    for c in ducts:
+        bpy.data.objects.remove(c, do_unlink=True)
 
     mesh = I["cell_mesh"]
     cutters = duct_cutter(p, I["duct_clearance"], mesh["duct_points"], mesh["duct_stations"], mesh["floor_step"])

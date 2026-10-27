@@ -245,7 +245,7 @@ def build_ducts(p, mats):
         bm.free()
         _, cx, cz, _ = p["duct"][1]
         bi.inward_fix(obj, bi.P(stations[0], side * cx, cz))
-        parts.append(bi.finish(obj, mats["mechanical"]))
+        parts.append(bi.finish(obj, mats["body"]))
         obj.data.materials.append(mats["duct"])
         obj.data.polygons[-1].material_index = 1  # the cap at the engine face
     return parts
@@ -374,16 +374,14 @@ def build_mouth(p, mats):
     width = len(rings[0])
     faces = [(j * width + k, (j + 1) * width + k, (j + 1) * width + k + 1, j * width + k + 1)
              for j in range(len(rings) - 1) for k in range(width - 1)]
-    indices = [1 if k == width - 2 else 0 for j in range(len(rings) - 1) for k in range(width - 1)]
-    parts = [detail_mesh("intake_mouth_" + sd, "intake_duct_" + sd, verts, faces,
-                         [mats["body"], mats["mechanical"]], indices, side)
+    parts = [detail_mesh("intake_mouth_" + sd, "intake_duct_" + sd, verts, faces, [mats["body"]], [0] * len(faces), side)
              for side, sd in ((1, "L"), (-1, "R"))]
     return parts + mouth_corners(p, mats, edge)
 
 
 def mouth_corners(p, mats, edge):
     """The lobe's open edge is an arc; past each end the opening runs on to the body ahead, leaving a wedge between
-    the duct, the skin at the lip and the body ahead that looks into the fuselage. Close each with a trim sheet in
+    the duct, the skin at the lip and the body ahead that looks into the fuselage. Close each with a skin sheet in
     the lip's plane, from just inside the duct out to the skin, in 3 degree steps to where the skin meets the body
     ahead, which hides the rest; the fuel cells fill the body ahead behind it. At the bottom the skin there is the
     trough's, which keeps its distance from the ducts (stations.DUCT_CLEARANCE), so the sheets are the skin's, not
@@ -416,7 +414,7 @@ def mouth_corners(p, mats, edge):
         faces += [(start + 3 * j + k, start + 3 * j + k + 1, start + 3 * j + k + 4, start + 3 * j + k + 3)
                   for j in range((len(verts) - start) // 3 - 1) for k in range(2)]
     faces = facing(verts, faces, Vector((0, -1, 0)))  # seen from ahead, through the mouth
-    return [detail_mesh("intake_corners_" + sd, "skin_mid_" + sd, verts, faces, [mats["mechanical"]],
+    return [detail_mesh("intake_corners_" + sd, "skin_mid_" + sd, verts, faces, [mats["body"]],
                         [0] * len(faces), side) for side, sd in ((1, "L"), (-1, "R"))]
 
 
