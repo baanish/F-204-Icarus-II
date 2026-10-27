@@ -20,7 +20,7 @@ import internals
 
 
 def original_functions(path, names, namespace):
-    source = subprocess.check_output(["git", "show", "4d815d5:" + path], cwd=ROOT).decode()
+    source = subprocess.check_output(["git", "show", "71736602783e01df01309a82d7baffe56672515c:" + path], cwd=ROOT).decode()
     tree = ast.parse(source)
     functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name in names]
     for function in functions:
