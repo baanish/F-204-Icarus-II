@@ -10,7 +10,7 @@ namespace Icarus;
 
 /// <summary>
 /// The F-204 Icarus II plugin: config (BepInEx/config/baanish.icarus.cfg), the "[Icarus]" logger, the Harmony install,
-/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver, the cockpit's live instruments and the live tuning knobs.
+/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver, the cockpit's live instruments, the tip tanks' fuel and the live tuning knobs.
 /// </summary>
 [BepInPlugin(Guid, "F-204 Icarus II", Version)]
 public sealed class IcarusPlugin : BaseUnityPlugin
@@ -24,7 +24,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Seconds between a mission starting and the supply repair and stock-mission supply, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(BulletHitLog.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(SelfCollision.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(GunTargetTestSupport.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(BulletHitLog.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(SelfCollision.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(GunTargetTestSupport.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(TipTanks.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 

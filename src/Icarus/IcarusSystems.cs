@@ -39,6 +39,11 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<EjectLog>();
         }
 
+        if (!__instance.TryGetComponent<TipTanks>(out _))
+        {
+            __instance.gameObject.AddComponent<TipTanks>();
+        }
+
         if (!__instance.TryGetComponent<SectionInertia>(out var sections))
         {
             sections = __instance.gameObject.AddComponent<SectionInertia>();

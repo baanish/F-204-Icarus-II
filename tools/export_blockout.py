@@ -7,7 +7,8 @@ its axis and a <name>_visible mesh child. Optional Colliders and LOD1 meshes mus
 be identity-parented to their owner. Pivots and axes are world-space; mesh bounds
 are part-local. hinge_axis_unity is world-space positive Blender hinge X. Each mesh part lists its uv_layers, and
 design_eye is the canopy's design eye point (canopy.EYE), world-space, and conformal the conformal
-hardpoint and the Icarus's own conformal mounts (stations.export).
+hardpoint and the Icarus's own conformal mounts (stations.export), and tip_tank the tip tank store (tip_tanks.export) with its own
+FBX, in the mount's frame.
 Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
 """
 
@@ -27,6 +28,7 @@ from scrub_fbx import scrub_file
 import build_icarus
 import canopy
 import stations
+import tip_tanks
 
 MAX_HULL = 255
 
@@ -154,6 +156,7 @@ def main():
     colliders = children_in("Colliders", by_name)
     lods = children_in("LOD1", by_name)
     parent_of = {o.name: o.parent.name if o.parent else None for o in objs}
+    tank_layout = tip_tanks.export(to_unity, coll)  # reads the wing by its name, before the renames below
     # Free the part names: Unity names each imported mesh after its FBX node.
     for obj in objs:
         obj.name = "source_" + obj.name
@@ -206,12 +209,26 @@ def main():
             bpy.data.objects.remove(temp, do_unlink=True)
         for _, mesh in meshes:
             bpy.data.meshes.remove(mesh)
+    # The tip tank, a store: its mesh in the mount's frame, so the temporary object sits at the origin.
+    tank = bpy.data.objects[tip_tanks.NAME]
+    tank.name = "source_" + tip_tanks.NAME
+    mesh = evaluated_mesh(tank, tip_tanks.NAME)
+    temp = bpy.data.objects.new(tip_tanks.NAME, mesh)
+    scratch.objects.link(temp)
+    fbx = out / f"{tip_tanks.NAME}.fbx"
+    export_fbx(fbx, [temp])
+    lo, hi = mesh_bounds(mesh)
+    store = dict(tank_layout, fbx=fbx.name, sha256=sha256(fbx), tris=tris(mesh),
+                 bounds_unity=bounds_unity(lo, hi), materials=material_tris(mesh), uv_layers=[l.name for l in mesh.uv_layers])
+    bpy.data.objects.remove(temp, do_unlink=True)
+    bpy.data.meshes.remove(mesh)
     source = REPO / "art/blender/build_icarus.py"
     eye = build_icarus.P(*canopy.EYE)
     manifest = {"source_generator": source.relative_to(REPO).as_posix(), "source_sha256": sha256(source),
                 "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
                 "design_eye": {"blender": [round(c, 5) for c in eye], "unity": to_unity(eye)},
                 "conformal": stations.export(to_unity),
+                "tip_tank": store,
                 "parts": report}
     (out / "blockout.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
     count = sum(p["fbx"] is not None for p in report.values())

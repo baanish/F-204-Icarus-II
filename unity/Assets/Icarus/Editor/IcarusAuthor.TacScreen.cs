@@ -17,7 +17,8 @@ namespace Icarus.Editor
 
         // The Revoker's sets by its HardpointIndex: wingtips 0 and 5, wing pylons 1 and 4, bays 2, cannon 3. Each Icarus
         // station takes the Revoker marker standing nearest its place on the Revoker's silhouette: the conformal stations
-        // take the bay and cannon markers, moved and retitled.
+        // take the bay and cannon markers, moved and retitled, and the tip tanks (HardpointIndex 6 and 7) share the wingtip
+        // markers with the tip missiles they replace.
         private static void BuildTacScreen(Build b)
         {
             var cockpit = b.Parts["cockpit_cell"].GetComponentsInChildren(GameType("Cockpit"), true).Single();
@@ -45,7 +46,7 @@ namespace Icarus.Editor
                 (int Left, int Right) Sides(int a, int c) => X(a) <= X(c) ? (a, c) : (c, a);
                 var (tipL, tipR) = Sides(0, 5);
                 var (pylonL, pylonR) = Sides(1, 4);
-                var map = new[] { tipL, tipR, pylonL, pylonR, 2, 3 };
+                var map = new[] { tipL, tipR, pylonL, pylonR, 2, 3, tipL, tipR };
                 elements.arraySize = map.Length;
                 for (var i = 0; i < map.Length; i++)
                 {

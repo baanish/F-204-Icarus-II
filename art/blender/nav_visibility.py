@@ -168,40 +168,67 @@ def mesh_tree(mesh):
     return BVHTree.FromPolygons([blender(v) for v in verts], tris.tolist(), all_triangles=True)
 
 
+def triangles(points, tris):
+    """Each triangle's centre and its normal: the emitters a lens shines from. The Unity-to-Blender basis reflects
+    handedness, so the winding is reversed."""
+    faces = [[points[i] for i in t] for t in tris]
+    return [(sum(f, Vector()) / 3, (f[2] - f[0]).cross(f[1] - f[0]).normalized()) for f in faces]
+
+
+def sector(side, sign, emitters, trees):
+    """The wing sector on one side, 0 to 110 degrees outboard and 90 above and below, against trees: blocked where no
+    lamp in emitters (name -> triangles) sees the direction. Returns the total, the blocked count, per-lamp counts
+    and the first blocked directions."""
+    blocked, each, examples, total = 0, dict.fromkeys(emitters, 0), [], 0
+    for az in range(0, 111, STEP_DEG):
+        for el in range(-90, 91, STEP_DEG):
+            a, e = math.radians(az), math.radians(el)
+            direction = Vector((sign * math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)))
+            visible = []
+            for name, faces in emitters.items():
+                clear = any(normal.dot(direction) > 1e-7 and
+                            all(tree.ray_cast(point + direction * 0.00001, direction, 40)[0] is None for tree in trees)
+                            for point, normal in faces)
+                visible.append(clear)
+                each[name] += not clear
+            total += 1
+            if not any(visible):
+                blocked += 1
+                if len(examples) < 8:
+                    examples.append([az, el])
+    return total, blocked, each, examples
+
+
+def tank_lamps(icarus, lenses):
+    """With a tip tank on each Tip Tank station: its mesh as a BVH per side, and each tank's two lenses (Blender
+    world vertices and the stock triangles), named after the wing lens they follow."""
+    import tip_tanks
+
+    tank = bpy.data.objects[tip_tanks.NAME]
+    trees, lamps = [], {}
+    for side, station in tip_tanks.stations_world(icarus).items():
+        trees.append(BVHTree.FromPolygons([station @ v.co for v in tank.data.vertices], [tuple(p.vertices) for p in tank.data.polygons]))
+        verts, tris = lenses[side]
+        for name, anchor in tip_tanks.lens_anchors().items():
+            lamps["tip_tank_lens_%s_%s" % (name, side)] = ([station @ anchor @ blender(v) for v in verts], tris)
+    return trees, lamps
+
+
 def measure(icarus):
     mounts, lenses = stock_geometry()
     lamps = lamp_meshes(icarus, lenses)
     stations = tip_stations(icarus)
     airframe = solids.bvh([o for o in icarus.all_objects if o.type == "MESH" and o.get("role") != "cockpit_view"])
-    emitters = {}
-    for name, (verts, tris) in lamps.items():
-        points = [blender(v) for v in verts]
-        faces = [[points[i] for i in t] for t in tris]
-        # The Unity-to-Blender basis reflects handedness, so reverse the winding.
-        emitters[name] = [(sum(f, Vector()) / 3, (f[2] - f[0]).cross(f[1] - f[0]).normalized()) for f in faces]
+    emitters = {name: triangles([blender(v) for v in verts], tris) for name, (verts, tris) in lamps.items()}
     results = []
-    for key, (mesh, _) in mounts.items():
-        stores = [mesh_tree((pos + mesh[0] @ rot.T, mesh[1])) for pos, rot in stations.values()]
+    loads = [(key, [mesh_tree((pos + mesh[0] @ rot.T, mesh[1])) for pos, rot in stations.values()], {})
+             for key, (mesh, _) in mounts.items()]
+    tank_trees, tank = tank_lamps(icarus, lenses)
+    loads.append(("tip_tank", tank_trees, {name: triangles(points, tris) for name, (points, tris) in tank.items()}))
+    for key, stores, extra in loads:
         for side, sign in (("L", 1), ("R", -1)):
-            names = [name for name in lamps if name.endswith("_" + side)]
-            blocked, each, examples, total = 0, dict.fromkeys(names, 0), [], 0
-            for az in range(0, 111, STEP_DEG):
-                for el in range(-90, 91, STEP_DEG):
-                    a, e = math.radians(az), math.radians(el)
-                    direction = Vector((sign * math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)))
-                    visible = []
-                    for name in names:
-                        clear = any(normal.dot(direction) > 1e-7 and
-                                    all(tree.ray_cast(point + direction * 0.00001, direction, 40)[0] is None
-                                        for tree in [airframe] + stores)
-                                    for point, normal in emitters[name])
-                        visible.append(clear)
-                        each[name] += not clear
-                    total += 1
-                    if not any(visible):
-                        blocked += 1
-                        if len(examples) < 8:
-                            examples.append([az, el])
+            lit = {name: faces for name, faces in list(emitters.items()) + list(extra.items()) if name.endswith("_" + side)}
+            total, blocked, each, examples = sector(side, sign, lit, [airframe] + stores)
             row = dict(side=side, store=key, total=total, blocked=blocked, fraction=blocked / total,
                        lamps={n: dict(blocked=b, fraction=b / total) for n, b in each.items()}, examples=examples)
             results.append(row)
@@ -215,9 +242,9 @@ def measure(icarus):
 def check(icarus):
     result = measure(icarus)
     if any(r["blocked"] for r in result["results"]):
-        raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store")
+        raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store or tip tank")
     result["aft"] = measure_aft(icarus)
     if result["aft"]["worst_fraction"]:
         raise ValueError("lights: rear position-light sector has blocked rays across stabilator travel")
-    print("nav visibility PASS: zero blocked directions for every allowed tip store and rear lamp pose")
+    print("nav visibility PASS: zero blocked directions for every allowed tip store, the tip tanks and every rear lamp pose")
     return result

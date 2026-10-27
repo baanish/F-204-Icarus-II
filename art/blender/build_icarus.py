@@ -1419,7 +1419,8 @@ def build_cached(repo=None, overrides=None):
 
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
 # (review_sheet.py).
-MODULES = ("parts", "speed_brakes", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit", "uvs")
+MODULES = ("parts", "speed_brakes", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit", "uvs",
+           "tip_tanks")
 
 
 def modules():
@@ -1472,6 +1473,9 @@ def _build(repo):
 
     uvs.unwrap(TARGET)
     lights.project_nav_paint(TARGET)
+    import tip_tanks
+
+    tip_tanks.build(p, mats, TARGET)  # a store in its own collection, painted from the wing's atlas
     hulls.paint_lods()
     skin_normals(TARGET)
     import checks

@@ -17,7 +17,7 @@ import build_icarus as bi
 import cycles_device
 
 
-COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References")
+COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References", "Stores")
 TEXTURES = tuple("Icarus_Cockpit_" + suffix + ".png" for suffix in ("b", "n", "m", "ao"))
 
 

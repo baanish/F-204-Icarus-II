@@ -10,7 +10,7 @@ Version 0.0.1, an early build. It flies, fights and comes apart in game, and it 
 
 - A flyable Primeva jet with a first-pass damage model: breakable parts and internal structure. A missile hit tears off wings, the engine and tail surfaces, and the airframe holds together under any load its flight controls allow.
 - A custom cockpit on the game's own displays and HUD, with a live standby attitude ball, fuel gauge and clock.
-- Six stations: a wingtip rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
+- Six stations: a wingtip that carries a droppable Starfighter tip tank or a missile rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
 - An iris nozzle that opens with afterburner and vectors thrust up to 4 degrees in pitch and yaw.
 - Four PALA liveries: Navy, Black, Desert splinter, and Bare Metal with high-visibility bands.
 - Its own engine, gear and belly-scrape sounds.
@@ -47,7 +47,7 @@ NOMM and Thunderstore packages are coming. This section will say how to install 
 The Icarus uses the game's normal controls, with no new key bindings.
 
 - **Where to find it.** It is a Primeva aircraft, offered at hardened aircraft shelters and medium hangars. In stock missions Primeva's AI also starts with four, and one Primeva factory per mission builds more. To turn that off, set `StockMissionSupply = false` under `[Missions]` in `BepInEx/config/baanish.icarus.cfg`. The host's setting applies from the next mission load.
-- **Loadouts.** Interceptor is the default, with Air Superiority, Strike and Close Support beside it. The wingtips take the MMR-S3 and IRM-S2. The pylon takes one store or a twin air-to-air rack. The conformal stations take the MMR-S3, IRM-S2 and AAM-29.
+- **Loadouts.** Interceptor is the default, with Air Superiority, Strike and Close Support beside it. Interceptor carries the tip tanks, 170 US gal each, burned before the internal fuel; select them and fire to drop the pair, and the fuel left in them goes with them. The other loadouts carry wingtip missiles. The wingtips take the tip tanks, the MMR-S3 or the IRM-S2. The pylon takes one store or a twin air-to-air rack. The conformal stations take the MMR-S3, IRM-S2 and AAM-29.
 - **Conformal missiles drop before they light.** Each slides 1.5 m down out of its trough first, so expect a short pause between the trigger and the motor.
 - **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the tanks in a little over six minutes.
 - **Flaps are automatic.** The leading-edge and trailing-edge flaps come out with low airspeed.

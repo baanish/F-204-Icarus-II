@@ -20,7 +20,9 @@ namespace Icarus.Editor
             for (var i = 0; i < sets.arraySize; i++)
             {
                 var set = sets.GetArrayElementAtIndex(i);
-                if (set.FindPropertyRelative("precludingHardpointSets").arraySize > 0) p.Add(names[i] + " precludes another set");
+                var precludes = set.FindPropertyRelative("precludingHardpointSets");
+                var excluded = Enumerable.Range(0, precludes.arraySize).Select(k => precludes.GetArrayElementAtIndex(k).intValue).ToArray();
+                if (!excluded.SequenceEqual(TipTankExclusions[i])) p.Add($"{names[i]} precludes sets [{string.Join(", ", excluded)}], expected [{string.Join(", ", TipTankExclusions[i])}]");
                 var hardpoints = set.FindPropertyRelative("hardpoints");
                 if (hardpoints.arraySize != 2) { p.Add($"{names[i]} has {hardpoints.arraySize} hardpoints"); continue; }
                 for (var j = 0; j < 2; j++)
@@ -53,7 +55,7 @@ namespace Icarus.Editor
             }
             if (loadouts.arraySize < 2) p.Add("fewer than two ordinary loadouts (WeaponManager falls back to loadouts[1])");
             if (lengths.Any(l => l != SetNames.Length)) p.Add("loadout lengths [" + string.Join(", ", lengths) + "]");
-            return $"sets [{string.Join(", ", names)}], hardpoints 0..{2 * SetNames.Length - 1} left before right, within {worst * 1000f:F1} mm of their measured positions, loadout lengths [{string.Join(", ", lengths)}]";
+            return $"sets [{string.Join(", ", names)}], Wingtip and Tip Tank precluding each other, hardpoints 0..{2 * SetNames.Length - 1} left before right, within {worst * 1000f:F1} mm of their measured positions, loadout lengths [{string.Join(", ", lengths)}]";
         }
 
         // A14: every offered mount, twins and the mod's own included, hung at each of its hardpoints, its colliders against

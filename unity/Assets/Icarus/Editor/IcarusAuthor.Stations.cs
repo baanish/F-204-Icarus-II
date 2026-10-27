@@ -24,6 +24,10 @@ namespace Icarus.Editor
             // main wheels' wells (art/blender/stations.py).
             { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.453f, 1.170f), 0f) },
             { "hardpoint_conformal_R", (new Vector3(0.550f, -0.453f, 1.170f), 0f) },
+            // On the tank's axis, outboard of the tip face by the tank's radius less the 0.03 m the tip face runs into it,
+            // the tank's cylinder centred on the tip chord (art/blender/tip_tanks.py hardpoint).
+            { "hardpoint_tiptank_L", (new Vector3(-3.630f, -0.562f, -2.725f), 0f) },
+            { "hardpoint_tiptank_R", (new Vector3(3.630f, -0.562f, -2.725f), 0f) },
         };
         private const float MeasuredTolerance = 0.001f;
         private const string MountFolder = ModFolder + "/Mounts";
@@ -147,7 +151,7 @@ namespace Icarus.Editor
             return mesh;
         }
 
-        // Six stations in SetNames order, each set [L, R] with HardpointIndex 0..5 left before right.
+        // Eight stations in SetNames order, each set [L, R] with HardpointIndex 0..7 left before right.
         private static void BuildStations(Build b)
         {
             // A wing station hangs under the middle of its pylon's flat lower edge, as stock blades put theirs, so every
@@ -204,6 +208,11 @@ namespace Icarus.Editor
                 return new Vector3(x, skin.Min() + 0.005f, z);
             }
 
+            // A tip tank station sits on the tank's own axis (art/blender/tip_tanks.py), unrolled, so one mount hangs the
+            // tank square on both tips.
+            var tank = Vec3(TipTankLayout()["hardpoint_unity"]) - b.Blockout.Origin;
+            Vector3 TankPoint(string side) => new Vector3((side == "L" ? 1f : -1f) * tank.x, tank.y, tank.z);
+
             // Pylon names the blade and plug a wing station shows and hides by load. Roll is the left station's turn about
             // the forward axis; the right one turns the other way.
             var sets = new (string Name, string Part, string Pylon, Func<string, Vector3> Where, float Roll)[]
@@ -211,6 +220,7 @@ namespace Icarus.Editor
                 (SetNames[0], "wing_spar_", null, TipPoint, -90f),
                 (SetNames[1], "wing_spar_", "pylon_inner_", s => PylonPoint("pylon_inner_" + s), 0f),
                 (SetNames[2], RootPart, null, ConformalPoint, 0f),
+                (SetNames[3], "wing_spar_", null, TankPoint, 0f),
             };
             var manager = b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager"));
             var so = new SerializedObject(manager);
@@ -221,7 +231,10 @@ namespace Icarus.Editor
             {
                 var set = list.GetArrayElementAtIndex(i);
                 set.FindPropertyRelative("name").stringValue = sets[i].Name;
-                set.FindPropertyRelative("precludingHardpointSets").arraySize = 0;
+                var precludes = set.FindPropertyRelative("precludingHardpointSets");
+                precludes.arraySize = TipTankExclusions[i].Length;
+                for (var k = 0; k < TipTankExclusions[i].Length; k++)
+                    precludes.GetArrayElementAtIndex(k).intValue = TipTankExclusions[i][k];
                 set.FindPropertyRelative("SymmetryWithPrev").boolValue = false;
                 set.FindPropertyRelative("SymmetryName").stringValue = string.Empty;
                 var options = set.FindPropertyRelative("weaponOptions");
