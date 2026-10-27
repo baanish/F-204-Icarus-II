@@ -2,9 +2,9 @@
 
 The 33 accepted source group names and native chart layouts stay in `native/parts.json`.
 Its masks, ordered transfers, provenance records and input hashes are persisted here.
-Original generated PNGs, guides, templates, contexts and prompts remain in their source folders.
+Generated PNGs, guides and templates unpack into their source folders from the texture-sources ZIP; contexts and prompts stay there in git.
 Native registration still requires silhouette IoU >= 0.70 and density >= 180 px/m.
-Companion acceptance runs before remapping with the existing native alignment gates.
+Generated companions are not read; height and roughness derive from each base.
 
 `current/parts.json` assigns the current atlas through maps in `current/`.
 Each rule reads immutable generation-atlas indices and writes current-atlas indices.

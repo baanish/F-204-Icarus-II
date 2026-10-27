@@ -86,6 +86,8 @@ def stitch_source(name, material_only=False):
 
 
 if __name__ == '__main__':
+    from texture_sources import require_texture_sources
+    require_texture_sources()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('name')
     parser.add_argument('--material-only', action='store_true')

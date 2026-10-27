@@ -1,9 +1,9 @@
 {
   "method": "per-chart generated paint fit to exact template",
   "source": "art/textures/generated/full/canopy_all.png",
-  "source_sha256": "9e899baa020221d258e585c9bb1c96344773a2cef94cc638d5d78cb74ad8562f",
+  "source_sha256": "85787dbccc9836b13441c01696b5c4b6e2d2f80f5c50172d2da1182a5266bbc0",
   "output": "art/textures/generated/full/canopy_all.stitched.png",
-  "output_sha256": "a2ce29f5dcff771122757c9f55bf00fb97afb6d8f6c45154d25aed9f64ba24da",
+  "output_sha256": "507d231503803554a3a2972b6eb4fe55230e89f423dac30d1073c1bfd787bfd6",
   "native_size": [
     1254,
     1254

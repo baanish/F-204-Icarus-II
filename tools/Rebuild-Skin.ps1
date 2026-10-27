@@ -21,6 +21,10 @@ function Invoke-SkinStep([string]$Executable, [string[]]$Arguments) {
 
 Push-Location $repoRoot
 try {
+    if ($Part -ne 'blender') {
+        # The generated sources come from the release's texture-sources ZIP; this names the fetch command when absent.
+        Invoke-SkinStep 'python' @('art/textures/texture_sources.py')
+    }
     if ($Part -ne 'python') {
         foreach ($mode in @('prepare', 'audit')) {
             Invoke-SkinStep 'pwsh' @('-NoProfile', '-File', 'tools/Run-Blender.ps1', '--background', '--factory-startup',

@@ -10,7 +10,7 @@ import uuid
 import numpy as np
 from PIL import Image
 
-from full_skin_compose import _chart_registration, assemble_full, source_charts
+from full_skin_compose import COMPANION_FALLBACK, _chart_registration, assemble_full, source_charts
 from full_skin_registration import check_sources
 
 
@@ -46,10 +46,6 @@ class FullSkinComposeTests(unittest.TestCase):
         base = np.zeros((64, 64, 3), 'uint8')
         base[13:45, 19:51] = field[13:45, 19:51, None]
         self.save(self.generated / 'base.png', base)
-        height = np.full((64, 64), 128, 'uint8')
-        height[13:45, 19:51] = field[13:45, 19:51]
-        self.save(self.generated / 'part_height.png', height)
-        self.save(self.generated / 'part_roughness.png', height)
         target = np.array([22 * 32 + 24, 22 * 32 + 25])
         source = np.array([5 * 32 + 7, 7 * 32 + 9])
         np.savez(self.full / 'mirror.npz', target_indices=target, source_indices=source)
@@ -73,18 +69,14 @@ class FullSkinComposeTests(unittest.TestCase):
     def write(self, path, value):
         path.write_text(json.dumps(value))
 
-    def assemble(self, validator=None):
-        if validator is None:
-            validator = lambda *args: {'accepted': True, 'offset_xy': [0., 0.]}
-        with patch('full_skin_compose.validate_companion', side_effect=validator):
-            return assemble_full(self.path)
+    def assemble(self):
+        return assemble_full(self.path)
 
     def test_repacked_atlas_registers_native_source_before_shared_remap(self):
         current = self.full / 'current.json'
         self.write(current, {'source_atlas_manifest': self.path.name,
                              'input_sha256': {self.path.name: hashlib.sha256(self.path.read_bytes()).hexdigest()}})
-        with patch('full_skin_compose.validate_companion', return_value={'accepted': True}), \
-                patch('source_atlas_mapping.remap_fields', side_effect=lambda fields, path: fields) as remap:
+        with patch('source_atlas_mapping.remap_fields', side_effect=lambda fields, path: fields) as remap:
             result = assemble_full(current)
         remap.assert_called_once()
         self.assertEqual(remap.call_args.args[1], current)
@@ -104,8 +96,6 @@ class FullSkinComposeTests(unittest.TestCase):
         result = self.assemble()
         # Target [5,7] maps to native x=27.71875, y=19.78125.
         self.assertAlmostEqual(result['base'][5, 7, 0], 167.5 / 255, places=6)
-        np.testing.assert_allclose(result['height'][self.mask], result['base'][self.mask, 0])
-        np.testing.assert_allclose(result['roughness'][self.mask], result['height'][self.mask])
         for key in ('base', 'height', 'roughness', 'height_valid', 'roughness_valid'):
             np.testing.assert_array_equal(result[key][22, 24:26], result[key][[5, 7], [7, 9]])
             np.testing.assert_array_equal(result[key][23, 24:26], result[key][22, [25, 24]])
@@ -120,8 +110,7 @@ class FullSkinComposeTests(unittest.TestCase):
         self.manifest['groups']['part']['charts'][0]['rotate_ccw'] = True
         self.write(self.path, self.manifest)
         result = self.assemble()
-        self.assertAlmostEqual(result['height'][5, 7], 181.0625 / 255, places=6)
-        np.testing.assert_allclose(result['height'][self.mask], result['base'][self.mask, 0])
+        self.assertAlmostEqual(result['base'][5, 7, 0], 181.0625 / 255, places=6)
 
     def test_same_guide_row_matches_positions_despite_top_pixel_jitter(self):
         # Identical shapes cannot disambiguate this pair. The right component
@@ -130,8 +119,6 @@ class FullSkinComposeTests(unittest.TestCase):
         base[13:45, 8:40] = 150
         base[12:44, 54:86] = 210
         self.save(self.generated / 'base.png', base)
-        self.save(self.generated / 'part_height.png', base[..., 0])
-        self.save(self.generated / 'part_roughness.png', base[..., 0])
         self.mask[:] = False
         self.mask[2:18, 3:19] = True
         self.mask[20:28, 3:11] = True
@@ -149,8 +136,6 @@ class FullSkinComposeTests(unittest.TestCase):
         self.assertEqual([c['native_px_per_m_min_axis'] for c in registrations], [300., 600.])
         self.assertAlmostEqual(result['base'][5, 7, 0], 150 / 255, places=6)
         self.assertAlmostEqual(result['base'][22, 7, 0], 210 / 255, places=6)
-        for kind in ('height', 'roughness'):
-            np.testing.assert_allclose(result[kind][self.mask], result['base'][self.mask, 0])
         preflight = check_sources(self.path)
         self.assertEqual(preflight['part']['status'], 'passed')
         self.assertEqual([c['source_box'] for c in preflight['part']['charts']],
@@ -180,8 +165,6 @@ class FullSkinComposeTests(unittest.TestCase):
         base = np.zeros((96, 96, 3), 'uint8')
         base[13:77, 19:83] = np.repeat(np.repeat(ring, 4, axis=0), 4, axis=1)[..., None] * 180
         self.save(self.generated / 'base.png', base)
-        for kind in ('height', 'roughness'):
-            self.save(self.generated / f'part_{kind}.png', base[..., 0])
         self.write(self.full / 'coverage.json', {'rules': [], 'assigned_texels': int(ring.sum())})
         result = self.assemble()
         evidence = result['report']['groups']['part']['registration'][0]
@@ -194,37 +177,13 @@ class FullSkinComposeTests(unittest.TestCase):
         self.assertEqual(preflight['part']['status'], 'passed')
         self.assertEqual(preflight['part']['charts'][0]['normalized_silhouette_iou'], .875)
 
-    def test_rejected_companion_retains_native_metrics_and_uses_base_fallback(self):
-        def validator(base, companion, kind):
-            return {'accepted': kind == 'roughness', 'offset_xy': [2., 0.],
-                    'precision': .5, 'reasons': ['misplaced']}
-        result = self.assemble(validator)
-        self.assertFalse(result['height_valid'].any())
-        self.assertTrue(result['roughness_valid'][22, 24])
-        report = result['report']['groups']['part']['companions']['height']
-        self.assertEqual(report['status'], 'fallback')
-        self.assertEqual(report['validation']['offset_xy'], [2., 0.])
-        self.assertGreater(result['base'][5, 7, 0], 0)
-
-    def test_explicit_generation_failure_falls_back_but_incomplete_generation_fails(self):
-        (self.generated / 'part_height.png').unlink()
-        with self.assertRaisesRegex(ValueError, 'generation.*record'):
-            self.assemble()
-        self.write(self.full / 'part_height.generation.json',
-                   {'accepted': False, 'output': None, 'generation_error': 'image tool unavailable'})
+    def test_companion_images_on_disk_are_never_read(self):
+        (self.generated / 'part_height.png').write_bytes(b'not a png')
         result = self.assemble()
-        self.assertFalse(result['height_valid'].any())
-        report = result['report']['groups']['part']['companions']['height']
-        self.assertEqual(report['generation']['generation_error'], 'image tool unavailable')
-        self.assertEqual(report['status'], 'fallback')
-
-    def test_native_mismatch_is_rejected_without_resizing_or_validator(self):
-        self.save(self.generated / 'part_height.png', np.full((48, 48), 128, 'uint8'))
-        calls = []
-        result = self.assemble(lambda b, c, k: calls.append(k) or {'accepted': True})
-        self.assertEqual(calls, ['roughness'])
-        self.assertFalse(result['height_valid'].any())
-        self.assertIn('native dimensions differ', str(result['report']))
+        self.assertFalse(result['height_valid'].any() or result['roughness_valid'].any())
+        for kind in ('height', 'roughness'):
+            self.assertEqual(result['report']['groups']['part']['companions'][kind], COMPANION_FALLBACK)
+        self.assertEqual(result['report']['height_accepted_texels'], 0)
 
     def test_group_mask_crop_excludes_unpainted_chart_corners(self):
         self.mask[2:9, 3:10] = False

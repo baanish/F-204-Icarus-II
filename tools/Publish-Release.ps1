@@ -10,8 +10,9 @@ $ErrorActionPreference = 'Stop'
 if ($Tag -notmatch '^v\d+\.\d+\.\d+$') { throw 'Expected release tag v<major>.<minor>.<patch>' }
 $Directory = (Resolve-Path -LiteralPath $Directory).Path
 $repository = 'baanish/F-204-Icarus-II'
-# GitHub returns assets in case-insensitive name order; NOMNOM imports the first asset.
-$assets = @("Icarus-$Tag-nomm.zip", "Icarus-$Tag-plugin-only.zip", 'RELEASE-NOTES.md', 'SHA256SUMS.txt')
+# GitHub returns assets in case-insensitive name order; NOMNOM imports the first asset, so the NOMM archive
+# uploads first and every other name sorts after it.
+$assets = @("Icarus-$Tag-nomm.zip", "Icarus-$Tag-plugin-only.zip", "Icarus-$Tag-texture-sources.zip", 'RELEASE-NOTES.md', 'SHA256SUMS.txt')
 foreach ($name in $assets) {
     if (-not (Test-Path -LiteralPath (Join-Path $Directory $name) -PathType Leaf)) { throw "Missing release asset: $name" }
 }

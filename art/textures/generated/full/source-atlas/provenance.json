@@ -1,6 +1,6 @@
 {
   "source_generation_inputs": {
-    "art/textures/generated/full/source-atlas/native/generation-inputs/old-bake/geometry_maps.npz": "1964da8c558eb9efb6c8a3842af95340de68b12e0f29e7a9a4102c4d8c47a18c",
+    "art/textures/generated/full/source-atlas/native/generation-inputs/old-bake/geometry_maps.npz": "3811f1dcbfec02f6a83d995273be16bf148d39abda67aa74bf014b8572e661a5",
     "art/textures/generated/full/source-atlas/native/generation-inputs/old-bake/atlas_triangles.json": "7b4278bd8a89793c5692162b4b18464459dd448922909f82c421198073429980",
     "art/textures/generated/full/source-atlas/native/generation-inputs/old-pilot/structure.json": "30c56384e9b393961fba1e751bf26a51a2a3d71f779000cdc9d2939c32d0ca6a",
     "art/textures/generated/full/source-atlas/native/generation-inputs/old-pilot/parts.json": "ccb987b48db6990a8bae49b3f5a885e866ebf9a991fcdf169bb4484434e481b7",
@@ -12,7 +12,7 @@
     "normalized_silhouette_iou_min": 0.7,
     "native_px_per_m_min": 180
   },
-  "native_companion_alignment": "unchanged companion_maps.py gates before remapping",
+  "native_companion_alignment": "none; generated companions are not read",
   "mapping_policy": {
     "position_tolerance_m": 0.015,
     "normal_cosine_min": 0.95,

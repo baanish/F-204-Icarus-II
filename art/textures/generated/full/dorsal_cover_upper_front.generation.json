@@ -2,7 +2,7 @@
   "tool": "image_gen.imagegen built-in",
   "original": "art/textures/generated/full/dorsal_cover_upper_front.png",
   "output": "art/textures/generated/full/dorsal_cover_upper_front.png",
-  "sha256": "4f38b7879c25c9f72933dbaef61b0b1aad5171124ff9796b938a8f41f8091bc3",
+  "sha256": "b0e0fab0329f5235f4ce8675df0e7c110eb96016118877db77c0c344fd7cd0ce",
   "native_size": [
     1254,
     1254

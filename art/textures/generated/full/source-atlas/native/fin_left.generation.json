@@ -2,7 +2,7 @@
   "tool": "image_gen.imagegen built-in",
   "original": "art/textures/generated/pilot2/fin_left.png",
   "output": "art/textures/generated/pilot2/fin_left.png",
-  "sha256": "c0480017587b5637fb9df92f0921c990fb095bd7b9bcd2dd9d432de5d629668a",
+  "sha256": "adeda1ec0e4dec3b728d1c4d433e781b28742ce2c5b57f30c0dff36d0bf0477c",
   "native_size": [
     1254,
     1254

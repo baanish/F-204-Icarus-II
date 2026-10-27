@@ -206,4 +206,6 @@ def check(write=True):
 
 
 if __name__ == '__main__':
+    from texture_sources import require_texture_sources
+    require_texture_sources()
     check(write='--no-write' not in sys.argv)

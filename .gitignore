@@ -33,3 +33,7 @@ unity/Assets/Plugins/Icarus.dll.meta
 unity/Assets/TextMesh Pro/
 unity/Assets/TextMesh Pro.meta
 unity/.vsconfig
+# Texture source images and arrays ship in the release's texture-sources ZIP (tools/Fetch-TextureSources.ps1);
+# art/textures/texture-sources.json pins them and their prompts and records stay tracked.
+art/textures/generated/**/*.png
+art/textures/generated/**/*.npz

@@ -17,7 +17,8 @@ $repository = 'baanish/F-204-Icarus-II'
 $suffix = if ($AllowLocal) { '-LOCAL' } else { '' }
 $nommName = "Icarus-$Tag$suffix-nomm.zip"
 $manualName = "Icarus-$Tag$suffix-plugin-only.zip"
-$assetNames = @($nommName, $manualName, 'RELEASE-NOTES.md')
+$sourcesName = "Icarus-$Tag$suffix-texture-sources.zip"
+$assetNames = @($nommName, $manualName, $sourcesName, 'RELEASE-NOTES.md')
 $releaseAssetNames = [string[]]($assetNames + 'SHA256SUMS.txt')
 [Array]::Sort($releaseAssetNames, [StringComparer]::OrdinalIgnoreCase)
 if ($releaseAssetNames[0] -cne $nommName) { throw 'Release asset names must sort with the NOMM archive first' }
@@ -31,7 +32,31 @@ foreach ($line in Get-Content -LiteralPath (Join-Path $Directory 'SHA256SUMS.txt
     $sums[$name] = $Matches[1]
     if ((Get-Sha256 (Join-Path $Directory $name)) -cne $sums[$name]) { throw "Checksum mismatch: $name" }
 }
-if ($sums.Count -ne $assetNames.Count) { throw 'SHA256SUMS.txt must cover both archives and release notes' }
+if ($sums.Count -ne $assetNames.Count) { throw 'SHA256SUMS.txt must cover every archive and the release notes' }
+# The texture-sources archive holds only pinned generated sources, each matching its own manifest entry.
+$archive = [IO.Compression.ZipFile]::OpenRead((Join-Path $Directory $sourcesName))
+try {
+    $manifestEntry = $archive.GetEntry('texture-sources.json')
+    if (-not $manifestEntry) { throw "$sourcesName is missing texture-sources.json" }
+    $reader = [IO.StreamReader]::new($manifestEntry.Open())
+    try { $pinned = ($reader.ReadToEnd() | ConvertFrom-Json -AsHashtable).files } finally { $reader.Dispose() }
+    $previous = ''
+    $count = 0
+    foreach ($entry in $archive.Entries) {
+        if ([StringComparer]::Ordinal.Compare($previous, $entry.FullName) -ge 0 -or
+            $entry.LastWriteTime.DateTime -ne [DateTime]::new(2026, 1, 1)) { throw 'Archives require sorted entries and fixed timestamps' }
+        $previous = $entry.FullName
+        if ($entry.FullName -ceq 'texture-sources.json') { continue }
+        if ($entry.FullName -cnotmatch '^art/textures/generated/[A-Za-z0-9._/-]+\.(?:png|npz)$' -or $entry.FullName -match '(^|/)\.\.?/' -or
+            -not $pinned.ContainsKey($entry.FullName)) { throw "Unexpected entry in ${sourcesName}: $($entry.FullName)" }
+        $stream = $entry.Open()
+        try { $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($stream)).ToLowerInvariant() }
+        finally { $stream.Dispose() }
+        if ($hash -cne $pinned[$entry.FullName]) { throw "Texture source differs from its manifest: $($entry.FullName)" }
+        $count++
+    }
+    if ($count -ne $pinned.Count) { throw "$sourcesName lacks pinned texture sources" }
+} finally { $archive.Dispose() }
 $payloadHashes = @{}
 foreach ($name in @($nommName, $manualName)) {
     $archive = [IO.Compression.ZipFile]::OpenRead((Join-Path $Directory $name))
@@ -84,4 +109,4 @@ if ($ReleaseJson) {
             $asset.size -ne (Get-Item -LiteralPath $path).Length -or $asset.digest -cne "sha256:$(Get-Sha256 $path)") { throw "GitHub asset mismatch: $($asset.name)" }
     }
 }
-Write-Output "RELEASE VERIFY PASS: $Tag$suffix checksums, dependencies, commit, paired archives and sorted asset names"
+Write-Output "RELEASE VERIFY PASS: $Tag$suffix checksums, dependencies, commit, paired archives, texture sources and sorted asset names"

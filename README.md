@@ -80,7 +80,7 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 ## Credits
 
 - Made by baanish. Claude and GPT models did the research, art, code and testing, and Grok joined the plan reviews. The [devlog](docs/devlog/) says which model did what.
-- Texture base art was drawn by Codex's built-in image generation from the Icarus's own renders and UV layouts. Each generated image sits in [`art/textures/generated/`](art/textures/generated/) next to the prompt that made it.
+- Texture base art was drawn by Codex's built-in image generation from the Icarus's own renders and UV layouts. The prompt and generation record of each generated image are in [`art/textures/generated/`](art/textures/generated/). The images themselves, losslessly recompressed without their original C2PA content credentials, are in each release's `Icarus-v<version>-texture-sources.zip`.
 - The engine sound comes from a public-domain DVIDS hush-house recording of an F110 engine. The gear and scrape sounds are resynthesized from CC0 recordings on Freesound, using [Earshot](https://github.com/Leonxlnx/earshot). [`Audio/CREDITS.md`](unity/Assets/Blueprinter/Mods/icarus/Audio/CREDITS.md) lists every source.
 - The cockpit lettering uses the [Barlow](https://github.com/jpt/barlow) font.
 - The aircraft is authored onto the game's FS-12 Revoker and loads through Blueprinter.

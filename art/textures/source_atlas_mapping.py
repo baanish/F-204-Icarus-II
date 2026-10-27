@@ -387,7 +387,7 @@ def rebuild_inventory(bake, output):
         'current_geometry_sha256': expected_bake_sha256,
         'current_atlas_triangles_sha256': sha256(bake / 'atlas_triangles.json'),
         'native_registration_gates': {'normalized_silhouette_iou_min': .70, 'native_px_per_m_min': 180},
-        'native_companion_alignment': 'unchanged companion_maps.py gates before remapping',
+        'native_companion_alignment': 'none; generated companions are not read',
         'mapping_policy': {'position_tolerance_m': POSITION_TOLERANCE_M, 'normal_cosine_min': NORMAL_COSINE,
                            'replaced_parts_always_parent_paint': ['gear_door_*', 'speed_brake_*']},
         'field_contract': list(FIELDS)})
@@ -395,9 +395,9 @@ def rebuild_inventory(bake, output):
 
 The 33 accepted source group names and native chart layouts stay in `native/parts.json`.
 Its masks, ordered transfers, provenance records and input hashes are persisted here.
-Original generated PNGs, guides, templates, contexts and prompts remain in their source folders.
+Generated PNGs, guides and templates unpack into their source folders from the texture-sources ZIP; contexts and prompts stay there in git.
 Native registration still requires silhouette IoU >= 0.70 and density >= 180 px/m.
-Companion acceptance runs before remapping with the existing native alignment gates.
+Generated companions are not read; height and roughness derive from each base.
 
 `current/parts.json` assigns the current atlas through maps in `current/`.
 Each rule reads immutable generation-atlas indices and writes current-atlas indices.

@@ -65,6 +65,8 @@ def check_sources(manifest_path, output_dir=None):
 
 
 if __name__ == '__main__':
+    from texture_sources import require_texture_sources
+    require_texture_sources()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--manifest', type=Path, default=Path(__file__).resolve().parents[2] /
                         '.cache/review/wave2/p9b-round2/full/parts.json')

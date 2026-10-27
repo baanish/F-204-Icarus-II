@@ -39,6 +39,9 @@ foreach ($path in @('README.md', 'LICENSE', 'tools/Verify-Release.ps1') + @($cre
 }
 & python (Join-Path $repo 'tools/export_manifest.py')
 if ($LASTEXITCODE -ne 0) { Fail 'exports do not match art/export-manifest.json' }
+# The release also carries the texture-sources ZIP; a checkout without the sources gets them from the last release.
+& python (Join-Path $repo 'art/textures/texture_sources.py')
+if ($LASTEXITCODE -ne 0) { Fail 'texture sources are missing; fetch the last release''s with: pwsh -NoProfile -File tools/Fetch-TextureSources.ps1 -Version <its version>' }
 if ($CheckOnly) { Write-Output "RELEASE CHECK PASS: $version at $commit; no build performed"; exit 0 }
 & python -m unittest discover -s (Join-Path $repo 'tests') -p test_release_tools.py
 if ($LASTEXITCODE -ne 0) { Fail 'release tool tests failed' }
@@ -149,6 +152,11 @@ try {
         Write-ReleaseArchive "Icarus-$tag-plugin-only.zip" "BepInEx/plugins/$modId/"
     )
 } finally { $buildLock.ReleaseMutex(); $buildLock.Dispose() }
+$sourcesLast = $null
+& pwsh -NoProfile -File (Join-Path $repo 'tools/Build-TextureSources.ps1') -OutDirectory $out | ForEach-Object { Write-Output "  $_"; $sourcesLast = $_ }
+if ($LASTEXITCODE -ne 0) { Fail "the texture-sources ZIP did not build: $sourcesLast" }
+$sourcesZip = Join-Path $out "Icarus-$tag-texture-sources.zip"
+if ($tag -cne "v$version") { Move-Item -LiteralPath (Join-Path $out "Icarus-v$version-texture-sources.zip") -Destination $sourcesZip }
 
 $releaseUrl = "https://github.com/$repository/releases/download/$tag"
 $notes = @(
@@ -163,11 +171,13 @@ $notes += @(
     'NOMM supplies the install folder for the flat NOMM archive. Confirm BepInEx 5 and Blueprinter 2.1.1+ are installed and Blueprinter is enabled.', '',
     "For manual installation, extract [Icarus-$tag-plugin-only.zip]($releaseUrl/Icarus-$tag-plugin-only.zip) beside NuclearOption.exe. It includes BepInEx/plugins/baanish.icarus/.", '',
     "[Install instructions]($sourceUrl/README.md#install) | [Known issues]($sourceUrl/README.md#known-issues)", '',
+    "[Icarus-$tag-texture-sources.zip]($releaseUrl/Icarus-$tag-texture-sources.zip) holds the generated texture source images for rebuilding the skin; installing and playing do not need it.", '',
     "Source commit: [$commit](https://github.com/$repository/commit/$commit).", '',
-    "[SHA256SUMS.txt]($releaseUrl/SHA256SUMS.txt) covers both archives and these notes."
+    "[SHA256SUMS.txt]($releaseUrl/SHA256SUMS.txt) covers the three archives and these notes."
 )
 if ($AllowDirty) { $notes = @('LOCAL REHEARSAL. NEVER PUBLISH. sourceCommit names the base commit; the payload includes uncommitted changes.', '') + $notes }
 $notes | Set-Content -LiteralPath (Join-Path $out 'RELEASE-NOTES.md') -Encoding utf8NoBOM
+$zips += $sourcesZip
 $assets = @($zips) + (Join-Path $out 'RELEASE-NOTES.md')
 [IO.File]::WriteAllLines((Join-Path $out 'SHA256SUMS.txt'), [string[]]@($assets | ForEach-Object { (Get-Sha256 $_) + '  ' + (Split-Path -Leaf $_) }))
 $verifyArgs = @('-Directory', $out, '-Tag', "v$version")

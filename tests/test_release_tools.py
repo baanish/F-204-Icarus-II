@@ -24,7 +24,7 @@ class ReleaseToolsTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
 
-    def package(self, *, local=False, extra=None, mismatch=False, metadata=None):
+    def package(self, *, local=False, extra=None, mismatch=False, metadata=None, sources=None):
         meta = {
             "id": "baanish.icarus", "sourceCommit": "a" * 40, "local": local,
             "bundle": {"fileName": "icarus_0.0.1.nobp", "hash": "sha256:" + sha256(b"bundle")},
@@ -55,6 +55,15 @@ class ReleaseToolsTests(unittest.TestCase):
                         data = b"different plugin"
                     entry = zipfile.ZipInfo(prefix + path, date_time=(2026, 1, 1, 0, 0, 0))
                     archive.writestr(entry, data)
+        source_files = {"art/textures/generated/full/part.png": b"base", "art/textures/generated/old.npz": b"bake"}
+        manifest = {path: sha256(data) for path, data in source_files.items()}
+        entries = dict(source_files, **{"texture-sources.json": json.dumps({"files": manifest}).encode()})
+        if sources:
+            sources(entries)
+        names.append(f"Icarus-{TAG}{suffix}-texture-sources.zip")
+        with zipfile.ZipFile(self.root / names[-1], "w") as archive:
+            for path, data in sorted(entries.items()):
+                archive.writestr(zipfile.ZipInfo(path, date_time=(2026, 1, 1, 0, 0, 0)), data)
         (self.root / "RELEASE-NOTES.md").write_text("Prerelease, Blueprinter required.")
         self.assets = names + ["RELEASE-NOTES.md", "SHA256SUMS.txt"]
         self.checksums()
@@ -127,6 +136,18 @@ class ReleaseToolsTests(unittest.TestCase):
         ):
             with self.subTest(mutate=mutate):
                 self.package(metadata=mutate)
+                self.assertNotEqual(self.verify().returncode, 0)
+
+    def test_texture_sources_match_their_manifest(self):
+        for name, mutate in (
+            ("tampered", lambda e: e.update({"art/textures/generated/full/part.png": b"other"})),
+            ("unpinned", lambda e: e.update({"art/textures/generated/extra.png": b"extra"})),
+            ("outside", lambda e: e.update({"tools/Build-Icarus.ps1": b"script"})),
+            ("missing", lambda e: e.pop("art/textures/generated/old.npz")),
+            ("no manifest", lambda e: e.pop("texture-sources.json")),
+        ):
+            with self.subTest(name=name):
+                self.package(sources=mutate)
                 self.assertNotEqual(self.verify().returncode, 0)
 
     def test_skip_build_cannot_produce_a_publishable_release(self):

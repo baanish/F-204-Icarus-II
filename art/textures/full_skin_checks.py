@@ -1,6 +1,5 @@
 """Offline full-skin checks and paged PNG review sheets. No owner acceptance is implied."""
 import argparse
-import csv
 import hashlib
 import json
 from pathlib import Path
@@ -10,7 +9,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import distance_transform_edt
 
-from companion_maps import THRESHOLDS
+from full_skin_compose import COMPANION_FALLBACK
 from rasterize import GUTTER_PX, PAINT_SIZE, SIZE, sample
 
 
@@ -165,50 +164,16 @@ def source_checks(manifest, alignment, full, report):
         else:
             require(not source.name.endswith('.stitched.png'), f'Unrecorded stitched source: {name}')
             entry['generation'] = native_generation(source, full / f'{name}.generation.json')
-            entry['source_policy'] = 'unchanged native generated base'
+            entry['source_policy'] = 'native generated base, losslessly recompressed'
         for kind in ('height', 'roughness'):
             key = f'{name}_{kind}'
-            path = sources / f'{key}.png'
-            saved = registered['companions'][kind]
-            companion = {'context': call_context(key, group, sources, full, True),
-                         'provenance': native_generation(path, full / f'{key}.generation.json')}
-            companion['failed_attempts'] = [
-                {'record': evidence(attempt), 'generation': read_json(attempt)}
-                for attempt in sorted(full.glob(f'{key}.failed*.json'))]
-            if path.is_file():
-                native = image_evidence(path)
-                require(native['sha256'] == saved.get('sha256') and native['size'] == saved.get('native_size'),
-                        f'Alignment companion size/hash differs: {key}')
-                # Assembly measured these exact native bytes before applying any field.
-                # The two hashes bind its evidence; do not repeat the same expensive detector.
-                validation = saved['validation']
-                require(validation['thresholds'] == THRESHOLDS and validation['kind'] == kind,
-                        f'Companion evidence uses another gate: {key}')
-                companion['image'] = native
-            else:
-                validation = saved['validation']
-                require(validation.get('accepted') is False and saved['status'] == 'fallback',
-                        f'Absent companion accepted: {key}')
-                require('companion generation failed' in validation.get('reasons', []),
-                        f'Missing companion failure reason: {key}')
-            accepted = validation.get('accepted') is True
-            require(saved['status'] == ('accepted' if accepted else 'fallback'),
-                    f'Companion status differs from acceptance: {key}')
-            if accepted:
-                require(validation['thresholds'] == THRESHOLDS, f'Acceptance thresholds changed: {key}')
-                require(companion['image']['size'] == base['size'], f'Accepted companion resized: {key}')
-                require(not validation['reasons'] and validation['confidence']['verifiable'] and
-                        validation['offset_magnitude'] + THRESHOLDS['offset_guard_band_px'] < 1,
-                        f'Accepted companion fails offset/confidence evidence: {key}')
-                require(all(validation['groups'][feature]['position_precision'] >= THRESHOLDS['minimum_precision'] and
-                            validation['groups'][feature]['position_recall'] >= THRESHOLDS['minimum_recall']
-                            for feature in ('seams', 'fasteners')), f'Accepted companion fails positions: {key}')
-            else:
-                require(saved.get('fallback_policy'), f'Missing fallback policy: {key}')
-            require(resolve(saved['path'], full).resolve() == path.resolve(), f'Companion path differs: {key}')
-            companion.update(status=saved['status'], validation=validation,
-                             fallback_policy=saved.get('fallback_policy'))
-            entry['companions'][kind] = companion
+            require(registered['companions'][kind] == COMPANION_FALLBACK, f'Companion is not the base-derived fallback: {key}')
+            # The companion image is never read; its exact request and generation record remain provenance.
+            record = full / f'{key}.generation.json'
+            entry['companions'][kind] = {**COMPANION_FALLBACK, 'context': call_context(key, group, sources, full, True),
+                                         'provenance': {'record': evidence(record), 'generation': read_json(record)},
+                                         'failed_attempts': [{'record': evidence(attempt), 'generation': read_json(attempt)}
+                                                             for attempt in sorted(full.glob(f'{key}.failed*.json'))]}
         registrations = registered['registration']
         require(len(registrations) == len(group['charts']), f'Incomplete chart registration: {name}')
         require(all(c['normalized_silhouette_iou'] >= .70 and c['native_px_per_m_min_axis'] >= 180
@@ -551,39 +516,11 @@ def seam_checks(full, bake, used, owner, groups, report):
     return failures
 
 
-def alignment_summary(full, report):
-    fields = ['group', 'kind', 'status', 'offset_x_px', 'offset_y_px', 'offset_magnitude_px',
-              'seam_position_precision', 'seam_position_recall', 'fastener_position_precision',
-              'fastener_position_recall', 'fallback_policy', 'reasons']
-    rows = []
-    for name, group in report['groups'].items():
-        for kind, companion in group['companions'].items():
-            validation = companion['validation']
-            offset = validation.get('offset_xy') or (None, None)
-            scores = validation.get('groups', {})
-            rows.append(dict(zip(fields, [name, kind, companion['status'], *offset,
-                validation.get('offset_magnitude'), scores.get('seams', {}).get('position_precision'),
-                scores.get('seams', {}).get('position_recall'), scores.get('fasteners', {}).get('position_precision'),
-                scores.get('fasteners', {}).get('position_recall'), companion.get('fallback_policy') or '',
-                '; '.join(validation.get('reasons', []))])))
-    with (full / 'alignment-summary.csv').open('w', encoding='utf-8', newline='') as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
-        writer.writeheader()
-        writer.writerows(rows)
-    lines = ['Native texels; +x right, +y down. Missing measurements are unverifiable, not zero.',
-             'Offline evidence only. Owner acceptance remains pending.', '',
-             '| ' + ' | '.join(fields) + ' |', '| ' + ' | '.join(['---'] * len(fields)) + ' |']
-    for row in rows:
-        cells = [f'{v:.6f}' if isinstance(v, float) else '' if v is None else str(v) for v in row.values()]
-        lines.append('| ' + ' | '.join(v.replace('|', '\\|').replace('\n', ' ') for v in cells) + ' |')
-    (full / 'alignment-summary.md').write_text(portable_text('\n'.join(lines) + '\n'), encoding='utf-8')
-
-
 def measure(full, bake):
     report = {'schema_version': 1, 'status': 'incomplete', 'owner_acceptance': 'pending',
               'note': 'Deterministic offline uncompressed checks only; no live game or owner acceptance.',
-              'alignment_measurement_policy': 'measured natively during assembly before use; current base/companion hashes and gate evidence checked here',
-              'groups': {}, 'maps': {}, 'companion_thresholds': dict(THRESHOLDS)}
+              'alignment_measurement_policy': 'measured natively during assembly before use; current base hashes and gate evidence checked here',
+              'groups': {}, 'maps': {}}
     try:
         manifest, alignment, coverage, stitch, composition = (
             read_json(full / name) for name in ('parts.json', 'alignment.json', 'coverage.json',
@@ -643,7 +580,6 @@ def measure(full, bake):
         else:
             source_checks(manifest, alignment, full, report)
             used, owner = coverage_checks(manifest, alignment, coverage, stitch, full, part, names, report)
-        alignment_summary(full, report)
         map_checks(full, bake, composition, report)
         failed_liveries = seam_checks(full, bake, used, owner, manifest['groups'], report)
         require(not failed_liveries, 'Seam median exceeds unchanged 2.26 policy for liveries: ' + ', '.join(failed_liveries))
@@ -840,6 +776,8 @@ def sheets(full, overview_only=False):
 
 
 if __name__ == '__main__':
+    from texture_sources import require_texture_sources
+    require_texture_sources()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=('measure', 'sheets', 'rebind-alignment'))
     parser.add_argument('--full', type=Path, default=FULL)

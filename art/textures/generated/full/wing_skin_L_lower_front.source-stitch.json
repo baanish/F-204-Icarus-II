@@ -1,9 +1,9 @@
 {
   "method": "style anchor grain and structural guide",
   "source": "art/textures/generated/pilot2/style_anchor.png",
-  "source_sha256": "22f3e60aa26457cd87340782dbe5d2ba44fa556d000867a4327a2e947c0bd44a",
+  "source_sha256": "4ca8097b791c85268ca086f04454199b80465b2b742fee65d4aa52c15005d3ad",
   "output": "art/textures/generated/full/wing_skin_L_lower_front.stitched.png",
-  "output_sha256": "4eeb3cc763c2b3ac322f036fe27d6be070636f09fb3ec485b1dc825c6480538b",
+  "output_sha256": "ad8dcfc758a5636cd1f4263cafac45055fbdf88e3adca2502969821a3bbb97f6",
   "native_size": [
     1254,
     1254

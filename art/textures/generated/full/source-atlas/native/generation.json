@@ -71,7 +71,7 @@
         }
       ],
       "skin_texels": 49832,
-      "sha256": "0097730b024be9ff763765d2c02d1ed52efbaea8387b3720e41988c283de1a85"
+      "sha256": "9b51c83b6db99e7c3c619da9373c90d02909c7175790add9f12d28c1036e96aa"
     },
     "forward_left": {
       "native_size": [
@@ -93,7 +93,7 @@
         }
       ],
       "skin_texels": 89343,
-      "sha256": "b3b50fc420975725e47de99cd16eb3aaf6b8379f12100ade2e7223934b85c2a2"
+      "sha256": "335a6856283587a0a925ec9bf26c9e6b9b685f5f655e27f125b97641816216d2"
     },
     "wing_root": {
       "native_size": [
@@ -115,7 +115,7 @@
         }
       ],
       "skin_texels": 50157,
-      "sha256": "47462c636a683b4ad5769d9ccc937947f92a148b015e61a98490c0f54a5bc399"
+      "sha256": "79e52e7e51f30533e606e95838314ddfef97502aab3696a6b0db4eaa966b25a9"
     },
     "wing_upper": {
       "native_size": [
@@ -148,7 +148,7 @@
         }
       ],
       "skin_texels": 85623,
-      "sha256": "7894a859c127324bf3cea755e87e6ceae3506bce55c27a6808a03ded8d4637bf"
+      "sha256": "c88959af8c89b21ee3318cffaf59ac54c2cb1760a19cc7303eb8b62f353b4d9a"
     },
     "fin_reflection": {
       "target_texels": 77893,
@@ -196,7 +196,7 @@
         }
       ],
       "skin_texels": 69580,
-      "sha256": "c0480017587b5637fb9df92f0921c990fb095bd7b9bcd2dd9d432de5d629668a"
+      "sha256": "adeda1ec0e4dec3b728d1c4d433e781b28742ce2c5b57f30c0dff36d0bf0477c"
     }
   }
 }

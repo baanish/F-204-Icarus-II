@@ -2,9 +2,8 @@
   "tool": "built-in image_gen.imagegen",
   "reference_policy": "only original UV guides, original neutral renders, or text; no game textures",
   "inherited_sources": {
-    "images": ["round2_base_nw.png", "round2_base_ne.png", "round2_base_sw.png", "round2_base_se.png", "paint.png", "mark.png", "digit.png"],
-    "prompts": "exact adjacent .prompt.txt files copied unchanged",
-    "round2_references": "original UV layout crops and original neutral aircraft render, as audited in p9b-pilot-handback.md Round 2"
+    "images": ["paint.png", "mark.png", "digit.png"],
+    "prompts": "exact adjacent .prompt.txt files copied unchanged"
   },
   "new_sources": [
     {"image": "bare_metal.png", "prompt": "bare_metal.prompt.txt", "references": [], "transparent_background": false},

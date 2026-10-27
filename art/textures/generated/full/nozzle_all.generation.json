@@ -2,7 +2,7 @@
   "tool": "image_gen.imagegen built-in",
   "original": "art/textures/generated/full/nozzle_all.png",
   "output": "art/textures/generated/full/nozzle_all.png",
-  "sha256": "b498f4db6f98f6bf0bcaa143d6db10373fdd30e41b0493616a549930f8533ac5",
+  "sha256": "ffb197bc3c7e5d5609ef19a6e4f1c09154bcdad0b1e42f9cdd39663c842c218a",
   "native_size": [
     1254,
     1254

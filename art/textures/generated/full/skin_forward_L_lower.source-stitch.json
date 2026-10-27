@@ -1,9 +1,9 @@
 {
   "method": "per-chart generated paint fit to exact template",
   "source": "art/textures/generated/full/skin_forward_L_lower.png",
-  "source_sha256": "3d777b21607cfe0e509e221872e861c5513f3b85b1f868d1cc6980600ac1f03e",
+  "source_sha256": "9b462edd206a6f3190a63454185f693300914f1eca47c639841abfc4c770f4de",
   "output": "art/textures/generated/full/skin_forward_L_lower.stitched.png",
-  "output_sha256": "1b8e4f0cd10ab33e149cb292c2b9fb65a5558a2248ae3046d99878fedb549606",
+  "output_sha256": "faabb17ebd09eb1851c40c6beec6f007111766eb826f273eefd619c2b0eb7012",
   "native_size": [
     1254,
     1254

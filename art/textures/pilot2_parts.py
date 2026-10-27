@@ -331,6 +331,8 @@ def service_relief(height, cavity, part, pos, names, manifest_path):
 
 
 if __name__ == '__main__':
+    from texture_sources import require_texture_sources
+    require_texture_sources()
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=('guides', 'context', 'compose'))
     parser.add_argument('--name', choices=GROUPS)

@@ -2,7 +2,7 @@
   "tool": "image_gen.imagegen built-in",
   "original": "art/textures/generated/full/rudder_all.png",
   "output": "art/textures/generated/full/rudder_all.png",
-  "sha256": "cfd764e2c04e1b00cc369c7d67bd459d21832e1a9c2587e4a7565e033d2f717a",
+  "sha256": "e2dfe1bdefa664a324400413789477e870dcb9579fda3867780f1d5fb2802e10",
   "native_size": [
     1254,
     1254

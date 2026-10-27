@@ -8,14 +8,16 @@ from PIL import Image
 from scipy.ndimage import binary_closing, distance_transform_edt, find_objects, gaussian_filter, label
 from scipy.optimize import linear_sum_assignment
 
-from companion_maps import validate_companion
 from record_paths import portable_record, resolve_record
-from rasterize import ROOT, sample
+from rasterize import sample
 
 
 HEIGHT_FLUSH = 128 / 255
 HEIGHT_SPAN_PX = .24
 LEGACY_HEIGHT_SCALE = .3
+# Generated height and roughness companions are never read: every one failed native validation, and production
+# relief comes from panels.py's airframe layout. Their prompts and generation records stay as provenance.
+COMPANION_FALLBACK = {'status': 'fallback', 'fallback_policy': 'legacy surface relief derived from this generated base'}
 
 
 def source_charts(image, count, layout=None):
@@ -57,33 +59,6 @@ def _read_image(path, rgb=False):
 
 def _write_report(path, report):
     path.write_text(json.dumps(portable_record(report), indent=2, allow_nan=False), encoding='utf-8')
-
-
-def _companion(image, name, kind, directory, cache):
-    path = directory / f'{name}_{kind}.png'
-    record = cache / f'{name}_{kind}.generation.json'
-    generation = resolve_record(json.loads(record.read_text())) if record.exists() else None
-    report = {'path': str(path), 'status': 'fallback', 'generation': generation,
-              'fallback_policy': 'legacy surface relief derived from this generated base'}
-    if not path.exists():
-        failed = generation and (generation.get('error') or generation.get('generation_error') or generation.get('status') in
-                                 ('failed', 'error', 'generation_failed') or generation.get('success') is False)
-        if not failed:
-            raise ValueError(f'{name} {kind}: missing companion and explicit generation failure record: {record}')
-        report['validation'] = {'accepted': False, 'reasons': ['companion generation failed']}
-        return None, report
-    companion = _read_image(path)
-    report['native_size'] = [companion.shape[1], companion.shape[0]]
-    report['sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
-    if companion.shape != image.shape[:2]:
-        report['validation'] = {'accepted': False, 'reasons': ['native dimensions differ; resizing is forbidden']}
-        return None, report
-    report['validation'] = validate_companion(image, companion, kind)
-    if not report['validation']['accepted']:
-        return None, report
-    report['status'] = 'accepted'
-    report['fallback_policy'] = None
-    return companion, report
 
 
 def _derived_fields(image, inside):
@@ -185,8 +160,8 @@ def assemble_full(manifest_path):
     """Return atlas base RGB, raw scalar fields, validity masks and JSON-safe evidence.
 
     Unused atlas texels are black. Every used texel must originate in a generated
-    base or an ordered coverage transfer. An absent companion needs an explicit
-    failed-generation record; a rejected native companion uses base-derived relief.
+    base or an ordered coverage transfer. Height and roughness are base-derived
+    fallbacks with no valid texels (COMPANION_FALLBACK).
     """
     path = Path(manifest_path)
     directory = path.parent
@@ -219,7 +194,6 @@ def assemble_full(manifest_path):
               'roughness': np.full(shape, .6, np.float32),
               'height_valid': np.zeros(shape, bool), 'roughness_valid': np.zeros(shape, bool),
               'used': np.zeros(shape, bool)}
-    companion_dir = _path(manifest.get('companion_dir', ROOT / 'art/textures/generated/full'), directory)
     report = {'groups': {}, 'transfers': [], 'atlas_size': list(shape[::-1]),
               'registration_policy': 'one-to-one base silhouettes by guide position and shape after closing 3, '
                                      'preserving UV holes; '
@@ -242,18 +216,12 @@ def assemble_full(manifest_path):
                                        manifest.get('guide_size', 1536))
             group_report = {'native_size': list(image.shape[1::-1]), 'source_path': str(source),
                             'sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
-                            'registration': [], 'companions': {}, 'skin_texels': int(mask.sum())}
+                            'registration': [],
+                            'companions': {kind: dict(COMPANION_FALLBACK) for kind in ('height', 'roughness')},
+                            'skin_texels': int(mask.sum())}
             report['groups'][name] = group_report
             painted = np.isin(labels, [candidate[0] for candidate in candidates])
-            derived = _derived_fields(image, painted)
-            maps = []
-            accepted = []
-            for kind, fallback in zip(('height', 'roughness'), derived):
-                companion, evidence = _companion(image, name, kind, companion_dir, directory)
-                group_report['companions'][kind] = evidence
-                maps.append(fallback if companion is None else companion)
-                accepted.append(companion is not None)
-            packed = np.dstack((image, *maps))
+            packed = np.dstack((image, *_derived_fields(image, painted)))
             covered = np.zeros(shape, bool)
             for chart, (source_id, box, _) in zip(charts, candidates):
                 selected, u, v, nearest, evidence = _chart_registration(
@@ -265,9 +233,8 @@ def assemble_full(manifest_path):
                 padded = packed[box][nearest[0], nearest[1]]
                 mapped = sample(padded, u, v)
                 fields['base'][y0:y1, x0:x1][selected] = mapped[..., :3][selected]
-                for channel, kind, valid in zip((3, 4), ('height', 'roughness'), accepted):
+                for channel, kind in zip((3, 4), ('height', 'roughness')):
                     fields[kind][y0:y1, x0:x1][selected] = mapped[..., channel][selected]
-                    fields[kind + '_valid'][y0:y1, x0:x1][selected] = valid
                 local_covered |= selected
                 group_report['registration'].append(evidence)
             if not np.array_equal(covered, mask):

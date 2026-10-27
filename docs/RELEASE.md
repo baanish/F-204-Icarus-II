@@ -8,11 +8,17 @@ Set the same numeric version in `src/Icarus/IcarusPlugin.cs`, `src/Icarus/Icarus
 
 To package from a worktree, first run `pwsh -NoProfile -File tools/Link-WorktreeAssets.ps1` and provide the ignored `tools/local-paths.json` described in BUILD.md. Each checkout writes its own `build/` and `.cache/release/`.
 
+Every release also carries the texture-sources ZIP, so the checkout needs the texture sources that git ignores. In a checkout without them, fetch the previous release's first:
+
+```powershell
+pwsh -NoProfile -File tools/Fetch-TextureSources.ps1 -Version <previous version>
+```
+
 ```powershell
 pwsh -NoProfile -File tools/Package-Release.ps1
 ```
 
-The command refuses to run while any tracked file is modified or any untracked file exists. It then checks the versions and the export manifest, runs the offline release tests and builds both payloads with `tools/Build-Icarus.ps1`. Because the tree is clean, the build's inputs are the release commit's files. The build must leave every tracked input unchanged except the prefab fileIDs Unity regenerates. Text hashes normalize CRLF line endings before comparing. To change an existing CRLF file with Python, use `read_bytes` and `write_bytes` so its line endings survive.
+The command refuses to run while any tracked file is modified or any untracked file exists. It then checks the versions, the export manifest and that the texture sources are present, runs the offline release tests, builds both payloads with `tools/Build-Icarus.ps1` and packs the texture sources with `tools/Build-TextureSources.ps1`. Because the tree is clean, the build's inputs are the release commit's files. The build must leave every tracked input unchanged except the prefab fileIDs Unity regenerates. Text hashes normalize CRLF line endings before comparing. To change an existing CRLF file with Python, use `read_bytes` and `write_bytes` so its line endings survive.
 
 The final line must say `RELEASE PASS`. Outputs are under `.cache/release/v<version>-<UTC time>/`:
 
@@ -20,10 +26,11 @@ The final line must say `RELEASE PASS`. Outputs are under `.cache/release/v<vers
 | --- | --- |
 | `Icarus-v<version>-nomm.zip` | Flat payload. NOMM supplies the install folder. |
 | `Icarus-v<version>-plugin-only.zip` | Manual install. Unzip it beside `NuclearOption.exe`, and its entries land in `BepInEx/plugins/baanish.icarus/`. |
-| `SHA256SUMS.txt` | SHA-256 hashes of both archives and of `RELEASE-NOTES.md`. |
+| `Icarus-v<version>-texture-sources.zip` | The generated images and arrays under `art/textures/generated/`, for rebuilding the skin. Installing and playing do not need it. |
+| `SHA256SUMS.txt` | SHA-256 hashes of the three archives and of `RELEASE-NOTES.md`. |
 | `RELEASE-NOTES.md` | Prerelease notes with absolute source and download links. |
 
-Both archives contain exactly `Icarus.dll`, `icarus_<version>.nobp`, `meta.json`, `README.md`, `LICENSE`, `audio/CREDITS.md` and `fonts/OFL.txt`. The DLL and bundle stay together when NOMM enables or disables the mod. Entries are sorted and carry fixed timestamps, so identical payloads produce byte-identical archives.
+The NOMM and plugin-only archives contain exactly `Icarus.dll`, `icarus_<version>.nobp`, `meta.json`, `README.md`, `LICENSE`, `audio/CREDITS.md` and `fonts/OFL.txt`. The DLL and bundle stay together when NOMM enables or disables the mod. Entries are sorted and carry fixed timestamps, so identical payloads produce byte-identical archives. The texture-sources archive holds every file `art/textures/texture-sources.json` pins, at its repository path, plus a copy of that manifest; `tools/Fetch-TextureSources.ps1` unpacks it.
 
 The output directory also holds staging copies of `meta.json` and `README.md`, already inside both ZIPs. Do not upload these separately. `meta.json` identifies the mod as `baanish.icarus`, records the full source commit and the hashes of the DLL and bundle actually shipped, and declares Blueprinter `com.nikkorap.blueprinter`, minimum `2.1.1`, in `artifact.dependencies`. Blueprinter and BepInEx are separate prerequisites and are never bundled. It holds no absolute paths and no enabled state.
 
@@ -48,7 +55,7 @@ Verify a release without Unity:
 pwsh -NoProfile -File tools/Verify-Release.ps1 -Directory <package-directory> -Tag v0.1.0
 ```
 
-For `-LOCAL` outputs, add `-AllowLocal` and keep the numeric tag. Verification checks checksums, exact paths, fixed timestamps, entry order, paired payloads, credits, dependency metadata and the embedded commit.
+For `-LOCAL` outputs, add `-AllowLocal` and keep the numeric tag. Verification checks checksums, exact paths, fixed timestamps, entry order, paired payloads, credits, dependency metadata and the embedded commit, and checks every texture source against the manifest inside its archive.
 
 ## Publish after owner approval
 
@@ -60,6 +67,6 @@ Push the reviewed source and tag that exact commit `v<version>`. The repository 
 pwsh -NoProfile -File tools/Publish-Release.ps1 -Directory <package-directory> -Tag v0.1.0
 ```
 
-The publisher verifies local assets, checks that the existing remote tag matches `meta.json`'s source commit, creates a draft prerelease, and uploads the NOMM ZIP first. It checks every uploaded size and SHA-256 digest and the full returned asset order before publishing. Asset names sort with the NOMM ZIP first for catalog discovery. A failed upload or draft check leaves the draft unpublished for inspection.
+The publisher verifies local assets, checks that the existing remote tag matches `meta.json`'s source commit, creates a draft prerelease, and uploads the NOMM ZIP first, then the plugin-only and texture-sources ZIPs. It checks every uploaded size and SHA-256 digest and the full returned asset order before publishing. Asset names sort with the NOMM ZIP first for catalog discovery. A failed upload or draft check leaves the draft unpublished for inspection.
 
 After publication it verifies the returned tag, URL, prerelease flag, asset order and digests, then downloads the NOMM ZIP and compares its hash. It never creates tags or pushes source. NOMM catalog registration is a separate first-release task.

@@ -25,6 +25,8 @@ python tools/export_manifest.py
 
 If the check reports files that differ right after cloning, the LFS download is incomplete, so run `git lfs pull` again. Don't regenerate the manifest to make it pass.
 
+The build reads only the committed exports and shipped maps. The generated images the skin maps are composed from are not in git; only [rebuilding the skin](#rebuild-the-skin) needs them.
+
 ## Prepare the Unity project (once)
 
 1. Open the `unity` folder in Unity Hub and let Unity restore its packages. Blueprinter Editor is pinned to commit `9a4a8e509480cbcde901a577985d5e9cbc570d91` in `unity/Packages/manifest.json`.
@@ -79,3 +81,15 @@ Before rebuilding, copy `tools/local-paths.example.json` to `tools/local-paths.j
 2. `python tools/export_manifest.py --write` pins the new exports. Review and commit the manifest with the changed source and exports, then build.
 3. When the outline or the damageable parts change, `python tools/status_diagram.py` redraws the damage diagram and the tac screen's front profile into `unity/Assets/Blueprinter/Mods/icarus/Diagram` and `art/diagram.json`.
 4. When the outline changes, `python tools/map_icon.py` redraws the icon the map and the plane select screen show into `unity/Assets/Blueprinter/Mods/icarus/Icons`, with a sheet beside stock jets in `.cache/review/share/icons`.
+
+## Rebuild the skin
+
+The ten skin maps are composed from generated images and arrays that are not in git. Each release ships them as `Icarus-v<version>-texture-sources.zip`. Fetch the ZIP for this checkout's version before rebuilding the skin:
+
+```powershell
+pwsh -NoProfile -File tools/Fetch-TextureSources.ps1
+```
+
+It checks every file against its SHA-256 in `art/textures/texture-sources.json` and unpacks it into `art/textures/generated/`, where git ignores it. `-Version <x.y.z>` fetches another release's ZIP, `-Url <https URL>` a mirror and `-Zip <file>` a local copy. Without the sources, `tools/Rebuild-Skin.ps1` and the texture tools stop and name this command. The prompts and generation records stay in git beside where each image unpacks. The rebuild itself is described in [art/textures/README.md](art/textures/README.md).
+
+After adding or removing source images or arrays, `pwsh -NoProfile -File tools/Build-TextureSources.ps1 -WriteManifest` pins them, and `tools/Build-TextureSources.ps1` builds the ZIP under `.cache/texture-sources/`. `tools/Package-Release.ps1` builds it into each release. Before pinning new files, `python tools/compact_texture_sources.py --include-signed` (needs `pip install pyoxipng`) recompresses them losslessly, checks that every file decodes to the same pixels or arrays, and carries the new hashes through the records. It never rewrites a prompt or context pack, and a re-encoded image loses its C2PA content credentials. Then run `tools/Rebuild-Skin.ps1 -Part python` to refresh the gate.
