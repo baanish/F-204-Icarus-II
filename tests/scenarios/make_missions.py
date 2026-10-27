@@ -21,7 +21,7 @@ if not TEMPLATES.is_absolute():
 if not TEMPLATES.is_dir():
     raise ValueError('The configured mission templates folder does not exist')
 
-AIRCRAFT, TITLE = "baanish_icarus", "F-240 Icarus II"
+AIRCRAFT, TITLE = "baanish_icarus", "F-204 Icarus II"
 # The Icarus's AircraftDefinition, as the build's rest-pose report logs it: spawnOffset (0, 1.49, -0.62), restRotation.x
 # -0.21 (nose up). Three hardpoint sets (Wingtip, Inner Wing, Conformal); three empty keys fly it clean, and a list of
 # any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).

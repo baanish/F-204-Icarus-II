@@ -5,7 +5,7 @@
     "Path": "Terrain_naval"
   },
   "missionSettings": {
-    "description": "F-240 Icarus II test mission: the player's Icarus for Primeva airborne over Ignus at 13,000 m MSL (x -78000, z -25000), heading 090, 520 m/s, with about 160 km of map ahead; 40% fuel, for hands-off pitch hold below half fuel; clean; no opponent.",
+    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva airborne over Ignus at 13,000 m MSL (x -78000, z -25000), heading 090, 520 m/s, with about 160 km of map ahead; 40% fuel, for hands-off pitch hold below half fuel; clean; no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",

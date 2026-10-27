@@ -5,7 +5,7 @@
     "Path": ""
   },
   "missionSettings": {
-    "description": "F-240 Icarus II test mission: two player slots, an Icarus each for Primeva at 3,000 m MSL heading north at 220 m/s, 1 km apart, 7 km south of Sandrift Airbase (Heartland), half fuel, clean, for a loopback host and client; no opponent.",
+    "description": "F-204 Icarus II test mission: two player slots, an Icarus each for Primeva at 3,000 m MSL heading north at 220 m/s, 1 km apart, 7 km south of Sandrift Airbase (Heartland), half fuel, clean, for a loopback host and client; no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",

@@ -5,7 +5,7 @@
     "Path": ""
   },
   "missionSettings": {
-    "description": "F-240 Icarus II test mission: the player's Icarus for Primeva parked on Sandrift Airbase's runway (Heartland) facing north, at rest, full fuel, clean, for fly mode=takeoff; no opponent.",
+    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva parked on Sandrift Airbase's runway (Heartland) facing north, at rest, full fuel, clean, for fly mode=takeoff; no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",

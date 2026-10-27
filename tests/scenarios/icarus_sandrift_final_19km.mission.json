@@ -5,7 +5,7 @@
     "Path": ""
   },
   "missionSettings": {
-    "description": "F-240 Icarus II test mission: the player's Icarus for Primeva at 1,200 m MSL, 150 m/s, 19 km out on Sandrift Airbase's runway centreline (Heartland), heading 004, 23% fuel, clean, for a straight-in fly mode=land; no opponent.",
+    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva at 1,200 m MSL, 150 m/s, 19 km out on Sandrift Airbase's runway centreline (Heartland), heading 004, 23% fuel, clean, for a straight-in fly mode=land; no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",
