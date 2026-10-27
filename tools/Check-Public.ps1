@@ -78,27 +78,21 @@ try {
     $paths = if ($All) { @(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z')) }
              else { @(Read-GitPaths @('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z')) }
     $rules = [ordered]@{
-        # The account name as a whole word, so longer words that contain it don't match.
-        'private username' = '(?<![A-Za-z])' + [regex]::Escape(('own' + 'er')) + '(?![A-Za-z])'
-        'private email' = [regex]::Escape(('owner' + '@example.test'))
         'Steam ID' = '(?<!\d)7656119\d{10}(?!\d)'
         'absolute user path' = '(?:[A-Z]:[\\/]+Users[\\/]+|/(?:Users|home|root)/|\\\\[^\\\s]+\\(?:Users|home)\\)'
         'private development path' = '[A-Z]:[\\/]+(?:[^\r\n"<>|]*[\\/]+)?(?:privatefolder|privatetree)(?:[\\/]+|(?=["\s]|$))'
         'personal Steam library path' = '[A-Z]:[\\/]+(?:[^\s"<>|]*[\\/]+)?(?:Users[\\/]+[^\\/\s"<>|]+[\\/]+[^\r\n"<>|]*Steam|Steam(?:Library)?[\\/]+(?:users|userdata)[\\/]+[^\\/\s"<>|]+)'
-        'private machine name' = '(?<![A-Za-z])(privatemachine)(?![A-Za-z])'
     }
-    $allowPath = 'tools/public-check-allowlist.json'
-    $allowlist = @()
-    if ($allowPath -in $paths -or (-not $All -and $allowPath -in @(Read-GitPaths @('ls-files', '-z', '--', $allowPath)))) {
-        $allowlist = @([Text.Encoding]::UTF8.GetString((Read-TreeBytes $allowPath)) | ConvertFrom-Json)
-        foreach ($entry in $allowlist) {
-            if (-not $entry.path -or -not $rules.Contains($entry.rule) -or -not $entry.values.Count -or -not $entry.reason) {
-                throw 'invalid public-check allowlist entry: require exact path, rule, values and reason'
-            }
+    # The owner's account name, email and machine names live in the gitignored tools/public-check-terms.json
+    # ({"terms": [...]}), so the public checker doesn't publish what it guards; each matches as a whole word.
+    $termsPath = Join-Path $Repo 'tools/public-check-terms.json'
+    if (Test-Path -LiteralPath $termsPath) {
+        $terms = @((Get-Content -LiteralPath $termsPath -Raw | ConvertFrom-Json).terms)
+        if ($terms.Count) {
+            $rules['private term'] = '(?<![A-Za-z0-9])(?:' + (($terms | ForEach-Object { [regex]::Escape($_) }) -join '|') + ')(?![A-Za-z0-9])'
         }
-    }
+    } else { Write-Output 'PUBLIC NOTE: no tools/public-check-terms.json, so only the generic rules ran' }
     $failures = [Collections.Generic.List[string]]::new()
-    $allowed = [Collections.Generic.HashSet[string]]::new()
     foreach ($path in $paths) {
         Write-Verbose "checking $path"
         if ($path -match '(?i)(^|/)(\.internal|\.cache|_donotship)(/|$)|^unity/Packages/nuclearoption/|^unity/Assets/Blueprinter/(Example|Generated)/') {
@@ -112,12 +106,8 @@ try {
         $views = @($path, $text, $text.Replace([string][char]0, ''))
         foreach ($rule in $rules.Keys) {
             foreach ($view in $views) {
-                foreach ($match in [regex]::Matches($view, $rules[$rule], 'IgnoreCase')) {
-                    $exception = @($allowlist | Where-Object {
-                        $_.path -ceq $path -and $_.rule -ceq $rule -and $match.Value -cin $_.values
-                    })
-                    if ($exception.Count) { [void]$allowed.Add("${path}: $rule ($($exception[0].reason))") }
-                    elseif ("${path}: $rule" -notin $failures) { $failures.Add("${path}: $rule") }
+                if ([regex]::IsMatch($view, $rules[$rule], 'IgnoreCase') -and "${path}: $rule" -notin $failures) {
+                    $failures.Add("${path}: $rule")
                 }
             }
         }
@@ -146,7 +136,6 @@ try {
             if ($digest -cne $manifest[$path]) { $failures.Add("${path}: staged export hash differs") }
         }
     }
-    $allowed | Sort-Object | ForEach-Object { Write-Output "PUBLIC ALLOW: $_" }
     if ($failures.Count) {
         $failures | ForEach-Object { Write-Output "PUBLIC FAIL: $_" }
         exit 1

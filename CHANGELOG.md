@@ -13,5 +13,5 @@ The first version of the F-204 Icarus II, a Primeva interceptor based on the F-1
 - Four PALA liveries: Navy, Black, Desert splinter, and Bare Metal with its own metallic finish.
 - Its own engine, gear and belly-scrape sounds.
 - Its own map and plane select icon.
-- Primeva's AI fields the Icarus in stock missions and one factory per mission builds it, behind the `[Missions] StockMissionSupply` setting, on by default.
+- In the stock operations Breakout, Confrontation, Domination, Escalation and Terminal Control (and their co-op versions), Primeva's AI fields the Icarus and one factory per mission builds it, behind the `[Missions] StockMissionSupply` setting, on by default.
 - Live tuning of the engine, afterburner, thrust vectoring, wing and drag area and AI speeds from `BepInEx/config/baanish.icarus.cfg`, locked to the shipped values while another player is connected.

@@ -54,46 +54,43 @@ class PublicCheckTests(unittest.TestCase):
         code, output = self.check(False)
         self.assertEqual(code, 0, output)
 
-    def test_new_path_rules_and_machine_word_boundaries(self):
-        names = json.loads((ROOT / 'tools/public-check-allowlist.json').read_text())[0]['values']
+    def write_terms(self, *terms):
+        (self.repo / '.gitignore').write_text('tools/public-check-terms.json\n')
+        config = self.repo / 'tools/public-check-terms.json'
+        config.parent.mkdir(exist_ok=True)
+        config.write_text(json.dumps({'terms': list(terms)}))
+
+    def test_new_path_rules(self):
         for value in [windows_path('privatetree/task/file'),
                       windows_path('Users/owner/privatefolder/file', 'R', '\\'),
-                      windows_path('SteamLibrary/' + 'users/owner/library', 'S'), *names]:
+                      windows_path('SteamLibrary/' + 'users/owner/library', 'S')]:
             with self.subTest(value=value):
                 self.sample.write_text(value)
                 code, output = self.check()
                 self.assertEqual(code, 1, output)
-        self.sample.write_text(windows_path('SteamLibrary/steamapps/common/Nuclear Option', 'D') + '\n' +
-                               ' '.join('prefix' + name + 'suffix' for name in names))
+        self.sample.write_text(windows_path('SteamLibrary/steamapps/common/Nuclear Option', 'D'))
         code, output = self.check()
         self.assertEqual(code, 0, output)
 
-    def test_account_name_matches_whole_words_only(self):
-        account = 'own' + 'er'
-        self.sample.write_text(account + 'd')
+    def test_private_terms_come_from_the_ignored_file_and_match_whole_words(self):
+        # Built by concatenation, since this file is copied into the scanned fixture repository.
+        term, email = 'owner' + 'box', 'owner' + '@example.test'
+        self.write_terms(term, email)
+        for value in [term, term.title() + ' runs it', 'mail ' + email]:
+            with self.subTest(value=value):
+                self.sample.write_text(value)
+                code, output = self.check()
+                self.assertEqual(code, 1, output)
+                self.assertIn('private term', output)
+        self.sample.write_text(term + 'd prefix' + term)
         code, output = self.check()
         self.assertEqual(code, 0, output)
-        self.sample.write_text(account)
-        code, output = self.check()
-        self.assertEqual(code, 1, output)
-        self.assertIn('private username', output)
 
-    def test_allowlist_requires_exact_path_rule_and_value(self):
-        value = json.loads((ROOT / 'tools/public-check-allowlist.json').read_text())[0]['values'][0]
-        self.sample.write_text(value)
-        config = self.repo / 'tools/public-check-allowlist.json'
-        config.parent.mkdir()
-        entries = [{'path': path, 'rule': 'private machine name', 'values': [value],
-                    'reason': 'Synthetic rule fixture.'} for path in
-                   ('sample.txt', 'tools/public-check-allowlist.json')]
-        config.write_text(json.dumps(entries))
+    def test_missing_terms_file_runs_the_generic_rules_and_says_so(self):
+        self.sample.write_text('owner' + 'box')
         code, output = self.check()
         self.assertEqual(code, 0, output)
-        self.assertIn('PUBLIC ALLOW: sample.txt', output)
-        self.sample.write_text(value + ' ' + windows_path('privatetree/private'))
-        code, output = self.check()
-        self.assertEqual(code, 1, output)
-        self.assertIn('private development path', output)
+        self.assertIn('only the generic rules ran', output)
 
     def test_lfs_objects_are_scanned_and_hash_checked_in_both_modes(self):
         content = windows_path('privatefolder/private').encode()

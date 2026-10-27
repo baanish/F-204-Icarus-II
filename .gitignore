@@ -18,6 +18,7 @@ src/**/bin/
 src/**/obj/
 # Imported game content, assemblies and generated data stay local.
 tools/local-paths.json
+tools/public-check-terms.json
 **/_donotship/
 **/_donotship.meta
 unity/Packages/nuclearoption/

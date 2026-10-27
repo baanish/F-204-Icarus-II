@@ -46,10 +46,10 @@ NOMM and Thunderstore packages are coming. This section will say how to install 
 
 The Icarus uses the game's normal controls, with no new key bindings.
 
-- **Where to find it.** It is a Primeva aircraft, offered at hardened aircraft shelters and medium hangars. In stock missions Primeva's AI also starts with four, and one Primeva factory per mission builds more. To turn that off, set `StockMissionSupply = false` under `[Missions]` in `BepInEx/config/baanish.icarus.cfg`. The host's setting applies from the next mission load.
+- **Where to find it.** It is a Primeva aircraft, offered at hardened aircraft shelters and medium hangars. In the stock operations Breakout, Confrontation, Domination, Escalation and Terminal Control, and their co-op versions, Primeva's AI also starts with four, and one Primeva factory per mission builds more. To turn that off, set `StockMissionSupply = false` under `[Missions]` in `BepInEx/config/baanish.icarus.cfg`. The host's setting applies from the next mission load.
 - **Loadouts.** Interceptor is the default, with Air Superiority, Strike and Close Support beside it. Interceptor carries the tip tanks, 170 US gal each, burned before the internal fuel; select them and fire to drop the pair, and the fuel left in them goes with them. The other loadouts carry wingtip missiles. The wingtips take the tip tanks, the MMR-S3 or the IRM-S2. The pylon takes one store or a twin air-to-air rack. The conformal stations take the MMR-S3, IRM-S2 and AAM-29.
 - **Conformal missiles drop before they light.** Each slides 1.5 m down out of its trough first, so expect a short pause between the trigger and the motor.
-- **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the tanks in a little over six minutes.
+- **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the internal tanks in an estimated six and a half minutes.
 - **Flaps are automatic.** The leading-edge and trailing-edge flaps come out with low airspeed.
 
 ![The gear retracting and extending in flight, in the Navy livery](docs/img/icarus-gear.gif)
