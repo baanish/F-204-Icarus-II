@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from record_paths import portable_record, resolve_record
 import numpy as np
 
 from full_skin_compose import (_chart_mask, _chart_registration, _match_charts, _path,
@@ -13,7 +14,7 @@ from full_skin_compose import (_chart_mask, _chart_registration, _match_charts, 
 def check_sources(manifest_path, output_dir=None):
     """Return every ready base's verdict; missing bases remain pending."""
     path = Path(manifest_path)
-    manifest = json.loads(path.read_text())
+    manifest = resolve_record(json.loads(path.read_text()))
     if manifest.get('source_atlas_manifest'):
         source = _path(manifest['source_atlas_manifest'], path.parent)
         return check_sources(source, output_dir or path.parent / 'registration_diagnostics')
@@ -59,7 +60,7 @@ def check_sources(manifest_path, output_dir=None):
             report[name] = {'status': 'failed', 'source_path': str(source), 'error': str(error)}
     output = Path(output_dir) if output_dir is not None else path.parent / 'registration_diagnostics'
     output.mkdir(parents=True, exist_ok=True)
-    (output / 'source_registration.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    (output / 'source_registration.json').write_text(json.dumps(portable_record(report), indent=2), encoding='utf-8')
     return report
 
 
@@ -70,6 +71,6 @@ if __name__ == '__main__':
     parser.add_argument('--output-dir', type=Path)
     args = parser.parse_args()
     report = check_sources(args.manifest, args.output_dir)
-    print(json.dumps({name: item['status'] if item['status'] != 'failed' else item['error']
-                      for name, item in report.items()}))
+    print(json.dumps(portable_record({name: item['status'] if item['status'] != 'failed' else item['error']
+                      for name, item in report.items()})))
     raise SystemExit(1 if any(item['status'] == 'failed' for item in report.values()) else 0)

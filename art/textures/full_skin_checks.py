@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from record_paths import portable_record, portable_text, resolve_record
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import distance_transform_edt
@@ -28,11 +29,11 @@ def require(condition, message):
 
 
 def read_json(path):
-    return json.loads(Path(path).read_text(encoding='utf-8'))
+    return resolve_record(json.loads(Path(path).read_text(encoding='utf-8')))
 
 
 def write_json(path, value):
-    Path(path).write_text(json.dumps(value, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+    Path(path).write_text(portable_text(json.dumps(portable_record(value), indent=2, allow_nan=False) + '\n'), encoding='utf-8')
 
 
 def resolve(value, directory):
@@ -575,7 +576,7 @@ def alignment_summary(full, report):
     for row in rows:
         cells = [f'{v:.6f}' if isinstance(v, float) else '' if v is None else str(v) for v in row.values()]
         lines.append('| ' + ' | '.join(v.replace('|', '\\|').replace('\n', ' ') for v in cells) + ' |')
-    (full / 'alignment-summary.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    (full / 'alignment-summary.md').write_text(portable_text('\n'.join(lines) + '\n'), encoding='utf-8')
 
 
 def measure(full, bake):

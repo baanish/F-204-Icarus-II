@@ -26,8 +26,9 @@ python art/textures/full_skin_registration.py
 
 After copying this source pack and the original generated folders into another checkout,
 prepare and audit the geometry, then run `python art/textures/full_skin_guides.py inventory`.
-`restore` also rebuilds changed maps. Inventory rebinds normalized metadata
-to the active checkout and refreshes metadata hashes, preserving original source inputs.
+`restore` also rebuilds changed maps. Readers resolve repo-relative metadata in the
+active checkout. Convert legacy records with `python tools/Make-TextureRecordsPortable.py`
+before inventory; the conversion refreshes metadata hashes and preserves source images.
 The exact old generation bake and pilot metadata are retained in `native/generation-inputs`
 for independent source-atlas coverage checks. No ignored old cache is required.
 Unknown canonical parts choose one source physical part by minimum whole-part RMS nearest

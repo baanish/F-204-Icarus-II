@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from record_paths import portable_record, resolve_record
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -35,15 +36,15 @@ def measurements():
     geometry = np.load(BAKE / 'geometry_maps.npz')
     part = geometry['part']
     pilot_mask = np.logical_or.reduce([np.asarray(Image.open(OUT / (name + '.mask.png'))) > 0 for name in GROUPS])
-    names = json.loads((BAKE / 'atlas_triangles.json').read_text())['parts']
+    names = resolve_record(json.loads((BAKE / 'atlas_triangles.json').read_text()))['parts']
     pilot_mask |= (part == names.index('fin_skin') + 1) & (geometry['position'][..., 0] < 0)
-    seams = json.loads((BAKE / 'seam_samples.json').read_text())
+    seams = resolve_record(json.loads((BAKE / 'seam_samples.json').read_text()))
     coords = np.asarray([s['uv'] for s in seams])
     def lookup(image, uv):
         return sample(image, (uv[:, 0] * 2048 - .5) / 2047, ((1 - uv[:, 1]) * 2048 - .5) / 2047)
     touches_pilot = (lookup(pilot_mask[..., None].astype(float), coords[:, 0])[:, 0] > .1) | (lookup(pilot_mask[..., None].astype(float), coords[:, 1])[:, 0] > .1)
     result = {'geometry_head': 'e9a6167906f12f6e0f554305186a7f6f57b15727', 'seams': {}, 'maps': {},
-              'native_sources': json.loads((OUT / 'stitch.json').read_text()),
+              'native_sources': resolve_record(json.loads((OUT / 'stitch.json').read_text())),
               'note': 'Offline uncompressed probe only. Pilot approval remains with the owner.'}
     for version in ('round1', 'pilot2'):
         folder = OUT / version / 'art/export/textures'
@@ -92,7 +93,7 @@ def measurements():
     result['relief_policy_characterization'] = {'input_seam_px': -.34, 'output_seam_px': -.102,
                                                'input_cavity': .94, 'output_cavity': .982, 'outside_pilot_unchanged': True}
     generation_path = SOURCES / 'generation.json'
-    generation = json.loads(generation_path.read_text())
+    generation = resolve_record(json.loads(generation_path.read_text()))
     shared = (ROOT / 'art/textures/round2_style.txt').read_text().strip()
     for name, original_name in generation['outputs'].items():
         image_path = SOURCES / (name + '.png')
@@ -104,15 +105,15 @@ def measurements():
         if not (SOURCES / (name + '.context.md')).read_text().strip():
             raise ValueError('Missing context pack: ' + name)
     generation['registered_sources'] = result['native_sources']
-    generation_path.write_text(json.dumps(generation, indent=2))
+    generation_path.write_text(json.dumps(portable_record(generation), indent=2))
     inputs = list(SOURCES.glob('*')) + [ROOT / 'art/textures/round2_style.txt', ROOT / 'art/textures/pilot2_parts.py',
         ROOT / 'art/textures/pilot2_review.py', ROOT / 'art/blender/pilot2_skin.py', ROOT / 'art/textures/compose_skin.py']
     inputs += [BAKE / n for n in ('geometry_maps.npz', 'ao_maps.npz', 'geometry.blend', 'skin.blend')]
     inputs += [OUT / n for n in ('parts.json', 'structure.json', 'stitch.json', 'render_settings.json')]
     inputs += list(OUT.glob('*.png'))
     result['evidence_sha256'] = {p.as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs if p.is_file()}
-    (OUT / 'measurements.json').write_text(json.dumps(result, indent=2))
-    print('PILOT REVIEW PASS', json.dumps({'seams': result['seams'], 'source_change': result['source_change']}, indent=2))
+    (OUT / 'measurements.json').write_text(json.dumps(portable_record(result), indent=2))
+    print('PILOT REVIEW PASS', json.dumps(portable_record({'seams': result['seams'], 'source_change': result['source_change']}), indent=2))
 
 
 if __name__ == '__main__':

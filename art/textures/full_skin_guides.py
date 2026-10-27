@@ -15,6 +15,7 @@ from scipy.spatial import cKDTree
 
 from panels import ACCESS_PANELS
 from pilot2_parts import font, guide_array, layout
+from record_paths import portable_record, portable_text, resolve_record
 from rasterize import ROOT, OUT as BAKE, SOURCE
 
 OUT = ROOT / '.cache/review/wave2/p9b-round2/full'
@@ -28,7 +29,7 @@ TINY_TEXELS = 400
 
 
 def write_json(path, data):
-    path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+    path.write_text(json.dumps(portable_record(data), indent=2) + '\n', encoding='utf-8')
 
 
 def relocate_record(value):
@@ -47,7 +48,7 @@ def relocate_record(value):
 
 def load_inputs():
     data = np.load(BAKE / 'geometry_maps.npz')
-    names = json.loads((BAKE / 'atlas_triangles.json').read_text())['parts']
+    names = resolve_record(json.loads((BAKE / 'atlas_triangles.json').read_text()))['parts']
     if not names or len(set(names)) != len(names):
         raise ValueError('Expected unique canonical object names')
     if data['part'].shape != (2048, 2048):
@@ -154,7 +155,7 @@ def inventory():
         from source_atlas_mapping import restore_inventory
         restore_inventory(BAKE, OUT)
         return
-    if (OUT / 'parts.json').is_file() and 'source_atlas_manifest' in json.loads((OUT / 'parts.json').read_text()):
+    if (OUT / 'parts.json').is_file() and 'source_atlas_manifest' in resolve_record(json.loads((OUT / 'parts.json').read_text())):
         raise ValueError('This atlas requires its persisted native source pack before inventory can rebuild maps')
     OUT.mkdir(parents=True, exist_ok=True)
     SOURCES.mkdir(parents=True, exist_ok=True)
@@ -163,7 +164,7 @@ def inventory():
     used = part > 0
     owner = np.zeros(part.shape, np.uint16)
     groups, all_charts, rules = {}, {}, []
-    pilot = json.loads((PILOT / 'parts.json').read_text())
+    pilot = resolve_record(json.loads((PILOT / 'parts.json').read_text()))
 
     def add_group(name, part_name, charts, reused=None):
         indices = np.concatenate([c['_indices'] for c in charts])
@@ -338,7 +339,7 @@ def inventory():
         group['prompt_path'] = (base_folder / (name + '.prompt.txt')).as_posix()
         stitch_path = SOURCES / (name + '.source-stitch.json')
         if stitch_path.exists():
-            group['source_stitch'] = relocate_record(json.loads(stitch_path.read_text()))
+            group['source_stitch'] = relocate_record(resolve_record(json.loads(stitch_path.read_text())))
             group['source_path'] = (SOURCES / (name + '.stitched.png')).as_posix()
         for stem in (name, name + '_height', name + '_roughness'):
             for suffix in ('.generation.json', '.call.json', '.source-stitch.json', '.failed-attempt.json'):
@@ -346,7 +347,7 @@ def inventory():
                 if stem == name and not group['generation_required'] and suffix == '.call.json':
                     record = base_folder / (stem + suffix)
                 if record.exists():
-                    write_json(OUT / record.name, relocate_record(json.loads(record.read_text())))
+                    write_json(OUT / record.name, relocate_record(resolve_record(json.loads(record.read_text()))))
 
     missing = used & (owner == 0)
     unassigned = []
@@ -381,16 +382,16 @@ def inventory():
     np.savez_compressed(OUT / 'ownership.npz', group_index=owner, group_names=np.array(list(groups)))
     write_json(OUT / 'parts.json', manifest)
     write_json(OUT / 'coverage.json', coverage)
-    print(json.dumps({'new_groups': [n for n, g in groups.items() if g['generation_required']],
+    print(json.dumps(portable_record({'new_groups': [n for n, g in groups.items() if g['generation_required']],
                       'reused_groups': [n for n, g in groups.items() if not g['generation_required']],
                       'canonical_texels': coverage['canonical_texels'], 'unassigned_texels': coverage['unassigned_texels'],
-                      'unmatched_surface_texels': coverage['unmatched_surface_texels']}))
+                      'unmatched_surface_texels': coverage['unmatched_surface_texels']})))
     if missing.any():
         raise ValueError('Unassigned canonical islands are recorded in coverage.json')
 
 
 def selected_groups(name):
-    manifest = json.loads((OUT / 'parts.json').read_text())
+    manifest = resolve_record(json.loads((OUT / 'parts.json').read_text()))
     groups = manifest['groups']
     if name and name not in groups:
         raise ValueError(f'Unknown group {name}; choose from {list(groups)}')
@@ -405,7 +406,7 @@ def guides(name=None):
         return
     data, names = load_inputs()
     pos, normal = data['position'][..., :3], data['normal'][..., :3]
-    structure = json.loads((PILOT / 'structure.json').read_text())
+    structure = resolve_record(json.loads((PILOT / 'structure.json').read_text()))
     x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
     frames, spars = structure['frames'], structure['spars']
     frame_distance = abs((y + structure['S0'] - frames['s0'] + frames['pitch']/2) % frames['pitch'] - frames['pitch']/2)
@@ -570,8 +571,8 @@ The five accepted pilot images, masks, chart layouts and guides are reused uncha
 
 References in image order:
 ''' + '\n'.join('- '+p for p in references) + '\n\nShared style block:\n'+shared+'\n'
-        Path(group['prompt_path']).write_text(prompt, encoding='utf-8')
-        Path(group['context_path']).write_text(note, encoding='utf-8')
+        Path(group['prompt_path']).write_text(portable_text(prompt), encoding='utf-8')
+        Path(group['context_path']).write_text(portable_text(note), encoding='utf-8')
         call = {'name': group_name, 'generation_required': group['generation_required'],
                 'prompt': group['prompt_path'], 'references': references, 'source_path': group['source_path']}
         write_json(OUT / (group_name+'.call.json'), call)
@@ -589,7 +590,7 @@ def check():
     if manifest['input_sha256'] != input_hashes():
         raise ValueError('Inputs changed after inventory; regenerate before using guides')
     data, names = load_inputs()
-    coverage = json.loads((OUT / 'coverage.json').read_text())
+    coverage = resolve_record(json.loads((OUT / 'coverage.json').read_text()))
     direct = np.zeros(data['part'].shape, np.uint16)
     shared = STYLE.read_text(encoding='utf-8').strip()
     for name, group in groups.items():
@@ -642,7 +643,7 @@ def check():
               'direct_texels': direct_count, 'transferred_texels': coverage['transferred_texels'],
               'unmatched_surface_texels': coverage['unmatched_surface_texels'], 'unassigned_texels': 0}
     write_json(OUT / 'checks.json', report)
-    print('CHECK PASS', json.dumps(report))
+    print('CHECK PASS', json.dumps(portable_record(report)))
 
 
 def main():

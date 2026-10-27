@@ -5,7 +5,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\pilot2\\radome.png",
+      "source_path": "art/textures/generated/pilot2/radome.png",
       "sha256": "0097730b024be9ff763765d2c02d1ed52efbaea8387b3720e41988c283de1a85",
       "registration": [
         {
@@ -115,7 +115,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\radome_height.png",
+          "path": "art/textures/generated/full/radome_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -133,7 +133,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\radome_roughness.png",
+          "path": "art/textures/generated/full/radome_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -4380,7 +4380,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\pilot2\\forward_left.png",
+      "source_path": "art/textures/generated/pilot2/forward_left.png",
       "sha256": "b3b50fc420975725e47de99cd16eb3aaf6b8379f12100ade2e7223934b85c2a2",
       "registration": [
         {
@@ -4412,7 +4412,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\forward_left_height.png",
+          "path": "art/textures/generated/full/forward_left_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -10514,7 +10514,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\forward_left_roughness.png",
+          "path": "art/textures/generated/full/forward_left_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -18043,7 +18043,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\pilot2\\wing_root.png",
+      "source_path": "art/textures/generated/pilot2/wing_root.png",
       "sha256": "47462c636a683b4ad5769d9ccc937947f92a148b015e61a98490c0f54a5bc399",
       "registration": [
         {
@@ -18075,7 +18075,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\wing_root_height.png",
+          "path": "art/textures/generated/full/wing_root_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -18093,7 +18093,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\wing_root_roughness.png",
+          "path": "art/textures/generated/full/wing_root_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -21266,7 +21266,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\pilot2\\wing_upper.png",
+      "source_path": "art/textures/generated/pilot2/wing_upper.png",
       "sha256": "7894a859c127324bf3cea755e87e6ceae3506bce55c27a6808a03ded8d4637bf",
       "registration": [
         {
@@ -21324,7 +21324,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\wing_upper_height.png",
+          "path": "art/textures/generated/full/wing_upper_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -32197,7 +32197,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\wing_upper_roughness.png",
+          "path": "art/textures/generated/full/wing_upper_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -50534,7 +50534,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\pilot2\\fin_left.png",
+      "source_path": "art/textures/generated/pilot2/fin_left.png",
       "sha256": "c0480017587b5637fb9df92f0921c990fb095bd7b9bcd2dd9d432de5d629668a",
       "registration": [
         {
@@ -50618,7 +50618,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\fin_left_height.png",
+          "path": "art/textures/generated/full/fin_left_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -54949,7 +54949,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\fin_left_roughness.png",
+          "path": "art/textures/generated/full/fin_left_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -60626,7 +60626,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\aileron_L_all.png",
+      "source_path": "art/textures/generated/full/aileron_L_all.png",
       "sha256": "d6f42597b84ff40b1979eafd3663013c04a22f90814ec6d0ae749931bc25471e",
       "registration": [
         {
@@ -60684,7 +60684,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\aileron_L_all_height.png",
+          "path": "art/textures/generated/full/aileron_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -62131,7 +62131,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\aileron_L_all_roughness.png",
+          "path": "art/textures/generated/full/aileron_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -65869,7 +65869,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\canopy_all.stitched.png",
+      "source_path": "art/textures/generated/full/canopy_all.stitched.png",
       "sha256": "a2ce29f5dcff771122757c9f55bf00fb97afb6d8f6c45154d25aed9f64ba24da",
       "registration": [
         {
@@ -66395,7 +66395,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\canopy_all_height.png",
+          "path": "art/textures/generated/full/canopy_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -67300,7 +67300,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\canopy_all_roughness.png",
+          "path": "art/textures/generated/full/canopy_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -68257,7 +68257,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\dorsal_cover_upper_front.png",
+      "source_path": "art/textures/generated/full/dorsal_cover_upper_front.png",
       "sha256": "4f38b7879c25c9f72933dbaef61b0b1aad5171124ff9796b938a8f41f8091bc3",
       "registration": [
         {
@@ -68289,7 +68289,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\dorsal_cover_upper_front_height.png",
+          "path": "art/textures/generated/full/dorsal_cover_upper_front_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -70595,7 +70595,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\dorsal_cover_upper_front_roughness.png",
+          "path": "art/textures/generated/full/dorsal_cover_upper_front_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -75040,7 +75040,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\dorsal_cover_upper_rear.png",
+      "source_path": "art/textures/generated/full/dorsal_cover_upper_rear.png",
       "sha256": "ebfc37b87bdcacba1d12ff80bfec18ab3f71f2459e13ac91d787687f15b6f14d",
       "registration": [
         {
@@ -75072,7 +75072,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\dorsal_cover_upper_rear_height.png",
+          "path": "art/textures/generated/full/dorsal_cover_upper_rear_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -76943,7 +76943,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\dorsal_cover_upper_rear_roughness.png",
+          "path": "art/textures/generated/full/dorsal_cover_upper_rear_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -78818,7 +78818,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\flap_L_all.png",
+      "source_path": "art/textures/generated/full/flap_L_all.png",
       "sha256": "48627a9955b9dd1125ae0b360344c1e9386af7e1fd69ab2e4e192eaaa537fdfc",
       "registration": [
         {
@@ -78876,7 +78876,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\flap_L_all_height.png",
+          "path": "art/textures/generated/full/flap_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -85286,7 +85286,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\flap_L_all_roughness.png",
+          "path": "art/textures/generated/full/flap_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -93655,7 +93655,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\gear_door_N_L_all.png",
+      "source_path": "art/textures/generated/full/gear_door_N_L_all.png",
       "sha256": "b3108d9614714cbbf0b63eb1f071550a4105212ad887473dbd8d8c4d39f474c3",
       "registration": [
         {
@@ -93687,7 +93687,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\gear_door_N_L_all_height.png",
+          "path": "art/textures/generated/full/gear_door_N_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -94332,7 +94332,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\gear_door_N_L_all_roughness.png",
+          "path": "art/textures/generated/full/gear_door_N_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -96189,7 +96189,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\gear_door_main_L_all.png",
+      "source_path": "art/textures/generated/full/gear_door_main_L_all.png",
       "sha256": "0e74d1f4f48d9edaad8b6893e0f55f12c16779c0f1acadd41a4a007f01bd7d22",
       "registration": [
         {
@@ -96221,7 +96221,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\gear_door_main_L_all_height.png",
+          "path": "art/textures/generated/full/gear_door_main_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -99104,7 +99104,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\gear_door_main_L_all_roughness.png",
+          "path": "art/textures/generated/full/gear_door_main_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -104769,7 +104769,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\intake_duct_L_all.png",
+      "source_path": "art/textures/generated/full/intake_duct_L_all.png",
       "sha256": "e16b124ba2dd10b87b49ffe33026f97d3732962dff5924ea97807a395febf55c",
       "registration": [
         {
@@ -105009,7 +105009,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\intake_duct_L_all_height.png",
+          "path": "art/textures/generated/full/intake_duct_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -109535,7 +109535,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\intake_duct_L_all_roughness.png",
+          "path": "art/textures/generated/full/intake_duct_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -117929,7 +117929,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\lef_L_all.png",
+      "source_path": "art/textures/generated/full/lef_L_all.png",
       "sha256": "ec0efac09cfb707590f8fab20c582515745098e7bb7868f48c26c28beb3b9d08",
       "registration": [
         {
@@ -117987,7 +117987,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\lef_L_all_height.png",
+          "path": "art/textures/generated/full/lef_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -120313,7 +120313,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\lef_L_all_roughness.png",
+          "path": "art/textures/generated/full/lef_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -124947,7 +124947,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\nozzle_all.png",
+      "source_path": "art/textures/generated/full/nozzle_all.png",
       "sha256": "b498f4db6f98f6bf0bcaa143d6db10373fdd30e41b0493616a549930f8533ac5",
       "registration": [
         {
@@ -125135,7 +125135,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\nozzle_all_height.png",
+          "path": "art/textures/generated/full/nozzle_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -133764,7 +133764,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\nozzle_all_roughness.png",
+          "path": "art/textures/generated/full/nozzle_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -145101,7 +145101,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\nozzle_petal_00_all.png",
+      "source_path": "art/textures/generated/full/nozzle_petal_00_all.png",
       "sha256": "fca0302fb7f90986c4232711b7e2f858fd231d6bd977f4b40cb9a19f9157a8fd",
       "registration": [
         {
@@ -145133,7 +145133,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\nozzle_petal_00_all_height.png",
+          "path": "art/textures/generated/full/nozzle_petal_00_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -148283,7 +148283,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\nozzle_petal_00_all_roughness.png",
+          "path": "art/textures/generated/full/nozzle_petal_00_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -154529,7 +154529,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\nozzle_seal_00_all.png",
+      "source_path": "art/textures/generated/full/nozzle_seal_00_all.png",
       "sha256": "4fe9062f2b660792e9d30748f378048cacb23fa6b292d09b2b9c8681b319a926",
       "registration": [
         {
@@ -154561,7 +154561,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\nozzle_seal_00_all_height.png",
+          "path": "art/textures/generated/full/nozzle_seal_00_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -154579,7 +154579,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\nozzle_seal_00_all_roughness.png",
+          "path": "art/textures/generated/full/nozzle_seal_00_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -156315,7 +156315,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\pylon_inner_L_all.png",
+      "source_path": "art/textures/generated/full/pylon_inner_L_all.png",
       "sha256": "01183902e4f948997806737c440c5ad723242a7ed0d1dd8cc6c0ad5913467884",
       "registration": [
         {
@@ -156425,7 +156425,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\pylon_inner_L_all_height.png",
+          "path": "art/textures/generated/full/pylon_inner_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -159220,7 +159220,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\pylon_inner_L_all_roughness.png",
+          "path": "art/textures/generated/full/pylon_inner_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -164363,7 +164363,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\pylon_inner_plug_L_all.stitched.png",
+      "source_path": "art/textures/generated/full/pylon_inner_plug_L_all.stitched.png",
       "sha256": "af1a2bbde0f2cfb0b069365194b615bd6de236c4b6f2bd92e74a083525d4727d",
       "registration": [
         {
@@ -164473,7 +164473,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\pylon_inner_plug_L_all_height.png",
+          "path": "art/textures/generated/full/pylon_inner_plug_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -164491,7 +164491,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\pylon_inner_plug_L_all_roughness.png",
+          "path": "art/textures/generated/full/pylon_inner_plug_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -164517,7 +164517,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\rudder_all.png",
+      "source_path": "art/textures/generated/full/rudder_all.png",
       "sha256": "cfd764e2c04e1b00cc369c7d67bd459d21832e1a9c2587e4a7565e033d2f717a",
       "registration": [
         {
@@ -164575,7 +164575,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\rudder_all_height.png",
+          "path": "art/textures/generated/full/rudder_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -169216,7 +169216,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\rudder_all_roughness.png",
+          "path": "art/textures/generated/full/rudder_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -176099,7 +176099,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_aft_L_lower.png",
+      "source_path": "art/textures/generated/full/skin_aft_L_lower.png",
       "sha256": "71665f32c92a5ec6d2a377bdf724ef086894bb6b4c8d6337f2b9906c8fad486c",
       "registration": [
         {
@@ -176131,7 +176131,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_aft_L_lower_height.png",
+          "path": "art/textures/generated/full/skin_aft_L_lower_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -178724,7 +178724,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_aft_L_lower_roughness.png",
+          "path": "art/textures/generated/full/skin_aft_L_lower_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -181139,7 +181139,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_aft_L_out.png",
+      "source_path": "art/textures/generated/full/skin_aft_L_out.png",
       "sha256": "0994be1af3d8474f0e27a81275fc2e46a0756e61ada87f7df0c80651ca8b2470",
       "registration": [
         {
@@ -181171,7 +181171,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_aft_L_out_height.png",
+          "path": "art/textures/generated/full/skin_aft_L_out_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -183436,7 +183436,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_aft_L_out_roughness.png",
+          "path": "art/textures/generated/full/skin_aft_L_out_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -185852,7 +185852,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_aft_L_upper.png",
+      "source_path": "art/textures/generated/full/skin_aft_L_upper.png",
       "sha256": "a642b170546477c5fb274990003c22bf21e1b5e3e197548ab3d67e3ba5fa7ca5",
       "registration": [
         {
@@ -185910,7 +185910,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_aft_L_upper_height.png",
+          "path": "art/textures/generated/full/skin_aft_L_upper_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -191168,7 +191168,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_aft_L_upper_roughness.png",
+          "path": "art/textures/generated/full/skin_aft_L_upper_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -196704,7 +196704,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_forward_L_lower.stitched.png",
+      "source_path": "art/textures/generated/full/skin_forward_L_lower.stitched.png",
       "sha256": "1b8e4f0cd10ab33e149cb292c2b9fb65a5558a2248ae3046d99878fedb549606",
       "registration": [
         {
@@ -196918,7 +196918,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_forward_L_lower_height.png",
+          "path": "art/textures/generated/full/skin_forward_L_lower_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -200800,7 +200800,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_forward_L_lower_roughness.png",
+          "path": "art/textures/generated/full/skin_forward_L_lower_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -206895,7 +206895,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_mid_L_lower.png",
+      "source_path": "art/textures/generated/full/skin_mid_L_lower.png",
       "sha256": "1134cde4a614a4840eed1cdec0995412ed79bfe482000e3d599e99001b9b69ba",
       "registration": [
         {
@@ -206927,7 +206927,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_mid_L_lower_height.png",
+          "path": "art/textures/generated/full/skin_mid_L_lower_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -210783,7 +210783,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_mid_L_lower_roughness.png",
+          "path": "art/textures/generated/full/skin_mid_L_lower_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -216191,7 +216191,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_mid_L_out.png",
+      "source_path": "art/textures/generated/full/skin_mid_L_out.png",
       "sha256": "2d10f8a56067baa7d9c033bcdd349d90a08954c5227b0e7a0ab6f301c4f50d3c",
       "registration": [
         {
@@ -216353,7 +216353,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_mid_L_out_height.png",
+          "path": "art/textures/generated/full/skin_mid_L_out_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -225328,7 +225328,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_mid_L_out_roughness.png",
+          "path": "art/textures/generated/full/skin_mid_L_out_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -238283,7 +238283,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\skin_mid_L_upper.png",
+      "source_path": "art/textures/generated/full/skin_mid_L_upper.png",
       "sha256": "51075e9544fb5ec9b3e0c33ee033571d73eb8a76ae055c72b3629fdbd32adcae",
       "registration": [
         {
@@ -238315,7 +238315,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\skin_mid_L_upper_height.png",
+          "path": "art/textures/generated/full/skin_mid_L_upper_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -240343,7 +240343,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\skin_mid_L_upper_roughness.png",
+          "path": "art/textures/generated/full/skin_mid_L_upper_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -243573,7 +243573,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\speed_brake_L_all.png",
+      "source_path": "art/textures/generated/full/speed_brake_L_all.png",
       "sha256": "a3009c129692861f354e2d51bf756f69042f19ebb726c8fb19d15d1af113e132",
       "registration": [
         {
@@ -243631,7 +243631,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\speed_brake_L_all_height.png",
+          "path": "art/textures/generated/full/speed_brake_L_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -246126,7 +246126,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\speed_brake_L_all_roughness.png",
+          "path": "art/textures/generated/full/speed_brake_L_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -251159,7 +251159,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\stabilator_lower.png",
+      "source_path": "art/textures/generated/full/stabilator_lower.png",
       "sha256": "5f71495e8e7293fafcc1302e6133ff07f23b512555c2753b06e906fcff040fcf",
       "registration": [
         {
@@ -251243,7 +251243,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\stabilator_lower_height.png",
+          "path": "art/textures/generated/full/stabilator_lower_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -255461,7 +255461,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\stabilator_lower_roughness.png",
+          "path": "art/textures/generated/full/stabilator_lower_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -262391,7 +262391,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\stabilator_upper.png",
+      "source_path": "art/textures/generated/full/stabilator_upper.png",
       "sha256": "c3275f6bb285458b5f6fcc1359990bcfafbbea805fffa8f0da0fb42e257c01c4",
       "registration": [
         {
@@ -262423,7 +262423,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\stabilator_upper_height.png",
+          "path": "art/textures/generated/full/stabilator_upper_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -262441,7 +262441,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\stabilator_upper_roughness.png",
+          "path": "art/textures/generated/full/stabilator_upper_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -264132,7 +264132,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\ventral_fin_all.png",
+      "source_path": "art/textures/generated/full/ventral_fin_all.png",
       "sha256": "b1353ffcfa38a8d618b528d85a9568a054db20c33187b30e2716e48065fc0384",
       "registration": [
         {
@@ -264242,7 +264242,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\ventral_fin_all_height.png",
+          "path": "art/textures/generated/full/ventral_fin_all_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -266518,7 +266518,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\ventral_fin_all_roughness.png",
+          "path": "art/textures/generated/full/ventral_fin_all_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -273651,7 +273651,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\wing_skin_L_lower_front.stitched.png",
+      "source_path": "art/textures/generated/full/wing_skin_L_lower_front.stitched.png",
       "sha256": "4eeb3cc763c2b3ac322f036fe27d6be070636f09fb3ec485b1dc825c6480538b",
       "registration": [
         {
@@ -273761,7 +273761,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\wing_skin_L_lower_front_height.png",
+          "path": "art/textures/generated/full/wing_skin_L_lower_front_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -273779,7 +273779,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\wing_skin_L_lower_front_roughness.png",
+          "path": "art/textures/generated/full/wing_skin_L_lower_front_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -274357,7 +274357,7 @@
         1254,
         1254
       ],
-      "source_path": "art\\textures\\generated\\full\\wing_skin_L_lower_rear.png",
+      "source_path": "art/textures/generated/full/wing_skin_L_lower_rear.png",
       "sha256": "d3122c612f9f90cba67c42ccb47bf45f3aed1ad2b3e7dc205919677814fab9f2",
       "registration": [
         {
@@ -274493,7 +274493,7 @@
       ],
       "companions": {
         "height": {
-          "path": "art\\textures\\generated\\full\\wing_skin_L_lower_rear_height.png",
+          "path": "art/textures/generated/full/wing_skin_L_lower_rear_height.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",
@@ -281870,7 +281870,7 @@
           }
         },
         "roughness": {
-          "path": "art\\textures\\generated\\full\\wing_skin_L_lower_rear_roughness.png",
+          "path": "art/textures/generated/full/wing_skin_L_lower_rear_roughness.png",
           "status": "fallback",
           "generation": {
             "tool": "image_gen.imagegen built-in",

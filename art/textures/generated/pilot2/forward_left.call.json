@@ -1,9 +1,9 @@
 {
-  "prompt": "art\\textures\\generated\\pilot2\\forward_left.prompt.txt",
+  "prompt": "art/textures/generated/pilot2/forward_left.prompt.txt",
   "references": [
-    "art\\textures\\generated\\pilot2\\forward_left.guide.png",
-    "art\\textures\\generated\\pilot2\\style_anchor.png",
-    "art\\textures\\generated\\pilot2\\forward_left.template.png",
-    "art\\textures\\generated\\pilot2\\forward_left.neighbor_radome.png"
+    "art/textures/generated/pilot2/forward_left.guide.png",
+    "art/textures/generated/pilot2/style_anchor.png",
+    "art/textures/generated/pilot2/forward_left.template.png",
+    "art/textures/generated/pilot2/forward_left.neighbor_radome.png"
   ]
 }

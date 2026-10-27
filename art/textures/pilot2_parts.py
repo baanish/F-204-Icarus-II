@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import label, find_objects, binary_erosion, binary_closing, binary_fill_holes, distance_transform_edt
 from scipy.spatial import cKDTree
 
+from record_paths import portable_record, portable_text, resolve_record
 from rasterize import ROOT, OUT as BAKE, SOURCE, sample
 from panels import ACCESS_PANELS
 
@@ -27,7 +28,7 @@ GROUPS = {
 
 def inputs():
     data = np.load(BAKE / 'geometry_maps.npz')
-    return data, json.loads((BAKE / 'atlas_triangles.json').read_text())['parts']
+    return data, resolve_record(json.loads((BAKE / 'atlas_triangles.json').read_text()))['parts']
 
 
 def chart_masks(part, name, names):
@@ -103,7 +104,7 @@ def guides():
     SOURCES.mkdir(parents=True, exist_ok=True)
     data, names = inputs()
     part, pos, normal = data['part'], data['position'][..., :3], data['normal'][..., :3]
-    structure = json.loads((OUT / 'structure.json').read_text())
+    structure = resolve_record(json.loads((OUT / 'structure.json').read_text()))
     frame = structure['frames']
     x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
     frame_distance = abs((y + structure['S0'] - frame['s0'] + frame['pitch'] / 2) % frame['pitch'] - frame['pitch'] / 2)
@@ -188,14 +189,14 @@ def guides():
         manifest['groups'][name] = {'part': part_name, 'description': description, 'guide_scale': scale,
                                     'guide_px_per_m': scale * 150, 'charts': packed,
                                     'skin_texels': int(selected.sum()), 'mask': (OUT / (name + '.mask.png')).as_posix()}
-    (OUT / 'parts.json').write_text(json.dumps(manifest, indent=2))
+    (OUT / 'parts.json').write_text(json.dumps(portable_record(manifest), indent=2))
     print('PILOT GUIDE PASS', {n: round(g['guide_px_per_m']) for n, g in manifest['groups'].items()})
 
 
 def context(name):
     if any((SOURCES / (name + suffix)).exists() for suffix in ('.png', '.generation.json')):
         raise ValueError('Accepted pilot prompt and reference inputs are immutable: ' + name)
-    manifest = json.loads((OUT / 'parts.json').read_text())
+    manifest = resolve_record(json.loads((OUT / 'parts.json').read_text()))
     g = manifest['groups'][name]
     prior_parts = {'radome': [], 'forward_left': ['radome'], 'wing_root': ['forward_left'],
                    'wing_upper': ['wing_root'], 'fin_left': ['wing_upper']}
@@ -243,14 +244,14 @@ Shared style block:
 {shared}
 """
     context_text = f"# {name} generation context\n\n{g['description']}\n\nThe aircraft's nose points world -Y, up is +Z and left outboard is +X. FWD, UP and OUT arrows in the guide are fitted independently on each chart from the actual world-position bake. Normal-to-sheet axes are labelled rather than guessed. All size values use metres.\n\n{physical}\n\nGuide density: {g['guide_px_per_m']:.1f} px/m. The actual native density is recorded in generation.json after generation. The atlas density stays about 150 px/m; source oversampling does not increase the final atlas resolution.\n\nStructure comes from art/blender/internals.py via structure.json: fuselage frames start at s=1.6 m with 0.6 m pitch; wing spars follow chord fractions 0.175 and 0.70, with rib locations built from the same interval calculation as internals.py. Access covers come from panels.ACCESS_PANELS. The gun-port cover stays closed. Fin root cover and wing filler are explicit art decisions, not claims about modelled interior structure. The radome has no metal fastener grid.\n\n{neighbors}\n\nReference inputs in tool order:\n" + '\n'.join('- ' + p for p in reference_list) + '\n\nOnly our own layout, material generation and current neutral render inputs are permitted. No game texture is supplied.\n\nShared style block:\n' + shared + '\n'
-    (SOURCES / (name + '.context.md')).write_text(context_text)
-    (SOURCES / (name + '.prompt.txt')).write_text(prompt)
-    (OUT / (name + '.call.json')).write_text(json.dumps({'prompt': (SOURCES / (name + '.prompt.txt')).as_posix(), 'references': reference_list}, indent=2))
+    (SOURCES / (name + '.context.md')).write_text(portable_text(context_text))
+    (SOURCES / (name + '.prompt.txt')).write_text(portable_text(prompt))
+    (OUT / (name + '.call.json')).write_text(json.dumps(portable_record({'prompt': (SOURCES / (name + '.prompt.txt')).as_posix(), 'references': reference_list}), indent=2))
     print('PILOT CONTEXT PASS', name, reference_list)
 
 
 def stitch(base, part, manifest_path):
-    manifest = json.loads(Path(manifest_path).read_text())
+    manifest = resolve_record(json.loads(Path(manifest_path).read_text()))
     report = {}
     pos = np.load(BAKE / 'geometry_maps.npz')['position'][..., :3]
     for name, group in manifest['groups'].items():
@@ -303,7 +304,7 @@ def stitch(base, part, manifest_path):
         report[name] = {'native_size': [image.shape[1], image.shape[0]], 'native_px_per_m_min_axis': min(density_values),
                         'registration': registrations, 'skin_texels': int(mask.sum()),
                         'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
-    (OUT / 'stitch.json').write_text(json.dumps(report, indent=2))
+    (OUT / 'stitch.json').write_text(json.dumps(portable_record(report), indent=2))
     return base
 
 
@@ -319,7 +320,7 @@ def compose(version):
 def service_relief(height, cavity, part, pos, names, manifest_path):
     # Maintained flush skin uses 0.3 of the legacy relief. A 0.34 px seam becomes 0.102 px, about 0.68 mm at 150 px/m.
     # Paint scratches remain visible in colour; they must not read as punched or corroded sheet metal.
-    manifest = json.loads(Path(manifest_path).read_text())
+    manifest = resolve_record(json.loads(Path(manifest_path).read_text()))
     selected = np.logical_or.reduce([np.asarray(Image.open(g['mask'])) > 0 for g in manifest['groups'].values()])
     selected |= (part == names.index('fin_skin') + 1) & (pos[..., 0] < 0)
     height[selected] *= .3

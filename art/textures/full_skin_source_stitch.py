@@ -9,6 +9,7 @@ from PIL import Image
 from scipy.ndimage import distance_transform_edt, gaussian_filter
 
 from full_skin_compose import _chart_mask, _match_charts, _read_image, source_charts
+from record_paths import portable_record, portable_text, resolve_record
 from rasterize import ROOT
 
 
@@ -17,7 +18,7 @@ OUT = ROOT / '.cache/review/wave2/p9b-round2/full'
 
 def stitch_source(name, material_only=False):
     manifest_path = OUT / 'parts.json'
-    manifest = json.loads(manifest_path.read_text())
+    manifest = resolve_record(json.loads(manifest_path.read_text()))
     group = manifest['groups'][name]
     source = Path(group['references']['style_anchor']) if material_only else ROOT / 'art/textures/generated/full' / (name + '.png')
     image = _read_image(source, True)
@@ -75,13 +76,13 @@ def stitch_source(name, material_only=False):
               'native_size': [size, size], 'charts': records,
               'limitation': 'material reuse after generation service rejection; no independently generated part detail' if material_only else
               'base-only chart fitting before companion generation; raw generated original remains unchanged'}
-    target.with_suffix('.context.md').write_text(Path(group['context_path']).read_text() + '\n\nSource stitching: ' + json.dumps(report, indent=2), encoding='utf-8')
-    (OUT / (name + '.source-stitch.json')).write_text(json.dumps(report, indent=2), encoding='utf-8')
-    target.with_name(name + '.source-stitch.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    target.with_suffix('.context.md').write_text(portable_text(Path(group['context_path']).read_text() + '\n\nSource stitching: ' + json.dumps(portable_record(report), indent=2)), encoding='utf-8')
+    (OUT / (name + '.source-stitch.json')).write_text(json.dumps(portable_record(report), indent=2), encoding='utf-8')
+    target.with_name(name + '.source-stitch.json').write_text(json.dumps(portable_record(report), indent=2), encoding='utf-8')
     group['source_path'] = target.as_posix()
     group['source_stitch'] = report
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding='utf-8')
-    print(json.dumps(report))
+    manifest_path.write_text(json.dumps(portable_record(manifest), indent=2), encoding='utf-8')
+    print(json.dumps(portable_record(report)))
 
 
 if __name__ == '__main__':

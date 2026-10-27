@@ -1,5 +1,6 @@
-# Checks staged blobs, including binary metadata. Reports rules and paths without repeating leaked content.
-param([string]$Repo = (Join-Path $PSScriptRoot '..'))
+# Checks staged blobs, or every tracked and untracked working-tree file with -All, including binary metadata.
+[CmdletBinding()]
+param([string]$Repo = (Join-Path $PSScriptRoot '..'), [switch]$All)
 
 $ErrorActionPreference = 'Stop'
 $Repo = [IO.Path]::GetFullPath($Repo)
@@ -36,7 +37,7 @@ function Resolve-LfsBytes([byte[]]$Bytes, [string]$Path) {
     if (-not $text.StartsWith('version https://git-lfs.github.com/spec/v1')) { return ,$Bytes }
     if ($text -notmatch 'oid sha256:([0-9a-f]{64})') { throw "$Path has an unreadable LFS pointer" }
     $oid = $Matches[1]
-    $common = [Text.Encoding]::UTF8.GetString((Read-GitBytes @('rev-parse', '--git-common-dir'))).Trim()
+    $common = [Text.Encoding]::UTF8.GetString((Read-GitBytes @('rev-parse', '--path-format=absolute', '--git-common-dir'))).Trim()
     $object = Join-Path $common "lfs/objects/$($oid.Substring(0, 2))/$($oid.Substring(2, 2))/$oid"
     if (-not (Test-Path -LiteralPath $object)) { throw "$Path has no local LFS object" }
     $real = [IO.File]::ReadAllBytes($object)
@@ -44,6 +45,11 @@ function Resolve-LfsBytes([byte[]]$Bytes, [string]$Path) {
         throw "$Path LFS object does not match its pointer"
     }
     return ,$real
+}
+
+function Read-TreeBytes([string]$Path) {
+    if ($All) { return ,(Resolve-LfsBytes ([IO.File]::ReadAllBytes((Join-Path $Repo $Path))) $Path) }
+    return ,(Resolve-LfsBytes (Read-GitBytes @('show', ":$Path")) $Path)
 }
 
 function Read-ScanBytes([byte[]]$Bytes, [string]$Path) {
@@ -69,28 +75,50 @@ function Read-ScanBytes([byte[]]$Bytes, [string]$Path) {
 
 try {
     if ((Read-GitBytes @('ls-files', '-u')).Length) { throw 'resolve unmerged index entries first' }
-    $paths = @(Read-GitPaths @('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z'))
+    $paths = if ($All) { @(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z')) }
+             else { @(Read-GitPaths @('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z')) }
     $rules = [ordered]@{
         # The account name as a whole word, so longer words that contain it don't match.
         'private username' = '(?<![A-Za-z])' + [regex]::Escape(('own' + 'er')) + '(?![A-Za-z])'
         'private email' = [regex]::Escape(('owner' + '@example.test'))
         'Steam ID' = '(?<!\d)7656119\d{10}(?!\d)'
         'absolute user path' = '(?:[A-Z]:[\\/]+Users[\\/]+|/(?:Users|home|root)/|\\\\[^\\\s]+\\(?:Users|home)\\)'
+        'private development path' = '[A-Z]:[\\/]+(?:[^\r\n"<>|]*[\\/]+)?(?:privatefolder|privatetree)(?:[\\/]+|(?=["\s]|$))'
+        'personal Steam library path' = '[A-Z]:[\\/]+(?:[^\s"<>|]*[\\/]+)?(?:Users[\\/]+[^\\/\s"<>|]+[\\/]+[^\r\n"<>|]*Steam|Steam(?:Library)?[\\/]+(?:users|userdata)[\\/]+[^\\/\s"<>|]+)'
+        'private machine name' = '(?<![A-Za-z])(privatemachine)(?![A-Za-z])'
+    }
+    $allowPath = 'tools/public-check-allowlist.json'
+    $allowlist = @()
+    if ($allowPath -in $paths -or (-not $All -and $allowPath -in @(Read-GitPaths @('ls-files', '-z', '--', $allowPath)))) {
+        $allowlist = @([Text.Encoding]::UTF8.GetString((Read-TreeBytes $allowPath)) | ConvertFrom-Json)
+        foreach ($entry in $allowlist) {
+            if (-not $entry.path -or -not $rules.Contains($entry.rule) -or -not $entry.values.Count -or -not $entry.reason) {
+                throw 'invalid public-check allowlist entry: require exact path, rule, values and reason'
+            }
+        }
     }
     $failures = [Collections.Generic.List[string]]::new()
+    $allowed = [Collections.Generic.HashSet[string]]::new()
     foreach ($path in $paths) {
+        Write-Verbose "checking $path"
         if ($path -match '(?i)(^|/)(\.internal|\.cache|_donotship)(/|$)|^unity/Packages/nuclearoption/|^unity/Assets/Blueprinter/(Example|Generated)/') {
             $failures.Add("${path}: local-only path")
         }
         if ($path -match '(?i)\.(dll|exe|nobp|unity3d|assets)(\.meta)?$') {
             $failures.Add("${path}: game or third-party binary")
         }
-        $bytes = Resolve-LfsBytes (Read-GitBytes @('show', ":$path")) $path
+        $bytes = Read-TreeBytes $path
         $text = [Text.Encoding]::Latin1.GetString((Read-ScanBytes $bytes $path))
         $views = @($path, $text, $text.Replace([string][char]0, ''))
         foreach ($rule in $rules.Keys) {
-            if (@($views | Where-Object { $_ -imatch $rules[$rule] }).Count) {
-                $failures.Add("${path}: $rule")
+            foreach ($view in $views) {
+                foreach ($match in [regex]::Matches($view, $rules[$rule], 'IgnoreCase')) {
+                    $exception = @($allowlist | Where-Object {
+                        $_.path -ceq $path -and $_.rule -ceq $rule -and $match.Value -cin $_.values
+                    })
+                    if ($exception.Count) { [void]$allowed.Add("${path}: $rule ($($exception[0].reason))") }
+                    elseif ("${path}: $rule" -notin $failures) { $failures.Add("${path}: $rule") }
+                }
             }
         }
         if ($path -match '(?i)\.fbx$') {
@@ -104,8 +132,8 @@ try {
     }
 
     $changed = @(Read-GitPaths @('diff', '--cached', '--name-only', '-z'))
-    if (@($changed | Where-Object { $_ -eq 'art/export-manifest.json' -or $_.StartsWith('art/export/') }).Count) {
-        $manifestBytes = Read-GitBytes @('show', ':art/export-manifest.json')
+    if ($All -or @($changed | Where-Object { $_ -eq 'art/export-manifest.json' -or $_.StartsWith('art/export/') }).Count) {
+        $manifestBytes = Read-TreeBytes 'art/export-manifest.json'
         $manifest = [Text.Encoding]::UTF8.GetString($manifestBytes) | ConvertFrom-Json -AsHashtable
         $exports = @(Read-GitPaths @('ls-files', '-z', '--', 'art/export/'))
         if (-not $exports.Count) { throw 'staged export manifest has no exports' }
@@ -114,15 +142,17 @@ try {
                 $failures.Add("${path}: missing or extra staged export")
                 continue
             }
-            $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData((Resolve-LfsBytes (Read-GitBytes @('show', ":$path")) $path))).ToLowerInvariant()
+            $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData((Read-TreeBytes $path))).ToLowerInvariant()
             if ($digest -cne $manifest[$path]) { $failures.Add("${path}: staged export hash differs") }
         }
     }
+    $allowed | Sort-Object | ForEach-Object { Write-Output "PUBLIC ALLOW: $_" }
     if ($failures.Count) {
         $failures | ForEach-Object { Write-Output "PUBLIC FAIL: $_" }
         exit 1
     }
-    Write-Output "PUBLIC PASS: $($paths.Count) staged files checked"
+    $mode = if ($All) { 'tracked and untracked working-tree' } else { 'staged' }
+    Write-Output "PUBLIC PASS: $($paths.Count) $mode files checked"
 } catch {
     Write-Output "PUBLIC FAIL: $($_.Exception.Message)"
     exit 1

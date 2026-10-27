@@ -1,0 +1,14 @@
+[
+  {
+    "path": "tools/Check-Public.ps1",
+    "rule": "private machine name",
+    "values": ["privatemachine"],
+    "reason": "The checker must name the whole words it rejects."
+  },
+  {
+    "path": "tools/public-check-allowlist.json",
+    "rule": "private machine name",
+    "values": ["privatemachine"],
+    "reason": "Exact checker literals are listed here to allow the rule definition."
+  }
+]

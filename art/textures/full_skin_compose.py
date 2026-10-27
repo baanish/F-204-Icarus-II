@@ -9,6 +9,7 @@ from scipy.ndimage import binary_closing, distance_transform_edt, find_objects, 
 from scipy.optimize import linear_sum_assignment
 
 from companion_maps import validate_companion
+from record_paths import portable_record, resolve_record
 from rasterize import ROOT, sample
 
 
@@ -55,13 +56,13 @@ def _read_image(path, rgb=False):
 
 
 def _write_report(path, report):
-    path.write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
+    path.write_text(json.dumps(portable_record(report), indent=2, allow_nan=False), encoding='utf-8')
 
 
 def _companion(image, name, kind, directory, cache):
     path = directory / f'{name}_{kind}.png'
     record = cache / f'{name}_{kind}.generation.json'
-    generation = json.loads(record.read_text()) if record.exists() else None
+    generation = resolve_record(json.loads(record.read_text())) if record.exists() else None
     report = {'path': str(path), 'status': 'fallback', 'generation': generation,
               'fallback_policy': 'legacy surface relief derived from this generated base'}
     if not path.exists():
@@ -189,7 +190,7 @@ def assemble_full(manifest_path):
     """
     path = Path(manifest_path)
     directory = path.parent
-    manifest = json.loads(path.read_text())
+    manifest = resolve_record(json.loads(path.read_text()))
     for input_path, expected in manifest.get('input_sha256', {}).items():
         source_input = _path(input_path, directory)
         if not source_input.is_file() or hashlib.sha256(source_input.read_bytes()).hexdigest() != expected:
@@ -199,7 +200,7 @@ def assemble_full(manifest_path):
         source_path = _path(manifest['source_atlas_manifest'], directory)
         if source_path.resolve() == path.resolve():
             raise ValueError('Source atlas manifest cannot reference itself')
-        source_manifest = json.loads(source_path.read_text())
+        source_manifest = resolve_record(json.loads(source_path.read_text()))
         if source_manifest.get('source_atlas_manifest'):
             raise ValueError('Source atlas registration must use an immutable native manifest')
         fields = remap_fields(assemble_full(source_path), path)
@@ -207,7 +208,7 @@ def assemble_full(manifest_path):
         _write_report(directory / 'stitch.json', fields['report'])
         Image.fromarray(np.round(np.clip(fields['base'], 0, 1) * 255).astype('uint8')).save(directory / 'assembled.png')
         return fields
-    coverage = json.loads((directory / 'coverage.json').read_text())
+    coverage = resolve_record(json.loads((directory / 'coverage.json').read_text()))
     groups = manifest['groups']
     first_mask = _read_image(_path(next(iter(groups.values()))['mask'], directory)) > 0
     shape = first_mask.shape

@@ -2,7 +2,7 @@
 
 Native registration remains on the immutable generation atlas. Current ownership
 is measured in world space. A nearest-parent transfer promises material coverage,
-not newly authored mechanical detail. No generated source file is rewritten.
+not newly authored mechanical detail. No generated source image is rewritten.
 """
 import copy
 import hashlib
@@ -14,6 +14,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 from scipy.spatial import cKDTree
 
+from record_paths import portable_record, portable_text, resolve_record
 from rasterize import ROOT, SOURCE, PAINT_SIZE as ATLAS_SIZE
 
 FIELDS = ('base', 'height', 'roughness', 'height_valid', 'roughness_valid', 'used')
@@ -27,11 +28,11 @@ def sha256(path):
 
 
 def read_json(path):
-    return json.loads(Path(path).read_text(encoding='utf-8'))
+    return resolve_record(json.loads(Path(path).read_text(encoding='utf-8')))
 
 
 def write_json(path, value):
-    Path(path).write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
+    Path(path).write_text(json.dumps(portable_record(value), indent=2) + '\n', encoding='utf-8')
 
 
 def nearest_parent(target_positions, target_normals, source_positions, source_normals):
@@ -124,7 +125,11 @@ def normalized_source_manifest(snapshot, output):
             destination = output / 'generation-inputs' / path.relative_to(snapshot)
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, destination)
-            persisted_generation_inputs[destination.as_posix()] = digest
+            if destination.suffix == '.json':
+                value = json.loads(destination.read_text(encoding='utf-8'))
+                if portable_record(value) != value:
+                    write_json(destination, value)
+            persisted_generation_inputs[destination.as_posix()] = sha256(destination)
         else:
             persisted_generation_inputs[value] = digest
 
@@ -386,7 +391,7 @@ def rebuild_inventory(bake, output):
         'mapping_policy': {'position_tolerance_m': POSITION_TOLERANCE_M, 'normal_cosine_min': NORMAL_COSINE,
                            'replaced_parts_always_parent_paint': ['gear_door_*', 'speed_brake_*']},
         'field_contract': list(FIELDS)})
-    (persistent / 'README.md').write_text('''# Reuse the registered generation atlas
+    (persistent / 'README.md').write_text(portable_text('''# Reuse the registered generation atlas
 
 The 33 accepted source group names and native chart layouts stay in `native/parts.json`.
 Its masks, ordered transfers, provenance records and input hashes are persisted here.
@@ -414,8 +419,9 @@ python art/textures/full_skin_registration.py
 
 After copying this source pack and the original generated folders into another checkout,
 prepare and audit the geometry, then run `python art/textures/full_skin_guides.py inventory`.
-`restore` also rebuilds changed maps. Inventory rebinds normalized metadata
-to the active checkout and refreshes metadata hashes, preserving original source inputs.
+`restore` also rebuilds changed maps. Readers resolve repo-relative metadata in the
+active checkout. Convert legacy records with `python tools/Make-TextureRecordsPortable.py`
+before inventory; the conversion refreshes metadata hashes and preserves source images.
 The exact old generation bake and pilot metadata are retained in `native/generation-inputs`
 for independent source-atlas coverage checks. No ignored old cache is required.
 Unknown canonical parts choose one source physical part by minimum whole-part RMS nearest
@@ -426,7 +432,7 @@ The bake and atlas hashes must stay unchanged throughout each rebuild.
 Current ownership guides go to the review cache. They never replace generation references.
 `remap_fields(source_fields, manifest_path)` preserves native registration report counts and
 returns the six mapped arrays plus current coverage evidence in `report.source_atlas_mapping`.
-''', encoding='utf-8')
+'''), encoding='utf-8')
     check_inventory(output / 'parts.json')
     return manifest
 
@@ -533,7 +539,7 @@ def check_inventory(manifest_path):
               'inferred_parent_parts': coverage.get('inferred_parent_parts', []),
               'inferred_parent_art_limitation': 'parent material only; no matched mechanical detail'}
     write_json(Path(manifest_path).parent / 'checks.json', report)
-    print('ADAPT CHECK PASS', json.dumps(report))
+    print('ADAPT CHECK PASS', json.dumps(portable_record(report)))
     return report
 
 

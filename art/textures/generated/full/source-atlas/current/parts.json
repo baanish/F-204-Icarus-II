@@ -9,8 +9,8 @@
   "input_sha256": {
     ".cache/review/wave2/p9b/02/geometry_maps.npz": "e8c6191c2f066897fc168b78208fced4d8c7ff2a84009a4194d68b42826af202",
     ".cache/review/wave2/p9b/02/atlas_triangles.json": "994c2b999148fd5db67956f34e871ecba5fe77f568c34ce6518e4b63e2cba18a",
-    "art/textures/generated/full/source-atlas/native/parts.json": "bf6f8711388e8074159d263d929a6605d26638875a55e488f04e9255fc7faca4",
-    "art/textures/generated/full/source-atlas/native/coverage.json": "bef98eae4ca0089c34a572f399a6b267bffe9533333b42519fa66403f3059576",
+    "art/textures/generated/full/source-atlas/native/parts.json": "f59b58015ae540d0eed3215be81c21f0b613e4e5838d1362b8f84604120ba18c",
+    "art/textures/generated/full/source-atlas/native/coverage.json": "d34cfc0d2063108c9318e33c5c2c40003b75d9fe19116a9f374e41ff274b544c",
     "art/textures/generated/full/source-atlas/native/ownership.npz": "9d0924a19e70e449d78155180a62b8d066417178268c2d971c75c76b3777cd32",
     "art/textures/generated/full/source-atlas/current/aileron_L_visible.source-transfer.npz": "3f2393620e397b800724b2dd16d1f594be02e34560e90d23e291cdb56e4a068f",
     "art/textures/generated/full/source-atlas/current/aileron_R_visible.source-transfer.npz": "941dcef23a29127ffb976c976d9719cca74eb5a86daad4dc24cf6c6d1ec55a53",
@@ -176,7 +176,7 @@
     "art/textures/generated/full/source-atlas/current/wing_skin_R.source-transfer.mask.png": "eb07c9c375837ed8e406c6d3e11f362e40f4e1bf1c6f07ddafad3c36486aa0bf",
     "art/textures/generated/full/source-atlas/current/wing_upper.mask.png": "6f7f1c47403cbc5929b062ff80efa6b17e6c182d5f51db76766010be6bc20fb6",
     "art/textures/generated/full/source-atlas/current/ownership.npz": "813310c5d93555deecd265d96d45252c3f695343d3687d7c6139cc2ba8751703",
-    "art/textures/generated/full/source-atlas/current/coverage.json": "3872d554b127c5a24ec2e66fd4ee45bbfbd3c02a890185a94f2bb6dbba17352d"
+    "art/textures/generated/full/source-atlas/current/coverage.json": "086b98b47f35e63fd3898e7b86d02e47b34ec7b32044dbc65392783f57ee4b78"
   },
   "groups": {
     "radome": {

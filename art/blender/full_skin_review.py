@@ -10,6 +10,9 @@ import sys
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'art/textures'))
+from record_paths import resolve_record
+
 FULL = ROOT / '.cache/review/wave2/p9b-round2/full'
 BAKE = ROOT / '.cache/review/wave2/p9b/02'
 RENDERS = FULL / 'renders'
@@ -101,7 +104,7 @@ def load_mask(path, bpy=None):
 
 def build_plan(group=None, overview_only=False, navy=False, bpy=None, groups_only=False):
     manifest_path = FULL / 'parts.json'
-    manifest = json.loads(manifest_path.read_text())
+    manifest = resolve_record(json.loads(manifest_path.read_text()))
     if group is not None and group not in manifest['groups']:
         raise ValueError(f'Unknown group {group!r}; choose from {", ".join(manifest["groups"])}')
     bake_path = Path(manifest['bake'])

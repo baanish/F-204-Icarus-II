@@ -1,5 +1,4 @@
-# -Part blender runs only the three Blender bakes, -Part python only the rest. The Python half writes this
-# checkout's absolute paths into the skin metadata it commits, so it runs in the checkout being committed.
+# -Part blender runs only the three Blender bakes, -Part python only the rest.
 param(
     [switch]$Render,
     [switch]$BuildPlugin,

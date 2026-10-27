@@ -6,10 +6,20 @@ the player's Icarus parked on Sandrift Airbase's runway, airborne near Sandrift 
 import copy
 import json
 import math
+import os
 import pathlib
 
 here = pathlib.Path(__file__).resolve().parent
-TEMPLATES = pathlib.Path(r"NO-Agentic-Framework\templates")
+config_path = here.parents[1] / 'tools/local-paths.json'
+config = json.loads(config_path.read_text()) if config_path.is_file() else {}
+templates = os.environ.get('ICARUS_MISSION_TEMPLATES') or config.get('mission_templates')
+if not templates:
+    raise ValueError('Set ICARUS_MISSION_TEMPLATES or mission_templates in tools/local-paths.json to the framework templates folder')
+TEMPLATES = pathlib.Path(templates)
+if not TEMPLATES.is_absolute():
+    TEMPLATES = here.parents[1] / TEMPLATES
+if not TEMPLATES.is_dir():
+    raise ValueError('The configured mission templates folder does not exist')
 
 AIRCRAFT, TITLE = "baanish_icarus", "F-240 Icarus II"
 # The Icarus's AircraftDefinition, as the build's rest-pose report logs it: spawnOffset (0, 1.49, -0.62), restRotation.x

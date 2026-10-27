@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import shutil
 
+from record_paths import portable_record, portable_text, resolve_record
 import numpy as np
 from PIL import Image
 from scipy.ndimage import distance_transform_edt, median_filter
@@ -55,7 +56,7 @@ def compose(part_manifest=None):
     paint_bake = np.load(OUT / 'geometry_maps.npz')
     paint_part = paint_bake['part']
     paint_used = paint_part > 0
-    names = json.loads((OUT / 'atlas_triangles.json').read_text())['parts']
+    names = resolve_record(json.loads((OUT / 'atlas_triangles.json').read_text()))['parts']
     atlas = np.load(OUT / 'atlas_geometry.npz')
     pos, normal, part = atlas['position'][..., :3], atlas['normal'][..., :3], atlas['part']
     if part.shape != (SIZE, SIZE) or paint_part.shape != (PAINT_SIZE, PAINT_SIZE):
@@ -64,7 +65,7 @@ def compose(part_manifest=None):
     # Generated paint was made per chart, so its residual fades over 14 texels at UV cuts.
     fade = smoothstep((distance_transform_edt(used) - 1) / 13)
     full = None
-    if part_manifest is not None and json.loads(part_manifest.read_text()).get('schema_version') in (1, 2):
+    if part_manifest is not None and resolve_record(json.loads(part_manifest.read_text())).get('schema_version') in (1, 2):
         from full_skin_compose import assemble_full
         full = assemble_full(part_manifest)
         if not np.array_equal(full['used'], paint_used):
@@ -84,7 +85,7 @@ def compose(part_manifest=None):
     Image.fromarray(np.uint8(generated * 255 + .5)).save(OUT / 'generated_base_assembled.png')
     residual = upsample(paint_grain(generated, paint_used), paint_used) * fade
     extended_pos, extended_normal, extended_part, domain, dx, dy = extend_geometry(pos, normal, part)
-    structure = json.loads(STRUCTURE.read_text())
+    structure = resolve_record(json.loads(STRUCTURE.read_text()))
     fields, layout_report = layout_fields(extended_pos, extended_normal, extended_part, names, domain, structure)
     height = surface_height(fields, PX_PER_M)
     seam, fastener = fields['seam'], np.maximum(fields['rivet'], fields['screw'])
@@ -129,7 +130,7 @@ def compose(part_manifest=None):
         dependencies = [part_manifest, part_manifest.parent / 'coverage.json', STRUCTURE]
         dependencies += [ROOT / 'art/textures/generated/full/source-policy.json']
         dependencies += list((SOURCE / 'full').rglob('*')) + list((SOURCE / 'pilot2').rglob('*'))
-        active_manifest = json.loads(part_manifest.read_text())
+        active_manifest = resolve_record(json.loads(part_manifest.read_text()))
         dependencies += [Path(path) if Path(path).is_absolute() else part_manifest.parent / path
                          for path in active_manifest.get('input_sha256', {})]
         if not active_manifest.get('source_atlas_manifest'):
@@ -170,7 +171,7 @@ def compose(part_manifest=None):
         report['liveries'][str(spec['id'])] = {'name': spec['name'], 'markings': marks, 'actual_decal_parts': actual,
             'analytic_reflection_max_rgb_levels': float(abs(reflected - reflection_baseline[used]).max() * 255)}
         print('SKIN LIVERY', spec['id'], spec['name'], flush=True)
-    (OUT / 'composition.json').write_text(json.dumps(report, indent=2) + '\n')
+    (OUT / 'composition.json').write_text(portable_text(json.dumps(portable_record(report), indent=2) + '\n'))
     print(f'SKIN COMPOSE PASS: ten {SIZE} maps')
 
 
@@ -185,12 +186,12 @@ def response_regions(painted, relief):
 
 
 def measure():
-    seams = json.loads((OUT / 'seam_samples.json').read_text())
+    seams = resolve_record(json.loads((OUT / 'seam_samples.json').read_text()))
     coords = np.asarray([s['uv'] for s in seams])
-    geometry = json.loads((OUT / 'geometry_checks.json').read_text())
+    geometry = resolve_record(json.loads((OUT / 'geometry_checks.json').read_text()))
     report = {'seam_policy': 'smooth world edges within 0.1 mm, face dot >= 0.95, 0.5 texel inward',
               'pilot_median_bar': 2.26, 'liveries': {}, 'maps': {}, 'generated_sources': {}}
-    composition = json.loads((OUT / 'composition.json').read_text())
+    composition = resolve_record(json.loads((OUT / 'composition.json').read_text()))
     for spec in specifications():
         path = EXPORT / ('Icarus_livery_' + str(spec['id']) + '.png')
         rgb = np.asarray(Image.open(path), np.float32)
@@ -249,7 +250,7 @@ def measure():
         report['generated_sources'][path.name] = {'path': str(path), 'prompt': str(prompt),
             'size': list(Image.open(path).size), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
             'prompt_sha256': hashlib.sha256(prompt.read_bytes()).hexdigest()}
-    (OUT / 'measurements.json').write_text(json.dumps(report, indent=2) + '\n')
+    (OUT / 'measurements.json').write_text(portable_text(json.dumps(portable_record(report), indent=2) + '\n'))
     gate_inputs = [ROOT / 'art/export-manifest.json', OUT / 'geometry_maps.npz', OUT / 'atlas_geometry.npz',
                    OUT / 'ao_maps.npz', STRUCTURE]
     gate_inputs += sorted((ROOT / 'art/textures').glob('*.py')) + sorted((ROOT / 'art/textures/liveries').glob('*.json'))
@@ -264,8 +265,8 @@ def measure():
     gate = {'pipeline_accepted': False, 'geometry_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
             'inputs': {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest() for path in gate_inputs if path.is_file()},
             'outputs': {name: entry['sha256'] for name, entry in report['maps'].items()}}
-    (ROOT / 'art/textures/gate.json').write_text(json.dumps(gate, indent=2) + '\n')
-    print(json.dumps({k: {s: v for s, v in entry.items() if s != 'mirror_pairs'} for k, entry in report['liveries'].items()}, indent=2))
+    (ROOT / 'art/textures/gate.json').write_text(portable_text(json.dumps(portable_record(gate), indent=2) + '\n'))
+    print(json.dumps(portable_record({k: {s: v for s, v in entry.items() if s != 'mirror_pairs'} for k, entry in report['liveries'].items()}), indent=2))
     if any(entry['median'] > 2.26 for entry in report['liveries'].values()):
         raise ValueError('Seam median exceeds pilot 2.26 RGB levels')
     print('SKIN OFFLINE CHECK PASS')

@@ -24,6 +24,19 @@ The build has only been run on the developer's machine. If a step fails on yours
 
 Imported game assets, assemblies and Unity caches stay local and are ignored by git. Never commit them; the pre-commit hook (`tools/Check-Public.ps1`) rejects them.
 
+Enable the hooks in each fresh clone, then check every tracked working-tree file before publication:
+
+```powershell
+git config core.hooksPath .githooks
+pwsh -NoProfile -File tools/Check-Public.ps1 -All
+```
+
+The hook checks staged blobs. `-All` checks tracked files and untracked, non-ignored files as they are on disk. Both resolve Git LFS pointers, check binary metadata and verify export hashes. Exceptions belong in `tools/public-check-allowlist.json`, with an exact file path, rule name, literal matched values and a reason. The initial exceptions allow the checker's own machine-name rule and its allowlist entries. These checks cover the current tree, not Git history.
+
+Texture provenance stores paths relative to the repository root. Readers resolve them against that root, independently of the working directory. After importing older records, run `python tools/Make-TextureRecordsPortable.py` to convert paths and update dependent metadata hashes. Repeating the conversion changes no files. External image-generation identifiers and native image hashes remain provenance.
+
+Test mission generation reads `ICARUS_MISSION_TEMPLATES`, or `mission_templates` in the ignored `tools/local-paths.json`, for the framework's templates folder. Relative template paths resolve from this repository's root. The bare-metal report cites installed game source by assembly and filename, without a local checkout path.
+
 ## Build
 
 From the repository root:
