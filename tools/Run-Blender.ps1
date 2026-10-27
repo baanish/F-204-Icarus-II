@@ -8,7 +8,8 @@ $self = [Array]::FindIndex($raw, [Predicate[string]] { param($a) $a -like '*Run-
 $BlenderArgs = if ($self -ge 0 -and $self -lt $raw.Count - 1) { $raw[($self + 1)..($raw.Count - 1)] } else { @() }
 
 $ErrorActionPreference = 'Stop'
-$blender = if ($env:ICARUS_BLENDER) { $env:ICARUS_BLENDER } else { 'C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe' }
+$blender = if ($env:ICARUS_BLENDER) { $env:ICARUS_BLENDER } else { (Get-Command blender -ErrorAction SilentlyContinue).Source }
+if (-not $blender) { throw 'set ICARUS_BLENDER to your blender.exe, or put blender on PATH' }
 $slots = 3
 $reserveCores = 4
 $mutexes = [System.Threading.Mutex[]](0..($slots - 1) | ForEach-Object { [System.Threading.Mutex]::new($false, "Global\CenturionBlenderSlot$_") })

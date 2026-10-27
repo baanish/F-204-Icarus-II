@@ -16,7 +16,6 @@
     <!-- Assembly-CSharp transitively references a newer compression facade that this plugin never uses. -->
     <NoWarn>$(NoWarn);MSB3277</NoWarn>
     <GameDir Condition="'$(GameDir)' == '' and '$(NUCLEAR_OPTION_DIR)' != ''">$(NUCLEAR_OPTION_DIR)</GameDir>
-    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option</GameDir>
     <Managed>$(GameDir)\NuclearOption_Data\Managed</Managed>
   </PropertyGroup>
 

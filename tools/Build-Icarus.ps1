@@ -57,6 +57,21 @@ $modVersion = (Get-Content -Raw -LiteralPath (Join-Path $project 'Assets/Bluepri
 if ($dllVersion -ne $modVersion) { Fail "src/Icarus is version $dllVersion but modinfo.json is $modVersion" }
 
 # Staged outside build/ until Unity succeeds, so a failed build never leaves a DLL beside an older bundle there.
+# The game folder: NUCLEAR_OPTION_DIR, else the Steam library that holds Nuclear Option.
+function Find-GameDir {
+    if ($env:NUCLEAR_OPTION_DIR) { return $env:NUCLEAR_OPTION_DIR }
+    $steam = (Get-ItemProperty -Path 'HKCU:\Software\Valve\Steam' -Name SteamPath -ErrorAction SilentlyContinue).SteamPath
+    if (-not $steam) { return $null }
+    $libraries = @($steam)
+    $vdf = Join-Path $steam 'steamapps/libraryfolders.vdf'
+    if (Test-Path -LiteralPath $vdf) {
+        $libraries += [regex]::Matches((Get-Content -LiteralPath $vdf -Raw), '"path"\s+"([^"]+)"') | ForEach-Object { $_.Groups[1].Value.Replace('\\', '\') }
+    }
+    $libraries | ForEach-Object { Join-Path $_ 'steamapps/common/Nuclear Option' } | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+}
+$gameDir = Find-GameDir
+if (-not $gameDir) { Fail 'Nuclear Option not found in any Steam library; set NUCLEAR_OPTION_DIR to its folder' }
+$env:NUCLEAR_OPTION_DIR = $gameDir
 $dotnetOut = Join-Path $repo '.cache/build-staging/dotnet'
 # --no-incremental: an up-to-date skip would leave a DLL older than this run.
 & dotnet build $csproj -c Release --no-incremental -o $dotnetOut --nologo | Out-Host
@@ -68,7 +83,6 @@ New-Item -ItemType Directory -Force $plugins | Out-Null
 Copy-Item -LiteralPath $dll -Destination $plugins -Force
 # The editor unloads Icarus.dll unless BepInEx and its own references resolve, and the project's imported game
 # assemblies don't include them. Blueprinter never bundles a .dll.
-$gameDir = if ($env:NUCLEAR_OPTION_DIR) { $env:NUCLEAR_OPTION_DIR } else { 'C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option' }
 $references = Join-Path $plugins 'BepInEx'
 New-Item -ItemType Directory -Force $references | Out-Null
 foreach ($name in 'BepInEx.dll', '0Harmony.dll', 'Mono.Cecil.dll', 'MonoMod.Utils.dll', 'MonoMod.RuntimeDetour.dll') {

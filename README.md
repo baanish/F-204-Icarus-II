@@ -8,7 +8,7 @@ Version 0.0.1, an early build. It flies, fights and comes apart in game, and it 
 
 ## What you get
 
-- A flyable Primeva jet with a first-pass damage model: breakable parts and internal structure. A missile hit tears off wings, the engine and tail surfaces, and the airframe holds together under any load its flight controls allow.
+- A flyable Primeva jet with a first-pass damage model: breakable parts and internal structure. A missile hit tears off wings, the engine and tail surfaces, and an undamaged airframe holds together in full-stick pulls.
 - A custom cockpit on the game's own displays and HUD, with a live standby attitude ball, fuel gauge and clock.
 - Six stations: a wingtip that carries a droppable Starfighter tip tank or a missile rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
 - An iris nozzle that opens with afterburner and vectors thrust up to 4 degrees in pitch and yaw.
