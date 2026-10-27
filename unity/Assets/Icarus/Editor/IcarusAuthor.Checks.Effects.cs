@@ -88,11 +88,12 @@ namespace Icarus.Editor
                     }
                 }
             }
-            var aft = b.Parts["stabilator"].transform.Find("navlight_aft");
+            var stabilatorHinge = b.Parts["stabilator"].transform.Find("stabilator_hinge");
+            var aft = stabilatorHinge.Find("navlight_aft");
             var aftRenderer = aft != null ? aft.GetComponent<MeshRenderer>() : null;
             var aftMesh = aft != null ? aft.GetComponent<MeshFilter>()?.sharedMesh : null;
             if (aftRenderer == null || aftMesh != b.Meshes["light_nav_aft"].Render || aftMesh.triangles.Length / 3 != 24)
-                p.Add("rear nav light must use the generated 24 triangle dome on the stabilator");
+                p.Add("rear nav light must use the generated 24 triangle dome on the stabilator's turning hinge");
             else
             {
                 var entries = Enumerable.Range(0, navLights.arraySize).Select(navLights.GetArrayElementAtIndex)
@@ -118,10 +119,10 @@ namespace Icarus.Editor
                     || Quaternion.Angle(aft.rotation, b.Blockout.Rotation("light_nav_aft")) > 0.01f)
                     p.Add("rear nav light moved off its generated trailing-edge position");
             }
-            var tailFairing = b.Parts["stabilator"].transform.Find("light_tail_fairing");
+            var tailFairing = stabilatorHinge.Find("light_tail_fairing");
             if (tailFairing == null || tailFairing.GetComponent<MeshRenderer>()?.sharedMaterial != b.Skin
                 || tailFairing.GetComponent<MeshFilter>()?.sharedMesh?.triangles.Length / 3 != 32)
-                p.Add("rear nav fairing must use 32 triangles and stabilator paint");
+                p.Add("rear nav fairing must use 32 triangles and stabilator paint, on the stabilator's turning hinge");
             if (b.Root.GetComponentsInChildren<Transform>(true).Any(t => t.name.StartsWith("light_beacon_", StringComparison.Ordinal)
                 || t.name.StartsWith("antenna_", StringComparison.Ordinal))) p.Add("beacon or separate antenna remains");
             foreach (var global in All(b, "SetGlobalParticles"))

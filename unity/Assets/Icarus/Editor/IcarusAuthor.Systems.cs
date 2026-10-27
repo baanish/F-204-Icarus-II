@@ -145,8 +145,10 @@ namespace Icarus.Editor
             var tailReference = Load<GameObject>(Stock + "GameObject/AttackHelo1_PLACEHOLDER.prefab");
             var stockTail = tailReference.GetComponentsInChildren<MeshRenderer>(true).Single(r => r.name == "taillight");
             var stockTailEntry = NavLightEntry(new SerializedObject(tailReference.GetComponent(GameType("NavLights"))), stockTail);
+            // The ControlSurface turns stabilator_hinge, not the part, so the lamp rides the hinge (its fairing does too,
+            // through AttachLeftovers).
             var aft = new GameObject("navlight_aft") { layer = b.Root.layer }.transform;
-            aft.SetParent(b.Parts["stabilator"].transform, true);
+            aft.SetParent(b.Parts["stabilator"].transform.Find("stabilator_hinge"), true);
             aft.SetPositionAndRotation(b.Blockout.Local("light_nav_aft"), b.Blockout.Rotation("light_nav_aft"));
             aft.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes["light_nav_aft"].Render;
             var aftRenderer = aft.gameObject.AddComponent<MeshRenderer>();
@@ -283,6 +285,8 @@ namespace Icarus.Editor
                 for (var name = part.BlenderParent; name != null && parent == null; name = b.Blockout.Has(name) ? b.Blockout.Parts[name].BlenderParent : null)
                     parent = b.Parts.TryGetValue(name, out var go) ? go.transform : b.Visuals.TryGetValue(name, out var visual) ? visual : null;
                 parent = parent != null ? parent : b.Root.transform;
+                // A hinged surface turns its <name>_hinge child, not the part, so its details ride the hinge.
+                parent = parent.Find(parent.name + "_hinge") ?? parent;
                 var mesh = new GameObject(part.Name) { layer = b.Root.layer };
                 mesh.transform.SetParent(parent, true);
                 mesh.transform.SetPositionAndRotation(b.Blockout.Local(part.Name), b.Blockout.Rotation(part.Name));
