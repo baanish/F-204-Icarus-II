@@ -162,7 +162,7 @@ $notes += @(
     '## Install', '',
     'NOMM supplies the install folder for the flat NOMM archive. Confirm BepInEx 5 and Blueprinter 2.1.1+ are installed and Blueprinter is enabled.', '',
     "For manual installation, extract [Icarus-$tag-plugin-only.zip]($releaseUrl/Icarus-$tag-plugin-only.zip) beside NuclearOption.exe. It includes BepInEx/plugins/baanish.icarus/.", '',
-    "[Install instructions]($sourceUrl/README.md#install) | [Known limitations]($sourceUrl/README.md#known-limitations)", '',
+    "[Install instructions]($sourceUrl/README.md#install) | [Known issues]($sourceUrl/README.md#known-issues)", '',
     "Source commit: [$commit](https://github.com/$repository/commit/$commit).", '',
     "[SHA256SUMS.txt]($releaseUrl/SHA256SUMS.txt) covers both archives and these notes."
 )
