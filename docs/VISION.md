@@ -88,4 +88,4 @@ The Unity build bakes its own values, set in the authoring scripts, into the air
 9. Polish (in progress)
 10. Custom audio (done: engine, gear travel and lock, belly scrape)
 
-Droppable tip tanks, 170 US gal each and burned before the internal fuel, hang on the wingtips in place of a missile; the default Interceptor loadout carries them.
+Droppable tip tanks, 170 US gal each and burned before the internal fuel, hang on the wingtips in place of a missile. The default Interceptor loadout carries them.

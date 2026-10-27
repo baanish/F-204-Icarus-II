@@ -35,7 +35,7 @@ The mod contains no game files. It needs your own copy of the game, whose assets
 
 1. Get the two files that make up the mod: `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle. Until there is a packaged release, build them from this repository as [BUILD.md](BUILD.md) describes.
 2. Close the game.
-3. Copy both files into `BepInEx/plugins/baanish.icarus/` in the game folder. They only work as a pair, so always replace both together. Keep a single copy: with a second `icarus_<version>.nobp` anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
+3. Copy both files into `BepInEx/plugins/baanish.icarus/` in the game folder. They only work as a pair, so always replace both together. Keep only one copy. If a second `icarus_<version>.nobp` sits anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
 4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.0.1 (baanish.icarus)`.
 
 ### Mod managers
@@ -47,7 +47,7 @@ NOMM and Thunderstore packages are coming. This section will say how to install 
 The Icarus uses the game's normal controls, with no new key bindings.
 
 - **Where to find it.** It is a Primeva aircraft, offered at hardened aircraft shelters and medium hangars. In the stock operations Breakout, Confrontation, Domination, Escalation and Terminal Control, and their co-op versions, Primeva's AI also starts with four, and one Primeva factory per mission builds more. To turn that off, set `StockMissionSupply = false` under `[Missions]` in `BepInEx/config/baanish.icarus.cfg`. The host's setting applies from the next mission load.
-- **Loadouts.** Interceptor is the default, with Air Superiority, Strike and Close Support beside it. Interceptor carries the tip tanks, 170 US gal each, burned before the internal fuel; select them and fire to drop the pair, and the fuel left in them goes with them. The other loadouts carry wingtip missiles. The wingtips take the tip tanks, the MMR-S3 or the IRM-S2. The pylon takes one store or a twin air-to-air rack. The conformal stations take the MMR-S3, IRM-S2 and AAM-29.
+- **Loadouts.** Interceptor is the default, with Air Superiority, Strike and Close Support beside it. Interceptor carries the tip tanks, 170 US gal each, which burn before the internal fuel. To drop the pair, select them and fire. Any fuel left in them goes with them. The other loadouts carry wingtip missiles. The wingtips take the tip tanks, the MMR-S3 or the IRM-S2. The pylon takes one store or a twin air-to-air rack. The conformal stations take the MMR-S3, IRM-S2 and AAM-29.
 - **Conformal missiles drop before they light.** Each slides 1.5 m down out of its trough first, so expect a short pause between the trigger and the motor.
 - **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the internal tanks in an estimated six and a half minutes.
 - **Flaps are automatic.** The leading-edge and trailing-edge flaps come out with low airspeed.

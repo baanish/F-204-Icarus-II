@@ -10,7 +10,7 @@ The build has only been run on the developer's machine. If a step fails on yours
 - The .NET SDK (8 or later).
 - Python 3.9 or later, available as `python`, for the export hash check.
 - Unity Editor **2022.3.62f2**.
-- A purchased copy of Nuclear Option **0.34.2** with BepInEx 5 installed in it. The build reads the game's assemblies and BepInEx's from there. The build finds the game in your Steam libraries; if it can't, set `NUCLEAR_OPTION_DIR` to the game folder.
+- A purchased copy of Nuclear Option **0.34.2** with BepInEx 5 installed in it. The build reads the game's assemblies and BepInEx's from there. The build finds the game in your Steam libraries. If it can't, set `NUCLEAR_OPTION_DIR` to the game folder.
 - An export of your game install from **AssetRipper 2.0.0** (Script Content Level **Level 1**, Script Export Format **Decompilation**). The repository holds no game assets; the build clones the FS-12 Revoker and other stock settings from your local import.
 
 ## Get the textures (once per clone)
@@ -23,7 +23,7 @@ git lfs pull
 python tools/export_manifest.py
 ```
 
-If the check reports files that differ right after cloning, the LFS download is incomplete: run `git lfs pull` again. Don't regenerate the manifest to make it pass.
+If the check reports files that differ right after cloning, the LFS download is incomplete, so run `git lfs pull` again. Don't regenerate the manifest to make it pass.
 
 ## Prepare the Unity project (once)
 
@@ -43,11 +43,11 @@ git config core.hooksPath .githooks
 pwsh -NoProfile -File tools/Check-Public.ps1 -All
 ```
 
-The hook checks staged blobs. `-All` checks tracked files and untracked, non-ignored files as they are on disk. Both resolve Git LFS pointers, check binary metadata and verify export hashes. Your own account name, email and machine names go in the gitignored `tools/public-check-terms.json` as `{"terms": [...]}`, each matched as a whole word, so the public checker never names them; without that file only the generic path and ID rules run. These checks cover the current tree, not Git history.
+The hook checks staged blobs. `-All` checks tracked files and untracked, non-ignored files as they are on disk. Both resolve Git LFS pointers, check binary metadata and verify export hashes. To also catch your own account name, email and machine names, list them in the gitignored `tools/public-check-terms.json` as `{"terms": [...]}`. Each is matched as a whole word, and the names never appear in the tracked checker. Without that file, only the generic path and ID rules run. These checks cover the current tree, not Git history.
 
-Texture provenance stores paths relative to the repository root. Readers resolve them against that root, independently of the working directory. After importing older records, run `python tools/Make-TextureRecordsPortable.py` to convert paths and update dependent metadata hashes. Repeating the conversion changes no files. External image-generation identifiers and native image hashes remain provenance.
+Texture provenance records store paths relative to the repository root, and the tools that read them resolve those paths from that root whatever the working directory. After importing older records, run `python tools/Make-TextureRecordsPortable.py` to convert their paths and update the metadata hashes that depend on them. Running it again changes no files. It leaves external image-generation identifiers and native image hashes in place as provenance.
 
-Test mission generation reads `ICARUS_MISSION_TEMPLATES`, or `mission_templates` in the ignored `tools/local-paths.json`, for the framework's templates folder. Relative template paths resolve from this repository's root. The bare-metal report cites installed game source by assembly and filename, without a local checkout path.
+Test mission generation reads `ICARUS_MISSION_TEMPLATES`, or `mission_templates` in the ignored `tools/local-paths.json`, for the test framework's mission templates folder. Relative template paths resolve from this repository's root. The bare-metal report cites installed game source by assembly and filename, without a local checkout path.
 
 ## Build
 
@@ -63,7 +63,7 @@ The build rewrites the authored assets under `unity/Assets/Blueprinter/Mods/icar
 
 ## Install your build
 
-For deterministic release archives and the separate publishing command, see [RELEASE.md](docs/RELEASE.md).
+To package your build as reproducible release archives, or to publish it, see [RELEASE.md](docs/RELEASE.md).
 
 Close the game, then copy `build/Icarus.dll` and `build/icarus_<version>.nobp` into `BepInEx/plugins/baanish.icarus/` in the game folder. Blueprinter 2.1.1 or later must be installed and enabled; 2.1.1 is the version the current build is tested with. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II <version> (baanish.icarus)`.
 
