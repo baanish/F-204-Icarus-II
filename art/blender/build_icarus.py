@@ -555,6 +555,13 @@ def skin_field(p, s):
     return field, zc
 
 
+def area_squeeze(p, s):
+    """The area-rule waist's radial scale of the whole section at station s (PARAMS area_rule)."""
+    ar = p["area_rule"]
+    u = (s - ar["centre_s"]) / ar["half_length"]
+    return 1.0 - ar["depth"] * math.cos(0.5 * math.pi * u) ** 2 if abs(u) < 1 else 1.0
+
+
 @geometry_cache.ring
 def blended_ring(p, s, angles=None):
     skin, zc = skin_field(p, s)
@@ -566,9 +573,7 @@ def blended_ring(p, s, angles=None):
         d = skin(x, z)
         return max(d, -min(c(x, z) for c in carves)) if carves else d
 
-    ar = p["area_rule"]
-    u = (s - ar["centre_s"]) / ar["half_length"]
-    squeeze = 1.0 - ar["depth"] * math.cos(0.5 * math.pi * u) ** 2 if abs(u) < 1 else 1.0
+    squeeze = area_squeeze(p, s)
 
     @lru_cache(maxsize=None)
     def radius(a, sample):
@@ -646,10 +651,20 @@ def blended_ring(p, s, angles=None):
     return ring
 
 
+# The loft's rings: the radome's taper in NOSE_RINGS packed toward its point (27 halves the spacing of 14, so the
+# radome's break ring near parts.RADOME_END stays where it was), even runs to the intake lip and on aft, and from
+# TAIL_FINE's station (the last ring of the even run at or ahead of it) to the tail at most TAIL_FINE's step apart,
+# where the boat tail's curves would otherwise facet.
+NOSE_RINGS, TAIL_FINE = 27, (11.1, 0.11)
+
+
 def fuselage_stations(p):
-    lip = p["intake"][0][0]
-    out = (spaced(0.0, 3.0, 14, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
-           + spaced(lip, lip + 0.6, 8) + spaced(lip + 0.6, p["fuselage"][-1][0], 50)[1:])
+    lip, end = p["intake"][0][0], p["fuselage"][-1][0]
+    body = spaced(lip + 0.6, end, 50)
+    fine = max(s for s in body if s <= TAIL_FINE[0])
+    out = (spaced(0.0, 3.0, NOSE_RINGS, nose_bias=True)[1:] + spaced(3.0, lip - 0.004, 20)[1:]
+           + spaced(lip, lip + 0.6, 8) + [s for s in body[1:] if s <= fine]
+           + spaced(fine, end, math.ceil((end - fine) / TAIL_FINE[1]) + 1)[1:])
     import stations
 
     for lo, hi, rings in stations.ramp_stations(p):  # the trough's ramps take their own rings
@@ -708,6 +723,65 @@ def build_fuselage(p, mat, duct_mat):
     bm.to_mesh(obj.data)
     bm.free()
     return obj
+
+
+# The parts cut from the fuselage loft, closed: their faces on the skin take its own normals (skin_normals).
+SKIN_PARTS = ("radome", "skin_", "dorsal_cover", "gear_door_", "speed_brake_")
+SKIN_ON = 0.003  # metres off the skin's field a face's corners may lie and still be shaded from it
+
+
+def skin_normals(icarus, p=None):
+    """Shade the fuselage skin from the surface it samples. Wherever the loft's columns bunch and fan out (round the
+    trough's ramps above all, where its sixteen columns gather into each ramp's tip) the faces go long and skewed, and
+    normals averaged over them swing several degrees off the surface: a wavy band in the bare metal. Every corner of a
+    face lying on the skin, or on the trough cut into it, takes the gradient of that field instead, from whichever of
+    the two the face lies on, so the lips stay creased; every other corner keeps the normal it has."""
+    import stations
+
+    p = p or PARAMS
+    fields = {}
+
+    def at(s):
+        if s not in fields:
+            skin, zc = skin_field(p, s)
+            carves = stations.carve_shapes(p, s)
+            cut = (lambda x, z: -min(c(x, z) for c in carves)) if carves else (lambda x, z: -1.0)
+            fields[s] = (skin, cut, zc, area_squeeze(p, s))
+        return fields[s]
+
+    def value(w, part):  # part 0: the skin, 1: the trough's cut; negative inside the airframe
+        skin, cut, zc, squeeze = at(round(w.y + S0, 6))
+        x, z = w.x / squeeze, zc + (w.z - zc) / squeeze  # the ring's own section, before the waist
+        return (skin, cut)[part](x, z)
+
+    def gradient(w, part, e=1e-4):
+        return Vector([value(w + d, part) - value(w - d, part)
+                       for d in (Vector((e, 0, 0)), Vector((0, e, 0)), Vector((0, 0, e)))]).normalized()
+
+    shaded = 0
+    for obj in icarus.all_objects:
+        if obj.type != "MESH" or not obj.name.startswith(SKIN_PARTS):
+            continue
+        me, rot = obj.data, obj.matrix_world.to_3x3()
+        world = [obj.matrix_world @ v.co for v in me.vertices]
+        normals = [Vector(c.vector) for c in me.corner_normals]
+        for poly in me.polygons:
+            corners = [world[i] for i in poly.vertices]
+            if min(w.y + S0 for w in corners) < 0.02:  # the radome's point has no surface normal
+                continue
+            centre = sum(corners, Vector()) / len(corners)
+            part = int(value(centre, 1) > value(centre, 0))
+            if any(abs(max(value(w, 0), value(w, 1))) > SKIN_ON for w in corners):
+                continue
+            facing = (rot @ poly.normal).normalized()
+            grads = [gradient(w, part) for w in corners]
+            if min(g.dot(facing) for g in grads) < 0.5:
+                continue
+            for li, g in zip(poly.loop_indices, grads):
+                normals[li] = (rot.transposed() @ g).normalized()
+            shaded += 1
+        me.normals_split_custom_set([tuple(n) for n in normals])
+    return shaded
 
 
 def inward_fix(obj, axis_point):
@@ -1399,6 +1473,7 @@ def _build(repo):
     uvs.unwrap(TARGET)
     lights.project_nav_paint(TARGET)
     hulls.paint_lods()
+    skin_normals(TARGET)
     import checks
 
     checks.intake_wing_junction(TARGET)

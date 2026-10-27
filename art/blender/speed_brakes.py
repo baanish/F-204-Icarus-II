@@ -88,8 +88,9 @@ KNUCKLE_DEG = {"panel": (-90.0, 110.0), "fixed": (65.0, 265.0)}
 RIBS = {"at": (0.26, 0.43), "width": 0.02, "height": 0.008, "rivet_pitch": 0.03, "rivet_r": 0.0025, "rivet_end": 0.03}
 LINES = {"r": 0.004, "sides": 5, "runs": ((0.10, -0.060, 0.057, -0.034, 0.008), (0.124, -0.070, 0.114, -0.044, -0.010))}
 NAMES = {side: ("speed_brake_" + side, "speed_brake_%s_rod" % side, "speed_brake_%s_cylinder" % side) for side in "LR"}
-# Triangles per brake: panel and actuator (the well counts in the fuselage_aft core's, its lip in the skin's).
-BUDGET = {name: {"target": 480, "cap": 480, "exact": (name + "_visible", rod, cylinder)}
+# Triangles per brake: panel and actuator (the well counts in the fuselage_aft core's, its lip in the skin's). The panel
+# takes the skin's rings over it (build_icarus TAIL_FINE).
+BUDGET = {name: {"target": 528, "cap": 528, "exact": (name + "_visible", rod, cylinder)}
           for name, rod, cylinder in NAMES.values()}
 CLOSEUPS = {"speed_brake": (Vector((2.1, 6.9, -0.75)), Vector((0.62, 5.25, 0.05)))}
 

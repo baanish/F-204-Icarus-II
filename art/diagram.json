@@ -113,7 +113,7 @@
     "sprite": "Icarus_status_fin_skin.png",
     "centre": [
      0.0,
-     -96.24
+     -96.5
     ],
     "size": [
      4.22,
@@ -121,7 +121,7 @@
     ],
     "px": [
      504,
-     763
+     764
     ]
    },
    "fin_spar": {

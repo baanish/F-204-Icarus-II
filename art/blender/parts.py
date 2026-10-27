@@ -34,8 +34,9 @@ FIN_LIFT_AREA = 3.1578
 BUDGET = {
     # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores); the
     # conformal trough's NACA ramp rings brought the skin to about 19,800, the gear doors' holes and the ring kept
-    # short of the rear ramp's deep end (build_icarus.fuselage_stations) to about 20,300.
-    "fuselage_skin": {"target": 20300, "cap": 20300, "objects": ("radome", "skin_", "dorsal_cover")},
+    # short of the rear ramp's deep end (build_icarus.fuselage_stations) to about 20,300. The radome's and the boat
+    # tail's finer rings (build_icarus NOSE_RINGS, TAIL_FINE) bring it to about 24,770.
+    "fuselage_skin": {"target": 24800, "cap": 24800, "objects": ("radome", "skin_", "dorsal_cover")},
     "wing_box_L": {"target": 2000, "cap": 2000, "objects": ("wing_skin_L",)},
     "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
@@ -48,8 +49,8 @@ BUDGET = {
     # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more.
     "structure_cores": {"target": 14700, "cap": 14800, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
-    # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160; the cap is what the finer cells took.
-    "fuel_cells": {"target": 3000, "cap": 6250, "objects": ("fuel_",)},
+    # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160.
+    "fuel_cells": {"target": 3000, "cap": 3200, "objects": ("fuel_",)},
     "engine": {"target": 600, "cap": 700, "objects": ("engine_core",)},
     "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
 }

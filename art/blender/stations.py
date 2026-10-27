@@ -60,13 +60,18 @@ DUCT_CLEARANCE = 0.03
 # where the main wheels' aft door begins, ahead of where the wheel, carrier and leg come in through the skin.
 NACA_WALL = (0.0, 0.004, 0.084, 0.234, 0.386, 0.534, 0.612, 0.688, 0.764, 0.842, 0.917)
 RAMP_CORNER, RAMP_FLATTEN, RAMP_BLEND, RAMP_SINK = 0.015, 0.15, 0.01, 0.5
+# Of the ramp's length, from its deep end, over which it grows out of the trough's own section: the main wheels' forward
+# door begins (s 8.80) where the aft ramp's own shape takes over.
+RAMP_MORPH = 0.3
 RAMP_ENDS = {-1: {"deg": 14.0, "fade": 0.15}, 1: {"deg": 20.0, "fade": 0.12}}
 # The loft's rings over each ramp, as fractions of its length from the deep end, and past its tip, as fractions of its
 # fade.
 RAMP_RINGS, FADE_RINGS = (0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0), (1 / 3, 2 / 3, 1.0)
 # Half-width of the trough's flat ceiling over the station line, where the shoe bears and the Unity author finds the
 # hardpoint: a round top meets the trough's outboard wall close to that line, and a mesh triangulated across that
-# corner lands the raycast millimetres off.
+# corner lands the raycast millimetres off. It fades out over FLAT_FADE beyond the shoe: any further forward it would
+# bring the trough's inboard corner too close to the forward fuel cell. It widens the trough's top only, not its walls
+# (trough_section), so the lips stay straight.
 FLAT, FLAT_FADE = 0.03, 0.3
 # The conformal mounts, by the stock mount each replaces. drop: hardpoint to the body's top at the hardpoint station;
 # centre: the missile's own origin forward of the hardpoint; pitch: nose down, degrees (Stores rule 9 allows 3);
@@ -173,6 +178,28 @@ def export(to_unity):
     return {"hardpoint_unity": to_unity(bi.P(CONFORMAL["s"], CONFORMAL["x"], CONFORMAL["z"])), "mounts": mounts}
 
 
+def trough_w(s):
+    """The trough's half-width at station s between its ramps' deep ends: the largest store's envelope grown by GAP, a
+    straight taper of 3 mm along its body, held at its full radius aft of where the body reaches it rather than
+    following its tail in, so the lips run straight along the fuselage."""
+    m = max(MOUNTS.values(), key=radius)
+    t = missile_axis(m, s)[0]
+    full = min(t for t, r in m["body"] if r == radius(m))
+    return GAP + (radius(m) if t <= full else envelope(m["body"], t))
+
+
+def flat(s):
+    """Half-width of the trough's flat ceiling at station s: FLAT along the shoe, fading out over FLAT_FADE beyond."""
+    reach = abs(s - CONFORMAL["s"]) - SHOE["length"] / 2 - 0.1
+    return FLAT * min(1.0, max(0.0, 1.0 - reach / FLAT_FADE))
+
+
+def in_trough(p, s):
+    """Whether station s lies between the trough's ramps' deep ends, where its one straight section runs."""
+    front, rear = ramps(p)
+    return front["s"] <= s <= rear["s"]
+
+
 def floor_z(s):
     """Height of the trough's top at station s on the station's line, or None where no mount reaches."""
     tops = []
@@ -197,6 +224,14 @@ def shoe(m):
     return [tuple(round(c, 5) for c in q) for q in out]
 
 
+def trough_section(zc, x0, top, w, f):
+    """The trough's cut between its ramps' deep ends, as carve_shapes' fields (negative inside): a slot whose walls stand
+    w either side of x0, its top at height top (floor_z) and flat f either side of x0, its upper corners rounded to
+    w - f (still round every store's envelope with GAP and more), with what lies behind it seen from the ring's centre
+    at height zc."""
+    return lambda x, z: segment_to_core((0.0, zc), (x, z), x0, top - w + f, f) - (w - f)
+
+
 def segment_to_core(c, q, x0, a, f=FLAT):
     """2D distance from the segment c-q to the core: the strip x0 - f to x0 + f running straight down from height a."""
     (cx, cz), (qx, qz) = c, q
@@ -218,13 +253,13 @@ def carve_shapes(p, s):
     """Fields (x, z) -> negative inside, that build_icarus.blended_ring cuts out of the skin at station s: each
     mount's envelope grown by GAP (round above its axis, straight down below it, both sides), together with what lies
     behind it seen from the ring's centre. blended_ring keeps a ray's outermost crossing, so without that shadow a ray
-    through the trough that met the belly again beyond it would bridge the trough's outboard side. Along the shoe the
-    round top widens into a flat ceiling FLAT either side of the station line, fading out over FLAT_FADE beyond it: any
-    further forward it would bring the trough's inboard corner too close to the forward fuel cell."""
+    through the trough that met the belly again beyond it would bridge the trough's outboard side. Between the ramps'
+    deep ends the envelopes give way to the trough's one straight section (trough_w), as high as the stores' tops
+    (floor_z), its round top widened into a flat ceiling either side of the station line along the shoe (flat)."""
     out = []
     _, zc = bi.fuselage_shapes(p, s)
-    reach = abs(s - CONFORMAL["s"]) - SHOE["length"] / 2 - 0.1
-    f = FLAT * min(1.0, max(0.0, 1.0 - reach / FLAT_FADE))
+    if in_trough(p, s):
+        return [trough_section(zc, side * CONFORMAL["x"], floor_z(s), trough_w(s), flat(s)) for side in (1, -1)]
     for m in MOUNTS.values():
         t, a = missile_axis(m, s)
         r = envelope(m["body"], t)
@@ -233,7 +268,7 @@ def carve_shapes(p, s):
         w = r + GAP
         for side in (1, -1):
             x0 = side * CONFORMAL["x"]
-            out.append(lambda x, z, x0=x0, a=a, w=w: segment_to_core((0.0, zc), (x, z), x0, a, f) - w)
+            out.append(lambda x, z, x0=x0, a=a, w=w: segment_to_core((0.0, zc), (x, z), x0, a, 0.0) - w)
     for r in ramps(p):
         section = ramp_section(p, r, s)
         if section:
@@ -267,8 +302,9 @@ def skin_crossing(skin, x, z, n):
 
 def ramp(p, way):
     """The ramp at one end of the trough (way -1 forward, 1 aft), left side: the store reaching furthest that way, the
-    junction station s where its body last has 0.9 of its full radius and the ramp leaves its arch, the arch's axis
-    height a and radius w there, the skin's inward normal n under the station line (x, z), the arch's depth below the
+    junction station s where its body last has 0.9 of its full radius and the ramp leaves the trough, the store's own
+    arch's axis height a and radius w there (narrower than the trough, which the ramp grows out of: ramp_section), the
+    skin's inward normal n under the station line (x, z), the arch's depth below the
     skin, its lips on the skin as distances along the skin's tangent (n turned a quarter, outboard positive) from the
     point under the axis, and the ramp's length at its angle (RAMP_ENDS)."""
     def end(m):
@@ -315,8 +351,9 @@ def naca_wall(f):
 def ramp_section(p, r, s):
     """A ramp's section at station s, left side, or None off it: the point on the uncut skin under the store's axis
     (along the skin's normal at the junction), the normal, the floor's depth below the skin, the walls on the skin as
-    distances along its tangent from that point (inboard, outboard) and the floor's corner radius. The arch's own
-    section is the one at the junction."""
+    distances along its tangent from that point (inboard, outboard), the floor's corner radius and the trough's own
+    section's share of it, which runs from 1 at the junction to 0 at RAMP_MORPH of the ramp. The arch's own section is
+    the one at the junction."""
     u = (s - r["s"]) * r["way"]
     if not 0 < u < r["length"]:
         return None
@@ -326,8 +363,9 @@ def ramp_section(p, r, s):
     h = skin_crossing(bi.skin_field(p, s)[0], CONFORMAL["x"], a, n)
     origin = (CONFORMAL["x"] + h * n[0], a + h * n[1])
     closing = 1.0 - naca_wall(u / r["length"])
+    m = min(1.0, u / (RAMP_MORPH * r["length"]))
     return (origin, n, r["depth"] * (1 - u / r["length"]),
-            tuple(lip * closing for lip in r["lips"]), corner)
+            tuple(lip * closing for lip in r["lips"]), corner, 1.0 - m * m * (3 - 2 * m))
 
 
 def ramp_field(r, section, side, zc):
@@ -335,8 +373,9 @@ def ramp_field(r, section, side, zc):
     skin's normal, its floor depth below the skin between its walls on it, rounded by the corner radius, with what
     lies behind it seen from the ring's centre at height zc; and never outside the arch's section at the junction,
     sunk along the normal RAMP_SINK of the way the floor has risen and blended over RAMP_BLEND, which holds the
-    trough's clearance to the ducts and fuel cells."""
-    (ox, oz), (nx, nz), depth, (inboard, outboard), corner = section
+    trough's clearance to the ducts and fuel cells. Near the junction it is blended with the trough's own section by
+    that section's share, so the ramp leaves the trough without a step."""
+    (ox, oz), (nx, nz), depth, (inboard, outboard), corner, share = section
     ox, nx = side * ox, side * nx
     tx, tz = nz, -nx  # outboard on the left side, inboard on the right
     mid, half = side * (inboard + outboard) / 2, (outboard - inboard) / 2
@@ -348,8 +387,16 @@ def ramp_field(r, section, side, zc):
 
     sink = RAMP_SINK * (r["depth"] - depth)
     centre, arch = local(0.0, zc), (side * CONFORMAL["x"] - sink * nx, r["a"] - sink * nz)
-    return lambda x, z: -bi.smin(corner - segment_to_core(centre, local(x, z), mid, a, f),
-                                 r["w"] - segment_to_core((0.0, zc), (x, z), arch[0], arch[1], 0.0), RAMP_BLEND)
+    x0 = side * CONFORMAL["x"]
+    trough = trough_section(zc, x0, floor_z(r["s"]), trough_w(r["s"]), flat(r["s"]))
+
+    def inside(x, z):
+        ramp = bi.smin(corner - segment_to_core(centre, local(x, z), mid, a, f),
+                       r["w"] - segment_to_core((0.0, zc), (x, z), arch[0], arch[1], 0.0), RAMP_BLEND)
+        if share <= 0:
+            return ramp
+        return -share * trough(x, z) + (1 - share) * ramp
+    return lambda x, z: -inside(x, z)
 
 
 def ramp_stations(p):
@@ -374,7 +421,7 @@ def ramp_lips(p, s):
         if not 0 < u < r["length"] + fade - 1e-9:
             continue
         at = min(s, r["s"] + r["way"] * r["length"] * 0.999, key=lambda q: (q - r["s"]) * r["way"])
-        (ox, oz), (nx, nz), _, walls, _ = ramp_section(p, r, at)
+        (ox, oz), (nx, nz), _, walls = ramp_section(p, r, at)[:4]
         hold = min(1.0, 1.0 - (u - r["length"]) / fade)
         return [(ox + y * nz, oz - y * nx) for y in walls], hold, u / (r["length"] + fade)
     return None
