@@ -1,7 +1,9 @@
 # Creates a draft first, verifies uploaded digests, then publishes a prerelease.
 param(
     [Parameter(Mandatory)][string]$Directory,
-    [Parameter(Mandatory)][string]$Tag
+    [Parameter(Mandatory)][string]$Tag,
+    # Publishes on a still-private repository, for a release made ahead of going public; NOMM can't fetch it until then.
+    [switch]$AllowPrivate
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,7 +27,7 @@ function Invoke-Gh {
 
 # The existing tag must identify the packaged source. Annotated tags need dereferencing.
 $repoInfo = (Invoke-Gh api "repos/$repository") -join "`n" | ConvertFrom-Json
-if ($repoInfo.private) { throw 'The release repository must be public' }
+if ($repoInfo.private -and -not $AllowPrivate) { throw 'The release repository must be public (pass -AllowPrivate to release ahead of going public)' }
 $ref = (Invoke-Gh api "repos/$repository/git/ref/tags/$Tag") -join "`n" | ConvertFrom-Json
 $target = $ref.object
 while ($target.type -ceq 'tag') { $target = ((Invoke-Gh api "repos/$repository/git/tags/$($target.sha)") -join "`n" | ConvertFrom-Json).object }
@@ -51,7 +53,7 @@ try {
     & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'Verify-Release.ps1') -Directory $Directory -Tag $Tag -ReleaseJson $jsonPath
     if ($LASTEXITCODE -ne 0) { throw 'Published release verification failed' }
     $repoInfo = (Invoke-Gh api "repos/$repository") -join "`n" | ConvertFrom-Json
-    if ($repoInfo.private) { throw 'Published release repository is private' }
+    if ($repoInfo.private -and -not $AllowPrivate) { throw 'Published release repository is private' }
     $download = Join-Path $Directory ('.download-check-' + [guid]::NewGuid())
     New-Item -ItemType Directory -Path $download | Out-Null
     try {

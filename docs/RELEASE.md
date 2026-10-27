@@ -54,7 +54,7 @@ For `-LOCAL` outputs, add `-AllowLocal` and keep the numeric tag. Verification c
 
 Keep releases as prereleases until multiplayer is tested on two PCs. Packaging checks do not establish gameplay or multiplayer compatibility.
 
-Push the reviewed source and tag that exact commit `v<version>`. The repository must be public with matching unobfuscated source before publication. Then, after the owner authorizes publishing:
+Push the reviewed source and tag that exact commit `v<version>`. The repository must be public with matching unobfuscated source before publication. To release ahead of making the repository public, add `-AllowPrivate`; the release stays out of NOMM's reach until the repository goes public. Then, after the owner authorizes publishing:
 
 ```powershell
 pwsh -NoProfile -File tools/Publish-Release.ps1 -Directory <package-directory> -Tag v0.1.0
