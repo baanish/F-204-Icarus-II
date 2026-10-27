@@ -54,6 +54,10 @@ The Icarus uses the game's normal controls, with no new key bindings.
 
 ![The gear retracting and extending in flight, in the Navy livery](docs/img/icarus-gear.gif)
 
+![The Bare Metal Icarus with its tip tanks on](docs/img/icarus-tiptanks-on.jpg)
+
+![Both tip tanks falling clear just after release](docs/img/icarus-tiptanks-drop.jpg)
+
 ![An AAM-29 dropping out of its belly trough, then its motor lighting](docs/img/icarus-conformal.gif)
 
 ![Taking off in full afterburner in the Black livery](docs/img/icarus-afterburner.gif)
