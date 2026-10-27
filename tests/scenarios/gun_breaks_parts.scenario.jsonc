@@ -1,0 +1,38 @@
+// Gun damage still breaks the Icarus apart: a part a gun burst takes to its structural threshold loses its joint strength
+// (AeroPart.ApplyDamage scales it to zero), however strong the undamaged joint is. The bullet_hits setup: a gun-only
+// Ifrit starts 180 m behind a clean Icarus (BulletTarget, the AI's), both northbound at 220 m/s at 8,000 m MSL; the
+// player's combat AI aims its gun, then act fires a three-second burst.
+// Pass: rounds hit the Icarus, and at least one of its joints breaks within 20 s (an "[Icarus] joint-break" line, which
+// src/Icarus/PartContactLog.cs writes for every Icarus).
+// From the repo root: no-agentic run tests/scenarios/gun_breaks_parts.scenario.jsonc
+{
+  "mission": "bullet_hits.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus"
+  ],
+  "config": {
+    "baanish.icarus": { "Diagnostics": { "StageLogging": true, "BulletHits": true } }
+  },
+  "timeout": 150,
+  "sample_hz": 10,
+  "steps": [
+    { "require": { "path": "own.alive", "eq": true }, "label": "the Ifrit is alive" },
+    { "fly": { "mode": "hold", "alt_msl_m": 8000, "hdg_deg": 0, "throttle": 0.4 } },
+    { "act": { "station": 0 } },
+    { "require": { "path": "own.station.ammo", "gt": 0 }, "label": "the gun is loaded" },
+    { "ai": { "path": "BulletTarget", "points": "-74000,70000,8000" } },
+    { "require": { "path": "contacts.BulletTarget.live", "eq": true }, "within": 10, "label": "the Icarus target has a live track" },
+    { "require": { "path": "contacts.BulletTarget.range_m", "lt": 400 }, "label": "the target is close enough for a rear gun pass" },
+    { "act": { "target": "BulletTarget" } },
+    { "mark": { "label": "gun-pass" } },
+    { "fly": { "mode": "ai", "target": "BulletTarget" } },
+    { "act": { "fire": 3 } },
+    { "require": { "log": "bullet-hit: aircraft=BulletTarget .* damageable=true", "since": "gun-pass" }, "within": 12,
+      "label": "gate: at least one round actually hits the Icarus" },
+    { "check": { "log": "joint-break ", "since": "gun-pass" }, "within": 20, "label": "a gun hit breaks an Icarus joint" },
+    { "fly": { "mode": "hold", "alt_msl_m": 8000, "hdg_deg": 0, "throttle": 0.4 } }
+  ]
+}

@@ -12,15 +12,20 @@ namespace Icarus.Editor
     {
         // Joint strength classes, after the Revoker's own joints (fuselage 100 kN, wing roots 50, wingtips 35, ailerons 30,
         // flaps and cheeks 10; torque equal to force): frames and spars hold, panels shed. The game multiplies them by 10
-        // on the simulating peer and weakens them with the part's hit points. The fuselage sections break apart at the VT-7
-        // Vagrant's strength (its cockpit and rear fuselage joints, 50 kN): the forward section at 60, the cockpit and
-        // the aft section at 50.
+        // on the simulating peer and weakens them with the part's hit points (AeroPart.ApplyDamage), and nothing else
+        // breaks a joint, so an undamaged stock jet keeps its wings and tail under any load its fly-by-wire allows. The
+        // Revoker spreads each wing over pieces on two to four joints of 30 to 50 kN at their own lift points; each Icarus
+        // wing spar, and the aft section with the engine and the T-tail, hang on one joint anchored where the parts meet,
+        // so that joint takes the whole bending moment and gets the Revoker's fuselage strength: at 50 and 60 kN the aft
+        // section tore off at hp 100 in a full-stick 8.4 g pull at Mach 1.25, the tailless jet then shedding its wings
+        // (tests/scenarios/full_stick_low_fast.scenario.jsonc). The forward section breaks at 60, the cockpit at the VT-7
+        // Vagrant's 50.
         private enum JointClass { Frame, ForwardSection, Section, Spar, Primary, Surface, Flap, Panel }
 
         private static readonly Dictionary<JointClass, float> JointForces = new Dictionary<JointClass, float>
         {
             { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 60000f }, { JointClass.Section, 50000f },
-            { JointClass.Spar, 60000f }, { JointClass.Primary, 40000f },
+            { JointClass.Spar, 100000f }, { JointClass.Primary, 40000f },
             { JointClass.Surface, 30000f }, { JointClass.Flap, 15000f }, { JointClass.Panel, 10000f },
         };
         // The forward section's Revoker "fuselage" armour keeps two thirds of its joint at 0 HP (structuralThreshold -200);
@@ -66,7 +71,7 @@ namespace Icarus.Editor
             P("fuel_aux", "fuselage_forward", JointClass.Primary, "wing1b_L"),
             P("skin_forward_L", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("skin_forward_R", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("fuselage_aft", RootPart, JointClass.Section, "tail", "tail"),
+            P("fuselage_aft", RootPart, JointClass.Frame, "tail", "tail"),
             P("engine_core", "fuselage_aft", JointClass.Spar, "tail"),
             P("nozzle", "engine_core", JointClass.Primary, "tail"),
             P("fin_spar", "fuselage_aft", JointClass.Spar, "vstab1"),

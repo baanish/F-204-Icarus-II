@@ -8,7 +8,7 @@ Version 0.0.1, an early build. It flies, fights and comes apart in game, and it 
 
 ## What you get
 
-- A flyable Primeva jet with a first-pass damage model: breakable parts, internal structure, and a fuselage that a missile can break apart in the air.
+- A flyable Primeva jet with a first-pass damage model: breakable parts and internal structure. A missile hit tears off wings, the engine and tail surfaces, and the airframe holds together under any load its flight controls allow.
 - A custom cockpit on the game's own displays and HUD, with a live standby attitude ball, fuel gauge and clock.
 - Six stations: a wingtip rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
 - An iris nozzle that opens with afterburner and vectors thrust up to 4 degrees in pitch and yaw.
@@ -62,7 +62,7 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 - Near Mach 2.8 at 60,000 ft the jet can porpoise in pitch by several degrees.
 - The flaps, nozzle and canopy move silently. Only the engine, gear and belly scrape have new sounds; the rest keep the stock or donor sounds.
 - Small visual gaps remain: a notch shows behind the stabilator at full travel, and a sliver of gear-bay interior can show with the doors open.
-- The damage model is a first pass and still needs balancing: parts can break off too easily.
+- The damage model is a first pass and still needs balancing.
 - The stock-mission supply loads, but nobody has yet checked mission by mission that Primeva's AI fields and builds the Icarus.
 
 ## Credits

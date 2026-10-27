@@ -1,8 +1,8 @@
-// Breakup under a missile hit: the owner saw the Icarus lose its wings to a missile while the fuselage came down whole,
-// its forward and aft sections still at 100 HP when their joints broke on the ground. The Icarus holds 10 km at 400 m/s
-// over Ignus and a Boscali AAM2 is spawned 3 km behind and 1.5 km to the left. Pass: the missile hits, and the forward or
-// aft fuselage section detaches in the air (within 20 s of the hit, the aircraft still above 1,000 m). The [Icarus]
-// joint-break lines in the run's log give each section's HP when its joint broke.
+// Breakup under a missile hit: the Icarus holds 10 km at 400 m/s over Ignus and a Boscali AAM2 is spawned 3 km behind
+// and 1.5 km to the left. Pass: the missile hits, and a primary structural part (a wing spar, the engine core or a
+// fuselage section) detaches in the air (within 20 s of the hit, the aircraft still above 1,000 m). Joints break only
+// from damage, as on stock jets, so an undamaged section stays on through the tumble after the kill. The [Icarus]
+// joint-break lines in the run's log give each part's HP when its joint broke.
 // From the repo root: no-agentic run tests/scenarios/breakup_missile_hit.scenario.jsonc
 {
   "mission": "icarus_ignus_10km_half.mission.json",
@@ -29,9 +29,12 @@
     { "screenshot": { "name": "hit" } },
     { "check": { "all": [
         { "path": "own.alt_msl_m", "gt": 1000 },
-        { "any": [ { "event": "part_detached", "since": "launched", "part": "fuselage_forward" },
+        { "any": [ { "event": "part_detached", "since": "launched", "part": "wing_spar_L" },
+                   { "event": "part_detached", "since": "launched", "part": "wing_spar_R" },
+                   { "event": "part_detached", "since": "launched", "part": "engine_core" },
+                   { "event": "part_detached", "since": "launched", "part": "fuselage_forward" },
                    { "event": "part_detached", "since": "launched", "part": "fuselage_aft" } ] } ] },
-      "within": 20, "label": "a fuselage section detaches in the air" },
+      "within": 20, "label": "a primary structural part detaches in the air" },
     { "screenshot": { "name": "breakup" } },
     { "record": { "event": "part_detached", "field": "part", "since": "launched" }, "label": "parts detached after the hit" },
   ],

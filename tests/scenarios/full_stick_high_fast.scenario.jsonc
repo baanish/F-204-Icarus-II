@@ -1,0 +1,58 @@
+// Full-stick loads high and fast, the companion of full_stick_low_fast: the Icarus starts over Ignus at 10,000 m, heading
+// east at 650 m/s (about Mach 2.2), full fuel, clean, and a hold at full afterburner reverses onto 270, back onto 090, then
+// pulls up for 14,000 m and pushes back down to 10,000 m.
+// Pass: nothing detached and no damage through every manoeuvre, with the pull past 8 g.
+// From the repo root: no-agentic run tests/scenarios/full_stick_high_fast.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.0.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "timeout": 240,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "mark": { "label": "start" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s level at full afterburner" },
+    { "require": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "path": "own.mach", "gt": 1.9 } ] }, "label": "gate: intact and past Mach 1.9 before the pulls" },
+    { "record": { "path": "own.mach" }, "label": "Mach before the reversal" },
+    { "record": { "path": "own.eas_mps" }, "label": "equivalent airspeed before the reversal, m/s" },
+
+    { "mark": { "label": "reversal" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 270, "throttle": 1 } },
+    { "wait": { "any": [ { "path": "own.load_g", "gt": 8 }, { "event": "part_detached", "since": "reversal" } ] }, "timeout": 10,
+      "label": "the hold pulls past 8 g (or a part comes off first)" },
+    { "record": { "path": "own.ctl.in.roll" }, "label": "roll command in the pull" },
+    { "record": { "path": "own.ctl.in.pitch" }, "label": "pitch command in the pull (-1 is full aft stick)" },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "reversal" } } ] }, "for": 12,
+      "label": "12 s through the reversal onto 270: nothing detached, no damage" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "since": "reversal" } }, "label": "nearest joint to breaking at the end of the reversal, load over limit" },
+    { "record": { "log_value": { "match": "tail-flex: .*up to ([0-9.]+) g", "since": "reversal" } }, "label": "peak load factor in the last second of the turn" },
+    { "record": { "path": "own.mach" }, "label": "Mach after the turn" },
+
+    { "mark": { "label": "back" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "back" } } ] }, "for": 14,
+      "label": "14 s through the roll reversal back onto 090: nothing detached, no damage" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "since": "back" } }, "label": "nearest joint to breaking at the end of the roll reversal back, load over limit" },
+
+    { "mark": { "label": "pullup" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 14000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "pullup" } } ] }, "for": 8,
+      "label": "8 s into the pull-up for 14,000 m: nothing detached, no damage" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "since": "pullup" } }, "label": "nearest joint to breaking at the end of the pull-up, load over limit" },
+    { "mark": { "label": "pushover" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "pushover" } } ] }, "for": 10,
+      "label": "10 s pushing back down to 10,000 m: nothing detached, no damage" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "since": "pushover" } }, "label": "nearest joint to breaking at the end of the push-over, load over limit" },
+    { "check": { "not": { "log": "joint-break", "since": "start" } }, "label": "no joint broke all run" },
+  ],
+}

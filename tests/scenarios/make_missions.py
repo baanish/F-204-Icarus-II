@@ -84,6 +84,7 @@ for name, alt, speed, fuel, what in [
     ("icarus_ignus_15km", 15000.0, 700.0, 1.0, "full fuel, for the 15 km top speed"),
     ("icarus_ignus_60kft", 18288.0, 700.0, 1.0, "full fuel, for the 60,000 ft top speed"),
     ("icarus_ignus_3km_fast", 3000.0, 480.0, 0.6, "60% fuel, for low-altitude supersonic handling"),
+    ("icarus_ignus_1km_fast", 1000.0, 410.0, 0.5, "half fuel, for full-stick pulls and rolls near Mach 1.2 low down"),
     ("icarus_ignus_10km_half", 10000.0, 400.0, 0.5, "half fuel, for the sustained turn"),
     ("icarus_ignus_13km_40", 13000.0, 520.0, 0.4, "40% fuel, for hands-off pitch hold below half fuel"),
 ]:
