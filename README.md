@@ -15,7 +15,11 @@ Version 0.0.1, an early build. It flies, fights and comes apart in game, and it 
 - Four PALA liveries: Navy, Black, Desert splinter, and Bare Metal with high-visibility bands.
 - Its own engine, gear and belly-scrape sounds.
 
-![Side view in the Navy livery](docs/img/icarus-side.jpg)
+![A low, fast pass over the desert in Bare Metal, afterburner lit](docs/img/icarus-flyby.gif)
+
+![The standby attitude ball turning with the aircraft through a roll and a pitch, in the cockpit](docs/img/icarus-standby.gif)
+
+![Parked on Sandrift's runway in the Desert splinter livery](docs/img/icarus-desert.jpg)
 
 ## Requirements
 
@@ -48,7 +52,11 @@ The Icarus uses the game's normal controls, with no new key bindings.
 - **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the tanks in a little over six minutes.
 - **Flaps are automatic.** The leading-edge and trailing-edge flaps come out with low airspeed.
 
-![The iris nozzle in afterburner](docs/img/icarus-afterburner.jpg)
+![The gear retracting and extending in flight, in the Navy livery](docs/img/icarus-gear.gif)
+
+![An AAM-29 dropping out of its belly trough, then its motor lighting](docs/img/icarus-conformal.gif)
+
+![Taking off in full afterburner in the Black livery](docs/img/icarus-afterburner.gif)
 
 ### Tuning
 
