@@ -117,30 +117,45 @@ def duct_area(p, s, step=0.004):
     return 2 * count * step * step
 
 
+def inboard_x(p, s):
+    """How close the left branch's wall comes to the centre line at s, seen from above."""
+    return min(x for x, _ in bi.duct_ring(p, s, 64))
+
+
 def check_duct_areas(p):
-    """The Y-duct is one constant tube: from just inside the lips, through the merge, to the blend before the engine
-    face, the flow area stays at DUCT_AREAS tube, with no bulge and no waist; over the blend it never shrinks, and it
-    ends at the face's area. Pinned to the values build_icarus.PARAMS["duct"] was solved for (tools/y_duct_design.py),
-    the tube 20 cm2 either way (its rows' interpolation between solved stations), the face 5 cm2: the grid's sampling
-    error is under 1 cm2."""
+    """The Y-duct closes from the lips onto one constant tube: from the lip's ring to the tube the flow area never
+    grows, and the branch's inboard wall never steps out, so it narrows on its outboard side, top and bottom, with no
+    shoulder bulging in toward the centre line; from there, through the merge, to the blend before the engine face,
+    the area stays at DUCT_AREAS tube, with no bulge and no waist; over the blend it never shrinks, and it ends at the
+    face's area. Pinned to the values build_icarus.PARAMS["duct"] was solved for (tools/y_duct_design.py), the tube 20
+    cm2 either way (its rows' interpolation between solved stations), the face 5 cm2: the grid's sampling error is
+    under 1 cm2."""
     (s0, s1), s_face = DUCT_AREAS["tube_s"], DUCT_AREAS["face_s"]
     if abs(p["duct"][-1][0] - s_face) > 1e-9:
         raise ValueError("propulsion: the Y-duct must end at the engine face's s %.2f" % s_face)
+    lip, merge = p["duct"][0][0], bi.duct_merge_s(p)
+    close = [(s, duct_area(p, s)) for s in [lip + 0.05 * i for i in range(int((s0 - lip) / 0.05) + 1)] + [s0]]
+    wall = [(s, inboard_x(p, s)) for s in [lip + 0.05 * i for i in range(int((merge - lip) / 0.05) + 1)]]
     tube = [(s, duct_area(p, s)) for s in [s0 + 0.05 * i for i in range(int(round((s1 - s0) / 0.05)) + 1)]]
     blend = [(s, duct_area(p, s)) for s in [s1 + 0.05 * i for i in range(int(round((s_face - s1) / 0.05)) + 1)]]
     problems = ["tube area %.4f m2 at s %.2f, pinned %.4f" % (a, s, DUCT_AREAS["tube"]) for s, a in tube
                 if abs(a - DUCT_AREAS["tube"]) > 0.002]
     problems += ["area falls %.4f m2 from s %.2f" % (a - b, s) for (s, a), (_, b) in zip(blend, blend[1:])
                  if b < a - 0.002]
+    problems += ["area grows %.4f m2 from s %.2f, ahead of the tube" % (b - a, s)
+                 for (s, a), (_, b) in zip(close, close[1:]) if b > a + 0.002]
+    problems += ["the inboard wall steps out %.3f m from s %.2f" % (b - a, s)
+                 for (s, a), (_, b) in zip(wall, wall[1:]) if b > a + 0.001]
     if abs(blend[-1][1] - DUCT_AREAS["face"]) > 0.0005:
         problems.append("face area %.4f m2, pinned %.4f" % (blend[-1][1], DUCT_AREAS["face"]))
-    merge = bi.duct_merge_s(p)
     if merge > DUCT_AREAS["merge_s"]:
         problems.append("the branches merge at s %.3f, aft of %.2f" % (merge, DUCT_AREAS["merge_s"]))
     if problems:
         raise ValueError("propulsion: Y-duct area schedule: " + "; ".join(problems))
-    return ("Y-duct flow area %.3f to %.3f m2 from s %.2f to %.2f, rising to %.3f at the face; the branches merge at "
-            "s %.3f" % (min(a for _, a in tube), max(a for _, a in tube), s0, s1, blend[-1][1], merge))
+    return ("Y-duct flow area %.3f m2 at the lip closing to %.3f to %.3f m2 from s %.2f to %.2f, rising to %.3f at the "
+            "face; the inboard wall from x %.3f at the lip to %.3f at s %.2f; the branches merge at s %.3f" % (
+                close[0][1], min(a for _, a in tube), max(a for _, a in tube), s0, s1, blend[-1][1], wall[0][1],
+                wall[-1][1], wall[-1][0], merge))
 
 
 def check_actuation():

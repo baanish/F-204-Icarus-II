@@ -84,23 +84,33 @@ PARAMS = {
     "shock_cone": {"apex_s": 6.15, "base_s": 6.90, "radius": 0.132, "cap": 0.10, "x": 0.58},
     # One Y-shaped duct: each intake's branch runs inboard from just inside the lip and merges with its twin into one
     # round duct ahead of the engine face (duct_field). Rows are the left branch's circle, (s, centre x, centre z,
-    # radius). The branch holds the lip's ring past the mouth (6.90), then closes round the shock cone's cap onto a
-    # constant tube by 7.30 (0.337 m2 for both, the old cone-and-diffuser duct's throat), which holds through the
-    # merge and, widening, over the flattened floor, to 9.20; from there it grows on a smoothstep to the engine face's
-    # 0.563 m2 at 9.60.
+    # radius). The branch holds the lip's ring past the mouth (6.90), its inboard side cut flat (duct_inboard), then
+    # closes on its outboard side, top and bottom round the shock cone's cap onto a constant tube by 7.30 (0.337 m2 for
+    # both, the old cone-and-diffuser duct's throat), which holds through the merge and, widening, over the flattened
+    # floor, to 9.20; from there it grows on a smoothstep to the engine face's 0.563 m2 at 9.60.
     # tools/y_duct_design.py solves the radii for that schedule; propulsion.check holds it.
-    "duct": [(6.86, 0.5150, 0.2200, 0.3860), (6.90, 0.5122, 0.2207, 0.3860), (7.00, 0.5057, 0.2224, 0.3619),
-             (7.10, 0.4988, 0.2240, 0.3088), (7.20, 0.4900, 0.2257, 0.2557), (7.30, 0.4773, 0.2276, 0.2315),
-             (7.40, 0.4606, 0.2300, 0.2316), (7.50, 0.4410, 0.2332, 0.2315), (7.60, 0.4200, 0.2373, 0.2316),
-             (7.70, 0.3954, 0.2422, 0.2316), (7.80, 0.3667, 0.2476, 0.2316), (7.90, 0.3371, 0.2533, 0.2315),
-             (8.00, 0.3100, 0.2591, 0.2316), (8.10, 0.2855, 0.2647, 0.2316), (8.20, 0.2620, 0.2700, 0.2312),
-             (8.30, 0.2400, 0.2749, 0.2293), (8.40, 0.2200, 0.2797, 0.2309), (8.50, 0.2023, 0.2845, 0.2339),
-             (8.60, 0.1863, 0.2892, 0.2374), (8.70, 0.1712, 0.2941, 0.2415), (8.80, 0.1565, 0.2992, 0.2496),
-             (8.90, 0.1413, 0.3044, 0.2607), (9.00, 0.1250, 0.3100, 0.2713), (9.10, 0.1077, 0.3160, 0.2818),
-             (9.20, 0.0896, 0.3225, 0.2896), (9.30, 0.0700, 0.3293, 0.3206), (9.40, 0.0479, 0.3363, 0.3726),
-             (9.50, 0.0240, 0.3432, 0.4122), (9.60, 0.0000, 0.3500, 0.4217)],
-    # The fillet radii of the smooth unions (bi.smin): the crotch where the branches meet, and the floor's corners.
-    "duct_blend": (0.10, 0.04),
+    "duct": [(6.86, 0.5150, 0.2200, 0.3860), (6.90, 0.5122, 0.2207, 0.3860), (6.95, 0.5089, 0.2216, 0.3711),
+             (7.00, 0.5057, 0.2224, 0.3252), (7.05, 0.5024, 0.2232, 0.3012), (7.10, 0.4988, 0.2240, 0.2770),
+             (7.15, 0.4947, 0.2248, 0.2575), (7.20, 0.4900, 0.2257, 0.2436), (7.25, 0.4842, 0.2266, 0.2348),
+             (7.30, 0.4773, 0.2276, 0.2315), (7.40, 0.4606, 0.2300, 0.2316), (7.50, 0.4410, 0.2332, 0.2315),
+             (7.60, 0.4200, 0.2373, 0.2316), (7.70, 0.3954, 0.2422, 0.2316), (7.80, 0.3667, 0.2476, 0.2316),
+             (7.90, 0.3371, 0.2533, 0.2315), (8.00, 0.3100, 0.2591, 0.2316), (8.10, 0.2855, 0.2647, 0.2316),
+             (8.20, 0.2620, 0.2700, 0.2312), (8.30, 0.2400, 0.2749, 0.2293), (8.40, 0.2200, 0.2797, 0.2309),
+             (8.50, 0.2023, 0.2845, 0.2339), (8.60, 0.1863, 0.2892, 0.2374), (8.70, 0.1712, 0.2941, 0.2415),
+             (8.80, 0.1565, 0.2992, 0.2496), (8.90, 0.1413, 0.3044, 0.2607), (9.00, 0.1250, 0.3100, 0.2713),
+             (9.10, 0.1077, 0.3160, 0.2818), (9.20, 0.0896, 0.3225, 0.2896), (9.30, 0.0700, 0.3293, 0.3206),
+             (9.40, 0.0479, 0.3363, 0.3726), (9.50, 0.0240, 0.3432, 0.4122), (9.60, 0.0000, 0.3500, 0.4217)],
+    # Ahead of the tube each branch's inboard side is a flat wall at this x (s, x), so the lip's ring, buried in the
+    # body on that side, does not bulge in toward the centre line before the tube: seen from above, the wall runs
+    # straight back from the edge of what shows through the mouth into the tube's inboard wall. Outside the table the
+    # section is the branch's circle: ahead of the duct, where the fuel cells' cutter runs on, the lip's whole ring
+    # keeps the forward cell out of sight lines through the mouth's lower corner. tools/y_duct_design.py solves it
+    # with the rows.
+    "duct_inboard": [(6.86, 0.3800), (6.90, 0.3800), (6.95, 0.3722), (7.00, 0.3510), (7.05, 0.3201), (7.10, 0.2836),
+                     (7.15, 0.2455), (7.20, 0.2099), (7.25, 0.1816), (7.30, 0.1658)],
+    # The fillet radii of the smooth unions (bi.smin): the crotch where the branches meet, the floor's corners, and the
+    # inboard wall's, round enough that the fuel cells' coarse duct cutter (internals.duct_cutter) keeps its clearance.
+    "duct_blend": (0.10, 0.04, 0.08),
     # Over the main wheels' bay the ducts' undersides are flattened at this height (s, z), their tops kept, so the
     # two flat tyres lie side by side beneath them (gear.GEAR["main"]); outside the table's ends, and where the floor
     # is below a duct's bottom, the section stays round. The owner's call, over raising the ducts into the fuel.
@@ -258,15 +268,19 @@ def pchip(xs, ys, x):
 def duct_field(p, s, grow=0.0):
     """The Y-duct's section at s as a field, negative inside, and the left branch's (centre x, centre z, radius): that
     branch's circle smooth-unioned with its mirror over PARAMS duct_blend's crotch radius, so the two meet in a filleted
-    crotch and run on as one round duct, the underside lifted onto duct_floor with its floor fillet. grow pushes the
-    wall out."""
+    crotch and run on as one round duct, its inboard side cut flat at duct_inboard and its underside lifted onto
+    duct_floor, each with its fillet. grow pushes the wall out."""
     _, cx, cz, r = resample(p["duct"], [s])[0]
-    crotch, fillet = p["duct_blend"]
+    crotch, fillet, corner = p["duct_blend"]
     table = p.get("duct_floor")
     floor = pchip([q[0] for q in table], [q[1] for q in table], s) if table and table[0][0] < s < table[-1][0] else None
+    wall = p.get("duct_inboard")
+    inboard = pchip([q[0] for q in wall], [q[1] for q in wall], s) if wall and wall[0][0] <= s < wall[-1][0] else None
 
     def field(x, z):
         d = smin(math.hypot(x - cx, z - cz) - r, math.hypot(x + cx, z - cz) - r, crotch)
+        if inboard is not None:
+            d = -smin(-d, abs(x) - inboard, corner)
         if floor is not None:
             d = -smin(-d, z - floor, fillet)
         return d - grow

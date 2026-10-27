@@ -48,7 +48,7 @@ BUDGET = {
     # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more.
     "structure_cores": {"target": 14700, "cap": 14800, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
-    # Coarse cells (internals.INTERNALS cell_mesh) come to about 2,920; the cap is what the finer cells took.
+    # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160; the cap is what the finer cells took.
     "fuel_cells": {"target": 3000, "cap": 6250, "objects": ("fuel_",)},
     "engine": {"target": 600, "cap": 700, "objects": ("engine_core",)},
     "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},

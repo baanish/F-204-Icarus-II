@@ -40,7 +40,7 @@ namespace Icarus.Editor
         // .internal research R7: the first-cut empty mass, which the export's mass_kg props must add up to, and the
         // internal fuel the fuel_kg props must: what the cells hold round the gear wells and the Y-duct (internals.py
         // design_fuel_kg).
-        private const float EmptyMass = 5800f, FuelMass = 3013f;
+        private const float EmptyMass = 5800f, FuelMass = 3082f;
 
         private static string RepoRoot => Directory.GetParent(Application.dataPath).Parent.FullName;
         private static string ExportFolder => Path.Combine(RepoRoot, "art", "export");
