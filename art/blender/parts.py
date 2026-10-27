@@ -26,6 +26,10 @@ import lights
 import stations
 
 SKIN = "Icarus_Body"
+# The fin's lifting area, m2, which IcarusAuthor.Aero.cs reads from fin_skin's side_area_m2: the side area the flight
+# model was tuned on, held fixed so the fin can be drawn to the F-104's shape without changing the handling. The drawn
+# fin, before the fin-tip fairing joins its mesh, measures about 14% more (drawn_side_area_m2).
+FIN_LIFT_AREA = 3.1578
 # Triangles per component: target and cap (budget.py sums them). Caps are ceilings; the references sit lower.
 BUDGET = {
     # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores); the
@@ -37,7 +41,8 @@ BUDGET = {
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
     "stabilator": {"target": 1700, "cap": 1700, "objects": ("stabilator_visible",)},
-    "fins": {"target": 2020, "cap": 2020, "objects": ("fin_skin", "ventral_fin")},
+    # The fin-tip fairing, a blade 1.85 m long as on the F-104, takes about 1,030 of the fins' 2,340.
+    "fins": {"target": 2340, "cap": 2340, "objects": ("fin_skin", "ventral_fin")},
     # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole, and the speed
     # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_aft) about 570, from the skin's. The
     # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more.
@@ -323,9 +328,8 @@ def _organise(p, icarus, internals, structure_mat):
     for obj in (O["fin_skin"], fin_spar):
         interior.subtract(interior.outward(obj), [body])
     bpy.data.objects.remove(body, do_unlink=True)
-    # The fin's own side area, before the fin-tip fairing joins its mesh: IcarusAuthor.Aero.cs gives the fin this
-    # lifting area, and the fairing is no part of it.
-    O["fin_skin"]["side_area_m2"] = round(side_area(O["fin_skin"]), 4)
+    O["fin_skin"]["side_area_m2"] = FIN_LIFT_AREA
+    O["fin_skin"]["drawn_side_area_m2"] = round(side_area(O["fin_skin"]), 4)
     # The canopy's lower edge dips into the fuselage; keep the cockpit cell clear of it.
     solid = canopy.build_canopy(p, structure_mat)  # the closed canopy shape; the built hood and windscreen are open
     # Grown as the frames are cut (canopy.FRAME_CLEAR), clear of the flanges under the glass's foot, and thinned to a

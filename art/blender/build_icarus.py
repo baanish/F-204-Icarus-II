@@ -17,6 +17,7 @@ import sys
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
+from mathutils.bvhtree import BVHTree
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # so internals.py imports in a headless run
 import geometry_cache
@@ -121,10 +122,13 @@ PARAMS = {
     },
     # The root rows curve the leading edge concavely down into the spine, which is the fin's fillet. The lowest
     # row sits under the tapering tail's top line and ends where the body does, so no gap opens under the fin;
-    # the trailing edge ends above the nozzle exit.
+    # the trailing edge ends above the nozzle exit. Above them the fin is the F-104's, from NASA TN D-6943's three-view
+    # at full size (both aircraft are 16.69 m from radome tip to tail): a leading edge swept 44 degrees, a trailing
+    # edge upright at s 15.85 down to the rudder's foot that then steps forward over the nozzle, and a 1.37 m tip
+    # chord inside the fin-tip fairing.
     "fin": {
-        "sections": [(12.00, 0.0, 0.70, 3.20), (12.25, 0.0, 0.98, 3.40), (12.90, 0.0, 1.30, 2.75),
-                     (13.30, 0.0, 1.60, 2.35), (14.68, 0.0, 2.88, 1.00)],
+        "sections": [(12.00, 0.0, 0.70, 3.20), (12.25, 0.0, 0.98, 3.40), (12.6075, 0.0, 1.156, 3.2425),
+                     (12.90, 0.0, 1.30, 2.95), (13.30, 0.0, 1.60, 2.55), (14.482, 0.0, 2.82, 1.368)],
         "thickness": 0.05,
     },
     # Control surfaces cut from the wing and fin: (name, span from, span to, chord fraction from, to, end gaps). Span
@@ -138,7 +142,7 @@ PARAMS = {
         ("flap_L", 1.086, 2.014, 0.786, 1.00, (0.018, 0.008)),
         ("aileron_L", 2.086, 3.274, 0.746, 1.00, (0.010, 0.006)),
     ],
-    "fin_surfaces": [("rudder", 1.156, 2.544, 0.686, 1.00, (0.012, 0.008))],
+    "fin_surfaces": [("rudder", 1.156, 2.544, 0.718, 1.00, (0.012, 0.008))],
     # A surface's hinged edge is a round nose about its hinge line, nested in a cove of the same shape in the box,
     # surface_cove_gap metres larger, so it turns through its travel with no slot opening and only skin in view.
     "surface_cove_gap": 0.003,
@@ -153,18 +157,25 @@ PARAMS = {
     # under the body lobe's centre, and deg1 the column just under the centre. The loft's nearest stations move onto
     # s0 and s1 (fuselage_stations); speed_brakes.check holds the outline to the panel lines.
     "speed_brake": {"s0": 13.0, "s1": 13.585, "deg0": -45.0, "deg1": -3.75},
-    # Squared off: the trailing edge runs straight across at the root's trailing edge instead of the F-104's V,
-    # with a small 45 degree cut at the tip's trailing corner. Left-hand sections; the stabilator is one piece, its
-    # sides meeting behind the fin-tip fairing. Its root row stands surface_cove_gap outboard of the fairing's
-    # radius, and the cut-out between the roots follows the fairing's outline, the same gap clear through the whole
-    # travel (build_stabilator).
+    # Squared off, the owner's choice over the F-104's V: the trailing edge runs straight across at the root's
+    # trailing edge, with a small 45 degree cut at the tip's trailing corner. Left-hand sections; the stabilator is one
+    # piece, its sides meeting behind the fin-tip fairing. Its root row, on the leading edge's line, stands
+    # surface_cove_gap outboard of the fairing's flat sides and slides along them through the whole travel, and the
+    # cut-out between the roots follows the fairing's tail, at least the same gap clear through the travel
+    # (build_stabilator). The drawn area plays no part in flight: the game's is IcarusAuthor.Aero.cs's TailArea.
     "stabilator": {
-        "sections": [(14.804, 0.063, 2.82, 1.886), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
+        "sections": [(14.8144, 0.093, 2.82, 1.8756), (15.342, 1.62, 2.82, 1.348), (15.41, 1.815, 2.82, 1.085)],
         "thickness": 0.045,
     },
-    # The fin-tip fairing round the stabilator pivot, as on the F-104: a body of revolution about a fore-aft axis at
-    # height z, from s0 to s1, hiding the fin tip, faired into the fin's sides below by a fillet of radius fillet.
-    "fin_fairing": {"z": 2.83, "s0": 14.62, "s1": 15.75, "radius": 0.06, "fillet": 0.05},
+    # The fin-tip fairing round the stabilator pivot, as on the F-104, whose fin runs on through the stabilator to
+    # stand 0.28 m (11 in) above it: a blade from s0 to s1 with flat sides radius out from the centreline, from
+    # flat_below under height z to flat above it, rounded over the top and bottom, hiding the fin tip and faired into
+    # the fin's sides below by a fillet of radius fillet. The stabilator's root slides along the flat sides and stays
+    # inside the blade's outline through the whole travel: its leading edge swings 0.165 m below z, and the outline
+    # reaches flat_below + radius, while the fillets stay clear above the rudder's top. A round nose nose metres long
+    # meets the fin's leading edge, and a pointed tail tapers over the last tail metres.
+    "fin_fairing": {"z": 2.82, "s0": 14.45, "s1": 16.30, "radius": 0.09, "flat": 0.20, "flat_below": 0.09,
+                    "nose": 0.35, "tail": 0.75, "fillet": 0.05},
     "ventral_fin": {
         "sections": [(10.85, 0.0, -0.22, 2.25), (10.95, 0.0, -0.62, 2.05)],  # root buried above the rising belly
         "thickness": 0.05,
@@ -1035,7 +1046,20 @@ def build_stabilator(p, mats):
     s_le, root_x, z, chord = st["sections"][0]
     pivot = P(p["stabilator_pivot_s"], 0.0, z)
     turns = [Matrix.Rotation(math.radians(a), 3, "X") for a in sweep_angles(surface_travel(p, "stabilator"))]
-    outline, axis_z = fairing_outline(p), p["fin_fairing"]["z"]
+    outline = fairing_outline(p)
+    fairing = bpy.data.objects["fin_fairing"]
+    tree = BVHTree.FromPolygons([fairing.matrix_world @ v.co for v in fairing.data.vertices],
+                                [f.vertices for f in fairing.data.polygons])
+    above = P(p["fin_fairing"]["s0"] + p["fin_fairing"]["nose"], 0.0, z + 1.0)
+    at, normal, _, _ = tree.find_nearest(above)
+    outward = 1.0 if (above - at).dot(normal) > 0 else -1.0  # the side the fairing's faces wind to
+
+    def fairing_distance(v):
+        """Distance from the point v to the fin-tip fairing's mesh, negative inside: inside when the first face a ray
+        along x meets faces the same way, so the ray leaves there (the nearest face's normal misleads at an edge)."""
+        distance = tree.find_nearest(v)[3]
+        hit, normal, _, _ = tree.ray_cast(v, Vector((1.0, 0.0, 0.0)))
+        return -distance if hit is not None and normal.x * outward > 0 else distance
 
     def clearance(x, s, skins=True):
         """Least distance from the fairing, over the travel, of the stabilator's front edge at span x and chord
@@ -1048,7 +1072,7 @@ def build_stabilator(p, mats):
                        for i in range(1, 9) for side in (-1, 1)]
         for v in points:
             v.x = x
-        return min(fairing_distance(outline, axis_z, pivot + turn @ (v - pivot)) for turn in turns for v in points)
+        return min(fairing_distance(pivot + turn @ (v - pivot)) for turn in turns for v in points)
 
     def least(clear, lo, hi):
         """The least value in lo..hi at which clear holds, which it does at hi."""
@@ -1130,29 +1154,14 @@ def miter(a, b, c, gap):
 
 
 def fairing_outline(p):
-    """The fin-tip fairing's outline, (s, radius) from its nose point on the axis to its tail point."""
+    """The fin-tip fairing's outline, (s, half width) from its nose point to its tail point; its sections grow and
+    shrink with the half width (fairing_ring)."""
     f = p["fin_fairing"]
-    r, s0, s1 = f["radius"], f["s0"], f["s1"]
-    nose, tail = 0.10, 0.10
+    r, s0, s1, nose, tail = f["radius"], f["s0"], f["s1"], f["nose"], f["tail"]
     out = [(s0, 0.0)]
-    out += [(s0 + nose * (1 - math.cos(math.radians(d))), 0.97 * r * math.sin(math.radians(d))) for d in (25, 50, 70, 90)]
-    out += [(s0 + 0.38, 0.97 * r), (s0 + 0.53, r), (s1 - 0.25, r), (s1 - 0.13, 0.97 * r)]
-    out += [(s1 - tail + tail * math.sin(math.radians(d)), 0.97 * r * math.cos(math.radians(d))) for d in (30, 55, 75)]
+    out += [(s0 + nose * (1 - math.cos(math.radians(d))), r * math.sin(math.radians(d))) for d in (20, 40, 60, 75, 90)]
+    out += [(s1 - tail * (1 - u), r * (1 - u * u)) for u in (0.0, 0.2, 0.4, 0.6, 0.8, 0.92)]
     return out + [(s1, 0.0)]
-
-
-def fairing_distance(outline, z, v):
-    """Distance from the point v to the fin-tip fairing's body of revolution, its outline about an axis at height z,
-    negative inside. Its sections are drawn inside their circles, and its fillets into the fin lie under it, closer in
-    than the stabilator reaches."""
-    s, rho = v.y + S0, math.hypot(v.x, v.z - z)
-    best, inside = math.inf, False
-    for (sa, ra), (sb, rb) in zip(outline, outline[1:]):
-        ds, dr = sb - sa, rb - ra
-        t = max(0.0, min(1.0, ((s - sa) * ds + (rho - ra) * dr) / (ds * ds + dr * dr)))
-        best = min(best, math.hypot(s - sa - t * ds, rho - ra - t * dr))
-        inside = inside or (sa <= s <= sb and rho < ra + dr * (s - sa) / ds)
-    return -best if inside else best
 
 
 FAIRING_INSET = 0.0015  # how far inside the fin's skin a fillet comes down, clear of the skin's faceting
@@ -1172,12 +1181,16 @@ def fin_chord(p, s, z):
 
 
 def fairing_ring(p, s, radius):
-    """The fin-tip fairing's section at s: a circle, and below it a fillet each side tangent to the circle and to the
-    fin's skin (FAIRING_INSET inside it), running on FAIRING_FOOT down into the fin. Behind the fin the fillets, feet
-    and the circle's lowest point are one point. Points run anticlockwise looking aft, from the left equator over the
-    top, down the right side, across inside the fin and up the left."""
+    """The fin-tip fairing's section at s, half width radius: flat sides from flat_below under height z to flat above
+    it, in proportion (radius over the full radius), closed by a half circle above and below, and below that a fillet each
+    side tangent to the lower half circle and to the fin's skin (FAIRING_INSET inside it), running on FAIRING_FOOT down
+    into the fin. Behind the fin the fillets, feet and the lowest point are one point. Points run anticlockwise
+    looking aft, from the left over the top, down the right side, across inside the fin and up the left."""
     f = p["fin_fairing"]
-    fin = fin_chord(p, s, f["z"] - radius)
+    scale = radius / f["radius"]
+    base = f["z"] - f["flat_below"] * scale  # the lower half circle's centre
+    flat = (f["flat"] + f["flat_below"]) * scale
+    fin = fin_chord(p, s, base - radius)
     t, half = fin if fin else (0.0, 0.0)
     ramp = min(t, 1.0 - t, FAIRING_TAPER) / FAIRING_TAPER if fin else 0.0
     k = f["fillet"] * ramp * ramp * (3 - 2 * ramp)
@@ -1185,20 +1198,20 @@ def fairing_ring(p, s, radius):
     if w >= radius:
         raise ValueError("the fin is thicker than the fin-tip fairing at s %.3f" % s)
     cx = w + k
-    cy = -math.sqrt((radius + k) ** 2 - cx * cx)  # the fillet's centre, radius + k from the axis
-    a1 = math.atan2(cy, cx)  # where the fillet meets the circle
+    cy = -math.sqrt((radius + k) ** 2 - cx * cx)  # the fillet's centre, radius + k from the lower centre
+    a1 = math.atan2(cy, cx)  # where the fillet meets the half circle
     a0 = math.atan2(-cy, -cx)  # the same point, round the fillet's centre
-    side = [(radius * math.cos(a1 * i / 4), radius * math.sin(a1 * i / 4)) for i in range(1, 5)]
+    side = [(radius * math.cos(a1 * i / 4), radius * math.sin(a1 * i / 4)) for i in range(5)]
     fillet = [(cx + k * math.cos(b), cy + k * math.sin(b)) for b in (a0 + (math.pi - a0) * i / 3 for i in (1, 2))]
     lower = side + fillet + [(w, cy), (w, cy - min(FAIRING_FOOT, half))]
-    top = [(radius * math.cos(math.pi * i / 8), radius * math.sin(math.pi * i / 8)) for i in range(9)]
+    top = [(radius * math.cos(math.pi * i / 8), flat + radius * math.sin(math.pi * i / 8)) for i in range(9)]
     ring = top + [(-x, y) for x, y in lower] + list(reversed(lower))
-    return [P(s, x, f["z"] + y) for x, y in ring]
+    return [P(s, x, base + y) for x, y in ring]
 
 
 def build_fin_fairing(p, mat):
-    """The fin-tip fairing: a round-ended body of revolution round the stabilator pivot, covering the fin tip and
-    faired into the fin by fillets (fairing_ring). It is detail of the fin skin and joins that part's mesh
+    """The fin-tip fairing: a round-ended blade round the stabilator pivot, covering the fin tip and faired into the
+    fin by fillets (fairing_ring). It is detail of the fin skin and joins that part's mesh
     (parts.merge_details)."""
     f = p["fin_fairing"]
     outline = fairing_outline(p)

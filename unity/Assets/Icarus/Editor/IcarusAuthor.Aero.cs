@@ -34,8 +34,8 @@ namespace Icarus.Editor
         private const float LefSpeedDeployed = 100f, LefSpeedRetracted = 160f, LefAddedArea = 1.25f;
 
         // R14's areas: 20.8079 m2 of main wing, the gross planform with the root chord carried to the centreline (both sides,
-        // surfaces included), 3.0 of horizontal tail (R7's, not the drawn 5.75), 2.0 of body; the fin and rudder carry
-        // their drawn side areas.
+        // surfaces included), 3.0 of horizontal tail (R7's, not the drawn 4.43), 2.0 of body; the fin carries the
+        // generator's pinned side area (parts.FIN_LIFT_AREA) and the rudder its drawn one.
         private const float WingArea = 20.8079f, TailArea = 3.0f, BodyArea = 2.0f;
         // Aggregate clean dragArea, shared over the parts that meet the air in R14's proportions. R14 modelled 0.55; in
         // game that left the jet 4% short of Mach 2.46 at 10 km, and 0.47 holds R14's level speeds at 10 and 15 km.
@@ -257,7 +257,7 @@ namespace Icarus.Editor
                 aero["wing_spar_" + side] = (spar, WingAirfoil);
             }
             aero["stabilator"] = (TailArea, TailAirfoil);
-            // the fin's own side area, which the generator measures before the fin-tip fairing joins the fin skin
+            // the fin's lifting area, which the generator pins (parts.FIN_LIFT_AREA)
             var finArea = b.Blockout.Parts["fin_skin"].Number("side_area_m2");
             if (finArea <= 0)
                 throw new InvalidDataException("fin_skin has no side_area_m2 in blockout.json");
