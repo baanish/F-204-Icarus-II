@@ -43,7 +43,7 @@ def measurements():
     def lookup(image, uv):
         return sample(image, (uv[:, 0] * 2048 - .5) / 2047, ((1 - uv[:, 1]) * 2048 - .5) / 2047)
     touches_pilot = (lookup(pilot_mask[..., None].astype(float), coords[:, 0])[:, 0] > .1) | (lookup(pilot_mask[..., None].astype(float), coords[:, 1])[:, 0] > .1)
-    result = {'geometry_head': 'e9a6167906f12f6e0f554305186a7f6f57b15727', 'seams': {}, 'maps': {},
+    result = {'geometry_head': 'e3caa41f13e7475af21d9117d408f17132c1c387', 'seams': {}, 'maps': {},
               'native_sources': resolve_record(json.loads((OUT / 'stitch.json').read_text())),
               'note': 'Offline uncompressed probe only. Pilot approval remains with the owner.'}
     for version in ('round1', 'pilot2'):

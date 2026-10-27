@@ -94,7 +94,7 @@ def main():
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     args.out.mkdir(parents=True, exist_ok=True)
     if args.baseline:
-        source = subprocess.check_output(["git", "show", "82cb1ab:art/blender/propulsion.py"], cwd=REPO)
+        source = subprocess.check_output(["git", "show", "935789b5:art/blender/propulsion.py"], cwd=REPO)
         exec(compile(source, "baseline_propulsion.py", "exec"), propulsion.__dict__)
     if args.baseline:
         bi.build()  # This mode executes historical source in memory.
