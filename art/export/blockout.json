@@ -189,6 +189,11 @@
    -0.29724,
    -3.1
   ],
+  "wingtip_offset_unity": [
+   -0.235,
+   0.0,
+   0.0585
+  ],
   "lenses": {
    "top": {
     "position": [

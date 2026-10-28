@@ -17,12 +17,16 @@ namespace Icarus.Editor
             if (!names.SequenceEqual(SetNames)) p.Add("sets [" + string.Join(", ", names) + "]");
             var indices = new List<int>();
             var worst = 0f;
+            var tankMiss = (Position: 0f, Angle: 0f);
+            // Where the tank hangs from either tip: its origin on the layout's, its axis forward, upright on the left tip and
+            // half a roll over on the right, which the plugin turns back (src/Icarus/TipTanks.cs).
+            var tankPlace = Vec3(TipTankLayout()["hardpoint_unity"]) - b.Blockout.Origin;
+            var tank = AssetDatabase.LoadAssetAtPath<GameObject>(MountFolder + "/" + TipTank + ".prefab");
             for (var i = 0; i < sets.arraySize; i++)
             {
                 var set = sets.GetArrayElementAtIndex(i);
                 var precludes = set.FindPropertyRelative("precludingHardpointSets");
-                var excluded = Enumerable.Range(0, precludes.arraySize).Select(k => precludes.GetArrayElementAtIndex(k).intValue).ToArray();
-                if (!excluded.SequenceEqual(TipTankExclusions[i])) p.Add($"{names[i]} precludes sets [{string.Join(", ", excluded)}], expected [{string.Join(", ", TipTankExclusions[i])}]");
+                if (precludes.arraySize != 0) p.Add($"{names[i]} precludes {precludes.arraySize} other sets, expected none");
                 var hardpoints = set.FindPropertyRelative("hardpoints");
                 if (hardpoints.arraySize != 2) { p.Add($"{names[i]} has {hardpoints.arraySize} hardpoints"); continue; }
                 for (var j = 0; j < 2; j++)
@@ -38,6 +42,21 @@ namespace Icarus.Editor
                     worst = Mathf.Max(worst, miss);
                     if (miss > MeasuredTolerance) p.Add($"{t.name} at {t.position.ToString("F4")} is {miss * 1000f:F1} mm from its measured {measured.Position.ToString("F3")}");
                     if (Mathf.Abs(Mathf.DeltaAngle(t.eulerAngles.z, measured.Roll)) > 0.1f) p.Add($"{t.name} rolls {t.eulerAngles.z:F1} deg, measured {measured.Roll}");
+                    if (i != 0) continue;
+                    var hung = (GameObject)Object.Instantiate(tank, t.position, t.rotation);
+                    try
+                    {
+                        var store = hung.transform.Find("pylon/tip_tank");
+                        var place = new Vector3((j == 0 ? 1f : -1f) * tankPlace.x, tankPlace.y, tankPlace.z);
+                        var position = Vector3.Distance(store.position, place);
+                        var angle = Mathf.Max(Vector3.Angle(store.forward, Vector3.forward), Vector3.Angle(store.up, j == 0 ? Vector3.up : Vector3.down));
+                        tankMiss = (Mathf.Max(tankMiss.Position, position), Mathf.Max(tankMiss.Angle, angle));
+                        if (position > MeasuredTolerance || angle > 0.1f) p.Add($"the tip tank on {t.name} hangs {position * 1000f:F1} mm and {angle:F2} deg from its place");
+                    }
+                    finally
+                    {
+                        Object.DestroyImmediate(hung);
+                    }
                 }
             }
             if (!indices.OrderBy(i => i).SequenceEqual(Enumerable.Range(0, 2 * SetNames.Length))) p.Add("HardpointIndex values [" + string.Join(", ", indices) + $"], expected 0..{2 * SetNames.Length - 1} once each");
@@ -55,7 +74,7 @@ namespace Icarus.Editor
             }
             if (loadouts.arraySize < 2) p.Add("fewer than two ordinary loadouts (WeaponManager falls back to loadouts[1])");
             if (lengths.Any(l => l != SetNames.Length)) p.Add("loadout lengths [" + string.Join(", ", lengths) + "]");
-            return $"sets [{string.Join(", ", names)}], Wingtip and Tip Tank precluding each other, hardpoints 0..{2 * SetNames.Length - 1} left before right, within {worst * 1000f:F1} mm of their measured positions, loadout lengths [{string.Join(", ", lengths)}]";
+            return $"sets [{string.Join(", ", names)}], none precluding another, hardpoints 0..{2 * SetNames.Length - 1} left before right, within {worst * 1000f:F1} mm of their measured positions, the tip tank hanging within {tankMiss.Position * 1000f:F2} mm and {tankMiss.Angle:F3} deg of its place on both tips (the right one half a roll over), loadout lengths [{string.Join(", ", lengths)}]";
         }
 
         // A14: every offered mount, twins and the mod's own included, hung at each of its hardpoints, its colliders against

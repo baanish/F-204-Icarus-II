@@ -26,7 +26,7 @@ AIRCRAFT, TITLE = "baanish_icarus", "F-204 Icarus II"
 # -0.21 (nose up). Three hardpoint sets (Wingtip, Inner Wing, Conformal); three empty keys fly it clean, and a list of
 # any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
 SPAWN_UP, REST_PITCH = 1.49, -0.21
-CLEAN = {"Selected": [{"Key": ""} for _ in range(4)]}
+CLEAN = {"Selected": [{"Key": ""} for _ in range(3)]}
 
 # Sandrift's runway surface under runway_start's spot (x 27877, z -19300) is 136.93 m, as the framework's make_missions.py
 # measured it; the origin starts spawnOffset.y plus 0.12 m above it, as runway_start does for the KR-67.

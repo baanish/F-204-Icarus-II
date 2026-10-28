@@ -17,7 +17,7 @@ game export for the stock mounts. Prints a verdict per check and exits nonzero o
 - Stores rule 5: each wingtip hardpoint on its tip face, 0.005 m in, at mid-thickness, 0.545 of the tip chord back from
   the leading edge (where both hooks of every wingtip mount bear on the face), its mount's -Y outboard.
 - Stores rule 14: both nav lenses outside every tip store's rendered bounds and physical collider envelope, the
-  missiles on the Wingtip stations and the tip tanks on the Tip Tank ones. The
+  missiles and the tip tank on the Wingtip stations. The
   --lights-blockout mode uses tools/review_lights.py's geometry snapshot and the source Wingtip option list, for
   verification before Unity can build. It also checks the entire stock lens stays inboard of the tip face.
 - Stores rule 18: every Conformal missile, where its rail ends and the motor lights, at least 1 m from every airframe
@@ -40,7 +40,7 @@ from stores import paths
 
 LOCAL = paths.load()
 from stores.bundle import Aircraft  # noqa: E402
-from stores.geometry import axis_quat, bounds, box_gap, mesh_distance, quat_matrix, segment_distance  # noqa: E402
+from stores.geometry import axis_quat, bounds, box_gap, mesh_distance, quat_matrix, segment_distance, turn_upright  # noqa: E402
 from stores import meshverts  # noqa: E402
 from stores.bodies import mesh_path  # noqa: E402
 from stores.mounts import load_mount  # noqa: E402
@@ -228,7 +228,7 @@ def main():
                     # a stock mount from the game export; the mod's own from the bundle, which carries its prefab
                     stock = (root / "GameObject" / (key + ".prefab")).exists()
                     mounts[key] = load_mount(root, index, key) if stock else plane.mount(key, stock_mesh)
-                (verts, tris), colliders = mounts[key]
+                (verts, tris), colliders = turn_upright(key, mounts[key], rot)
                 store = (pos + verts @ rot.T, tris)
                 store_bounds = bounds(store[0])
                 angle = strike(store[0])
@@ -333,13 +333,11 @@ def main():
             lamps.append((name, (pos + (verts * scale) @ rot.T, tris)))
         name = "light_nav_mount_" + side
         lamps.append((name, plane.posed(plane.find(name))))
-    # Each tip set against its own stores: the missiles on the rolled Wingtip stations, the tanks on the Tip Tank ones.
-    for tip_set in ("Wingtip", "Tip Tank"):
-        found = [i for i, (name, _) in enumerate(plane.sets) if name == tip_set]
-        if not found:
-            failed = True
-            print(f"Stores rule 14 FAIL: no {tip_set} set in the bundle")
-            continue
+    found = [i for i, (name, _) in enumerate(plane.sets) if name == "Wingtip"]
+    if not found:
+        failed = True
+        print("Stores rule 14 FAIL: no Wingtip set in the bundle")
+    else:
         tip_stations = [(name, *plane.world(hp)[:2]) for name, hp in plane.sets[found[0]][1]]
         failed |= not check_tip_lamps(tip_stations, lamps, {key: mounts[key] for key in plane.mounts[found[0]]})
     gap, hp, key, where = min(rule12)

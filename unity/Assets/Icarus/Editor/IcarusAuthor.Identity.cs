@@ -11,29 +11,24 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The hardpoint set order is an API: loadouts, exclusions and Blueprinter registrations address sets by position.
-        // The tip tanks have their own set at index 3 (Stores rule 7: a tank never hangs from the rolled missile station),
-        // which the Wingtip set precludes and which precludes it (TipTankExclusions).
-        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal", "Tip Tank" };
-        // Each set's precludingHardpointSets: the Wingtip missiles and the tip tanks hang from the same tips, one or the
-        // other. The game blocks a set while any set it lists is loaded (HardpointSet.BlockedByOtherHardpoint).
-        private static readonly int[][] TipTankExclusions = { new[] { 3 }, new int[0], new int[0], new[] { 0 } };
+        // The hardpoint set order is an API: loadouts and Blueprinter registrations address sets by position.
+        // The tip tanks share the Wingtip set with its missiles: the tank mount seats its tank upright on the rolled
+        // hardpoint (AuthorTipTankMount), so no set precludes another.
+        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal" };
 
         // What each set carries: a starter jet, so a Starfighter's kind of load and little that is advanced. The wingtip
-        // rails take only the MMR-S3 and IRM-S2; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
+        // stations take the MMR-S3 and IRM-S2 on their own rails, or the tip tank; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
         // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie, the GPO-N (1.5 kt and 250 kt) and the pods, one store
         // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations the MMR-S3, IRM-S2 and
-        // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts); the Tip Tank set the tip tanks
-        // (AuthorTipTankMount). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
+        // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
         // Auger, and no other double or triple racks (a rocket pod is one store).
         private static readonly string[][] StationKeys =
         {
-            new[] { "AAM1_single", "AAM3_single" },
+            new[] { "AAM1_single", "AAM3_single", TipTank },
             new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM4_single", "AAM1_double", "AAM3_double", "AAM2_double",
                     "AGM_heavy_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external", "Rocket2_4Pod",
                     "SpecialSmokePod", "SpecialFlarePod" },
             new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2 },
-            new[] { TipTank },
         };
         // The conformal mounts' jsonKeys (art/blender/stations.py MOUNTS).
         private const string ConformalAAM1 = "baanish_icarus_AAM1_conformal", ConformalAAM3 = "baanish_icarus_AAM3_conformal",
@@ -48,13 +43,13 @@ namespace Icarus.Editor
         }
 
         // Standard loadouts by mount jsonKey, one per set in SetNames order. loadouts[1], the default, is the first: the
-        // Interceptor carries the tip tanks (the owner's call), the others their wingtip missiles.
+        // Interceptor carries the tip tanks on its wingtips (the owner's call), the others their wingtip missiles.
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
-            ("Interceptor", new[] { null, "AAM4_single", ConformalAAM2, TipTank }),
-            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", ConformalAAM2, null }),
-            ("Strike", new[] { "AAM3_single", "bomb_500_single", ConformalAAM1, null }),
-            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", ConformalAAM1, null }),
+            ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2 }),
+            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", ConformalAAM2 }),
+            ("Strike", new[] { "AAM3_single", "bomb_500_single", ConformalAAM1 }),
+            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", ConformalAAM1 }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;

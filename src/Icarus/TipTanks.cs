@@ -25,11 +25,18 @@ namespace Icarus;
 /// jet never flies with one full tank on one tip. An AI-flown Icarus drops its tanks once they are dry.
 ///
 /// Each tank's nav lenses show the state and colour of the wing lens beside them, and its skin takes the jet's livery.
+///
+/// The Wingtip hardpoints are rolled -90 and +90 degrees and the tank mount undoes the left one's roll
+/// (IcarusAuthor.TipTanks.cs), so the right tank spawns upside down. <see cref="AfterSpawnMount"/> turns that tank's rack,
+/// and with it the store, its lenses and the round it spawns, half a roll about the tank's axis, and points its eject rail
+/// outboard. It reads only the geometry the game has just built, identical on every peer, so it sends nothing.
 /// </summary>
 sealed class TipTanks : MonoBehaviour
 {
     /// <summary>The round's UnitDefinition.jsonKey (IcarusAuthor.TipTankRound).</summary>
     const string RoundKey = "baanish_icarus_tip_tank_round";
+    /// <summary>The tank mount's WeaponMount.jsonKey (IcarusAuthor.TipTank).</summary>
+    const string MountKey = "baanish_icarus_tip_tank";
     /// <summary>Fuel a tank holds, kg (art/blender/tip_tanks.py FUEL_KG: 170 US gal of jet fuel).</summary>
     internal const float FuelKg = 500f;
     /// <summary>kg/s into the internal cells: more than full afterburner burns, so the cells stay full while a tank has fuel.</summary>
@@ -49,10 +56,14 @@ sealed class TipTanks : MonoBehaviour
         new("tip-tank-release", typeof(MountedMissile), nameof(MountedMissile.Fire),
             new[] { typeof(Unit), typeof(Unit), typeof(Vector3), typeof(WeaponStation), typeof(GlobalPosition) },
             prefix: AccessTools.Method(typeof(TipTanks), nameof(BeforeFire))),
+        new("tip-tank-flip", typeof(Hardpoint), nameof(Hardpoint.SpawnMount), new[] { typeof(Aircraft), typeof(WeaponMount) },
+            postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterSpawnMount))),
         new("tip-tank-hud", typeof(CombatHUD), nameof(CombatHUD.ShowWeaponStation),
             postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterShowWeaponStation))),
     };
 
+    static readonly AccessTools.FieldRef<MountedMissile, MountedMissile.RailDirection> RailOf =
+        AccessTools.FieldRefAccess<MountedMissile, MountedMissile.RailDirection>("railDirection");
     static readonly AccessTools.FieldRef<Weapon, Hardpoint> HardpointOf = AccessTools.FieldRefAccess<Weapon, Hardpoint>("hardpoint");
     static readonly AccessTools.FieldRef<FuelTank, UnitPart> CellPart = AccessTools.FieldRefAccess<FuelTank, UnitPart>("part");
     static readonly Dictionary<WeaponInfo, bool> IsTankInfo = new();
@@ -72,7 +83,7 @@ sealed class TipTanks : MonoBehaviour
     Aircraft aircraft = null!;
     readonly List<Tank> tanks = new();
     readonly MaterialPropertyBlock paint = new();
-    float nextRefresh, nextReport;
+    float nextRefresh, nextReport, nextPose;
 
     float External => tanks.Where(t => t.Attached).Sum(t => t.Fuel);
     float ExternalCapacity => tanks.Count(t => t.Attached) * FuelKg;
@@ -126,6 +137,14 @@ sealed class TipTanks : MonoBehaviour
         }
 
         Dress();
+        if (Time.time < nextPose) return;
+        nextPose = Time.time + ReportS;
+        foreach (Tank t in tanks.Where(t => t.Attached))
+        {
+            Vector3 local = aircraft.transform.InverseTransformPoint(t.Weapon.transform.position);
+            IcarusPlugin.Log.Stage($"tip-tank-pose {t.Side} {aircraft.persistentID}", $"tip tank {t.Side} hangs at ({local.x:0.000}, {local.y:0.000}, {local.z:0.000}), " +
+                $"up {Vector3.Dot(t.Weapon.transform.up, aircraft.transform.up):0.000}, forward {Vector3.Dot(t.Weapon.transform.forward, aircraft.transform.forward):0.000}");
+        }
     }
 
     // Rearmed on the ground: a tank still hanging is full again (the game puts the full store mass back on a fired one;
@@ -303,6 +322,26 @@ sealed class TipTanks : MonoBehaviour
         skin.SetPropertyBlock(block);
     }
 
+    // The mount's rack carries the store, and the store's lenses are its children, so turning the rack turns the lot; the
+    // rack's origin is the tank's, so the tank stays where the mount put it. The round spawns where the store is, so it
+    // spawns upright too. The rail is authored for the left tip (the store's -X, outboard there); once the store is upright
+    // outboard is the store's +X on the right tip.
+    static void AfterSpawnMount(Aircraft aircraft, WeaponMount weaponMount, GameObject __result)
+    {
+        if (IcarusPlugin.FeaturesOff.Contains("tip-tank-flip") || __result == null || weaponMount == null || weaponMount.jsonKey != MountKey) return;
+        foreach (MountedMissile store in __result.GetComponentsInChildren<MountedMissile>(true))
+        {
+            Transform rack = store.transform.parent;
+            Transform root = aircraft.transform;
+            bool turned = rack != null && Vector3.Dot(store.transform.up, root.up) < 0f;
+            if (turned) rack!.RotateAround(store.transform.position, store.transform.forward, 180f);
+            Vector3 local = root.InverseTransformPoint(store.transform.position);
+            if (local.x > 0f) RailOf(store) = MountedMissile.RailDirection.Right;
+            IcarusPlugin.Log.Stage("tip-tank-flip", $"tip tank {(local.x < 0f ? "L" : "R")} {(turned ? "turned" : "kept")}: at ({local.x:0.000}, {local.y:0.000}, {local.z:0.000}), " +
+                $"up {Vector3.Dot(store.transform.up, root.up):0.000}, forward {Vector3.Dot(store.transform.forward, root.forward):0.000}, rail {RailOf(store)}", everyOccurrence: true);
+        }
+    }
+
     // A released tank falls as its own round, a fresh copy of the round prefab the game spawns on every peer
     // (Spawner.SpawnMissile), not the store that hung: it takes the livery and lens state of the wing it left, as the
     // store had them. StartMissile runs on every peer once the round knows its owner.
@@ -315,7 +354,9 @@ sealed class TipTanks : MonoBehaviour
         DressStore(IcarusSystems.Parts(aircraft), side, __instance.GetComponent<Renderer>(),
             renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
             new MaterialPropertyBlock());
-        IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery", everyOccurrence: true);
+        Vector3 spawn = aircraft.transform.InverseTransformPoint(__instance.transform.position);
+        IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery, spawned at ({spawn.x:0.000}, {spawn.y:0.000}, {spawn.z:0.000}), " +
+            $"up {Vector3.Dot(__instance.transform.up, aircraft.transform.up):0.000}", everyOccurrence: true);
     }
 
     // The tank is authored as a bomb (the game releases it like one), so the HUD would draw the bombing sight (pipper, fall

@@ -5,7 +5,7 @@
     "Path": "Terrain_naval"
   },
   "missionSettings": {
-    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva airborne over Ignus at 10,000 m MSL (x -78000, z -25000), heading 090, 650 m/s, full internal fuel and a full tip tank on each wingtip (the Tip Tank set); no opponent.",
+    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva airborne over Ignus at 10,000 m MSL (x -78000, z -25000), heading 090, 650 m/s, full internal fuel and a full tip tank on each wingtip (the Wingtip set); no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",
@@ -82,16 +82,13 @@
       "savedLoadout": {
         "Selected": [
           {
-            "Key": ""
-          },
-          {
-            "Key": ""
-          },
-          {
-            "Key": ""
-          },
-          {
             "Key": "baanish_icarus_tip_tank"
+          },
+          {
+            "Key": ""
+          },
+          {
+            "Key": ""
           }
         ]
       },

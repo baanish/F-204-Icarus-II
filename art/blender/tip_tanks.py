@@ -1,4 +1,4 @@
-"""The Starfighter tip tank: a droppable store for the Tip Tank hardpoint set, one on each wingtip in place of a missile.
+"""The Starfighter tip tank: a droppable store for the Wingtip hardpoint set, one on each wingtip in place of a missile.
 
 The F-104's tip tanks held 170 US gal each (643 L; 2,210 lb of JP-4 the pair, F-104G technical data), on a body about
 5.44 m long and 0.52 m across: the 1/4-scale replica tank of the NS Modelers F-104 kit is 1,360 mm by 130 mm. Here the
@@ -6,10 +6,13 @@ body is a tangent-ogive nose, a short cylinder over the tip chord and a longer t
 horizontal fin each side and one on top at the tail. No fin below: one there would reach the runway before the
 airframe's tail strike (Stores rule 13).
 
-The tank is a store, not part of the airframe: it lives in the Stores collection, its mesh in the mount's frame (the
-hardpoint at its origin, the aircraft root's axes, Stores rule 7), so one mount serves both tips and the body is
-symmetric across its vertical plane. The hardpoint sits on the tank's axis, outboard of the tip face by the radius less
-EMBED, so the wing's tip face runs EMBED into the tank's side along the whole tip chord, as on the real jet.
+The tank is a store, not part of the airframe: it lives in the Stores collection, its mesh in its own frame (origin on
+its axis at the middle of the cylinder, the aircraft root's axes), the body symmetric across its vertical plane. The
+Wingtip hardpoints are rolled -90 and +90 degrees, so the mount seats the tank on the hardpoint's -Y side and turns it
+upright (IcarusAuthor.TipTanks.cs). The two rolls differ by half a turn, so the one mount hangs the right tank upside
+down, and the plugin (src/Icarus/TipTanks.cs) turns it back half a roll about its axis as the mount spawns. The tank's
+axis sits outboard of the tip face by the radius less EMBED, so the wing's tip face runs EMBED into the tank's side along
+the whole tip chord, as on the real jet.
 
 The tank carries a stock nav lens on top and one underneath, each on a boss (LENSES): a 0.52 m body outboard of the
 tip blocks the wing's own lenses outboard, so the tank's lenses light the sector while it hangs, and the plugin
@@ -112,7 +115,7 @@ def tip(icarus):
 
 
 def hardpoint(icarus):
-    """The left Tip Tank hardpoint, Blender world: on the tank's axis, the cylinder's middle at the tip chord's."""
+    """The left tank's origin, Blender world: on its axis, the cylinder's middle at the tip chord's."""
     t = tip(icarus)
     return Vector((t["x"] + TANK["radius"] - EMBED, (t["le"] + t["te"]) / 2, t["z"]))
 
@@ -268,7 +271,7 @@ def build(p, mats, icarus):
 
 
 def stations_world(icarus):
-    """Both Tip Tank hardpoints' world matrices, left then right (rotation 0)."""
+    """Both tanks' world matrices as hung, left then right (rotation 0)."""
     hp = hardpoint(icarus)
     return {"L": Matrix.Translation(hp), "R": Matrix.Translation(Vector((-hp.x, hp.y, hp.z)))}
 
@@ -284,12 +287,17 @@ def volume():
 
 
 def export(to_unity, icarus):
-    """The tank for blockout.json: its key, the left hardpoint (world, Unity axes), the lens anchors and collider in the
-    mount frame (Unity axes), and its fuel and mass."""
+    """The tank for blockout.json: its key, its left origin (world, Unity axes) and that origin's offset from the left
+    Wingtip hardpoint (aircraft axes, Stores rule 5), the lens anchors and collider in the tank's frame (Unity axes), and
+    its fuel and mass."""
+    import nav_visibility
+
+    wingtip = nav_visibility.tip_stations(icarus)["L"][0]
+    offset = [round(a - float(b), 5) for a, b in zip(to_unity(hardpoint(icarus)), wingtip)]
     anchors = {}
     for name, m in lens_anchors().items():
         anchors[name] = {"position": to_unity(m.translation), "roll_deg": 180.0 if name == "bottom" else 0.0}
-    return {"key": KEY, "hardpoint_unity": to_unity(hardpoint(icarus)), "lenses": anchors,
+    return {"key": KEY, "hardpoint_unity": to_unity(hardpoint(icarus)), "wingtip_offset_unity": offset, "lenses": anchors,
             "length": TANK["length"], "radius": TANK["radius"], "capsule_radius": CAPSULE_RADIUS,
             "centre_unity": to_unity(Vector((0, TANK["length"] / 2 - nose_offset(), 0))),
             "fuel_kg": FUEL_KG, "dry_kg": DRY_KG, "volume_l": round(volume(), 1)}

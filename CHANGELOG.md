@@ -10,6 +10,7 @@
 - The leading-edge flaps also droop with angle of attack, as the Brawler's slats do: from 10 degrees, fully down by 20, on top of the low-speed droop.
 - The wing pylons carry the GPO-N nuclear bomb, at tactical (1.5 kt) or strategic (250 kt) yield, one per pylon.
 - Tip tanks have their own line art in the weapon panel and loadout menu, and selecting them no longer brings up the bombing sight.
+- The tip tanks hang from the Wingtip station beside the MMR-S3 and IRM-S2, so the loadout menu has one wingtip slot instead of two, and they release outboard from either tip. Mission files that still list a fourth Icarus loadout entry lose their tip tanks.
 - Dropping the tip tanks once they are nearly empty no longer tears the jet apart.
 - New setting, off by default: Fun > HelipadSpawn lets players spawn the Icarus on helipads, standing on its tail with the gear up, and full afterburner launches it straight up. It is for the memes and not balanced. The AI never spawns there.
 

@@ -200,7 +200,7 @@ def sector(side, sign, emitters, trees):
 
 
 def tank_lamps(icarus, lenses):
-    """With a tip tank on each Tip Tank station: its mesh as a BVH per side, and each tank's two lenses (Blender
+    """With a tip tank on each Wingtip station: its mesh as a BVH per side, and each tank's two lenses (Blender
     world vertices and the stock triangles), named after the wing lens they follow."""
     import tip_tanks
 

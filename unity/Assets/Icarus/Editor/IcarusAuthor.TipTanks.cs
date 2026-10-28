@@ -11,13 +11,17 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The tip tank store (art/blender/tip_tanks.py): a mount for the Tip Tank set whose one round is the tank, released
+        // The tip tank store (art/blender/tip_tanks.py): a mount for the Wingtip set whose one round is the tank, released
         // like a dumb bomb through the game's networked store release. Built from copies of the stock PAB-250 (bomb_250_1:
         // its prefab, definition and weapon info) and its single mount, under the Icarus's own keys, as the MiG-29 mods
         // build their drop tanks. The round has no steering and almost no warhead: it bursts on
         // impact with a puff of dust or spray, and zero effectiveness keeps the AI from choosing it as a weapon. Its fuel is
         // the plugin's (src/Icarus/TipTanks.cs): the store's mass is the full tank, which the plugin moves into the internal
         // cells as the jet burns, so a release sheds the shell and whatever fuel is left in it.
+        // The mount hangs from the rolled Wingtip hardpoint, so its rack carries the tank to the hardpoint's -Y side and
+        // turns it upright, undoing WingtipRoll. The right hardpoint's opposite roll leaves its tank upside down; the
+        // plugin turns it back half a roll about its axis as the mount spawns (src/Icarus/TipTanks.cs), and points its
+        // rail outboard.
         private const string TipTank = "baanish_icarus_tip_tank";
         // The round's definition key, which src/Icarus/TipTanks.cs finds the tanks by.
         private const string TipTankRound = "baanish_icarus_tip_tank_round";
@@ -25,8 +29,10 @@ namespace Icarus.Editor
         // area that is 0.053, and the fins bring it to 0.06, a little above a stock MMR-S3 on its rail (0.05). RCS scaled
         // the same way from the PTB-1150's 0.05. No empty mass, drag or RCS: the tip face stays clean when the tank goes.
         private const float TipTankDrag = 0.06f, TipTankRcs = 0.035f;
-        // The release: the tank slides 0.3 m straight down at 3 m/s before the round spawns, clear of the tip face, then
-        // falls outboard of every airframe part. It turns tangible 1 s after it spawns and arms at 1.5 s.
+        // The release: the tank slides 0.3 m outboard at 3 m/s before the round spawns, off the tip face, then falls clear
+        // of every airframe part. The rail runs along the store's own -X (RailDirection.Left), outboard on the left tip;
+        // the plugin sets the right tank's to Right once it has turned that tank upright. Down would carry a tank back
+        // toward the wing in a below-1 g transient. It turns tangible 1 s after it spawns and arms at 1.5 s.
         private const float TipTankEjectLength = 0.3f, TipTankEjectSpeed = 3f;
         private const string TipTankDescription = "F-104-style wingtip fuel tanks, 170 US gal (500 kg of fuel) each. The jet burns their fuel " +
             "before its internal fuel. Select them and fire to drop the pair; the fuel left in them goes with them.";
@@ -260,8 +266,9 @@ namespace Icarus.Editor
                 // The PAB-250's rack stays, hidden and without colliders, as the tank's parent: the tank bears on the tip face.
                 var rack = root.transform.Find("pylon") ?? throw new InvalidDataException("bomb_250_single has no pylon (its rack)");
                 var store = rack.Find("bomb") ?? throw new InvalidDataException("bomb_250_single has no bomb");
-                rack.localPosition = Vector3.zero;
-                rack.localRotation = Quaternion.identity;
+                var unroll = Quaternion.Inverse(Quaternion.Euler(0f, 0f, WingtipRoll));
+                rack.localPosition = unroll * Vec3(layout["wingtip_offset_unity"]);
+                rack.localRotation = unroll;
                 rack.localScale = Vector3.one;
                 rack.GetComponent<MeshRenderer>().enabled = false;
                 foreach (var box in rack.GetComponents<Collider>())
@@ -272,7 +279,7 @@ namespace Icarus.Editor
                 store.name = "tip_tank";
                 DressTipTank(store, mesh, layout);
                 var launcher = new SerializedObject(store.GetComponent(GameType("MountedMissile")));
-                Prop(launcher, "railDirection").intValue = 1; // RailDirection.Down
+                Prop(launcher, "railDirection").intValue = 3; // RailDirection.Left: outboard on the left tip
                 Num(launcher, "railLength", TipTankEjectLength);
                 Num(launcher, "railSpeed", TipTankEjectSpeed);
                 Num(launcher, "railDelay", 0f);

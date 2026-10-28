@@ -1,4 +1,4 @@
-"""Render the Icarus with a tip tank on each Tip Tank station, and check the paint the tanks take.
+"""Render the Icarus with a tip tank on each Wingtip station, and check the paint the tanks take.
 
 pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python tools/review_tip_tanks.py
 

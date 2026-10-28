@@ -1,0 +1,34 @@
+// Default loadout: the Icarus spawns with no saved loadout (icarus_default_loadout.mission.json), so the game gives it
+// the aircraft's default, the Interceptor loadout (loadouts[1]): tip tanks on the Wingtip set, an AAM-36 on the Inner
+// Wing set and an AAM-29 on the conformal one. Pass: the tank station is the first, holds both tanks and still carries fuel,
+// the next two stations are the AAM-36 and the AAM-29, and the Icarus is undamaged.
+// From the repo root: no-agentic run tests/scenarios/icarus_default_loadout.scenario.jsonc
+{
+  "mission": "icarus_default_loadout.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "mark": { "label": "start" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 50, "hold": 40, "label": "level and steady; the join notice has gone" },
+    { "act": { "station": 0 } },
+    { "check": { "all": [ { "path": "own.station.name", "eq": "Tip Tank" }, { "path": "own.station.ammo", "eq": 2 } ] }, "within": 3,
+      "label": "the first station is the Wingtip set's two tip tanks" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks (\\d+) of 1000 kg", "source": "F-204 Icarus II", "since": "start", "gt": 700 } },
+      "within": 10, "label": "both tanks hang with fuel in them: over 700 of 1,000 kg after the 40 s wait" },
+    { "act": { "station": 1 } },
+    { "check": { "path": "own.station.name", "eq": "AAM-36 Scimitar" }, "within": 3, "label": "the second station is the Inner Wing set's AAM-36" },
+    { "act": { "station": 2 } },
+    { "check": { "path": "own.station.name", "eq": "AAM-29 Scythe" }, "within": 3, "label": "the third station is the conformal AAM-29" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 22, "hdg_deg": 300, "pitch_deg": 12 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles on the orbit" },
+    { "screenshot": { "name": "default_loadout_tanks" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "gt": 0.999 } ] }, "for": 5, "label": "the Icarus is undamaged" },
+  ],
+}

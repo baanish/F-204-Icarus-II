@@ -16,6 +16,27 @@ def quat_matrix(q):
                      [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
 
 
+TURNED_MOUNTS = ("baanish_icarus_tip_tank",)  # the mounts src/Icarus/TipTanks.cs turns upright as they spawn
+
+
+def turn_upright(key, mount, rot):
+    """The mount as the game hangs it from a hardpoint of rotation rot: a TURNED_MOUNTS store that would hang upside
+    down (its capsule's up pointing down in the aircraft frame) is turned half a roll about its own forward axis through
+    its centre, as the plugin does. Mount is (mesh, colliders) in its own frame."""
+    if key not in TURNED_MOUNTS:
+        return mount
+    (verts, tris), colliders = mount
+    for c in colliders:
+        if c["kind"] != "Capsule" or c["trigger"]:
+            continue
+        frame = quat_matrix(c["rot"])
+        if (rot @ frame[:, 1])[1] >= 0:
+            break
+        axis, centre = frame[:, 2], np.asarray(c["centre"])
+        return ((centre + (verts - centre) @ (2 * np.outer(axis, axis) - np.eye(3)).T, tris), colliders)
+    return mount
+
+
 def axis_quat(axis, degrees):
     h = np.radians(degrees) / 2
     return tuple(np.asarray(axis, float) * np.sin(h)) + (float(np.cos(h)),)

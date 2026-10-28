@@ -5,7 +5,7 @@ import numpy as np
 
 from stores import meshverts
 from stores.bodies import mesh_path
-from stores.geometry import bounds, box_gap, quat_matrix, segment_distance
+from stores.geometry import bounds, box_gap, quat_matrix, segment_distance, turn_upright
 
 
 def stock_lens(index, side, anchor=None):
@@ -34,7 +34,8 @@ def check_tip_lamps(stations, lamps, mounts):
     """Rendered AABBs conservatively enclose every store triangle. Collider checks include their interiors."""
     results = []
     for hp_name, pos, rot in stations:
-        for key, (mesh, colliders) in mounts.items():
+        for key, mount in mounts.items():
+            mesh, colliders = turn_upright(key, mount, rot)
             store_bounds = bounds(pos + mesh[0] @ rot.T)
             for name, lamp in lamps:
                 gap = box_gap(bounds(lamp[0]), store_bounds)
