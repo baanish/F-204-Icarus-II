@@ -245,28 +245,80 @@ namespace Icarus.Editor
                     if (points > 255 || collider.triangles.Length / 3 > 255)
                         throw new InvalidDataException($"{collider.name} has {points} points and {collider.triangles.Length / 3} triangles; the limit is 255.");
                 }
-                (meshes.Render, meshes.Materials) = SkinFirst(meshes.Render, meshes.Materials, slots[SkinSlot]);
+                (meshes.Render, meshes.Materials) = SkinFirst(meshes.Render, meshes.Materials, slots[SkinSlot], true);
                 if (meshes.Lod1 != null)
-                    (meshes.Lod1, meshes.Lod1Materials) = SkinFirst(meshes.Lod1, meshes.Lod1Materials, slots[SkinSlot]);
+                    (meshes.Lod1, meshes.Lod1Materials) = SkinFirst(meshes.Lod1, meshes.Lod1Materials, slots[SkinSlot], false);
                 result[part.Name] = meshes;
             }
             Debug.Log($"[Icarus] stage: imported {result.Count} meshes, {result.Values.Sum(m => m.Colliders.Length)} collider pieces, {result.Values.Count(m => m.Lod1 != null)} LOD1 hulls");
             return result;
         }
 
-        // The mesh with the skin's submesh first (a copy in MeshFolder), or the mesh itself when it already is. The game
-        // sets a livery on material slot 0 only (UnitPart.SetLivery).
-        private static (Mesh Mesh, Material[] Materials) SkinFirst(Mesh mesh, Material[] materials, Material skin)
+        // The mesh with the skin's submesh first (a copy in MeshFolder), or the mesh itself when it already is and needs no
+        // twins. The game sets a livery on material slot 0 only (UnitPart.SetLivery). With bothSides, every skin triangle
+        // gets a back-facing twin in the same submesh, on the same points and UVs, as 8 of 10 stock jets have: the skin
+        // shader culls back faces, so through a damage hole or a break a one-sided skin's far wall shows the sky. The twin
+        // shares the skin's material, so the damage map cuts both sides alike. LOD1 hulls are closed and never holed.
+        private static (Mesh Mesh, Material[] Materials) SkinFirst(Mesh mesh, Material[] materials, Material skin, bool bothSides)
         {
             var first = Array.IndexOf(materials, skin);
-            if (first <= 0)
+            if (first < 0 || first == 0 && !bothSides)
                 return (mesh, materials);
             var order = new[] { first }.Concat(Enumerable.Range(0, materials.Length).Where(i => i != first)).ToArray();
             var copy = Object.Instantiate(mesh);
-            copy.name = mesh.name + "_skinfirst";
+            copy.name = mesh.name + (bothSides ? "_twosided" : "_skinfirst");
             for (var i = 0; i < order.Length; i++)
                 copy.SetTriangles(mesh.GetTriangles(order[i]), i, false);
+            if (bothSides)
+                AddBackFaces(copy);
             return (SaveMesh(copy), order.Select(i => materials[i]).ToArray());
+        }
+
+        // Appends a reversed twin of every submesh 0 triangle on copied vertices: normals turned in, and tangent w flipped so
+        // the bitangent, and with it the normal map's V direction, stays where the UVs put it.
+        private static void AddBackFaces(Mesh mesh)
+        {
+            var front = mesh.GetTriangles(0);
+            var used = front.Distinct().ToArray();
+            var twin = new Dictionary<int, int>();
+            var count = mesh.vertexCount;
+            for (var i = 0; i < used.Length; i++)
+                twin[used[i]] = count + i;
+            List<T> Extend<T>(T[] values, Func<T, T> turn) =>
+                values.Length == 0 ? new List<T>() : values.Concat(used.Select(i => turn(values[i]))).ToList();
+            var vertices = Extend(mesh.vertices, v => v);
+            var normals = Extend(mesh.normals, n => -n);
+            var tangents = Extend(mesh.tangents, t => new Vector4(t.x, t.y, t.z, -t.w));
+            var colors = Extend(mesh.colors, c => c);
+            var uvs = Enumerable.Range(0, 8).Select(channel =>
+            {
+                var attribute = UnityEngine.Rendering.VertexAttribute.TexCoord0 + channel;
+                if (mesh.HasVertexAttribute(attribute) && mesh.GetVertexAttributeDimension(attribute) != 2)
+                    throw new InvalidDataException($"{mesh.name}: UV channel {channel} isn't 2D");
+                var list = new List<Vector2>();
+                mesh.GetUVs(channel, list);
+                return Extend(list.ToArray(), uv => uv);
+            }).ToArray();
+            var submeshes = Enumerable.Range(0, mesh.subMeshCount).Select(i => mesh.GetTriangles(i)).ToArray();
+            if (vertices.Count > ushort.MaxValue)
+                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            mesh.SetVertices(vertices);
+            if (normals.Count > 0) mesh.SetNormals(normals);
+            if (tangents.Count > 0) mesh.SetTangents(tangents);
+            if (colors.Count > 0) mesh.SetColors(colors);
+            for (var channel = 0; channel < uvs.Length; channel++)
+                if (uvs[channel].Count > 0)
+                    mesh.SetUVs(channel, uvs[channel]);
+            var back = new int[front.Length];
+            for (var i = 0; i < front.Length; i += 3)
+            {
+                back[i] = twin[front[i]];
+                back[i + 1] = twin[front[i + 2]];
+                back[i + 2] = twin[front[i + 1]];
+            }
+            submeshes[0] = front.Concat(back).ToArray();
+            for (var i = 0; i < submeshes.Length; i++)
+                mesh.SetTriangles(submeshes[i], i, false);
         }
 
         private static void ConfigureModelImporter(string path, Dictionary<string, Material> slots)

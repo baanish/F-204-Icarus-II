@@ -38,6 +38,7 @@ namespace Icarus.Editor
                 }
             }
             if (skinRenderers.Length == 0) p.Add("no skin renderers");
+            var drawn = 0;
             foreach (var renderer in renderers.Where(r => r.name.Contains("_detail_")))
                 p.Add("unmerged detail renderer: " + renderer.name);
             foreach (var renderer in skinRenderers)
@@ -73,6 +74,15 @@ namespace Icarus.Editor
                         p.Add(renderer.name + " skin UV outside [0,1]");
                         break;
                     }
+                // SkinFirst twins every skin triangle so a hole or a break shows the inside of the skin, not the sky; LOD1
+                // hulls are closed and never holed.
+                var skin = mesh.GetIndices(skinSlot);
+                if (!b.Lod1.Contains(renderer))
+                {
+                    if (2 * OneSided(mesh.vertices, skin).Length != skin.Length)
+                        p.Add($"{renderer.name}: {OneSided(mesh.vertices, skin).Length / 3} of {skin.Length / 3} skin triangles lack a back-facing twin");
+                    drawn += skin.Length / 3;
+                }
             }
             foreach (var property in new[] { "_Basecolor", "_Livery", "_Normal", "_AO", "_Metallic", "_BasecolorDmg", "_NormalDmg" })
             {
@@ -141,8 +151,15 @@ namespace Icarus.Editor
                 if (3 * spread < 2 * (tris.Length / 3))
                     p.Add($"{hull.name}: {spread} of {tris.Length / 3} skin triangles span the atlas; the rest sample a point");
             }
-            return $"{skinRenderers.Length} registered skin renderers, four Primeva liveries, exterior LOD0 {count} renderers, " +
+            return $"{skinRenderers.Length} registered skin renderers, {drawn} skin triangles drawn from both sides, four Primeva liveries, exterior LOD0 {count} renderers, " +
                 $"{b.Lod1.Count} LOD1 hulls on their parts' paint ({skinHulls} on the skin)";
+        }
+
+        // Triangles of a renderer's mesh with a two-sided skin counted once (OneSided); -1 without a mesh.
+        private static int OneSidedCount(Component c)
+        {
+            var mesh = c.GetComponent<MeshFilter>()?.sharedMesh;
+            return mesh == null ? -1 : OneSided(mesh.vertices, mesh.triangles).Length / 3;
         }
     }
 }

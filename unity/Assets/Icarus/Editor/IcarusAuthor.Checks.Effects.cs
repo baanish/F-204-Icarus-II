@@ -28,7 +28,7 @@ namespace Icarus.Editor
             {
                 var fairing = b.Parts["wing_skin_" + side].transform.Find("light_nav_mount_" + side);
                 if (fairing == null || fairing.GetComponent<MeshRenderer>()?.sharedMaterial != b.Skin
-                    || fairing.GetComponent<MeshFilter>()?.sharedMesh?.triangles.Length / 3 != 44)
+                    || OneSidedCount(fairing) != 44)
                     p.Add("nav fairings must have 44 triangles per wing and share its livery material");
                 foreach (var (name, owner) in FormationLenses(side).Concat(NavLenses(side).Select(l => (l.Name, "wing_skin_" + side))))
                 {
@@ -121,7 +121,7 @@ namespace Icarus.Editor
             }
             var tailFairing = stabilatorHinge.Find("light_tail_fairing");
             if (tailFairing == null || tailFairing.GetComponent<MeshRenderer>()?.sharedMaterial != b.Skin
-                || tailFairing.GetComponent<MeshFilter>()?.sharedMesh?.triangles.Length / 3 != 32)
+                || OneSidedCount(tailFairing) != 32)
                 p.Add("rear nav fairing must use 32 triangles and stabilator paint, on the stabilator's turning hinge");
             if (b.Root.GetComponentsInChildren<Transform>(true).Any(t => t.name.StartsWith("light_beacon_", StringComparison.Ordinal)
                 || t.name.StartsWith("antenna_", StringComparison.Ordinal))) p.Add("beacon or separate antenna remains");

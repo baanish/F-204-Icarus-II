@@ -13,9 +13,11 @@ import bpy
 
 import build_icarus as bi
 
-# Global limits: (target, hard limit), triangles.
-EXTERIOR = (85000, 100000)  # exterior LOD0, internals and cockpit proxies included, cockpit_view renderers excluded
-SKIN_MAX = 50000
+# Global limits: (target, hard limit), triangles drawn. The Unity author draws every skin triangle from both sides
+# (IcarusAuthor.SkinFirst gives each a back-facing twin, as stock jets have), so these count the skin twice; module BUDGETs
+# count the triangles modelled here, once.
+EXTERIOR = (135000, 140000)  # exterior LOD0, internals and cockpit proxies included, cockpit_view renderers excluded
+SKIN_MAX = 90000
 TRIM_SHARE = (0.27, 0.58)  # jet_mechanical and aircraft_structure, of exterior LOD0
 TRIMS = ("jet_mechanical", "aircraft_structure")
 COCKPIT_MAX = 35000
@@ -24,6 +26,11 @@ LOD1_PER_HULL, LOD1_TOTAL = 56, 760
 
 def tris(obj):
     return sum(len(f.vertices) - 2 for f in obj.data.polygons)
+
+
+def skin_tris(obj):
+    names = [m.name if m else "" for m in obj.data.materials]
+    return sum(len(f.vertices) - 2 for f in obj.data.polygons if names and names[f.material_index] == "Icarus_Body")
 
 
 def meshes(icarus):
@@ -61,8 +68,12 @@ def over_caps(icarus, budget):
 def report(icarus):
     exterior = [o for o in meshes(icarus) if not is_cockpit(o)]
     cockpit = [o for o in meshes(icarus) if is_cockpit(o)]
-    lines = ["budget: exterior LOD0 %d triangles on %d renderers; cockpit %d on %d"
-             % (sum(map(tris, exterior)), len(exterior), sum(map(tris, cockpit)), len(cockpit))]
+    hulls = [o for o in bpy.data.collections["LOD1"].objects] if "LOD1" in bpy.data.collections else []
+    colliders = [o for o in bpy.data.collections["Colliders"].objects] if "Colliders" in bpy.data.collections else []
+    twins = sum(skin_tris(o) for o in exterior if o not in hulls and o not in colliders)
+    lines = ["budget: exterior LOD0 %d triangles drawn (%d modelled, %d skin twins) on %d renderers; cockpit %d on %d"
+             % (sum(map(tris, exterior)) + twins, sum(map(tris, exterior)), twins, len(exterior),
+                sum(map(tris, cockpit)), len(cockpit))]
 
     per_mat = {}
     for o in exterior:
@@ -73,7 +84,7 @@ def report(icarus):
     total = max(1, sum(per_mat.values()))
     lines.append("materials (%d static): %s" % (len(per_mat), ", ".join(
         "%s %d" % (n, c) for n, c in sorted(per_mat.items(), key=lambda kv: -kv[1]))))
-    skin = per_mat.get("Icarus_Body", 0)
+    skin = per_mat.get("Icarus_Body", 0) + twins
     trim = sum(per_mat.get(n, 0) for n in TRIMS)
     lines.append("skin %d (limit %d)%s; trim share %.0f%% (%.0f to %.0f%%)%s" % (
         skin, SKIN_MAX, " OVER" if skin > SKIN_MAX else "", 100 * trim / total, 100 * TRIM_SHARE[0],
@@ -93,8 +104,6 @@ def report(icarus):
                  "cap %d (hard limit %d)" % (sums[False][0], sums[False][1], EXTERIOR[0], EXTERIOR[1],
                                             sums[True][0], sums[True][1], COCKPIT_MAX))
 
-    hulls = [o for o in bpy.data.collections["LOD1"].objects] if "LOD1" in bpy.data.collections else []
-    colliders = [o for o in bpy.data.collections["Colliders"].objects] if "Colliders" in bpy.data.collections else []
     lines.append("LOD1 %d hulls, %d triangles, largest %d (limits %d per hull, %d total); colliders %d hulls, %d triangles"
                  % (len(hulls), sum(map(tris, hulls)), max(map(tris, hulls), default=0), LOD1_PER_HULL, LOD1_TOTAL,
                     len(colliders), sum(map(tris, colliders))))

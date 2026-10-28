@@ -221,11 +221,28 @@ namespace Icarus.Editor
             return Quaternion.LookRotation(along, normal);
         }
 
+        // A mesh's triangles less the back-facing twins SkinFirst gives the skin, so a two-sided surface counts once: a
+        // triangle is dropped when the same three points, wound the other way, came before it.
+        private static int[] OneSided(Vector3[] v, int[] t)
+        {
+            var seen = new HashSet<(Vector3, Vector3, Vector3)>();
+            var kept = new List<int>();
+            for (var i = 0; i < t.Length; i += 3)
+            {
+                Vector3 a = v[t[i]], b = v[t[i + 1]], c = v[t[i + 2]];
+                if (seen.Contains((a, c, b)) || seen.Contains((c, b, a)) || seen.Contains((b, a, c)))
+                    continue;
+                seen.Add((a, b, c));
+                kept.AddRange(new[] { t[i], t[i + 1], t[i + 2] });
+            }
+            return kept.ToArray();
+        }
+
         // Planform of a thin closed mesh: half its surface.
         private static float PlanformArea(Mesh mesh)
         {
             var v = mesh.vertices;
-            var t = mesh.triangles;
+            var t = OneSided(v, mesh.triangles);
             var area = 0f;
             for (var i = 0; i < t.Length; i += 3)
                 area += Vector3.Cross(v[t[i + 1]] - v[t[i]], v[t[i + 2]] - v[t[i]]).magnitude / 2;
@@ -236,7 +253,7 @@ namespace Icarus.Editor
         private static float SideArea(Mesh mesh, Transform t)
         {
             var v = mesh.vertices.Select(t.TransformVector).ToArray();
-            var tris = mesh.triangles;
+            var tris = OneSided(mesh.vertices, mesh.triangles);
             var area = 0f;
             for (var i = 0; i < tris.Length; i += 3)
                 area += Mathf.Abs(Vector3.Cross(v[tris[i + 1]] - v[tris[i]], v[tris[i + 2]] - v[tris[i]]).x) / 2;
@@ -353,7 +370,7 @@ namespace Icarus.Editor
         private static Vector3 AreaCentroid(Transform t, Mesh mesh)
         {
             var v = WorldVertices(t, mesh);
-            var tris = mesh.triangles;
+            var tris = OneSided(mesh.vertices, mesh.triangles);
             var sum = Vector3.zero;
             var area = 0f;
             for (var i = 0; i < tris.Length; i += 3)
