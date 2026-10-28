@@ -476,7 +476,11 @@ def restore_inventory(bake, output):
         manifest = rebind(original)
         for dependency, expected in manifest['input_sha256'].items():
             actual = sha256(dependency)
-            if folder == current and dependency in geometry_paths and actual != expected:
+            # current/ is a derived cache of the hash-guarded native pack and the bake: a map there that differs (a
+            # texture-source ZIP older than this manifest) is rebuilt like a geometry change, not trusted or refused.
+            # Exact hashes cannot pin it across machines: the bake and the mapping differ in float32 last bits.
+            if folder == current and actual != expected and (
+                    dependency in geometry_paths or Path(dependency).resolve().parent == current.resolve()):
                 geometry_changed = True
                 continue
             if actual != expected and dependency not in changed_metadata:

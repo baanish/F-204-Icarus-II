@@ -156,6 +156,29 @@ class SourceAtlasMappingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'dependency differs'):
                 restore_inventory(bake, output)
 
+    def test_restore_rebuilds_a_current_map_older_than_its_manifest(self):
+        # A texture-source ZIP older than the committed manifest holds older current/ maps: rebuilt, not refused.
+        root = Path(__file__).resolve().parents[2] / '.cache/source-atlas-tests' / uuid.uuid4().hex
+        root.mkdir(parents=True)
+        self.addCleanup(shutil.rmtree, root)
+        sources = root / 'art/textures/generated'
+        native, current = sources / 'full/source-atlas/native', sources / 'full/source-atlas/current'
+        native.mkdir(parents=True)
+        current.mkdir()
+        bake = root / '.cache/review/bake'
+        bake.mkdir(parents=True)
+        (bake / 'geometry_maps.npz').write_bytes(b'unchanged prepared geometry')
+        stale = current / 'aileron_L_visible.source-transfer.npz'
+        stale.write_bytes(b'map from an older pack')
+        (native / 'parts.json').write_text(json.dumps({'input_sha256': {}, 'groups': {}}), encoding='utf-8')
+        (current / 'parts.json').write_text(json.dumps({'input_sha256': {
+            (bake / 'geometry_maps.npz').as_posix(): sha256(bake / 'geometry_maps.npz'),
+            stale.as_posix(): '0' * 64}}), encoding='utf-8')
+        with patch('source_atlas_mapping.ROOT', root), patch('source_atlas_mapping.SOURCE', sources), \
+                patch('source_atlas_mapping.rebuild_inventory', return_value={'rebuilt': True}) as rebuild:
+            self.assertEqual(restore_inventory(bake, root / '.cache/review/full'), {'rebuilt': True})
+        rebuild.assert_called_once()
+
     def test_new_door_donors_and_mirror_are_explicit(self):
         names = ['gear_door_N_L_visible', 'gear_door_main_L_visible']
         self.assertEqual(donor_part('gear_door_N2_L_visible', names), ('gear_door_N_L_visible', False))
