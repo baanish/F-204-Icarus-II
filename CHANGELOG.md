@@ -6,6 +6,7 @@
 - The aircraft menu picks the Bare Metal livery for the Icarus by default, on both sides, instead of a random one.
 - The skin is drawn from both sides, as on most stock jets: a damage hole or a broken section shows the inside of the skin instead of the sky through the far wall.
 - The leading-edge flaps also droop with angle of attack, as the Brawler's slats do: from 10 degrees, fully down by 20, on top of the low-speed droop.
+- The wing pylons carry the GPO-N nuclear bomb, at tactical (1.5 kt) or strategic (250 kt) yield, one per pylon.
 - New setting, off by default: Fun > HelipadSpawn lets players spawn the Icarus on helipads, standing on its tail with the gear up, and full afterburner launches it straight up. It is for the memes and not balanced. The AI never spawns there.
 
 ## 0.1.0 (2026-10-27)

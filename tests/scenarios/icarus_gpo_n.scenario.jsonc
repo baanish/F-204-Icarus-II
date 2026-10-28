@@ -1,0 +1,28 @@
+// GPO-N (1.5kt) on the wing pylon: the Icarus flies level at 10,000 m in a mission that allows nuclear weapons and
+// drops one bomb from its Inner Wing pylons. The bomb leaves the station, falls as a live nuclearBomb1 contact, and is
+// gone again within a minute, which is the game's own detonation (no log line names it, so the fireball itself is read
+// from a screenshot).
+// From the repo root: no-agentic run tests/scenarios/icarus_gpo_n.scenario.jsonc
+{
+  "mission": "icarus_gpo_n.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 240,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 20, "hold": 15, "label": "level and steady" },
+    { "act": { "station": 0 } },
+    { "check": { "all": [ { "path": "own.station.name", "eq": "GPO-N (1.5kt)" }, { "path": "own.station.ammo", "eq": 2 } ] }, "within": 3, "label": "one GPO-N on each pylon" },
+    { "time": { "scale": 4 } },
+    { "act": { "fire": 0.2 } },
+    { "check": { "path": "own.station.ammo", "eq": 1 }, "within": 3, "label": "one bomb left its pylon" },
+    { "wait": { "path": "contacts.count", "gt": 0 }, "timeout": 10, "label": "the bomb falls as a live contact" },
+    { "wait": { "path": "contacts.count", "eq": 0 }, "timeout": 120, "label": "the bomb detonates and is gone" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "gt": 0.5 } ] }, "label": "the Icarus is still flying" },
+  ],
+}

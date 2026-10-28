@@ -21,7 +21,7 @@ namespace Icarus.Editor
 
         // What each set carries: a starter jet, so a Starfighter's kind of load and little that is advanced. The wingtip
         // rails take only the MMR-S3 and IRM-S2; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
-        // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie and the pods, one store
+        // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie, the GPO-N (1.5 kt and 250 kt) and the pods, one store
         // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations the MMR-S3, IRM-S2 and
         // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts); the Tip Tank set the tip tanks
         // (AuthorTipTankMount). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
@@ -30,7 +30,7 @@ namespace Icarus.Editor
         {
             new[] { "AAM1_single", "AAM3_single" },
             new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM4_single", "AAM1_double", "AAM3_double", "AAM2_double",
-                    "AGM_heavy_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "Rocket2_4Pod",
+                    "AGM_heavy_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external", "Rocket2_4Pod",
                     "SpecialSmokePod", "SpecialFlarePod" },
             new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2 },
             new[] { TipTank },
