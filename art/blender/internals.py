@@ -65,14 +65,17 @@ INTERNALS = {
                "thickness": 0.008, "mass_kg_each": 9},
     "stringers": {"column_step": 6, "size": (0.015, 0.025), "tolerance": 0.01,
                   "longerons": (12, 36, 60, 84), "longeron_size": (0.03, 0.04),
-                  "runs": ((1.6, 5.57), (5.92, 10.97), (11.03, 14.8))},
-    # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0 and the tail end at 14.8), so
+                  "runs": ((1.6, 5.57), (5.92, 10.97), (11.03, 12.97), (13.075, 14.8))},
+    # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0, TAIL_START 13.0 and the tail end
+    # at 14.8), so
     # a section that comes away shows a closed, shaded face instead of open frames against the sky. Each is cut clear
     # of whatever runs through it and has a torn rim. Stations (centres): 5.57 and 10.97 ahead of their joints,
-    # 11.03 behind its joint, 14.76 inside the last frame; the mid section's front wall stands at 5.92, behind the
-    # aux cell (to 5.90), which leaves with the forward section and would hole a wall at the joint down to its floor.
+    # 11.03 behind its joint, 12.97 ahead of the tail cone's and 13.075 behind it, clear of frame 19's flange (13.0 to
+    # 13.05, on fuselage_aft) by the wall's clearance, 14.76 inside the last frame; the mid section's front wall stands
+    # at 5.92, behind the aux cell (to 5.90), which leaves with the forward section and would hole a wall at the joint
+    # down to its floor.
     # The radome break at 1.6 needs none: the nose avionics box fills the section there.
-    "bulkheads": {"at": (5.57, 5.92, 10.97, 11.03, 14.76), "thickness": 0.02, "inset": 0.035, "points": 20,
+    "bulkheads": {"at": (5.57, 5.92, 10.97, 11.03, 12.97, 13.075, 14.76), "thickness": 0.02, "inset": 0.035, "points": 20,
                   "tear": (0.0, 0.6, 0.15, 1.0, 0.35, 0.0, 0.8, 0.25, 0.5, 0.05), "tear_depth": 0.03,
                   "clearance": 0.015, "hole_points": 12},
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)

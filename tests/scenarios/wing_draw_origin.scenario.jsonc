@@ -1,8 +1,9 @@
 // Drawn wing seams near the world origin: the Icarus, full tip tanks and fuel, starts 2 km west of the origin at 3,000 m and
 // 300 m/s (icarus_ignus_origin_tanks.mission.json), and the hold turns it hard through 180 degrees and back, past 8 g,
 // within a few km of the origin. src/Icarus/WingSkinFollow.cs draws each wing part on the part it hangs from while they
-// are jointed; its "wing-skin-<piece>" and "wing-draw-<part>" lines give each part's drawn and physical offset off its
-// rest in the inner box's frame, with ulp_mm, the float32 spacing of world positions there, a fraction of a millimetre
+// are jointed, and the tail cone on the aft core with the afterburner and nozzle on it; its "wing-skin-<piece>",
+// "wing-draw-<part>" and "tail-draw-<part>" lines give each part's drawn and physical offset off its rest in the frame
+// of the part its seam meets (the inner box, the aft core, the tail cone), with ulp_mm, the float32 spacing of world positions there, a fraction of a millimetre
 // here against 7.8 mm 77 km out. tools/flight_peaks.py reads the peaks.
 // From the repo root: no-agentic run tests/scenarios/wing_draw_origin.scenario.jsonc
 {

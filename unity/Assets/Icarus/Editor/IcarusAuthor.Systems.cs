@@ -51,7 +51,7 @@ namespace Icarus.Editor
                 var point = points.GetArrayElementAtIndex(i);
                 var t = (Transform)point.FindPropertyRelative("transform").objectReferenceValue;
                 var side = t.name.EndsWith("L", StringComparison.Ordinal) ? -1f : 1f;
-                var skin = b.Parts[side < 0 ? "skin_aft_L" : "skin_aft_R"].GetComponent<MeshRenderer>().bounds;
+                var skin = BoundsOf(FamilyVertices(b, side < 0 ? "skin_aft_L" : "skin_aft_R"));
                 t.SetParent(b.Parts["fuselage_aft"].transform, true);
                 t.SetPositionAndRotation(new Vector3(side < 0 ? skin.min.x : skin.max.x, skin.min.y + 0.15f, skin.center.z),
                     Quaternion.LookRotation(new Vector3(side * 0.8f, -0.55f, -0.25f), Vector3.up));

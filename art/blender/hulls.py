@@ -57,7 +57,7 @@ LOD1_TRIS = (("skin_", 40), ("radome", 32), ("nozzle", 32), ("dorsal_cover", 24)
 LOD1_DEFAULT = 12
 LOD1_PER_HULL, LOD1_TOTAL = 56, 780
 # Parts inside the skin's LOD1 hulls, which get none of their own.
-LOD1_HIDDEN = ("fuselage_", "wing_spar_", "fin_spar", "engine_core", "cockpit_cell", "radar_tray", "avionics_tray",
+LOD1_HIDDEN = ("fuselage_", "wing_spar_", "fin_spar", "engine_core", "engine_afterburner", "cockpit_cell", "radar_tray", "avionics_tray",
                "fuel_", "intake_duct_")
 COLLIDER_TRIS = 24  # a collider piece of a part with no LOD1 hull
 # Thin skin patches: at most PATCHES a panel (more only where the trough's cuts make them) of PATCH_TRIS triangles,
@@ -74,7 +74,7 @@ BODY_AXIS_Z = 0.3  # height of the axis body patches split by angle around
 # crossing it (Unity's A14 allows 0.005 m). Away from the stores there is no trough for a patch to span.
 SPLIT_NEAR, SPLIT_SLACK = 0.05, 0.004
 DUCT_CHUNKS = 6
-STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft")
+STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail")
 # A core's frames as SHELLS pieces round its axis, each cut SHELL_GAP clear of the other parts' hulls: past A12's
 # 0.005 m, so the Unity author braces no part to a shell. The parts jointed to the core may overlap it (no brace),
 # except the cockpit and the gear legs: A9's seat path and A8's ground casts run through them.
@@ -616,7 +616,7 @@ def rebuild_pieces(made):
     and a LOD1 hull with its family's LOD1_TRIS shared by skin area (LOD1_DEFAULT at least). A structure core that a
     piece hangs on in place of the family's own parent, or that loses such a piece, has its shells carved again from
     SHELL_GROUPS, clear of the parts round it now (a core's shells keep clear only of parts not jointed to it)."""
-    from parts import full_tree
+    from parts import LATE_PARENTS, full_tree
     from uvs import SKIN
 
     colliders, lods = bpy.data.collections["Colliders"], bpy.data.collections["LOD1"]
@@ -633,6 +633,9 @@ def rebuild_pieces(made):
                 attach(piece.name + "_lod1", lod, piece, lods)
             if piece.get("mass_kg", 0) > 0:
                 attach_colliders(piece, patches(piece, report), colliders)
+    for name, parent in LATE_PARENTS.items():  # a part moved after the unwrap leaves one core's joint for another's
+        if name in full_tree() and full_tree()[name][0] != parent:
+            cores.update({full_tree()[name][0], parent} & set(STRUCTURE_CORES))
     for name in sorted(cores):
         core = bpy.data.objects[name]
         for c in [c for c in core.children if c.name in colliders.objects]:

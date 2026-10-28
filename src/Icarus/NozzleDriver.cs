@@ -60,7 +60,7 @@ sealed class NozzleDriver : MonoBehaviour
         Turbojet? engine = IcarusSystems.Engine(GetComponent<Aircraft>());
         nozzle = engine == null ? null : IcarusSystems.Nozzle(engine);
         thrust = nozzle != null ? nozzle.transform : null;
-        ring = thrust != null && thrust.parent != null ? thrust.parent.Find("nozzle_vector") : null;
+        ring = thrust != null && thrust.parent != null ? Under(thrust.parent, "nozzle_vector") : null;
         if (ring == null || thrust == null || nozzle == null)
         {
             IcarusPlugin.Log.Error($"nozzle driver: missing {(ring == null ? "nozzle_vector " : "")}{(thrust == null ? "thrust_vector " : "")}{(nozzle == null ? "JetNozzle" : "")}; petals stay at their dry pose");
@@ -90,10 +90,14 @@ sealed class NozzleDriver : MonoBehaviour
         IcarusPlugin.Log.Stage("nozzle", $"nozzle driver on {name}: {petals.Count} petals and seals, {links.Count} links, {rams.Count} rams");
     }
 
+    // A child of the nozzle part, or of the mover WingSkinFollow.cs draws the part's renderers under while the nozzle
+    // draws on the tail cone.
+    static Transform? Under(Transform part, string name) => part.Find(name) ?? part.Find(part.name + "_drawn/" + name);
+
     void FindActuation()
     {
         Transform part = thrust!.parent;
-        sync = part.Find("nozzle_sync_ring");
+        sync = Under(part, "nozzle_sync_ring");
         if (sync == null)
         {
             IcarusPlugin.Log.Error("nozzle driver: missing nozzle_sync_ring; the actuation stays at its dry pose");
@@ -120,7 +124,7 @@ sealed class NozzleDriver : MonoBehaviour
             }
             else if (child.name.StartsWith("nozzle_ram_") && child.name.EndsWith("_rod"))
             {
-                Transform? cylinder = part.Find(child.name.Substring(0, child.name.Length - "_rod".Length) + "_cylinder");
+                Transform? cylinder = sync.parent.Find(child.name.Substring(0, child.name.Length - "_rod".Length) + "_cylinder");
                 if (cylinder != null) rams.Add((Rest(cylinder, child.position), Rest(child, cylinder.position)));
             }
         }
@@ -191,7 +195,10 @@ sealed class NozzleDriver : MonoBehaviour
         float afterburner = max > 0f ? Mathf.Clamp01(nozzle.GetTotalThrust() / max) : 0f;
         float open = afterburner * Tuning.NozzleOpenDegrees;
         // The exhaust leaves along -Z of the ring at rest; its sideways part, in degrees, is how far the exit points away.
-        Vector3 exhaust = ring.InverseTransformDirection(-thrust.forward);
+        // Read in the ring's frame on the nozzle's body, not under the mover that draws it on the tail cone, so only the
+        // vector deflects the petals.
+        Quaternion onBody = ring.parent == thrust.parent ? ring.rotation : thrust.parent.rotation * ring.localRotation;
+        Vector3 exhaust = Quaternion.Inverse(onBody) * -thrust.forward;
         Vector2 deflection = new Vector2(exhaust.x, exhaust.y) * Mathf.Rad2Deg;
         foreach (Petal petal in petals)
         {

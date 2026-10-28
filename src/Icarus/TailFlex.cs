@@ -14,7 +14,9 @@ namespace Icarus;
 /// whichever is nearer; a joint breaks at 1), which the full_stick scenarios read. A "wing-crank-<side>" line gives how far
 /// the outer wing box's body has carried its tip (where its wingtip station was made) in the inner box's frame from where
 /// the joints made it, the physical seam the two boxes meet at, its peak over that second in mm, and the peak of the
-/// outer box's joint against its limit. WingSkinFollow.cs draws the seam shut while the boxes are jointed.
+/// outer box's joint against its limit. WingSkinFollow.cs draws the seam shut while the boxes are jointed. A "thrust-line"
+/// line gives the nozzle's body's peak turn against the root over that second, exact for small turns: the JetNozzle rides
+/// that body, so this is how far the thrust line has turned off its authored axis before vectoring.
 /// </summary>
 static class TailFlex
 {
@@ -64,6 +66,9 @@ sealed class TailFlexProbe : MonoBehaviour
     // inner box's frame, and the tip's peak movement since the last line, mm.
     (string Side, AeroPart Outer, AeroPart Inner, Vector3 Tip, Vector3 Home)[] cranks = null!;
     float[] crankPeak = null!;
+    AeroPart? nozzle;
+    Quaternion nozzleRest;
+    float nozzlePeak;
 
     internal void Begin(Aircraft owner, AeroPart[] tail, AeroPart[] all)
     {
@@ -79,6 +84,9 @@ sealed class TailFlexProbe : MonoBehaviour
         cranks = found.ToArray();
         crankPeak = new float[cranks.Length];
         aircraft = owner;
+        nozzle = all.FirstOrDefault(p => p.name == "nozzle");
+        if (nozzle != null) nozzleRest = Quaternion.Inverse(aircraft.rb.rotation) * nozzle.rb.rotation;
+        nozzlePeak = 0f;
         parts = tail;
         rest = parts.Select(p => Quaternion.Inverse(aircraft.rb.rotation) * p.rb.rotation).ToArray();
         joints = IcarusSystems.Parts(aircraft).SelectMany(p => p.Joints.Where(j => j.joint != null)
@@ -121,6 +129,12 @@ sealed class TailFlexProbe : MonoBehaviour
             crankPeak[i] = Mathf.Max(crankPeak[i], (c.Inner.transform.InverseTransformPoint(c.Outer.transform.TransformPoint(c.Tip)) - c.Home).magnitude * 1000f);
         }
 
+        if (nozzle != null && !nozzle.IsDetached())
+        {
+            Quaternion d = Quaternion.Inverse(nozzleRest) * Quaternion.Inverse(aircraft.rb.rotation) * nozzle.rb.rotation;
+            nozzlePeak = Mathf.Max(nozzlePeak, 2f * Mathf.Atan2(new Vector3(d.x, d.y, d.z).magnitude, Mathf.Abs(d.w)) * Mathf.Rad2Deg);
+        }
+
         gPeak = Mathf.Max(gPeak, Mathf.Abs(aircraft.gForce));
         if (Time.time < reportAt) return;
         reportAt = Time.time + ReportIntervalS;
@@ -138,6 +152,9 @@ sealed class TailFlexProbe : MonoBehaviour
                 $"tip_mm={crankPeak[i]:0.00} joint={(j < 0 ? float.NaN : jointPeak[j]):0.00}; peaks over 1 s, up to {gPeak:0.0} g");
         }
         System.Array.Clear(crankPeak, 0, crankPeak.Length);
+        if (nozzle != null)
+            IcarusPlugin.Log.Stage("thrust-line", nozzle.IsDetached() ? "nozzle detached" : $"turn_deg={nozzlePeak:0.000}; peaks over 1 s, up to {gPeak:0.0} g");
+        nozzlePeak = 0f;
         System.Array.Clear(jointPeak, 0, jointPeak.Length);
         System.Array.Clear(peak, 0, peak.Length);
         System.Array.Clear(roll, 0, roll.Length);

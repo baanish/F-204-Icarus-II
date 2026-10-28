@@ -45,13 +45,14 @@ BUDGET = {
     # The fin-tip fairing, a blade 1.85 m long as on the F-104, takes about 1,030 of the fins' 2,340.
     "fins": {"target": 2340, "cap": 2340, "objects": ("fin_skin", "ventral_fin")},
     # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole, and the speed
-    # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_aft) about 570, from the skin's. The
-    # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more.
-    "structure_cores": {"target": 14700, "cap": 14800, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft")},
+    # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_tail) about 570, from the skin's. The
+    # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more. The
+    # walls either side of the tail cone's break and the stringer runs parted there take about 300 (15,106 measured).
+    "structure_cores": {"target": 15100, "cap": 15200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
     # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160.
     "fuel_cells": {"target": 3000, "cap": 3200, "objects": ("fuel_",)},
-    "engine": {"target": 600, "cap": 700, "objects": ("engine_core",)},
+    "engine": {"target": 600, "cap": 700, "objects": ("engine_core", "engine_afterburner")},
     "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
 }
 BAY_CUT_GROW = 0.003  # structure cut back this far beyond each gear well box (bay_cutters)
@@ -76,8 +77,10 @@ TREE = {
     "avionics_tray": ("fuselage_forward", 100),
     "canopy": ("cockpit_cell", 60),
     "fuselage_aft": ("fuselage_mid", 400),
+    "fuselage_tail": ("fuselage_aft", 0),  # its share of fuselage_aft's 400 (MOMENT_SPLITS)
     "engine_core": ("fuselage_aft", 1150),
-    "nozzle": ("engine_core", 130),
+    "engine_afterburner": ("engine_core", 0),  # its share of engine_core's 1,150
+    "nozzle": ("engine_core", 130),  # the afterburner's in a split build (LATE_PARENTS)
     "intake_duct_L": ("fuselage_mid", 100),
     "intake_duct_R": ("fuselage_mid", 100),
     "wing_spar_L": ("fuselage_mid", 230),
@@ -116,7 +119,7 @@ TREE = {
     "gear_door_main_R": ("fuselage_mid", 0),
     "dorsal_cover": ("fuselage_mid", 40),
     # Not in the plan's 41: small parts the plan folds into their parents' budgets.
-    "speed_brake_L": ("fuselage_aft", 0),
+    "speed_brake_L": ("fuselage_aft", 0),  # the tail cone's in a split build (LATE_PARENTS)
     "speed_brake_R": ("fuselage_aft", 0),
     "ventral_fin": ("fuselage_aft", 0),
 }
@@ -128,6 +131,9 @@ ROLE = {"fuel_": "fuel_tank", "skin_": "skin", "dorsal": "skin", "wing_skin": "s
 # Fuselage skin panels by station: radome ahead of RADOME_END, then forward, mid and aft panels per side; the
 # dorsal cover is the spine strip between DORSAL s range above DORSAL_Z.
 RADOME_END, FORWARD_END, MID_END = 1.6, 5.6, 11.0
+# The tail cone's break, on frame 19 and the butt joint art/textures/panels.py draws there: fuselage_aft ahead of it,
+# fuselage_tail behind, and the aft skin panels part there (SPLITS).
+TAIL_START = 13.0
 # The structure cores' origins, Blender world space, pinned rather than read off their bounds (recentre): the
 # hardpoints are placed relative to fuselage_mid's (Unity A5 checks them against measured positions), the joints
 # and the children of each core hang off its origin, and the skin atlas packs from those children's world
@@ -135,21 +141,29 @@ RADOME_END, FORWARD_END, MID_END = 1.6, 5.6, 11.0
 # The values are the cores' bounding-box centres when the keel set their length (stations 3.6, 8.375 and 13.0), as
 # float32 literals so they land bit for bit. check() fails if a core's origin is anything else.
 CORE_ORIGINS = {"fuselage_forward": (0.0, -4.3999996, 0.25242168), "fuselage_mid": (0.0, 0.375, 0.26522803),
-                "fuselage_aft": (-0.00024959445, 5.0, 0.34087268)}
-# The inner wing boxes keep the origins the whole boxes had (their bounds' centres), as float32 literals, for the same
-# reason: the skin atlas is unwrapped from world coordinates, and a box whose origin moved would carry its flap and
-# the wing skin to new world matrices a rounding apart, and the atlas packs every island anew from any such change.
-WING_BOX_ORIGINS = {"wing_spar_L": (1.9800000190734863, 1.5572816133499146, -0.025429904460906982),
-                    "wing_spar_R": (-1.9800000190734863, 1.5572816133499146, -0.025429904460906982)}
+                "fuselage_aft": (-0.00024959445, 5.0, 0.34087268),
+                # the tail cone's bounding-box centre when its break was cut at TAIL_START (about station 13.96)
+                "fuselage_tail": (0.0, 5.957499980926514, 0.3575679063796997)}
+# A part a piece is split off keeps the origin it had whole (its bounds' centre), as a float32 literal, for the same
+# reason: the skin atlas is unwrapped from world coordinates, and a part whose origin moved would carry the skinned
+# parts it holds (the wing boxes' flap and skin, the engine core's nozzle) to new world matrices a rounding apart, and
+# the atlas packs every island anew from any such change.
+SPLIT_ORIGINS = {"wing_spar_L": (1.9800000190734863, 1.5572816133499146, -0.025429904460906982),
+                 "wing_spar_R": (-1.9800000190734863, 1.5572816133499146, -0.025429904460906982),
+                 "engine_core": (0.0, 4.349999904632568, 0.35499998927116394)}
 # Parts that move to a part split off their parent only after the atlas is unwrapped (split_pieces), for the reason
-# above: the surfaces beyond the crank ride the outer wing box in a split build, and the inner box until then.
-LATE_PARENTS = {name + _sd: "wing_spar_outer_" + _sd for name in ("aileron_", "lef_") for _sd in ("L", "R")}
+# above: the surfaces beyond the crank ride the outer wing box in a split build and the inner box until then, the
+# nozzle the afterburner, and the speed brakes (their actuators' cylinders too) and the ventral fin the tail cone.
+LATE_PARENTS = {**{name + _sd: "wing_spar_outer_" + _sd for name in ("aileron_", "lef_") for _sd in ("L", "R")},
+                "nozzle": "engine_afterburner", "ventral_fin": "fuselage_tail",
+                **{"speed_brake_" + _sd + end: "fuselage_tail" for _sd in ("L", "R") for end in ("", "_cylinder")}}
 DORSAL = (5.0, 12.4)
 # A family's dry mass shared between two parts split from it so that its first moment along the axis that separates
 # them stays where it was: part -> (the part split from it, axis). A part's mass sits at the centre of its hulls'
 # bounds (IcarusAuthor ConfigurePart's CoM, which UnitPart.ModifyMass makes the body's centre of mass), here its own
 # bounds' centre, and splitting by any other share would move the balance the 5% MAC margin was tuned on.
-MOMENT_SPLITS = {"wing_spar_L": ("wing_spar_outer_L", 0), "wing_spar_R": ("wing_spar_outer_R", 0)}
+MOMENT_SPLITS = {"wing_spar_L": ("wing_spar_outer_L", 0), "wing_spar_R": ("wing_spar_outer_R", 0),
+                 "engine_core": ("engine_afterburner", 1), "fuselage_aft": ("fuselage_tail", 1)}
 DORSAL_Z, DORSAL_HALF_WIDTH = 0.80, 0.30
 
 
@@ -254,7 +268,7 @@ def recentre(obj):
         return
     lo = Vector([min(v.co[i] for v in obj.data.vertices) for i in range(3)])
     hi = Vector([max(v.co[i] for v in obj.data.vertices) for i in range(3)])
-    pins = {**CORE_ORIGINS, **WING_BOX_ORIGINS}
+    pins = {**CORE_ORIGINS, **SPLIT_ORIGINS}
     c = Vector(pins[obj.name]) if obj.name in pins else (lo + hi) / 2
     obj.data.transform(Matrix.Translation(-c))
     obj.matrix_world = obj.matrix_world @ Matrix.Translation(c)
@@ -277,6 +291,11 @@ SKIN_FAMILIES = ("skin_", "wing_skin_", "dorsal_cover")
 # Each wing skin parts at the crank plane, the inner pieces on the inner box and the outer on the outer box, and each
 # box's upper skin from its lower on the closures' middle columns (bi.box).
 SPLITS = {}
+for _sd in ("L", "R"):
+    # each aft panel at the tail cone's break, the front piece on fuselage_aft and the rear on the tail cone
+    SPLITS["skin_aft_" + _sd] = ([((0.0, TAIL_START - bi.S0, 0.0), (0.0, 1.0, 0.0))], [
+        ("skin_aft_front_" + _sd, "fuselage_aft", lambda c, side: station(c) < TAIL_START),
+        ("skin_aft_rear_" + _sd, "fuselage_tail", lambda c, side: True)])
 for _sd, _x in (("L", 1.0), ("R", -1.0)):
     SPLITS["wing_skin_" + _sd] = ([((_x * bi.WING_CRANK, 0.0, 0.0), (1.0, 0.0, 0.0))], [
         ("wing_skin_%s_%s_%s" % (box, skin, _sd), ("wing_spar_" if box == "inner" else "wing_spar_outer_") + _sd,
@@ -286,9 +305,6 @@ for _sd, _x in (("L", 1.0), ("R", -1.0)):
 # Riders whose piece is named rather than found by position: each wing tip's nav light fairing wraps the tip, top and
 # bottom, and rides the upper skin with the upper lens (its lower lens rides the lower skin, by position).
 RIDERS = {"light_nav_mount_" + _sd: "wing_skin_outer_upper_" + _sd for _sd in ("L", "R")}
-# The edges along which each split family's own corner normals already broke (a crease, as at a sharp trailing edge),
-# world segments, as cut_family found them: seam_check holds a seam's normals together everywhere else.
-CREASES = {}
 # A connected stretch of a family's skin faces counts as its sheet when it holds at least this share of them; smaller
 # islands are details merged into it (merge_details), moved whole.
 SHEET_SHARE = 0.1
@@ -391,11 +407,6 @@ def cut_family(icarus, obj, planes, pieces):
     for face in bm.faces:
         for loop, index in zip(face.loops, mesh.polygons[face.index].loop_indices):
             loop[normal] = corner[index].vector
-    CREASES[obj.name] = [(obj.matrix_world @ e.verts[0].co, obj.matrix_world @ e.verts[1].co) for e in bm.edges
-                         if len(e.link_loops) == 2 and any(
-                             a[normal].angle(b[normal], 0.0) > math.radians(SEAM_NORMAL_DEG)
-                             for v in e.verts for a in e.link_loops[0].face.loops if a.vert == v
-                             for b in e.link_loops[1].face.loops if b.vert == v)]
     sides = bm.faces.layers.int.get(bi.SPLIT_SIDE)
     if sides is not None:
         split_caps(bm, sides)
@@ -547,20 +558,25 @@ def _organise(p, icarus, internals, structure_mat):
                    lambda c, a=a, b=b, sd=sd: a <= station(c) < b and side(c) == sd and not dorsal(c))
     bpy.data.objects.remove(fus, do_unlink=True)
 
+    def section(o):
+        """Whether a member at its first corner's station falls between a and b: stations rounded to 1e-6 (the frame
+        loop's sums land a rounding off a break, frame 19 at 12.999999999999995), and a frame on a break goes to the
+        section ahead of it."""
+        s = round(station(o.matrix_world @ o.data.vertices[0].co), 6)
+        frame = o.name.startswith("frame_")
+        return lambda a, b: (a <= s < b and not (frame and s == a and a > 0)) or (frame and s == b)
+
     for name, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),
-                       ("fuselage_aft", MID_END, 99.0)):
-        # joined members are gone from the list
-        frames = [o for o in icarus.objects if o.name.startswith(("frame_", "stringer_", "bulkhead_"))]
-        members = [f for f in frames if a <= station(f.matrix_world @ f.data.vertices[0].co) < b]
-        # gear wells belong to the structure they are cut into
-        members += [o for o in icarus.objects if o.name.startswith(("nose_gear_bay", "main_gear_bay"))
-                    and a <= station(o.matrix_world @ o.data.vertices[0].co) < b]
+                       ("fuselage_aft", MID_END, TAIL_START), ("fuselage_tail", TAIL_START, 99.0)):
+        # joined members are gone from the list; gear wells belong to the structure they are cut into, and join after
+        # the members, so the core's first material slot is the frames' (parts.open_bays gives its cut faces slot 0)
+        members = [o for prefixes in (("frame_", "stringer_", "bulkhead_"), ("nose_gear_bay", "main_gear_bay"))
+                   for o in icarus.objects if o.name.startswith(prefixes) and section(o)(a, b)]
         join(name, members)
 
     rename(O["cockpit_tub"], "cockpit_cell")
     join("radar_tray", [O["radar_dish"], O["radar_unit"], O["avionics_nose"]])
     rename(O["avionics_aft"], "avionics_tray")
-    join("engine_core", [O["engine_core"], O["engine_afterburner"]])
     rename(O["nozzle_shroud"], "nozzle")
     for sd in ("L", "R"):
         join("intake_duct_" + sd, [O["duct_" + sd], O["shock_cone_" + sd]])
@@ -667,7 +683,7 @@ def check(icarus):
         raise ValueError("parts: over the triangle caps: " + "; ".join(over))
     # within the float noise of parenting (forward and aft hang off mid), far under any real drift
     moved = ["%s at %s" % (name, tuple(bpy.data.objects[name].matrix_world.translation))
-             for name, origin in {**CORE_ORIGINS, **WING_BOX_ORIGINS}.items()
+             for name, origin in {**CORE_ORIGINS, **SPLIT_ORIGINS}.items()
              if (bpy.data.objects[name].matrix_world.translation - Vector(origin)).length > 1e-5]
     if moved:
         raise ValueError("parts: structure core or wing box origins off their pins: " + "; ".join(moved))
@@ -678,16 +694,16 @@ def check(icarus):
     print(surface_sweep(icarus))
 
 
-SEAM_PLANE, SEAM_SHARED, SEAM_NORMAL_DEG = 0.005, 0.0002, 1.0  # seam_check's limits, metres and degrees
+SEAM_PLANE, SEAM_SHARED, SEAM_NORMAL_DEG, SEAM_SURFACE_DEG = 0.005, 0.0002, 1.0, 30.0  # seam_check's limits, metres and degrees
 
 
 def seam_check(icarus):
     """Every SPLITS family's pieces meet cleanly. A boundary corner of a piece that lies on a sibling piece's surface is
-    on a cut: a sibling must have a corner within SEAM_SHARED of it, with a corner normal within SEAM_NORMAL_DEG of
-    each of its own there (so no crease opens, and a crease the family had stays), and the corner must lie within
-    SEAM_PLANE of one of the family's cut planes, or where an upper piece meets its lower (the closures' middle
-    columns). A build that leaves the families whole has nothing to check."""
-    from mathutils.geometry import intersect_point_line
+    on a cut: a sibling must have a corner within SEAM_SHARED of it, and the corner must lie within SEAM_PLANE of one of
+    the family's cut planes, or where an upper piece meets its lower (the closures' middle columns). Where the sibling's
+    faces there carry the same surface on (face normals within SEAM_SURFACE_DEG), their corner normals must agree within
+    SEAM_NORMAL_DEG, so no crease opens; a cut along a fold the skin already had (the front edge of a speed brake's
+    opening) has no such face, and keeps the fold. A build that leaves the families whole has nothing to check."""
     from mathutils.kdtree import KDTree
 
     report, problems = [], []
@@ -695,12 +711,15 @@ def seam_check(icarus):
         objs = [bpy.data.objects.get(piece) for piece, _, _ in pieces]
         if any(o is None for o in objs):
             continue
-        corners = {}  # piece -> [(world point, [world corner normals])]
+        corners = {}  # piece -> [(world point, [(world corner normal, world face normal)])]
         for o in objs:
-            normals = [o.matrix_world.to_3x3() @ n.vector for n in o.data.corner_normals]
+            turn = o.matrix_world.to_3x3()
+            normals = [turn @ n.vector for n in o.data.corner_normals]
             at = {}
-            for loop in o.data.loops:
-                at.setdefault(loop.vertex_index, []).append(normals[loop.index])
+            for poly in o.data.polygons:
+                face = (turn @ poly.normal).normalized()
+                for loop in poly.loop_indices:
+                    at.setdefault(o.data.loops[loop].vertex_index, []).append((normals[loop], face))
             counts = {}
             for poly in o.data.polygons:
                 for key in poly.edge_keys:
@@ -730,11 +749,12 @@ def seam_check(icarus):
                         continue
                     if not upper_lower and min(abs((p - Vector(co)).dot(Vector(no).normalized())) for co, no in planes) > SEAM_PLANE:
                         problems.append("%s corner %s meets %s off every cut plane" % (o.name, tuple(round(c, 4) for c in p), other.name))
-                    if any(0 <= t <= 1 and (q - p).length <= SEAM_SHARED
-                           for q, t in (intersect_point_line(p, a, b) for a, b in CREASES.get(name, ()))):
-                        continue  # the family's own crease
-                    theirs = points[i][1]
-                    worst = max(min(n.angle(m, 0.0) for m in theirs) for n in normals)
+                    # every corner of the other piece at this point (a merged detail, a speed brake's lip, may sit on
+                    # the sheet's edge with corners of its own), on faces that carry this corner's face's surface on
+                    theirs = [m for _, k, _ in kd.find_range(p, SEAM_SHARED) for m in points[k][1]]
+                    turns = [min(n.angle(m, 0.0) for m, g in theirs if g.angle(f, 0.0) <= math.radians(SEAM_SURFACE_DEG))
+                             for n, f in normals if any(g.angle(f, 0.0) <= math.radians(SEAM_SURFACE_DEG) for _, g in theirs)]
+                    worst = max(turns, default=0.0)
                     if math.degrees(worst) > SEAM_NORMAL_DEG:
                         problems.append("%s corner %s turns %.2f deg from %s's" % (o.name, tuple(round(c, 4) for c in p), math.degrees(worst), other.name))
         report.append("%s %d pieces, %d seam corners" % (name, len(objs), seams))

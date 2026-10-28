@@ -88,6 +88,7 @@ for name, alt, speed, fuel, what in [
     ("icarus_ignus_10km_half", 10000.0, 400.0, 0.5, "half fuel, for the sustained turn"),
     ("icarus_ignus_13km_40", 13000.0, 520.0, 0.4, "40% fuel, for hands-off pitch hold below half fuel"),
     ("icarus_ignus_3km_300", 3000.0, 300.0, 0.5, "half fuel, for the full-aileron roll rate at 300 m/s"),
+    ("icarus_ignus_3km_250", 3000.0, 250.0, 0.5, "half fuel, for the speed brakes opening and closing at 250 m/s"),
 ]:
     m = template("airborne")
     m["MapKey"] = IGNUS

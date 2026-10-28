@@ -46,11 +46,15 @@ namespace Icarus.Editor
         // it also joins the root, as the Revoker's wing2 does, with the inner box as its tensor (check A18 benches the crank).
         // That brace takes the most of the outer wing's load: 0.98 of an OuterWing joint's limit in a full-stick pull with
         // full tip tanks and fuel (tests/scenarios/full_stick_low_fast_tip_tanks.scenario.jsonc), so it holds at Spar class.
-        // A brace with no class of its own takes its owner's.
+        // fuselage_aft (213 kg) carries the engine core (738, with the afterburner's 412 and the nozzle behind it), the tail
+        // cone and the fin: on their own joints, in a 9 g pull, the tail cone sat 1.4 deg and the core 1.0 off it, and the fin
+        // turned 1.0 deg in a rolling pull. Each of the three also joins the root, with fuselage_aft as its tensor, which held
+        // them to 0.1, 0.2 and 0.3 deg (check A18). A brace with no class of its own takes its owner's.
         private static readonly (string Owner, string To, string Tensor, JointClass? Class)[] Braces =
         {
             ("stabilator", "fuselage_aft", "fin_spar", null), ("rudder", "fuselage_aft", "fin_spar", null), ("fin_skin", "fuselage_aft", "fin_spar", null),
             ("wing_spar_outer_L", RootPart, "wing_spar_L", JointClass.Spar), ("wing_spar_outer_R", RootPart, "wing_spar_R", JointClass.Spar),
+            ("fuselage_tail", RootPart, "fuselage_aft", null), ("engine_core", RootPart, "fuselage_aft", null), ("fin_spar", RootPart, "fuselage_aft", null),
         };
 
         // The strength class of a part's joint i: its own for its parent joint, its brace's for a brace.
@@ -85,14 +89,19 @@ namespace Icarus.Editor
             P("skin_forward_L", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("skin_forward_R", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("fuselage_aft", RootPart, JointClass.Frame, "tail", "tail"),
+            P("fuselage_tail", "fuselage_aft", JointClass.Section, "tail"),
             P("engine_core", "fuselage_aft", JointClass.Spar, "tail"),
-            P("nozzle", "engine_core", JointClass.Primary, "tail"),
+            // the afterburner carries the nozzle and its thrust (JetNozzle on nozzle), so it holds as the core does
+            P("engine_afterburner", "engine_core", JointClass.Spar, "tail"),
+            P("nozzle", "engine_afterburner", JointClass.Primary, "tail"),
             P("fin_spar", "fuselage_aft", JointClass.Spar, "vstab1"),
             P("fin_skin", "fin_spar", JointClass.Panel, "vstab1/vstab2"),
             P("rudder", "fin_spar", JointClass.Surface, "vstab1/vstab2/rudder"),
             P("stabilator", "fin_spar", JointClass.Surface, "vstab1/vstab2"),
-            P("skin_aft_L", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_aft_R", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
+            P("skin_aft_front_L", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
+            P("skin_aft_front_R", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
+            P("skin_aft_rear_L", "fuselage_tail", JointClass.Panel, "fuselage/cockpit/cheek_L"),
+            P("skin_aft_rear_R", "fuselage_tail", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("intake_duct_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("intake_duct_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("wing_spar_L", RootPart, JointClass.Spar, "fuselage/wing1a_L"),
@@ -265,7 +274,7 @@ namespace Icarus.Editor
         // reared up on the runway. A box over the core's whole section gives it a fuselage section's inertia. The box ships
         // disabled, since an enabled one stops bullets and blasts on any layer but 13, which the AI's terrain checks hit;
         // src/Icarus/SectionInertia.cs enables it only while Unity computes the body's mass properties, then pins them.
-        private static readonly string[] StructureCores = { RootPart, "fuselage_forward", "fuselage_aft" };
+        private static readonly string[] StructureCores = { RootPart, "fuselage_forward", "fuselage_aft", "fuselage_tail" };
         internal const int IgnoreCollisionsLayer = 15; // PhysicsLayers.IgnoreCollisions
 
         private static void AddSectionInertia(GameObject part, Bounds section)

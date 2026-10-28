@@ -94,15 +94,30 @@
      353
     ]
    },
+   "engine_afterburner": {
+    "sprite": "Icarus_status_engine_afterburner.png",
+    "centre": [
+     0.0,
+     -92.02
+    ],
+    "size": [
+     14.77,
+     29.53
+    ],
+    "px": [
+     484,
+     805
+    ]
+   },
    "engine_core": {
     "sprite": "Icarus_status_engine_core.png",
     "centre": [
      0.0,
-     -66.71
+     -53.0
     ],
     "size": [
      14.77,
-     80.16
+     52.73
     ],
     "px": [
      484,
@@ -248,15 +263,15 @@
     "sprite": "Icarus_status_fuselage_aft.png",
     "centre": [
      0.0,
-     -74.36
+     -61.96
     ],
     "size": [
      27.42,
-     61.17
+     31.64
     ],
     "px": [
      460,
-     678
+     687
     ]
    },
    "fuselage_forward": {
@@ -287,6 +302,21 @@
     "px": [
      450,
      394
+    ]
+   },
+   "fuselage_tail": {
+    "sprite": "Icarus_status_fuselage_tail.png",
+    "centre": [
+     0.0,
+     -74.36
+    ],
+    "size": [
+     21.09,
+     61.17
+    ],
+    "px": [
+     472,
+     678
     ]
    },
    "gear_leg_L": {
@@ -454,34 +484,64 @@
      904
     ]
    },
-   "skin_aft_L": {
-    "sprite": "Icarus_status_skin_aft_L.png",
+   "skin_aft_front_L": {
+    "sprite": "Icarus_status_skin_aft_front_L.png",
     "centre": [
      -6.86,
-     -77.52
+     -61.17
     ],
     "size": [
      14.77,
-     65.39
+     32.7
     ],
     "px": [
      458,
      682
     ]
    },
-   "skin_aft_R": {
-    "sprite": "Icarus_status_skin_aft_R.png",
+   "skin_aft_front_R": {
+    "sprite": "Icarus_status_skin_aft_front_R.png",
     "centre": [
      6.86,
-     -77.52
+     -61.17
     ],
     "size": [
      14.77,
-     65.39
+     32.7
     ],
     "px": [
      510,
      682
+    ]
+   },
+   "skin_aft_rear_L": {
+    "sprite": "Icarus_status_skin_aft_rear_L.png",
+    "centre": [
+     -4.48,
+     -93.08
+    ],
+    "size": [
+     11.6,
+     34.8
+    ],
+    "px": [
+     473,
+     799
+    ]
+   },
+   "skin_aft_rear_R": {
+    "sprite": "Icarus_status_skin_aft_rear_R.png",
+    "centre": [
+     4.48,
+     -93.08
+    ],
+    "size": [
+     11.6,
+     34.8
+    ],
+    "px": [
+     507,
+     799
     ]
    },
    "skin_forward_L": {

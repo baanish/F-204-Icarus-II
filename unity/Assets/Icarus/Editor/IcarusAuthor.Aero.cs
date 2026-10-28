@@ -151,12 +151,12 @@ namespace Icarus.Editor
 
         // The speed brakes open on the stock Airbrake, which turns each transform about its own +X: each panel hangs from
         // an opener whose +X is the hinge axis signed so a positive turn swings the panel out. Each actuator is two pieces
-        // with their pivots at their eyes, the cylinder on fuselage_aft and the rod on the opener, each aimed at the
+        // with their pivots at their eyes, the cylinder on the tail cone and the rod on the opener, each aimed at the
         // other's eye by an AimConstraint about the hinge axis; the Airbrake enables its constraints while the brakes are
         // open, as the stock VTOLTrainer1 aims its piston.
         private static void BuildSpeedBrakes(Build b)
         {
-            var aft = b.Parts["fuselage_aft"].transform;
+            var aft = b.Parts["fuselage_tail"].transform;  // the brakes run from the tail cone's break back
             var openers = new List<Object>();
             var constraints = new List<Object>();
             foreach (var name in new[] { "speed_brake_L", "speed_brake_R" })
@@ -189,12 +189,12 @@ namespace Icarus.Editor
             var so = new SerializedObject(airbrake);
             SetList(Prop(so, "transforms"), openers);
             SetList(Prop(so, "constraints"), constraints);
-            Prop(so, "part").objectReferenceValue = b.Part("fuselage_aft");
+            Prop(so, "part").objectReferenceValue = b.Part("fuselage_tail");
             if (Deflection(b, "speed_brake_L") != Deflection(b, "speed_brake_R"))
                 throw new InvalidDataException("the speed brakes open by different angles; the one Airbrake turns both alike");
             Prop(so, "maxAngle").floatValue = Deflection(b, "speed_brake_L");
             so.ApplyModifiedPropertiesWithoutUndo();
-            b.Report.Add($"speed brakes: {openers.Count} panels open {Prop(so, "maxAngle").floatValue} deg outward on fuselage_aft, drag {Prop(so, "dragAmount").floatValue}; {constraints.Count} actuator pieces aimed");
+            b.Report.Add($"speed brakes: {openers.Count} panels open {Prop(so, "maxAngle").floatValue} deg outward on fuselage_tail, drag {Prop(so, "dragAmount").floatValue}; {constraints.Count} actuator pieces aimed");
         }
 
         // An actuator piece turning about its eye so it keeps pointing at the other piece's eye, its twist held about the
@@ -272,7 +272,12 @@ namespace Icarus.Editor
         private static void SetAero(Build b)
         {
             var aero = new Dictionary<string, (float Area, int Airfoil)>();
-            var wingShare = new Dictionary<string, (string Side, float Share)>();
+            // parts split off a DragAreas entry share its drag: each wing box by its skin's planform, the aft core and the
+            // tail cone by their frontal areas
+            var dragShare = new Dictionary<string, (string Of, float Share)>();
+            float Frontal(string n) => b.Parts[n].GetComponent<MeshRenderer>().bounds.size.x * b.Parts[n].GetComponent<MeshRenderer>().bounds.size.y;
+            foreach (var n in new[] { "fuselage_aft", "fuselage_tail" })
+                dragShare[n] = ("fuselage_aft", Frontal(n) / (Frontal("fuselage_aft") + Frontal("fuselage_tail")));
             foreach (var side in new[] { "L", "R" })
             {
                 var surfaces = new[] { "aileron_", "flap_", "lef_" }.Select(s => s + side).ToArray();
@@ -284,8 +289,8 @@ namespace Icarus.Editor
                 var planform = WingBoxes(b, side).ToDictionary(box => box, box => BoxSkins(b, box, side).Sum(n => PlanformArea(b.Meshes[n].Render)));
                 foreach (var box in planform.Keys)
                 {
-                    wingShare[box] = (side, planform[box] / planform.Values.Sum());
-                    aero[box] = (spar * wingShare[box].Share, WingAirfoil);
+                    dragShare[box] = ("wing_spar_" + side, planform[box] / planform.Values.Sum());
+                    aero[box] = (spar * dragShare[box].Share, WingAirfoil);
                 }
             }
             aero["stabilator"] = (TailArea, TailAirfoil);
@@ -306,7 +311,7 @@ namespace Icarus.Editor
                 var (area, airfoil) = aero.TryGetValue(spec.Name, out var a) ? a : (0f, BodyAirfoil);
                 Prop(so, "wingArea").floatValue = area;
                 Prop(so, "airfoil").intValue = airfoil;
-                Prop(so, "dragArea").floatValue = wingShare.TryGetValue(spec.Name, out var box) ? DragAreas["wing_spar_" + box.Side] * box.Share
+                Prop(so, "dragArea").floatValue = dragShare.TryGetValue(spec.Name, out var split) ? DragAreas[split.Of] * split.Share
                     : DragAreas.TryGetValue(spec.Name, out var drag) ? drag : 0f;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }

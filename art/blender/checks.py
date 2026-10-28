@@ -91,7 +91,9 @@ def internals_inside_skin(icarus):
     meshes = [o for o in icarus.all_objects if o.type == "MESH" and not o.name.endswith("_visible")]
     skins = [o for o in meshes if o.get("role") in ("skin", "canopy")]
     inside = [o for o in meshes if o.get("role") in ("radar", "avionics", "cockpit", "gear", "engine", "fuel_tank")]
-    cores = [o for o in meshes if o.name in ("fuselage_forward", "fuselage_mid", "fuselage_aft")]
+    from hulls import STRUCTURE_CORES
+
+    cores = [o for o in meshes if o.name in STRUCTURE_CORES]
     body = [o for o in skins if not o.name.startswith(("wing_skin_", "fin_skin"))]
     trees = {o.name: tree(o) for o in skins + inside}
     grid = {o.name: tree(o, "Icarus_Frame") for o in cores}
@@ -327,8 +329,10 @@ def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
     s0, s1 = min(lo for lo, _, _ in ramps), max(hi for _, hi, _ in ramps)
     c = stations.CONFORMAL
     volumes.append(("conformal trough", bi.P(s0, -c["x"] - 0.3, -1.0), bi.P(s1, c["x"] + 0.3, c["z"] + 0.3), in_trough))
-    found, sampled = {}, 0
-    for core in (o for o in icarus.all_objects if o.name in ("fuselage_forward", "fuselage_mid", "fuselage_aft")):
+    found, sampled = {}, {}
+    from hulls import STRUCTURE_CORES
+
+    for core in (o for o in icarus.all_objects if o.name in STRUCTURE_CORES):
         slots = [m.name if m else "" for m in core.data.materials]
         mesh = core.data
         mesh.calc_loop_triangles()
@@ -344,12 +348,12 @@ def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
             for i in range(nb + 1):
                 for j in range(math.floor(nc * (1 - i / nb) + 1e-9) + 1):
                     q = a + (b - a) * (i / nb) + (c3 - a) * (j / nc)
-                    sampled += 1
+                    sampled[core.name] = sampled.get(core.name, 0) + 1
                     for name, lo, hi, inside in near:
                         if all(lo[k] <= q[k] <= hi[k] for k in range(3)) and inside(q):
                             found.setdefault((name, core.name), []).append(q)
-    message = "structure clear of bays: %d samples of %s's frames near %d bays and wells" % (
-        sampled, "/".join(("forward", "mid", "aft")), len(volumes))
+    message = "structure clear of bays: %s frame samples near %d bays and wells" % (
+        ", ".join("%s %d" % kv for kv in sorted(sampled.items())), len(volumes))
     if found:
         raise ValueError(message + ": " + "; ".join(
             "%d in the %s from %s, first at s %.3f x %.3f z %.3f" % (len(qs), name, core, qs[0].y + bi.S0, qs[0].x, qs[0].z)

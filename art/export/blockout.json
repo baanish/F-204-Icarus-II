@@ -2051,6 +2051,99 @@
     "tris": 24
    }
   },
+  "engine_afterburner": {
+   "fbx": "engine_afterburner.fbx",
+   "blender_parent": "engine_core",
+   "pivot_blender": [
+    0.0,
+    6.05,
+    0.36
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.36,
+    -6.05
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "role": "engine",
+    "owner": "fuselage",
+    "mass_kg": 412.3,
+    "family": "engine_core",
+    "family_mass_kg": 1150
+   },
+   "bounds_unity": [
+    [
+     -0.4416,
+     -0.4416,
+     -0.95
+    ],
+    [
+     0.4416,
+     0.4416,
+     0.95
+    ]
+   ],
+   "sha256": "5747ed3048ea361c7b9cc4d616bf503459e9d6e564c23f80af35ff1f89f3bcf6",
+   "bounds_blender": [
+    [
+     -0.4416,
+     -0.95,
+     -0.4416
+    ],
+    [
+     0.4416,
+     0.95,
+     0.4416
+    ]
+   ],
+   "tris": 94,
+   "materials": [
+    [
+     "jet_mechanical",
+     94
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [
+    {
+     "name": "engine_afterburner_colmesh0",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.4416,
+       -0.4416,
+       -0.95
+      ],
+      [
+       0.4416,
+       0.4416,
+       0.95
+      ]
+     ]
+    }
+   ],
+   "lod1": null
+  },
   "engine_core": {
    "fbx": "engine_core.fbx",
    "blender_parent": "fuselage_aft",
@@ -2083,13 +2176,16 @@
    },
    "props": {
     "role": "engine",
-    "mass_kg": 1150
+    "owner": "fuselage",
+    "mass_kg": 737.7,
+    "family": "engine_core",
+    "family_mass_kg": 1150
    },
    "bounds_unity": [
     [
      -0.46,
      -0.465,
-     -2.65
+     -0.75
     ],
     [
      0.46,
@@ -2097,7 +2193,7 @@
      2.65
     ]
    ],
-   "sha256": "2857d351d78f3a4ebcfe34251c71e8e28e84a04b6406b787f9163558c0cd981e",
+   "sha256": "223e05e34dc5b872e1c9c0f6c20c4037f1460f33a91d9bef5d624fca2d553473",
    "bounds_blender": [
     [
      -0.46,
@@ -2106,15 +2202,15 @@
     ],
     [
      0.46,
-     2.65,
+     0.75,
      0.465
     ]
    ],
-   "tris": 252,
+   "tris": 158,
    "materials": [
     [
      "jet_mechanical",
-     252
+     158
     ]
    ],
    "uv_layers": [
@@ -2129,7 +2225,7 @@
       [
        -0.46,
        -0.465,
-       -2.65
+       -0.75
       ],
       [
        0.46,
@@ -3178,13 +3274,15 @@
    },
    "props": {
     "role": "structure",
-    "mass_kg": 400
+    "mass_kg": 212.7,
+    "family": "fuselage_aft",
+    "family_mass_kg": 400
    },
    "bounds_unity": [
     [
      -0.86117,
      -0.67259,
-     -1.85
+     -0.05
     ],
     [
      0.86142,
@@ -3192,7 +3290,7 @@
      1.98
     ]
    ],
-   "sha256": "866360978c5405f6ee7879d475aa34631ff14e1a2a595c57c3fb994f2d0810fe",
+   "sha256": "adb55c1bf6d13e5d9f165535b8a3d6afc9900ffb01f129531da2ea23fced4e90",
    "bounds_blender": [
     [
      -0.86142,
@@ -3201,32 +3299,18 @@
     ],
     [
      0.86117,
-     1.85,
+     0.05,
      0.67024
     ]
    ],
-   "tris": 4184,
+   "tris": 1888,
    "materials": [
     [
      "Icarus_Frame",
-     3122
-    ],
-    [
-     "Icarus_Duct",
-     224
-    ],
-    [
-     "jet_mechanical",
-     208
-    ],
-    [
-     "Icarus_WellDetail",
-     630
+     1888
     ]
    ],
-   "uv_layers": [
-    "UVMap"
-   ],
+   "uv_layers": [],
    "colliders": [
     {
      "name": "fuselage_aft_colmesh0",
@@ -3234,9 +3318,9 @@
      "tris": 32,
      "bounds_unity": [
       [
-       -0.40381,
-       0.28551,
-       -1.85
+       -0.38571,
+       0.33779,
+       -0.05
       ],
       [
        -0.00025,
@@ -3252,12 +3336,12 @@
      "bounds_unity": [
       [
        -0.66081,
-       0.00159,
-       -1.85
+       0.01276,
+       -0.05
       ],
       [
        -0.33236,
-       0.39159,
+       0.40077,
        1.98
       ]
      ]
@@ -3268,13 +3352,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       -0.77893,
+       -0.77883,
        -0.45275,
-       -1.85
+       -0.05
       ],
       [
-       -0.27299,
-       -0.0888,
+       -0.40085,
+       -0.09993,
        1.98
       ]
      ]
@@ -3285,13 +3369,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       -0.44712,
+       -0.44372,
        -0.67259,
-       -1.85
+       -0.04789
       ],
       [
        -0.00775,
-       -0.27492,
+       -0.39132,
        1.98
       ]
      ]
@@ -3304,11 +3388,11 @@
       [
        -0.00025,
        -0.67259,
-       -1.85
+       -0.05
       ],
       [
-       0.44662,
-       -0.27492,
+       0.44327,
+       -0.39132,
        1.98
       ]
      ]
@@ -3319,13 +3403,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       0.27249,
+       0.40035,
        -0.45275,
-       -1.85
+       -0.05
       ],
       [
-       0.74287,
-       -0.11819,
+       0.77842,
+       -0.09993,
        1.98
       ]
      ]
@@ -3336,13 +3420,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       0.33246,
-       0.00159,
-       -1.85
+       0.34406,
+       0.01276,
+       -0.05
       ],
       [
        0.6743,
-       0.39159,
+       0.40077,
        1.98
       ]
      ]
@@ -3353,13 +3437,13 @@
      "tris": 32,
      "bounds_unity": [
       [
-       0.00038,
-       0.28551,
-       -1.85
+       0.00131,
+       0.34727,
+       -0.05
       ],
       [
-       0.40331,
-       0.66737,
+       0.38521,
+       0.67006,
        1.98
       ]
      ]
@@ -3413,7 +3497,7 @@
      2.0
     ]
    ],
-   "sha256": "f0a9bed6463c14e8962fc87c15dbd50d1166aed9e4fc3617639acc7ae8cd851c",
+   "sha256": "db1472026ab859183d7e9d7548deaf50170ad4d524a6b446431196b86b603fbf",
    "bounds_blender": [
     [
      -0.59829,
@@ -3556,7 +3640,7 @@
      2.575
     ]
    ],
-   "sha256": "3e9f18a2447fafb9acbf1a76a8134f194ebfe94b680de192d747fc43207ae09a",
+   "sha256": "d04bbec9d939c9566558cf6c0592a23b643e940a0bb9e01a1bdb075ccf02d553",
    "bounds_blender": [
     [
      -1.05514,
@@ -3569,11 +3653,11 @@
      0.74523
     ]
    ],
-   "tris": 7650,
+   "tris": 7654,
    "materials": [
     [
      "Icarus_Frame",
-     5914
+     5918
     ],
     [
      "Icarus_Duct",
@@ -3589,7 +3673,7 @@
      "bounds_unity": [
       [
        -0.41582,
-       0.35158,
+       0.38891,
        -2.605
       ],
       [
@@ -3610,7 +3694,7 @@
        -2.605
       ],
       [
-       -0.34837,
+       -0.35996,
        0.43083,
        2.575
       ]
@@ -3627,8 +3711,8 @@
        -2.605
       ],
       [
-       -0.18563,
-       -0.11328,
+       -0.21549,
+       -0.11456,
        2.4649
       ]
      ]
@@ -3641,11 +3725,11 @@
       [
        -0.49648,
        -0.74523,
-       -2.60277
+       -2.44725
       ],
       [
        -0.0003,
-       -0.17493,
+       -0.19593,
        2.575
       ]
      ]
@@ -3690,7 +3774,7 @@
      "tris": 32,
      "bounds_unity": [
       [
-       0.34837,
+       0.35316,
        0.00627,
        -2.605
       ],
@@ -3715,6 +3799,229 @@
        0.41582,
        0.69129,
        2.47887
+      ]
+     ]
+    }
+   ],
+   "lod1": null
+  },
+  "fuselage_tail": {
+   "fbx": "fuselage_tail.fbx",
+   "blender_parent": "fuselage_aft",
+   "pivot_blender": [
+    0.0,
+    5.9575,
+    0.35757
+   ],
+   "pivot_unity": [
+    -0.0,
+    0.35757,
+    -5.9575
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "role": "structure",
+    "mass_kg": 187.3,
+    "family": "fuselage_aft",
+    "family_mass_kg": 400
+   },
+   "bounds_unity": [
+    [
+     -0.62692,
+     -0.63825,
+     -0.8925
+    ],
+    [
+     0.62692,
+     0.63825,
+     0.96075
+    ]
+   ],
+   "sha256": "127fbc65b3fa62849536e94d4baaf344a87df0a8fe1af1d4cb29e2468027b8ca",
+   "bounds_blender": [
+    [
+     -0.62692,
+     -0.96075,
+     -0.63825
+    ],
+    [
+     0.62692,
+     0.8925,
+     0.63825
+    ]
+   ],
+   "tris": 2660,
+   "materials": [
+    [
+     "Icarus_Frame",
+     1598
+    ],
+    [
+     "Icarus_Duct",
+     224
+    ],
+    [
+     "jet_mechanical",
+     208
+    ],
+    [
+     "Icarus_WellDetail",
+     630
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [
+    {
+     "name": "fuselage_tail_colmesh0",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.3921,
+       0.31842,
+       -0.8925
+      ],
+      [
+       -0.0,
+       0.62289,
+       0.8925
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh1",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.59918,
+       0.00236,
+       -0.8925
+      ],
+      [
+       -0.32301,
+       0.39387,
+       0.8925
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh2",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.62649,
+       -0.44194,
+       -0.8925
+      ],
+      [
+       -0.27274,
+       -0.02141,
+       0.9474
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh3",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.44221,
+       -0.63825,
+       -0.8925
+      ],
+      [
+       -0.0075,
+       -0.30999,
+       0.9474
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh4",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.0,
+       -0.63825,
+       -0.8925
+      ],
+      [
+       0.44221,
+       -0.32116,
+       0.9575
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh5",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.2742,
+       -0.44194,
+       -0.8925
+      ],
+      [
+       0.62649,
+       -0.02141,
+       0.94741
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh6",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.32301,
+       0.00314,
+       -0.8925
+      ],
+      [
+       0.59918,
+       0.39387,
+       0.8925
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_tail_colmesh7",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.0,
+       0.27777,
+       -0.8925
+      ],
+      [
+       0.3921,
+       0.62352,
+       0.8925
       ]
      ]
     }
@@ -7656,7 +7963,7 @@
   },
   "nozzle": {
    "fbx": "nozzle.fbx",
-   "blender_parent": "engine_core",
+   "blender_parent": "engine_afterburner",
    "pivot_blender": [
     0.0,
     7.15,
@@ -14551,18 +14858,18 @@
     "tris": 12
    }
   },
-  "skin_aft_L": {
-   "fbx": "skin_aft_L.fbx",
+  "skin_aft_front_L": {
+   "fbx": "skin_aft_front_L.fbx",
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
     0.45319,
-    5.0648,
+    3.9648,
     0.34032
    ],
    "pivot_unity": [
     -0.45319,
     0.34032,
-    -5.0648
+    -3.9648
    ],
    "axes_unity": {
     "right": [
@@ -14583,38 +14890,39 @@
    },
    "props": {
     "role": "skin",
-    "mass_kg": 45
+    "mass_kg": 23.561,
+    "family_mass_kg": 45
    },
    "bounds_unity": [
     [
      -0.45319,
      -0.70203,
-     -2.1352
+     -1.0352
     ],
     [
      0.45319,
      0.70203,
-     2.1352
+     1.0352
     ]
    ],
-   "sha256": "33beb295644a2a737464df74b96d902fe253e6cc5b6ba59566d8695731a8252e",
+   "sha256": "612899300ae7262673eac927cb8a1c06ab6d6920be44c22745d997665422d23d",
    "bounds_blender": [
     [
      -0.45319,
-     -2.1352,
+     -1.0352,
      -0.70203
     ],
     [
      0.45319,
-     2.1352,
+     1.0352,
      0.70203
     ]
    ],
-   "tris": 3510,
+   "tris": 1658,
    "materials": [
     [
      "Icarus_Body",
-     3510
+     1658
     ]
    ],
    "uv_layers": [
@@ -14622,124 +14930,124 @@
    ],
    "colliders": [
     {
-     "name": "skin_aft_L_colmesh0",
+     "name": "skin_aft_front_L_colmesh0",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
        -0.39555,
        -0.04032,
-       -0.0
+       -1.0352
+      ],
+      [
+       0.03652,
+       0.33086,
+       1.0352
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_front_L_colmesh1",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.04224,
+       0.33086,
+       -1.0352
       ],
       [
        0.45319,
        0.70203,
-       2.1352
+       1.0352
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh1",
+     "name": "skin_aft_front_L_colmesh2",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
-       0.00521,
-       0.2682,
-       -2.1352
+       -0.22794,
+       -0.59712,
+       -1.0352
+      ],
+      [
+       0.12389,
+       -0.37117,
+       1.0352
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_front_L_colmesh3",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.10464,
+       -0.70203,
+       -1.0352
       ],
       [
        0.45319,
-       0.68604,
-       -0.0
+       -0.56638,
+       1.0352
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh2",
+     "name": "skin_aft_front_L_colmesh4",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
-       -0.19255,
-       -0.04032,
-       -2.1352
+       -0.41497,
+       -0.37117,
+       -1.0352
       ],
       [
-       0.14468,
-       0.40766,
-       -0.0
+       -0.05907,
+       -0.20574,
+       1.0352
       ]
      ]
     },
     {
-     "name": "skin_aft_L_colmesh3",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.33629,
-       -0.51401,
-       -2.1352
-      ],
-      [
-       0.21468,
-       -0.27716,
-       2.1352
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_L_colmesh4",
+     "name": "skin_aft_front_L_colmesh5",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
        -0.45319,
-       -0.27716,
-       -2.1352
+       -0.20574,
+       -1.0352
       ],
       [
-       0.21265,
+       -0.15018,
        -0.04032,
-       2.1352
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_L_colmesh5",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.0205,
-       -0.70203,
-       -2.1352
-      ],
-      [
-       0.45319,
-       -0.27883,
-       2.1352
+       1.0352
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 40
+    "tris": 20
    }
   },
-  "skin_aft_R": {
-   "fbx": "skin_aft_R.fbx",
+  "skin_aft_front_R": {
+   "fbx": "skin_aft_front_R.fbx",
    "blender_parent": "fuselage_aft",
    "pivot_blender": [
     -0.45371,
-    5.0648,
+    3.9648,
     0.34032
    ],
    "pivot_unity": [
     0.45371,
     0.34032,
-    -5.0648
+    -3.9648
    ],
    "axes_unity": {
     "right": [
@@ -14760,38 +15068,39 @@
    },
    "props": {
     "role": "skin",
-    "mass_kg": 45
+    "mass_kg": 23.563,
+    "family_mass_kg": 45
    },
    "bounds_unity": [
     [
      -0.45371,
      -0.70203,
-     -2.1352
+     -1.0352
     ],
     [
      0.45371,
      0.70203,
-     2.1352
+     1.0352
     ]
    ],
-   "sha256": "567094c4d70fcb9a3713f41721fc421fe67fa8f1110dcc5519f1101b2339ba3c",
+   "sha256": "e7dc86ddc9ac35c4e255f1cc04ac4c5f70943e4a56c9fb367979e1c6f5673323",
    "bounds_blender": [
     [
      -0.45371,
-     -2.1352,
+     -1.0352,
      -0.70203
     ],
     [
      0.45371,
-     2.1352,
+     1.0352,
      0.70203
     ]
    ],
-   "tris": 3510,
+   "tris": 1658,
    "materials": [
     [
      "Icarus_Body",
-     3510
+     1658
     ]
    ],
    "uv_layers": [
@@ -14799,110 +15108,466 @@
    ],
    "colliders": [
     {
-     "name": "skin_aft_R_colmesh0",
+     "name": "skin_aft_front_R_colmesh0",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.10121,
+       -0.59465,
+       -1.0352
+      ],
+      [
+       0.25129,
+       -0.35102,
+       1.0352
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_front_R_colmesh1",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
        -0.45371,
        -0.70203,
-       -2.1352
+       -1.0352
       ],
       [
-       0.25129,
-       -0.35102,
-       2.1352
+       -0.10121,
+       -0.55196,
+       1.0352
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh1",
+     "name": "skin_aft_front_R_colmesh2",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
-       0.04192,
+       0.07379,
        -0.35102,
-       -1.71994
+       -1.0352
+      ],
+      [
+       0.43956,
+       -0.17551,
+       1.0352
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_front_R_colmesh3",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.15864,
+       -0.17551,
+       -1.0352
       ],
       [
        0.45371,
        0.0,
-       2.1352
+       1.0352
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh2",
+     "name": "skin_aft_front_R_colmesh4",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
-       -0.36987,
-       -0.35102,
-       -2.1352
-      ],
-      [
-       0.04192,
+       -0.05991,
        0.0,
-       -0.5202
-      ]
-     ]
-    },
-    {
-     "name": "skin_aft_R_colmesh3",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.45371,
-       0.0,
-       -0.0
+       -1.0352
       ],
       [
        0.35444,
-       0.70203,
-       2.1352
+       0.35102,
+       1.0352
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh4",
+     "name": "skin_aft_front_R_colmesh5",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
        -0.45371,
-       0.27883,
-       -2.1352
+       0.35102,
+       -1.0352
       ],
       [
-       -0.01932,
-       0.68604,
+       0.02752,
+       0.70203,
+       1.0352
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 20
+   }
+  },
+  "skin_aft_rear_L": {
+   "fbx": "skin_aft_rear_L.fbx",
+   "blender_parent": "fuselage_tail",
+   "pivot_blender": [
+    0.32595,
+    6.1,
+    0.35603
+   ],
+   "pivot_unity": [
+    -0.32595,
+    0.35603,
+    -6.1
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "role": "skin",
+    "mass_kg": 21.439,
+    "family_mass_kg": 45
+   },
+   "bounds_unity": [
+    [
+     -0.32595,
+     -0.67373,
+     -1.1
+    ],
+    [
+     0.32595,
+     0.67373,
+     1.1
+    ]
+   ],
+   "sha256": "c5459fb69477ae217eaa598c2fddc77d7f50b940b217bb16af4bad84f7a4a6bc",
+   "bounds_blender": [
+    [
+     -0.32595,
+     -1.1,
+     -0.67373
+    ],
+    [
+     0.32595,
+     1.1,
+     0.67373
+    ]
+   ],
+   "tris": 1852,
+   "materials": [
+    [
+     "Icarus_Body",
+     1852
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [
+    {
+     "name": "skin_aft_rear_L_colmesh0",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.32595,
+       -0.44455,
+       -0.0
+      ],
+      [
+       -0.07231,
+       0.0,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_L_colmesh1",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.27436,
+       -0.4011,
+       -1.1
+      ],
+      [
+       0.06857,
+       0.0,
        -0.0
       ]
      ]
     },
     {
-     "name": "skin_aft_R_colmesh5",
+     "name": "skin_aft_rear_L_colmesh2",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
       [
-       -0.15392,
-       0.0,
-       -2.1352
+       -0.1273,
+       -0.67373,
+       -1.1
       ],
       [
-       0.18988,
-       0.42213,
+       0.32595,
+       -0.27904,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_L_colmesh3",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.10315,
+       0.26724,
+       -1.1
+      ],
+      [
+       0.32595,
+       0.67373,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_L_colmesh4",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.31858,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.09235,
+       0.41198,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_L_colmesh5",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.27682,
+       0.0,
+       -1.1
+      ],
+      [
+       0.02955,
+       0.40021,
        -0.0
       ]
      ]
     }
    ],
    "lod1": {
-    "tris": 40
+    "tris": 18
+   }
+  },
+  "skin_aft_rear_R": {
+   "fbx": "skin_aft_rear_R.fbx",
+   "blender_parent": "fuselage_tail",
+   "pivot_blender": [
+    -0.32595,
+    6.1,
+    0.35603
+   ],
+   "pivot_unity": [
+    0.32595,
+    0.35603,
+    -6.1
+   ],
+   "axes_unity": {
+    "right": [
+     1.0,
+     0.0,
+     -0.0
+    ],
+    "up": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "forward": [
+     -0.0,
+     0.0,
+     1.0
+    ]
+   },
+   "props": {
+    "role": "skin",
+    "mass_kg": 21.437,
+    "family_mass_kg": 45
+   },
+   "bounds_unity": [
+    [
+     -0.32595,
+     -0.67373,
+     -1.1
+    ],
+    [
+     0.32595,
+     0.67373,
+     1.1
+    ]
+   ],
+   "sha256": "e690757195c9ff4c87b29b4f45162a58994f7c8ece2447314567b18400212091",
+   "bounds_blender": [
+    [
+     -0.32595,
+     -1.1,
+     -0.67373
+    ],
+    [
+     0.32595,
+     1.1,
+     0.67373
+    ]
+   ],
+   "tris": 1852,
+   "materials": [
+    [
+     "Icarus_Body",
+     1852
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "colliders": [
+    {
+     "name": "skin_aft_rear_R_colmesh0",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.32595,
+       -0.67373,
+       -1.1
+      ],
+      [
+       0.19728,
+       -0.33686,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_R_colmesh1",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.13484,
+       -0.33686,
+       -0.0
+      ],
+      [
+       0.32595,
+       0.0,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_R_colmesh2",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.15577,
+       -0.33686,
+       -1.1
+      ],
+      [
+       0.27436,
+       0.0,
+       -0.0
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_R_colmesh3",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.32595,
+       0.26724,
+       -1.1
+      ],
+      [
+       0.10315,
+       0.67373,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_R_colmesh4",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.09235,
+       0.0,
+       -0.0
+      ],
+      [
+       0.31858,
+       0.41198,
+       1.1
+      ]
+     ]
+    },
+    {
+     "name": "skin_aft_rear_R_colmesh5",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.02955,
+       0.0,
+       -1.1
+      ],
+      [
+       0.27682,
+       0.40021,
+       -0.0
+      ]
+     ]
+    }
+   ],
+   "lod1": {
+    "tris": 18
    }
   },
   "skin_forward_L": {
@@ -16533,7 +17198,7 @@
   },
   "speed_brake_L": {
    "fbx": null,
-   "blender_parent": "fuselage_aft",
+   "blender_parent": "fuselage_tail",
    "pivot_blender": [
     0.49923,
     5.0015,
@@ -16574,7 +17239,7 @@
   },
   "speed_brake_L_cylinder": {
    "fbx": "speed_brake_L_cylinder.fbx",
-   "blender_parent": "fuselage_aft",
+   "blender_parent": "fuselage_tail",
    "pivot_blender": [
     0.4397,
     5.0465,
@@ -16797,7 +17462,7 @@
   },
   "speed_brake_R": {
    "fbx": null,
-   "blender_parent": "fuselage_aft",
+   "blender_parent": "fuselage_tail",
    "pivot_blender": [
     -0.49923,
     5.0015,
@@ -16838,7 +17503,7 @@
   },
   "speed_brake_R_cylinder": {
    "fbx": "speed_brake_R_cylinder.fbx",
-   "blender_parent": "fuselage_aft",
+   "blender_parent": "fuselage_tail",
    "pivot_blender": [
     -0.4397,
     5.0465,
@@ -17194,7 +17859,7 @@
   },
   "ventral_fin": {
    "fbx": "ventral_fin.fbx",
-   "blender_parent": "fuselage_aft",
+   "blender_parent": "fuselage_tail",
    "pivot_blender": [
     0.0,
     3.975,

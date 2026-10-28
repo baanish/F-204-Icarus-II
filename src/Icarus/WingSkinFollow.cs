@@ -11,15 +11,21 @@ namespace Icarus;
 /// pieces, the aileron, the leading-edge flap, the nav lights and lenses, and the wingtip station with any store on it)
 /// drawn on the outer box's drawn pose. Each is its own rigidbody on FixedJoints, and the joint solver lets a part drift
 /// under load: at 9 g a skin drifted 4 to 5 mm off its box, showing the internals through it, and the outer box's tip
-/// moved 4 to 6 mm off the inner box, opening a gap at the crank where the two meet.
+/// moved 4 to 6 mm off the inner box, opening a gap at the crank where the two meet. The tail cone draws the same way on
+/// the aft core, with its rear skin panels on it, and the afterburner and the nozzle on the tail cone: the engine chain
+/// hangs on the aft core (and the root) while the tail cone wraps it, and at 9 g under full afterburner the nozzle's fixed
+/// shroud moved 17 mm off the tail cone's skin, which the tail cone's hot ring would show as a step.
 ///
 /// Only rendering moves. Each part's renderers, and its wingtip station, go under a transform of their own (a mover),
 /// which this turns by the difference between the part's drawn and physical poses; its rigidbody, mass, joints,
 /// colliders, lift normal, centre-of-mass marker and joint anchors stay where the game puts them, and so does a
 /// surface's hinge where its lift normal rides it, so control surfaces and high-lift devices still turn their meshes.
 /// The one collider that rides along is a store's on the wingtip station, which shares the store's transform, so a
-/// store released there leaves from where it is drawn. Once a part's joint to its parent breaks, or either detaches, it
-/// draws on its own body again, and whatever hangs off it draws on that, so a shed wing falls as before. Simple physics
+/// store released there leaves from where it is drawn; on the tail, a subtree with a collider stays on its body, and the
+/// nozzle's thrust transform (the JetNozzle's) stays put, so the thrust acts where the game puts it. Once one of the
+/// joints that hold a part where it is drawn breaks (its own to its parent; for the afterburner and nozzle, every joint
+/// from them down the engine chain to the aft core, and the tail cone's), or a part on it detaches, it draws on its own
+/// body again, and whatever hangs off it draws on that, so a shed wing or tail cone falls as before. Simple physics
 /// merges every part onto one body, which leaves nothing to drift; there everything draws on its own body. The drawn
 /// pose is composed from world poses each frame, so far from the world origin it is as exact as float32 positions
 /// there, the floor every separate body in the game shares (millimetres at 77 km, micrometres near the origin).
@@ -48,12 +54,16 @@ sealed class WingDraw : MonoBehaviour
 
     sealed class Follower
     {
-        public AeroPart Part = null!, Leader = null!, Inner = null!;
+        public AeroPart Part = null!, Leader = null!;
         public Follower? LeaderFollower;
+        public (AeroPart Part, AeroPart To)[] Holds = null!;  // the joints that must stand for the part to draw on its leader
+        public AeroPart Against = null!;        // the part its seam is reported against, drawn where that is a follower too
+        public Follower? AgainstFollower;
+        public string Kind = null!;
         public Vector3 RestPosition;            // the part's pose in its leader's frame as authored
         public Quaternion RestRotation;
         public (Transform Parent, Transform Mover)[] Groups = null!;
-        public Transform Reference = null!;     // a drawn transform: its rest in the side's inner box frame, its place on the part
+        public Transform Reference = null!;     // a drawn transform: its rest in Against's frame, its place on the part
         public Vector3 ReferenceRest, ReferenceLocal;
         public bool Released;
         public Vector3 DrawnPosition;
@@ -69,8 +79,7 @@ sealed class WingDraw : MonoBehaviour
         aircraft = owner;
         AeroPart[] parts = IcarusSystems.Parts(aircraft);
         var physics = new HashSet<Transform>(parts.SelectMany(p => new[] { LiftNormalOf(p), CentreOf(p) }
-            .Concat(p.Joints.Select(j => j.anchor))).Where(t => t != null));
-        AeroPart? LeaderOf(AeroPart p) => p.Joints.Length > 0 ? p.Joints[0].connectedPart as AeroPart : null;
+            .Concat(p.Joints.Select(j => j.anchor))).Concat(aircraft.GetComponentsInChildren<JetNozzle>(true).Select(n => n.transform)).Where(t => t != null));
         foreach (string side in new[] { "L", "R" })
         {
             AeroPart? inner = parts.FirstOrDefault(p => p.name == "wing_spar_" + side);
@@ -84,27 +93,66 @@ sealed class WingDraw : MonoBehaviour
             foreach (AeroPart part in chain)
             {
                 AeroPart leader = LeaderOf(part)!;
-                MoveRootRenderer(part);
-                var groups = new List<(Transform, Transform)>();
-                Collect(part.transform, physics, groups);
-                if (groups.Count == 0) continue;
-                var (restPosition, restRotation) = Relative(part.transform, leader.transform);
-                var f = new Follower
-                {
-                    Part = part, Leader = leader, Inner = inner, LeaderFollower = mine.TryGetValue(leader, out var lf) ? lf : null,
-                    RestPosition = restPosition, RestRotation = restRotation, Groups = groups.ToArray(),
-                };
-                // the wingtip station where there is one, the tip a crank seam opens most at, else the first drawn child
-                f.Reference = f.Groups.SelectMany(g => g.Item2.Cast<Transform>()).FirstOrDefault(t => t.name.StartsWith("hardpoint_wingtip_"))
-                              ?? f.Groups[0].Item2.GetChild(0);
-                f.ReferenceRest = Relative(f.Reference, inner.transform).Position;
-                f.ReferenceLocal = Relative(f.Reference, part.transform).Position;
-                mine[part] = f;
-                followers.Add(f);
-                IcarusPlugin.Log.Info($"wing-draw authored: {part.name} on {leader.name}, {f.Groups.Sum(g => g.Item2.childCount)} draw roots; " +
-                    $"offset={f.RestPosition.ToString("F6")} rotation={f.RestRotation.ToString("F6")}");
+                Follow(part, leader, mine, new[] { (part, leader) }, inner, null, part.name.StartsWith("wing_skin_") ? "wing-skin-" : "wing-draw-", physics, false);
             }
         }
+
+        // the tail cone on the aft core with what hangs on it, then the afterburner and the nozzle on the tail cone
+        AeroPart? Named(string n) => parts.FirstOrDefault(p => p.name == n);
+        AeroPart? aft = Named("fuselage_aft"), tail = Named("fuselage_tail"), core = Named("engine_core"), afterburner = Named("engine_afterburner"), nozzle = Named("nozzle");
+        if (aft == null || tail == null || LeaderOf(tail) != aft) return;
+        var drawn = new Dictionary<AeroPart, Follower>();
+        Follower? cone = Follow(tail, aft, drawn, new[] { (tail, aft) }, aft, null, "tail-draw-", physics, true);
+        if (cone == null) return;
+        foreach (AeroPart rider in parts.Where(p => LeaderOf(p) == tail))
+            Follow(rider, tail, drawn, new[] { (rider, tail) }, tail, cone, "tail-draw-", physics, true);
+        if (core == null || afterburner == null || LeaderOf(core) != aft || LeaderOf(afterburner) != core) return;
+        var engine = new[] { (afterburner, core), (core, aft), (tail, aft) };
+        Follow(afterburner, tail, drawn, engine, tail, cone, "tail-draw-", physics, true);
+        if (nozzle != null && LeaderOf(nozzle) == afterburner)
+            Follow(nozzle, tail, drawn, engine.Prepend((nozzle, afterburner)).ToArray(), tail, cone, "tail-draw-", physics, true);
+    }
+
+    static AeroPart? LeaderOf(AeroPart p) => p.Joints.Length > 0 ? p.Joints[0].connectedPart as AeroPart : null;
+
+    // Draws part on leader (drawn itself where it is in mine) while every joint in holds stands; its seam is reported
+    // against against (drawn where againstFollower is given). keepColliders leaves any subtree with a collider on its body.
+    Follower? Follow(AeroPart part, AeroPart leader, Dictionary<AeroPart, Follower> mine, (AeroPart, AeroPart)[] holds,
+        AeroPart against, Follower? againstFollower, string kind, HashSet<Transform> physics, bool keepColliders)
+    {
+        MoveRootRenderer(part);
+        var groups = new List<(Transform, Transform)>();
+        Collect(part.transform, physics, groups, keepColliders);
+        if (groups.Count == 0) return null;
+        var (restPosition, restRotation) = Between(part.transform, leader.transform);
+        var f = new Follower
+        {
+            Part = part, Leader = leader, LeaderFollower = mine.TryGetValue(leader, out var lf) ? lf : null, Holds = holds,
+            Against = against, AgainstFollower = againstFollower, Kind = kind,
+            RestPosition = restPosition, RestRotation = restRotation, Groups = groups.ToArray(),
+        };
+        // the wingtip station where there is one, the tip a crank seam opens most at, else the first drawn child
+        f.Reference = f.Groups.SelectMany(g => g.Item2.Cast<Transform>()).FirstOrDefault(t => t.name.StartsWith("hardpoint_wingtip_"))
+                      ?? f.Groups[0].Item2.GetChild(0);
+        f.ReferenceRest = Between(f.Reference, against.transform).Position;
+        f.ReferenceLocal = Relative(f.Reference, part.transform).Position;
+        mine[part] = f;
+        followers.Add(f);
+        IcarusPlugin.Log.Info($"{kind.TrimEnd('-')} authored: {part.name} on {leader.name}, {f.Groups.Sum(g => g.Item2.childCount)} draw roots; " +
+            $"offset={f.RestPosition.ToString("F6")} rotation={f.RestRotation.ToString("F6")}");
+        return f;
+    }
+
+    // t's pose in other's frame, through their nearest common ancestor, each leg composed from local poses (Relative).
+    static (Vector3 Position, Quaternion Rotation) Between(Transform t, Transform other)
+    {
+        Transform? common = other;
+        while (common != null && !t.IsChildOf(common)) common = common.parent;
+        if (common == null) return (other.InverseTransformPoint(t.position), Quaternion.Inverse(other.rotation) * t.rotation);
+        var (tp, tr) = Relative(t, common);
+        var (op, or) = Relative(other, common);
+        Quaternion back = Quaternion.Inverse(or);
+        return (back * (tp - op), back * tr);
     }
 
     // t's pose in ancestor's frame, composed from the local poses between them. Before complex physics the parts are
@@ -124,17 +172,19 @@ sealed class WingDraw : MonoBehaviour
     }
 
     // Every child subtree of t that renders (or is a wingtip station) and holds nothing physics reads goes under a mover,
-    // one per parent, made at identity, so locally nothing moves. A child that holds a physics transform is entered
-    // instead, and another part's transform (parts are still nested until complex physics unparents them) is left alone.
-    static void Collect(Transform t, HashSet<Transform> physics, List<(Transform, Transform)> groups)
+    // one per parent, made at identity, so locally nothing moves. A child that holds a physics transform (or, with
+    // keepColliders, a collider) is entered instead, and another part's transform (parts are still nested until complex
+    // physics unparents them) is left alone, as is a collider's own transform with keepColliders.
+    static void Collect(Transform t, HashSet<Transform> physics, List<(Transform, Transform)> groups, bool keepColliders)
     {
         Transform? mover = null;
         foreach (Transform child in t.Cast<Transform>().ToArray())
         {
             if (child.GetComponent<UnitPart>() != null) continue;
-            if (child.GetComponentsInChildren<Transform>(true).Any(physics.Contains))
+            if (child.GetComponentsInChildren<Transform>(true).Any(physics.Contains) ||
+                keepColliders && child.GetComponentsInChildren<Collider>(true).Length > 0)
             {
-                Collect(child, physics, groups);
+                if (!keepColliders || child.GetComponent<Collider>() == null) Collect(child, physics, groups, keepColliders);
                 continue;
             }
             if (child.GetComponentsInChildren<Renderer>(true).Length == 0 && !child.name.StartsWith("hardpoint_")) continue;
@@ -194,11 +244,11 @@ sealed class WingDraw : MonoBehaviour
             if (f.Part == null) continue;
             Transform part = f.Part.transform;
             bool simple = f.Part.rb == null || f.Part.rb == aircraft.rb;
-            if (!f.Released && !simple && (f.Leader == null || f.Part.IsDetached() || f.Leader.IsDetached() ||
-                                           !f.Part.Joints.Any(j => j.connectedPart == f.Leader && j.joint != null)))
+            if (!f.Released && !simple && (f.Leader == null || f.Leader.IsDetached() || f.Holds.Any(h => h.Part == null || h.To == null ||
+                    h.Part.IsDetached() || h.To.IsDetached() || !h.Part.Joints.Any(j => j.connectedPart == h.To && j.joint != null))))
             {
                 f.Released = true;
-                IcarusPlugin.Log.Info($"wing-draw released: {f.Part.name}; draws on its own body");
+                IcarusPlugin.Log.Info($"{f.Kind.TrimEnd('-')} released: {f.Part.name}; draws on its own body");
             }
             if (f.Released || simple)
             {
@@ -228,14 +278,18 @@ sealed class WingDraw : MonoBehaviour
         foreach (Follower f in followers)
         {
             // simple physics draws every part on the one body: nothing to report
-            if (f.Part == null || f.Inner == null || f.Reference == null || f.Part.rb == null || f.Part.rb == aircraft.rb) continue;
-            Transform inner = f.Inner.transform;
-            // drawn: how far the drawn reference sits off its rest in the inner box's frame; physical: the part's body's
-            float drawn = (inner.InverseTransformPoint(f.Reference.position) - f.ReferenceRest).magnitude * 1000f;
-            float physical = (inner.InverseTransformPoint(f.Part.transform.TransformPoint(f.ReferenceLocal)) - f.ReferenceRest).magnitude * 1000f;
-            string kind = f.Part.name.StartsWith("wing_skin_") ? "wing-skin-" : "wing-draw-";
-            // the spacing of float32 world positions where the inner box is, the finest any two bodies can be drawn apart
-            Vector3 at = inner.position;
+            if (f.Part == null || f.Against == null || f.Reference == null || f.Part.rb == null || f.Part.rb == aircraft.rb) continue;
+            Transform against = f.Against.transform;
+            // drawn: how far the drawn reference sits off its rest in Against's drawn frame; physical: the part's body's in
+            // Against's body's
+            Follower? on = f.AgainstFollower;
+            Vector3 drawnAt = on != null ? on.DrawnPosition : against.position;
+            Quaternion drawnTurn = on != null ? on.DrawnRotation : against.rotation;
+            float drawn = (Quaternion.Inverse(drawnTurn) * (f.Reference.position - drawnAt) - f.ReferenceRest).magnitude * 1000f;
+            float physical = (against.InverseTransformPoint(f.Part.transform.TransformPoint(f.ReferenceLocal)) - f.ReferenceRest).magnitude * 1000f;
+            string kind = f.Kind;
+            // the spacing of float32 world positions where Against is, the finest any two bodies can be drawn apart
+            Vector3 at = against.position;
             float far = Mathf.Max(Mathf.Abs(at.x), Mathf.Abs(at.y), Mathf.Abs(at.z));
             float ulp = (System.BitConverter.Int32BitsToSingle(System.BitConverter.SingleToInt32Bits(far) + 1) - far) * 1000f;
             IcarusPlugin.Log.Stage(kind + f.Part.name, $"g={load:F3} physical_mm={physical:F4} attached={!f.Released} drawn_mm={drawn:F4} ulp_mm={ulp:F4}");

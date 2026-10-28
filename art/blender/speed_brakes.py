@@ -14,8 +14,8 @@ lies on them. The parts follow the stock aircraft (the FS-12 Revoker's panel and
   floor that the cylinder lies in shut, down to the anchor fitting on frame 13.0 (Patch.channel). Its airframe stands
   on them a step lighter, on Icarus_WellDetail: ribs with rivet rows, two hydraulic lines and the anchor fitting
   (well_detail); the fixed hinge knuckles and the fitting's pin heads are on jet_mechanical. It joins the
-  fuselage_aft core (merge_into) and faces inward; clear_wells cuts the core's frames and stringers back from it.
-- speed_brake_<side>_cylinder on fuselage_aft and speed_brake_<side>_rod on the hinge: the actuator, each with its
+  fuselage_tail core (merge_into) and faces inward; clear_wells cuts the cores' frames and stringers back from it.
+- speed_brake_<side>_cylinder on the tail cone (fuselage_aft until the late split) and speed_brake_<side>_rod on the hinge: the actuator, each with its
   origin at its eye and local Y along its axis toward the other's eye. The game turns only the hinge, so in Unity
   each aims at the other's eye with an AimConstraint that the Airbrake enables while the brakes are open, as the
   stock VTOLTrainer1 aims its piston (IcarusAuthor.Aero.cs BuildSpeedBrakes). aim_actuators() poses them the same
@@ -88,7 +88,7 @@ KNUCKLE_DEG = {"panel": (-90.0, 110.0), "fixed": (65.0, 265.0)}
 RIBS = {"at": (0.26, 0.43), "width": 0.02, "height": 0.008, "rivet_pitch": 0.03, "rivet_r": 0.0025, "rivet_end": 0.03}
 LINES = {"r": 0.004, "sides": 5, "runs": ((0.10, -0.060, 0.057, -0.034, 0.008), (0.124, -0.070, 0.114, -0.044, -0.010))}
 NAMES = {side: ("speed_brake_" + side, "speed_brake_%s_rod" % side, "speed_brake_%s_cylinder" % side) for side in "LR"}
-# Triangles per brake: panel and actuator (the well counts in the fuselage_aft core's, its lip in the skin's). The panel
+# Triangles per brake: panel and actuator (the well counts in the fuselage_tail core's, its lip in the skin's). The panel
 # takes the skin's rings over it (build_icarus TAIL_FINE).
 BUDGET = {name: {"target": 528, "cap": 528, "exact": (name + "_visible", rod, cylinder)}
           for name, rod, cylinder in NAMES.values()}
@@ -505,11 +505,11 @@ def build(p, mats):
     for obj, reach in ((rod_obj, rod_length), (cylinder_obj, gland)):
         obj["role"] = "visual"
         obj["reach_m"] = round(reach, 5)  # how far it runs from its eye along its axis
-    cylinder_obj["parent_part"] = "fuselage_aft"  # parts.organise hangs it there
+    cylinder_obj["parent_part"] = "fuselage_aft"  # parts.organise hangs it there; the tail cone's in a split build
     well_obj = well.realise("speed_brake_well_L", (dark, mech, mats["well_detail"]))
     hardware = well_obj.data.attributes.new(name="exterior_hardware", type="INT", domain="FACE")
     hardware.data.foreach_set("value", [int(i >= hardware_start) for i in range(len(well.faces))])
-    well_obj["merge_into"] = "fuselage_aft"
+    well_obj["merge_into"] = "fuselage_tail"
     lip_obj = lip_shell.realise("speed_brake_well_lip_L", (skin,))
     lip_obj["merge_into"] = "skin_aft_L"
     left += [rod_obj, cylinder_obj, well_obj, lip_obj]
@@ -645,22 +645,24 @@ def cut_holes(patch):
 
 
 def clear_wells(icarus):
-    """Cut the fuselage_aft core's frames, stringers and break walls (its Icarus_Frame faces) back SHAPE["clear"] from
-    both wells and their channels, so an open well shows only its own walls, as parts.open_bays clears the gear bays.
-    Render mesh only: run after the hulls, which keep the whole frames."""
+    """Cut the fuselage_tail and fuselage_aft cores' frames, stringers and break walls (their Icarus_Frame faces) back
+    SHAPE["clear"] from both wells and their channels, so an open well shows only its own walls, as parts.open_bays
+    clears the gear bays. The wells lie behind the tail cone's break, but frame 19's flange runs on into them from
+    fuselage_aft. Render meshes only: run after the hulls, which keep the whole frames."""
     import internals
     import parts
 
     patch = Patch(bi.PARAMS)
-    cutters = []
-    for side in (1, -1):
-        for verts, faces in patch.voids(side):
-            void = bi.mesh_object("speed_brake_void", verts, faces)  # world space, as cut_shells wants
-            cutters.append(internals.grown(void, SHAPE["clear"]))
-            me = void.data
-            bpy.data.objects.remove(void)
-            bpy.data.meshes.remove(me)
-    parts.cut_structure(icarus, bpy.data.objects["fuselage_aft"], cutters)
+    for core in ("fuselage_aft", "fuselage_tail"):
+        cutters = []  # cut_structure uses them up
+        for side in (1, -1):
+            for verts, faces in patch.voids(side):
+                void = bi.mesh_object("speed_brake_void", verts, faces)  # world space, as cut_shells wants
+                cutters.append(internals.grown(void, SHAPE["clear"]))
+                me = void.data
+                bpy.data.objects.remove(void)
+                bpy.data.meshes.remove(me)
+        parts.cut_structure(icarus, bpy.data.objects[core], cutters)
 
 
 def aim_actuators():
@@ -800,7 +802,9 @@ def check(icarus):
     patch = Patch(bi.PARAMS)
     problems = outline_on_panel_lines(bi.PARAMS, patch)
     O = bpy.data.objects
-    fixed = {n: checks.tree(O[n]) for n in ("fuselage_aft", "skin_aft_L", "skin_aft_R", "engine_core")}
+    fixed = {n: checks.tree(O[n]) for n in ("fuselage_aft", "fuselage_tail")}
+    fixed.update({n: checks.tree(parts.family_objects(icarus, n)) for n in ("skin_aft_L", "skin_aft_R")})
+    fixed["engine_core"] = checks.tree([O["engine_core"], O["engine_afterburner"]])
     engine = fixed["engine_core"]
     nearest = min(engine.find_nearest(Vector((side * q.x, q.y, q.z)))[3] for q in channel_floor(patch) for side in (1, -1))
     if nearest < SHAPE["engine_clear"]:

@@ -1,0 +1,36 @@
+// Speed brakes at 250 m/s: the Icarus holds 3,000 m heading east near 250 m/s, half fuel, clean
+// (icarus_ignus_3km_250.mission.json), then cuts the throttle to 0, which opens the speed brakes (the stock Airbrake opens
+// them while the throttle is at 0), and brings it back, which closes them. The brakes ride the tail cone (fuselage_tail).
+// Pass: nothing detached, no damage and no joint broken with the brakes open and after they close; screenshots of the
+// tail open and closed, the first one 40 s after setup, once the join notice has gone.
+// From the repo root: no-agentic run tests/scenarios/speed_brakes_250.scenario.jsonc
+{
+  "mission": "icarus_ignus_3km_250.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 150,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 2800 } ] },
+      "label": "the Icarus airborne at 3 km" },
+    { "mark": { "label": "start" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0.55 } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 16, "hdg_deg": 150, "pitch_deg": 12 } },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 40, "timeout": 45, "label": "40 s level; the join notice has gone" },
+    { "mark": { "label": "open" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0 } },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 5, "timeout": 7, "label": "5 s at throttle 0, the brakes open" },
+    { "screenshot": { "name": "open" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 3,
+      "label": "intact with the brakes open" },
+    { "mark": { "label": "close" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0.55 } },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 5, "timeout": 7, "label": "5 s back on the throttle, the brakes closed" },
+    { "screenshot": { "name": "closed" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } },
+                          { "not": { "log": "joint-break", "since": "start" } } ] }, "label": "intact after they close, no joint broken" },
+  ],
+}
