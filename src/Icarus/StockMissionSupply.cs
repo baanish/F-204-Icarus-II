@@ -8,7 +8,7 @@ namespace Icarus;
 
 /// <summary>
 /// Puts the Icarus into Primeva's AI supply in the stock operations and has one Primeva Revoker factory in each build
-/// Icarus instead, behind Missions.StockMissionSupply, default on (owner, 2026-10-20; .internal research R3). The host's
+/// Icarus instead, behind Missions.StockMissionSupply, default on (owner, 2026-10-20). The host's
 /// setting decides, read at each mission load. Only the built-in missions in <see cref="Factories"/> change: the
 /// numbered scenarios, Altercation and Carrier Duel keep their stock supply, and the mission editor is left alone, since
 /// it saves a factory's live production type back into the mission (Building.CreateBuiltInSavedUnit).
