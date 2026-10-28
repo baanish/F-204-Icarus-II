@@ -218,6 +218,8 @@ namespace Icarus.Editor
             Num(so, "shortLandingSpeed", ApproachAtLowFuel);
             // Full dry: throttleRemap ends at 0.88 and the afterburner starts at 0.9 (R7).
             Num(so, "cruiseThrottle", 0.85f);
+            // Tier 2, the owner's call: unlocked a rank before the Revoker it is built on, beside the Brawler.
+            Prop(so, "rankRequired").intValue = 2;
             so.ApplyModifiedPropertiesWithoutUndo();
             Debug.Log($"[Icarus] stage: parameters {Airfoils.Length} airfoils, {StandardLoadouts.Length} standard loadouts, landingSpeed {LandingSpeedField:F1} (75 m/s at {LowFuelLandingMass:0} kg of {MaxWeight:0})");
             return SaveAsset(parameters, ParametersPath);

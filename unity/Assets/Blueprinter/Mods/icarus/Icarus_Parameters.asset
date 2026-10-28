@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Icarus_Parameters
   m_EditorClassIdentifier: 
   aircraftName: baanish_icarus
-  rankRequired: 3
+  rankRequired: 2
   airfoils:
   - name: Icarus_wing
     liftCoef:
