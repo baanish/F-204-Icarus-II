@@ -310,7 +310,9 @@ def main():
         for hp_name, hp in hardpoints:
             pos, rot, _ = plane.world(hp)
             side = "L" if pos[0] < 0 else "R"
-            skin = plane.posed(plane.find("wing_skin_" + side))[0]
+            # the wing skin, whole or in its pieces (wing_skin_<piece>_<side>)
+            skin = np.concatenate([plane.posed(plane.find(n))[0] for n in sorted({n["name"] for n in plane.nodes.values()})
+                                   if n.startswith("wing_skin_") and n.endswith("_" + side) and n != "wing_skin_visible"])
             outer = np.abs(skin[:, 0]).max()
             face = skin[np.abs(skin[:, 0]) > outer - 0.001]
             le, te = face[:, 2].max(), face[:, 2].min()

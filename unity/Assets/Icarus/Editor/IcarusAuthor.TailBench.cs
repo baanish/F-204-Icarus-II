@@ -52,7 +52,12 @@ namespace Icarus.Editor
         // alone), loads it as each case says and reports each watched part's turn against the root over the last second:
         // its mean roll about the fuselage axis, its largest turn about any axis (into worst, by "case part") and its
         // roll's peak-to-peak (wobble), with each joint's mean load there against its in-game break force.
-        private static string RunTailBench(GameObject prefab, string[] watched, string[] trimParts, bool icarusAnchors, float fuelFraction, Dictionary<string, float> worst)
+        // stores: kg a part carries at its centre-of-mass marker besides its fuel (UnitPart.ModifyMass, as a mounted store's
+        // mass is). seams: each outer part's point (a transform under it) whose movement in the inner part's frame, mm from
+        // its rest, goes into worst by "case |seam| outer", with the outer part's joint load against its break force by
+        // "case |load| outer".
+        private static string RunTailBench(GameObject prefab, string[] watched, string[] trimParts, bool icarusAnchors, float fuelFraction, Dictionary<string, float> worst,
+            Dictionary<string, float> stores = null, (string Outer, string Inner, string Point)[] seams = null)
         {
             var report = new StringBuilder();
             foreach (var bench in BenchCases)
@@ -62,7 +67,8 @@ namespace Icarus.Editor
                 {
                     var copy = (GameObject)Object.Instantiate(prefab, Vector3.zero, Quaternion.identity);
                     SceneManager.MoveGameObjectToScene(copy, scene);
-                    report.Append(BenchRun(copy, scene.GetPhysicsScene(), bench, watched, trimParts, icarusAnchors, fuelFraction, worst));
+                    report.Append(BenchRun(copy, scene.GetPhysicsScene(), bench, watched, trimParts, icarusAnchors, fuelFraction, worst,
+                        stores ?? new Dictionary<string, float>(), seams ?? new (string, string, string)[0]));
                 }
                 finally
                 {
@@ -73,7 +79,7 @@ namespace Icarus.Editor
         }
 
         private static string BenchRun(GameObject root, PhysicsScene physics, BenchCase bench, string[] watched, string[] trimParts, bool icarusAnchors,
-            float fuelFraction, Dictionary<string, float> worst)
+            float fuelFraction, Dictionary<string, float> worst, Dictionary<string, float> stores, (string Outer, string Inner, string Point)[] seams)
         {
             var parts = root.GetComponentsInChildren(GameType("AeroPart"), true)
                 .ToDictionary(c => c.gameObject == root ? "root" : c.gameObject.name, c => new BenchPart { Name = c.gameObject.name, Part = c });
@@ -112,7 +118,7 @@ namespace Icarus.Editor
                     rb = p.Part.gameObject.AddComponent<Rigidbody>();
                 rb.isKinematic = false;
                 rb.useGravity = false;
-                rb.mass = Prop(so, "mass").floatValue + (fuel.TryGetValue(p.Part, out var kg) ? kg : 0);
+                rb.mass = Prop(so, "mass").floatValue + (fuel.TryGetValue(p.Part, out var kg) ? kg : 0) + (stores.TryGetValue(p.Name, out var store) ? store : 0);
                 rb.drag = 0;
                 rb.angularDrag = 0;
                 rb.sleepThreshold = 0;
@@ -123,7 +129,7 @@ namespace Icarus.Editor
                 rb.ResetInertiaTensor();
                 // UnitPart.ModifyMass, from a tank's fuel.
                 var com = (Transform)Prop(so, "centerOfMass").objectReferenceValue;
-                var fuelled = fuel.ContainsKey(p.Part) && com != null;
+                var fuelled = (fuel.ContainsKey(p.Part) || stores.ContainsKey(p.Name)) && com != null;
                 if (fuelled)
                     rb.centerOfMass = com.localPosition;
                 SectionInertia.Pin(rb, SectionInertia.BoxesUnder(new[] { p.Part }), automaticCenter: !fuelled);
@@ -184,6 +190,11 @@ namespace Icarus.Editor
             var watch = watched.Where(parts.ContainsKey).ToArray();
             var rest = watch.ToDictionary(n => n, n => Relative(parts[n].Rb));
             var turns = watch.ToDictionary(n => n, n => new List<(float Angle, float Roll)>());
+            var seamPoints = seams.Where(s => parts.ContainsKey(s.Outer) && parts.ContainsKey(s.Inner))
+                .Select(s => (s.Outer, s.Inner, Point: FindDeep(parts[s.Outer].Part.transform, s.Point))).Where(s => s.Point != null).ToArray();
+            Vector3 InInner((string Outer, string Inner, Transform Point) s) => parts[s.Inner].Part.transform.InverseTransformPoint(s.Point.position);
+            var seamRest = seamPoints.ToDictionary(s => s.Outer, InInner);
+            var seamMoved = seamPoints.ToDictionary(s => s.Outer, s => 0f);
             var load = joints.ToDictionary(j => j.Joint, j => (Force: 0f, Torque: 0f, Samples: 0));
             var steps = Mathf.RoundToInt(bench.Seconds / BenchStep);
             for (var step = 0; step < steps; step++)
@@ -209,6 +220,8 @@ namespace Icarus.Editor
                     var l = load[j.Joint];
                     load[j.Joint] = (l.Force + j.Joint.currentForce.magnitude, l.Torque + j.Joint.currentTorque.magnitude, l.Samples + 1);
                 }
+                foreach (var s in seamPoints)
+                    seamMoved[s.Outer] = Mathf.Max(seamMoved[s.Outer], (InInner(s) - seamRest[s.Outer]).magnitude * 1000f);
                 foreach (var n in watch)
                 {
                     (Relative(parts[n].Rb) * Quaternion.Inverse(rest[n])).ToAngleAxis(out var angle, out var axis);
@@ -224,8 +237,16 @@ namespace Icarus.Editor
                 worst[bench.Name + " " + n] = s.Max(x => x.Angle);
                 line.Append($" {n} roll {s.Average(x => x.Roll):+0.00;-0.00} deg, max {s.Max(x => x.Angle):0.00}, wobble {s.Max(x => x.Roll) - s.Min(x => x.Roll):0.00};");
             }
+            foreach (var s in seamPoints)
+            {
+                var j = joints.First(x => x.Owner == s.Outer && x.To == s.Inner);
+                var share = Mathf.Max(load[j.Joint].Force, load[j.Joint].Torque) / load[j.Joint].Samples / j.Break;
+                worst[bench.Name + " |seam| " + s.Outer] = seamMoved[s.Outer];
+                worst[bench.Name + " |load| " + s.Outer] = share;
+                line.Append($" {s.Outer} tip {seamMoved[s.Outer]:0.00} mm off {s.Inner}, joint at {share:0.00} of its break;");
+            }
             line.AppendLine();
-            foreach (var j in joints.Where(j => watch.Contains(j.Owner) || watch.Contains(j.To)))
+            foreach (var j in joints.Where(j => watch.Contains(j.Owner) || watch.Contains(j.To) || seamPoints.Any(s => s.Outer == j.Owner)))
                 line.AppendLine($"    joint {j.Owner} -> {j.To}: {load[j.Joint].Force / load[j.Joint].Samples / 1000:0.0} kN, {load[j.Joint].Torque / load[j.Joint].Samples / 1000:0.0} kN m (breaks at {j.Break / 1000:0} in game)");
             return line.ToString();
         }
@@ -243,7 +264,34 @@ namespace Icarus.Editor
             foreach (var w in worst.Where(w => w.Value > TailFlexLimitDeg))
                 p.Add($"{w.Key}: turns {w.Value:0.00} deg against the root, over {TailFlexLimitDeg}");
             var top = worst.OrderByDescending(w => w.Value).First();
-            return $"{string.Join(", ", TailParts)} within {TailFlexLimitDeg} deg of the root in {BenchCases.Length} bench cases at half fuel; worst {top.Key} {top.Value:0.00} deg";
+            return $"{string.Join(", ", TailParts)} within {TailFlexLimitDeg} deg of the root in {BenchCases.Length} bench cases at half fuel; worst {top.Key} {top.Value:0.00} deg"
+                + "; " + CheckCrankSeam(b, p);
+        }
+
+        // The outer wing box hangs on the inner at the crank, and the wingtip station's store rides it (a full tip tank is
+        // 570 kg, an empty one 70; art/blender/tip_tanks.py): its joint may carry at most half its break force on any bench
+        // case, empty and full. Its tip's movement against the inner box, the physical seam where the two meet, is reported:
+        // no solver setting or second brace brought it under 5 mm with a full tank (4.3 mm empty and 6.3 full at 48
+        // position and 16 velocity iterations, 5.3 and 8.1 as the game runs them), so src/Icarus/WingSkinFollow.cs draws
+        // the outer box on the inner while they are jointed and the seam never shows.
+        private const float CrankLoadLimit = 0.5f;
+        private static readonly float[] TipStores = { 70f, 570f };
+
+        private static string CheckCrankSeam(Build b, List<string> p)
+        {
+            var seams = new[] { "L", "R" }.Select(s => ("wing_spar_outer_" + s, "wing_spar_" + s, "hardpoint_wingtip_" + s)).ToArray();
+            var lines = new List<string>();
+            foreach (var kg in TipStores)
+            {
+                var worst = new Dictionary<string, float>();
+                var stores = seams.ToDictionary(s => s.Item1, s => kg);
+                Debug.Log($"[Icarus] crank bench, tip stores {kg} kg:\n" + RunTailBench(b.Root, new string[0], new[] { "stabilator" }, true, 0.5f, worst, stores, seams));
+                var seam = worst.Where(w => w.Key.Contains(" |seam| ")).OrderByDescending(w => w.Value).First();
+                var load = worst.Where(w => w.Key.Contains(" |load| ")).OrderByDescending(w => w.Value).First();
+                if (load.Value > CrankLoadLimit) p.Add($"tip stores {kg} kg: {load.Key} {load.Value:0.00} of its break, over {CrankLoadLimit}");
+                lines.Add($"tip stores {kg} kg: physical seam {seam.Value:0.00} mm ({seam.Key}), {load.Key} {load.Value:0.00}");
+            }
+            return "wing crank " + string.Join("; ", lines);
         }
 
         // Batch entry, which authors nothing: pwsh tools/Build-Icarus.ps1 -ExecuteMethod Icarus.Editor.IcarusAuthor.TailBenchFromBatch

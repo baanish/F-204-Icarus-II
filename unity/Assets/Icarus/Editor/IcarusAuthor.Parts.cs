@@ -20,12 +20,15 @@ namespace Icarus.Editor
         // section tore off at hp 100 in a full-stick 8.4 g pull at Mach 1.25, the tailless jet then shedding its wings
         // (tests/scenarios/full_stick_low_fast.scenario.jsonc). The forward section breaks at 60, the cockpit at the VT-7
         // Vagrant's 50.
-        private enum JointClass { Frame, ForwardSection, Section, Spar, Primary, Surface, Flap, Panel }
+        // OuterWing joins the outer wing box to the inner at the crank: stock outer wing joints are 35 to 50 kN, and at 9 g
+        // and 8 t the outer box's lift about 0.6 m out from the crank is about 81 kN, with up to 690 kg of tip tank and box
+        // on it (art/blender/parts.py TREE, the breakup design's joint table).
+        private enum JointClass { Frame, ForwardSection, Section, Spar, OuterWing, Primary, Surface, Flap, Panel }
 
         private static readonly Dictionary<JointClass, float> JointForces = new Dictionary<JointClass, float>
         {
             { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 60000f }, { JointClass.Section, 50000f },
-            { JointClass.Spar, 100000f }, { JointClass.Primary, 40000f },
+            { JointClass.Spar, 100000f }, { JointClass.OuterWing, 60000f }, { JointClass.Primary, 40000f },
             { JointClass.Surface, 30000f }, { JointClass.Flap, 15000f }, { JointClass.Panel, 10000f },
         };
         // The forward section's Revoker "fuselage" armour keeps two thirds of its joint at 0 HP (structuralThreshold -200);
@@ -38,11 +41,21 @@ namespace Icarus.Editor
         // rolled off the root in a 9 g pull, swinging through 8 deg, while fin_spar stayed within 0.2 (check A18). Each
         // also joins fuselage_aft, as the Revoker joins every fin piece to its root. The cross joint is the part's own, at
         // its own class, so its hit points weaken it, and its tensor is fin_spar (the stock rule: the owner's ancestor
-        // under the two parts' common ancestor), so it lets go when the fin does.
-        private static readonly (string Owner, string To, string Tensor)[] TailBraces =
+        // under the two parts' common ancestor), so it lets go when the fin does. Each outer wing box (117 kg, its fuel and
+        // up to a 570 kg tip tank) hangs on an inner box of 113, the heavy child on a light link the solver holds worst, so
+        // it also joins the root, as the Revoker's wing2 does, with the inner box as its tensor (check A18 benches the crank).
+        // That brace takes the most of the outer wing's load: 0.98 of an OuterWing joint's limit in a full-stick pull with
+        // full tip tanks and fuel (tests/scenarios/full_stick_low_fast_tip_tanks.scenario.jsonc), so it holds at Spar class.
+        // A brace with no class of its own takes its owner's.
+        private static readonly (string Owner, string To, string Tensor, JointClass? Class)[] Braces =
         {
-            ("stabilator", "fuselage_aft", "fin_spar"), ("rudder", "fuselage_aft", "fin_spar"), ("fin_skin", "fuselage_aft", "fin_spar"),
+            ("stabilator", "fuselage_aft", "fin_spar", null), ("rudder", "fuselage_aft", "fin_spar", null), ("fin_skin", "fuselage_aft", "fin_spar", null),
+            ("wing_spar_outer_L", RootPart, "wing_spar_L", JointClass.Spar), ("wing_spar_outer_R", RootPart, "wing_spar_R", JointClass.Spar),
         };
+
+        // The strength class of a part's joint i: its own for its parent joint, its brace's for a brace.
+        private static JointClass JointClassOf(PartSpec spec, int i) =>
+            i == 0 ? spec.Joint : Braces.Where(t => t.Owner == spec.Name).ElementAt(i - 1).Class ?? spec.Joint;
 
         private sealed class PartSpec
         {
@@ -83,15 +96,23 @@ namespace Icarus.Editor
             P("intake_duct_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("intake_duct_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("wing_spar_L", RootPart, JointClass.Spar, "fuselage/wing1a_L"),
-            P("wing_skin_L", "wing_spar_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("aileron_L", "wing_spar_L", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
+            P("wing_spar_outer_L", "wing_spar_L", JointClass.OuterWing, "fuselage/wing1a_L/wing2_L/wingtip_L"),
+            P("wing_skin_inner_upper_L", "wing_spar_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("wing_skin_inner_lower_L", "wing_spar_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("wing_skin_outer_upper_L", "wing_spar_outer_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("wing_skin_outer_lower_L", "wing_spar_outer_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("aileron_L", "wing_spar_outer_L", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("flap_L", "wing_spar_L", JointClass.Flap, "fuselage/wing1a_L/wing2_L/flap_L"),
-            P("lef_L", "wing_spar_L", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
+            P("lef_L", "wing_spar_outer_L", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("wing_spar_R", RootPart, JointClass.Spar, "fuselage/wing1a_L"),
-            P("wing_skin_R", "wing_spar_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("aileron_R", "wing_spar_R", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
+            P("wing_spar_outer_R", "wing_spar_R", JointClass.OuterWing, "fuselage/wing1a_L/wing2_L/wingtip_L"),
+            P("wing_skin_inner_upper_R", "wing_spar_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("wing_skin_inner_lower_R", "wing_spar_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("wing_skin_outer_upper_R", "wing_spar_outer_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("wing_skin_outer_lower_R", "wing_spar_outer_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
+            P("aileron_R", "wing_spar_outer_R", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("flap_R", "wing_spar_R", JointClass.Flap, "fuselage/wing1a_L/wing2_L/flap_L"),
-            P("lef_R", "wing_spar_R", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
+            P("lef_R", "wing_spar_outer_R", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("gear_leg_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("gear_leg_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("fuel_forward_main", RootPart, JointClass.Primary, "wing1b_L"),
@@ -165,7 +186,7 @@ namespace Icarus.Editor
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
             }
-            foreach (var brace in TailBraces)
+            foreach (var brace in Braces)
                 b.Joints[brace.Owner].Add(brace.To);
             b.Report.Add($"parts: {b.Specs.Count} AeroParts ({Tree.Length} on the R13 tree), {b.Mass.Values.Sum():0} kg dry, " +
                 $"tanks {string.Join(", ", b.Tanks.Select(t => t + " " + b.Blockout.Parts[t].Number("fuel_kg")))}");
@@ -319,7 +340,7 @@ namespace Icarus.Editor
             b.Report.Add("damage: armour from " + string.Join("; ", b.Specs.GroupBy(s => s.Armour).Select(g => (g.Key == "" ? "Fighter1" : g.Key) + " -> " + string.Join(", ", g.Select(s => s.Name)))));
         }
 
-        // Serialized PartJoints: one per part to its parent part (AeroPart.Awake reads joints[0]), then its TailBraces, each
+        // Serialized PartJoints: one per part to its parent part (AeroPart.Awake reads joints[0]), then its Braces, each
         // pinned where the two parts' colliders meet. No other cross joints brace touching neighbours: the
         // Icarus's parts ignore one another's colliders at spawn (src/Icarus/SelfCollision.cs), so a neighbour can't push
         // them apart, and a section shed in a breakup takes nothing but its children with it.
@@ -338,10 +359,10 @@ namespace Icarus.Editor
                 joints.arraySize = list.Count;
                 for (var i = 0; i < list.Count; i++)
                 {
-                    var force = JointForces[spec[entry.Key].Joint];
+                    var force = JointForces[JointClassOf(spec[entry.Key], i)];
                     var joint = joints.GetArrayElementAtIndex(i);
                     joint.FindPropertyRelative("connectedPart").objectReferenceValue = b.Part(list[i]);
-                    joint.FindPropertyRelative("tensor").objectReferenceValue = i == 0 ? null : b.Part(TailBraces.Single(t => t.Owner == entry.Key && t.To == list[i]).Tensor);
+                    joint.FindPropertyRelative("tensor").objectReferenceValue = i == 0 ? null : b.Part(Braces.Single(t => t.Owner == entry.Key && t.To == list[i]).Tensor);
                     joint.FindPropertyRelative("solverIterations").intValue = JointSolverIterations;
                     joint.FindPropertyRelative("breakForce").floatValue = force;
                     joint.FindPropertyRelative("breakTorque").floatValue = force;
@@ -352,7 +373,7 @@ namespace Icarus.Editor
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
             b.Report.Add("joints: " + string.Join(", ", Enum.GetValues(typeof(JointClass)).Cast<JointClass>().Select(c => $"{c} {JointForces[c] / 1000:0} kN")) + $", {JointSolverIterations} solver iterations; " +
-                "tail cross joints " + string.Join(", ", TailBraces.Select(t => $"{t.Owner} -> {t.To} (tensor {t.Tensor})")));
+                "cross joints " + string.Join(", ", Braces.Select(t => $"{t.Owner} -> {t.To} (tensor {t.Tensor})")));
         }
 
         // Where two parts meet: the middle of their colliders' common bounds, or of the gap between them.

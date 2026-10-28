@@ -1387,7 +1387,9 @@ def door_wing():
     O = bpy.data.objects
     problems, report = [], {}
     for leg in ("L", "R"):
-        wing = tree(O["wing_skin_" + leg])
+        from parts import family_objects
+
+        wing = tree(family_objects(bpy.data.collections["Icarus"], "wing_skin_" + leg))
         for i in range(11):
             with posed({d: i / 10 for d in doors_of(leg)}):
                 for d in doors_of(leg):

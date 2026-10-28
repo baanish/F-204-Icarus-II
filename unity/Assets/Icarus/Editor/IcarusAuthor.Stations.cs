@@ -170,7 +170,7 @@ namespace Icarus.Editor
             // owner redefined it); its roll turns the mount's rail onto the face, so the store hangs beside the tip.
             Vector3 TipPoint(string side)
             {
-                var vertices = WorldVertices(b.Parts["wing_skin_" + side].transform, b.Meshes["wing_skin_" + side].Render);
+                var vertices = FamilyVertices(b, "wing_skin_" + side);
                 var outer = vertices.Max(v => Mathf.Abs(v.x));
                 var tip = vertices.Where(v => Mathf.Abs(v.x) > outer - 0.001f).ToArray();
                 var leading = tip.Max(v => v.z);
@@ -211,7 +211,7 @@ namespace Icarus.Editor
             // the forward axis; the right one turns the other way.
             var sets = new (string Name, string Part, string Pylon, Func<string, Vector3> Where, float Roll)[]
             {
-                (SetNames[0], "wing_spar_", null, TipPoint, WingtipRoll),
+                (SetNames[0], "wing_spar_outer_", null, TipPoint, WingtipRoll),
                 (SetNames[1], "wing_spar_", "pylon_inner_", s => PylonPoint("pylon_inner_" + s), 0f),
                 (SetNames[2], RootPart, null, ConformalPoint, 0f),
             };

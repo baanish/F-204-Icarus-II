@@ -73,8 +73,8 @@ class SplitAndMargin(unittest.TestCase):
         for loop, n in zip(obj.data.loops, obj.data.corner_normals):
             normals[tuple(round(c, 6) for c in obj.data.vertices[loop.vertex_index].co)] = n.vector.copy()
         made = parts.cut_family(self.col, obj, [((1.5, 0, 0), (1, 0, 0))],
-                                [("skin_test_front_L", "split_root", lambda c: c.x < 1.5),
-                                 ("skin_test_rear_L", "split_root", lambda c: True)])
+                                [("skin_test_front_L", "split_root", lambda c, side: c.x < 1.5),
+                                 ("skin_test_rear_L", "split_root", lambda c, side: True)])
         return made, before, normals
 
     def test_cut_interpolates_uvs_and_normals_and_shares_mass(self):

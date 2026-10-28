@@ -402,6 +402,7 @@ namespace Icarus.Editor
                 b.Donor = CaptureDonor(b, templates);
                 StripDonor(b);
                 BuildParts(b);
+                b.Report.Add("family moments: " + string.Join("; ", KeepFamilyMoments(b)));
                 BuildSurfaces(b);
                 SetAero(b);
                 BuildEngine(b);
@@ -563,6 +564,36 @@ namespace Icarus.Editor
 
         // A mesh's vertices in world space through the transform that draws it.
         private static Vector3[] WorldVertices(Transform t, Mesh mesh) => mesh.vertices.Select(t.TransformPoint).ToArray();
+
+        // A skin family is cut into pieces named <family>_<piece>_<side> (art/blender/parts.py split_pieces); SkinFamily is
+        // parts.family: a skin's name less its piece codes, whole tokens only, and any other name as it is.
+        private static readonly string[] PieceCodes = { "front", "rear", "belly", "inner", "outer", "upper", "lower" };
+
+        private static string SkinFamily(string name) =>
+            name.StartsWith("skin_", StringComparison.Ordinal) || name.StartsWith("wing_skin_", StringComparison.Ordinal) || name.StartsWith("dorsal_cover", StringComparison.Ordinal)
+                ? string.Join("_", name.Split('_').Where(t => Array.IndexOf(PieceCodes, t) < 0))
+                : name;
+
+        // The parts of one skin family: its pieces, or the family itself where the export keeps it whole.
+        private static string[] FamilyParts(Build b, string family) =>
+            b.Specs.Select(s => s.Name).Where(n => SkinFamily(n) == family).OrderBy(n => n, StringComparer.Ordinal).ToArray();
+
+        private static Vector3[] FamilyVertices(Build b, string family) =>
+            FamilyParts(b, family).SelectMany(n => WorldVertices(b.Parts[n].transform, b.Meshes[n].Render)).ToArray();
+
+        // The area-weighted centroid of several parts' meshes, world space.
+        private static Vector3 AreaCentroid(Build b, IEnumerable<string> parts)
+        {
+            var sum = Vector3.zero;
+            var area = 0f;
+            foreach (var n in parts)
+            {
+                var a = PlanformArea(b.Meshes[n].Render);
+                sum += a * AreaCentroid(b.Parts[n].transform, b.Meshes[n].Render);
+                area += a;
+            }
+            return sum / area;
+        }
 
         private static Bounds BoundsOf(IEnumerable<Vector3> points)
         {

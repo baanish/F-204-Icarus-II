@@ -211,20 +211,32 @@ def nav_fairing(wing, side, paint, lens, height=NAV_HEIGHT):
     return obj
 
 
+def wing_triangles(icarus, side):
+    """The wing skin's triangles, whole or in its pieces (parts.family_objects): world corners, corner UVs (as
+    vectors with z 0) and world corner normals."""
+    from parts import family_objects
+
+    out = []
+    for wing in family_objects(icarus, "wing_skin_" + side):
+        wing.data.calc_loop_triangles()
+        uv = wing.data.uv_layers["UVMap"].data
+        normals = wing.data.corner_normals
+        normal_matrix = wing.matrix_world.to_3x3().inverted().transposed()
+        out += [([wing.matrix_world @ wing.data.vertices[i].co for i in t.vertices],
+                 [Vector((*uv[i].uv, 0)) for i in t.loops], [normal_matrix @ normals[i].vector for i in t.loops])
+                for t in wing.data.loop_triangles]
+    return out
+
+
 def project_nav_paint(icarus, check=False):
     """Continue the skin paint across the fairings without repacking the atlas."""
     worst = 0.0
     for side in ("L", "R"):
-        wing = icarus.all_objects["wing_skin_" + side]
         obj = icarus.all_objects["light_nav_mount_" + side]
-        wing.data.calc_loop_triangles()
-        triangles = list(wing.data.loop_triangles)
-        points = [[wing.matrix_world @ wing.data.vertices[i].co for i in t.vertices] for t in triangles]
+        triangles = wing_triangles(icarus, side)
+        points = [t[0] for t in triangles]
         tree = BVHTree.FromPolygons([v for tri in points for v in tri],
                                    [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(len(triangles))], all_triangles=True)
-        source = wing.data.uv_layers["UVMap"].data
-        wing_normals = wing.data.corner_normals
-        normal_matrix = wing.matrix_world.to_3x3().inverted().transposed()
         target = obj.data.uv_layers.get("UVMap") or obj.data.uv_layers.new(name="UVMap")
         normals = [n.vector.copy() for n in obj.data.corner_normals]
         roots = set(obj["_nav_root_indices"])
@@ -234,9 +246,8 @@ def project_nav_paint(icarus, check=False):
             at, normal, index, _ = tree.ray_cast(Vector((point.x, point.y, up * 2)), Vector((0, 0, -up)), 5)
             if at is None:
                 raise ValueError("nav fairing paint projection missed the wing")
-            uv_points = [Vector((*source[i].uv, 0)) for i in triangles[index].loops]
-            uv = barycentric_transform(at, *points[index], *uv_points)
-            skin_normals = [normal_matrix @ wing_normals[i].vector for i in triangles[index].loops]
+            uv = barycentric_transform(at, *points[index], *triangles[index][1])
+            skin_normals = triangles[index][2]
             root_normal = barycentric_transform(at, *points[index], *skin_normals).normalized()
             if check:
                 worst = max(worst, (target.data[loop.index].uv - Vector((uv.x, uv.y))).length)
@@ -399,10 +410,15 @@ def check(icarus):
         raise ValueError("lights: expected the white 24 triangle dome and 32 triangle trailing-edge fairing")
     if [m.name for m in fairing.data.materials] != [NAV_PAINT]:
         raise ValueError("lights: the tail fairing must share the stabilator paint")
+    from parts import family_objects
+
     for side in ("L", "R"):
+        # the wing skin, or the piece of it the lens sits nearest in a split build
+        skins = [(o, BVHTree.FromObject(o, bpy.context.evaluated_depsgraph_get())) for o in family_objects(icarus, "wing_skin_" + side)]
         for name in ("light_nav_" + side, "light_nav_lower_" + side):
             obj = objects[name]
-            if obj.parent != objects["wing_skin_" + side] or obj["colour"] != ("red" if side == "L" else "green"):
+            at = lambda skin: skin[1].find_nearest(skin[0].matrix_world.inverted() @ obj.matrix_world.translation)[3]
+            if obj.parent != min(skins, key=at)[0] or obj["colour"] != ("red" if side == "L" else "green"):
                 raise ValueError("lights: nav lens has the wrong wing owner or colour: " + name)
     if any(n.startswith(("light_beacon_", "antenna_")) for n in objects):
         raise ValueError("lights: beacons or separate antenna parts remain")

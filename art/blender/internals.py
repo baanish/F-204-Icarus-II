@@ -640,9 +640,11 @@ def _build(p, mats):
     for side, suffix in ((1, "_L"), (-1, "_R")):
         pieces = []
         x0, x1 = 0.62, wing[-1][1] - 0.06
+        # Each spar in two at the crank, where the wing's inner box (parts.organise) ends and its outer box begins.
         for name, f in (("spar_front", sp["front_f"]), ("spar_rear", sp["rear_f"])):
-            stations = [(u, f - 0.006, f + 0.006) for u in bi.span_stations(wing, "x", x0, x1)]
-            pieces.append(bi.strip(name + suffix, wing, stations, p["wing"]["thickness"] * 0.9, "x"))
+            for piece, a, b in (("", x0, bi.WING_CRANK), ("_outer", bi.WING_CRANK, x1)):
+                stations = [(u, f - 0.006, f + 0.006) for u in bi.span_stations(wing, "x", a, b)]
+                pieces.append(bi.strip(name + piece + suffix, wing, stations, p["wing"]["thickness"] * 0.9, "x"))
         n_ribs = int((x1 - x0) / sp["rib_pitch"]) + 1
         for i in range(n_ribs):
             u = x0 + i * (x1 - x0) / (n_ribs - 1)

@@ -87,12 +87,32 @@ for name, alt, speed, fuel, what in [
     ("icarus_ignus_1km_fast", 1000.0, 410.0, 0.5, "half fuel, for full-stick pulls and rolls near Mach 1.2 low down"),
     ("icarus_ignus_10km_half", 10000.0, 400.0, 0.5, "half fuel, for the sustained turn"),
     ("icarus_ignus_13km_40", 13000.0, 520.0, 0.4, "40% fuel, for hands-off pitch hold below half fuel"),
+    ("icarus_ignus_3km_300", 3000.0, 300.0, 0.5, "half fuel, for the full-aileron roll rate at 300 m/s"),
 ]:
     m = template("airborne")
     m["MapKey"] = IGNUS
     icarus(m["aircraft"][0], fuel, {"x": IGNUS_X, "y": alt, "z": IGNUS_Z}, rotation(90, 0), speed)
     save(m, name, f"the player's Icarus for Primeva airborne over Ignus at {alt:,.0f} m MSL (x {IGNUS_X:.0f}, z {IGNUS_Z:.0f}), heading 090, "
          f"{speed:.0f} m/s, with about 160 km of map ahead; {what}; clean; no opponent.")
+
+# Full-stick loads with a full tip tank on each wingtip (the Wingtip set's baanish_icarus_tip_tank mount) and full fuel:
+# 570 kg on each outer wing box, the heaviest the crank between the boxes carries.
+m = template("airborne")
+m["MapKey"] = IGNUS
+icarus(m["aircraft"][0], 1.0, {"x": IGNUS_X, "y": 1000.0, "z": IGNUS_Z}, rotation(90, 0), 410.0)
+m["aircraft"][0]["savedLoadout"]["Selected"][0]["Key"] = "baanish_icarus_tip_tank"
+save(m, "icarus_ignus_1km_fast_tanks", f"the player's Icarus for Primeva airborne over Ignus at 1,000 m MSL (x {IGNUS_X:.0f}, z {IGNUS_Z:.0f}), "
+     "heading 090, 410 m/s, full fuel and a full tip tank on each wingtip, for full-stick pulls with the heaviest outer wings; no opponent.")
+
+# Full tip tanks at 3,000 m, 2 km short of the world origin heading east at 300 m/s: a hard turn there stays within a
+# few km of the origin, where float32 world positions resolve to a fraction of a millimetre, so the drawn wing's seams can
+# be read near their true size (at the other missions' 77 km out positions round to 7.8 mm).
+m = template("airborne")
+m["MapKey"] = IGNUS
+icarus(m["aircraft"][0], 1.0, {"x": -2000.0, "y": 3000.0, "z": 0.0}, rotation(90, 0), 300.0)
+m["aircraft"][0]["savedLoadout"]["Selected"][0]["Key"] = "baanish_icarus_tip_tank"
+save(m, "icarus_ignus_origin_tanks", "the player's Icarus for Primeva over Ignus at 3,000 m MSL, 2 km west of the world origin, heading 090, 300 m/s, "
+     "full fuel and a full tip tank on each wingtip, for drawn seams read where float32 positions are finest; no opponent.")
 
 # Eight Icarus inside the 10 km a jet keeps its per-part bodies from the camera (Aircraft.CheckPhysicsLod), for frame time
 # with a full flight: the player's and seven AI wingmen 400 m apart in a line abreast to the north.

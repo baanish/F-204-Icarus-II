@@ -46,6 +46,15 @@ namespace Icarus.Editor
             { "nozzle", 0.02f }, { "intake_duct_L", 0.03f }, { "intake_duct_R", 0.03f }, { "wing_spar_L", 0.02f }, { "wing_spar_R", 0.02f },
             { "fin_spar", 0.015f }, { "stabilator", 0.02f },
         }.ToDictionary(e => e.Key, e => e.Value * DragAreaTotal / DragAreaR14);
+        // The wing's boxes on one side, root first: the inner box at the root and the outer box beyond the crank
+        // (art/blender/parts.py), each carrying its own skin pieces' planform share of the spar's lift and drag.
+        private static string[] WingBoxes(Build b, string side) =>
+            new[] { "wing_spar_" + side, "wing_spar_outer_" + side }.Where(b.Parts.ContainsKey).ToArray();
+
+        // The skin parts a box carries: the wing skin's pieces jointed to it (the whole skin on a box that keeps it).
+        private static string[] BoxSkins(Build b, string box, string side) =>
+            FamilyParts(b, "wing_skin_" + side).Where(n => b.Specs.Single(s => s.Name == n).Parent == box).ToArray();
+
         // R14: each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, for a
         // 5% MAC static margin empty and 8.7% at 20% fuel (its neutral point 9.326 m, MAC 3.491 m).
         private const float SparForceStation = 7.83455f;
@@ -263,6 +272,7 @@ namespace Icarus.Editor
         private static void SetAero(Build b)
         {
             var aero = new Dictionary<string, (float Area, int Airfoil)>();
+            var wingShare = new Dictionary<string, (string Side, float Share)>();
             foreach (var side in new[] { "L", "R" })
             {
                 var surfaces = new[] { "aileron_", "flap_", "lef_" }.Select(s => s + side).ToArray();
@@ -271,7 +281,12 @@ namespace Icarus.Editor
                 var spar = WingArea / 2 - surfaces.Sum(s => aero[s].Area);
                 if (spar <= 0)
                     throw new InvalidDataException($"wing {side}: its surfaces' {surfaces.Sum(s => aero[s].Area):F2} m2 leave nothing of R7's {WingArea / 2} m2 for the spar");
-                aero["wing_spar_" + side] = (spar, WingAirfoil);
+                var planform = WingBoxes(b, side).ToDictionary(box => box, box => BoxSkins(b, box, side).Sum(n => PlanformArea(b.Meshes[n].Render)));
+                foreach (var box in planform.Keys)
+                {
+                    wingShare[box] = (side, planform[box] / planform.Values.Sum());
+                    aero[box] = (spar * wingShare[box].Share, WingAirfoil);
+                }
             }
             aero["stabilator"] = (TailArea, TailAirfoil);
             // the fin's lifting area, which the generator pins (parts.FIN_LIFT_AREA)
@@ -291,13 +306,15 @@ namespace Icarus.Editor
                 var (area, airfoil) = aero.TryGetValue(spec.Name, out var a) ? a : (0f, BodyAirfoil);
                 Prop(so, "wingArea").floatValue = area;
                 Prop(so, "airfoil").intValue = airfoil;
-                Prop(so, "dragArea").floatValue = DragAreas.TryGetValue(spec.Name, out var drag) ? drag : 0f;
+                Prop(so, "dragArea").floatValue = wingShare.TryGetValue(spec.Name, out var box) ? DragAreas["wing_spar_" + box.Side] * box.Share
+                    : DragAreas.TryGetValue(spec.Name, out var drag) ? drag : 0f;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
             // Lift frames for the lifting parts that aren't hinged (BuildSurfaces set those).
             foreach (var side in new[] { "L", "R" })
-                SetWingLift(b, side);
+                foreach (var box in WingBoxes(b, side))
+                    SetWingLift(b, box, side);
             SetFinLift(b);
             var body = new GameObject(RootPart + "_liftNormal") { layer = b.Root.layer }.transform;
             body.SetParent(b.Root.transform, false);
@@ -309,17 +326,17 @@ namespace Icarus.Editor
             ReportBalance(b);
         }
 
-        // The spar carries the wing's lift. Its frame follows the wing skin's span (with the anhedral) at zero incidence; the
-        // force acts at the quarter chord where the skin's area centroid sits, through centerOfLift, since the game applies
-        // a part's lift at its own centre of mass.
-        private static void SetWingLift(Build b, string side)
+        // Each wing box carries its share of the wing's lift. Its frame follows its skin pieces' span (with the anhedral)
+        // at zero incidence; the force acts at R14's station, through centerOfLift, at the span of the box's own centre of
+        // mass, since the game applies a part's lift there: the outer box's lift acts outboard of the inner's.
+        private static void SetWingLift(Build b, string box, string side)
         {
-            var spar = b.Parts["wing_spar_" + side].transform;
-            var skin = b.Parts["wing_skin_" + side].transform;
-            var skinPoints = WorldVertices(skin, b.Meshes["wing_skin_" + side].Render);
-            var chordPoints = skinPoints
+            var spar = b.Parts[box].transform;
+            var skins = BoxSkins(b, box, side);
+            var skinPoints = skins.SelectMany(n => WorldVertices(b.Parts[n].transform, b.Meshes[n].Render)).ToArray();
+            var chordPoints = FamilyVertices(b, "wing_skin_" + side)
                 .Concat(new[] { "flap_", "aileron_", "lef_" }.SelectMany(s => WorldVertices(b.Visuals[s + side + "_visible"], b.Meshes[s + side + "_visible"].Render))).ToArray();
-            var centroid = AreaCentroid(skin, b.Meshes["wing_skin_" + side].Render);
+            var centroid = AreaCentroid(b, skins);
             // The edges at the centroid's span, interpolated between the span stations either side of it: the
             // skin and its surfaces share their stations, so each station holds the leading and trailing edge.
             var stations = chordPoints.GroupBy(p => Mathf.Round(Mathf.Abs(p.x) * 1000f))
@@ -327,7 +344,7 @@ namespace Icarus.Editor
             var atX = Mathf.Abs(centroid.x);
             var next = Array.FindIndex(stations, s => s.X >= atX);
             if (next < 1)
-                throw new InvalidDataException($"wing_skin_{side}: no chord stations either side of its centroid x {centroid.x:F2}");
+                throw new InvalidDataException($"{box}: no chord stations either side of its skin's centroid x {centroid.x:F2}");
             var (inboard, outboard) = (stations[next - 1], stations[next]);
             var along = (atX - inboard.X) / (outboard.X - inboard.X);
             var le = Mathf.Lerp(inboard.Le, outboard.Le, along);

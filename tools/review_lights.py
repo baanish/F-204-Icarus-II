@@ -54,8 +54,10 @@ def main():
     for side, sign in (("L", -1), ("R", 1)):
         anchor = unity(bpy.data.objects["light_nav_" + side].matrix_world.translation)
         snapshot["nav_anchors"][side] = anchor
-        wing = bpy.data.objects["wing_skin_" + side]
-        verts = np.asarray([unity(wing.matrix_world @ v.co) for v in wing.data.vertices])
+        from parts import family_objects
+
+        verts = np.asarray([unity(wing.matrix_world @ v.co)
+                            for wing in family_objects(bpy.data.collections["Icarus"], "wing_skin_" + side) for v in wing.data.vertices])
         outer = np.abs(verts[:, 0]).max()
         tip = verts[np.abs(verts[:, 0]) > outer - 0.001]
         leading, trailing = tip[:, 2].max(), tip[:, 2].min()

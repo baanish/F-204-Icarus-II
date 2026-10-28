@@ -74,7 +74,8 @@ def blender_main(out):
     # Station points on the front profile, Blender (x, z), left side; the right mirrors them. As IcarusAuthor.Stations
     # places them: the wingtip on the tip face at mid-thickness, the inner pylon at its lowest point, and the conformal
     # hardpoint where stations.CONFORMAL holds it.
-    skin = tris["wing_skin_L"].reshape(-1, 3)
+    # the left wing skin, whole or in its pieces (wing_skin_<piece>_L)
+    skin = np.concatenate([t.reshape(-1, 3) for n, t in tris.items() if n.startswith("wing_skin_") and n.endswith("_L")])
     outer = skin[:, 0].max()
     tip = skin[skin[:, 0] > outer - 0.001]
     pylon = tris["pylon_inner_L"].reshape(-1, 3)

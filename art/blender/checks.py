@@ -15,13 +15,19 @@ Z = Vector((0, 0, 1))
 
 
 def tree(obj, slot=None):
-    """obj's faces as a world-space BVH tree; with slot, only the faces on that material."""
+    """obj's faces (or a list of objects', as a skin family's pieces) as a world-space BVH tree; with slot, only the
+    faces on that material. Makes no datablocks, so a caller may build trees while it walks a collection's objects."""
     bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    if slot is not None:
-        names = [m.name if m else "" for m in obj.data.materials]
-        bmesh.ops.delete(bm, geom=[f for f in bm.faces if names[f.material_index] != slot], context="FACES")
-    bm.transform(obj.matrix_world)
+    for o in obj if isinstance(obj, (list, tuple)) else [obj]:
+        verts, faces = len(bm.verts), len(bm.faces)
+        bm.from_mesh(o.data)  # appends
+        bm.verts.ensure_lookup_table()
+        bm.faces.ensure_lookup_table()
+        if slot is not None:
+            names = [m.name if m else "" for m in o.data.materials]
+            bmesh.ops.delete(bm, geom=[f for f in bm.faces[faces:] if names[f.material_index] != slot], context="FACES")
+            bm.verts.ensure_lookup_table()
+        bmesh.ops.transform(bm, matrix=o.matrix_world, verts=bm.verts[verts:])
     t = BVHTree.FromBMesh(bm)
     bm.free()
     return t

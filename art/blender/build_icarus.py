@@ -879,6 +879,13 @@ def welded(obj):
 SURFACE_ARC = 7  # points round a surface's nose between its two skins
 BOX_SKIN = 13  # points along each face of the box between its leading and trailing closures
 BOX_CLOSURE = 10  # points round the box's leading or trailing closure: a cove, or the airfoil round its edge
+# The span (x) where the wing's inner and outer boxes meet: the crank, the leading-edge flap's inboard end, where the
+# skin's panel lines draw the crank rib (art/textures/panels.py).
+WING_CRANK = 1.956
+# A box's faces carry a face attribute SPLIT_SIDE naming the skin they belong to, for parts.split_pieces to part the
+# upper skin from the lower on existing edges: each ring's two closures divide at their middle column (the airfoil's
+# leading or trailing edge, or a cove's middle), and the end caps, which span both, are cut between those columns.
+SPLIT_SIDE, UPPER, LOWER, CAP = "split_side", 1, 2, 3
 
 
 def skin_point(sections, u, t, side, thickness, axis):
@@ -1017,7 +1024,15 @@ def box(name, sections, thickness, axis, hinges, cove_gap):
                 leading = ([skin(fl * (1 - i / half), -1) for i in range(1, half + 1)]
                            + [skin(fu * i / half, 1) for i in range(half)])
             rings.append(upper + trailing + lower + leading)
-    return welded(loft(name, rings, cap_back=True, cap_front=True))
+    obj = loft(name, rings, cap_back=True, cap_front=True)
+    n = len(rings[0])
+    trailing_middle = BOX_SKIN + half - 1  # the trailing closure's last point on the upper side
+    leading_middle = 2 * BOX_SKIN + BOX_CLOSURE + half - 1  # the leading closure's last point on the lower side
+    sides = obj.data.attributes.new(SPLIT_SIDE, "INT", "FACE")
+    for face in obj.data.polygons:  # loft: a face per column k between each two rings, then the caps
+        k = face.index % n if face.index < (len(rings) - 1) * n else None
+        sides.data[face.index].value = CAP if k is None else LOWER if trailing_middle <= k < leading_middle else UPPER
+    return welded(obj)
 
 
 def hinge_frame(a, b):
@@ -1484,6 +1499,7 @@ def _build(repo, split=True):
                       "lods": len(bpy.data.collections["LOD1"].objects)}
         tree = {name: obj for name, obj in tree.items() if name not in pieces}
         tree.update((piece.name, piece) for made in pieces.values() for piece in made)
+    part_tree.drop_split_sides(TARGET)
     hulls.paint_lods()
     skin_normals(TARGET)
     import checks

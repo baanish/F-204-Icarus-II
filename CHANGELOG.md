@@ -4,6 +4,7 @@
 
 - The Icarus no longer falls apart in a Boscali hangar's aircraft preview, and Boscali players can fly it from the aircraft menu. With no Boscali livery, the menu failed before it set the preview up; Boscali players now get all four PALA liveries there.
 - The aircraft menu picks the Bare Metal livery for the Icarus by default, on both sides, instead of a random one.
+- Each wing breaks up in more pieces: the outer wing can come off at the crank, taking its share of the lift with it, and the wing skin is four panels a side instead of one. The joint at the crank never shows in hard pulls.
 - The skin tears like a stock jet's: panel joints and rivet rows stay standing while damage opens the skin bay by bay with torn edges. It used to lose about half its skin in round holes by 80% health, starting with the clean metal.
 - The skin is drawn from both sides, as on most stock jets: a damage hole or a broken section shows the inside of the skin instead of the sky through the far wall.
 - The wing's ribs and fuel tanks no longer show through the top of the wing in hard pulls. A wing skin that tears off still falls away on its own.

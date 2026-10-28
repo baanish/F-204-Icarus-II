@@ -54,10 +54,11 @@ namespace Icarus.Editor
             Item("A15", "cockpit renderers", p => CheckCockpitRenderers(b, p));
             Item("A16", "stock-mission supply keys", p => CheckStockSupply(definition, p));
             Item("A17", "engine and aircraft audio", p => CheckEngineAudio(b, p) + "; " + CheckAircraftSounds(b, p));
-            Item("A18", "tail stiffness under flight loads", p => CheckTailStiffness(b, p));
+            Item("A18", "tail and wing crank stiffness under flight loads", p => CheckTailStiffness(b, p));
             Item("A19", "bullet collider ownership", p => CheckBulletColliders(b, p));
             Item("A20", "section inertia pinned with the boxes disabled", p => CheckSectionInertia(b, p));
             Item("A21", "map and HUD icons", p => CheckIcons(definition, p));
+            Item("A22", "breakup tree", p => CheckBreakupTree(b, p));
             if (failures.Count > 0)
                 throw new InvalidDataException("Icarus authoring checks failed:\n  " + string.Join("\n  ", failures));
         }
@@ -218,9 +219,9 @@ namespace Icarus.Editor
             var actuators = GetList(Prop(airbrake, "constraints"));
             if (actuators.Length != 4 || actuators.Any(c => !(c is UnityEngine.Animations.AimConstraint aim) || aim.sourceCount != 1 || !Inside(b, aim))) p.Add("Airbrake constraints aren't the four actuator pieces' AimConstraints");
             if (Prop(airbrake, "part").objectReferenceValue != b.Part("fuselage_aft")) p.Add("Airbrake part isn't fuselage_aft");
-            var wing = new[] { "wing_spar_L", "wing_spar_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" }.Sum(n => GetFloat(b.Part(n), "wingArea"));
+            var wing = new[] { "wing_spar_L", "wing_spar_R", "wing_spar_outer_L", "wing_spar_outer_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" }.Sum(n => GetFloat(b.Part(n), "wingArea"));
             if (Mathf.Abs(wing - WingArea) > 0.01f) p.Add($"main wing {wing:F2} m2, not R7's {WingArea}");
-            foreach (var skin in Tree.Where(s => s.Name.Contains("skin") || s.Name == "dorsal_cover"))
+            foreach (var skin in Tree.Where(s => s.Name.Contains("skin") || s.Name.StartsWith("dorsal_cover", StringComparison.Ordinal)))
                 if (GetFloat(b.Part(skin.Name), "wingArea") != 0) p.Add(skin.Name + " has lift; skins carry none (R13)");
             var drag = All(b, "AeroPart").Sum(a => GetFloat(a, "dragArea"));
             if (Mathf.Abs(drag - DragAreaTotal) > 1e-3f) p.Add($"dragArea {drag:F3}, not the tuned {DragAreaTotal}");

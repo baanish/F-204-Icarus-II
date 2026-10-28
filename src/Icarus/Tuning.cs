@@ -29,7 +29,7 @@ static class Tuning
     const float DefaultNozzleOpen = 15f;
     // The main wing's AeroParts whose area WingArea scales; the leading-edge and trailing-edge flaps have their area held
     // by a HighLiftDevice, which WingArea rescales through its cached endpoints.
-    static readonly string[] MainWing = { "wing_spar_L", "wing_spar_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" };
+    static readonly string[] MainWing = { "wing_spar_L", "wing_spar_R", "wing_spar_outer_L", "wing_spar_outer_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" };
 
     sealed class Knob
     {

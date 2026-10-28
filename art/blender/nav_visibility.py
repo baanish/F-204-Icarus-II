@@ -142,9 +142,11 @@ def stock_geometry():
 
 def tip_stations(icarus):
     result = {}
+    from parts import family_objects
+
     for side, sign in (("L", -1), ("R", 1)):
-        wing = icarus.all_objects["wing_skin_" + side]
-        verts = np.array([unity(wing.matrix_world @ v.co) for v in wing.data.vertices])
+        verts = np.array([unity(wing.matrix_world @ v.co) for wing in family_objects(icarus, "wing_skin_" + side)
+                          for v in wing.data.vertices])
         outer = np.abs(verts[:, 0]).max()
         tip = verts[np.abs(verts[:, 0]) > outer - 0.001]
         leading, trailing = tip[:, 2].max(), tip[:, 2].min()

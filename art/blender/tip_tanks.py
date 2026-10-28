@@ -106,8 +106,9 @@ def nose_offset():
 
 def tip(icarus):
     """The left wing's tip face: outer x, mid-thickness z, leading and trailing edge y (Blender world)."""
-    wing = icarus.all_objects["wing_skin_L"]
-    verts = [wing.matrix_world @ v.co for v in wing.data.vertices]
+    from parts import family_objects
+
+    verts = [wing.matrix_world @ v.co for wing in family_objects(icarus, "wing_skin_L") for v in wing.data.vertices]
     outer = max(v.x for v in verts)
     face = [v for v in verts if v.x > outer - 0.001]
     return dict(x=outer, z=(max(v.z for v in face) + min(v.z for v in face)) / 2,
@@ -219,10 +220,10 @@ def away(verts, face, centre):
 
 def skin_uv(icarus, side_up):
     """The atlas UV of the wing's skin at PAINT, on its upper (side_up 1) or lower surface."""
-    wing = icarus.all_objects["wing_skin_L"]
-    wing.data.calc_loop_triangles()
-    triangles = list(wing.data.loop_triangles)
-    points = [[wing.matrix_world @ wing.data.vertices[i].co for i in t.vertices] for t in triangles]
+    import lights
+
+    triangles = lights.wing_triangles(icarus, "L")
+    points = [t[0] for t in triangles]
     from mathutils.bvhtree import BVHTree
 
     tree = BVHTree.FromPolygons([v for tri in points for v in tri], [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(len(triangles))],
@@ -233,8 +234,7 @@ def skin_uv(icarus, side_up):
     at, _, index, _ = tree.ray_cast(bi.P(le + PAINT["chord"] * chord, PAINT["span"], z + side_up * 2), Vector((0, 0, -side_up)), 5)
     if at is None:
         raise ValueError("tip tank paint: no wing skin at the paint point")
-    uv = wing.data.uv_layers["UVMap"].data
-    return barycentric_transform(at, *points[index], *[Vector((*uv[i].uv, 0)) for i in triangles[index].loops]).to_2d()
+    return barycentric_transform(at, *points[index], *triangles[index][1]).to_2d()
 
 
 def paint(obj, icarus):

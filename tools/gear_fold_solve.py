@@ -27,7 +27,8 @@ LEG_R = 0.06  # the leg's half-width about its line, pivot to wheel centre
 # Stores the folding gear must keep STORE_GAP from, by hardpoint name part, and the airframe it cannot pass through,
 # by mesh name prefix: everything else on its way is skin a door opens or structure a well clears.
 STORE_HARDPOINTS = ("innerwing_L", "conformal_L")
-HARD = ("wing_skin_L", "intake_duct_L", "engine_core")
+HARD = ("wing_skin_inner_upper_L", "wing_skin_inner_lower_L", "wing_skin_outer_upper_L", "wing_skin_outer_lower_L",
+        "intake_duct_L", "engine_core")
 # And skin no door can open, as (s from, s to, x from, x to) boxes of skin faces wholly inside them below z -0.1: the
 # left conformal trough with its rear ramp (art/blender/stations.py), whose faces follow the ramp's moving columns,
 # and the ramp's fade inboard of the forward main door's stepped edge, where a door would share an edge with the aft

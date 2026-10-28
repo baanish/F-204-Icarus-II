@@ -8,8 +8,9 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // Exterior rule 27's ceilings for the LOD1 hulls (A12): triangles per hull and in all.
-        private const int Lod1PerHull = 56, Lod1Total = 760;
+        // The ceilings for the LOD1 hulls (A12): exterior rule 27's per hull, and in all its 760 raised to the 780 the
+        // split wing skins measure (art/blender/hulls.py LOD1_TOTAL).
+        private const int Lod1PerHull = 56, Lod1Total = 780;
 
         // Each LOD1 hull on the part or visual it belongs to, at identity (the export puts it in that mesh's space).
         private static void AddLods(Build b)

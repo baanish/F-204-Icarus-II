@@ -11,7 +11,10 @@ namespace Icarus;
 /// a part flex as far as its joints' conditioning allows; tests/scenarios/tail_rigidity.scenario.jsonc reads the line.
 /// fin_skin is the fin the player sees; fin_spar is the structure inside it. A "joint-load" line beside it gives the three
 /// joints that came nearest their break limits over that second, each as its peak load over its limit (force or torque,
-/// whichever is nearer; a joint breaks at 1), which the full_stick scenarios read.
+/// whichever is nearer; a joint breaks at 1), which the full_stick scenarios read. A "wing-crank-<side>" line gives how far
+/// the outer wing box's body has carried its tip (where its wingtip station was made) in the inner box's frame from where
+/// the joints made it, the physical seam the two boxes meet at, its peak over that second in mm, and the peak of the
+/// outer box's joint against its limit. WingSkinFollow.cs draws the seam shut while the boxes are jointed.
 /// </summary>
 static class TailFlex
 {
@@ -40,7 +43,7 @@ static class TailFlex
             probe = __instance.gameObject.AddComponent<TailFlexProbe>();
         }
 
-        probe.Begin(__instance, tail!);
+        probe.Begin(__instance, tail!, all);
     }
 }
 
@@ -57,9 +60,24 @@ sealed class TailFlexProbe : MonoBehaviour
     // Every joint the aircraft's parts made, and each one's peak load over its break limit since the last line.
     (string Name, PartJoint Joint)[] joints = null!;
     float[] jointPeak = null!;
+    // Each side's outer wing box, the inner box it hangs on, its tip in the outer box's frame and its rest point in the
+    // inner box's frame, and the tip's peak movement since the last line, mm.
+    (string Side, AeroPart Outer, AeroPart Inner, Vector3 Tip, Vector3 Home)[] cranks = null!;
+    float[] crankPeak = null!;
 
-    internal void Begin(Aircraft owner, AeroPart[] tail)
+    internal void Begin(Aircraft owner, AeroPart[] tail, AeroPart[] all)
     {
+        var found = new System.Collections.Generic.List<(string, AeroPart, AeroPart, Vector3, Vector3)>();
+        foreach (string side in new[] { "L", "R" })
+        {
+            AeroPart? outer = all.FirstOrDefault(p => p.name == "wing_spar_outer_" + side);
+            AeroPart? inner = all.FirstOrDefault(p => p.name == "wing_spar_" + side);
+            Transform? tip = outer == null ? null : outer.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "hardpoint_wingtip_" + side);
+            if (outer != null && inner != null && tip != null)
+                found.Add((side, outer, inner, outer.transform.InverseTransformPoint(tip.position), inner.transform.InverseTransformPoint(tip.position)));
+        }
+        cranks = found.ToArray();
+        crankPeak = new float[cranks.Length];
         aircraft = owner;
         parts = tail;
         rest = parts.Select(p => Quaternion.Inverse(aircraft.rb.rotation) * p.rb.rotation).ToArray();
@@ -96,6 +114,13 @@ sealed class TailFlexProbe : MonoBehaviour
             jointPeak[i] = Mathf.Max(jointPeak[i], joint.currentForce.magnitude / joint.breakForce, joint.currentTorque.magnitude / joint.breakTorque);
         }
 
+        for (int i = 0; i < cranks.Length; i++)
+        {
+            var c = cranks[i];
+            if (c.Outer == null || c.Inner == null || c.Outer.IsDetached() || c.Inner.IsDetached()) continue;
+            crankPeak[i] = Mathf.Max(crankPeak[i], (c.Inner.transform.InverseTransformPoint(c.Outer.transform.TransformPoint(c.Tip)) - c.Home).magnitude * 1000f);
+        }
+
         gPeak = Mathf.Max(gPeak, Mathf.Abs(aircraft.gForce));
         if (Time.time < reportAt) return;
         reportAt = Time.time + ReportIntervalS;
@@ -106,6 +131,13 @@ sealed class TailFlexProbe : MonoBehaviour
         string worst = string.Join(", ", Enumerable.Range(0, joints.Length).OrderByDescending(i => jointPeak[i]).Take(3)
             .Select(i => $"{joints[i].Name} {jointPeak[i]:0.00}"));
         IcarusPlugin.Log.Stage("joint-load", $"nearest break: {worst}; peaks over 1 s, up to {gPeak:0.0} g");
+        for (int i = 0; i < cranks.Length; i++)
+        {
+            int j = System.Array.FindIndex(joints, x => x.Joint == cranks[i].Outer.Joints.FirstOrDefault());
+            IcarusPlugin.Log.Stage("wing-crank-" + cranks[i].Side,
+                $"tip_mm={crankPeak[i]:0.00} joint={(j < 0 ? float.NaN : jointPeak[j]):0.00}; peaks over 1 s, up to {gPeak:0.0} g");
+        }
+        System.Array.Clear(crankPeak, 0, crankPeak.Length);
         System.Array.Clear(jointPeak, 0, jointPeak.Length);
         System.Array.Clear(peak, 0, peak.Length);
         System.Array.Clear(roll, 0, roll.Length);

@@ -37,8 +37,8 @@ BUDGET = {
     # short of the rear ramp's deep end (build_icarus.fuselage_stations) to about 20,300. The radome's and the boat
     # tail's finer rings (build_icarus NOSE_RINGS, TAIL_FINE) bring it to about 24,770.
     "fuselage_skin": {"target": 24800, "cap": 24800, "objects": ("radome", "skin_", "dorsal_cover")},
-    "wing_box_L": {"target": 2000, "cap": 2000, "objects": ("wing_skin_L",)},
-    "wing_box_R": {"target": 2000, "cap": 2000, "objects": ("wing_skin_R",)},
+    "wing_box_L": {"target": 2000, "cap": 2000, "family": ("wing_skin_L",)},
+    "wing_box_R": {"target": 2000, "cap": 2000, "family": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
     "stabilator": {"target": 1700, "cap": 1700, "objects": ("stabilator_visible",)},
@@ -82,9 +82,11 @@ TREE = {
     "intake_duct_R": ("fuselage_mid", 100),
     "wing_spar_L": ("fuselage_mid", 230),
     "wing_spar_R": ("fuselage_mid", 230),
+    "wing_spar_outer_L": ("wing_spar_L", 0),  # its share of wing_spar_L's 230 (MOMENT_SPLITS)
+    "wing_spar_outer_R": ("wing_spar_R", 0),
     "wing_skin_L": ("wing_spar_L", 60),
     "wing_skin_R": ("wing_spar_R", 60),
-    "aileron_L": ("wing_spar_L", 35),
+    "aileron_L": ("wing_spar_L", 35),  # the outer box's in a split build (LATE_PARENTS)
     "aileron_R": ("wing_spar_R", 35),
     "flap_L": ("wing_spar_L", 45),
     "flap_R": ("wing_spar_R", 45),
@@ -134,7 +136,20 @@ RADOME_END, FORWARD_END, MID_END = 1.6, 5.6, 11.0
 # float32 literals so they land bit for bit. check() fails if a core's origin is anything else.
 CORE_ORIGINS = {"fuselage_forward": (0.0, -4.3999996, 0.25242168), "fuselage_mid": (0.0, 0.375, 0.26522803),
                 "fuselage_aft": (-0.00024959445, 5.0, 0.34087268)}
+# The inner wing boxes keep the origins the whole boxes had (their bounds' centres), as float32 literals, for the same
+# reason: the skin atlas is unwrapped from world coordinates, and a box whose origin moved would carry its flap and
+# the wing skin to new world matrices a rounding apart, and the atlas packs every island anew from any such change.
+WING_BOX_ORIGINS = {"wing_spar_L": (1.9800000190734863, 1.5572816133499146, -0.025429904460906982),
+                    "wing_spar_R": (-1.9800000190734863, 1.5572816133499146, -0.025429904460906982)}
+# Parts that move to a part split off their parent only after the atlas is unwrapped (split_pieces), for the reason
+# above: the surfaces beyond the crank ride the outer wing box in a split build, and the inner box until then.
+LATE_PARENTS = {name + _sd: "wing_spar_outer_" + _sd for name in ("aileron_", "lef_") for _sd in ("L", "R")}
 DORSAL = (5.0, 12.4)
+# A family's dry mass shared between two parts split from it so that its first moment along the axis that separates
+# them stays where it was: part -> (the part split from it, axis). A part's mass sits at the centre of its hulls'
+# bounds (IcarusAuthor ConfigurePart's CoM, which UnitPart.ModifyMass makes the body's centre of mass), here its own
+# bounds' centre, and splitting by any other share would move the balance the 5% MAC margin was tuned on.
+MOMENT_SPLITS = {"wing_spar_L": ("wing_spar_outer_L", 0), "wing_spar_R": ("wing_spar_outer_R", 0)}
 DORSAL_Z, DORSAL_HALF_WIDTH = 0.80, 0.30
 
 
@@ -239,7 +254,8 @@ def recentre(obj):
         return
     lo = Vector([min(v.co[i] for v in obj.data.vertices) for i in range(3)])
     hi = Vector([max(v.co[i] for v in obj.data.vertices) for i in range(3)])
-    c = Vector(CORE_ORIGINS[obj.name]) if obj.name in CORE_ORIGINS else (lo + hi) / 2
+    pins = {**CORE_ORIGINS, **WING_BOX_ORIGINS}
+    c = Vector(pins[obj.name]) if obj.name in pins else (lo + hi) / 2
     obj.data.transform(Matrix.Translation(-c))
     obj.matrix_world = obj.matrix_world @ Matrix.Translation(c)
 
@@ -255,9 +271,24 @@ def full_tree():
 PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower")
 SKIN_FAMILIES = ("skin_", "wing_skin_", "dorsal_cover")
 # The skin families split_pieces cuts: family -> (cut planes, pieces). Each plane, (point, normal) in Blender world
-# space, bisects the family's sheet; each piece, (name, parent part, test), takes the sheet faces whose world centre
-# passes its test, the first piece whose test holds, and every detail island whose centre does.
+# space, bisects the family's sheet; each piece, (name, parent part, test), takes the sheet faces for which
+# test(world centre, side) holds, the first piece whose test does, where side is the face's bi.SPLIT_SIDE (0 where it
+# has none). A detail island and a rider (a light, a mount) go to the piece whose sheet lies nearest them.
+# Each wing skin parts at the crank plane, the inner pieces on the inner box and the outer on the outer box, and each
+# box's upper skin from its lower on the closures' middle columns (bi.box).
 SPLITS = {}
+for _sd, _x in (("L", 1.0), ("R", -1.0)):
+    SPLITS["wing_skin_" + _sd] = ([((_x * bi.WING_CRANK, 0.0, 0.0), (1.0, 0.0, 0.0))], [
+        ("wing_skin_%s_%s_%s" % (box, skin, _sd), ("wing_spar_" if box == "inner" else "wing_spar_outer_") + _sd,
+         lambda c, side, inner=(box == "inner"), upper=(skin == "upper"):
+            (abs(c.x) < bi.WING_CRANK) == inner and (side == bi.UPPER) == upper)
+        for box in ("inner", "outer") for skin in ("upper", "lower")])
+# Riders whose piece is named rather than found by position: each wing tip's nav light fairing wraps the tip, top and
+# bottom, and rides the upper skin with the upper lens (its lower lens rides the lower skin, by position).
+RIDERS = {"light_nav_mount_" + _sd: "wing_skin_outer_upper_" + _sd for _sd in ("L", "R")}
+# The edges along which each split family's own corner normals already broke (a crease, as at a sharp trailing edge),
+# world segments, as cut_family found them: seam_check holds a seam's normals together everywhere else.
+CREASES = {}
 # A connected stretch of a family's skin faces counts as its sheet when it holds at least this share of them; smaller
 # islands are details merged into it (merge_details), moved whole.
 SHEET_SHARE = 0.1
@@ -286,6 +317,10 @@ def split_pieces(icarus, splits=None):
     {family: [pieces]}."""
     splits = SPLITS if splits is None else splits
     O = bpy.data.objects
+    for name, parent in LATE_PARENTS.items():
+        world = O[name].matrix_world.copy()
+        O[name].parent = O[parent]
+        O[name].matrix_world = world
     made = {}
     for name, (planes, pieces) in splits.items():
         made[name] = cut_family(icarus, O[name], planes, pieces)
@@ -330,6 +365,19 @@ def islands_of(faces):
     return out
 
 
+def split_caps(bm, sides):
+    """Cut each end cap (side bi.CAP) between the two corners where its ring's upper skin meets its lower, an edge
+    between existing corners, so no UV moves, and give each half the side of the faces round it."""
+    for cap in [f for f in bm.faces if f[sides] == bi.CAP]:
+        ends = [v for v in cap.verts if {f[sides] for f in v.link_faces} >= {bi.UPPER, bi.LOWER}]
+        if len(ends) != 2:
+            raise ValueError("parts: a cap with %d corners where the upper skin meets the lower, not 2" % len(ends))
+        bmesh.ops.connect_verts(bm, verts=ends)
+    for half in [f for f in bm.faces if f[sides] == bi.CAP]:
+        around = [g[sides] for e in half.edges for g in e.link_faces if g[sides] in (bi.UPPER, bi.LOWER)]
+        half[sides] = max(set(around), key=around.count)
+
+
 def cut_family(icarus, obj, planes, pieces):
     """obj cut along planes into pieces (split_pieces). Returns the piece objects."""
     mesh = obj.data
@@ -343,6 +391,14 @@ def cut_family(icarus, obj, planes, pieces):
     for face in bm.faces:
         for loop, index in zip(face.loops, mesh.polygons[face.index].loop_indices):
             loop[normal] = corner[index].vector
+    CREASES[obj.name] = [(obj.matrix_world @ e.verts[0].co, obj.matrix_world @ e.verts[1].co) for e in bm.edges
+                         if len(e.link_loops) == 2 and any(
+                             a[normal].angle(b[normal], 0.0) > math.radians(SEAM_NORMAL_DEG)
+                             for v in e.verts for a in e.link_loops[0].face.loops if a.vert == v
+                             for b in e.link_loops[1].face.loops if b.vert == v)]
+    sides = bm.faces.layers.int.get(bi.SPLIT_SIDE)
+    if sides is not None:
+        split_caps(bm, sides)
     sheet_tag = bm.faces.layers.int.new("split_sheet")
     for f in sheet_faces(bm, skin_slot):
         f[sheet_tag] = 1
@@ -357,11 +413,17 @@ def cut_family(icarus, obj, planes, pieces):
     owner = {}
     sheet = [f for f in bm.faces if f[sheet_tag]]
     for f in sheet:
-        owner[f] = piece_at(pieces, to_world @ f.calc_center_median())
+        owner[f] = piece_at(pieces, to_world @ f.calc_center_median(), f[sides] if sides is not None else 0)
+    bm.verts.index_update()
+    nearest = BVHTree.FromPolygons([to_world @ v.co for v in bm.verts], [[v.index for v in f.verts] for f in sheet])
+
+    def on_sheet(point):
+        return owner[sheet[nearest.find_nearest(point)[2]]]
+
     for island in islands_of(f for f in bm.faces if not f[sheet_tag]):
         centre = sum((to_world @ f.calc_center_median() for f in island), Vector()) / len(island)
         for f in island:
-            owner[f] = piece_at(pieces, centre)
+            owner[f] = on_sheet(centre)
     areas = {}
     for f in bm.faces:
         if f.material_index == skin_slot:
@@ -386,6 +448,8 @@ def cut_family(icarus, obj, planes, pieces):
         bmesh.ops.delete(part, geom=[f for i, f in enumerate(part.faces) if i not in keep], context="FACES")
         bmesh.ops.delete(part, geom=[v for v in part.verts if not v.link_faces], context="VERTS")
         part.faces.layers.int.remove(layer)
+        if part.faces.layers.int.get(bi.SPLIT_SIDE) is not None:
+            part.faces.layers.int.remove(part.faces.layers.int[bi.SPLIT_SIDE])
         me = bpy.data.meshes.new(name)
         part.to_mesh(me)
         part.free()
@@ -399,6 +463,7 @@ def cut_family(icarus, obj, planes, pieces):
         for k, v in props.items():
             piece[k] = v
         piece["mass_kg"] = round(props.get("mass_kg", 0) * areas.get(name, 0.0) / total, 3) if total else 0
+        piece["family_mass_kg"] = props.get("mass_kg", 0)  # IcarusAuthor A22 sums the pieces against it
         made.append(piece)
     bm.free()
     for piece, (name, parent, _) in zip(made, pieces):
@@ -407,7 +472,7 @@ def cut_family(icarus, obj, planes, pieces):
         piece.parent = bpy.data.objects[parent]
         piece.matrix_world = w
     for rider in riders:
-        p = bpy.data.objects[piece_at(pieces, rider.matrix_world.translation)]
+        p = bpy.data.objects[RIDERS.get(rider.name) or on_sheet(rider.matrix_world.translation)]
         w = rider.matrix_world.copy()
         rider.parent = p
         rider.matrix_world = w
@@ -417,11 +482,18 @@ def cut_family(icarus, obj, planes, pieces):
     return made
 
 
-def piece_at(pieces, point):
+def piece_at(pieces, point, side):
     for name, _, test in pieces:
-        if test(point):
+        if test(point, side):
             return name
     raise ValueError("parts: no piece takes the point %s (%s)" % (tuple(point), ", ".join(p[0] for p in pieces)))
+
+
+def drop_split_sides(icarus):
+    """Remove bi.SPLIT_SIDE from every mesh that still carries it (a box no split cuts, or a build that splits none)."""
+    for obj in icarus.all_objects:
+        if obj.type == "MESH" and bi.SPLIT_SIDE in obj.data.attributes:
+            obj.data.attributes.remove(obj.data.attributes[bi.SPLIT_SIDE])
 
 
 def restore_normals(me):
@@ -492,14 +564,18 @@ def _organise(p, icarus, internals, structure_mat):
     rename(O["nozzle_shroud"], "nozzle")
     for sd in ("L", "R"):
         join("intake_duct_" + sd, [O["duct_" + sd], O["shock_cone_" + sd]])
-        spar = [o for o in icarus.objects if o.name.startswith(("spar_front_" + sd, "spar_rear_" + sd))
-                or (o.name.startswith("rib_") and o.name.endswith("_" + sd))]
+        spar = [o for o in icarus.objects if o.name.startswith(("spar_front_", "spar_rear_", "rib_"))
+                and o.name.endswith("_" + sd)]
         # The wing is too thin for separate tank parts: a skin or spar hull would swallow them. As on stock
-        # aircraft, the wing's fuel belongs to the wing part itself, the spar, with the bladders as its meshes.
-        bladders = [O["fuel_strake_" + sd], O["fuel_wing_" + sd]]
-        wing_fuel = sum(o["fuel_kg"] for o in bladders)
-        spar_obj = join("wing_spar_" + sd, spar + bladders)
-        spar_obj["fuel_kg"] = round(wing_fuel, 1)
+        # aircraft, the wing's fuel belongs to the wing part itself, the box, with the bladders as its meshes: the
+        # strake's in the inner box, the outer wing's (1.95 to 3.05, whole) in the outer, which the spars, ribs and
+        # bladders join by their centres either side of the crank.
+        members = spar + [O["fuel_strake_" + sd], O["fuel_wing_" + sd]]
+        outer = lambda o: abs(sum((o.matrix_world @ v.co).x for v in o.data.vertices) / len(o.data.vertices)) > bi.WING_CRANK
+        for name, part in (("wing_spar_" + sd, [o for o in members if not outer(o)]),
+                           ("wing_spar_outer_" + sd, [o for o in members if outer(o)])):
+            fuel = round(sum(o.get("fuel_kg", 0.0) for o in part), 1)
+            join(name, part)["fuel_kg"] = fuel
         rename(O["wing_" + sd], "wing_skin_" + sd)
     rename(O["fin"], "fin_skin")
     fin = p["fin"]["sections"]
@@ -545,6 +621,8 @@ def _organise(p, icarus, internals, structure_mat):
             world = obj.matrix_world.copy()
             obj.parent = parts[parent]
             obj.matrix_world = world
+    for name, (other, axis) in MOMENT_SPLITS.items():
+        split_moment(parts[name], parts[other], axis)
     nozzle_vector = O["nozzle_vector"]
     world = nozzle_vector.matrix_world.copy()
     nozzle_vector.parent = parts["nozzle"]
@@ -563,6 +641,24 @@ def _organise(p, icarus, internals, structure_mat):
     return parts
 
 
+def bounds(objs):
+    """The world bounds (lo, hi) of the objects' meshes."""
+    pts = [o.matrix_world @ v.co for o in objs for v in o.data.vertices]
+    return (Vector([min(p[i] for p in pts) for i in range(3)]), Vector([max(p[i] for p in pts) for i in range(3)]))
+
+
+def split_moment(part, other, axis):
+    """Share part's mass_kg (the family's) between part and other, keeping its first moment along axis about the
+    centre of their joint bounds: m_part + m_other = M, m_part c_part + m_other c_other = M c (MOMENT_SPLITS)."""
+    total = part["mass_kg"]
+    centre = lambda objs: sum(bounds(objs), Vector())[axis] / 2
+    c, a, b = centre([part, other]), centre([part]), centre([other])
+    share = round(total * (c - a) / (b - a), 1)
+    part["mass_kg"], other["mass_kg"] = round(total - share, 1), share
+    for obj in (part, other):  # IcarusAuthor A22 sums the two against the family
+        obj["family"], obj["family_mass_kg"] = part.name, total
+
+
 def check(icarus):
     import budget
 
@@ -571,11 +667,80 @@ def check(icarus):
         raise ValueError("parts: over the triangle caps: " + "; ".join(over))
     # within the float noise of parenting (forward and aft hang off mid), far under any real drift
     moved = ["%s at %s" % (name, tuple(bpy.data.objects[name].matrix_world.translation))
-             for name, origin in CORE_ORIGINS.items()
+             for name, origin in {**CORE_ORIGINS, **WING_BOX_ORIGINS}.items()
              if (bpy.data.objects[name].matrix_world.translation - Vector(origin)).length > 1e-5]
     if moved:
-        raise ValueError("parts: structure core origins off their CORE_ORIGINS pins: " + "; ".join(moved))
+        raise ValueError("parts: structure core or wing box origins off their pins: " + "; ".join(moved))
+    lef = next(cut for cut in bi.PARAMS["wing_surfaces"] if cut[0] == "lef_L")
+    if lef[1] != bi.WING_CRANK:
+        raise ValueError("parts: the wing crank %.3f is not the leading-edge flap's inboard end %.3f" % (bi.WING_CRANK, lef[1]))
+    print(seam_check(icarus))
     print(surface_sweep(icarus))
+
+
+SEAM_PLANE, SEAM_SHARED, SEAM_NORMAL_DEG = 0.005, 0.0002, 1.0  # seam_check's limits, metres and degrees
+
+
+def seam_check(icarus):
+    """Every SPLITS family's pieces meet cleanly. A boundary corner of a piece that lies on a sibling piece's surface is
+    on a cut: a sibling must have a corner within SEAM_SHARED of it, with a corner normal within SEAM_NORMAL_DEG of
+    each of its own there (so no crease opens, and a crease the family had stays), and the corner must lie within
+    SEAM_PLANE of one of the family's cut planes, or where an upper piece meets its lower (the closures' middle
+    columns). A build that leaves the families whole has nothing to check."""
+    from mathutils.geometry import intersect_point_line
+    from mathutils.kdtree import KDTree
+
+    report, problems = [], []
+    for name, (planes, pieces) in SPLITS.items():
+        objs = [bpy.data.objects.get(piece) for piece, _, _ in pieces]
+        if any(o is None for o in objs):
+            continue
+        corners = {}  # piece -> [(world point, [world corner normals])]
+        for o in objs:
+            normals = [o.matrix_world.to_3x3() @ n.vector for n in o.data.corner_normals]
+            at = {}
+            for loop in o.data.loops:
+                at.setdefault(loop.vertex_index, []).append(normals[loop.index])
+            counts = {}
+            for poly in o.data.polygons:
+                for key in poly.edge_keys:
+                    counts[key] = counts.get(key, 0) + 1
+            edge_verts = {v for key, n in counts.items() if n == 1 for v in key}
+            corners[o.name] = ([(o.matrix_world @ o.data.vertices[i].co, at[i]) for i in sorted(edge_verts)],
+                               [(o.matrix_world @ v.co, at.get(v.index, [])) for v in o.data.vertices])
+        seams = 0
+        for o in objs:
+            for other in objs:
+                if other is o:
+                    continue
+                surface = checks.tree(other)
+                points = corners[other.name][1]
+                kd = KDTree(len(points))
+                for i, (p, _) in enumerate(points):
+                    kd.insert(p, i)
+                kd.balance()
+                upper_lower = set(o.name.split("_")) ^ set(other.name.split("_")) == {"upper", "lower"}
+                for p, normals in corners[o.name][0]:
+                    if surface.find_nearest(p)[3] > SEAM_PLANE:
+                        continue
+                    seams += 1
+                    q, i, gap = kd.find(p)
+                    if gap > SEAM_SHARED:
+                        problems.append("%s corner %s is %.5f m from %s's nearest" % (o.name, tuple(round(c, 4) for c in p), gap, other.name))
+                        continue
+                    if not upper_lower and min(abs((p - Vector(co)).dot(Vector(no).normalized())) for co, no in planes) > SEAM_PLANE:
+                        problems.append("%s corner %s meets %s off every cut plane" % (o.name, tuple(round(c, 4) for c in p), other.name))
+                    if any(0 <= t <= 1 and (q - p).length <= SEAM_SHARED
+                           for q, t in (intersect_point_line(p, a, b) for a, b in CREASES.get(name, ()))):
+                        continue  # the family's own crease
+                    theirs = points[i][1]
+                    worst = max(min(n.angle(m, 0.0) for m in theirs) for n in normals)
+                    if math.degrees(worst) > SEAM_NORMAL_DEG:
+                        problems.append("%s corner %s turns %.2f deg from %s's" % (o.name, tuple(round(c, 4) for c in p), math.degrees(worst), other.name))
+        report.append("%s %d pieces, %d seam corners" % (name, len(objs), seams))
+    if problems:
+        raise ValueError("parts: seams: " + "; ".join(problems[:20]) + (" (%d in all)" % len(problems) if len(problems) > 20 else ""))
+    return "seam check: " + ("; ".join(report) if report else "no family split")
 
 
 def side_area(obj):

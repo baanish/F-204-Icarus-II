@@ -27,7 +27,7 @@ namespace Icarus.Editor
         private static readonly string[] ArmourSources =
         {
             "", "fuselage", "tail", "fuselage/cockpit", "fuselage/cockpit/nose", "fuselage/cockpit/cheek_L", "fuselage/intake_L",
-            "fuselage/wing1a_L", "fuselage/wing1a_L/wing2_L", "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L", "fuselage/wing1a_L/wing2_L/flap_L",
+            "fuselage/wing1a_L", "fuselage/wing1a_L/wing2_L", "fuselage/wing1a_L/wing2_L/wingtip_L", "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L", "fuselage/wing1a_L/wing2_L/flap_L",
             "wing1b_L", "vstab1", "vstab1/vstab2", "vstab1/vstab2/rudder",
         };
 

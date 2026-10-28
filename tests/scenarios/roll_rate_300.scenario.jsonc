@@ -1,0 +1,31 @@
+// Roll rate at 300 m/s: the Icarus holds 3,000 m heading east at 300 m/s, half fuel, clean, then the hold reverses onto
+// 270 and back, rolling at full aileron into each turn (the hold saturates the fly-by-wire's roll command, as in the
+// full_stick scenarios; own.ctl.in.roll is in the trace). Samples at 20 Hz; tools/flight_peaks.py reads the peak roll
+// rate and the roll command from the trace. A measurement for comparing two builds at matched fuel and loadout.
+// From the repo root: no-agentic run tests/scenarios/roll_rate_300.scenario.jsonc
+{
+  "mission": "icarus_ignus_3km_300.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 2800 } ] },
+      "label": "the Icarus airborne at 3 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0.7 } },
+    { "wait": { "path": "own.roll_rate_dps", "between": [-2, 2] }, "hold": 2, "timeout": 15, "label": "settled wings level" },
+    { "record": { "path": "own.tas_mps" }, "label": "true airspeed at the first roll, m/s" },
+    { "mark": { "label": "roll" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 270, "throttle": 0.7 } },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 6, "timeout": 8, "label": "6 s into the reversal onto 270" },
+    { "mark": { "label": "back" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0.7 } },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 6, "timeout": 8, "label": "6 s into the reversal back onto 090" },
+    { "record": { "path": "own.tas_mps" }, "label": "true airspeed at the end, m/s" },
+  ],
+}

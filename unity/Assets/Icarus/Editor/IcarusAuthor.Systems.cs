@@ -71,16 +71,19 @@ namespace Icarus.Editor
             var lights = new List<string>();
             foreach (var side in new[] { "L", "R" })
             {
-                var skin = b.Parts["wing_skin_" + side].transform;
+                // The wing skin part each lens's anchor hangs on in the export: the skin, or the outer piece under it.
+                var upperSkin = b.Blockout.Parts["light_nav_" + side].BlenderParent;
+                var lowerSkin = b.Blockout.Parts["light_nav_lower_" + side].BlenderParent;
+                var skin = b.Parts[upperSkin].transform;
                 var nav = root.Find("navlight_" + side);
                 nav.SetParent(skin, true);
                 nav.rotation = b.Blockout.Rotation("light_nav_" + side);
                 nav.localScale = Vector3.one;
                 nav.position = Lamp(nav, "light_nav_" + side);
-                NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
+                NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part(upperSkin);
                 lights.Add($"{nav.name} at light_nav_{side}");
 
-                var lower = Object.Instantiate(nav.gameObject, skin).transform;
+                var lower = Object.Instantiate(nav.gameObject, b.Parts[lowerSkin].transform).transform;
                 lower.name = "navlight_lower_" + side;
                 lower.rotation = b.Blockout.Rotation("light_nav_lower_" + side);
                 lower.position = Lamp(lower, "light_nav_lower_" + side);
@@ -91,7 +94,7 @@ namespace Icarus.Editor
                 var lowerEntry = navEntries.GetArrayElementAtIndex(sourceIndex);
                 var sourceEntry = navEntries.GetArrayElementAtIndex(sourceIndex + 1);
                 lowerEntry.FindPropertyRelative("renderer").objectReferenceValue = lower.GetComponent<Renderer>();
-                lowerEntry.FindPropertyRelative("part").objectReferenceValue = b.Part("wing_skin_" + side);
+                lowerEntry.FindPropertyRelative("part").objectReferenceValue = b.Part(lowerSkin);
                 lowerEntry.FindPropertyRelative("litMaterial").objectReferenceValue = sourceEntry.FindPropertyRelative("litMaterial").objectReferenceValue;
                 lowerEntry.FindPropertyRelative("controlState").intValue = sourceEntry.FindPropertyRelative("controlState").intValue;
                 lowerEntry.FindPropertyRelative("gear").objectReferenceValue = null;
@@ -130,7 +133,7 @@ namespace Icarus.Editor
                     lights.Add($"{formation.name} on {owner}");
                 }
 
-                var tipVertices = WorldVertices(skin, b.Meshes["wing_skin_" + side].Render);
+                var tipVertices = FamilyVertices(b, "wing_skin_" + side);
                 var outer = tipVertices.Max(v => Mathf.Abs(v.x));
                 var tip = tipVertices.Where(v => Mathf.Abs(v.x) > outer - 0.05f).ToArray();
                 var tipCentre = tip.Aggregate(Vector3.zero, (s, v) => s + v) / tip.Length;
@@ -139,7 +142,7 @@ namespace Icarus.Editor
                 vortex.position = new Vector3(Mathf.Sign(tipCentre.x) * outer, tipCentre.y, tip.Min(v => v.z));
                 var vapour = root.Find("wingVapor_" + side);
                 vapour.SetParent(b.Parts["wing_spar_" + side].transform, true);
-                vapour.position = AreaCentroid(skin, b.Meshes["wing_skin_" + side].Render);
+                vapour.position = AreaCentroid(b, FamilyParts(b, "wing_skin_" + side));
                 b.Placed.UnionWith(new[] { nav, vortex, vapour });
             }
             var tailReference = Load<GameObject>(Stock + "GameObject/AttackHelo1_PLACEHOLDER.prefab");
@@ -160,7 +163,7 @@ namespace Icarus.Editor
             aftEntry.FindPropertyRelative("part").objectReferenceValue = b.Part("stabilator");
             aftEntry.FindPropertyRelative("gear").objectReferenceValue = null;
             aftEntry.FindPropertyRelative("litMaterial").objectReferenceValue = stockTailEntry.FindPropertyRelative("litMaterial").objectReferenceValue;
-            aftEntry.FindPropertyRelative("controlState").intValue = NavLightEntry(navLights, b.Parts["wing_skin_L"].transform.Find("navlight_L").GetComponent<Renderer>())
+            aftEntry.FindPropertyRelative("controlState").intValue = NavLightEntry(navLights, b.Parts[b.Blockout.Parts["light_nav_L"].BlenderParent].transform.Find("navlight_L").GetComponent<Renderer>())
                 .FindPropertyRelative("controlState").intValue;
             var stockTailObjects = stockTailEntry.FindPropertyRelative("objects");
             var aftObjects = aftEntry.FindPropertyRelative("objects");
@@ -188,7 +191,7 @@ namespace Icarus.Editor
 
             // The transonic vapour cone where the wing root meets the body; the downwash under the nozzle on the Icarus
             // ground line; the scrape sparks on the belly.
-            var wingRoot = WorldVertices(b.Parts["wing_skin_L"].transform, b.Meshes["wing_skin_L"].Render).OrderBy(v => Mathf.Abs(v.x)).Take(20).Max(v => v.z);
+            var wingRoot = FamilyVertices(b, "wing_skin_L").OrderBy(v => Mathf.Abs(v.x)).Take(20).Max(v => v.z);
             var cone = b.Parts["fuselage_forward"].transform.Find("vaporCone") ?? throw new MissingReferenceException("vaporCone");
             cone.position = new Vector3(0f, b.Parts[RootPart].GetComponent<MeshRenderer>().bounds.center.y, wingRoot);
             // Its 7-8 m particles were sized for the Revoker's broad body; the system scales locally, so the transform

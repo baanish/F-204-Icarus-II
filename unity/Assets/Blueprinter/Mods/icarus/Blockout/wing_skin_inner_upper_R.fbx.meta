@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b4cba60369ff51a4babcf2e11d54e83e
+guid: f6238cc43f8324243b2a47658e6690b2
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -42,73 +42,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Icarus_Glass
-    second: {fileID: 2100000, guid: f68282079e2a22142b2abad952ae03a9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Int_Avionics
-    second: {fileID: 2100000, guid: f4de756bf15078c4d91be37c47c1762d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Int_Bay
-    second: {fileID: 2100000, guid: 52b43c64c8b576740820d70585ee9986, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Int_Cockpit
-    second: {fileID: 2100000, guid: b53b5ed866bad0d479348f3b5081e142, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Int_Engine
-    second: {fileID: 2100000, guid: 64bb774cb0c6e114c8acd251a1ddc1fa, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Int_Fuel
-    second: {fileID: 2100000, guid: 98d424205e9d01743a8cbb7069712373, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Int_Structure
-    second: {fileID: 2100000, guid: e8d4d6bd6941b7c42ab3e21761b08f05, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Nozzle
-    second: {fileID: 2100000, guid: 730fc93fdbb31754ea312a41da63a2af, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Petal
-    second: {fileID: 2100000, guid: d1183e265880db44286d9d1b9989a12f, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Icarus_Seal
-    second: {fileID: 2100000, guid: ac325601913e92f45a3d7d55305755d0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
       name: Icarus_Strut
     second: {fileID: 2100000, guid: 3e2a7fe0163fa5945954c783b219bf30, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Icarus_Tyre
-    second: {fileID: 2100000, guid: b725f89ec2cc3bc449ccf14522cf4ad7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
       name: Icarus_WellDetail
     second: {fileID: 2100000, guid: 5c089d8b8839a004ca43bf67eafa7be0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: LOD
-    second: {fileID: 2100000, guid: 7d6ad621856f7a14695bf6cfe2bb81ba, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

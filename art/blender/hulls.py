@@ -5,7 +5,8 @@ part, and one mesh per part in "LOD1" as its far-distance stand-in. Each sits at
 so its vertices are in the part's own space. Unity caps a convex collider at 255 vertices.
 
 LOD1 is one hull per part seen from outside, its triangles capped by LOD1_TRIS so the set stays inside Exterior rule
-27's 56 per hull and 760 in all. The parts under the skin get none: at that distance the skin's hulls hide them. A
+27's 56 per hull and, with the wing skins split in four a side (parts.SPLITS, each piece at least LOD1_DEFAULT), 780
+in all. The parts under the skin get none: at that distance the skin's hulls hide them. A
 hull over its cap keeps the points that reach furthest out (hull_mesh), so it never grows past the part.
 
 Each hull wears its part's paint (paint_lods, after uvs.unwrap): a face takes the material of the part surface under
@@ -54,7 +55,7 @@ SKIP_ROLES = ("visual", "cockpit_view")
 LOD1_TRIS = (("skin_", 40), ("radome", 32), ("nozzle", 32), ("dorsal_cover", 24), ("canopy_visible", 24),
              ("wing_skin_", 24), ("stabilator", 24), ("fin_skin", 20))
 LOD1_DEFAULT = 12
-LOD1_PER_HULL, LOD1_TOTAL = 56, 760
+LOD1_PER_HULL, LOD1_TOTAL = 56, 780
 # Parts inside the skin's LOD1 hulls, which get none of their own.
 LOD1_HIDDEN = ("fuselage_", "wing_spar_", "fin_spar", "engine_core", "cockpit_cell", "radar_tray", "avionics_tray",
                "fuel_", "intake_duct_")
@@ -81,7 +82,7 @@ SHELLS, SHELL_GAP = 8, 0.01
 
 # LOD1 and collider limits, by collection: triangles in total (budget.py sums them).
 BUDGET = {
-    "lod1": {"target": 760, "cap": 760, "collection": "LOD1"},
+    "lod1": {"target": 780, "cap": 780, "collection": "LOD1"},
     # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
     # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420).
     "colliders": {"target": 5300, "cap": 5300, "collection": "Colliders"},
