@@ -50,9 +50,9 @@ def dilate(values, used):
     return result
 
 
-def save_map(path, values, used):
+def save_map(path, values, used, empty=0):
     rgb = np.uint8(np.clip(values, 0, 1) * 255 + 0.5)
-    rgb[~used] = 0
+    rgb[~used] = np.uint8(np.clip(empty, 0, 1) * 255 + 0.5)
     Image.fromarray(dilate(rgb, used)).save(path)
 
 

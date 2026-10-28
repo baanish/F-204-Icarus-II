@@ -106,8 +106,9 @@ def compose(part_manifest=None):
     np.savez_compressed(OUT / 'surface_fields.npz', height=height.astype(np.float32), cavity=cavity.astype(np.float32),
                         groove=seam.astype(np.float32), relief=relief.astype(np.float32),
                         baked_ao=baked_ao.astype(np.float32))
-    dmg_b, dmg_n = compose_damage(pos, normal, used, fade, height)
-    save_map(EXPORT / 'Icarus_skin_dmg_b.png', dmg_b, used)
+    dmg_b, dmg_n = compose_damage(pos, normal, used, fade, height, fields)
+    # Empty atlas past the gutter never opens, so mips and filtering pull no holes into island edges.
+    save_map(EXPORT / 'Icarus_skin_dmg_b.png', dmg_b, used, empty=(0, 0, 0, 1))
     save_map(EXPORT / 'Icarus_skin_dmg_n.png', dmg_n, used)
     decals = sources()
     report = {'atlas_size': SIZE, 'paint_size': PAINT_SIZE, 'px_per_m': PX_PER_M,
@@ -185,6 +186,25 @@ def response_regions(painted, relief):
         'recessed_texels': int(recessed.sum()), 'clear_texels': int(clear.sum())}
 
 
+def damage_alpha_check(used, relief):
+    """Hold the shipped damage alpha to the stock shader's direction and to the open shares of stock skins.
+
+    Ten stock skin maps open 0.5 to 13% of their texels by HP 80 and 9 to 32% by HP 0, and keep 68 to 91% at or above
+    alpha 0.5, which never opens (damage.py). Joints and fastener rows must never open.
+    """
+    alpha = np.asarray(Image.open(EXPORT / 'Icarus_skin_dmg_b.png'), np.float64)[..., 3] / 255
+    skin = alpha[used]
+    share = {hp: float(((1 - hp / 100) * (skin - .52) + .02 < 0).mean()) for hp in (80, 60, 40, 20, 0)}
+    result = {'open_share_by_hp': {str(hp): value for hp, value in share.items()},
+              'never_open_share': float((skin >= .5).mean()),
+              'relief_texels_min_alpha': float(alpha[used & (relief > .5)].min())}
+    if result['relief_texels_min_alpha'] < .5:
+        raise ValueError('Damage alpha opens joint or fastener texels; high alpha must be the metal that stays')
+    if not (.005 <= share[80] <= .13 and .09 <= share[0] <= .32 and .68 <= result['never_open_share'] <= .91):
+        raise ValueError(f'Damage alpha open shares outside the stock range: {result}')
+    return result
+
+
 def measure():
     seams = resolve_record(json.loads((OUT / 'seam_samples.json').read_text()))
     coords = np.asarray([s['uv'] for s in seams])
@@ -237,6 +257,7 @@ def measure():
                 'cavity_mean_in_grooves': float(cavity[recessed].mean()),
                 'cavity_mean_clear_paint': float(cavity[clear].mean())}
     report['surface_response'] = response
+    report['damage_alpha'] = damage_alpha_check(used, relief)
     if response['height_to_png_normal_max_angle_error_deg'] > .5:
         raise ValueError('Normal PNG does not follow the shared height field')
     if response['smoothness_mean_in_grooves'] >= response['smoothness_mean_clear_paint']:

@@ -431,7 +431,8 @@ def map_checks(full, bake, composition, report):
             continue
         values = pixels(path)
         mismatches = int(np.any(values[gutter] != values[nearest[0][gutter], nearest[1][gutter]], axis=-1).sum())
-        nonzero = int(np.any(values[outside] != 0, axis=-1).sum())
+        empty = (0, 0, 0, 255) if name == 'Icarus_skin_dmg_b.png' else 0  # compose: empty atlas never tears
+        nonzero = int(np.any(values[outside] != empty, axis=-1).sum())
         record['gutter'] = {'width_px': GUTTER_PX, 'texels': int(gutter.sum()), 'mismatched_texels': mismatches,
                              'nonzero_beyond_gutter': nonzero}
         require(mismatches == 0 and nonzero == 0, f'Nearest-skin gutter differs: {name}')
