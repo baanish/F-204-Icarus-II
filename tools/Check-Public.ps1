@@ -1,6 +1,10 @@
-# Checks staged blobs, or every tracked and untracked working-tree file with -All, including binary metadata.
-[CmdletBinding()]
-param([string]$Repo = (Join-Path $PSScriptRoot '..'), [switch]$All)
+# Checks staged blobs, working-tree files with -All, or commit text with -MessageFile.
+[CmdletBinding(DefaultParameterSetName = 'Files')]
+param(
+    [string]$Repo = (Join-Path $PSScriptRoot '..'),
+    [Parameter(ParameterSetName = 'Files')][switch]$All,
+    [Parameter(Mandatory, ParameterSetName = 'Message')][string]$MessageFile
+)
 
 $ErrorActionPreference = 'Stop'
 $Repo = [IO.Path]::GetFullPath($Repo)
@@ -73,29 +77,51 @@ function Read-ScanBytes([byte[]]$Bytes, [string]$Path) {
     } finally { $kept.Dispose() }
 }
 
+function Test-PublicText([string]$Path, [string[]]$Views) {
+    foreach ($rule in $rules.Keys) {
+        # Binary bytes can match by chance, so this rule reads text only.
+        if ($rule -eq 'private notes reference' -and ($Path -in @('.gitignore', 'tools/Check-Public.ps1') -or $Views[-2].Contains([char]0))) { continue }
+        foreach ($view in $Views) {
+            if ([regex]::IsMatch($view, $rules[$rule], 'IgnoreCase') -and "${Path}: $rule" -notin $failures) {
+                $failures.Add("${Path}: $rule")
+            }
+        }
+    }
+}
+
 try {
-    if ((Read-GitBytes @('ls-files', '-u')).Length) { throw 'resolve unmerged index entries first' }
-    $paths = if ($All) { @(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z')) }
+    if (-not $MessageFile -and (Read-GitBytes @('ls-files', '-u')).Length) { throw 'resolve unmerged index entries first' }
+    $paths = if ($MessageFile) { @() }
+             elseif ($All) { @(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z')) }
              else { @(Read-GitPaths @('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z')) }
     $rules = [ordered]@{
         'Steam ID' = '(?<!\d)7656119\d{10}(?!\d)'
         'absolute user path' = '(?:[A-Z]:[\\/]+Users[\\/]+|/(?:Users|home|root)/|\\\\[^\\\s]+\\(?:Users|home)\\)'
-        'private development path' = '[A-Z]:[\\/]+(?:[^\r\n"<>|]*[\\/]+)?(?:privatefolder|privatetree)(?:[\\/]+|(?=["\s]|$))'
         'personal Steam library path' = '[A-Z]:[\\/]+(?:[^\s"<>|]*[\\/]+)?(?:Users[\\/]+[^\\/\s"<>|]+[\\/]+[^\r\n"<>|]*Steam|Steam(?:Library)?[\\/]+(?:users|userdata)[\\/]+[^\\/\s"<>|]+)'
     }
-    # The owner's account name, email and machine names live in the gitignored tools/public-check-terms.json
-    # ({"terms": [...]}), so the public checker doesn't publish what it guards; each matches as a whole word.
+    # Names and patterns the owner keeps private: {"terms": [...], "patterns": {"rule name": "regex"}}.
     $termsPath = Join-Path $Repo 'tools/public-check-terms.json'
     if (Test-Path -LiteralPath $termsPath) {
-        $terms = @((Get-Content -LiteralPath $termsPath -Raw | ConvertFrom-Json).terms)
+        $config = Get-Content -LiteralPath $termsPath -Raw | ConvertFrom-Json -AsHashtable
+        $terms = @($config.terms | Where-Object { $_ })
         if ($terms.Count) {
             $rules['private term'] = '(?<![A-Za-z0-9])(?:' + (($terms | ForEach-Object { [regex]::Escape($_) }) -join '|') + ')(?![A-Za-z0-9])'
         }
+        if ($config.patterns) {
+            foreach ($name in $config.patterns.Keys) {
+                if ($name -eq 'private notes reference' -and $All) { continue }
+                $rules[$name] = $config.patterns[$name]
+            }
+        }
     } else { Write-Output 'PUBLIC NOTE: no tools/public-check-terms.json, so only the generic rules ran' }
     $failures = [Collections.Generic.List[string]]::new()
+    if ($MessageFile) {
+        $text = [IO.File]::ReadAllText($MessageFile)
+        Test-PublicText 'commit message' @($text, $text.Replace([string][char]0, ''))
+    }
     foreach ($path in $paths) {
         Write-Verbose "checking $path"
-        if ($path -match '(?i)(^|/)(\.internal|\.cache|_donotship)(/|$)|^unity/Packages/nuclearoption/|^unity/Assets/Blueprinter/(Example|Generated)/') {
+        if ($path -match '(?i)(^|/)(\.cache|_donotship)(/|$)|^unity/Packages/nuclearoption/|^unity/Assets/Blueprinter/(Example|Generated)/') {
             $failures.Add("${path}: local-only path")
         }
         if ($path -match '(?i)\.(dll|exe|nobp|unity3d|assets)(\.meta)?$') {
@@ -104,13 +130,7 @@ try {
         $bytes = Read-TreeBytes $path
         $text = [Text.Encoding]::Latin1.GetString((Read-ScanBytes $bytes $path))
         $views = @($path, $text, $text.Replace([string][char]0, ''))
-        foreach ($rule in $rules.Keys) {
-            foreach ($view in $views) {
-                if ([regex]::IsMatch($view, $rules[$rule], 'IgnoreCase') -and "${path}: $rule" -notin $failures) {
-                    $failures.Add("${path}: $rule")
-                }
-            }
-        }
+        Test-PublicText $path $views
         if ($path -match '(?i)\.fbx$') {
             $temp = [IO.Path]::GetTempFileName()
             try {
@@ -121,8 +141,8 @@ try {
         }
     }
 
-    $changed = @(Read-GitPaths @('diff', '--cached', '--name-only', '-z'))
-    if ($All -or @($changed | Where-Object { $_ -eq 'art/export-manifest.json' -or $_.StartsWith('art/export/') }).Count) {
+    $changed = if ($MessageFile) { @() } else { @(Read-GitPaths @('diff', '--cached', '--name-only', '-z')) }
+    if (-not $MessageFile -and ($All -or @($changed | Where-Object { $_ -eq 'art/export-manifest.json' -or $_.StartsWith('art/export/') }).Count)) {
         $manifestBytes = Read-TreeBytes 'art/export-manifest.json'
         $manifest = [Text.Encoding]::UTF8.GetString($manifestBytes) | ConvertFrom-Json -AsHashtable
         $exports = @(Read-GitPaths @('ls-files', '-z', '--', 'art/export/'))
@@ -140,8 +160,11 @@ try {
         $failures | ForEach-Object { Write-Output "PUBLIC FAIL: $_" }
         exit 1
     }
-    $mode = if ($All) { 'tracked and untracked working-tree' } else { 'staged' }
-    Write-Output "PUBLIC PASS: $($paths.Count) $mode files checked"
+    if ($MessageFile) { Write-Output 'PUBLIC PASS: commit message checked' }
+    else {
+        $mode = if ($All) { 'tracked and untracked working-tree' } else { 'staged' }
+        Write-Output "PUBLIC PASS: $($paths.Count) $mode files checked"
+    }
 } catch {
     Write-Output "PUBLIC FAIL: $($_.Exception.Message)"
     exit 1
