@@ -14,7 +14,7 @@ namespace Icarus.Editor
         // The tip tank store (art/blender/tip_tanks.py): a mount for the Tip Tank set whose one round is the tank, released
         // like a dumb bomb through the game's networked store release. Built from copies of the stock PAB-250 (bomb_250_1:
         // its prefab, definition and weapon info) and its single mount, under the Icarus's own keys, as the MiG-29 mods
-        // build their drop tanks (.internal research R2). The round has no steering and almost no warhead: it bursts on
+        // build their drop tanks. The round has no steering and almost no warhead: it bursts on
         // impact with a puff of dust or spray, and zero effectiveness keeps the AI from choosing it as a weapon. Its fuel is
         // the plugin's (src/Icarus/TipTanks.cs): the store's mass is the full tank, which the plugin moves into the internal
         // cells as the jet burns, so a release sheds the shell and whatever fuel is left in it.
@@ -110,6 +110,37 @@ namespace Icarus.Editor
                 lod.SetLODs(levels);
                 lod.RecalculateBounds();
             }
+        }
+
+        // The weapon panel and loadout icon, drawn by tools/tip_tank_icon.py. Imported as the stock weapon icons are
+        // (weaponIcon_bomb_250): one sprite at 100 pixels per unit with a centre pivot, mipmapped, bilinear, clamped, sRGB, compressed.
+        private const string TipTankIconPath = ModFolder + "/Icons/Icarus_weaponIcon_tip_tank.png";
+
+        private static Sprite TipTankIconSprite()
+        {
+            if (!(AssetImporter.GetAtPath(TipTankIconPath) is TextureImporter importer))
+            {
+                AssetDatabase.ImportAsset(TipTankIconPath, ImportAssetOptions.ForceSynchronousImport);
+                importer = AssetImporter.GetAtPath(TipTankIconPath) as TextureImporter ?? throw new FileNotFoundException("Run tools/tip_tank_icon.py first.", TipTankIconPath);
+            }
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spritePixelsPerUnit = 100f;
+            settings.spriteAlignment = (int)SpriteAlignment.Center;
+            settings.spriteMeshType = SpriteMeshType.Tight;
+            importer.SetTextureSettings(settings);
+            importer.mipmapEnabled = true;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.anisoLevel = 1;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.sRGBTexture = true;
+            importer.alphaSource = TextureImporterAlphaSource.FromInput;
+            importer.alphaIsTransparency = true;
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            importer.SaveAndReimport();
+            return Load<Sprite>(TipTankIconPath);
         }
 
         // The lens objects' names; src/Icarus/TipTanks.cs finds them by this prefix.
@@ -214,6 +245,7 @@ namespace Icarus.Editor
             Prop(weapon, "weaponName").stringValue = "Tip Tank";
             Prop(weapon, "shortName").stringValue = "TANK";
             Prop(weapon, "description").stringValue = TipTankDescription;
+            Prop(weapon, "weaponIcon").objectReferenceValue = TipTankIconSprite();
             foreach (var role in new[] { "antiSurface", "antiAir", "antiMissile", "antiRadar" })
                 Num(weapon, "effectiveness." + role, 0f);
             Num(weapon, "pierceDamage", 20f);

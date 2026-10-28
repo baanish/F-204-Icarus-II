@@ -46,6 +46,11 @@ sealed class TipTanks : MonoBehaviour
             postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterGetFuelQuantity))),
         new("tip-tanks", typeof(Missile), "StartMissile", Type.EmptyTypes,
             postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterStartMissile))),
+        new("tip-tank-release", typeof(MountedMissile), nameof(MountedMissile.Fire),
+            new[] { typeof(Unit), typeof(Unit), typeof(Vector3), typeof(WeaponStation), typeof(GlobalPosition) },
+            prefix: AccessTools.Method(typeof(TipTanks), nameof(BeforeFire))),
+        new("tip-tank-hud", typeof(CombatHUD), nameof(CombatHUD.ShowWeaponStation),
+            postfix: AccessTools.Method(typeof(TipTanks), nameof(AfterShowWeaponStation))),
     };
 
     static readonly AccessTools.FieldRef<Weapon, Hardpoint> HardpointOf = AccessTools.FieldRefAccess<Weapon, Hardpoint>("hardpoint");
@@ -58,7 +63,7 @@ sealed class TipTanks : MonoBehaviour
         public Weapon Weapon = null!;
         public WeaponStation Station = null!;
         public string Side = "";
-        public float Fuel, Moved;
+        public float Fuel, Moved, Returned;
         public bool Attached;
         public Renderer? Skin;
         public Renderer? Top, Bottom;
@@ -136,6 +141,26 @@ sealed class TipTanks : MonoBehaviour
         }
     }
 
+    // The mass the cells took from the hardpoint goes back to it. The game's release takes the whole store mass off that
+    // part (MountedMissile.Fire, through RemoveFromHardpoint) and sets its rigidbody to what is left with no floor, so with
+    // the fuel already moved the part would go below zero and the solver would tear the jet apart: a tank released with
+    // under about 130 kg left, on a 368 kg wing spar, did exactly that. Called before the game's subtraction.
+    void ReturnMoved(Weapon weapon)
+    {
+        Tank? t = tanks.Find(x => x.Weapon == weapon);
+        if (t == null || t.Moved == 0f) return;
+        ShiftStoreMass(t, t.Moved);
+        t.Returned = t.Moved;
+        t.Moved = 0f;
+        IcarusPlugin.Log.Stage("tip-tanks-return", $"tip tank {t.Side}: {t.Returned:0} kg given back to its hardpoint ahead of the release", everyOccurrence: true);
+    }
+
+    static void BeforeFire(MountedMissile __instance, Unit owner)
+    {
+        if (IcarusPlugin.FeaturesOff.Contains("tip-tank-release") || owner == null) return;
+        if (owner.TryGetComponent<TipTanks>(out var ledger)) ledger.ReturnMoved(__instance);
+    }
+
     static void ShiftStoreMass(Tank t, float amount)
     {
         if (amount != 0f) HardpointOf(t.Weapon)?.ModifyMass(amount);
@@ -157,10 +182,9 @@ sealed class TipTanks : MonoBehaviour
             bool attached = t.Weapon.GetAmmoLoaded() > 0;
             if (t.Attached && !attached)
             {
-                // The game took the full store mass off the wing; what already went to the cells comes back.
-                ShiftStoreMass(t, t.Moved);
-                IcarusPlugin.Log.Stage("tip-tanks-release", $"tip tank {t.Side} released with {t.Fuel:0} kg; {t.Moved:0} kg had moved to the cells; mass {aircraft.GetMass():0} kg", everyOccurrence: true);
-                t.Moved = 0f;
+                // The game took the full store mass off the wing; what already went to the cells came back first (ReturnMoved).
+                IcarusPlugin.Log.Stage("tip-tanks-release", $"tip tank {t.Side} released with {t.Fuel:0} kg; {t.Returned:0} kg had moved to the cells; mass {aircraft.GetMass():0} kg", everyOccurrence: true);
+                t.Returned = 0f;
                 t.Fuel = 0f;
                 released = true;
             }
@@ -292,6 +316,22 @@ sealed class TipTanks : MonoBehaviour
             renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
             new MaterialPropertyBlock());
         IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery", everyOccurrence: true);
+    }
+
+    // The tank is authored as a bomb (the game releases it like one), so the HUD would draw the bombing sight (pipper, fall
+    // line, time of flight). A tank has nothing to aim: swap in the game's no-weapon state, as with no station selected.
+    // WeaponInfo.bomb stays set: only this HUD choice and the AI's bombing mode read it, and the AI never picks a tank
+    // (zero effectiveness against every role).
+    static int hudSwaps;
+
+    static void AfterShowWeaponStation(CombatHUD __instance, WeaponStation weaponStation, ref HUDWeaponState ___weaponState, GameObject ___NoWeaponUI)
+    {
+        if (IcarusPlugin.FeaturesOff.Contains("tip-tank-hud") || weaponStation == null || !IsTank(weaponStation.WeaponInfo)) return;
+        ___weaponState.gameObject.SetActive(false);
+        Destroy(___weaponState.gameObject);
+        ___weaponState = Instantiate(___NoWeaponUI, SceneSingleton<FlightHud>.i.GetHUDCenter()).GetComponent<HUDWeaponState>();
+        ___weaponState.SetHUDWeaponState(__instance.targetDesignator, __instance.aircraft, weaponStation);
+        IcarusPlugin.Log.Stage("tip-tank-hud", $"tip tank selected, no weapon sight (selection {++hudSwaps})", everyOccurrence: true);
     }
 
     static void AfterGetFuelLevel(Aircraft __instance, ref float __result)

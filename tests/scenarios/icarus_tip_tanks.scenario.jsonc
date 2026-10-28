@@ -4,10 +4,13 @@
 // line (src/Icarus/TipTanks.cs, every 5 s) shows the tanks going down while the internal cells stay full, and the fuel
 // level (Aircraft.GetFuelLevel, which the HUD gauge and cockpit needle read) counts both. Then it fires the Tip Tank
 // station: one trigger pull releases the pair through the game's store release, and each "tip-tanks-release: tip tank <side> released with
-// <kg>; ... mass <kg>" line gives the fuel that went with it and the mass after.
-// Pass: the tanks drain at least 150 kg while the internal cells hold at least 3,070 of their 3,082 kg, the fuel level
-// stays between 80 and 100 per cent, both tanks release with fuel still in them, the jet is at least 900 kg lighter after
-// the release, the station is empty, and the Icarus is undamaged for 10 s after it.
+// <kg>; <kg> had moved to the cells; mass <kg>" line gives the fuel that went with it, the fuel the cells had taken and the
+// mass after. The tanks are burned dry at 4x time and released empty: the case where all 500 kg of each tank had moved
+// to the cells, which took the wing spar's mass below zero at the release and tore the jet apart until the plugin gave
+// the moved mass back ahead of the game's own subtraction (TipTanks.ReturnMoved).
+// Pass: the tanks drain while the internal cells hold at least 2,900 of their 3,082 kg, the fuel level reads the tanks
+// (70 to 80 per cent while they hang dry), both tanks release empty with 500 kg each given back, the jet is under
+// 9,100 kg after the release, the station is empty, no joint breaks all run, and the Icarus is undamaged for 10 s after it.
 // From the repo root: no-agentic run tests/scenarios/icarus_tip_tanks.scenario.jsonc
 {
   "mission": "icarus_tip_tanks.mission.json",
@@ -17,7 +20,7 @@
     "../../.cache/build-staging/dotnet",
     "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
-  "timeout": 240,
+  "timeout": 420,
   "steps": [
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
     { "mark": { "label": "start" } },
@@ -34,12 +37,16 @@
     { "camera": { "mode": "game" } },
     { "mark": { "label": "burn" } },
     { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1.0 } },
-    { "wait": { "path": "own.alive", "eq": true }, "timeout": 50, "hold": 45, "label": "45 s on full throttle" },
+    { "time": { "scale": 4 } },
     { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks (\\d+) of 1000 kg", "source": "F-204 Icarus II", "since": "burn", "lt": 850 } },
-      "within": 6, "label": "the tanks have drained at least 150 kg" },
-    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks \\d+ of 1000 kg, internal (\\d+) kg", "source": "F-204 Icarus II", "since": "burn", "gt": 3070 } },
-      "label": "the internal cells stay full while the tanks feed them" },
-    { "check": { "path": "own.fuel_frac", "between": [0.8, 0.999] }, "label": "the fuel level counts the tanks: below full, above 80 per cent" },
+      "within": 120, "label": "the tanks have drained at least 150 kg" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks (\\d+) of 1000 kg", "source": "F-204 Icarus II", "since": "burn", "lt": 1 } },
+      "within": 240, "label": "the tanks are dry" },
+    { "time": { "scale": 1 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 8, "hold": 6, "label": "steady at normal time, the empty tanks still hanging" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks \\d+ of 1000 kg, internal (\\d+) kg", "source": "F-204 Icarus II", "since": "burn", "gt": 2900 } },
+      "label": "the internal cells stay near full while the tanks feed them" },
+    { "check": { "path": "own.fuel_frac", "between": [0.7, 0.8] }, "label": "the fuel level counts the dry tanks' capacity: full cells over cells and tanks" },
     { "record": { "path": "own.fuel_frac" }, "label": "fuel level before the release" },
     { "record": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks (\\d+) of 1000 kg", "source": "F-204 Icarus II", "since": "burn" } }, "label": "tank fuel before the release, kg" },
     { "record": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-fuel: tip tanks .*, mass (\\d+) kg", "source": "F-204 Icarus II", "since": "burn" } }, "label": "mass before the release, kg" },
@@ -52,10 +59,12 @@
     { "mark": { "label": "release" } },
     { "act": { "fire": 0.2 } },
     { "screenshot": { "name": "tip_tanks_falling" } },
-    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank L released with (\\d+) kg", "source": "F-204 Icarus II", "since": "release", "gt": 50 } },
-      "within": 3, "label": "the left tank released with its fuel" },
-    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank R released with (\\d+) kg", "source": "F-204 Icarus II", "since": "release", "gt": 50 } },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank L released with (\\d+) kg", "source": "F-204 Icarus II", "since": "release", "lt": 1 } },
+      "within": 3, "label": "the left tank released empty" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank R released with (\\d+) kg", "source": "F-204 Icarus II", "since": "release", "lt": 1 } },
       "within": 3, "label": "the right tank went with it" },
+    { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank R released with \\d+ kg; (\\d+) kg had moved", "source": "F-204 Icarus II", "since": "release", "gt": 490 } },
+      "label": "all 500 kg of the right tank had moved to the cells: the case that broke the jet" },
     { "check": { "path": "own.station.ammo", "eq": 0 }, "within": 3, "label": "the station is empty" },
     { "wait": { "path": "own.alive", "eq": true }, "timeout": 4, "hold": 2, "label": "the tanks fall away" },
     { "screenshot": { "name": "tip_tanks_away" } },
@@ -66,9 +75,10 @@
     { "record": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank R released with .*; mass (\\d+) kg", "source": "F-204 Icarus II", "since": "release" } }, "label": "mass after the release, kg" },
     { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank R released with .*; mass (\\d+) kg", "source": "F-204 Icarus II", "since": "release", "lt": 9100 } },
       "label": "the jet without its tanks: under 9,100 kg (5,800 empty and 3,082 internal fuel, less what it burned)" },
-    { "check": { "path": "own.fuel_frac", "gt": 0.97 }, "within": 3, "label": "the fuel level reads the full internal cells alone" },
+    { "check": { "path": "own.fuel_frac", "gt": 0.9 }, "within": 3, "label": "the fuel level reads the full internal cells alone" },
     { "record": { "path": "own.fuel_frac" }, "label": "fuel level after the release" },
-    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "not": { "event": "damage", "since": "release" } } ] }, "for": 10,
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "gt": 0.999 }, { "not": { "event": "damage", "since": "release" } } ] }, "for": 10,
       "label": "the Icarus takes no damage for 10 s after the release" },
+    { "check": { "not": { "log": "joint-break", "since": "start" } }, "label": "no joint broke all run" },
   ],
 }

@@ -44,7 +44,7 @@ MonoBehaviour:
   gravMult: 1
   pierceDamage: 20
   blastDamage: 0
-  weaponIcon: {fileID: 21300000, guid: 0a80e244732576d4cba29d4520f22110, type: 2}
+  weaponIcon: {fileID: 21300000, guid: 749ba759c36a44a428fa47357ce6a90c, type: 3}
   armorTierEffectiveness: 7
   airburstHeight: 0
   visibilityWhenFired: 0
