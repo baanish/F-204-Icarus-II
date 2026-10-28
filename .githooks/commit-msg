@@ -1,2 +1,8 @@
 #!/bin/sh
-exec pwsh -NoProfile -File "$(git rev-parse --show-toplevel)/tools/Check-Public.ps1" -MessageFile "$1"
+# The author and committer identity are published with the message, so they are checked with it.
+f=$(mktemp)
+{ cat "$1"; git var GIT_AUTHOR_IDENT; git var GIT_COMMITTER_IDENT; } > "$f"
+pwsh -NoProfile -File "$(git rev-parse --show-toplevel)/tools/Check-Public.ps1" -MessageFile "$f"
+rc=$?
+rm -f "$f"
+exit $rc
