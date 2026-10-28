@@ -100,3 +100,10 @@ for slot in m["aircraft"]:
     icarus(slot, 0.5)
 save(m, "icarus_group", "two player slots, an Icarus each for Primeva at 3,000 m MSL heading north at 220 m/s, 1 km apart, "
      "7 km south of Sandrift Airbase (Heartland), half fuel, clean, for a loopback host and client; no opponent.")
+
+# South Boscali General Aviation (Primeva here) has revetments, a medium hangar and two helipads; the Icarus is offered only at its
+# helipads, so two peers joining there each take one. With no player slots the peers join at the airbase as a player does from the map.
+m = template("group_airborne")
+m["aircraft"] = []
+save(m, "icarus_helipad", "no player slots, for peers that join at South Boscali General Aviation (Heartland, Primeva), whose two "
+     "helipads are the only hangars that take an Icarus; no opponent.")

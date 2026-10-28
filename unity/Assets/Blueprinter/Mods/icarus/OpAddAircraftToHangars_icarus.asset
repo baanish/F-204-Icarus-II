@@ -20,3 +20,6 @@ MonoBehaviour:
   - hangarUnitJsonKey: shelter1
     hangarNames:
     - shelter1
+  - hangarUnitJsonKey: Helipad
+    hangarNames:
+    - Helipad

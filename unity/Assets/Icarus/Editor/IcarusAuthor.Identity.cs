@@ -292,7 +292,7 @@ namespace Icarus.Editor
         }
 
         // The hangars the Revoker uses, and every stock mount on the sets that offer it.
-        private static readonly string[] HangarUnitKeys = { "hangar_med", "shelter1" };
+        private static readonly string[] HangarUnitKeys = { "hangar_med", "shelter1", "Helipad" };
 
         private static void AuthorOps(Stations stations)
         {

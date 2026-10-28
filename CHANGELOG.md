@@ -4,6 +4,7 @@
 
 - The Icarus no longer falls apart in a Boscali hangar's aircraft preview, and Boscali players can fly it from the aircraft menu. With no Boscali livery, the menu failed before it set the preview up; Boscali players now get all four PALA liveries there.
 - The aircraft menu picks the Bare Metal livery for the Icarus by default, on both sides, instead of a random one.
+- New setting, off by default: Fun > HelipadSpawn lets players spawn the Icarus on helipads, standing on its tail with the gear up, and full afterburner launches it straight up. It is for the memes and not balanced. The AI never spawns there.
 
 ## 0.1.0 (2026-10-27)
 
