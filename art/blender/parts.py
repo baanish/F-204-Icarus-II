@@ -249,6 +249,189 @@ def full_tree():
     return {**TREE, **canopy.TREE, **lights.TREE, **stations.TREE, **gear.TREE}
 
 
+# A skin family is cut into pieces named <family>_<piece>_<side> (split_pieces); these are the piece codes, and the
+# families are the skins whose names start with SKIN_FAMILIES. Other parts keep whatever their names hold
+# (pylon_inner_L, light_nav_lower_L, wing_spar_outer_L).
+PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower")
+SKIN_FAMILIES = ("skin_", "wing_skin_", "dorsal_cover")
+# The skin families split_pieces cuts: family -> (cut planes, pieces). Each plane, (point, normal) in Blender world
+# space, bisects the family's sheet; each piece, (name, parent part, test), takes the sheet faces whose world centre
+# passes its test, the first piece whose test holds, and every detail island whose centre does.
+SPLITS = {}
+# A connected stretch of a family's skin faces counts as its sheet when it holds at least this share of them; smaller
+# islands are details merged into it (merge_details), moved whole.
+SHEET_SHARE = 0.1
+
+
+def family(name):
+    """The skin family a piece belongs to: its name less the piece codes, whole underscore tokens only. Any other name
+    is its own family."""
+    if not name.startswith(SKIN_FAMILIES):
+        return name
+    return "_".join(token for token in name.split("_") if token not in PIECE_CODES)
+
+
+def family_objects(icarus, name):
+    """The meshes of one family by name: the family itself in a build that does not split it, its pieces in one that
+    does."""
+    return sorted((o for o in icarus.all_objects if o.type == "MESH" and family(o.name) == name), key=lambda o: o.name)
+
+
+def split_pieces(icarus, splits=None):
+    """Cut each skin family of splits (SPLITS by default) into its pieces, after uvs.unwrap and the passes that read
+    the families whole. A plane cut splits existing edges, each new corner taking the UV and the normal interpolated
+    along the edge it splits, so the atlas, its seams and the shading are the family's. Each piece gets the family's
+    properties and a share of its mass by skin area, its parent part, and the family's riders (lights, mounts) that
+    sit on it; the family's own colliders and LOD1 hull go (hulls.rebuild_pieces makes the pieces' own). Returns
+    {family: [pieces]}."""
+    splits = SPLITS if splits is None else splits
+    O = bpy.data.objects
+    made = {}
+    for name, (planes, pieces) in splits.items():
+        made[name] = cut_family(icarus, O[name], planes, pieces)
+    return made
+
+
+def sheet_faces(bm, skin_slot):
+    """The faces of bm's sheet: every face of a connected stretch holding at least SHEET_SHARE of its skin faces."""
+    seen, sheet = set(), set()
+    total = sum(f.material_index == skin_slot for f in bm.faces)
+    for start in bm.faces:
+        if start in seen:
+            continue
+        island, todo = [], [start]
+        seen.add(start)
+        while todo:
+            f = todo.pop()
+            island.append(f)
+            for g in {g for v in f.verts for g in v.link_faces} - seen:
+                seen.add(g)
+                todo.append(g)
+        if sum(f.material_index == skin_slot for f in island) >= SHEET_SHARE * total:
+            sheet.update(island)
+    return sheet
+
+
+def islands_of(faces):
+    """faces grouped into vertex-connected islands."""
+    faces, seen, out = set(faces), set(), []
+    for start in faces:
+        if start in seen:
+            continue
+        island, todo = [], [start]
+        seen.add(start)
+        while todo:
+            f = todo.pop()
+            island.append(f)
+            for g in {g for v in f.verts for g in v.link_faces if g in faces} - seen:
+                seen.add(g)
+                todo.append(g)
+        out.append(island)
+    return out
+
+
+def cut_family(icarus, obj, planes, pieces):
+    """obj cut along planes into pieces (split_pieces). Returns the piece objects."""
+    mesh = obj.data
+    skin_slot = [m.name if m else "" for m in mesh.materials].index(SKIN)
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    # Each corner's normal as a corner attribute, which an edge split interpolates like the UVs.
+    normal = bm.loops.layers.float_vector.new("split_normal")
+    corner = list(mesh.corner_normals)
+    bm.faces.ensure_lookup_table()
+    for face in bm.faces:
+        for loop, index in zip(face.loops, mesh.polygons[face.index].loop_indices):
+            loop[normal] = corner[index].vector
+    sheet_tag = bm.faces.layers.int.new("split_sheet")
+    for f in sheet_faces(bm, skin_slot):
+        f[sheet_tag] = 1
+    to_local = obj.matrix_world.inverted()
+    for co, no in planes:
+        local_co = to_local @ Vector(co)
+        local_no = (obj.matrix_world.to_3x3().transposed() @ Vector(no)).normalized()
+        sheet = [f for f in bm.faces if f[sheet_tag]]
+        geom = list({e for f in sheet for e in f.edges}) + list({v for f in sheet for v in f.verts}) + sheet
+        bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-6, plane_co=local_co, plane_no=local_no)
+    to_world = obj.matrix_world
+    owner = {}
+    sheet = [f for f in bm.faces if f[sheet_tag]]
+    for f in sheet:
+        owner[f] = piece_at(pieces, to_world @ f.calc_center_median())
+    for island in islands_of(f for f in bm.faces if not f[sheet_tag]):
+        centre = sum((to_world @ f.calc_center_median() for f in island), Vector()) / len(island)
+        for f in island:
+            owner[f] = piece_at(pieces, centre)
+    areas = {}
+    for f in bm.faces:
+        if f.material_index == skin_slot:
+            areas[owner[f]] = areas.get(owner[f], 0.0) + f.calc_area()
+    props = {k: obj[k] for k in obj.keys()}
+    riders = [c for c in obj.children if not any(col.name in ("Colliders", "LOD1") for col in c.users_collection)]
+    for c in obj.children:
+        if c not in riders:
+            data = c.data
+            bpy.data.objects.remove(c, do_unlink=True)
+            if data is not None and data.users == 0:
+                bpy.data.meshes.remove(data)
+    family_name, world = obj.name, obj.matrix_world.copy()
+    obj.name = obj.data.name = family_name + "__family"
+    made = []
+    total = sum(areas.values())
+    for name, parent, _ in pieces:
+        part = bm.copy()
+        layer = part.faces.layers.int["split_sheet"]
+        part.faces.ensure_lookup_table()
+        keep = {i for i, f in enumerate(bm.faces) if owner[f] == name}
+        bmesh.ops.delete(part, geom=[f for i, f in enumerate(part.faces) if i not in keep], context="FACES")
+        bmesh.ops.delete(part, geom=[v for v in part.verts if not v.link_faces], context="VERTS")
+        part.faces.layers.int.remove(layer)
+        me = bpy.data.meshes.new(name)
+        part.to_mesh(me)
+        part.free()
+        for m in mesh.materials:
+            me.materials.append(m)
+        piece = bpy.data.objects.new(name, me)
+        for collection in obj.users_collection:
+            collection.objects.link(piece)
+        piece.matrix_world = world
+        restore_normals(me)
+        for k, v in props.items():
+            piece[k] = v
+        piece["mass_kg"] = round(props.get("mass_kg", 0) * areas.get(name, 0.0) / total, 3) if total else 0
+        made.append(piece)
+    bm.free()
+    for piece, (name, parent, _) in zip(made, pieces):
+        recentre(piece)
+        w = piece.matrix_world.copy()
+        piece.parent = bpy.data.objects[parent]
+        piece.matrix_world = w
+    for rider in riders:
+        p = bpy.data.objects[piece_at(pieces, rider.matrix_world.translation)]
+        w = rider.matrix_world.copy()
+        rider.parent = p
+        rider.matrix_world = w
+    data = obj.data
+    bpy.data.objects.remove(obj, do_unlink=True)
+    bpy.data.meshes.remove(data)
+    return made
+
+
+def piece_at(pieces, point):
+    for name, _, test in pieces:
+        if test(point):
+            return name
+    raise ValueError("parts: no piece takes the point %s (%s)" % (tuple(point), ", ".join(p[0] for p in pieces)))
+
+
+def restore_normals(me):
+    """Set the mesh's corner normals from its split_normal corner attribute (split_pieces), then drop it."""
+    attr = me.attributes["split_normal"]
+    vectors = [Vector(a.vector).normalized() for a in attr.data]
+    me.attributes.remove(attr)
+    me.normals_split_custom_set(vectors)
+
+
 def organise(p, icarus, internals, structure_mat):
     """Turn the built exterior and internals into the part tree. Returns the parts by name."""
     prev, bi.TARGET = bi.TARGET, icarus

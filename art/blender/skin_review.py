@@ -29,11 +29,14 @@ def bake_ao(canonical):
     hidden = {o: o.hide_render for o in scene.objects if o.type == 'MESH'}
     groups = {s: [o.name for o in canonical if o.name.startswith('skin_' + s)] + ['fuselage_' + s]
               for s in ('forward', 'mid', 'aft')}
-    groups['wing_left'] = ['wing_skin_L', 'wing_spar_L']
+    # The structure split off the cores and the inner wing boxes (parts.organise, in both build modes) bakes in with them.
+    groups['aft'].append('fuselage_tail')
+    groups['mid'] += ['fuselage_truss_front', 'fuselage_truss_rear']
+    groups['wing_left'] = ['wing_skin_L', 'wing_spar_L', 'wing_spar_outer_L']
     if any(o.name == 'wing_skin_R' for o in canonical):
-        groups['wing_right'] = ['wing_skin_R', 'wing_spar_R']
+        groups['wing_right'] = ['wing_skin_R', 'wing_spar_R', 'wing_spar_outer_R']
     contexts = [bpy.data.objects[name] for members in groups.values() for name in members
-                if name not in {o.name for o in canonical}]
+                if name not in {o.name for o in canonical} and name in bpy.data.objects]
     arrays = {}
     try:
         for obj in hidden:

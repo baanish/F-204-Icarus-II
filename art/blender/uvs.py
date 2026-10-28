@@ -256,8 +256,19 @@ def overlap_count(triangles):
 
 
 def island_margin(objects):
+    """The least gap, in atlas pixels, between two UV islands of the skin. An island is the faces joined across edges
+    whose ends share their UVs. The pieces of one skin family (parts.split_pieces) cut its islands apart along their
+    boundaries, so their edges are keyed by the family and the edge's UV pair alone: a cut joins back into its island.
+    Within a family a UV pair names one edge (mirrored islands are shared only across MIRROR_PAIRS, none of them a skin
+    family), and world positions would be no key, since pieces under different cores reach them through different
+    matrices."""
+    from parts import family
+
     edges, boundaries = defaultdict(list), []
     parent = {}
+    members = defaultdict(int)
+    for obj in objects:
+        members[family(obj.name)] += 1
 
     def root(face):
         while parent[face] != face:
@@ -271,9 +282,11 @@ def island_margin(objects):
             key = (obj.name, face.index)
             parent[key] = key
             points = [(obj.data.loops[i].vertex_index, tuple(uv[i].uv)) for i in face.loop_indices]
+            shared = members[family(obj.name)] > 1
             for (vi, a), (vj, b) in zip(points, points[1:] + points[:1]):
-                edge = (obj.name, tuple(sorted(((vi, tuple(round(c, 7) for c in a)),
-                                                (vj, tuple(round(c, 7) for c in b))))))
+                ra, rb = tuple(round(c, 7) for c in a), tuple(round(c, 7) for c in b)
+                edge = ((family(obj.name), tuple(sorted((ra, rb)))) if shared
+                        else (obj.name, tuple(sorted(((vi, ra), (vj, rb))))))
                 edges[edge].append((key, a, b))
     for entries in edges.values():
         for face, _, _ in entries[1:]:

@@ -50,14 +50,14 @@ def inputs(repo, parameters):
     }
 
 
-def load_or_build(repo=None, overrides=None):
+def load_or_build(repo=None, overrides=None, split=True):
     repo = Path(repo or Path(__file__).resolve().parents[2]).resolve()
     # Appending into an already-built scene would rename materials and objects.
     # Live edits and repeated variant builds retain build()'s existing semantics.
     if os.environ.get("ICARUS_NO_BUILD_CACHE") == "1" or any(bpy.data.collections.get(n) for n in COLLECTIONS):
-        return bi.build(str(repo), overrides)
+        return bi.build(str(repo), overrides, split)
     parameters = dict(bi.PARAMS, **(overrides or {}))
-    fingerprint = inputs(repo, parameters)
+    fingerprint = dict(inputs(repo, parameters), split=split)
     key = hashlib.sha256(json.dumps(fingerprint, sort_keys=True).encode()).hexdigest()
     folder = repo / ".cache/build-cache"
     blend = folder / (key + ".blend")
@@ -101,7 +101,7 @@ def load_or_build(repo=None, overrides=None):
         return record["metrics"]
 
     print("BUILD CACHE MISS " + key, flush=True)
-    metrics = bi.build(str(repo), overrides)
+    metrics = bi.build(str(repo), overrides, split)
     import cockpit
 
     folder.mkdir(parents=True, exist_ok=True)

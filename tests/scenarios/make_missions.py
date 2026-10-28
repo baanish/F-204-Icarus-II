@@ -94,6 +94,20 @@ for name, alt, speed, fuel, what in [
     save(m, name, f"the player's Icarus for Primeva airborne over Ignus at {alt:,.0f} m MSL (x {IGNUS_X:.0f}, z {IGNUS_Z:.0f}), heading 090, "
          f"{speed:.0f} m/s, with about 160 km of map ahead; {what}; clean; no opponent.")
 
+# Eight Icarus inside the 10 km a jet keeps its per-part bodies from the camera (Aircraft.CheckPhysicsLod), for frame time
+# with a full flight: the player's and seven AI wingmen 400 m apart in a line abreast to the north.
+m = template("airborne")
+m["MapKey"] = IGNUS
+icarus(m["aircraft"][0], 0.5, {"x": IGNUS_X, "y": 10000.0, "z": IGNUS_Z}, rotation(90, 0), 400.0)
+for k in range(1, 8):
+    wing = copy.deepcopy(m["aircraft"][0])
+    wing.update(UniqueName=f"Icarus_Wing{k}", playerControlled=False, playerControlledPriority=-1)
+    wing["globalPosition"] = {"x": IGNUS_X, "y": 10000.0, "z": IGNUS_Z + 400.0 * k}
+    m["aircraft"].append(wing)
+save(m, "icarus_ignus_10km_eight", f"the player's Icarus and seven AI Icarus for Primeva over Ignus at 10,000 m MSL, 400 m apart in a "
+     f"line abreast to the north of x {IGNUS_X:.0f}, z {IGNUS_Z:.0f}, heading 090 at 400 m/s, half fuel, clean, for frame time with "
+     "eight Icarus near the camera; no opponent.")
+
 m = template("group_airborne")
 m["aircraft"] = m["aircraft"][:2]
 for slot in m["aircraft"]:

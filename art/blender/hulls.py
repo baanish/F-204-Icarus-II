@@ -481,17 +481,28 @@ def jointed(core, owner):
     return part.parent == core or core.parent == part
 
 
-def shells(owner, others):
-    """A structure core's frames as SHELLS pieces round its axis (through its origin, along Blender y), each cut flat
-    SHELL_GAP clear of every hull in others (separation() shapes), closest first, world space. A blast hits a part only
-    where its trace toward the part's origin meets that part's own collider (DamageEffects.FragTrace), so the core
-    needs hulls all round its axis, not a keel under it."""
+# Each structure core's frame points by shell sector, world space, as build() found them before open_bays cut the
+# render meshes: rebuild_pieces carves a core's shells again from these when the parts round it change.
+SHELL_GROUPS = {}
+
+
+def shell_groups(owner):
+    """A structure core's world vertices in SHELLS sectors round its axis (through its origin, along Blender y)."""
     world = [owner.matrix_world @ v.co for v in owner.data.vertices]
     zc = owner.matrix_world.translation.z
     groups = [[] for _ in range(SHELLS)]
     for w in world:
         a = math.atan2(w.x, w.z - zc)  # pieces meet on the centre line, so each side's are cut alike
         groups[min(SHELLS - 1, int((a % (2 * math.pi)) // (2 * math.pi / SHELLS)))].append(w)
+    return groups
+
+
+def shells(owner, others, groups=None):
+    """A structure core's frames as SHELLS pieces round its axis (shell_groups, or the groups given), each cut flat
+    SHELL_GAP clear of every hull in others (separation() shapes), closest first, world space. A blast hits a part only
+    where its trace toward the part's origin meets that part's own collider (DamageEffects.FragTrace), so the core
+    needs hulls all round its axis, not a keel under it."""
+    groups = shell_groups(owner) if groups is None else groups
     out = []
     for g in groups:
         bm = capped(g, PATCH_TRIS) if len(g) >= 4 else None
@@ -530,17 +541,7 @@ def build(icarus):
         if owner.get("mass_kg", 0) <= 0 and owner.get("role") != "fuel_tank":
             shapes = []
         elif name.startswith(PATCHED):
-            pieces, trough = skin_patches(owner)
-            shapes, thick = [], 0.0
-            for piece in pieces:
-                piece.normal_update()
-                hull = patch_hull(points_of(piece), [v.normal.copy() for v in piece.verts])
-                if hull:
-                    shapes.append(hull)
-                    thick = max(thick, thickness(hull, piece))
-                piece.free()
-            report.append("%s %d patches%s, thickest %.3f m" % (
-                name, len(shapes), " (%d more for the trough)" % trough if trough else "", thick))
+            shapes = patches(owner, report)
         elif name.startswith("intake_duct_"):
             shapes = piece_hulls(chunks(owner, DUCT_CHUNKS))
         elif name in STRUCTURE_CORES:  # its shells fill round the other parts' hulls, so they come last
@@ -561,24 +562,100 @@ def build(icarus):
         attach(name + "_lod1", lod, owner, lods)
         count["lods"] += 1
     for core in cores:
-        owned[core] = shells(core, [bm_shape(bm) for o, bms in owned.items()
-                                    if not jointed(core, o) or o.get("role") in ("cockpit", "gear") for bm in bms])
+        SHELL_GROUPS[core.name] = shell_groups(core)
+        owned[core] = shells(core, others_of(core, owned), SHELL_GROUPS[core.name])
         report.append("%s %d shells" % (core.name, len(owned[core])))
     for owner, shapes in owned.items():
-        to_local = owner.matrix_world.inverted()
-        for made, bm in enumerate(shapes):
-            bm.transform(to_local)
-            me = bpy.data.meshes.new("%s_col%d" % (owner.name, made))
-            bm.to_mesh(me)
-            bm.free()
-            attach(me.name, me, owner, colliders)
-            count["colliders"] += 1
+        count["colliders"] += attach_colliders(owner, shapes, colliders)
     print("hulls: " + "; ".join(report))
     for col in (colliders, lods):  # wireframe and out of renders, but still evaluated for the exporter
         col.hide_render = True
         for obj in col.objects:
             obj.display_type = "WIRE"
     return count
+
+
+def patches(owner, report):
+    """A skin panel's thin patch hulls (skin_patches), world space, with a line for the report."""
+    pieces, trough = skin_patches(owner)
+    shapes, thick = [], 0.0
+    for piece in pieces:
+        piece.normal_update()
+        hull = patch_hull(points_of(piece), [v.normal.copy() for v in piece.verts])
+        if hull:
+            shapes.append(hull)
+            thick = max(thick, thickness(hull, piece))
+        piece.free()
+    report.append("%s %d patches%s, thickest %.3f m" % (
+        owner.name, len(shapes), " (%d more for the trough)" % trough if trough else "", thick))
+    return shapes
+
+
+def others_of(core, owned):
+    """The separation() shapes a core's shells keep clear of: every other part's hulls but those jointed to the core,
+    the cockpit's and the gear's excepted."""
+    return [bm_shape(bm) for o, bms in owned.items()
+            if o != core and (not jointed(core, o) or o.get("role") in ("cockpit", "gear")) for bm in bms]
+
+
+def attach_colliders(owner, shapes, colliders):
+    """Each world-space hull as a collider mesh of owner, freed; returns how many."""
+    to_local = owner.matrix_world.inverted()
+    for made, bm in enumerate(shapes):
+        bm.transform(to_local)
+        me = bpy.data.meshes.new("%s_col%d" % (owner.name, made))
+        bm.to_mesh(me)
+        bm.free()
+        attach(me.name, me, owner, colliders)
+    return len(shapes)
+
+
+def rebuild_pieces(made):
+    """Hulls for the skin pieces parts.split_pieces made, {family: [pieces]}: each piece its own skin_patches in full
+    and a LOD1 hull with its family's LOD1_TRIS shared by skin area (LOD1_DEFAULT at least). A structure core that a
+    piece hangs on in place of the family's own parent, or that loses such a piece, has its shells carved again from
+    SHELL_GROUPS, clear of the parts round it now (a core's shells keep clear only of parts not jointed to it)."""
+    from parts import full_tree
+    from uvs import SKIN
+
+    colliders, lods = bpy.data.collections["Colliders"], bpy.data.collections["LOD1"]
+    report, cores = [], set()
+    for name, pieces in made.items():
+        areas = [sum(f.area for f in p.data.polygons if p.data.materials[f.material_index].name == SKIN) for p in pieces]
+        for piece, area in zip(pieces, areas):
+            moved = {piece.parent.name, full_tree()[name][0]}
+            if len(moved) > 1:
+                cores.update(moved & set(STRUCTURE_CORES))
+            tris = max(LOD1_DEFAULT, round(lod_tris(name) * area / sum(areas)))
+            lod = hull_mesh(piece.name + "_lod1", [v.co.copy() for v in piece.data.vertices], tris)
+            if lod is not None:
+                attach(piece.name + "_lod1", lod, piece, lods)
+            if piece.get("mass_kg", 0) > 0:
+                attach_colliders(piece, patches(piece, report), colliders)
+    for name in sorted(cores):
+        core = bpy.data.objects[name]
+        for c in [c for c in core.children if c.name in colliders.objects]:
+            data = c.data
+            bpy.data.objects.remove(c, do_unlink=True)
+            bpy.data.meshes.remove(data)
+        owned = {}
+        for c in colliders.objects:
+            if c.parent != core:
+                bm = bmesh.new()
+                bm.from_mesh(c.data)
+                bm.transform(c.parent.matrix_world)
+                owned.setdefault(c.parent, []).append(bm)
+        carved = shells(core, others_of(core, owned), SHELL_GROUPS[name])
+        for bms in owned.values():
+            for bm in bms:
+                bm.free()
+        attach_colliders(core, carved, colliders)
+        report.append("%s %d shells" % (name, len(carved)))
+    for col in (colliders, lods):
+        col.hide_render = True
+        for obj in col.objects:
+            obj.display_type = "WIRE"
+    print("hulls: pieces: " + "; ".join(report))
 
 
 # --- LOD1 paint ---------------------------------------------------------------------------------------------------

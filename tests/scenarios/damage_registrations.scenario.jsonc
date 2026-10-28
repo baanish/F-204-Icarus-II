@@ -1,0 +1,36 @@
+// Damage registrations: the Icarus spawns with its default loadout (tip tanks, an AAM-36 and an AAM-29), and the plugin's
+// [Diagnostics] ReloadLoadout hands it a fresh copy of that loadout three times, respawning every mount as a rearm with
+// a loadout change does. Unit.RegisterDamageable only appends, and damage and break messages address a part by its byte
+// index in that list, so the count must stay under 256 for the jet's life. Records the count the plugin's
+// "damage-registrations" lines give before the first reload (the spawn count) and after the first and the third.
+// From the repo root: no-agentic run tests/scenarios/damage_registrations.scenario.jsonc
+{
+  "mission": "icarus_default_loadout.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "mark": { "label": "reload1" } },
+    { "config": { "guid": "baanish.icarus", "section": "Diagnostics", "key": "ReloadLoadout", "value": 1 } },
+    { "wait": { "log": "after a loadout spawn$", "source": "F-204 Icarus II", "since": "reload1" }, "timeout": 5, "label": "the first reload respawns the mounts" },
+    { "record": { "log_value": { "match": "damage-registrations \\S+: (\\d+) before a reload", "source": "F-204 Icarus II", "since": "reload1" } },
+      "label": "registrations at spawn" },
+    { "record": { "log_value": { "match": "damage-registrations \\S+: (\\d+) after a loadout spawn", "source": "F-204 Icarus II", "since": "reload1" } },
+      "label": "registrations after one reload" },
+    { "mark": { "label": "reload2" } },
+    { "config": { "guid": "baanish.icarus", "section": "Diagnostics", "key": "ReloadLoadout", "value": 2 } },
+    { "wait": { "log": "after a loadout spawn$", "source": "F-204 Icarus II", "since": "reload2" }, "timeout": 5, "label": "the second reload respawns the mounts" },
+    { "mark": { "label": "reload3" } },
+    { "config": { "guid": "baanish.icarus", "section": "Diagnostics", "key": "ReloadLoadout", "value": 3 } },
+    { "wait": { "log": "after a loadout spawn$", "source": "F-204 Icarus II", "since": "reload3" }, "timeout": 5, "label": "the third reload respawns the mounts" },
+    { "record": { "log_value": { "match": "damage-registrations \\S+: (\\d+) after a loadout spawn", "source": "F-204 Icarus II", "since": "reload3" } },
+      "label": "registrations after three reloads" },
+  ],
+}

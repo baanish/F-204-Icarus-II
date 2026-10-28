@@ -1,0 +1,58 @@
+// breakup_missile_hit with seven AI Icarus flying 400 m apart beside the player's, for frame time with eight Icarus near
+// the camera (icarus_ignus_10km_eight.mission.json). Breakup under a missile hit: the Icarus holds 10 km at 400 m/s over Ignus and a Boscali AAM2 is spawned 3 km behind
+// and 1.5 km to the left. Pass: the missile hits, and a primary structural part (a wing spar, the engine core or a
+// fuselage section) detaches in the air (within 20 s of the hit, the aircraft still above 1,000 m). Joints break only
+// from damage, as on stock jets, so an undamaged section stays on through the tumble after the kill. The [Icarus]
+// joint-break lines in the run's log give each part's HP when its joint broke. Frame time is measured over 10 s of intact
+// flight, the 10 s after the hit and the 30 s of debris after that, and the run watches the tumble that long so
+// tools/breakup_report.py sees every part that comes off. Run uncapped (no-agentic run --uncapped) for the frame times.
+// From the repo root: no-agentic run --uncapped tests/scenarios/breakup_missile_hit_eight.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km_eight.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 4,
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 120, "pitch_deg": 10 } },
+    { "mark": { "label": "start" } },
+    { "perf": {} },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 10, "timeout": 15, "label": "10 s of intact flight" },
+    { "perf": { "label": "intact" } },
+    { "spawn": { "kind": "missile", "type": "AAM2", "faction": "Boscali", "back_m": 3000, "left_m": 1500, "speed_mps": 600, "name": "m1" } },
+    { "mark": { "label": "launched" } },
+    { "wait": { "event": "missile_end", "since": "launched" }, "timeout": 40, "label": "the missile ends" },
+    { "check": { "event": "missile_end", "since": "launched", "result": "hit" }, "label": "the missile hits the Icarus" },
+    { "mark": { "label": "hit" } },
+    { "perf": {} },
+    { "screenshot": { "name": "hit" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 10, "timeout": 15, "label": "the 10 s after the hit" },
+    { "perf": { "label": "breakup" } },
+    { "perf": {} },
+    { "check": { "all": [
+        { "path": "own.alt_msl_m", "gt": 1000 },
+        { "any": [ { "event": "part_detached", "since": "launched", "part": "wing_spar_L" },
+                   { "event": "part_detached", "since": "launched", "part": "wing_spar_R" },
+                   { "event": "part_detached", "since": "launched", "part": "engine_core" },
+                   { "event": "part_detached", "since": "launched", "part": "fuselage_forward" },
+                   { "event": "part_detached", "since": "launched", "part": "fuselage_aft" } ] } ] },
+      "within": 20, "label": "a primary structural part detaches in the air" },
+    { "screenshot": { "name": "breakup" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 30, "timeout": 35, "label": "30 s of debris" },
+    { "perf": { "label": "debris" } },
+    { "screenshot": { "name": "debris" } },
+    { "record": { "event": "part_detached", "field": "part", "since": "launched" }, "label": "parts detached after the hit" },
+    { "record": { "event": "frames", "label": "intact", "field": "p95_ms", "since": "start" }, "label": "frame time p95, intact (ms)" },
+    { "record": { "event": "frames", "label": "breakup", "field": "p95_ms", "since": "start" }, "label": "frame time p95, 10 s after the hit (ms)" },
+    { "record": { "event": "frames", "label": "debris", "field": "p95_ms", "since": "start" }, "label": "frame time p95, 30 s of debris (ms)" },
+  ],
+}

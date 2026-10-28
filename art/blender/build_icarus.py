@@ -1396,25 +1396,26 @@ def metrics(objs):
     }
 
 
-def build(repo=None, overrides=None):
-    """Rebuild the aircraft. overrides replaces top-level PARAMS entries for this build only (variant renders)."""
+def build(repo=None, overrides=None, split=True):
+    """Rebuild the aircraft. overrides replaces top-level PARAMS entries for this build only (variant renders). split
+    False leaves the skin families whole (parts.split_pieces), as the skin bake reads them."""
     global TARGET, PARAMS
     base = PARAMS
     if overrides:
         PARAMS = dict(base, **overrides)
     geometry_cache.clear()
     try:
-        return _build(repo)
+        return _build(repo, split)
     finally:
         PARAMS = base
         geometry_cache.clear()
 
 
-def build_cached(repo=None, overrides=None):
+def build_cached(repo=None, overrides=None, split=True):
     """Reuse a checked aircraft in a fresh script; build() always regenerates it."""
     import build_cache
 
-    return build_cache.load_or_build(repo, overrides)
+    return build_cache.load_or_build(repo, overrides, split)
 
 
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
@@ -1429,7 +1430,7 @@ def modules():
     return [importlib.import_module(name) for name in MODULES]
 
 
-def _build(repo):
+def _build(repo, split=True):
     global TARGET
     repo = repo or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     TARGET = collection("Icarus")
@@ -1476,6 +1477,13 @@ def _build(repo):
     import tip_tanks
 
     tip_tanks.build(p, mats, TARGET)  # a store in its own collection, painted from the wing's atlas
+    if split:
+        pieces = part_tree.split_pieces(TARGET)  # after every pass that reads a skin family whole
+        hulls.rebuild_pieces(pieces)
+        hull_count = {"colliders": len(bpy.data.collections["Colliders"].objects),
+                      "lods": len(bpy.data.collections["LOD1"].objects)}
+        tree = {name: obj for name, obj in tree.items() if name not in pieces}
+        tree.update((piece.name, piece) for made in pieces.values() for piece in made)
     hulls.paint_lods()
     skin_normals(TARGET)
     import checks

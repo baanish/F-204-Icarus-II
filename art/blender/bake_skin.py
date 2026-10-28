@@ -77,7 +77,9 @@ def prepare():
 
     for obj in list(bpy.data.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
-    metrics = build_icarus.build_cached()
+    # The skin families whole: the bake numbers its parts and groups its AO by family, and the pieces of the split build
+    # carry these UVs unchanged (tools/check_uv_families.py).
+    metrics = build_icarus.build_cached(split=False)
     icarus = bpy.data.collections["Icarus"]
     report = uvs.check(icarus)
     (OUT / "geometry_checks.json").write_text(json.dumps({"build": metrics, "uv": report}, indent=2))

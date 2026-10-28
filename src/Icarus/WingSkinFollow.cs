@@ -23,12 +23,12 @@ static class WingSkinFollow
     {
         if (IcarusPlugin.FeaturesOff.Contains("wing-skin-follow") || __instance.definition == null ||
             __instance.definition.jsonKey != IcarusPlugin.JsonKey) return;
-        AeroPart[] parts = IcarusSystems.Parts(__instance);
-        foreach (string side in new[] { "L", "R" })
+        // Each wing skin piece follows the box its own parent joint hangs it on, so a skin cut at the crank follows
+        // the inner or the outer box; the outer box is drawn by its own body, which carries the tip and its stores.
+        foreach (AeroPart skin in IcarusSystems.Parts(__instance).Where(p => p.name.StartsWith("wing_skin_")))
         {
-            AeroPart skin = parts.FirstOrDefault(p => p.name == "wing_skin_" + side);
-            AeroPart spar = parts.FirstOrDefault(p => p.name == "wing_spar_" + side);
-            if (skin == null || spar == null || skin.GetComponent<WingSkinPose>() != null) continue;
+            if (skin.Joints.Length == 0 || skin.Joints[0].connectedPart is not AeroPart spar ||
+                skin.GetComponent<WingSkinPose>() != null) continue;
             skin.gameObject.AddComponent<WingSkinPose>().Begin(__instance, skin, spar);
         }
     }
