@@ -35,8 +35,9 @@ BUDGET = {
     # 900 of the skin's target and 600 of its ceiling went to the speed brake wells' airframe (structure_cores); the
     # conformal trough's NACA ramp rings brought the skin to about 19,800, the gear doors' holes and the ring kept
     # short of the rear ramp's deep end (build_icarus.fuselage_stations) to about 20,300. The radome's and the boat
-    # tail's finer rings (build_icarus NOSE_RINGS, TAIL_FINE) bring it to about 24,770.
-    "fuselage_skin": {"target": 24800, "cap": 24800, "objects": ("radome", "skin_", "dorsal_cover")},
+    # tail's finer rings (build_icarus NOSE_RINGS, TAIL_FINE) bring it to about 24,770. The forward and mid panels' cuts at
+    # their lower lap joints and at the truss break take about 630 more (25,401 measured).
+    "fuselage_skin": {"target": 25400, "cap": 25500, "objects": ("radome", "skin_", "dorsal_cover")},
     "wing_box_L": {"target": 2000, "cap": 2000, "family": ("wing_skin_L",)},
     "wing_box_R": {"target": 2000, "cap": 2000, "family": ("wing_skin_R",)},
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
@@ -48,7 +49,8 @@ BUDGET = {
     # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_tail) about 570, from the skin's. The
     # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more. The
     # walls either side of the tail cone's break and the stringer runs parted there take about 300 (15,106 measured).
-    "structure_cores": {"target": 15100, "cap": 15200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail")},
+    "structure_cores": {"target": 15100, "cap": 15200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail",
+                                                                    "fuselage_truss_")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
     # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160.
     "fuel_cells": {"target": 3000, "cap": 3200, "objects": ("fuel_",)},
@@ -69,7 +71,11 @@ CLOSEUPS = {
 # part name -> (parent, dry mass kg). Hinged surfaces are listed by their hinge name. The canopy, light and station
 # modules list their own parts (organise merges their TREEs).
 TREE = {
-    "fuselage_mid": (None, 910),
+    # The root's 910 kg shared with the truss over its top (TRUSS): about 45 kg of frame arcs and stringers each side of
+    # TRUSS_BREAK. organise marks the three one family, so IcarusAuthor keeps their moment as the root had it.
+    "fuselage_mid": (None, 820),
+    "fuselage_truss_front": ("fuselage_mid", 45),
+    "fuselage_truss_rear": ("fuselage_mid", 45),
     "fuselage_forward": ("fuselage_mid", 500),
     "cockpit_cell": ("fuselage_forward", 480),
     "radome": ("cockpit_cell", 35),
@@ -158,6 +164,12 @@ LATE_PARENTS = {**{name + _sd: "wing_spar_outer_" + _sd for name in ("aileron_",
                 "nozzle": "engine_afterburner", "ventral_fin": "fuselage_tail",
                 **{"speed_brake_" + _sd + end: "fuselage_tail" for _sd in ("L", "R") for end in ("", "_cylinder")}}
 DORSAL = (5.0, 12.4)
+# The mid section's truss: its frames' arcs over the top, between the upper longerons (skin columns 12 and 36, 45
+# degrees either side of it), with the stringers between them (internals INTERNALS["stringers"]["truss"]), in two
+# parts at TRUSS_BREAK, frame 11 and the butt joint art/textures/panels.py draws there; the skin panels and the dorsal
+# cover over it part there too (SPLITS).
+TRUSS = interior.INTERNALS["stringers"]["truss"]
+TRUSS_BREAK = TRUSS["break"]
 # A family's dry mass shared between two parts split from it so that its first moment along the axis that separates
 # them stays where it was: part -> (the part split from it, axis). A part's mass sits at the centre of its hulls'
 # bounds (IcarusAuthor ConfigurePart's CoM, which UnitPart.ModifyMass makes the body's centre of mass), here its own
@@ -220,6 +232,16 @@ def subset(name, source, keep_face):
     obj.matrix_world = source.matrix_world.copy()
     bi.TARGET.objects.link(obj)
     return obj
+
+
+def keep_faces(obj, keep):
+    """Drop the faces of obj for which keep(world centre) is false, and the corners left with none."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if not keep(obj.matrix_world @ f.calc_center_median())], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
 
 
 def join(name, objs):
@@ -285,7 +307,9 @@ def full_tree():
 PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower")
 SKIN_FAMILIES = ("skin_", "wing_skin_", "dorsal_cover")
 # The skin families split_pieces cuts: family -> (cut planes, pieces). Each plane, (point, normal) in Blender world
-# space, bisects the family's sheet; each piece, (name, parent part, test), takes the sheet faces for which
+# space, bisects the family's sheet, or with a third member where(world face centre) only the sheet faces it holds for
+# (a lap joint's plane in its own bay, which takes a corner within BAY_PLANE_ON of it as on it: the loft's own
+# columns run a fraction of a millimetre off it in places, and an exact cut left slivers that thin there); each piece, (name, parent part, test), takes the sheet faces for which
 # test(world centre, side) holds, the first piece whose test does, where side is the face's bi.SPLIT_SIDE (0 where it
 # has none). A detail island and a rider (a light, a mount) go to the piece whose sheet lies nearest them.
 # Each wing skin parts at the crank plane, the inner pieces on the inner box and the outer on the outer box, and each
@@ -296,6 +320,62 @@ for _sd in ("L", "R"):
     SPLITS["skin_aft_" + _sd] = ([((0.0, TAIL_START - bi.S0, 0.0), (0.0, 1.0, 0.0))], [
         ("skin_aft_front_" + _sd, "fuselage_aft", lambda c, side: station(c) < TAIL_START),
         ("skin_aft_rear_" + _sd, "fuselage_tail", lambda c, side: True)])
+
+
+def panel_lines(p):
+    """The fuselage's panel lines as art/textures/panels.py draws them (panels.fuselage_lines), from the body centre
+    heights pilot2_skin.py writes to structure.json for it, with the panels module."""
+    import os
+    import sys
+
+    import numpy as np
+
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "textures"))
+    import panels
+
+    table = p["fuselage"]
+    sections = [[float(s), bi.fuselage_shapes(p, float(s))[1]] for s in np.arange(table[0][0], table[-1][0], .05)]
+    return panels, panels.fuselage_lines({"frames": interior.INTERNALS["frames"], "fuselage_sections": sections},
+                                         (RADOME_END, FORWARD_END, MID_END, table[-1][0]))
+
+
+_PANELS, _LINES = panel_lines(bi.PARAMS)
+
+
+def below_lap(c):
+    """Whether a world point lies below its side's lower lap joint, as the paint draws it."""
+    return float(_PANELS.lap_distances(abs(c.x), station(c), c.z, _LINES)[1]) < 0
+
+
+def lower_lap_planes(sd, a, b):
+    """The lower lap joint on side sd between stations a and b: each bay between two of the paint's knots takes the
+    plane through the 45 degree lines at its ends (panels.lap_distances), cutting only that bay's faces on that side."""
+    x = 1.0 if sd == "L" else -1.0
+    knots, zc = list(_LINES["knots"]), list(_LINES["knot_zc"])
+    planes = []
+    for k0, k1, z0, z1 in zip(knots, knots[1:], zc, zc[1:]):
+        if k1 <= a or k0 >= b:
+            continue
+        dk, dz = k1 - k0, z1 - z0
+        planes.append(((0.0, k0 - bi.S0, float(z0)), (x * dk, -dz, dk),
+                       lambda c, k0=k0, k1=k1: k0 <= station(c) <= k1 and (c.x >= 0) == (x > 0)))
+    return planes
+
+
+for _sd in ("L", "R"):
+    # each forward panel at its lower lap joint, the belly below it
+    SPLITS["skin_forward_" + _sd] = (lower_lap_planes(_sd, RADOME_END, FORWARD_END), [
+        ("skin_forward_belly_" + _sd, "fuselage_forward", lambda c, side: below_lap(c)),
+        ("skin_forward_" + _sd, "fuselage_forward", lambda c, side: True)])
+    # each mid panel at the truss break and its lower lap joint
+    SPLITS["skin_mid_" + _sd] = ([((0.0, TRUSS_BREAK - bi.S0, 0.0), (0.0, 1.0, 0.0))] + lower_lap_planes(_sd, FORWARD_END, MID_END), [
+        ("skin_mid_%s%s_%s" % (half, belly, _sd), "fuselage_mid",
+         lambda c, side, front=(half == "front"), low=(belly == "_belly"):
+            (station(c) < TRUSS_BREAK) == front and below_lap(c) == low)
+        for half in ("front", "rear") for belly in ("", "_belly")])
+SPLITS["dorsal_cover"] = ([((0.0, TRUSS_BREAK - bi.S0, 0.0), (0.0, 1.0, 0.0))], [
+    ("dorsal_cover_front", "fuselage_mid", lambda c, side: station(c) < TRUSS_BREAK),
+    ("dorsal_cover_rear", "fuselage_mid", lambda c, side: True)])
 for _sd, _x in (("L", 1.0), ("R", -1.0)):
     SPLITS["wing_skin_" + _sd] = ([((_x * bi.WING_CRANK, 0.0, 0.0), (1.0, 0.0, 0.0))], [
         ("wing_skin_%s_%s_%s" % (box, skin, _sd), ("wing_spar_" if box == "inner" else "wing_spar_outer_") + _sd,
@@ -308,6 +388,7 @@ RIDERS = {"light_nav_mount_" + _sd: "wing_skin_outer_upper_" + _sd for _sd in ("
 # A connected stretch of a family's skin faces counts as its sheet when it holds at least this share of them; smaller
 # islands are details merged into it (merge_details), moved whole.
 SHEET_SHARE = 0.1
+BAY_PLANE_ON = 0.001
 
 
 def family(name):
@@ -414,12 +495,12 @@ def cut_family(icarus, obj, planes, pieces):
     for f in sheet_faces(bm, skin_slot):
         f[sheet_tag] = 1
     to_local = obj.matrix_world.inverted()
-    for co, no in planes:
+    for co, no, *where in planes:
         local_co = to_local @ Vector(co)
         local_no = (obj.matrix_world.to_3x3().transposed() @ Vector(no)).normalized()
-        sheet = [f for f in bm.faces if f[sheet_tag]]
+        sheet = [f for f in bm.faces if f[sheet_tag] and (not where or where[0](obj.matrix_world @ f.calc_center_median()))]
         geom = list({e for f in sheet for e in f.edges}) + list({v for f in sheet for v in f.verts}) + sheet
-        bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-6, plane_co=local_co, plane_no=local_no)
+        bmesh.ops.bisect_plane(bm, geom=geom, dist=BAY_PLANE_ON if where else 1e-6, plane_co=local_co, plane_no=local_no)
     to_world = obj.matrix_world
     owner = {}
     sheet = [f for f in bm.faces if f[sheet_tag]]
@@ -435,6 +516,11 @@ def cut_family(icarus, obj, planes, pieces):
         centre = sum((to_world @ f.calc_center_median() for f in island), Vector()) / len(island)
         for f in island:
             owner[f] = on_sheet(centre)
+    seam = bm.verts.layers.int.new(SEAM_CORNER)  # seam_check reads it
+    for e in bm.edges:
+        if len({owner[f] for f in e.link_faces}) > 1:
+            for v in e.verts:
+                v[seam] = 1
     areas = {}
     for f in bm.faces:
         if f.material_index == skin_slot:
@@ -566,6 +652,22 @@ def _organise(p, icarus, internals, structure_mat):
         frame = o.name.startswith("frame_")
         return lambda a, b: (a <= s < b and not (frame and s == a and a > 0)) or (frame and s == b)
 
+    # The truss (TRUSS): each mid section frame's arc over the top, above both upper longerons' 45 degree lines through
+    # the body centre (faces between the frame's columns 12 and 36), with the stringers between them, each half with
+    # the frames on its side of TRUSS_BREAK (frame 11, on it, goes ahead, as section() puts frames).
+    def over_top(c):
+        return c.z - bi.fuselage_shapes(p, station(c))[1] > abs(c.x)
+
+    truss = {"fuselage_truss_front": [], "fuselage_truss_rear": []}
+    for frame in [o for o in icarus.objects if o.name.startswith("frame_") and section(o)(FORWARD_END, MID_END)]:
+        half = "fuselage_truss_front" if section(frame)(FORWARD_END, TRUSS_BREAK) else "fuselage_truss_rear"
+        truss[half].append(subset(frame.name + "_arc", frame, over_top))
+        keep_faces(frame, lambda c: not over_top(c))
+    for c in TRUSS["columns"]:
+        truss["fuselage_truss_front"].append(O["stringer_%02d_1a" % c])
+        truss["fuselage_truss_rear"].append(O["stringer_%02d_1b" % c])
+    for name, members in truss.items():
+        join(name, members)
     for name, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),
                        ("fuselage_aft", MID_END, TAIL_START), ("fuselage_tail", TAIL_START, 99.0)):
         # joined members are gone from the list; gear wells belong to the structure they are cut into, and join after
@@ -639,6 +741,9 @@ def _organise(p, icarus, internals, structure_mat):
             obj.matrix_world = world
     for name, (other, axis) in MOMENT_SPLITS.items():
         split_moment(parts[name], parts[other], axis)
+    root = ("fuselage_mid", "fuselage_truss_front", "fuselage_truss_rear")
+    for name in root:  # IcarusAuthor A22 sums the three against the root's 910
+        parts[name]["family"], parts[name]["family_mass_kg"] = root[0], sum(tree[n][1] for n in root)
     nozzle_vector = O["nozzle_vector"]
     world = nozzle_vector.matrix_world.copy()
     nozzle_vector.parent = parts["nozzle"]
@@ -695,15 +800,18 @@ def check(icarus):
 
 
 SEAM_PLANE, SEAM_SHARED, SEAM_NORMAL_DEG, SEAM_SURFACE_DEG = 0.005, 0.0002, 1.0, 30.0  # seam_check's limits, metres and degrees
+SEAM_CORNER = "split_seam"  # a piece's point attribute: 1 on each corner cut_family left on an edge between two pieces
 
 
 def seam_check(icarus):
-    """Every SPLITS family's pieces meet cleanly. A boundary corner of a piece that lies on a sibling piece's surface is
-    on a cut: a sibling must have a corner within SEAM_SHARED of it, and the corner must lie within SEAM_PLANE of one of
-    the family's cut planes, or where an upper piece meets its lower (the closures' middle columns). Where the sibling's
-    faces there carry the same surface on (face normals within SEAM_SURFACE_DEG), their corner normals must agree within
-    SEAM_NORMAL_DEG, so no crease opens; a cut along a fold the skin already had (the front edge of a speed brake's
-    opening) has no such face, and keeps the fold. A build that leaves the families whole has nothing to check."""
+    """Every SPLITS family's pieces meet cleanly. Each corner cut_family left where two pieces meet (SEAM_CORNER, on a
+    boundary edge of its piece) must have a sibling's corner within SEAM_SHARED of it, the nearest sibling corner within
+    SEAM_PLANE being the one it is measured against, and must lie within SEAM_PLANE of one of the family's cut planes,
+    or where an upper piece meets its lower (the closures' middle columns). Where the sibling's faces there carry the
+    same surface on (face normals within SEAM_SURFACE_DEG), their corner normals must agree within SEAM_NORMAL_DEG, so
+    no crease opens; a cut along a fold the skin already had (the front edge of a speed brake's opening) has no such
+    face, and keeps the fold. Corners on the family's own edges (holes, section ends) are no seam, however near one.
+    A build that leaves the families whole has nothing to check."""
     from mathutils.kdtree import KDTree
 
     report, problems = [], []
@@ -711,7 +819,7 @@ def seam_check(icarus):
         objs = [bpy.data.objects.get(piece) for piece, _, _ in pieces]
         if any(o is None for o in objs):
             continue
-        corners = {}  # piece -> [(world point, [(world corner normal, world face normal)])]
+        seam, every = [], []  # (piece, world point, [(world corner normal, world face normal)])
         for o in objs:
             turn = o.matrix_world.to_3x3()
             normals = [turn @ n.vector for n in o.data.corner_normals]
@@ -724,40 +832,41 @@ def seam_check(icarus):
             for poly in o.data.polygons:
                 for key in poly.edge_keys:
                     counts[key] = counts.get(key, 0) + 1
-            edge_verts = {v for key, n in counts.items() if n == 1 for v in key}
-            corners[o.name] = ([(o.matrix_world @ o.data.vertices[i].co, at[i]) for i in sorted(edge_verts)],
-                               [(o.matrix_world @ v.co, at.get(v.index, [])) for v in o.data.vertices])
-        seams = 0
-        for o in objs:
-            for other in objs:
-                if other is o:
-                    continue
-                surface = checks.tree(other)
-                points = corners[other.name][1]
-                kd = KDTree(len(points))
-                for i, (p, _) in enumerate(points):
-                    kd.insert(p, i)
-                kd.balance()
-                upper_lower = set(o.name.split("_")) ^ set(other.name.split("_")) == {"upper", "lower"}
-                for p, normals in corners[o.name][0]:
-                    if surface.find_nearest(p)[3] > SEAM_PLANE:
-                        continue
-                    seams += 1
-                    q, i, gap = kd.find(p)
-                    if gap > SEAM_SHARED:
-                        problems.append("%s corner %s is %.5f m from %s's nearest" % (o.name, tuple(round(c, 4) for c in p), gap, other.name))
-                        continue
-                    if not upper_lower and min(abs((p - Vector(co)).dot(Vector(no).normalized())) for co, no in planes) > SEAM_PLANE:
-                        problems.append("%s corner %s meets %s off every cut plane" % (o.name, tuple(round(c, 4) for c in p), other.name))
-                    # every corner of the other piece at this point (a merged detail, a speed brake's lip, may sit on
-                    # the sheet's edge with corners of its own), on faces that carry this corner's face's surface on
-                    theirs = [m for _, k, _ in kd.find_range(p, SEAM_SHARED) for m in points[k][1]]
-                    turns = [min(n.angle(m, 0.0) for m, g in theirs if g.angle(f, 0.0) <= math.radians(SEAM_SURFACE_DEG))
-                             for n, f in normals if any(g.angle(f, 0.0) <= math.radians(SEAM_SURFACE_DEG) for _, g in theirs)]
-                    worst = max(turns, default=0.0)
-                    if math.degrees(worst) > SEAM_NORMAL_DEG:
-                        problems.append("%s corner %s turns %.2f deg from %s's" % (o.name, tuple(round(c, 4) for c in p), math.degrees(worst), other.name))
-        report.append("%s %d pieces, %d seam corners" % (name, len(objs), seams))
+            boundary = {v for key, n in counts.items() if n == 1 for v in key}
+            flag = o.data.attributes.get(SEAM_CORNER)
+            if flag is None:
+                problems.append("%s carries no %s corners" % (o.name, SEAM_CORNER))
+                continue
+            for v in o.data.vertices:
+                corner = (o, o.matrix_world @ v.co, at.get(v.index, []))
+                every.append(corner)
+                if v.index in boundary and flag.data[v.index].value:
+                    seam.append(corner)
+        kd = KDTree(len(every))
+        for i, (_, q, _) in enumerate(every):
+            kd.insert(q, i)
+        kd.balance()
+        for o, p, normals in seam:
+            siblings = [(every[k], gap) for _, k, gap in kd.find_range(p, SEAM_PLANE) if every[k][0] is not o]
+            if not siblings:
+                problems.append("%s seam corner %s has no sibling corner within %.3f m" % (o.name, tuple(round(c, 4) for c in p), SEAM_PLANE))
+                continue
+            (other, _, _), gap = min(siblings, key=lambda s: s[1])
+            if gap > SEAM_SHARED:
+                problems.append("%s corner %s is %.5f m from %s's nearest" % (o.name, tuple(round(c, 4) for c in p), gap, other.name))
+                continue
+            upper_lower = set(o.name.split("_")) ^ set(other.name.split("_")) == {"upper", "lower"}
+            if not upper_lower and min(abs((p - Vector(co)).dot(Vector(no).normalized())) for co, no, *_ in planes) > SEAM_PLANE:
+                problems.append("%s corner %s meets %s off every cut plane" % (o.name, tuple(round(c, 4) for c in p), other.name))
+            # every sibling corner at this point (a merged detail, a speed brake's lip, may sit on the sheet's edge with
+            # corners of its own), on faces that carry this corner's face's surface on
+            theirs = [m for (piece, _, ms), gap in siblings if gap <= SEAM_SHARED for m in ms]
+            turns = [min(n.angle(m, 0.0) for m, g in theirs if g.angle(f, 0.0) <= math.radians(SEAM_SURFACE_DEG))
+                     for n, f in normals if any(g.angle(f, 0.0) <= math.radians(SEAM_SURFACE_DEG) for _, g in theirs)]
+            worst = max(turns, default=0.0)
+            if math.degrees(worst) > SEAM_NORMAL_DEG:
+                problems.append("%s corner %s turns %.2f deg from %s's" % (o.name, tuple(round(c, 4) for c in p), math.degrees(worst), other.name))
+        report.append("%s %d pieces, %d seam corners" % (name, len(objs), len(seam)))
     if problems:
         raise ValueError("parts: seams: " + "; ".join(problems[:20]) + (" (%d in all)" % len(problems) if len(problems) > 20 else ""))
     return "seam check: " + ("; ".join(report) if report else "no family split")

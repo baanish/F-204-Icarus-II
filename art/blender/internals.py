@@ -65,7 +65,10 @@ INTERNALS = {
                "thickness": 0.008, "mass_kg_each": 9},
     "stringers": {"column_step": 6, "size": (0.015, 0.025), "tolerance": 0.01,
                   "longerons": (12, 36, 60, 84), "longeron_size": (0.03, 0.04),
-                  "runs": ((1.6, 5.57), (5.92, 10.97), (11.03, 12.97), (13.075, 14.8))},
+                  "runs": ((1.6, 5.57), (5.92, 10.97), (11.03, 12.97), (13.075, 14.8)),
+                  # the stringers over the top, between the upper longerons, part at the truss break (parts.TRUSS_BREAK)
+                  # into stringer_<column>_1a and _1b, each with its half of the mid section's truss
+                  "truss": {"columns": (18, 24, 30), "break": 8.2}},
     # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0, TAIL_START 13.0 and the tail end
     # at 14.8), so
     # a section that comes away shows a closed, shaded face instead of open frames against the sky. Each is cut clear
@@ -700,20 +703,30 @@ def stringers(p):
         return rings[s]
 
     out = []
+    truss = st["truss"]
     for run, (s0, s1) in enumerate(st["runs"]):
-        stations = [s0] + [s for s in skin_stations if s0 < s < s1] + [s1]
         for c in range(0, bi.RING, st["column_step"]):
-            width, depth = st["longeron_size"] if c in st["longerons"] else st["size"]
-            line = [pulled(ring(s), inset)[c] for s in stations]
-            keep = sorted(simplified(line, 0, len(line) - 1, st["tolerance"]) | {0, len(line) - 1})
-            sections = []
-            for i in keep:
-                skin = ring(stations[i])
-                side = (skin[(c + 1) % bi.RING] - skin[c - 1]).normalized() * (width / 2)
-                face, back = pulled(skin, inset)[c], pulled(skin, inset + depth)[c]
-                sections.append([face - side, face + side, back + side, back - side])
-            out.append(bi.loft("stringer_%02d_%d" % (c, run), sections, cap_back=True, cap_front=True))
+            if s0 < truss["break"] < s1 and c in truss["columns"]:
+                out += [stringer(ring, st, inset, skin_stations, c, a, b, "%d%s" % (run, half))
+                        for a, b, half in ((s0, truss["break"], "a"), (truss["break"], s1, "b"))]
+            else:
+                out.append(stringer(ring, st, inset, skin_stations, c, s0, s1, run))
     return out
+
+
+def stringer(ring, st, inset, skin_stations, c, s0, s1, run):
+    """One stringer on skin column c from s0 to s1, named stringer_<column>_<run>."""
+    stations = [s0] + [s for s in skin_stations if s0 < s < s1] + [s1]
+    width, depth = st["longeron_size"] if c in st["longerons"] else st["size"]
+    line = [pulled(ring(s), inset)[c] for s in stations]
+    keep = sorted(simplified(line, 0, len(line) - 1, st["tolerance"]) | {0, len(line) - 1})
+    sections = []
+    for i in keep:
+        skin = ring(stations[i])
+        side = (skin[(c + 1) % bi.RING] - skin[c - 1]).normalized() * (width / 2)
+        face, back = pulled(skin, inset)[c], pulled(skin, inset + depth)[c]
+        sections.append([face - side, face + side, back + side, back - side])
+    return bi.loft("stringer_%02d_%s" % (c, run), sections, cap_back=True, cap_front=True)
 
 
 def simplified(line, i, j, tolerance):

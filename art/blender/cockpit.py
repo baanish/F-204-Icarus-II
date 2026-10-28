@@ -790,7 +790,9 @@ class Space:
         self.skin = bvh([o for o in bi.TARGET.all_objects if o.type == "MESH" and o.get("role") == "skin"])
         self.outer_glass = bvh([O[canopy.GLASS_OUTER], O[canopy.WINDSCREEN]])
         self.inner_glass = bvh([O[canopy.GLASS_INNER], O[canopy.WINDSCREEN_INNER]])
-        self.sill_objects = [O[n] for n in ("skin_forward_L", "skin_forward_R", "dorsal_cover")]
+        import parts
+
+        self.sill_objects = [o for n in ("skin_forward_L", "skin_forward_R", "dorsal_cover") for o in parts.family_objects(bi.TARGET, n)]
         self.sill = bvh(self.sill_objects)  # the cut skin under the seam
         uncut = canopy.skin_solid(p)
         self.uncut = bvh([uncut])  # the skin as if the canopy had cut no opening in it
@@ -2134,6 +2136,7 @@ def check(icarus):
     shield under the over-nose line, every display fully seen from the eye, the interior clear of the airframe, glass
     and frames, the stock seat, stick and throttle, and of the hood as it opens; the inner frames in their inset."""
     import budget
+    import parts
 
     O = bpy.data.objects
     problems = budget.over_caps(icarus, BUDGET)
@@ -2196,7 +2199,7 @@ def check(icarus):
     for names in (("skin_forward_L", "skin_forward_R", "dorsal_cover"), (canopy.FRAME,), (canopy.GLASS_INNER, canopy.GLASS_OUTER),
                   (canopy.WINDSCREEN, canopy.WINDSCREEN_INNER), ("canopy_frame_inner", "windscreen_frame_inner"),
                   ("avionics_tray", "radar_tray", "fuel_aux")):
-        others = [O[n] for n in names]
+        others = [o for n in names for o in parts.family_objects(bi.TARGET, n)]
         pairs = interior.overlap(tree_of(others))
         if pairs:
             problems.append("interior meets %s (%d face pairs): %s; against %s" % (

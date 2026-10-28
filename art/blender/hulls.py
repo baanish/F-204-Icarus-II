@@ -5,8 +5,8 @@ part, and one mesh per part in "LOD1" as its far-distance stand-in. Each sits at
 so its vertices are in the part's own space. Unity caps a convex collider at 255 vertices.
 
 LOD1 is one hull per part seen from outside, its triangles capped by LOD1_TRIS so the set stays inside Exterior rule
-27's 56 per hull and, with the wing skins split in four a side (parts.SPLITS, each piece at least LOD1_DEFAULT), 780
-in all. The parts under the skin get none: at that distance the skin's hulls hide them. A
+27's 56 per hull and, with the wing skins split in four a side and the fuselage panels in their pieces (parts.SPLITS,
+each piece at least LOD1_DEFAULT), 814 in all. The parts under the skin get none: at that distance the skin's hulls hide them. A
 hull over its cap keeps the points that reach furthest out (hull_mesh), so it never grows past the part.
 
 Each hull wears its part's paint (paint_lods, after uvs.unwrap): a face takes the material of the part surface under
@@ -55,7 +55,7 @@ SKIP_ROLES = ("visual", "cockpit_view")
 LOD1_TRIS = (("skin_", 40), ("radome", 32), ("nozzle", 32), ("dorsal_cover", 24), ("canopy_visible", 24),
              ("wing_skin_", 24), ("stabilator", 24), ("fin_skin", 20))
 LOD1_DEFAULT = 12
-LOD1_PER_HULL, LOD1_TOTAL = 56, 780
+LOD1_PER_HULL, LOD1_TOTAL = 56, 814
 # Parts inside the skin's LOD1 hulls, which get none of their own.
 LOD1_HIDDEN = ("fuselage_", "wing_spar_", "fin_spar", "engine_core", "engine_afterburner", "cockpit_cell", "radar_tray", "avionics_tray",
                "fuel_", "intake_duct_")
@@ -79,10 +79,14 @@ STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage
 # 0.005 m, so the Unity author braces no part to a shell. The parts jointed to the core may overlap it (no brace),
 # except the cockpit and the gear legs: A9's seat path and A8's ground casts run through them.
 SHELLS, SHELL_GAP = 8, 0.01
+# The mid section's truss over the top (parts.TRUSS): as an ordinary hidden part it would get one hull over all of it, a
+# lid across the section that would catch the rounds and blasts meant for the tanks under it. It takes the root's top
+# two shell sectors instead (0 and 7, either side of the top, round the root's axis), each a shallow arc.
+TRUSS = "fuselage_truss_"
 
 # LOD1 and collider limits, by collection: triangles in total (budget.py sums them).
 BUDGET = {
-    "lod1": {"target": 780, "cap": 780, "collection": "LOD1"},
+    "lod1": {"target": 814, "cap": 814, "collection": "LOD1"},
     # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
     # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420).
     "colliders": {"target": 5300, "cap": 5300, "collection": "Colliders"},
@@ -488,10 +492,15 @@ SHELL_GROUPS = {}
 
 
 def shell_groups(owner):
-    """A structure core's world vertices in SHELLS sectors round its axis (through its origin, along Blender y)."""
+    """A structure core's world vertices in SHELLS sectors round its axis (through its origin, along Blender y); a truss
+    part's in the root's top two sectors, split at the centre line."""
     world = [owner.matrix_world @ v.co for v in owner.data.vertices]
-    zc = owner.matrix_world.translation.z
     groups = [[] for _ in range(SHELLS)]
+    if owner.name.startswith(TRUSS):
+        for w in world:
+            groups[0 if w.x >= 0 else SHELLS - 1].append(w)
+        return groups
+    zc = owner.matrix_world.translation.z
     for w in world:
         a = math.atan2(w.x, w.z - zc)  # pieces meet on the centre line, so each side's are cut alike
         groups[min(SHELLS - 1, int((a % (2 * math.pi)) // (2 * math.pi / SHELLS)))].append(w)
@@ -545,7 +554,7 @@ def build(icarus):
             shapes = patches(owner, report)
         elif name.startswith("intake_duct_"):
             shapes = piece_hulls(chunks(owner, DUCT_CHUNKS))
-        elif name in STRUCTURE_CORES:  # its shells fill round the other parts' hulls, so they come last
+        elif name in STRUCTURE_CORES or name.startswith(TRUSS):  # its shells fill round the other parts' hulls, so they come last
             shapes = []
             cores.append(owner)
         elif lod is not None:
@@ -594,9 +603,11 @@ def patches(owner, report):
 
 def others_of(core, owned):
     """The separation() shapes a core's shells keep clear of: every other part's hulls but those jointed to the core,
-    the cockpit's and the gear's excepted."""
+    the cockpit's and the gear's excepted. A truss part, which the skin over it is not jointed to, may overlap that skin
+    as a core does the panels on it, and keeps clear of the tanks under it."""
+    overlaps = lambda o: jointed(core, o) or core.name.startswith(TRUSS) and o.get("role") == "skin"
     return [bm_shape(bm) for o, bms in owned.items()
-            if o != core and (not jointed(core, o) or o.get("role") in ("cockpit", "gear")) for bm in bms]
+            if o != core and (not overlaps(o) or o.get("role") in ("cockpit", "gear")) for bm in bms]
 
 
 def attach_colliders(owner, shapes, colliders):

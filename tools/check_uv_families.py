@@ -8,7 +8,9 @@ tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --pyth
 A corner matches against the old faces that hold its point (as a corner or on an edge): first the face the new face
 was cut from (one that holds all its corners), then those facing the same way (an exporter's triangles of a cut cap
 match none whole), then the one whose surface lies nearest the new face's centre, so a corner on a UV seam is judged
-on its own side of it. Exits nonzero on any mismatch.
+on its own side of it. Where two cuts cross inside an old face (a lap joint meeting a station cut), the corner they
+make lies on no old edge: it lies on the second cut's straight edge between two corners on old edges, and takes the
+UV interpolated along it. Exits nonzero on any mismatch.
 """
 import json
 import sys
@@ -92,6 +94,30 @@ def main():
             polys.append(list(range(start, start + len(corners))))
             start += len(corners)
         tree = BVHTree.FromPolygons(verts, polys)
+
+        def family_uv(point):
+            """The UVs the old faces holding point give it, those facing nearest first, as expected() finds them."""
+            held = {k for _, _, k, _ in tree.find_nearest_range(point, 2 * ON)}
+            return expected(point, faces, sorted(held, key=lambda k: surface_of(k, point)))
+
+        def surface_of(k, point):
+            return min((intersect_point_line(point, a, b)[0] - point).length
+                       for a, b in zip(faces[k][0], faces[k][0][1:] + faces[k][0][:1]))
+
+        def crossing(point):
+            """The UV a corner where two cuts cross inside an old face takes: interpolated between the two corners of the
+            new faces round it that lie on old edges, on a straight line through it."""
+            around = [q for corners, _ in new[name] if any((q - point).length <= ON for q in corners) for q in corners
+                      if (q - point).length > ON]
+            for i, a in enumerate(around):
+                for b in around[i + 1:]:
+                    closest, t = intersect_point_line(point, a, b)
+                    if 0 < t < 1 and (closest - point).length <= ON:
+                        ua, ub = family_uv(a), family_uv(b)
+                        if ua and ub:
+                            return [ua[0].lerp(ub[0], t)]
+            return []
+
         for corners, uvs in new[name]:
             centre = sum(corners, Vector()) / len(corners)
             # how far each old face's surface lies from the new face's centre: the face it was cut from lies on it
@@ -103,7 +129,7 @@ def main():
             for point, uv, held in zip(corners, uvs, near):
                 candidates = sorted(held, key=lambda k: (k not in source, normal(faces[k][0]).dot(facing) < 0.95,
                                                          surface.get(k, float("inf"))))
-                want = expected(point, faces, candidates)
+                want = expected(point, faces, candidates) or crossing(point)
                 checked += 1
                 if not want:
                     problems.append("%s: corner %s lies on no old face" % (name, tuple(round(c, 5) for c in point)))

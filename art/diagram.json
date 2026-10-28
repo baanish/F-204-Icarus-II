@@ -79,19 +79,34 @@
      198
     ]
    },
-   "dorsal_cover": {
-    "sprite": "Icarus_status_dorsal_cover.png",
+   "dorsal_cover_front": {
+    "sprite": "Icarus_status_dorsal_cover_front.png",
     "centre": [
      0.0,
-     -12.92
+     17.67
     ],
     "size": [
      10.55,
-     109.69
+     48.52
     ],
     "px": [
      492,
      353
+    ]
+   },
+   "dorsal_cover_rear": {
+    "sprite": "Icarus_status_dorsal_cover_rear.png",
+    "centre": [
+     0.0,
+     -36.12
+    ],
+    "size": [
+     10.55,
+     63.28
+    ],
+    "px": [
+     492,
+     529
     ]
    },
    "engine_afterburner": {
@@ -317,6 +332,36 @@
     "px": [
      472,
      678
+    ]
+   },
+   "fuselage_truss_front": {
+    "sprite": "Icarus_status_fuselage_truss_front.png",
+    "centre": [
+     0.0,
+     12.13
+    ],
+    "size": [
+     16.88,
+     37.97
+    ],
+    "px": [
+     480,
+     394
+    ]
+   },
+   "fuselage_truss_rear": {
+    "sprite": "Icarus_status_fuselage_truss_rear.png",
+    "centre": [
+     0.0,
+     -26.1
+    ],
+    "size": [
+     15.82,
+     43.24
+    ],
+    "px": [
+     482,
+     529
     ]
    },
    "gear_leg_L": {
@@ -574,34 +619,154 @@
      158
     ]
    },
-   "skin_mid_L": {
-    "sprite": "Icarus_status_skin_mid_L.png",
+   "skin_forward_belly_L": {
+    "sprite": "Icarus_status_skin_forward_belly_L.png",
     "centre": [
-     -7.65,
-     -6.33
+     -2.9,
+     62.75
     ],
     "size": [
-     17.93,
-     80.16
+     8.44,
+     61.17
     ],
     "px": [
-     449,
-     384
+     485,
+     158
     ]
    },
-   "skin_mid_R": {
-    "sprite": "Icarus_status_skin_mid_R.png",
+   "skin_forward_belly_R": {
+    "sprite": "Icarus_status_skin_forward_belly_R.png",
     "centre": [
-     7.65,
-     -6.33
+     2.9,
+     62.75
     ],
     "size": [
-     17.93,
-     80.16
+     8.44,
+     61.17
     ],
     "px": [
      507,
+     158
+    ]
+   },
+   "skin_mid_front_L": {
+    "sprite": "Icarus_status_skin_mid_front_L.png",
+    "centre": [
+     -9.76,
+     13.71
+    ],
+    "size": [
+     12.66,
+     40.08
+    ],
+    "px": [
+     451,
      384
+    ]
+   },
+   "skin_mid_front_R": {
+    "sprite": "Icarus_status_skin_mid_front_R.png",
+    "centre": [
+     9.76,
+     13.71
+    ],
+    "size": [
+     12.66,
+     40.08
+    ],
+    "px": [
+     525,
+     384
+    ]
+   },
+   "skin_mid_front_belly_L": {
+    "sprite": "Icarus_status_skin_mid_front_belly_L.png",
+    "centre": [
+     -2.64,
+     13.71
+    ],
+    "size": [
+     8.44,
+     40.08
+    ],
+    "px": [
+     486,
+     384
+    ]
+   },
+   "skin_mid_front_belly_R": {
+    "sprite": "Icarus_status_skin_mid_front_belly_R.png",
+    "centre": [
+     3.16,
+     13.71
+    ],
+    "size": [
+     7.38,
+     40.08
+    ],
+    "px": [
+     510,
+     384
+    ]
+   },
+   "skin_mid_rear_L": {
+    "sprite": "Icarus_status_skin_mid_rear_L.png",
+    "centre": [
+     -9.76,
+     -25.58
+    ],
+    "size": [
+     13.71,
+     42.19
+    ],
+    "px": [
+     449,
+     529
+    ]
+   },
+   "skin_mid_rear_R": {
+    "sprite": "Icarus_status_skin_mid_rear_R.png",
+    "centre": [
+     9.76,
+     -25.58
+    ],
+    "size": [
+     13.71,
+     42.19
+    ],
+    "px": [
+     523,
+     529
+    ]
+   },
+   "skin_mid_rear_belly_L": {
+    "sprite": "Icarus_status_skin_mid_rear_belly_L.png",
+    "centre": [
+     -3.43,
+     -25.58
+    ],
+    "size": [
+     8.44,
+     42.19
+    ],
+    "px": [
+     483,
+     529
+    ]
+   },
+   "skin_mid_rear_belly_R": {
+    "sprite": "Icarus_status_skin_mid_rear_belly_R.png",
+    "centre": [
+     3.43,
+     -25.58
+    ],
+    "size": [
+     8.44,
+     42.19
+    ],
+    "px": [
+     509,
+     529
     ]
    },
    "stabilator": {

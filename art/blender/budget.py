@@ -22,7 +22,7 @@ SKIN_MAX = 90000
 TRIM_SHARE = (0.27, 0.58)  # jet_mechanical and aircraft_structure, of exterior LOD0
 TRIMS = ("jet_mechanical", "aircraft_structure")
 COCKPIT_MAX = 35000
-LOD1_PER_HULL, LOD1_TOTAL = 56, 780  # hulls.LOD1_TOTAL
+LOD1_PER_HULL, LOD1_TOTAL = 56, 814  # hulls.LOD1_TOTAL
 
 
 def tris(obj):

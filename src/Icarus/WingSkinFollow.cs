@@ -14,14 +14,16 @@ namespace Icarus;
 /// moved 4 to 6 mm off the inner box, opening a gap at the crank where the two meet. The tail cone draws the same way on
 /// the aft core, with its rear skin panels on it, and the afterburner and the nozzle on the tail cone: the engine chain
 /// hangs on the aft core (and the root) while the tail cone wraps it, and at 9 g under full afterburner the nozzle's fixed
-/// shroud moved 17 mm off the tail cone's skin, which the tail cone's hot ring would show as a step.
+/// shroud moved 17 mm off the tail cone's skin, which the tail cone's hot ring would show as a step. Every other fuselage
+/// skin piece draws on the core it hangs on: in an 8.5 g pull they moved 1.4 to 3.5 mm off their cores, past the 2 mm a
+/// seam between two pieces may open.
 ///
 /// Only rendering moves. Each part's renderers, and its wingtip station, go under a transform of their own (a mover),
 /// which this turns by the difference between the part's drawn and physical poses; its rigidbody, mass, joints,
 /// colliders, lift normal, centre-of-mass marker and joint anchors stay where the game puts them, and so does a
 /// surface's hinge where its lift normal rides it, so control surfaces and high-lift devices still turn their meshes.
 /// The one collider that rides along is a store's on the wingtip station, which shares the store's transform, so a
-/// store released there leaves from where it is drawn; on the tail, a subtree with a collider stays on its body, and the
+/// store released there leaves from where it is drawn; on the fuselage, a subtree with a collider stays on its body, and the
 /// nozzle's thrust transform (the JetNozzle's) stays put, so the thrust acts where the game puts it. Once one of the
 /// joints that hold a part where it is drawn breaks (its own to its parent; for the afterburner and nozzle, every joint
 /// from them down the engine chain to the aft core, and the tail cone's), or a part on it detaches, it draws on its own
@@ -95,6 +97,15 @@ sealed class WingDraw : MonoBehaviour
                 AeroPart leader = LeaderOf(part)!;
                 Follow(part, leader, mine, new[] { (part, leader) }, inner, null, part.name.StartsWith("wing_skin_") ? "wing-skin-" : "wing-draw-", physics, false);
             }
+        }
+
+        // each fuselage skin piece on the core it hangs on (the tail cone's draw with the tail cone, below)
+        foreach (AeroPart piece in parts.Where(p => p.name.StartsWith("skin_") || p.name.StartsWith("dorsal_cover")))
+        {
+            AeroPart? on = LeaderOf(piece);
+            // the root (fuselage_mid) is the aircraft's own object, named for the aircraft
+            if (on != null && (on.gameObject == aircraft.gameObject || on.name.StartsWith("fuselage_") && on.name != "fuselage_tail"))
+                Follow(piece, on, new Dictionary<AeroPart, Follower>(), new[] { (piece, on) }, on, null, "skin-draw-", physics, true);
         }
 
         // the tail cone on the aft core with what hangs on it, then the afterburner and the nozzle on the tail cone

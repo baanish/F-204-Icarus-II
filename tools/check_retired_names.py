@@ -30,6 +30,11 @@ ALLOW = {
 } | {
     ("art/blender/lights.py", name) for name in ("wing_skin_L", "wing_skin_R", "dorsal_cover", "skin_mid_L")
 } | {
+    # merge_details joins the intake corners into the mid skin before split_pieces cuts it; the review builds split=False
+    ("art/blender/propulsion.py", name) for name in ("skin_mid_L", "skin_mid_R")
+} | {
+    ("tools/review_propulsion.py", "skin_mid_L")
+} | {
     ("tools/check_retired_names.py", name) for name in RETIRED
 } | {
     ("tools/test_breakup_split.py", name) for name in RETIRED

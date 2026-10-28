@@ -99,7 +99,7 @@ def main():
     if args.baseline:
         bi.build()  # This mode executes historical source in memory.
     else:
-        bi.build_cached()
+        bi.build_cached(split=False)  # the intake's skin whole, as propulsion reads it
     report = measurements()
     name = "baseline-measurements.json" if args.baseline else "measurements.json"
     (args.out / name).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

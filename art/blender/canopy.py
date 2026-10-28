@@ -619,9 +619,11 @@ def opening_clashes(hinge, steps=8):
     O = bpy.data.objects
     a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
     bm = bmesh.new()
-    for name in ("skin_forward_L", "skin_forward_R", WINDSCREEN):
-        me = O[name].data.copy()
-        me.transform(O[name].matrix_world)
+    import parts
+
+    for obj in [o for n in ("skin_forward_L", "skin_forward_R", WINDSCREEN) for o in parts.family_objects(bi.TARGET, n)]:
+        me = obj.data.copy()
+        me.transform(obj.matrix_world)
         bm.from_mesh(me)
         bpy.data.meshes.remove(me)
     bmesh.ops.delete(bm, geom=[f for f in bm.faces if any((v.co - a).dot(u) > -0.001 for v in f.verts)], context="FACES")
@@ -657,7 +659,9 @@ def opening_sweep(hinge, step_deg=2.5):
 
     O = bpy.data.objects
     a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
-    fixed = bvh([O[n] for n in FUSELAGE])
+    import parts
+
+    fixed = bvh([o for n in FUSELAGE for o in parts.family_objects(bi.TARGET, n)])
     hood = [o for o in hinge.children if o.type == "MESH"]
     steps = int(math.ceil(abs(hinge["travel_deg"]) / step_deg))
     seat, gap = [], math.inf

@@ -41,7 +41,9 @@ def intake_wing_junction(icarus):
     """
     counts, worst, problems = {1: 0, -1: 0}, 0.0, []
     for obj in icarus.all_objects:
-        if obj.name not in ("fuselage", "skin_mid_L", "skin_mid_R"):
+        from parts import family
+
+        if obj.name != "fuselage" and family(obj.name) not in ("skin_mid_L", "skin_mid_R"):
             continue
         bm = bmesh.new()
         bm.from_mesh(obj.data)
@@ -85,15 +87,15 @@ def fuel_cell_clearance(icarus):
 
 def internals_inside_skin(icarus):
     """Nothing under the skin may cut through it: radar, avionics, cockpit, gear, engine, fuel cells, and the
-    fuselage's frames, stringers and break walls (the structure cores' Icarus_Frame faces) through the fuselage's own
+    fuselage's frames, stringers and break walls (the structure cores' and the truss's Icarus_Frame faces) through the fuselage's own
     skin. Those do cross the wing roots buried in the body, as a real wing carry-through does, and the wells joined
     into the cores meet the skin at their openings."""
     meshes = [o for o in icarus.all_objects if o.type == "MESH" and not o.name.endswith("_visible")]
     skins = [o for o in meshes if o.get("role") in ("skin", "canopy")]
     inside = [o for o in meshes if o.get("role") in ("radar", "avionics", "cockpit", "gear", "engine", "fuel_tank")]
-    from hulls import STRUCTURE_CORES
+    from hulls import STRUCTURE_CORES, TRUSS
 
-    cores = [o for o in meshes if o.name in STRUCTURE_CORES]
+    cores = [o for o in meshes if o.name in STRUCTURE_CORES or o.name.startswith(TRUSS)]
     body = [o for o in skins if not o.name.startswith(("wing_skin_", "fin_skin"))]
     trees = {o.name: tree(o) for o in skins + inside}
     grid = {o.name: tree(o, "Icarus_Frame") for o in cores}
@@ -292,7 +294,7 @@ def _interior_visibility(icarus, allow_openings, doors_open):
 
 
 def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
-    """No frame, stringer or break wall (the structure cores' Icarus_Frame faces) inside a bay or well, where an open
+    """No frame, stringer or break wall (the structure cores' and the truss's Icarus_Frame faces) inside a bay or well, where an open
     door or panel would show it: the gear bays (parts.open_bays' boxes), the speed brake wells (speed_brakes.Patch's
     voids) and the conformal trough (stations.carve_shapes). The faces are sampled every spacing; a sample counts once
     it is more than tolerance inside, so members cut back to a bay's wall pass."""
@@ -330,9 +332,9 @@ def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
     c = stations.CONFORMAL
     volumes.append(("conformal trough", bi.P(s0, -c["x"] - 0.3, -1.0), bi.P(s1, c["x"] + 0.3, c["z"] + 0.3), in_trough))
     found, sampled = {}, {}
-    from hulls import STRUCTURE_CORES
+    from hulls import STRUCTURE_CORES, TRUSS
 
-    for core in (o for o in icarus.all_objects if o.name in STRUCTURE_CORES):
+    for core in (o for o in icarus.all_objects if o.name in STRUCTURE_CORES or o.name.startswith(TRUSS)):
         slots = [m.name if m else "" for m in core.data.materials]
         mesh = core.data
         mesh.calc_loop_triangles()

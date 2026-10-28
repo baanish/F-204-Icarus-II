@@ -34,6 +34,9 @@ HARD = ("wing_skin_inner_upper_L", "wing_skin_inner_lower_L", "wing_skin_outer_u
 # and the ramp's fade inboard of the forward main door's stepped edge, where a door would share an edge with the aft
 # door beside its inboard hinge (gear.GEAR["doors"]).
 NO_DOOR = ((5.0, 8.96, 0.30, 0.62), (8.95, 9.08, 0.30, 0.66))
+# The left forward and mid skin families' pieces (art/blender/parts.py SPLITS), whose faces NO_DOOR picks from.
+SKIN = ("skin_forward_L", "skin_forward_belly_L", "skin_mid_front_L", "skin_mid_rear_L", "skin_mid_front_belly_L",
+        "skin_mid_rear_belly_L")
 
 
 def rot(axis, deg):
@@ -146,7 +149,7 @@ def clearance_scene(nobp):
         elif name.startswith(HARD):
             v, tris = plane.posed(t)
             hard.append(surface_points(blender(v), np.asarray(tris).reshape(-1, 3), 0.02))
-        elif name.startswith(("skin_forward_L", "skin_mid_L")):
+        elif name in SKIN:
             v, tris = plane.posed(t)
             v, tris = blender(v), np.asarray(tris).reshape(-1, 3)
             c = v[tris]

@@ -27,15 +27,12 @@ opening, the panel's front edge only moves aft and out, and the seam can stay a 
 that axis stand a few millimetres proud of the skin, as a piano hinge's do.
 """
 import math
-import os
-import sys
 
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 from mathutils.kdtree import KDTree
-import numpy as np
 
 import build_icarus as bi
 import checks
@@ -689,17 +686,9 @@ def panel_lines(p):
     """The fuselage's panel lines round the brakes as art/textures/panels.py draws them: butt joints (seams), the
     riveted frames between them, the lap joints' planes (signed distances, positive above, at a point), the fastener
     rows' offset from a joint and the seam's half width."""
-    import internals
     import parts
 
-    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "textures"))
-    import panels
-
-    table = p["fuselage"]
-    # The body centre heights pilot2_skin.py writes to structure.json for panels.py.
-    sections = [[float(s), bi.fuselage_shapes(p, float(s))[1]] for s in np.arange(table[0][0], table[-1][0], .05)]
-    lines = panels.fuselage_lines({"frames": internals.INTERNALS["frames"], "fuselage_sections": sections},
-                                  (parts.RADOME_END, parts.FORWARD_END, parts.MID_END, table[-1][0]))
+    panels, lines = parts.panel_lines(p)
     laps = lambda v: [float(d) for d in panels.lap_distances(abs(v.x), v.y + bi.S0, v.z, lines)]
     return lines["joints"], lines["plain"], laps, panels.ROW_OFFSET, panels.SEAM_HALF_WIDTH
 

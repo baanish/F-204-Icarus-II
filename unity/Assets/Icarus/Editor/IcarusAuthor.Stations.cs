@@ -201,7 +201,8 @@ namespace Icarus.Editor
             {
                 var x = (side == "L" ? 1f : -1f) * conformal.x;
                 var z = conformal.z;
-                var skin = new[] { RootPart, "intake_duct_L", "intake_duct_R", "skin_mid_L", "skin_mid_R" }.SelectMany(n => Crossings(n, x, z)).ToArray();
+                var skin = new[] { RootPart, "intake_duct_L", "intake_duct_R" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
+                    .SelectMany(n => Crossings(n, x, z)).ToArray();
                 if (skin.Length == 0)
                     throw new InvalidDataException($"no belly skin above the conformal station at x {x}, z {z:F2}");
                 return new Vector3(x, skin.Min() + 0.005f, z);

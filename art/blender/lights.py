@@ -79,7 +79,7 @@ BUDGET = {
     "tail_light": {"target": 56, "cap": 56, "exact": ("light_nav_aft", "light_tail_fairing")},
     "formation_lenses": {"target": 160, "cap": 160, "objects": ("light_formation_",)},
     "fin_strips": {"target": 56, "cap": 56, "objects": ("light_fin_",)},
-    "antennas": {"target": 36, "cap": 36, "objects": ("dorsal_cover", "skin_mid_L"),
+    "antennas": {"target": 36, "cap": 36, "family": ("dorsal_cover", "skin_mid_L"),
                  "face_attribute": "antenna"},
 }
 CLOSEUPS = {
@@ -423,11 +423,11 @@ def check(icarus):
     if any(n.startswith(("light_beacon_", "antenna_")) for n in objects):
         raise ValueError("lights: beacons or separate antenna parts remain")
     for index, (name, _, _, _, _, owner) in enumerate(ANTENNAS, 1):
-        obj = objects[owner]
-        tag = obj.data.attributes.get("antenna")
-        faces = [f for f in obj.data.polygons if tag and tag.data[f.index].value == index]
-        count = sum(len(f.vertices) - 2 for f in faces)
-        if not 0 < count <= 60 or any(obj.data.materials[f.material_index].name != "Icarus_Body" for f in faces):
+        # the skin family's faces, in whichever of its pieces the antenna went to in a split build
+        faces = [(obj, f) for obj in family_objects(icarus, owner) if obj.data.attributes.get("antenna")
+                 for f in obj.data.polygons if obj.data.attributes["antenna"].data[f.index].value == index]
+        count = sum(len(f.vertices) - 2 for _, f in faces)
+        if not 0 < count <= 60 or any(obj.data.materials[f.material_index].name != "Icarus_Body" for obj, f in faces):
             raise ValueError("lights: %s must be 1 to 60 skin triangles in %s, got %d" % (name, owner, count))
     worst, areas = 0.0, {}
     for side in ("L", "R"):

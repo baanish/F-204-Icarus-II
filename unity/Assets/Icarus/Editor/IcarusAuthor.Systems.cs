@@ -28,7 +28,8 @@ namespace Icarus.Editor
             var renderers = b.Root.GetComponentsInChildren<MeshRenderer>(true).Where(r => r.gameObject.layer != 3).ToArray();
             var noseTip = b.Parts["radome"].GetComponent<MeshRenderer>().bounds.max.z;
             var tailEnd = renderers.Min(r => r.bounds.min.z);
-            var belly = new[] { RootPart, "skin_mid_L", "skin_mid_R", "fuselage_forward", "fuselage_aft" }.Min(n => b.Parts[n].GetComponent<MeshRenderer>().bounds.min.y);
+            var belly = new[] { RootPart, "fuselage_forward", "fuselage_aft" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
+                .Min(n => b.Parts[n].GetComponent<MeshRenderer>().bounds.min.y);
 
             // Radar on the radome's Revoker nose, bound to the radar tray, whose loss is the radar's (R13).
             var radar = b.Parts["radome"].GetComponent(GameType("Radar"));
@@ -196,7 +197,7 @@ namespace Icarus.Editor
             cone.position = new Vector3(0f, b.Parts[RootPart].GetComponent<MeshRenderer>().bounds.center.y, wingRoot);
             // Its 7-8 m particles were sized for the Revoker's broad body; the system scales locally, so the transform
             // scales them to the Icarus's width there.
-            var width = new[] { "skin_mid_L", "skin_mid_R" }.SelectMany(n => WorldVertices(b.Parts[n].transform, b.Meshes[n].Render)).Select(v => v.x).ToArray();
+            var width = FamilyVertices(b, "skin_mid_L").Concat(FamilyVertices(b, "skin_mid_R")).Select(v => v.x).ToArray();
             cone.localScale = Vector3.one * ((width.Max() - width.Min()) / RevokerBodyWidth);
             var ground = Contacts(b).Min(l => l.Contact.y);
             var downwash = b.Find("downwash");
