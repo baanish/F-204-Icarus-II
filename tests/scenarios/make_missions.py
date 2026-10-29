@@ -1,6 +1,8 @@
 """Writes the Icarus's test missions into tests/scenarios/ from NO-Agentic-Framework's templates, never by hand:
 the player's Icarus parked on Sandrift Airbase's runway, airborne near Sandrift at 3 km, airborne over Ignus at 10 and
-15 km with about 160 km of map ahead, and a loopback group mission with two Icarus slots. Every Icarus flies clean.
+15 km with about 160 km of map ahead, a loopback group mission with two Icarus slots, and a Hyperion carrier at sea for
+the game's AI to fly from and the player to land on. Every Icarus flies clean but the carrier landing's, which carries
+its arrestor hook.
   python tests/scenarios/make_missions.py
 """
 import copy
@@ -23,10 +25,11 @@ if not TEMPLATES.is_dir():
 
 AIRCRAFT, TITLE = "baanish_icarus", "F-204 Icarus II"
 # The Icarus's AircraftDefinition, as the build's rest-pose report logs it: spawnOffset (0, 1.49, -0.62), restRotation.x
-# -0.21 (nose up). Three hardpoint sets (Wingtip, Inner Wing, Conformal); three empty keys fly it clean, and a list of
-# any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
+# -0.21 (nose up). Four hardpoint sets (Wingtip, Inner Wing, Conformal, Tail Hook); four empty keys fly it clean, and a
+# list of any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
 SPAWN_UP, REST_PITCH = 1.49, -0.21
-CLEAN = {"Selected": [{"Key": ""} for _ in range(3)]}
+CLEAN = {"Selected": [{"Key": ""} for _ in range(4)]}
+HOOK = "baanish_icarus_tail_hook"  # the Tail Hook set's one mount (IcarusAuthor.TailHook.cs)
 
 # Sandrift's runway surface under runway_start's spot (x 27877, z -19300) is 136.93 m, as the framework's make_missions.py
 # measured it; the origin starts spawnOffset.y plus 0.12 m above it, as runway_start does for the KR-67.
@@ -142,3 +145,67 @@ m = template("group_airborne")
 m["aircraft"] = []
 save(m, "icarus_helipad", "no player slots, for peers that join at South Boscali General Aviation (Heartland, Primeva), whose two "
      "helipads are the only hangars that take an Icarus; no opponent.")
+
+# The Hyperion, Primeva's, where the game's own Carrier Duel puts it on Ignus (FleetCarrier1, heading about 092, open
+# sea), holding still: no waypoints. Primeva's supply holds Icarus airframes for a player who joins on the carrier.
+CARRIER = {"type": "FleetCarrier1", "faction": "Primeva", "globalPosition": {"x": -44692.49, "y": 5.63970947, "z": -36468.8672},
+           "rotation": {"x": 0.0, "y": 0.719034255, "z": 0.0, "w": 0.6949746}, "CaptureStrength": {"IsOverride": False, "Value": 100.0},
+           "CaptureDefense": {"IsOverride": False, "Value": 0.0}, "UniqueName": "Hyperion", "holdPosition": True, "skill": 0.7,
+           "waypoints": []}
+
+
+def carrier_mission(template_name):
+    m = template(template_name)
+    m["MapKey"] = IGNUS
+    m["ships"] = [copy.deepcopy(CARRIER)]
+    for faction in m["factions"]:
+        if faction["factionName"] == "Primeva":
+            faction["supplies"] = [s for s in faction.get("supplies", []) if s["UnitType"] != AIRCRAFT] + [{"UnitType": AIRCRAFT, "Count": 4}]
+    return m
+
+
+# Astern of the Hyperion on its heading, 15 km out at 1,200 m and 150 m/s with the hook and 20% fuel, the landing
+# AI's 75 m/s approach weight (IcarusAuthor.Identity.cs LowFuelLandingMass), for fly mode=land onto its deck.
+CARRIER_HDG = 2 * math.degrees(math.atan2(CARRIER["rotation"]["y"], CARRIER["rotation"]["w"]))
+m = carrier_mission("airborne")
+back = 15000.0
+c = CARRIER["globalPosition"]
+icarus(m["aircraft"][0], 0.2, {"x": round(c["x"] - math.sin(math.radians(CARRIER_HDG)) * back, 1), "y": 1200.0,
+                               "z": round(c["z"] - math.cos(math.radians(CARRIER_HDG)) * back, 1)}, rotation(CARRIER_HDG, 0), 150.0)
+m["aircraft"][0]["savedLoadout"]["Selected"][3]["Key"] = HOOK
+save(m, "icarus_hyperion_final", f"the player's Icarus for Primeva 15 km astern of the Hyperion carrier (Ignus) at 1,200 m MSL, 150 m/s, "
+     f"heading {CARRIER_HDG:03.0f} as the carrier, 20% fuel, clean but for its arrestor hook, for fly mode=land onto the deck; no opponent.")
+
+# The game's own AI on the Hyperion: Primeva holds only Icarus airframes and no airbase but the carrier (Ignus's fields
+# held by nobody and disabled, as the game's Carrier Duel holds them), with room for one AI aircraft, so the faction AI
+# spawns an Icarus in one of the carrier's hangars with a standard loadout (every one carries the hook), launches it
+# over the ski jump and, finding nothing to fight, brings it home to the deck. Boscali flies nothing. A run needs a
+# player: the player's Icarus holds 30 km north at 6,000 m, out of the AI's count (reduceAIPerFriendlyPlayer 0).
+# Ignus's fields as Carrier Duel lists them: (name, centre, selection point, capture range).
+DUEL_AIRBASES = [
+    ("City Airport", (2206.0, 8.08, 4153.0), (1847.0, 8.975, 3635.0), 2100.0),
+    ("SE Airbase", (74648.0, 0.0, -28520.0), (73798.7, 13.29, -30105.7), 2600.0),
+    ("NW Airbase", (-75861.8359, 13.6, 33605.4922), (-76375.8359, 10.97, 33652.69), 2283.0),
+    ("Island7 Airstrip", (-37929.875, 14.6, 11240.9443), (-38201.08, 14.6, 11257.0439), 713.0),
+    ("Island9 Airstrip", (-13454.6, 11.0, 30503.2), (-13327.36, 11.038, 31289.8), 1100.0),
+    ("Island14 Airstrip", (55365.0, 10.0, -27038.0), (55121.8, 9.84, -27373.5), 1032.0),
+    ("SW Airbase", (-74591.8, 12.5, -28639.36), (-75528.51, 9.38, -28557.09), 1394.0),
+    ("NE Airbase", (69687.6, 11.58, 26056.8), (70792.99, 7.72999954, 26749.83), 1592.0),
+    ("Island5 Airstrip", (42140.1, 9.64, -213.2), (42324.8, 6.65000057, 95.2), 879.0),
+]
+xyz = lambda v: dict(zip("xyz", v))
+m = carrier_mission("airborne")
+c = CARRIER["globalPosition"]
+icarus(m["aircraft"][0], 1.0, {"x": c["x"], "y": 6000.0, "z": c["z"] + 30000.0}, rotation(CARRIER_HDG, 0), 250.0)
+m["airbases"] = [{"IsOverride": True, "faction": "None", "UniqueName": n, "DisplayName": n, "Disabled": True, "Capturable": False,
+                  "CaptureDefense": 10.0, "CaptureRange": r, "Center": xyz(c), "SelectionPosition": xyz(sel), "Tower": "",
+                  "VerticalLandingPoints": [], "ServicePoints": [], "roads": {"roads": []}, "runways": []}
+                 for n, c, sel, r in DUEL_AIRBASES]
+for faction in m["factions"]:
+    primeva = faction["factionName"] == "Primeva"
+    faction["supplies"] = [{"UnitType": AIRCRAFT, "Count": 4}] if primeva else []
+    faction["AIAircraftLimit"] = 1 if primeva else 0
+    faction["reduceAIPerFriendlyPlayer"] = 0
+save(m, "icarus_hyperion_ai", "the player's Icarus 30 km north of the Hyperion at 6,000 m, out of the AI's count; Primeva's only airbase the Hyperion carrier (Ignus, at rest where the game's Carrier Duel "
+     "puts it) and its only supply four Icarus, room for one AI aircraft, for the game's AI to spawn, launch and recover an Icarus there; "
+     "Boscali flies nothing.")

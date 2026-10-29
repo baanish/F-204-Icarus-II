@@ -1436,7 +1436,7 @@ def build_cached(repo=None, overrides=None, split=True):
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
 # (review_sheet.py).
 MODULES = ("parts", "speed_brakes", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "clearance", "cockpit",
-           "uvs", "tip_tanks")
+           "uvs", "tip_tanks", "tail_hook")
 
 
 def modules():
@@ -1460,6 +1460,7 @@ def _build(repo, split=True):
     import propulsion
     import speed_brakes
     import stations
+    import tail_hook
 
     fuselage = build_fuselage(p, mats["body"], mats["duct"])
     parts = [fuselage, build_probe(p, mats["strut"])]  # a bare-metal boom in every livery
@@ -1471,6 +1472,7 @@ def _build(repo, split=True):
     parts += gear.build(p, mats)
     parts += lights.build(p, mats)
     parts += stations.build(p, mats)
+    parts += tail_hook.build(p, mats)  # the ventral fin's fairing, cut into the loft before it splits into panels
     import internals  # imports this module back for its helpers, so it loads after them
 
     internals.build(p, collection("Internals"), mats)
@@ -1498,6 +1500,7 @@ def _build(repo, split=True):
                       "lods": len(bpy.data.collections["LOD1"].objects)}
         tree = {name: obj for name, obj in tree.items() if name not in pieces}
         tree.update((piece.name, piece) for made in pieces.values() for piece in made)
+    tail_hook.fin_hulls(TARGET)  # after the tail cone's shells are carved afresh
     part_tree.drop_split_sides(TARGET)
     import chunks
     import clearance

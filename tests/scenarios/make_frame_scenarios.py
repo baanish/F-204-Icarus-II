@@ -25,8 +25,8 @@ def generate():
             scenario["steps"][11]["label"] = f"the missile hits the {title}"
             if jet == "baanish_icarus":
                 scenario["steps"].insert(1, {
-                    "require": {"path": "mods.baanish.icarus.loadout", "eq": "||"},
-                    "label": "loadout: all three hardpoint sets empty", "within": 3})
+                    "require": {"path": "mods.baanish.icarus.loadout", "eq": "|||"},
+                    "label": "loadout: all four hardpoint sets empty", "within": 3})
                 scenario["mission"] = source + ".mission.json"
             else:
                 mission = json.loads((HERE / (source + ".mission.json")).read_text())

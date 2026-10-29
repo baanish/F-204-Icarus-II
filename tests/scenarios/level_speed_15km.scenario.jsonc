@@ -18,8 +18,8 @@
   "sample_hz": 2,
   "timeout": 420,
   "steps": [
-    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
-      "label": "loadout: all three hardpoint sets empty" },
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "|||" }, "within": 3,
+      "label": "loadout: all four hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 14500 } ] },
       "label": "the Icarus airborne at 15 km" },
     { "mark": { "label": "start" } },

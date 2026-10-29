@@ -12,9 +12,11 @@ namespace Icarus.Editor
         // centre of mass in the root's frame, empty and with full internal fuel. Splitting a part keeps its family's first
         // moment (art/blender/parts.py MOMENT_SPLITS, skin pieces by area), so the centres may move only by rounding. The
         // 1,500 kg engine and the 215 kg radar that balances it keep the empty centre and move the full one 23 mm aft
-        // (about 20.8% MAC instead of 21.5%).
-        private static readonly Vector3 PinnedEmptyCg = new Vector3(-0.00119854242f, 0.0266057253f, -0.7802818f),
-            PinnedFullCg = new Vector3(0.0001f, 0.0514f, -0.2583f);
+        // (about 20.8% MAC instead of 21.5%). The hook fairing's 20 kg aft and the radar's 45 kg more forward then move
+        // both 43 mm forward, so the 50 kg hook every standard loadout carries (on the tail cone at spawn, not here)
+        // brings the empty margin back to 5.7% MAC (IcarusAuthor.Aero.cs ReportBalance).
+        private static readonly Vector3 PinnedEmptyCg = new Vector3(9.21141054E-06f, 0.0234056264f, -0.737129331f),
+            PinnedFullCg = new Vector3(5.616695E-05f, 0.0503463335f, -0.234061733f);
         private const float BalanceTolerance = 0.01f;
         // Damage registrations: Unit.RegisterDamageable only appends and sends a part's index as a byte, so the list must
         // stay under 256 for the jet's life. The prefab's own damageables plus the one the default loadout's mounts add

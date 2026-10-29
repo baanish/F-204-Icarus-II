@@ -59,6 +59,7 @@ namespace Icarus.Editor
             Item("A20", "section inertia pinned with the boxes disabled", p => CheckSectionInertia(b, p));
             Item("A21", "map and HUD icons", p => CheckIcons(definition, p));
             Item("A22", "breakup tree", p => CheckBreakupTree(b, p));
+            Item("A23", "tail hook and carrier hangars", p => CheckTailHook(b, parameters, p));
             if (failures.Count > 0)
                 throw new InvalidDataException("Icarus authoring checks failed:\n  " + string.Join("\n  ", failures));
         }
@@ -223,7 +224,7 @@ namespace Icarus.Editor
             if (Mathf.Abs(wing - WingArea) > 0.01f) p.Add($"main wing {wing:F2} m2, not the sized {WingArea}");
             if (GetFloat(b.Part("fin_skin"), "wingArea") != 0) p.Add("fin_skin has lift; skins carry none by design");
             var drag = All(b, "AeroPart").Sum(a => GetFloat(a, "dragArea"));
-            if (Mathf.Abs(drag - DragAreaTotal) > 1e-3f) p.Add($"dragArea {drag:F3}, not the tuned {DragAreaTotal}");
+            if (Mathf.Abs(drag - DragAreaTotal - FairingDragArea) > 1e-4f) p.Add($"dragArea {drag:F4}, not the tuned {DragAreaTotal} and the hook fairing's {FairingDragArea}");
             return $"airfoils [{string.Join(", ", names)}]; {surfaces.Length} ControlSurfaces (pitch {Sum("pitchRange")}, roll {Sum("rollRange")}, yaw {Sum("yawRange")}), {devices.Length} HighLiftDevices, two speed brakes; wing {wing:F2} m2, dragArea {drag:F2}";
         }
 

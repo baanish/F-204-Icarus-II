@@ -1,0 +1,487 @@
+{
+  "JsonVersion": 6,
+  "MapKey": {
+    "Type": "GameWorldPrefab",
+    "Path": "Terrain_naval"
+  },
+  "missionSettings": {
+    "description": "F-204 Icarus II test mission: the player's Icarus 30 km north of the Hyperion at 6,000 m, out of the AI's count; Primeva's only airbase the Hyperion carrier (Ignus, at rest where the game's Carrier Duel puts it) and its only supply four Icarus, room for one AI aircraft, for the game's AI to spawn, launch and recover an Icarus there; Boscali flies nothing.",
+    "allowEventContent": false,
+    "Tags": [],
+    "playerMode": "SingleAndMultiplayer",
+    "allowRespawn": true,
+    "playerStartingRank": 6,
+    "rankMultiplier": 1.0,
+    "successfulSortieBonus": 0.25,
+    "nuclearEscalationThreshold": 0.0,
+    "strategicEscalationThreshold": 0.0,
+    "minRankTacticalWarhead": 0,
+    "minRankStrategicWarhead": 0,
+    "cameraStartPosition": {
+      "IsOverride": false,
+      "Value": {
+        "Position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "w": 0.0
+        }
+      }
+    },
+    "missionRoads": {
+      "roads": []
+    },
+    "missionSeaLanes": {
+      "roads": []
+    },
+    "wrecksMaxNumber": 0,
+    "wrecksDecayTime": 0.0
+  },
+  "environment": {
+    "timeOfDay": 12.0,
+    "timeFactor": 0.0,
+    "weatherIntensity": 0.0,
+    "cloudAltitude": 1800.0,
+    "windSpeed": 0.0,
+    "windTurbulence": 0.0,
+    "windHeading": 0.0,
+    "windRandomHeading": 0.0,
+    "moonPhase": 14.0
+  },
+  "aircraft": [
+    {
+      "type": "baanish_icarus",
+      "faction": "Primeva",
+      "UniqueName": "Agentic_Own",
+      "globalPosition": {
+        "x": -44692.49,
+        "y": 6000.0,
+        "z": -6468.867200000001
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.719034,
+        "z": -0.0,
+        "w": 0.694975
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "playerControlled": true,
+      "playerControlledPriority": 0,
+      "savedLoadout": {
+        "Selected": [
+          {
+            "Key": ""
+          },
+          {
+            "Key": ""
+          },
+          {
+            "Key": ""
+          },
+          {
+            "Key": ""
+          }
+        ]
+      },
+      "livery": 0,
+      "liveryType": "Builtin",
+      "liveryName": "",
+      "fuel": 1.0,
+      "skill": 1.0,
+      "bravery": 0.5,
+      "startingSpeed": 250.0
+    }
+  ],
+  "vehicles": [],
+  "ships": [
+    {
+      "type": "FleetCarrier1",
+      "faction": "Primeva",
+      "globalPosition": {
+        "x": -44692.49,
+        "y": 5.63970947,
+        "z": -36468.8672
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.719034255,
+        "z": 0.0,
+        "w": 0.6949746
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 100.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "UniqueName": "Hyperion",
+      "holdPosition": true,
+      "skill": 0.7,
+      "waypoints": []
+    }
+  ],
+  "buildings": [],
+  "scenery": [],
+  "containers": [],
+  "missiles": [],
+  "pilots": [],
+  "factions": [
+    {
+      "factionName": "Boscali",
+      "preventJoin": false,
+      "preventDonation": true,
+      "supplies": [],
+      "startingBalance": 999999.0,
+      "playerJoinAllowance": 9999.0,
+      "playerTaxRate": 0.2,
+      "regularIncome": 0.0,
+      "excessFundsDistributePercent": 0.25,
+      "killReward": 1.0,
+      "airSkillMultiplier": 1.0,
+      "surfaceSkillMultiplier": 1.0,
+      "startingWarheads": 999,
+      "reserveWarheads": 0,
+      "reserveAirframes": 0,
+      "extraReservesPerPlayer": 0,
+      "AIAircraftLimit": 0,
+      "reduceAIPerFriendlyPlayer": 0,
+      "addAIPerEnemyPlayer": 0.0,
+      "restrictions": {
+        "aircraft": [],
+        "weapons": []
+      },
+      "cameraStartPosition": {
+        "IsOverride": false,
+        "Value": {
+          "Position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+          }
+        }
+      }
+    },
+    {
+      "factionName": "Primeva",
+      "preventJoin": false,
+      "preventDonation": true,
+      "supplies": [
+        {
+          "UnitType": "baanish_icarus",
+          "Count": 4
+        }
+      ],
+      "startingBalance": 999999.0,
+      "playerJoinAllowance": 9999.0,
+      "playerTaxRate": 0.2,
+      "regularIncome": 0.0,
+      "excessFundsDistributePercent": 0.25,
+      "killReward": 1.0,
+      "airSkillMultiplier": 1.0,
+      "surfaceSkillMultiplier": 1.0,
+      "startingWarheads": 999,
+      "reserveWarheads": 0,
+      "reserveAirframes": 0,
+      "extraReservesPerPlayer": 0,
+      "AIAircraftLimit": 1,
+      "reduceAIPerFriendlyPlayer": 0,
+      "addAIPerEnemyPlayer": 0.0,
+      "restrictions": {
+        "aircraft": [],
+        "weapons": []
+      },
+      "cameraStartPosition": {
+        "IsOverride": false,
+        "Value": {
+          "Position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "Rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+          }
+        }
+      }
+    }
+  ],
+  "airbases": [
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "City Airport",
+      "DisplayName": "City Airport",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 2100.0,
+      "Center": {
+        "x": 2206.0,
+        "y": 8.08,
+        "z": 4153.0
+      },
+      "SelectionPosition": {
+        "x": 1847.0,
+        "y": 8.975,
+        "z": 3635.0
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "SE Airbase",
+      "DisplayName": "SE Airbase",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 2600.0,
+      "Center": {
+        "x": 74648.0,
+        "y": 0.0,
+        "z": -28520.0
+      },
+      "SelectionPosition": {
+        "x": 73798.7,
+        "y": 13.29,
+        "z": -30105.7
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "NW Airbase",
+      "DisplayName": "NW Airbase",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 2283.0,
+      "Center": {
+        "x": -75861.8359,
+        "y": 13.6,
+        "z": 33605.4922
+      },
+      "SelectionPosition": {
+        "x": -76375.8359,
+        "y": 10.97,
+        "z": 33652.69
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "Island7 Airstrip",
+      "DisplayName": "Island7 Airstrip",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 713.0,
+      "Center": {
+        "x": -37929.875,
+        "y": 14.6,
+        "z": 11240.9443
+      },
+      "SelectionPosition": {
+        "x": -38201.08,
+        "y": 14.6,
+        "z": 11257.0439
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "Island9 Airstrip",
+      "DisplayName": "Island9 Airstrip",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1100.0,
+      "Center": {
+        "x": -13454.6,
+        "y": 11.0,
+        "z": 30503.2
+      },
+      "SelectionPosition": {
+        "x": -13327.36,
+        "y": 11.038,
+        "z": 31289.8
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "Island14 Airstrip",
+      "DisplayName": "Island14 Airstrip",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1032.0,
+      "Center": {
+        "x": 55365.0,
+        "y": 10.0,
+        "z": -27038.0
+      },
+      "SelectionPosition": {
+        "x": 55121.8,
+        "y": 9.84,
+        "z": -27373.5
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "SW Airbase",
+      "DisplayName": "SW Airbase",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1394.0,
+      "Center": {
+        "x": -74591.8,
+        "y": 12.5,
+        "z": -28639.36
+      },
+      "SelectionPosition": {
+        "x": -75528.51,
+        "y": 9.38,
+        "z": -28557.09
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "NE Airbase",
+      "DisplayName": "NE Airbase",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1592.0,
+      "Center": {
+        "x": 69687.6,
+        "y": 11.58,
+        "z": 26056.8
+      },
+      "SelectionPosition": {
+        "x": 70792.99,
+        "y": 7.72999954,
+        "z": 26749.83
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "None",
+      "UniqueName": "Island5 Airstrip",
+      "DisplayName": "Island5 Airstrip",
+      "Disabled": true,
+      "Capturable": false,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 879.0,
+      "Center": {
+        "x": 42140.1,
+        "y": 9.64,
+        "z": -213.2
+      },
+      "SelectionPosition": {
+        "x": 42324.8,
+        "y": 6.65000057,
+        "z": 95.2
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    }
+  ],
+  "objectives": [
+    {
+      "Type": "None",
+      "UniqueName": "Mission Start",
+      "Faction": "",
+      "DisplayName": "",
+      "Hidden": true,
+      "Outcomes": []
+    }
+  ],
+  "outcomes": []
+}

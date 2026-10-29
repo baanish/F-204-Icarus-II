@@ -18,11 +18,11 @@ import build_icarus as bi
 # (IcarusAuthor.SkinFirst gives each a back-facing twin, as stock jets have), so these count the skin twice; module BUDGETs
 # count the triangles modelled here, once.
 EXTERIOR = (135000, 140000)  # exterior LOD0, internals and cockpit proxies included, cockpit_view renderers excluded
-SKIN_MAX = 90000
+SKIN_MAX = 92000  # 2,000 of it the ventral fin's hook fairing (tail_hook.py), less the loft it replaces
 TRIM_SHARE = (0.27, 0.58)  # jet_mechanical and aircraft_structure, of exterior LOD0
 TRIMS = ("jet_mechanical", "aircraft_structure")
 COCKPIT_MAX = 35000
-LOD1_PER_HULL, LOD1_TOTAL = 56, 814  # hulls.LOD1_TOTAL
+LOD1_PER_HULL, LOD1_TOTAL = 56, 818  # hulls.LOD1_TOTAL
 
 
 def tris(obj):

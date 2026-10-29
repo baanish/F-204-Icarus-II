@@ -150,7 +150,7 @@ namespace Icarus.Editor
             return mesh;
         }
 
-        // Eight stations in SetNames order, each set [L, R] with HardpointIndex 0..7 left before right.
+        // Six stations in SetNames order, each set [L, R] with HardpointIndex 0..5 left before right, then the tail hook's.
         private static void BuildStations(Build b)
         {
             // A wing station hangs under the middle of its pylon's flat lower edge, as stock blades put theirs, so every
@@ -219,7 +219,7 @@ namespace Icarus.Editor
             var manager = b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager"));
             var so = new SerializedObject(manager);
             var list = Prop(so, "hardpointSets");
-            list.arraySize = sets.Length;
+            list.arraySize = SetNames.Length;
             var lines = new List<string>();
             for (var i = 0; i < sets.Length; i++)
             {
@@ -265,6 +265,7 @@ namespace Icarus.Editor
                     lines.Add($"{point.name} #{2 * i + j} on {partName} at {point.position.ToString("F3")} roll {point.eulerAngles.z:F0}");
                 }
             }
+            lines.Add(BuildTailHookStation(b, list.GetArrayElementAtIndex(TailHookSet)));
             so.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add("stations: " + string.Join("; ", lines));
         }

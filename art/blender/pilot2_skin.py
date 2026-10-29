@@ -15,6 +15,7 @@ import bake_skin as bake
 import build_icarus as bi
 import internals
 import skin_review
+import tail_hook
 import uvs
 
 OUT = ROOT / '.cache/review/wave2/p9b-round2'
@@ -62,7 +63,8 @@ def structure():
             'wing_sections': bi.wing_sections(bi.PARAMS['wing']), 'wing_surfaces': bi.PARAMS['wing_surfaces'], 'S0': bi.S0,
             'wing_profile': [list(bi.section_at(bi.wing_sections(bi.PARAMS['wing']), float(x), 'x'))
                              for x in np.linspace(.58, 3.4, 1001)],
-            'objects': objects, 'fittings': fittings, 'views': VIEWS}
+            'objects': objects, 'fittings': fittings, 'views': VIEWS,
+            'ventral_fin_cut_s': tail_hook.fin_cut(bi.PARAMS)}
     (OUT / 'structure.json').write_text(json.dumps(data))
     print('PILOT STRUCTURE PASS', [o['name'] for o in objects], flush=True)
 

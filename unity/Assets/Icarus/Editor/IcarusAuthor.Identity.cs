@@ -13,8 +13,8 @@ namespace Icarus.Editor
     {
         // The hardpoint set order is an API: loadouts and Blueprinter registrations address sets by position.
         // The tip tanks share the Wingtip set with its missiles: the tank mount seats its tank upright on the rolled
-        // hardpoint (AuthorTipTankMount), so no set precludes another.
-        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal" };
+        // hardpoint (AuthorTipTankMount), so no set precludes another. The Tail Hook set comes last (TailHookSet).
+        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal", "Tail Hook" };
 
         // What each set carries: a starter jet, so a Starfighter's kind of load and little that is advanced. The wingtip
         // stations take the MMR-S3 and IRM-S2 on their own rails, or the tip tank; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
@@ -29,6 +29,7 @@ namespace Icarus.Editor
                     "AGM_heavy_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external", "Rocket2_4Pod",
                     "SpecialSmokePod", "SpecialFlarePod" },
             new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2 },
+            new[] { TailHook },
         };
         // The conformal mounts' jsonKeys (art/blender/stations.py MOUNTS).
         private const string ConformalAAM1 = "baanish_icarus_AAM1_conformal", ConformalAAM3 = "baanish_icarus_AAM3_conformal",
@@ -43,13 +44,15 @@ namespace Icarus.Editor
         }
 
         // Standard loadouts by mount jsonKey, one per set in SetNames order. loadouts[1], the default, is the first: the
-        // Interceptor carries the tip tanks on its wingtips (the owner's call), the others their wingtip missiles.
+        // Interceptor carries the tip tanks on its wingtips (the owner's call), the others their wingtip missiles. Every one
+        // carries the hook (the owner's call): the faction AI spawns a jet on the Hyperion with any standard loadout, and
+        // its landing AI looks for an arrestor deck only when the equipped mount says it has a hook.
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
-            ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2 }),
-            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", ConformalAAM2 }),
-            ("Strike", new[] { "AAM3_single", "bomb_500_single", ConformalAAM1 }),
-            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", ConformalAAM1 }),
+            ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook }),
+            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", ConformalAAM2, TailHook }),
+            ("Strike", new[] { "AAM3_single", "bomb_500_single", ConformalAAM1, TailHook }),
+            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", ConformalAAM1, TailHook }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
@@ -62,6 +65,7 @@ namespace Icarus.Editor
             foreach (var own in AuthorConformalMounts())
                 stations.ByKey[own.Key] = own.Value;
             stations.ByKey[TipTank] = AuthorTipTankMount();
+            stations.ByKey[TailHook] = AuthorTailHookMount();
             for (var i = 0; i < sets.arraySize; i++)
                 foreach (var mount in GetList(sets.GetArrayElementAtIndex(i).FindPropertyRelative("weaponOptions")).Where(o => o != null))
                     stations.ByKey[KeyOf(mount)] = mount;
@@ -288,8 +292,13 @@ namespace Icarus.Editor
             return Load<Sprite>(MapIconPath);
         }
 
-        // The hangars the Revoker uses, and every stock mount on the sets that offer it.
+        // The hangars the Revoker uses, every one of each unit, and every stock mount on the sets that offer it.
         private static readonly string[] HangarUnitKeys = { "hangar_med", "shelter1", "Helipad" };
+        // The Hyperion's fixed-wing deck spawns, as the Compass and Ifrit use them (the owner's call): hangar_R2 and hangar_R3 on the deck
+        // and hangar_R1 on the right elevator, not hangar_F, its helicopter elevator. The jet launches under its own thrust over
+        // the ski jump; the game has no catapult.
+        private const string CarrierKey = "FleetCarrier1";
+        private static readonly string[] CarrierHangars = { "hangar_R1", "hangar_R2", "hangar_R3" };
 
         private static void AuthorOps(Stations stations)
         {
@@ -308,7 +317,15 @@ namespace Icarus.Editor
                 var hangar = index.HangarUnits.Find(h => h.jsonKey == key) ?? throw new InvalidDataException("OpReferenceIndex has no hangar unit " + key + ".");
                 hangarOp.hangars.Add(new OpAddAircraftToHangars.HangarTarget { hangarUnitJsonKey = hangar.jsonKey, hangarNames = new List<string>(hangar.hangarNames) });
             }
-            SaveAsset(hangarOp, ModFolder + "/" + hangarOp.name + ".asset");
+            var carrier = index.HangarUnits.Find(h => h.jsonKey == CarrierKey) ?? throw new InvalidDataException("OpReferenceIndex has no hangar unit " + CarrierKey + ".");
+            var missing = CarrierHangars.Where(n => !carrier.hangarNames.Contains(n)).ToArray();
+            if (missing.Length > 0)
+                throw new InvalidDataException($"OpReferenceIndex's {CarrierKey} has no {string.Join(", ", missing)}.");
+            hangarOp.hangars.Add(new OpAddAircraftToHangars.HangarTarget { hangarUnitJsonKey = CarrierKey, hangarNames = new List<string>(CarrierHangars) });
+            hangarOp = SaveAsset(hangarOp, ModFolder + "/" + hangarOp.name + ".asset");
+            var onCarrier = hangarOp.hangars.Where(h => h.hangarUnitJsonKey == CarrierKey).SelectMany(h => h.hangarNames).OrderBy(n => n, StringComparer.Ordinal).ToArray();
+            if (!onCarrier.SequenceEqual(CarrierHangars))
+                throw new InvalidDataException($"A5: the Icarus registers on {CarrierKey}'s [{string.Join(", ", onCarrier)}], expected exactly [{string.Join(", ", CarrierHangars)}].");
 
             var offered = new Dictionary<string, List<int>>();
             for (var set = 0; set < SetNames.Length; set++)
@@ -345,7 +362,7 @@ namespace Icarus.Editor
                 op.aircraft.Add(new OpAddWeaponToHardpoint.AircraftTarget { aircraftJsonKey = JsonKey, hardpointIndices = new List<int>(entry.Value) });
                 SaveAsset(op, ModFolder + "/" + op.name + ".asset");
             }
-            Debug.Log($"[Icarus] check A5 registration PASS: sets [{string.Join(", ", sets)}]; hangars [{string.Join(", ", HangarUnitKeys)}]; {offered.Count} mounts ({own.Count} the mod's own): " +
+            Debug.Log($"[Icarus] check A5 registration PASS: sets [{string.Join(", ", sets)}]; hangars [{string.Join(", ", HangarUnitKeys)}, {CarrierKey} {string.Join("/", CarrierHangars)}]; {offered.Count} mounts ({own.Count} the mod's own): " +
                 string.Join("; ", offered.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => e.Key + " on " + string.Join("/", e.Value))));
         }
     }

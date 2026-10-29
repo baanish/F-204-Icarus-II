@@ -1,0 +1,61 @@
+// Carrier trap: the game's landing AI flies the Icarus onto the Hyperion's deck and its arrestor hook catches a wire. The
+// Icarus starts 15 km astern of the carrier at 1,200 m, 150 m/s, 20% fuel (the landing AI's 75 m/s approach weight), clean
+// but for the hook (Tail Hook set, IcarusAuthor.TailHook.cs). The landing AI reads the equipped mount's tailHook flag
+// (WeaponManager.HasTailHook) and picks the deck's arrestor runway; the game's TailHook deploys itself below 100 m/s between
+// 30 and 120 m radar altitude, descending, and reports "Tail Hook Deployed" and "Caught <n> Wire" on the player's HUD
+// (TailHook.cs), which the action report shows. The deck stands about 17.8 m above the sea.
+// Pass: the hook deploys on the approach, the jet touches down, a wire catches it, it stops on the deck within 8 s of
+// touchdown with every part attached, no damage and no joint broken ("joint-break", src/Icarus/PartContactLog.cs).
+// Recorded: the approach speed at the bottom of the hook's window (30 m) and at touchdown, the sink rate, and the plugin's
+// per-second joint loads ("joint-load", src/Icarus/TailFlex.cs: the three joints nearest their break limits, 1 breaks).
+// Run at 1x: the plugin's stage lines are throttled by wall time, so at 4x most seconds of the trap go unlogged.
+// The peak over the trap: python tools/flight_peaks.py <run folder> --since trap
+// From the repo root: no-agentic run tests/scenarios/carrier_trap.scenario.jsonc realtime=true
+{
+  "mission": "icarus_hyperion_final.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.2.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "speed": 1,
+  "timeout": 420,
+  "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "|||baanish_icarus_tail_hook" }, "within": 3,
+      "label": "loadout: the tail hook alone" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "gt": 800 },
+                            { "path": "contacts.Hyperion.live", "eq": true } ] },
+      "label": "the Icarus airborne astern of the Hyperion" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5,
+      "label": "the airframe is intact 5 s after spawn" },
+    { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
+    { "watch": { "ui": "ActionReportText" } },
+    { "fly": { "mode": "land" } },
+    { "check": { "path": "fly.mode", "eq": "land" }, "within": 1, "label": "the game's landing AI has the jet" },
+    { "wait": { "visible": "ActionReportText", "with_text": "Tail Hook Deployed" }, "timeout": 200, "label": "the hook deploys on the approach" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS as the hook deploys, m/s" },
+    { "record": { "path": "own.alt_agl_m" }, "label": "radar altitude as the hook deploys, m" },
+    { "wait": { "path": "own.alt_agl_m", "lt": 30 }, "timeout": 60, "label": "through 30 m, the bottom of the hook's window" },
+    { "record": { "path": "own.tas_mps" }, "label": "approach speed at 30 m, TAS m/s" },
+    { "record": { "path": "own.aoa_deg" }, "label": "angle of attack at 30 m, deg" },
+    { "wait": { "event": "touchdown", "since": "start" }, "timeout": 60, "label": "touchdown" },
+    { "mark": { "label": "trap" } },
+    { "record": { "event": "touchdown", "field": "gs_mps", "since": "start" }, "label": "ground speed at touchdown, m/s" },
+    { "record": { "event": "touchdown", "field": "vs_mps", "since": "start" }, "label": "sink rate at touchdown, m/s" },
+    { "check": { "any": [ { "visible": "ActionReportText", "with_text": "Caught 1st Wire" }, { "visible": "ActionReportText", "with_text": "Caught 2nd Wire" },
+                          { "visible": "ActionReportText", "with_text": "Caught 3rd Wire" }, { "visible": "ActionReportText", "with_text": "Caught 4th Wire" } ] },
+      "within": 4, "label": "a wire catches the hook" },
+    { "check": { "path": "own.gs_mps", "lt": 1 }, "within": 8, "label": "stopped within 8 s of touchdown" },
+    { "check": { "path": "own.alt_msl_m", "between": [16, 20] }, "label": "stopped on the deck, not off its end" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 },
+                          { "not": { "event": "part_detached", "since": "start" } }, { "not": { "log": "joint-break", "since": "start" } } ] },
+      "label": "every part attached, no damage, no joint broken" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "since": "trap" } }, "label": "nearest joint to breaking after the trap, load over limit" },
+    { "record": { "log_value": { "match": "tail-flex: .*up to ([0-9.]+) g", "since": "trap" } }, "label": "load factor in the last second logged" },
+    { "check": { "path": "own.hp_frac", "eq": 1 }, "for": 10, "label": "parked on the deck 10 s, intact" },
+  ],
+}

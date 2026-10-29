@@ -15,12 +15,12 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ICARUS = "baanish_icarus"
-AIR_TO_AIR = ["AAM1_single", "AAM4_single", "baanish_icarus_AAM2_conformal"]
+AIR_TO_AIR = ["AAM1_single", "AAM4_single", "baanish_icarus_AAM2_conformal", ""]
 INTERCEPTOR = ["autocannon_27mm_internal", "AAM4_triple_internal", "AAM4_triple_internal",
                "AAM3_single_internal", "AAM2_double", "AAM1_double", ""]
 # The Ifrit's stock loadout: the gun, three AAM-29 Scythes in each main bay, an IRM-S2 in each side bay.
 IFRIT_STANDARD = ["autocannon_27mm_internal", "AAM2_triple_internal", "AAM2_triple_internal", "AAM3_single_internal", "", "", ""]
-TARGET = ["", "bomb_500_single", ""]
+TARGET = ["", "bomb_500_single", "", ""]
 # Combat AI clamps targetHeight to 8000 in AIPilotCombatModes.cs:1261. Starting
 # there avoids its +5 m/s target-height drift at lower altitudes (:506-516).
 # This is an AGL cap, not an MSL hold: Autopilot.cs:215-231 adds terrain height.
@@ -167,7 +167,7 @@ def verify_contracts():
     assert [u["globalPosition"] for u in targets] == [
         {"x": -74000, "y": 8000, "z": z} for z in (-33200, -32200, -31200, -30200)]
     assert all(u["startingSpeed"] == 200 and u["rotation"] == rotation(0) for u in targets)
-    assert all(u["savedLoadout"]["Selected"] == [{"Key": ""}, {"Key": "bomb_500_single"}, {"Key": ""}]
+    assert all(u["savedLoadout"]["Selected"] == [{"Key": k} for k in TARGET]
                for u in targets)
     assert gun["objectives"][1]["waypoints"] == [
         {"Position": {"x": -74000, "y": 8000, "z": ROUTE_END_Z}, "Range": 1000}]

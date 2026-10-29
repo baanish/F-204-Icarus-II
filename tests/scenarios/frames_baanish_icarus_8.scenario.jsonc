@@ -16,7 +16,7 @@
   "timeout": 180,
   "steps": [
     {"require": {"all": [{"path": "own.alive", "eq": true}, {"path": "own.type", "eq": "baanish_icarus"}, {"path": "own.alt_msl_m", "gt": 9500}]}, "label": "the Icarus airborne at 10 km"},
-    {"require": {"path": "mods.baanish.icarus.loadout", "eq": "||"}, "label": "loadout: all three hardpoint sets empty", "within": 3},
+    {"require": {"path": "mods.baanish.icarus.loadout", "eq": "|||"}, "label": "loadout: all four hardpoint sets empty", "within": 3},
     {"fly": {"mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8}},
     {"wait": {"path": "own.pitch_rate_dps", "between": [-1, 1]}, "hold": 5, "timeout": 30, "label": "settled"},
     {"camera": {"mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 120, "pitch_deg": 10}},

@@ -23,3 +23,8 @@ MonoBehaviour:
   - hangarUnitJsonKey: Helipad
     hangarNames:
     - Helipad
+  - hangarUnitJsonKey: FleetCarrier1
+    hangarNames:
+    - hangar_R1
+    - hangar_R2
+    - hangar_R3

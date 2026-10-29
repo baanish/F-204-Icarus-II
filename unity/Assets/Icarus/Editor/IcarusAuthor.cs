@@ -40,7 +40,7 @@ namespace Icarus.Editor
         // First-cut empty mass sized below the F-104G's 6,348 kg, which the export's mass_kg props must add up to, and the
         // internal fuel the fuel_kg props must: what the cells hold round the gear wells and the Y-duct (internals.py
         // design_fuel_kg).
-        private const float EmptyMass = 6300f, FuelMass = 3082f;
+        private const float EmptyMass = 6365f, FuelMass = 3082f;
 
         private static string RepoRoot => Directory.GetParent(Application.dataPath).Parent.FullName;
         private static string ExportFolder => Path.Combine(RepoRoot, "art", "export");

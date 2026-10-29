@@ -25,6 +25,8 @@ namespace Icarus.Editor
             for (var i = 0; i < sets.arraySize; i++)
             {
                 var set = sets.GetArrayElementAtIndex(i);
+                if (i == TailHookSet)
+                    continue; // one hardpoint, HardpointIndex -1: A23
                 var precludes = set.FindPropertyRelative("precludingHardpointSets");
                 if (precludes.arraySize != 0) p.Add($"{names[i]} precludes {precludes.arraySize} other sets, expected none");
                 var hardpoints = set.FindPropertyRelative("hardpoints");
@@ -59,7 +61,7 @@ namespace Icarus.Editor
                     }
                 }
             }
-            if (!indices.OrderBy(i => i).SequenceEqual(Enumerable.Range(0, 2 * SetNames.Length))) p.Add("HardpointIndex values [" + string.Join(", ", indices) + $"], expected 0..{2 * SetNames.Length - 1} once each");
+            if (!indices.OrderBy(i => i).SequenceEqual(Enumerable.Range(0, 2 * TailHookSet))) p.Add("HardpointIndex values [" + string.Join(", ", indices) + $"], expected 0..{2 * TailHookSet - 1} once each");
             var so = new SerializedObject(parameters);
             var lengths = new List<int>();
             var loadouts = Prop(so, "loadouts");
@@ -74,7 +76,7 @@ namespace Icarus.Editor
             }
             if (loadouts.arraySize < 2) p.Add("fewer than two ordinary loadouts (WeaponManager falls back to loadouts[1])");
             if (lengths.Any(l => l != SetNames.Length)) p.Add("loadout lengths [" + string.Join(", ", lengths) + "]");
-            return $"sets [{string.Join(", ", names)}], none precluding another, hardpoints 0..{2 * SetNames.Length - 1} left before right, within {worst * 1000f:F1} mm of their measured positions, the tip tank hanging within {tankMiss.Position * 1000f:F2} mm and {tankMiss.Angle:F3} deg of its place on both tips (the right one half a roll over), loadout lengths [{string.Join(", ", lengths)}]";
+            return $"sets [{string.Join(", ", names)}], none precluding another, hardpoints 0..{2 * TailHookSet - 1} left before right, within {worst * 1000f:F1} mm of their measured positions, the tip tank hanging within {tankMiss.Position * 1000f:F2} mm and {tankMiss.Angle:F3} deg of its place on both tips (the right one half a roll over), loadout lengths [{string.Join(", ", lengths)}]";
         }
 
         // A14: every offered mount, twins and the mod's own included, hung at each of its hardpoints, its colliders against
