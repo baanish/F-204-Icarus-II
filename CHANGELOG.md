@@ -6,7 +6,7 @@
 - The aircraft menu picks the Bare Metal livery for the Icarus by default, on both sides, instead of a random one.
 - The Icarus unlocks at rank 2, beside the Brawler, instead of rank 3.
 - The fuselage breaks up in finer pieces: the side panels part at the lower lap joint and at the mid frame, the dorsal cover splits in two, and the frame and stringer truss over the top comes away in two halves, showing the tanks under it. Like the wing and tail, the panels show no seam while attached.
-- The tail breaks up in more pieces: the tail cone with the speed brakes can come off behind the engine, and the afterburner section separates from the engine. Braces keep the tail stiff in hard pulls, and no seam opens while the pieces are attached.
+- The tail breaks up in more pieces: the tail cone with the speed brakes can come off behind the engine, and the afterburner section separates from the engine, which kills the engine. Braces keep the tail stiff in hard pulls, and no seam opens while the pieces are attached.
 - Each wing breaks up in more pieces: the outer wing can come off at the crank, taking its share of the lift with it, and the wing skin is four panels a side instead of one. The joint at the crank never shows in hard pulls.
 - The skin tears like a stock jet's: panel joints and rivet rows stay standing while damage opens the skin bay by bay with torn edges. It used to lose about half its skin in round holes by 80% health, starting with the clean metal.
 - The skin is drawn from both sides, as on most stock jets: a damage hole or a broken section shows the inside of the skin instead of the sky through the far wall.
