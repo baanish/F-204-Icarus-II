@@ -12,7 +12,7 @@
 - The wings no longer strike the aft section in fast rolls. The game's floating-origin shift set each piece of the jet back to its interpolated position, a different distance for each, so in a fast roll the wings jumped up to 13 cm out of place for one frame.
 - The fuel cells look like rubberised fuel bladders instead of the generic equipment finish.
 - In multiplayer, losing the nose section no longer stops the rest of a breakup from reaching the other players.
-- The tail breaks up in more pieces: the tail cone with the speed brakes can come off behind the engine. Braces keep the tail stiff in hard pulls, and no seam opens while the pieces are attached.
+- The tail breaks up in more pieces: the tail cone with the speed brakes can come off behind the engine. Braces keep the tail stiff in hard pulls.
 - Each wing breaks up in more pieces: the outer wing can come off at the crank, taking its share of the lift with it.
 - The skin tears like a stock jet's: panel joints and rivet rows stay standing while damage opens the skin bay by bay with torn edges. It used to lose about half its skin in round holes by 80% health, starting with the clean metal.
 - The skin is drawn from both sides, as on most stock jets: a damage hole or a broken section shows the inside of the skin instead of the sky through the far wall.

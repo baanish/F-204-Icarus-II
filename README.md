@@ -8,7 +8,7 @@ Version 0.1.0, an early prerelease. It flies, fights and comes apart in game, an
 
 ## What you get
 
-- A flyable Primeva jet with a first-pass damage model: breakable parts and internal structure. A missile hit tears off wings, the engine and tail surfaces, and an undamaged airframe holds together in full-stick pulls.
+- A flyable Primeva jet with a damage model built like the stock jets': the fuselage and wings break up in whole sections that collide with the rest of the jet, a missile hit tears off wings, the tail and the aft section with the engine, and an undamaged airframe holds together in full-stick pulls.
 - A custom cockpit on the game's own displays and HUD, with a live standby attitude ball, fuel gauge and clock.
 - Six stations: a wingtip that carries a droppable Starfighter tip tank or a missile rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
 - An iris nozzle that opens with afterburner and vectors thrust up to 4 degrees in pitch and yaw.
@@ -74,7 +74,7 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 - Near Mach 2.8 at 60,000 ft the jet can porpoise in pitch by several degrees.
 - The flaps, nozzle and canopy move silently. Only the engine, gear and belly scrape have new sounds; the rest keep the stock or donor sounds.
 - Small visual gaps remain: a notch shows behind the stabilator at full travel, and a sliver of gear-bay interior can show with the doors open.
-- The damage model is a first pass and still needs balancing.
+- The damage model takes the stock Revoker's armour and still needs balancing in play.
 - The stock-mission supply loads, but nobody has yet checked mission by mission that Primeva's AI fields and builds the Icarus.
 
 ## Credits
