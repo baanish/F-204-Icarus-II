@@ -66,6 +66,8 @@ namespace Icarus.Editor
                 p.Add($"part {part} has no damage diagram image");
             if (images.Length == 0) p.Add("no damage diagram images");
             var cameras = new[] { "camMountForward", "camMountRear" }.Select(f => (Transform)Prop(new SerializedObject(b.Parts["radome"].GetComponent(GameType("TargetCam"))), f).objectReferenceValue).ToArray();
+            if (Prop(new SerializedObject(b.Parts["radome"].GetComponent(GameType("TargetCam"))), "targetScreenRenderer").objectReferenceValue == null)
+                p.Add("the TargetCam has no screen to paint when its part comes off");
             var minimum = float.PositiveInfinity;
             foreach (var r in b.Root.GetComponentsInChildren<MeshRenderer>(true).Where(r => r.gameObject.layer != 3))
                 foreach (var camera in cameras)

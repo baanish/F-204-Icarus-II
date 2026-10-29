@@ -86,6 +86,9 @@ namespace Icarus.Editor
             SetList(Prop(lights, "lightRenderers"), new Object[] { lamps });
             lights.ApplyModifiedPropertiesWithoutUndo();
             Set(cockpitUi, "tacScreenRender", screen);
+            // TargetCam's detach handler paints its screen with the stock no-signal material. The Revoker's target screen went
+            // with its interior, and a null one throws there, which ends the part's detach before the other peers hear of it.
+            Set(b.Parts["radome"].GetComponent(GameType("TargetCam")), "targetScreenRenderer", screen);
             var aircraft = new SerializedObject(b.Aircraft);
             SetList(Prop(aircraft, "cockpitRenderers"), view);
             // Hidden in the cockpit view: the internals round the pilot, the outer glass, and the proxies standing in outside
