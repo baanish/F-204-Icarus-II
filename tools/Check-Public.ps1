@@ -101,6 +101,11 @@ try {
     }
     # Names and patterns the owner keeps private: {"terms": [...], "patterns": {"rule name": "regex"}}.
     $termsPath = Join-Path $Repo 'tools/public-check-terms.json'
+    # A linked worktree has no copy of the ignored file, so read the main checkout's.
+    if (-not (Test-Path -LiteralPath $termsPath)) {
+        $common = [Text.Encoding]::UTF8.GetString((Read-GitBytes @('rev-parse', '--path-format=absolute', '--git-common-dir'))).Trim()
+        $termsPath = Join-Path (Split-Path $common -Parent) 'tools/public-check-terms.json'
+    }
     if (Test-Path -LiteralPath $termsPath) {
         $config = Get-Content -LiteralPath $termsPath -Raw | ConvertFrom-Json -AsHashtable
         $terms = @($config.terms | Where-Object { $_ })
