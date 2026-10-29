@@ -19,6 +19,7 @@ namespace Icarus.Editor
         private static readonly (string Slot, Color32 Colour, float Metallic, float Smoothness)[] FlatSlots =
         {
             ("Icarus_Duct", new Color32(13, 13, 13, 255), 0f, 0.2f),
+            ("Icarus_FuelCell", new Color32(89, 77, 53, 255), 0f, 0.15f),
             ("Icarus_WellDetail", new Color32(52, 54, 58, 255), 0.5f, 0.35f),
             ("Icarus_Nozzle", new Color32(137, 128, 123, 255), 0.9f, 0.65f),
             ("Icarus_Petal", new Color32(180, 175, 170, 255), 0.85f, 0.7f),

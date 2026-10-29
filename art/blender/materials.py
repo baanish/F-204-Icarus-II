@@ -58,10 +58,11 @@ def build():
         "strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
         "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9),
         # Hidden structure on the stock trims (Exterior rule 4): spars and ribs on aircraft_structure;
-        # equipment, tanks, bays and the coves of moving surfaces on jet_mechanical.
+        # equipment, bays and the coves of moving surfaces on jet_mechanical.
         "structure": stock("aircraft_structure"),
         "mechanical": stock("jet_mechanical"),
-        "fuel_tank": stock("jet_mechanical"),
+        # Rubberised fuel bladders stay matte and nonmetallic beside the stock mechanical trim.
+        "fuel_tank": material("Icarus_FuelCell", (0.10, 0.075, 0.035, 1.0), 0.0, 0.85),
         "engine": stock("jet_mechanical"),
         "avionics": stock("jet_mechanical"),
         "radar": stock("jet_mechanical"),
