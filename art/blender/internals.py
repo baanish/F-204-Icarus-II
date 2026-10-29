@@ -28,7 +28,7 @@ INTERNALS = {
     # inset from the skin, z floor, x from, x to). A cell fills the skin section above its floor between its x
     # limits, minus the ducts with clearance. The design load is spread over the cells by what each holds: what they
     # hold round the F-104-style gear wells and the Y-duct, one constant tube from just behind the lips to the engine
-    # face, its branches' inboard walls flat from the lips, with the shock cones cut back to their tips (R7's 2,400 kg,
+    # face, its branches' inboard walls flat from the lips, with the shock cones cut back to their tips (design's 2,400 kg,
     # trimmed by the wells to 2,320).
     "design_fuel_kg": 3082,
     "duct_clearance": 0.025,  # duct wall plus gap between a fuel cell and an intake duct

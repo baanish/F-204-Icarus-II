@@ -9,23 +9,23 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // R7's first-cut engine: a 65 kN core plus 45 kN of afterburner, maxSpeed raised past the stock 522 m/s cap, and its
+        // First-cut engine design: a 65 kN core plus 45 kN of afterburner, maxSpeed raised past the stock 522 m/s cap, and its
         // fuel rates (kg per roughly one-second check).
         private const float MaxThrust = 65000f, EngineMaxSpeed = 760f, MinDensity = 0.10f, FuelMin = 0.45f, FuelMax = 2.5f;
         private const float AfterburnerThrust = 45000f, AfterburnerFuel = 5.5f, AfterburnerStart = 0.90f, AfterburnerEnd = 1.00f, AfterburnerSmoothing = 2f;
         private static readonly Vector2 ThrottleRemap = new Vector2(0f, 0.88f);
         private const float MinRpm = 1000f, MaxRpm = 3000f, SpoolRate = 1500f, StartupRate = 200f;
-        // R7's altitudeThrust keys (altitude, factor, in and out tangent): linear between 0, 10, 15 and 19 km.
+        // Designed altitudeThrust keys (altitude, factor, in and out tangent): linear between 0, 10, 15 and 19 km.
         private static readonly float[][] AltitudeThrust =
         {
             new[] { 0f, 1.0f, -2e-5f, -2e-5f }, new[] { 10000f, 0.8f, -2e-5f, -5e-5f },
             new[] { 15000f, 0.55f, -5e-5f, -6.25e-5f }, new[] { 19000f, 0.3f, -6.25e-5f, -6.25e-5f },
         };
-        // R12: stock vectoring kept at 4 degrees in pitch and yaw, no roll mixing. The cutoff sits above the top speed
+        // Stock vectoring set to 4 degrees in pitch and yaw by design, no roll mixing. The cutoff sits above the top speed
         // (912 m/s, where the thrust taper ends): the Revoker's 250 m/s left the Icarus, rarely that slow, without it.
         private static readonly Vector3 ThrustVectoring = new Vector3(4f, 4f, 0f);
         private const float VectoringMaxAirspeed = 1000f;
-        // R13: the engine fails from its core and nozzle, at the Revoker's threshold.
+        // The engine fails from its core and nozzle by design, at the Revoker's threshold.
         private const float EngineDamageThreshold = 50f;
         // fighter1_afterburner_nozzle's bounds: the glow cylinder the Revoker's nozzle is sized to.
         private const float RevokerGlowRadius = 0.517f, RevokerGlowLength = 0.6f;

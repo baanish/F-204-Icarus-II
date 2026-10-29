@@ -15,7 +15,7 @@ REPO = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=REPO / ".cache/review/wave2/P3/01")
-    parser.add_argument("--reference", type=Path, default=REPO / ".cache/research/R8/Lockheed-page-8.png")
+    parser.add_argument("--reference", type=Path, required=True, help="the Lockheed F-104 power plant page to compare against")
     args = parser.parse_args()
     section = json.loads((args.out / "section.json").read_text())
     fig, axes = plt.subplots(1, 2, figsize=(14, 7), layout="constrained")
@@ -62,7 +62,7 @@ def main():
     reference.thumbnail((980, 800))
     reference = reference.resize((970, 700))
     sheet.paste(reference, (1190, 75))
-    draw.text((1190, 790), "Lockheed F-104 power plant, page 6 / R8 source L", fill="#20272e", font=small)
+    draw.text((1190, 790), "Lockheed F-104 power plant, page 6", fill="#20272e", font=small)
     draw.text((30, 895), "Model: 30 mm cone undercut; no splitter plate or stand-off (owner).", fill="#20272e", font=small)
     section_image = Image.open(args.out / "inlet_section.png").convert("RGB")
     section_image.thumbnail((2140, 1070))

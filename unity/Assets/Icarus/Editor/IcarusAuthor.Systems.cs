@@ -31,7 +31,7 @@ namespace Icarus.Editor
             var belly = new[] { RootPart, "fuselage_forward", "fuselage_aft" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
                 .Min(n => b.Parts[n].GetComponent<MeshRenderer>().bounds.min.y);
 
-            // Radar on the radome's Revoker nose, bound to the radar tray, whose loss is the radar's (R13).
+            // Radar on the radome's Revoker nose, bound to the radar tray, whose loss disables the radar by design.
             var radar = b.Parts["radome"].GetComponent(GameType("Radar"));
             Set(radar, "part", b.Part("radar_tray"));
 

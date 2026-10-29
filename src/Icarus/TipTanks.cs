@@ -12,7 +12,7 @@ namespace Icarus;
 /// it and moves the same mass from the tank's hardpoint to the cells, so the jet burns the tank first and its weight
 /// follows the fuel; once the tanks run dry the internal fuel goes down. A release takes the full store mass off the wing
 /// (MountedMissile.RemoveFromHardpoint), and this gives back what had already moved, so the jet sheds the shell and the
-/// fuel left in it. This is the MiG-29 mods' ledger (.internal research R2); the internal cells stay stock.
+/// fuel left in it. This follows the MiG-29 mods' external-fuel ledger; the internal cells stay stock.
 ///
 /// The ledger runs where the aircraft is simulated (the owner: the player's own client, the host for AI), as the game's
 /// own fuel burn does. Nothing of it is sent over the network: the tanks' presence and their release are the game's

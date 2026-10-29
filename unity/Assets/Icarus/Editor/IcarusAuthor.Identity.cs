@@ -90,7 +90,7 @@ namespace Icarus.Editor
             }).ToArray();
         }
 
-        // The sized curves (.internal research R7, re-sized by R14 to a 4.0/rad wing slope): keys as (alpha, value, in
+        // Curves sized in an offline replica of the game's aero, with a 4.0/rad wing slope: keys as (alpha, value, in
         // tangent, out tangent).
         // The game's alpha is the airflow angle, negative for a nose-up body, so the wing's +0.12 camber lift sits at -0.12
         // on the curve at zero alpha.
@@ -148,7 +148,7 @@ namespace Icarus.Editor
             new AnimationCurve(keys.Select(k => new Keyframe(k[0], k[1], k[2], k[3])).ToArray()) { preWrapMode = WrapMode.ClampForever, postWrapMode = WrapMode.ClampForever };
 
         // AI numbers. The landing AI flies landingSpeed x sqrt(mass / maxWeight) (AIPilotLandingState.cs:96), so the
-        // field is the speed at MaxWeight that gives R7's 75 m/s approach at 20% fuel (LowFuelLandingMass).
+        // field is the speed at MaxWeight that gives the target 75 m/s approach at 20% fuel (LowFuelLandingMass).
         private const float MaxWeight = EmptyMass + FuelMass + 2000f; // 2 t of stores
         private const float LowFuelLandingMass = EmptyMass + 0.2f * FuelMass;
         private const float ApproachAtLowFuel = 75f;
@@ -204,11 +204,11 @@ namespace Icarus.Editor
             // The Icarus's copy of the Revoker's HUD extras (IcarusAuthor.Hud.cs): its overspeed warning at the Icarus's speeds.
             Prop(so, "HUDExtras").objectReferenceValue = hudExtras;
 
-            // First-cut AI numbers (R4/R7): an interceptor that bleeds energy in turns and lands fast.
+            // First-cut AI design: an interceptor that bleeds energy in turns and lands fast.
             Num(so, "aircraftGLimit", 7.33f); // the F-104's limit
             Num(so, "maxSpeed", 800f);
             // The takeoff AI rotates at 0.7 of this and gains about 30 m/s in the rotation on afterburner: 75 lifts off at
-            // 90 to 94 m/s, inside R7's band; below about 70 m/s the stabilator cannot raise the nose.
+            // 90 to 94 m/s, near the full-fuel approach prediction; below about 70 m/s the stabilator cannot raise the nose.
             Num(so, "takeoffSpeed", 75f);
             Num(so, "takeoffDistance", 1500f);
             Num(so, "turningRadius", 2500f);
@@ -216,7 +216,7 @@ namespace Icarus.Editor
             Num(so, "approachSpeed", 85f);
             Num(so, "landingSpeed", LandingSpeedField);
             Num(so, "shortLandingSpeed", ApproachAtLowFuel);
-            // Full dry: throttleRemap ends at 0.88 and the afterburner starts at 0.9 (R7).
+            // Full dry by design: throttleRemap ends at 0.88 and the afterburner starts at 0.9.
             Num(so, "cruiseThrottle", 0.85f);
             // Tier 2, the owner's call: unlocked a rank before the Revoker it is built on, beside the Brawler.
             Prop(so, "rankRequired").intValue = 2;
@@ -248,7 +248,7 @@ namespace Icarus.Editor
             var info = Prop(so, "aircraftInfo");
             Num(info.FindPropertyRelative("emptyWeight"), EmptyMass);
             Num(info.FindPropertyRelative("maxWeight"), MaxWeight);
-            Num(info.FindPropertyRelative("maxSpeed"), 2750f); // km/h: R7's Mach 2.58 at 10 km
+            Num(info.FindPropertyRelative("maxSpeed"), 2750f); // km/h: offline model's Mach 2.58 at 10 km
             Num(info.FindPropertyRelative("stallSpeed"), 230f); // km/h
             Num(info.FindPropertyRelative("maneuverability"), 6f);
             // length, width, height, spawnOffset and restRotation come from the authored prefab (SetRestPose).

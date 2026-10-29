@@ -23,7 +23,7 @@ namespace Icarus.Editor
             public int FormationState;
         }
 
-        // Revoker parts the Icarus parts take their armour from (R13: "use Revoker armor classes").
+        // Revoker parts the Icarus parts take their armour from, reusing stock armour classes.
         private static readonly string[] ArmourSources =
         {
             "", "fuselage", "tail", "fuselage/cockpit", "fuselage/cockpit/nose", "fuselage/cockpit/cheek_L", "fuselage/intake_L",
@@ -132,7 +132,7 @@ namespace Icarus.Editor
             b.Report.Add($"control sense from the Revoker: pitch {capture.PitchSense:+0;-0}, roll {capture.RollSense:+0;-0}, yaw {capture.YawSense:+0;-0} (torque sign about X, Z, Y per +1 input)");
         }
 
-        // R5's strip: keeps the Revoker's systems and deletes its airframe, canards, cannon, internal bays and doors,
+        // Keeps the Revoker's systems and deletes its airframe, canards, cannon, internal bays and doors,
         // canopy rig and gear doors, rescuing what the Icarus keeps from inside them first. Reused GameObjects (the root,
         // fuselage, cockpit, nose and tail, which carry the systems) become Icarus parts in BuildParts.
         private static void StripDonor(Build b)

@@ -37,7 +37,7 @@ namespace Icarus.Editor
 
         public const string JsonKey = "baanish_icarus";
         private const string RootPart = "fuselage_mid";
-        // .internal research R7: the first-cut empty mass, which the export's mass_kg props must add up to, and the
+        // First-cut empty mass sized below the F-104G's 6,348 kg, which the export's mass_kg props must add up to, and the
         // internal fuel the fuel_kg props must: what the cells hold round the gear wells and the Y-duct (internals.py
         // design_fuel_kg).
         private const float EmptyMass = 5800f, FuelMass = 3082f;
@@ -140,7 +140,7 @@ namespace Icarus.Editor
                     };
                 }
                 if (!result.Parts.ContainsKey(RootPart))
-                    throw new InvalidDataException($"The blockout has no {RootPart}, the root part; the export isn't on the R13 part tree yet.");
+                    throw new InvalidDataException($"The blockout has no {RootPart}, the root part; the export isn't on the designed part tree yet.");
                 result.Origin = result.Parts[RootPart].Pivot;
                 return result;
             }
@@ -379,7 +379,7 @@ namespace Icarus.Editor
             public readonly List<string> Report = new List<string>();
             public DonorCapture Donor;
             public Vector3 Size; // span, height on the gear at rest, length of the Icarus meshes
-            public readonly List<PartSpec> Specs = new List<PartSpec>(); // R13's tree, then any extra fuel cells
+            public readonly List<PartSpec> Specs = new List<PartSpec>(); // base tree, then any extra fuel cells
             public readonly Dictionary<string, float> Mass = new Dictionary<string, float>(); // dry kg per part
             public readonly List<string> Tanks = new List<string>();
 

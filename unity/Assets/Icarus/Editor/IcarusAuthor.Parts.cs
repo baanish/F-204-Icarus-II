@@ -70,7 +70,7 @@ namespace Icarus.Editor
         private static PartSpec P(string name, string parent, JointClass joint, string armour, string reuse = null) =>
             new PartSpec { Name = name, Parent = parent, Joint = joint, Armour = armour, Reuse = reuse };
 
-        // R13's "Suggested decision" tree, with the stabilator as one all-moving piece; parents before children. Armour is the
+        // Designed damage tree, with the stabilator as one all-moving piece; parents before children. Armour is the
         // Revoker part whose armour class the part takes. Reuse is the Revoker GameObject that becomes the part, carrying
         // its systems: the root holds the aircraft, engine and countermeasures, the fuselage its vapour cone, the cockpit
         // the weapon manager, fly-by-wire, autopilot, crew and displays, the nose the radar and cameras, the tail the
@@ -145,8 +145,8 @@ namespace Icarus.Editor
         };
 
         private static readonly string[] R13Tanks = { "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R", "fuel_aux" };
-        // Fuel cells the export adds beyond R13 carry no dry mass of their own ("their dry mass is in their hosts"); each
-        // still becomes its own part, so its one collider and same-object FuelTank are hit on their own (R13), and takes
+        // Fuel cells the export adds beyond the base tree carry no dry mass of their own; their dry mass is in their hosts. Each
+        // still becomes its own part, so its one collider and same-object FuelTank are hit on their own, and takes
         // this much from its host, since a part needs mass.
         private const float CellMass = 5f;
 
@@ -208,12 +208,12 @@ namespace Icarus.Editor
             }
             foreach (var brace in Braces)
                 b.Joints[brace.Owner].Add(brace.To);
-            b.Report.Add($"parts: {b.Specs.Count} AeroParts ({Tree.Length} on the R13 tree), {b.Mass.Values.Sum():0} kg dry, " +
+            b.Report.Add($"parts: {b.Specs.Count} AeroParts ({Tree.Length} on the base tree), {b.Mass.Values.Sum():0} kg dry, " +
                 $"tanks {string.Join(", ", b.Tanks.Select(t => t + " " + b.Blockout.Parts[t].Number("fuel_kg")))}");
         }
 
-        // The export must hold every R13 part, each under its R13 parent through its Blender parents; the only other parts
-        // it may add are fuel cells. Plans the part list (R13's, then the extra cells under their hosts) and dry masses.
+        // The export must hold every base part, each under its designed parent through its Blender parents; the only other parts
+        // it may add are fuel cells. Plans the part list (base tree, then the extra cells under their hosts) and dry masses.
         private static void PlanParts(Build b)
         {
             var problems = new List<string>();
@@ -228,7 +228,7 @@ namespace Icarus.Editor
                     host = b.Blockout.Parts[host].BlenderParent;
                 if (host == null || cell.Fbx == null)
                 {
-                    problems.Add($"fuel cell {cell.Name} has no mesh or no R13 host");
+                    problems.Add($"fuel cell {cell.Name} has no mesh or no base-tree host");
                     continue;
                 }
                 b.Specs.Add(P(cell.Name, host, JointClass.Primary, "wing1b_L"));
@@ -254,7 +254,7 @@ namespace Icarus.Editor
                 while (parent != null && !names.Contains(parent))
                     parent = b.Blockout.Parts[parent].BlenderParent;
                 if (parent != spec.Parent)
-                    problems.Add($"{spec.Name} hangs under {parent ?? "nothing"} in the export, under {spec.Parent ?? "nothing"} in R13");
+                    problems.Add($"{spec.Name} hangs under {parent ?? "nothing"} in the export, under {spec.Parent ?? "nothing"} in the designed tree");
                 if (MeshEntry(b.Blockout, spec.Name).Number("mass_kg") <= 0)
                     problems.Add(spec.Name + " has no mass_kg");
             }
@@ -262,21 +262,21 @@ namespace Icarus.Editor
             var planned = new HashSet<string>(b.Specs.Select(s => s.Name));
             foreach (var part in b.Blockout.Parts.Values.Where(p => p.Number("mass_kg") > 0 && !planned.Contains(p.Name)
                          && !(p.Name.EndsWith("_visible", StringComparison.Ordinal) && names.Contains(p.Name.Substring(0, p.Name.Length - 8)))))
-                problems.Add($"{part.Name} carries {part.Number("mass_kg")} kg but isn't an R13 part or a fuel cell");
+                problems.Add($"{part.Name} carries {part.Number("mass_kg")} kg but isn't a base-tree part or a fuel cell");
             var dry = b.Mass.Values.Sum();
             if (Mathf.Abs(dry - EmptyMass) > 1f)
-                problems.Add($"the parts' mass_kg add up to {dry}, not R7's {EmptyMass}");
+                problems.Add($"the parts' mass_kg add up to {dry}, not the designed {EmptyMass}");
             if (b.Mass.Values.Any(m => m <= 0))
                 problems.Add("a part is left without mass: " + string.Join(", ", b.Mass.Where(m => m.Value <= 0).Select(m => m.Key)));
             var fuel = b.Tanks.Sum(t => b.Blockout.Parts[t].Number("fuel_kg"));
             if (Mathf.Abs(fuel - FuelMass) > 1f)
-                problems.Add($"the tanks' fuel_kg add up to {fuel}, not R7's {FuelMass}");
+                problems.Add($"the tanks' fuel_kg add up to {fuel}, not the design load {FuelMass}");
             foreach (var tank in R13Tanks)
                 if (!b.Tanks.Contains(tank) || b.Blockout.Parts[tank].Text("role") != "fuel_tank")
                     problems.Add(tank + " isn't a fuel_tank with fuel_kg");
             if (problems.Count > 0)
-                throw new InvalidDataException("R13 part tree check failed:\n  " + string.Join("\n  ", problems));
-            Debug.Log($"[Icarus] check R13 tree PASS: {Tree.Length} R13 parts and {b.Specs.Count - Tree.Length} extra fuel cells [{string.Join(", ", b.Specs.Skip(Tree.Length).Select(s => s.Name + " on " + s.Parent))}], {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
+                throw new InvalidDataException("Designed part tree check failed:\n  " + string.Join("\n  ", problems));
+            Debug.Log($"[Icarus] check base tree PASS: {Tree.Length} base parts and {b.Specs.Count - Tree.Length} extra fuel cells [{string.Join(", ", b.Specs.Skip(Tree.Length).Select(s => s.Name + " on " + s.Parent))}], {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
         }
 
         // The fuselage cores' hulls are frame shells carved round what they hold (art/blender/hulls.py), and Unity takes a
@@ -339,7 +339,7 @@ namespace Icarus.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        // Armour, thresholds and hit points from each part's Revoker armour class (R13); every part starts at 100 HP.
+        // Armour, thresholds and hit points from each part's Revoker armour class; every part starts at 100 HP by design.
         private static void AuthorDamage(Build b)
         {
             foreach (var spec in b.Specs)

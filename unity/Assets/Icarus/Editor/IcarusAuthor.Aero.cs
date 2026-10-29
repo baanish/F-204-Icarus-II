@@ -27,18 +27,18 @@ namespace Icarus.Editor
             var deg = b.Blockout.Parts[name].Number("deflection_deg");
             return deg > 0f ? deg : throw new InvalidDataException($"{name} has no deflection_deg in blockout.json");
         }
-        // Trailing-edge flaps as the Revoker's (R6): gear-independent, by speed, no added area, their own lift normal
-        // turning with them. Leading-edge flaps (R6 structure, R7 numbers): 1.25 m2 more area a side below 100 m/s, gone
-        // above 160, on a lift normal that doesn't droop, so the device adds area as R7's replica sized it.
+        // Trailing-edge flaps as the Revoker's: gear-independent, by speed, no added area, their own lift normal
+        // turning with them. Leading-edge flaps use stock devices, sized to add 1.25 m2 a side below 100 m/s, gone
+        // above 160, on a lift normal that doesn't droop, as sized in an offline replica of the game's aero.
         private const float FlapSpeedDeployed = 90f, FlapSpeedRetracted = 150f;
         private const float LefSpeedDeployed = 100f, LefSpeedRetracted = 160f, LefAddedArea = 1.25f;
 
-        // R14's areas: 20.8079 m2 of main wing, the gross planform with the root chord carried to the centreline (both sides,
-        // surfaces included), 3.0 of horizontal tail (R7's, not the drawn 4.43), 2.0 of body; the fin carries the
+        // Geometry-sized areas: 20.8079 m2 of main wing, gross planform with the root chord carried to the centreline (both sides,
+        // surfaces included), 3.0 of horizontal tail and 2.0 of body by design; the fin carries the
         // generator's pinned side area (parts.FIN_LIFT_AREA) and the rudder its drawn one.
         private const float WingArea = 20.8079f, TailArea = 3.0f, BodyArea = 2.0f;
-        // Aggregate clean dragArea, shared over the parts that meet the air in R14's proportions. R14 modelled 0.55; in
-        // game that left the jet 4% short of Mach 2.46 at 10 km, and 0.47 holds R14's level speeds at 10 and 15 km.
+        // Aggregate clean dragArea, shared over exposed parts in the offline model's proportions. It modelled 0.55; in
+        // game that left the jet 4% short of Mach 2.46 at 10 km, and 0.47 holds the model's level speeds at 10 and 15 km.
         private const float DragAreaR14 = 0.55f, DragAreaTotal = 0.47f;
         private static readonly Dictionary<string, float> DragAreas = new Dictionary<string, float>
         {
@@ -55,7 +55,7 @@ namespace Icarus.Editor
         private static string[] BoxSkins(Build b, string box, string side) =>
             FamilyParts(b, "wing_skin_" + side).Where(n => b.Specs.Single(s => s.Name == n).Parent == box).ToArray();
 
-        // R14: each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, for a
+        // Each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, sized for a
         // 5% MAC static margin empty and 8.7% at 20% fuel (its neutral point 9.326 m, MAC 3.491 m).
         private const float SparForceStation = 7.83455f;
         private const float WingMac = 3.4911f;
@@ -102,7 +102,7 @@ namespace Icarus.Editor
                     Prop(so, "speedDeployed").floatValue = flap ? FlapSpeedDeployed : LefSpeedDeployed;
                     Prop(so, "speedRetracted").floatValue = flap ? FlapSpeedRetracted : LefSpeedRetracted;
                     Prop(so, "alphaMin").floatValue = 0f;
-                    Prop(so, "alphaFactor").floatValue = 0f; // R7's replica schedules by speed alone
+                    Prop(so, "alphaFactor").floatValue = 0f; // speed-only deployment by design
                     Prop(so, "deployedArea").floatValue = flap ? 0f : LefAddedArea;
                     var moving = Prop(so, "movingParts");
                     moving.arraySize = 1;
@@ -285,7 +285,7 @@ namespace Icarus.Editor
                     aero[s] = (PlanformArea(b.Meshes[s + "_visible"].Render), WingAirfoil);
                 var spar = WingArea / 2 - surfaces.Sum(s => aero[s].Area);
                 if (spar <= 0)
-                    throw new InvalidDataException($"wing {side}: its surfaces' {surfaces.Sum(s => aero[s].Area):F2} m2 leave nothing of R7's {WingArea / 2} m2 for the spar");
+                    throw new InvalidDataException($"wing {side}: its surfaces' {surfaces.Sum(s => aero[s].Area):F2} m2 leave nothing of the sized {WingArea / 2} m2 for the spar");
                 var planform = WingBoxes(b, side).ToDictionary(box => box, box => BoxSkins(b, box, side).Sum(n => PlanformArea(b.Meshes[n].Render)));
                 foreach (var box in planform.Keys)
                 {
@@ -332,7 +332,7 @@ namespace Icarus.Editor
         }
 
         // Each wing box carries its share of the wing's lift. Its frame follows its skin pieces' span (with the anhedral)
-        // at zero incidence; the force acts at R14's station, through centerOfLift, at the span of the box's own centre of
+        // at zero incidence; the force acts at the sized station, through centerOfLift, at the span of the box's own centre of
         // mass, since the game applies a part's lift there: the outer box's lift acts outboard of the inner's.
         private static void SetWingLift(Build b, string box, string side)
         {
@@ -369,7 +369,7 @@ namespace Icarus.Editor
             var force = GeneratorS0 - SparForceStation - b.Blockout.Origin.z;
             var centerOfLift = Quaternion.Inverse(lift.rotation) * new Vector3(0, 0, force - com.z);
             Set(part, "centerOfLift", centerOfLift);
-            b.Report.Add($"lift {spar.name}: measured quarter chord station {Station(b, quarter.z):F3} m (chord {le - te:F2} m at x {centroid.x:F2}); force at R14's station {SparForceStation} m, " +
+            b.Report.Add($"lift {spar.name}: measured quarter chord station {Station(b, quarter.z):F3} m (chord {le - te:F2} m at x {centroid.x:F2}); force at sized station {SparForceStation} m, " +
                 $"{Station(b, quarter.z) - SparForceStation:F3} m ahead of it and {force - com.z:+0.000;-0.000} m from the spar's centre of mass; dihedral {Mathf.Atan2(span.y, Mathf.Abs(span.x)) * Mathf.Rad2Deg:F1} deg");
         }
 
@@ -415,7 +415,7 @@ namespace Icarus.Editor
                 var so = new SerializedObject(part);
                 var lift = (Transform)so.FindProperty("liftNormal").objectReferenceValue ?? part.transform;
                 var com = (Transform)so.FindProperty("centerOfMass").objectReferenceValue ?? part.transform;
-                var slope = so.FindProperty("airfoil").intValue == BodyAirfoil ? 2.5f : 4.0f; // R14: wing and tail both 4.0/rad
+                var slope = so.FindProperty("airfoil").intValue == BodyAirfoil ? 2.5f : 4.0f; // wing and tail sized at 4.0/rad
                 var w = so.FindProperty("wingArea").floatValue * slope * lift.up.y * lift.up.y;
                 sum += w * (com.position + lift.rotation * so.FindProperty("centerOfLift").vector3Value).z;
                 weight += w;
