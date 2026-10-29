@@ -1,0 +1,50 @@
+// Breakup across two peers: a loopback host and client, each flying an Icarus (icarus_group.mission.json, the client in
+// Agentic_Peer2, 1 km to the host's right). A Boscali AAM2 is spawned 3 km behind the client's Icarus (a spawn is
+// placed from the host), then another behind the host's. Every peer logs each Icarus part that comes away
+// ("part-detached <UniqueName> <part>: id <id>", src/Icarus/PartContactLog.cs), by the id damage and break messages
+// address it by; the client-owned and the host-owned breakups must each show on both
+// peers, and the two logs must list the same parts and ids: after the run, python tools/detach_check.py peers <run>.
+// From the repo root: no-agentic run tests/scenarios/breakup_peers.scenario.jsonc
+{
+  "mission": "icarus_group.mission.json",
+  "peers": {
+    "host": {
+      "role": "host", "mods": "clean",
+      "plugins": [
+        "installed:com.nikkorap.blueprinter",
+        "../../.cache/build-staging/dotnet",
+        "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+      ],
+    },
+    "client": {
+      "role": "client", "mods": "clean",
+      "plugins": [
+        "installed:com.nikkorap.blueprinter",
+        "../../.cache/build-staging/dotnet",
+        "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+      ],
+    },
+  },
+  "timeout": 300,
+  "steps": [
+    { "require": { "path": "net.players", "eq": 2 }, "within": 60, "label": "host and client both in" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the host flies an Icarus" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "on": "client", "label": "the client flies an Icarus" },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 0, "throttle": 0.8 } },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 0, "throttle": 0.8 }, "on": "client" },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 35, "timeout": 40, "label": "35 s level; the join notices have gone" },
+    { "mark": { "label": "client_kill" } },
+    { "mark": { "label": "client_kill" }, "on": "client" },
+    { "spawn": { "kind": "missile", "type": "AAM2", "faction": "Boscali", "target": "Agentic_Peer2", "back_m": 3000, "left_m": -1000, "speed_mps": 600, "name": "m1" } },
+    { "wait": { "log": "part-detached Agentic_Peer2 ", "source": "F-204 Icarus II", "since": "client_kill" }, "on": "client", "timeout": 40,
+      "label": "the client's Icarus starts to come apart" },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 15, "timeout": 20, "label": "15 s of the client's breakup" },
+    { "check": { "log": "part-detached Agentic_Peer2 ", "source": "F-204 Icarus II", "since": "client_kill" }, "label": "the host sees the client's Icarus come apart" },
+    { "mark": { "label": "host_kill" } },
+    { "mark": { "label": "host_kill" }, "on": "client" },
+    { "spawn": { "kind": "missile", "type": "AAM2", "faction": "Boscali", "back_m": 3000, "left_m": 1500, "speed_mps": 600, "name": "m2" } },
+    { "wait": { "log": "part-detached Agentic_Own ", "source": "F-204 Icarus II", "since": "host_kill" }, "timeout": 40, "label": "the host's Icarus starts to come apart" },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 15, "timeout": 20, "label": "15 s of the host's breakup" },
+    { "check": { "log": "part-detached Agentic_Own ", "source": "F-204 Icarus II", "since": "host_kill" }, "on": "client", "label": "the client sees the host's Icarus come apart" },
+  ],
+}

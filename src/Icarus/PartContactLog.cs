@@ -5,8 +5,9 @@ namespace Icarus;
 
 /// <summary>
 /// Stage lines for what tears an Icarus apart: each collision an Icarus part takes (with the other collider's part, and
-/// "self" when that part is on the same aircraft) and each joint that breaks, with every joint's limits and load on that
-/// part. A part tree this deep only holds together while its parts don't collide with one another and its joints carry
+/// "self" when that part is on the same aircraft), each joint that breaks, with every joint's limits and load on that
+/// part, and each part that comes away, on every peer, by its aircraft's UniqueName and the id damage and break
+/// messages address it by, so two peers' logs can be checked for the same breakup. A part tree this deep only holds together while its parts don't collide with one another and its joints carry
 /// what the airframe does, so these name the pair or the joint when it doesn't.
 /// </summary>
 static class PartContactLog
@@ -19,6 +20,8 @@ static class PartContactLog
             prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeJointBreak))),
         new("part-contact-log", typeof(UnitPart), "TakeDamage",
             prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeTakeDamage))),
+        new("part-contact-log", typeof(UnitPart), nameof(UnitPart.Detach),
+            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeDetach))),
     };
 
     static bool IsIcarus(UnitPart part) =>
@@ -43,6 +46,12 @@ static class PartContactLog
         var caller = new System.Diagnostics.StackTrace(2, false).GetFrame(0)?.GetMethod();
         IcarusPlugin.Log.Stage($"damage {__instance.name}",
             $"pierce {pierceDamage:0.0}, blast {blastDamage:0.0}, fire {fireDamage:0.0}, impact {impactDamage:0.0}, hp {__instance.hitPoints:0}, from {caller?.DeclaringType?.Name}.{caller?.Name}");
+    }
+
+    static void BeforeDetach(UnitPart __instance)
+    {
+        if (!IcarusPlugin.Log.StageEnabled || IcarusPlugin.FeaturesOff.Contains("part-contact-log") || !IsIcarus(__instance)) return;
+        IcarusPlugin.Log.Stage($"part-detached {__instance.parentUnit.UniqueName} {__instance.name}", $"id {__instance.id}");
     }
 
     static void BeforeJointBreak(UnitPart __instance, float breakForce)

@@ -88,13 +88,14 @@ TRUSS = "fuselage_truss_"
 BUDGET = {
     "lod1": {"target": 814, "cap": 814, "collection": "LOD1"},
     # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
-    # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420).
-    "colliders": {"target": 5300, "cap": 5300, "collection": "Colliders"},
+    # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420), then every skin
+    # piece's own patches, the tail cone's and the truss's shells once the breakup split them (7,852 measured).
+    "colliders": {"target": 7852, "cap": 7852, "collection": "Colliders"},
 }
 CLOSEUPS = {}
-# The same three, 102 base hulls, 40 clearance cuts and 17 net for the section shells, and about 20 where the gear
-# doors' holes and the trough ramps' deep ends split the skin.
-COLLIDER_HULLS = 180
+# The same: 102 base hulls, 40 clearance cuts, 17 net for the section shells and about 20 where the gear doors' holes
+# and the trough ramps' deep ends split the skin, then the split's pieces and shells (266 measured).
+COLLIDER_HULLS = 266
 
 
 def check(icarus):
@@ -132,8 +133,11 @@ def check(icarus):
     if problems:
         raise ValueError("hulls check: LOD1 paint: " + "; ".join(problems))
     col_tris = sum(budget.tris(o) for o in cols)
+    if len(cols) > COLLIDER_HULLS or col_tris > BUDGET["colliders"]["cap"]:
+        raise ValueError("hulls check: colliders %d hulls, %d triangles, over %d or %d" % (
+            len(cols), col_tris, COLLIDER_HULLS, BUDGET["colliders"]["cap"]))
     print("hulls check PASS: LOD1 %d hulls, %d triangles, largest %d, %d skin faces (%d on a point of the atlas); "
-          "colliders %d hulls (provisional cap %d), %d triangles (provisional cap %d)"
+          "colliders %d hulls (cap %d), %d triangles (cap %d)"
           % (len(lods), sum(sizes), max(sizes), skin_faces, point_faces, len(cols), COLLIDER_HULLS, col_tris,
              BUDGET["colliders"]["cap"]))
 
