@@ -9,10 +9,10 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // First-cut engine design: a 65 kN core plus 45 kN of afterburner, maxSpeed raised past the stock 522 m/s cap, and its
+        // Engine design: a 90 kN core plus 45 kN of afterburner, maxSpeed raised past the stock 522 m/s cap, and its
         // fuel rates (kg per roughly one-second check).
-        private const float MaxThrust = 65000f, EngineMaxSpeed = 760f, MinDensity = 0.10f, FuelMin = 0.45f, FuelMax = 2.5f;
-        private const float AfterburnerThrust = 45000f, AfterburnerFuel = 5.5f, AfterburnerStart = 0.90f, AfterburnerEnd = 1.00f, AfterburnerSmoothing = 2f;
+        private const float MaxThrust = 90000f, EngineMaxSpeed = 760f, MinDensity = 0.10f, FuelMin = 0.45f, FuelMax = 2.5f;
+        private const float AfterburnerThrust = 45000f, AfterburnerFuel = 6.6f, AfterburnerStart = 0.90f, AfterburnerEnd = 1.00f, AfterburnerSmoothing = 2f;
         private static readonly Vector2 ThrottleRemap = new Vector2(0f, 0.88f);
         private const float MinRpm = 1000f, MaxRpm = 3000f, SpoolRate = 1500f, StartupRate = 200f;
         // Designed altitudeThrust keys (altitude, factor, in and out tangent): linear between 0, 10, 15 and 19 km.

@@ -10,9 +10,11 @@ namespace Icarus.Editor
     {
         // The balance the 5% MAC margin was tuned on, before the breakup split (BalanceFromBatch on that prefab): the
         // centre of mass in the root's frame, empty and with full internal fuel. Splitting a part keeps its family's first
-        // moment (art/blender/parts.py MOMENT_SPLITS, skin pieces by area), so the centres may move only by rounding.
+        // moment (art/blender/parts.py MOMENT_SPLITS, skin pieces by area), so the centres may move only by rounding. The
+        // 1,500 kg engine and the 215 kg radar that balances it keep the empty centre and move the full one 23 mm aft
+        // (about 20.8% MAC instead of 21.5%).
         private static readonly Vector3 PinnedEmptyCg = new Vector3(-0.00119854242f, 0.0266057253f, -0.7802818f),
-            PinnedFullCg = new Vector3(-0.0007295151f, 0.0538963675f, -0.235217616f);
+            PinnedFullCg = new Vector3(0.0001f, 0.0514f, -0.2583f);
         private const float BalanceTolerance = 0.01f;
         // Damage registrations: Unit.RegisterDamageable only appends and sends a part's index as a byte, so the list must
         // stay under 256 for the jet's life. The prefab's own damageables plus the one the default loadout's mounts add

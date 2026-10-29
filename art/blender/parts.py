@@ -4,7 +4,7 @@ Nuclear Option damages an aircraft part by part: each part is a separate body wi
 joint to its parent, and what a hit or a detachment reveals is whatever geometry lies under it. So the exterior skin is
 split into panels, each carried by the part under it as on stock jets (chunks.py), the spars and tanks they cover are
 parts of their own, and the Blender parent tree is the part tree the Unity author builds. Names, parents and dry masses follow the Full Fidelity
-plan in the project notes (5,800 kg dry), except that the stabilator is one all-moving piece where the plan has two
+plan in the project notes (6,300 kg dry with the 1,500 kg engine and 215 kg radar), except that the stabilator is one all-moving piece where the plan has two
 halves, so 40 parts where it has 41.
 
 Detail a package builds as its own object tagged merge_into = "<part>" joins that part's mesh (merge_details), so it
@@ -76,13 +76,13 @@ TREE = {
     "fuselage_forward": ("fuselage_mid", 500),
     "cockpit_cell": ("fuselage_forward", 480),
     "radome": ("cockpit_cell", 35),
-    "radar_tray": ("cockpit_cell", 65),
+    "radar_tray": ("cockpit_cell", 215),  # an interceptor radar, which balances the 1,500 kg engine
     "avionics_tray": ("fuselage_forward", 100),
     "canopy": ("cockpit_cell", 60),
     "fuselage_aft": ("fuselage_mid", 400),
     "fuselage_tail": ("fuselage_aft", 0),  # its share of fuselage_aft's 400 (MOMENT_SPLITS)
-    "engine_core": ("fuselage_aft", 1150),
-    "engine_afterburner": ("engine_core", 0),  # its share of engine_core's 1,150
+    "engine_core": ("fuselage_aft", 1500),
+    "engine_afterburner": ("engine_core", 0),  # its share of engine_core's 1,500
     "nozzle": ("engine_core", 130),  # the afterburner's in a split build (LATE_PARENTS)
     "intake_duct_L": ("fuselage_mid", 100),
     "intake_duct_R": ("fuselage_mid", 100),

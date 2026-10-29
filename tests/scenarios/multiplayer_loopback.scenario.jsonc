@@ -1,9 +1,9 @@
 // Multiplayer loopback: a host and a client on this PC, each flying an Icarus, both seeded with a tuning file that would cut
 // core thrust to 30 kN. With a remote peer connected every knob reads its shipped value (src/Icarus/Tuning.cs RefreshLock), so
-// both fly the shipped 65 kN core plus 45 kN afterburner (110 kN advertised), not the seeded 75 kN. The lock and its first
+// both fly the shipped 90 kN core plus 45 kN afterburner (135 kN advertised), not the seeded 75 kN. The lock and its first
 // readback are logged as the client joins, before any step can place a mark, so the run tests the lock live instead: a config
 // step on each peer moves MaxThrust to 31 kN mid-session, and neither peer may apply it or unlock.
-// Pass: both peers in; on each, the Icarus intact 5 s in, max thrust 110 kN before and for 5 s after the config change, no
+// Pass: both peers in; on each, the Icarus intact 5 s in, max thrust 135 kN before and for 5 s after the config change, no
 // "tuning: applied" and no "no remote peer" line since the change, and after 30 s of the same hold (3,000 m, heading 000,
 // throttle 1) alive and within 150 m of 3,000 m. Each peer's TAS after the hold is recorded; the two agree within 5% when both
 // fly shipped values (they start at the same 220 m/s). The lock line and the "locked to shipped" hash are in each peer's
@@ -45,22 +45,22 @@
     { "check": { "all": [ { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "start" } } ] }, "on": "client",
       "label": "the client's airframe is intact" },
     { "require": { "path": "own.hp_frac", "eq": 1 }, "on": "client", "label": "gate: the steps after need an intact airframe" },
-    { "check": { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 }, "label": "the host flies 110 kN, not the seeded 75 kN" },
-    { "check": { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 }, "on": "client", "label": "the client flies 110 kN, not the seeded 75 kN" },
+    { "check": { "path": "own.engines.0.max_thrust_n", "near": 135000, "tol": 500 }, "label": "the host flies 135 kN, not the seeded 75 kN" },
+    { "check": { "path": "own.engines.0.max_thrust_n", "near": 135000, "tol": 500 }, "on": "client", "label": "the client flies 135 kN, not the seeded 75 kN" },
 
     // The knob moves while connected; both stay on shipped values.
     { "mark": { "label": "retune" } },
     { "mark": { "label": "retune" }, "on": "client" },
     { "config": { "guid": "baanish.icarus", "section": "Tuning.Engine", "key": "MaxThrust", "value": 31000 } },
     { "config": { "guid": "baanish.icarus", "section": "Tuning.Engine", "key": "MaxThrust", "value": 31000 }, "on": "client" },
-    { "check": { "all": [ { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 },
+    { "check": { "all": [ { "path": "own.engines.0.max_thrust_n", "near": 135000, "tol": 500 },
                           { "not": { "log": "tuning: applied on ", "source": "F-204 Icarus II", "since": "retune" } },
                           { "not": { "log": "tuning: no remote peer", "source": "F-204 Icarus II", "since": "retune" } } ] },
-      "for": 5, "label": "the host ignores the retune: 110 kN, nothing applied, still locked" },
-    { "check": { "all": [ { "path": "own.engines.0.max_thrust_n", "near": 110000, "tol": 500 },
+      "for": 5, "label": "the host ignores the retune: 135 kN, nothing applied, still locked" },
+    { "check": { "all": [ { "path": "own.engines.0.max_thrust_n", "near": 135000, "tol": 500 },
                           { "not": { "log": "tuning: applied on ", "source": "F-204 Icarus II", "since": "retune" } },
                           { "not": { "log": "tuning: no remote peer", "source": "F-204 Icarus II", "since": "retune" } } ] }, "on": "client",
-      "for": 5, "label": "the client ignores the retune: 110 kN, nothing applied, still locked" },
+      "for": 5, "label": "the client ignores the retune: 135 kN, nothing applied, still locked" },
 
     { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 0, "throttle": 1 } },
     { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 0, "throttle": 1 }, "on": "client" },

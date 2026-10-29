@@ -307,7 +307,7 @@ namespace Icarus.Editor
         private static readonly float[] TipStores = { 70f, 570f };
 
         // The engine, afterburner and nozzle are meshes of fuselage_aft, which takes the thrust (JetNozzle on fuselage_aft,
-        // as the Revoker's sits on its tail part): under full afterburner (65 kN core and 45 afterburner), vectored to its 4
+        // as the Revoker's sits on its tail part): under full afterburner (90 kN core and 45 afterburner), vectored to its 4
         // degree limit, in a 9 g pull, fuselage_aft's own joint, the tail cone's and the root braces of the tail cone and fin
         // carry at most NozzleLoadLimit of their break forces. Reported: the thrust line's turn (fuselage_aft against the
         // root), and the physical seams of the fixed shroud (the nozzle's mesh) against the tail cone it ends in, whose skin
@@ -315,8 +315,8 @@ namespace Icarus.Editor
         private const float NozzleLoadLimit = 0.7f;
         private static readonly BenchCase[] NozzleCases =
         {
-            new BenchCase { Name = "9 g pull, full afterburner vectored 4 deg", G = 9f, Thrust = 110000f, VectorDeg = 4f, Seconds = 3f },
-            new BenchCase { Name = "1 g, full afterburner vectored 4 deg", G = 1f, Thrust = 110000f, VectorDeg = 4f, Seconds = 3f },
+            new BenchCase { Name = "9 g pull, full afterburner vectored 4 deg", G = 9f, Thrust = 135000f, VectorDeg = 4f, Seconds = 3f },
+            new BenchCase { Name = "1 g, full afterburner vectored 4 deg", G = 1f, Thrust = 135000f, VectorDeg = 4f, Seconds = 3f },
         };
 
         // The angle between two rotations, in degrees, exact for small turns (Quaternion.Angle reads 0 below about 0.16).

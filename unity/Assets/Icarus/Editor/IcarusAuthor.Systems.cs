@@ -14,6 +14,8 @@ namespace Icarus.Editor
         private const float RevokerBodyWidth = 2.5f;
         // TargetCam renders from 2 m out: its mounts sit 2.5 m clear of every mesh (Centurion's measured margin).
         private const float CameraClearance = 2.5f;
+        // Radar range in m, cone in degrees off the nose, power drawn from the capacitor per second (Revoker 40,000, 30, 2.5).
+        private const float RadarRange = 60000f, RadarCone = 20f, RadarPowerDraw = 5f;
 
         // art/blender/lights.py: one side's generated formation lenses and the skin part each rides on.
         private static (string Name, string Owner)[] FormationLenses(string side) =>
@@ -31,9 +33,14 @@ namespace Icarus.Editor
             var belly = new[] { RootPart, "fuselage_forward", "fuselage_aft" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
                 .Min(n => Placed(b, n).GetComponent<MeshRenderer>().bounds.min.y);
 
-            // Radar on the radome's Revoker nose, bound to the part the radar tray folds into, whose loss disables it.
+            // Radar on the radome's Revoker nose, bound to the part the radar tray folds into, whose loss disables it. An
+            // interceptor's radar, longer and narrower than any stock jet's (they reach 50 km at most, 30 or 60 degrees off
+            // the nose), drawing twice the Revoker's power; its 215 kg radar_tray balances the 1,500 kg engine (parts.py).
             var radar = b.Parts["radome"].GetComponent(GameType("Radar"));
             Set(radar, "part", b.Part(Host(b, "radar_tray")));
+            Set(radar, "RadarParameters.maxRange", RadarRange);
+            Set(radar, "radarCone", RadarCone);
+            Set(radar, "powerDraw", RadarPowerDraw);
 
             var targetCam = new SerializedObject(b.Parts["radome"].GetComponent(GameType("TargetCam")));
             var forward = (Transform)Prop(targetCam, "camMountForward").objectReferenceValue;
