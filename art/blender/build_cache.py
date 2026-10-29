@@ -15,6 +15,7 @@ import numpy as np
 
 import build_icarus as bi
 import cycles_device
+from cache_root import cache_root
 
 
 COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References", "Stores")
@@ -59,7 +60,7 @@ def load_or_build(repo=None, overrides=None, split=True):
     parameters = dict(bi.PARAMS, **(overrides or {}))
     fingerprint = dict(inputs(repo, parameters), split=split)
     key = hashlib.sha256(json.dumps(fingerprint, sort_keys=True).encode()).hexdigest()
-    folder = repo / ".cache/build-cache"
+    folder = cache_root(repo) / "build-cache"
     blend = folder / (key + ".blend")
     manifest = folder / (key + ".json")
     textures = repo / "art/export/textures"

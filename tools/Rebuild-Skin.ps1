@@ -21,6 +21,16 @@ function Invoke-SkinStep([string]$Executable, [string[]]$Arguments) {
 
 Push-Location $repoRoot
 try {
+    $skinCacheHit = $false
+    $skinFingerprint = Join-Path $repoRoot '.cache/skin-cache-inputs.json'
+    if ($Part -eq 'all') {
+        Invoke-SkinStep 'pwsh' @('-NoProfile', '-File', 'tools/Run-Blender.ps1', '--background', '--factory-startup',
+            '--python-exit-code', '1', '--python', 'art/blender/skin_cache_probe.py', '--', $skinFingerprint)
+        & python tools/skin_cache.py restore --geometry $skinFingerprint
+        if ($LASTEXITCODE -eq 0) { $skinCacheHit = $true }
+        elseif ($LASTEXITCODE -ne 3) { throw "Skin cache lookup failed with exit code $LASTEXITCODE" }
+    }
+    if (-not $skinCacheHit) {
     if ($Part -ne 'blender') {
         # The generated sources come from the release's texture-sources ZIP; this names the fetch command when absent.
         Invoke-SkinStep 'python' @('art/textures/texture_sources.py')
@@ -60,6 +70,10 @@ try {
     Invoke-SkinStep 'python' @('art/textures/compose_skin.py', 'measure')
     Invoke-SkinStep 'python' @('art/textures/full_skin_checks.py', 'measure')
     Invoke-SkinStep 'python' @('art/textures/bare_metal_checks.py', '--current-maps')
+    if ($Part -eq 'all') {
+        Invoke-SkinStep 'python' @('tools/skin_cache.py', 'publish', '--geometry', $skinFingerprint)
+    }
+    }
     if ($BuildPlugin) {
         Invoke-SkinStep 'dotnet' @('build', 'src/Icarus', '-c', 'Release', '-o', '.cache/build-staging/dotnet')
     }
