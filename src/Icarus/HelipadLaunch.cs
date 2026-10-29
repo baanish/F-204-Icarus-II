@@ -21,7 +21,8 @@ static class HelipadLaunch
         allow = config.Bind("Fun", "HelipadSpawn", false,
             "Lets you spawn the Icarus on helipads, standing on its tail with the gear up. Full afterburner launches it " +
             "straight up like a rocket. This is for the memes and obviously not balanced. Players only: the AI never " +
-            "spawns there. In multiplayer the host's setting decides.");
+            "spawns there. Don't use it in multiplayer: the host's setting decides who may spawn there, and a joining " +
+            "player's Icarus breaks apart on the pad as it spawns.");
 
     internal static readonly PatchTarget[] PatchTargets =
     {

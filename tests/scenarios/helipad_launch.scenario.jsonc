@@ -4,6 +4,7 @@
   "peers": {
     "host": {
       "role": "host", "mods": "clean",
+      "config": { "baanish.icarus": { "Fun": { "HelipadSpawn": true } } },
       "spawn_at": { "faction": "Primeva", "airbase": "South Boscali General Aviation", "aircraft": "baanish_icarus" },
       "plugins": [
         "installed:com.nikkorap.blueprinter",
@@ -13,6 +14,7 @@
     },
     "client": {
       "role": "client", "mods": "clean",
+      "config": { "baanish.icarus": { "Fun": { "HelipadSpawn": true } } },
       "spawn_at": { "faction": "Primeva", "airbase": "South Boscali General Aviation", "aircraft": "baanish_icarus" },
       "plugins": [
         "installed:com.nikkorap.blueprinter",

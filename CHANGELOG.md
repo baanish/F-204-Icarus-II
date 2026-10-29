@@ -23,7 +23,7 @@
 - The tip tanks hang from the Wingtip station beside the MMR-S3 and IRM-S2, so the loadout menu has one wingtip slot instead of two, and they release outboard from either tip. Mission files that still list a fourth Icarus loadout entry lose their tip tanks.
 - Dropping the tip tanks once they are nearly empty no longer tears the jet apart.
 - A tip tank lost with its wing no longer keeps feeding its fuel into the jet, and the other tank can still be dropped.
-- New setting, off by default: Fun > HelipadSpawn lets players spawn the Icarus on helipads, standing on its tail with the gear up, and full afterburner launches it straight up. It is for the memes and not balanced. The AI never spawns there.
+- New setting, off by default: Fun > HelipadSpawn lets players spawn the Icarus on helipads, standing on its tail with the gear up, and full afterburner launches it straight up. It is for the memes and not balanced. The AI never spawns there. Don't use it in multiplayer: a joining player's Icarus breaks apart on the pad as it spawns.
 
 ## 0.1.0 (2026-10-27)
 

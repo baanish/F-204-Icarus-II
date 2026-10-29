@@ -75,6 +75,7 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 - The flaps, nozzle and canopy move silently. Only the engine, gear and belly scrape have new sounds; the rest keep the stock or donor sounds.
 - Small visual gaps remain: a notch shows behind the stabilator at full travel, and a sliver of gear-bay interior can show with the doors open.
 - The damage model takes the stock Revoker's armour and still needs balancing in play.
+- The Fun > HelipadSpawn setting is single player only: in multiplayer a joining player's Icarus breaks apart on the pad as it spawns.
 - The stock-mission supply loads, but nobody has yet checked mission by mission that Primeva's AI fields and builds the Icarus.
 
 ## Credits
