@@ -14,7 +14,7 @@ the best.
 
     python -I tools/gear_fold_solve.py --pivot 9.85,0.20,-0.28 --wheel 9.84,1.24,-0.95 --stow 0.335,-0.085 --fold 109.5
     python -I tools/gear_fold_solve.py --pivot 10.47,0.30,-0.20 --wheel 9.84,1.24,-0.95 --stow 0.335,-0.055 \\
-        --bundle build/icarus_0.1.0.nobp --scan
+        --bundle build/icarus_0.2.0.nobp --scan
 """
 import argparse
 import math
