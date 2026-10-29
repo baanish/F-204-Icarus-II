@@ -43,7 +43,7 @@ namespace Icarus.Editor
             {
                 var names = family.ToArray();
                 Bounds Hulls(IEnumerable<string> parts) =>
-                    BoundsOf(parts.SelectMany(n => b.Parts[n].GetComponents<MeshCollider>()).SelectMany(c => Corners(c.bounds)).Select(root.InverseTransformPoint));
+                    BoundsOf(parts.Select(n => PreCarveBox(b, n, "mass_box_world")).SelectMany(box => Corners(box)).Select(root.InverseTransformPoint));
                 var centre = Hulls(names).center;
                 var bounds = names.Select(n => Hulls(new[] { n })).ToArray();
                 var mass = names.Select(n => b.Mass[n]).ToArray();
@@ -138,7 +138,7 @@ namespace Icarus.Editor
             foreach (var n in families.SelectMany(f => f))
             {
                 var marker = ((Transform)GetRef(b.Part(n), "centerOfMass")).position;
-                var hulls = BoundsOf(b.Parts[n].GetComponents<MeshCollider>().SelectMany(c => Corners(c.bounds)));
+                var hulls = PreCarveBox(b, n, "mass_box_world");
                 hulls.Expand(1e-4f);
                 if (!hulls.Contains(marker)) p.Add($"{n}: its centre-of-mass marker lies outside its hulls' bounds");
             }

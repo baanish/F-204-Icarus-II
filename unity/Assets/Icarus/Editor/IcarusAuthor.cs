@@ -402,6 +402,7 @@ namespace Icarus.Editor
                 b.Donor = CaptureDonor(b, templates);
                 StripDonor(b);
                 BuildParts(b);
+                PlaceSkins(b);
                 b.Report.Add("family moments: " + string.Join("; ", KeepFamilyMoments(b)));
                 BuildSurfaces(b);
                 SetAero(b);
@@ -574,12 +575,20 @@ namespace Icarus.Editor
                 ? string.Join("_", name.Split('_').Where(t => Array.IndexOf(PieceCodes, t) < 0))
                 : name;
 
-        // The parts of one skin family: its pieces, or the family itself where the export keeps it whole.
+        // The meshes of one skin family: its pieces, or the family itself where the export keeps it whole. A folded piece
+        // is a mesh on the part it hangs on (PlaceSkins), not a part.
         private static string[] FamilyParts(Build b, string family) =>
-            b.Specs.Select(s => s.Name).Where(n => SkinFamily(n) == family).OrderBy(n => n, StringComparer.Ordinal).ToArray();
+            b.Blockout.Parts.Values.Where(p => p.Fbx != null && SkinFamily(p.Name) == family && (b.Parts.ContainsKey(p.Name) || b.Visuals.ContainsKey(p.Name)))
+                .Select(p => p.Name).OrderBy(n => n, StringComparer.Ordinal).ToArray();
+
+        // Where a part's or a placed skin's mesh sits.
+        private static Transform Placed(Build b, string name) => b.Parts.TryGetValue(name, out var part) ? part.transform : b.Visuals[name];
+
+        // The part a mesh belongs to: itself, or the part a folded skin panel went into (art/blender/chunks.py).
+        private static string Host(Build b, string name) => b.Blockout.Parts[name].Text("folded_into") ?? name;
 
         private static Vector3[] FamilyVertices(Build b, string family) =>
-            FamilyParts(b, family).SelectMany(n => WorldVertices(b.Parts[n].transform, b.Meshes[n].Render)).ToArray();
+            FamilyParts(b, family).SelectMany(n => WorldVertices(Placed(b, n), b.Meshes[n].Render)).ToArray();
 
         // The area-weighted centroid of several parts' meshes, world space.
         private static Vector3 AreaCentroid(Build b, IEnumerable<string> parts)
@@ -589,7 +598,7 @@ namespace Icarus.Editor
             foreach (var n in parts)
             {
                 var a = PlanformArea(b.Meshes[n].Render);
-                sum += a * AreaCentroid(b.Parts[n].transform, b.Meshes[n].Render);
+                sum += a * AreaCentroid(Placed(b, n), b.Meshes[n].Render);
                 area += a;
             }
             return sum / area;
@@ -601,6 +610,22 @@ namespace Icarus.Editor
             var bounds = new Bounds(all[0], Vector3.zero);
             foreach (var p in all)
                 bounds.Encapsulate(p);
+            return bounds;
+        }
+
+        // A part's hull box as the export recorded it before clearance.carve cut its hulls apart from its neighbours'
+        // (art/blender/clearance.py mass_box), in world space: "mass_box_local" boxes each hull in the part's own frame
+        // and then their corners in world (ConfigurePart's rule), "mass_box_world" boxes their world points
+        // (KeepFamilyMoments' and A22's). The export gives both from the root part's origin, where the root sits. The
+        // centres of mass stay where the uncut hulls put them.
+        private static Bounds PreCarveBox(Build b, string part, string key)
+        {
+            if (!(MeshEntry(b.Blockout, part).Props.TryGetValue(key, out var value) && value is List<object> box && box.Count == 6))
+                throw new InvalidOperationException($"{part} has no {key} (min x y z, max x y z) in the export");
+            Vector3 World(int i) => b.Root.transform.TransformPoint(
+                new Vector3(-Convert.ToSingle(box[i]), Convert.ToSingle(box[i + 2]), -Convert.ToSingle(box[i + 1])));
+            var bounds = new Bounds(World(0), Vector3.zero);
+            bounds.Encapsulate(World(3));
             return bounds;
         }
 

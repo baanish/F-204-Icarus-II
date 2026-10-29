@@ -3,10 +3,10 @@ count, the static material list, and the sums of every module's BUDGET against t
 
 Each module in build_icarus.MODULES carries BUDGET = {component: {"target", "cap", "objects" or "collection",
 "exact", "family", "cockpit"}}: "objects" are object-name prefixes the component counts, "exact" whole object
-names, "family" skin families (parts.family: the family in a build that keeps it whole, its pieces in one that splits
-it), "collection" counts a whole collection (LOD1, Colliders), and "cockpit" puts it in the cockpit sum instead of the
-exterior one. Targets steer and caps are ceilings; a module enforces its own caps in its check() (over_caps). This
-report enforces nothing.
+names, "family" skin families (parts.families: the family in a build that keeps it whole, its pieces in one that
+splits it, and a part a piece was joined into), "collection" counts a whole collection (LOD1, Colliders), and
+"cockpit" puts it in the cockpit sum instead of the exterior one. Targets steer and caps are ceilings; a module enforces
+its own caps in its check() (over_caps). This report enforces nothing.
 
     print(report(bpy.data.collections["Icarus"]))   # build_icarus._build prints it after every build
 """
@@ -45,7 +45,7 @@ def is_cockpit(obj):
 def selected(icarus, item, key):
     """The objects one selector of a BUDGET item ("objects", "exact" or "family") picks among those measure counts:
     meshes, or for a reference_triangles item the objects carrying that property."""
-    from parts import family
+    from parts import families
 
     names = tuple(item.get(key, ()))
     if item.get("reference_triangles"):
@@ -55,7 +55,7 @@ def selected(icarus, item, key):
     else:
         pool = meshes(icarus)
     match = {"objects": lambda o: o.name.startswith(names), "exact": lambda o: o.name in names,
-             "family": lambda o: family(o.name) in names}[key]
+             "family": lambda o: bool(families(o) & set(names))}[key]
     return [o for o in pool if names and match(o)]
 
 

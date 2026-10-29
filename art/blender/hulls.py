@@ -20,10 +20,10 @@ one capped at COLLIDER_TRIS. Curved skin panels and the wing and fin skins get u
 where its hull sits deepest under the skin: one hull of a curved panel would be a solid block hiding the fuel cells
 and gear wells under it, and the LandingGear ground cast would meet it. Near the conformal stores every patch also
 keeps to one side of each stations.collider_splits() plane, which can take a panel past PATCHES. The structure cores
-carry SHELLS pieces of their frames round the body axis (shells()), and the intake ducts short chunks. A fuel cell
+carry SHELLS pieces of their section's shell round the body axis (shells()), and the intake ducts short chunks. A fuel cell
 keeps one hull even though its duct cut-out makes it concave: clearing the ducts takes a dozen pieces round each, and a
 round penetrates through successive colliders anyway, so a shot into the duct area may also reach the cell wrapped
-round it. The Icarus's own parts never collide with one another (src/Icarus/SelfCollision.cs), so hulls may overlap.
+round it. Hulls built here may overlap other parts'; clearance.carve() cuts them apart once every hull is made.
 """
 import math
 
@@ -75,7 +75,7 @@ BODY_AXIS_Z = 0.3  # height of the axis body patches split by angle around
 SPLIT_NEAR, SPLIT_SLACK = 0.05, 0.004
 DUCT_CHUNKS = 6
 STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail")
-# A core's frames as SHELLS pieces round its axis, each cut SHELL_GAP clear of the other parts' hulls: past A12's
+# A core's shell as SHELLS pieces round its axis, each cut SHELL_GAP clear of the other parts' hulls: past A12's
 # 0.005 m, so the Unity author braces no part to a shell. The parts jointed to the core may overlap it (no brace),
 # except the cockpit and the gear legs: A9's seat path and A8's ground casts run through them.
 SHELLS, SHELL_GAP = 8, 0.01
@@ -89,13 +89,16 @@ BUDGET = {
     "lod1": {"target": 814, "cap": 814, "collection": "LOD1"},
     # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
     # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420), then every skin
-    # piece's own patches, the tail cone's and the truss's shells once the breakup split them (7,852 measured).
-    "colliders": {"target": 7852, "cap": 7852, "collection": "Colliders"},
+    # piece's own patches, the tail cone's and the truss's shells once the breakup split them (7,852), then the fuel
+    # cells' solid slices and the clearance carve's cut faces, with the skin panels folded into their parts (chunks.py,
+    # clearance.py; 11,986 measured, the cap 2% over).
+    "colliders": {"target": 11986, "cap": 12230, "collection": "Colliders"},
 }
 CLOSEUPS = {}
 # The same: 102 base hulls, 40 clearance cuts, 17 net for the section shells and about 20 where the gear doors' holes
-# and the trough ramps' deep ends split the skin, then the split's pieces and shells (266 measured).
-COLLIDER_HULLS = 266
+# and the trough ramps' deep ends split the skin, then the split's pieces and shells (266), then the fuel cells' 8 by 2
+# solid slices (clearance.sectors; 337 measured, the cap 2% over).
+COLLIDER_HULLS = 344
 
 
 def check(icarus):
@@ -490,15 +493,17 @@ def jointed(core, owner):
     return part.parent == core or core.parent == part
 
 
-# Each structure core's frame points by shell sector, world space, as build() found them before open_bays cut the
-# render meshes: rebuild_pieces carves a core's shells again from these when the parts round it change.
+# Each structure core's shell points by sector, world space, as build() found them: rebuild_pieces carves a core's shells again from these when the parts round it change.
 SHELL_GROUPS = {}
 
 
 def shell_groups(owner):
     """A structure core's world vertices in SHELLS sectors round its axis (through its origin, along Blender y); a truss
     part's in the root's top two sectors, split at the centre line."""
-    world = [owner.matrix_world @ v.co for v in owner.data.vertices]
+    import parts
+
+    # from the skin's shape at the frame stations (parts.shell_points), as no frame is drawn
+    world = parts.SHELL_POINTS.get(owner.name) or [owner.matrix_world @ v.co for v in owner.data.vertices]
     groups = [[] for _ in range(SHELLS)]
     if owner.name.startswith(TRUSS):
         for w in world:
@@ -512,7 +517,7 @@ def shell_groups(owner):
 
 
 def shells(owner, others, groups=None):
-    """A structure core's frames as SHELLS pieces round its axis (shell_groups, or the groups given), each cut flat
+    """A structure core's shell as SHELLS pieces round its axis (shell_groups, or the groups given), each cut flat
     SHELL_GAP clear of every hull in others (separation() shapes), closest first, world space. A blast hits a part only
     where its trace toward the part's origin meets that part's own collider (DamageEffects.FragTrace), so the core
     needs hulls all round its axis, not a keel under it."""

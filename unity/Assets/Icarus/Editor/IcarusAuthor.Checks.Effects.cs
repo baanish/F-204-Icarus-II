@@ -26,14 +26,14 @@ namespace Icarus.Editor
             var lensTriangles = new Dictionary<string, (int Lens, int All)> { ["light_formation_"] = (32, 80), ["light_fin_"] = (8, 28) };
             foreach (var side in new[] { "L", "R" })
             {
-                var fairing = b.Parts[b.Blockout.Parts["light_nav_mount_" + side].BlenderParent].transform.Find("light_nav_mount_" + side);
+                var fairing = Placed(b, b.Blockout.Parts["light_nav_mount_" + side].BlenderParent).Find("light_nav_mount_" + side);
                 if (fairing == null || fairing.GetComponent<MeshRenderer>()?.sharedMaterial != b.Skin
                     || OneSidedCount(fairing) != 44)
                     p.Add("nav fairings must have 44 triangles per wing and share its livery material");
                 foreach (var (name, owner) in FormationLenses(side).Concat(NavLenses(side).Select(l => (l.Name, b.Blockout.Parts[l.Anchor].BlenderParent))))
                 {
                     var formation = !name.StartsWith("navlight_", StringComparison.Ordinal);
-                    var parent = b.Parts[owner].transform;
+                    var parent = Placed(b, owner);
                     var lamp = parent.Find(name);
                     if (lamp == null) { p.Add(name + " is not on its skin part"); continue; }
                     var renderer = lamp.GetComponent<MeshRenderer>();
@@ -43,7 +43,7 @@ namespace Icarus.Editor
                         .Where(e => e.FindPropertyRelative("renderer").objectReferenceValue == renderer).ToArray();
                     if (entries.Length != 1) { p.Add($"{name} has {entries.Length} nav entries"); continue; }
                     var entry = entries[0];
-                    if (entry.FindPropertyRelative("part").objectReferenceValue != b.Part(parent.name))
+                    if (entry.FindPropertyRelative("part").objectReferenceValue != b.Part(Host(b, owner)))
                         p.Add(name + " is bound to the wrong part");
                     var triangles = mesh.triangles.Length / 3;
                     if (formation)
@@ -103,7 +103,7 @@ namespace Icarus.Editor
                 {
                     var entry = entries[0];
                     var wing = NavLightEntry(new SerializedObject(b.Root.GetComponent(GameType("NavLights"))),
-                        b.Parts[b.Blockout.Parts["light_nav_L"].BlenderParent].transform.Find("navlight_L").GetComponent<Renderer>());
+                        Placed(b, b.Blockout.Parts["light_nav_L"].BlenderParent).Find("navlight_L").GetComponent<Renderer>());
                     if (entry.FindPropertyRelative("part").objectReferenceValue != b.Part("stabilator")
                         || entry.FindPropertyRelative("gear").objectReferenceValue != null
                         || entry.FindPropertyRelative("controlState").intValue != wing.FindPropertyRelative("controlState").intValue

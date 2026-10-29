@@ -307,8 +307,7 @@ sealed class TipTanks : MonoBehaviour
 
     static void DressStore(AeroPart[] parts, string side, Renderer? skin, Renderer? top, Renderer? bottom, MaterialPropertyBlock block)
     {
-        // The wing skin parts that carry the lenses (the outer upper and lower pieces of a split wing skin), under the
-        // transform WingSkinFollow draws them with.
+        // The wing skin meshes that carry the lenses (the outer upper and lower pieces of the wing skin), on the outer box.
         Transform? Lens(string name) => parts.Where(p => p != null).SelectMany(p => p.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == name);
         Transform? upperLens = Lens("navlight_" + side);
         AeroPart? wing = upperLens == null ? null : upperLens.GetComponentInParent<AeroPart>();
@@ -317,8 +316,8 @@ sealed class TipTanks : MonoBehaviour
         Renderer? lower = Lens("navlight_lower_" + side)?.GetComponent<Renderer>();
         if (top != null && upper != null) top.sharedMaterial = upper.sharedMaterial;
         if (bottom != null && lower != null) bottom.sharedMaterial = lower.sharedMaterial;
-        // the skin's own mesh, which WingSkinFollow moves off the part's transform onto a child of its own
-        Material? livery = (wing.GetComponent<Renderer>() ?? wing.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.name == wing.name + "_mesh"))?.sharedMaterial;
+        // the skin mesh the lens sits on
+        Material? livery = upperLens.parent != null ? upperLens.parent.GetComponent<Renderer>()?.sharedMaterial : null;
         if (skin == null || livery == null) return;
         skin.GetPropertyBlock(block);
         if (livery.HasProperty(LiveryId) && livery.GetTexture(LiveryId) is Texture paint) block.SetTexture(LiveryId, paint);

@@ -91,7 +91,7 @@ namespace Icarus.Editor
             Physics.SyncTransforms();
             var colliders = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null))
                 .Select(c => (collider: c, part: (Object)c.GetComponentInParent(aeroType, true))).ToArray();
-            var overlaps = 0;
+            var overlaps = new List<string>();
             for (var i = 0; i < colliders.Length; i++)
                 for (var j = i + 1; j < colliders.Length; j++)
                 {
@@ -99,12 +99,12 @@ namespace Icarus.Editor
                     var (c, pc) = colliders[j];
                     if (pa == pc || linked.Contains((pa, pc)) || !a.bounds.Intersects(c.bounds))
                         continue;
-                    // Counted, not failed: the plugin has the Icarus's parts ignore one another's colliders (SelfCollision.cs).
+                    // Counted here; art/blender/clearance.py's check fails the export on any unjointed pair closer than its gap.
                     if (Physics.ComputePenetration(a, a.transform.position, a.transform.rotation, c, c.transform.position, c.transform.rotation, out _, out var depth) && depth > 0.005f)
-                        overlaps++;
+                        overlaps.Add($"{a.name} ({a.GetType().Name}) and {c.name} ({c.GetType().Name}) {depth * 1000:0} mm");
                 }
             return $"{parts.Length} AeroParts, {mass:0} kg, every part jointed to its parent and collidable, convex hulls, {colliders.Length} colliders " +
-                $"({pieces.Length} mesh hulls, {pieces.Sum(c => c.sharedMesh.triangles.Length / 3)} triangles) with {overlaps} unjointed overlaps, {dangling} dangling references, " +
+                $"({pieces.Length} mesh hulls, {pieces.Sum(c => c.sharedMesh.triangles.Length / 3)} triangles) with {overlaps.Count} unjointed overlaps{(overlaps.Count > 0 ? " (" + string.Join("; ", overlaps.Take(10)) + ")" : "")}, {dangling} dangling references, " +
                 $"LOD in {groups.Length} part groups, {hulls.Length} LOD1 hulls of {hulls.Sum(h => h.tris)} triangles (largest {hulls.Max(h => h.tris)})";
         }
     }

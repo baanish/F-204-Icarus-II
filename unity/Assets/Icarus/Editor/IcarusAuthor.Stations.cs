@@ -180,7 +180,7 @@ namespace Icarus.Editor
             // Heights at which the vertical line through (x, z) crosses a part's mesh.
             IEnumerable<float> Crossings(string part, float x, float z)
             {
-                var v = WorldVertices(b.Parts[part].transform, b.Meshes[part].Render);
+                var v = WorldVertices(Placed(b, part), b.Meshes[part].Render);
                 var triangles = b.Meshes[part].Render.triangles;
                 for (var k = 0; k < triangles.Length; k += 3)
                 {

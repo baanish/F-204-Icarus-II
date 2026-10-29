@@ -79,36 +79,6 @@
      198
     ]
    },
-   "dorsal_cover_front": {
-    "sprite": "Icarus_status_dorsal_cover_front.png",
-    "centre": [
-     0.0,
-     17.67
-    ],
-    "size": [
-     10.55,
-     48.52
-    ],
-    "px": [
-     492,
-     353
-    ]
-   },
-   "dorsal_cover_rear": {
-    "sprite": "Icarus_status_dorsal_cover_rear.png",
-    "centre": [
-     0.0,
-     -36.12
-    ],
-    "size": [
-     10.55,
-     63.28
-    ],
-    "px": [
-     492,
-     529
-    ]
-   },
    "engine_afterburner": {
     "sprite": "Icarus_status_engine_afterburner.png",
     "centre": [
@@ -278,15 +248,15 @@
     "sprite": "Icarus_status_fuselage_aft.png",
     "centre": [
      0.0,
-     -61.96
+     -61.7
     ],
     "size": [
-     27.42,
-     31.64
+     28.48,
+     33.75
     ],
     "px": [
-     460,
-     687
+     458,
+     682
     ]
    },
    "fuselage_forward": {
@@ -296,11 +266,11 @@
      63.02
     ],
     "size": [
-     18.98,
+     20.04,
      61.17
     ],
     "px": [
-     476,
+     474,
      157
     ]
    },
@@ -308,26 +278,26 @@
     "sprite": "Icarus_status_fuselage_mid.png",
     "centre": [
      0.0,
-     -7.91
+     -12.92
     ],
     "size": [
-     32.7,
-     78.05
+     33.75,
+     109.69
     ],
     "px": [
-     450,
-     394
+     448,
+     353
     ]
    },
    "fuselage_tail": {
     "sprite": "Icarus_status_fuselage_tail.png",
     "centre": [
      0.0,
-     -74.36
+     -76.99
     ],
     "size": [
      21.09,
-     61.17
+     66.45
     ],
     "px": [
      472,
@@ -529,246 +499,6 @@
      904
     ]
    },
-   "skin_aft_front_L": {
-    "sprite": "Icarus_status_skin_aft_front_L.png",
-    "centre": [
-     -6.86,
-     -61.17
-    ],
-    "size": [
-     14.77,
-     32.7
-    ],
-    "px": [
-     458,
-     682
-    ]
-   },
-   "skin_aft_front_R": {
-    "sprite": "Icarus_status_skin_aft_front_R.png",
-    "centre": [
-     6.86,
-     -61.17
-    ],
-    "size": [
-     14.77,
-     32.7
-    ],
-    "px": [
-     510,
-     682
-    ]
-   },
-   "skin_aft_rear_L": {
-    "sprite": "Icarus_status_skin_aft_rear_L.png",
-    "centre": [
-     -4.48,
-     -93.08
-    ],
-    "size": [
-     11.6,
-     34.8
-    ],
-    "px": [
-     473,
-     799
-    ]
-   },
-   "skin_aft_rear_R": {
-    "sprite": "Icarus_status_skin_aft_rear_R.png",
-    "centre": [
-     4.48,
-     -93.08
-    ],
-    "size": [
-     11.6,
-     34.8
-    ],
-    "px": [
-     507,
-     799
-    ]
-   },
-   "skin_forward_L": {
-    "sprite": "Icarus_status_skin_forward_L.png",
-    "centre": [
-     -4.22,
-     62.75
-    ],
-    "size": [
-     11.6,
-     61.17
-    ],
-    "px": [
-     474,
-     158
-    ]
-   },
-   "skin_forward_R": {
-    "sprite": "Icarus_status_skin_forward_R.png",
-    "centre": [
-     4.22,
-     62.75
-    ],
-    "size": [
-     11.6,
-     61.17
-    ],
-    "px": [
-     506,
-     158
-    ]
-   },
-   "skin_forward_belly_L": {
-    "sprite": "Icarus_status_skin_forward_belly_L.png",
-    "centre": [
-     -2.9,
-     62.75
-    ],
-    "size": [
-     8.44,
-     61.17
-    ],
-    "px": [
-     485,
-     158
-    ]
-   },
-   "skin_forward_belly_R": {
-    "sprite": "Icarus_status_skin_forward_belly_R.png",
-    "centre": [
-     2.9,
-     62.75
-    ],
-    "size": [
-     8.44,
-     61.17
-    ],
-    "px": [
-     507,
-     158
-    ]
-   },
-   "skin_mid_front_L": {
-    "sprite": "Icarus_status_skin_mid_front_L.png",
-    "centre": [
-     -9.76,
-     13.71
-    ],
-    "size": [
-     12.66,
-     40.08
-    ],
-    "px": [
-     451,
-     384
-    ]
-   },
-   "skin_mid_front_R": {
-    "sprite": "Icarus_status_skin_mid_front_R.png",
-    "centre": [
-     9.76,
-     13.71
-    ],
-    "size": [
-     12.66,
-     40.08
-    ],
-    "px": [
-     525,
-     384
-    ]
-   },
-   "skin_mid_front_belly_L": {
-    "sprite": "Icarus_status_skin_mid_front_belly_L.png",
-    "centre": [
-     -2.64,
-     13.71
-    ],
-    "size": [
-     8.44,
-     40.08
-    ],
-    "px": [
-     486,
-     384
-    ]
-   },
-   "skin_mid_front_belly_R": {
-    "sprite": "Icarus_status_skin_mid_front_belly_R.png",
-    "centre": [
-     3.16,
-     13.71
-    ],
-    "size": [
-     7.38,
-     40.08
-    ],
-    "px": [
-     510,
-     384
-    ]
-   },
-   "skin_mid_rear_L": {
-    "sprite": "Icarus_status_skin_mid_rear_L.png",
-    "centre": [
-     -9.76,
-     -25.58
-    ],
-    "size": [
-     13.71,
-     42.19
-    ],
-    "px": [
-     449,
-     529
-    ]
-   },
-   "skin_mid_rear_R": {
-    "sprite": "Icarus_status_skin_mid_rear_R.png",
-    "centre": [
-     9.76,
-     -25.58
-    ],
-    "size": [
-     13.71,
-     42.19
-    ],
-    "px": [
-     523,
-     529
-    ]
-   },
-   "skin_mid_rear_belly_L": {
-    "sprite": "Icarus_status_skin_mid_rear_belly_L.png",
-    "centre": [
-     -3.43,
-     -25.58
-    ],
-    "size": [
-     8.44,
-     42.19
-    ],
-    "px": [
-     483,
-     529
-    ]
-   },
-   "skin_mid_rear_belly_R": {
-    "sprite": "Icarus_status_skin_mid_rear_belly_R.png",
-    "centre": [
-     3.43,
-     -25.58
-    ],
-    "size": [
-     8.44,
-     42.19
-    ],
-    "px": [
-     509,
-     529
-    ]
-   },
    "stabilator": {
     "sprite": "Icarus_status_stabilator.png",
     "centre": [
@@ -784,184 +514,64 @@
      901
     ]
    },
-   "wing_skin_inner_lower_L": {
-    "sprite": "Icarus_status_wing_skin_inner_lower_L.png",
-    "centre": [
-     -18.72,
-     -25.05
-    ],
-    "size": [
-     22.15,
-     76.99
-    ],
-    "px": [
-     399,
-     461
-    ]
-   },
-   "wing_skin_inner_lower_R": {
-    "sprite": "Icarus_status_wing_skin_inner_lower_R.png",
-    "centre": [
-     18.72,
-     -25.05
-    ],
-    "size": [
-     22.15,
-     76.99
-    ],
-    "px": [
-     541,
-     461
-    ]
-   },
-   "wing_skin_inner_upper_L": {
-    "sprite": "Icarus_status_wing_skin_inner_upper_L.png",
-    "centre": [
-     -18.72,
-     -25.05
-    ],
-    "size": [
-     22.15,
-     76.99
-    ],
-    "px": [
-     399,
-     461
-    ]
-   },
-   "wing_skin_inner_upper_R": {
-    "sprite": "Icarus_status_wing_skin_inner_upper_R.png",
-    "centre": [
-     18.72,
-     -25.05
-    ],
-    "size": [
-     22.15,
-     76.99
-    ],
-    "px": [
-     541,
-     461
-    ]
-   },
-   "wing_skin_outer_lower_L": {
-    "sprite": "Icarus_status_wing_skin_outer_lower_L.png",
-    "centre": [
-     -39.55,
-     -45.35
-    ],
-    "size": [
-     23.2,
-     32.7
-    ],
-    "px": [
-     318,
-     622
-    ]
-   },
-   "wing_skin_outer_lower_R": {
-    "sprite": "Icarus_status_wing_skin_outer_lower_R.png",
-    "centre": [
-     39.55,
-     -45.35
-    ],
-    "size": [
-     23.2,
-     32.7
-    ],
-    "px": [
-     618,
-     622
-    ]
-   },
-   "wing_skin_outer_upper_L": {
-    "sprite": "Icarus_status_wing_skin_outer_upper_L.png",
-    "centre": [
-     -39.55,
-     -45.35
-    ],
-    "size": [
-     23.2,
-     32.7
-    ],
-    "px": [
-     318,
-     622
-    ]
-   },
-   "wing_skin_outer_upper_R": {
-    "sprite": "Icarus_status_wing_skin_outer_upper_R.png",
-    "centre": [
-     39.55,
-     -45.35
-    ],
-    "size": [
-     23.2,
-     32.7
-    ],
-    "px": [
-     618,
-     622
-    ]
-   },
    "wing_spar_L": {
     "sprite": "Icarus_status_wing_spar_L.png",
     "centre": [
      -18.72,
-     -24.26
+     -25.05
     ],
     "size": [
      22.15,
-     52.73
+     76.99
     ],
     "px": [
      399,
-     504
+     461
     ]
    },
    "wing_spar_R": {
     "sprite": "Icarus_status_wing_spar_R.png",
     "centre": [
      18.72,
-     -24.26
+     -25.05
     ],
     "size": [
      22.15,
-     52.73
+     76.99
     ],
     "px": [
      541,
-     504
+     461
     ]
    },
    "wing_spar_outer_L": {
     "sprite": "Icarus_status_wing_spar_outer_L.png",
     "centre": [
-     -39.29,
-     -41.13
+     -39.55,
+     -45.35
     ],
     "size": [
-     22.15,
-     23.2
+     23.2,
+     32.7
     ],
     "px": [
-     321,
-     624
+     318,
+     622
     ]
    },
    "wing_spar_outer_R": {
     "sprite": "Icarus_status_wing_spar_outer_R.png",
     "centre": [
-     39.29,
-     -41.13
+     39.55,
+     -45.35
     ],
     "size": [
-     22.15,
-     23.2
+     23.2,
+     32.7
     ],
     "px": [
-     619,
-     624
+     618,
+     622
     ]
    }
   }

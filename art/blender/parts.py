@@ -2,8 +2,8 @@
 
 Nuclear Option damages an aircraft part by part: each part is a separate body with its own colliders, hit points and
 joint to its parent, and what a hit or a detachment reveals is whatever geometry lies under it. So the exterior skin is
-split into thin panels that can come away, the frames, spars and tanks they cover are parts of their own, and the
-Blender parent tree is the part tree the Unity author builds. Names, parents and dry masses follow the Full Fidelity
+split into panels, each carried by the part under it as on stock jets (chunks.py), the spars and tanks they cover are
+parts of their own, and the Blender parent tree is the part tree the Unity author builds. Names, parents and dry masses follow the Full Fidelity
 plan in the project notes (5,800 kg dry), except that the stabilator is one all-moving piece where the plan has two
 halves, so 40 parts where it has 41.
 
@@ -45,11 +45,9 @@ BUDGET = {
     "stabilator": {"target": 1700, "cap": 1700, "objects": ("stabilator_visible",)},
     # The fin-tip fairing, a blade 1.85 m long as on the F-104, takes about 1,030 of the fins' 2,340.
     "fins": {"target": 2340, "cap": 2340, "objects": ("fin_skin", "ventral_fin")},
-    # The frames and stringers cut clear of the intake ducts take about 700 more than they did whole, and the speed
-    # brake wells' ribs, rivets, lines and anchor brackets (joined into fuselage_tail) about 570, from the skin's. The
-    # gear wells, unions of boxes clipped to the skin, and the members cut back round them take about 2,500 more. The
-    # walls either side of the tail cone's break and the stringer runs parted there take about 300 (15,106 measured).
-    "structure_cores": {"target": 15100, "cap": 15200, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail",
+    # No frame, stringer or wall is drawn: the gear wells, unions of boxes clipped to the skin, and the speed brake
+    # wells' ribs, rivets, lines and anchor brackets (joined into fuselage_tail), 3,078 measured.
+    "structure_cores": {"target": 3100, "cap": 3140, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail",
                                                                     "fuselage_truss_")},
     "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
     # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160.
@@ -57,7 +55,6 @@ BUDGET = {
     "engine": {"target": 600, "cap": 700, "objects": ("engine_core", "engine_afterburner")},
     "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
 }
-BAY_CUT_GROW = 0.003  # structure cut back this far beyond each gear well box (bay_cutters)
 FRONT_HINGE_CLEAR = 0.03  # a gear well's floor opened this far ahead of a front-hinged door's hinge (open_bays)
 GEAR_DOOR_SPECS = {spec[0]: spec for spec in gear.GEAR["doors"]}
 # Review close-ups: name -> (camera location, look-at point), Blender axes.
@@ -143,7 +140,7 @@ TAIL_START = 13.0
 # The structure cores' origins, Blender world space, pinned rather than read off their bounds (recentre): the
 # hardpoints are placed relative to fuselage_mid's (Unity A5 checks them against measured positions), the joints
 # and the children of each core hang off its origin, and the skin atlas packs from those children's world
-# coordinates, so an origin that drifted with the frames, stringers and walls inside a core would move all of them.
+# coordinates, so an origin that drifted with what a core holds would move all of them.
 # The values are the cores' bounding-box centres when the keel set their length (stations 3.6, 8.375 and 13.0), as
 # float32 literals so they land bit for bit. check() fails if a core's origin is anything else.
 CORE_ORIGINS = {"fuselage_forward": (0.0, -4.3999996, 0.25242168), "fuselage_mid": (0.0, 0.375, 0.26522803),
@@ -164,18 +161,32 @@ LATE_PARENTS = {**{name + _sd: "wing_spar_outer_" + _sd for name in ("aileron_",
                 "nozzle": "engine_afterburner", "ventral_fin": "fuselage_tail",
                 **{"speed_brake_" + _sd + end: "fuselage_tail" for _sd in ("L", "R") for end in ("", "_cylinder")}}
 DORSAL = (5.0, 12.4)
-# The mid section's truss: its frames' arcs over the top, between the upper longerons (skin columns 12 and 36, 45
-# degrees either side of it), with the stringers between them (internals INTERNALS["stringers"]["truss"]), in two
-# parts at TRUSS_BREAK, frame 11 and the butt joint art/textures/panels.py draws there; the skin panels and the dorsal
-# cover over it part there too (SPLITS).
-TRUSS = interior.INTERNALS["stringers"]["truss"]
-TRUSS_BREAK = TRUSS["break"]
+# The mid section's truss: the structure over the top, between the upper longerons (45 degrees either side of it), in
+# two parts at TRUSS_BREAK, frame 11 and the butt joint art/textures/panels.py draws there; the skin panels and the
+# dorsal cover over it part there too (SPLITS).
+TRUSS_BREAK = 8.2
+# The collider shells' points of each structure core and truss half (hulls.shell_groups): the skin's shape at the frame
+# stations (internals.shell_rings), the truss's over the top, the cores' the rest, none inside the canopy's opening.
+SHELL_POINTS = {}
 # A family's dry mass shared between two parts split from it so that its first moment along the axis that separates
 # them stays where it was: part -> (the part split from it, axis). A part's mass sits at the centre of its hulls'
 # bounds (IcarusAuthor ConfigurePart's CoM, which UnitPart.ModifyMass makes the body's centre of mass), here its own
 # bounds' centre, and splitting by any other share would move the balance the 5% MAC margin was tuned on.
 MOMENT_SPLITS = {"wing_spar_L": ("wing_spar_outer_L", 0), "wing_spar_R": ("wing_spar_outer_R", 0),
                  "engine_core": ("engine_afterburner", 1), "fuselage_aft": ("fuselage_tail", 1)}
+# The fuselage sections and truss halves draw no structure, so neither their split nor their balance may come from their
+# meshes or collider shells. Each one's centre-of-mass box, Blender world (lo, hi), is the box its frames', stringers'
+# and walls' hulls made (584dfc37's export), read by chunks.markers in place of its hulls; the tail cone's share of
+# fuselage_aft's 400 kg is the one their bounds made then (split_moment). Together they hold the dry balance on
+# IcarusAuthor A22's pin.
+CORE_MASS_BOXES = {
+    "fuselage_forward": ((-0.5983, -6.3841, -0.5044), (0.5983, -2.42, 0.2345)),
+    "fuselage_mid": ((-0.9865, -2.2, -0.48), (0.9865, 2.98, 1.0025)),
+    "fuselage_aft": ((-0.7787, 3.02, -0.3317), (0.7786, 5.05, 1.0092)),
+    "fuselage_tail": ((-0.6265, 5.0, -0.2807), (0.6265, 6.85, 0.9811)),
+    "fuselage_truss_front": ((-0.3662, -2.2, 0.7301), (0.376, -0.8399, 1.0076)),
+    "fuselage_truss_rear": ((-0.413, 0.3067, 0.6888), (0.4033, 2.97, 1.0002))}
+SPLIT_SHARES = {"fuselage_aft": 187.3}
 DORSAL_Z, DORSAL_HALF_WIDTH = 0.80, 0.30
 
 
@@ -286,11 +297,15 @@ def rename(obj, name):
 def recentre(obj):
     """Move a part's origin to its bounding-box centre, or a structure core's to its pinned CORE_ORIGINS, keeping
     the geometry where it is."""
-    if obj.type != "MESH" or not obj.data.vertices:
+    if obj.type != "MESH":
         return
-    lo = Vector([min(v.co[i] for v in obj.data.vertices) for i in range(3)])
-    hi = Vector([max(v.co[i] for v in obj.data.vertices) for i in range(3)])
     pins = {**CORE_ORIGINS, **SPLIT_ORIGINS}
+    # a truss half or a section with nothing drawn of its own yet: its pin, or its collider shells' centre
+    pts = [v.co for v in obj.data.vertices] or SHELL_POINTS.get(obj.name, [])
+    if not pts:
+        return
+    lo = Vector([min(v[i] for v in pts) for i in range(3)])
+    hi = Vector([max(v[i] for v in pts) for i in range(3)])
     c = Vector(pins[obj.name]) if obj.name in pins else (lo + hi) / 2
     obj.data.transform(Matrix.Translation(-c))
     obj.matrix_world = obj.matrix_world @ Matrix.Translation(c)
@@ -373,9 +388,10 @@ for _sd in ("L", "R"):
          lambda c, side, front=(half == "front"), low=(belly == "_belly"):
             (station(c) < TRUSS_BREAK) == front and below_lap(c) == low)
         for half in ("front", "rear") for belly in ("", "_belly")])
+# the dorsal cover at the truss break, each half on the truss half under it: the skin those chunks carry
 SPLITS["dorsal_cover"] = ([((0.0, TRUSS_BREAK - bi.S0, 0.0), (0.0, 1.0, 0.0))], [
-    ("dorsal_cover_front", "fuselage_mid", lambda c, side: station(c) < TRUSS_BREAK),
-    ("dorsal_cover_rear", "fuselage_mid", lambda c, side: True)])
+    ("dorsal_cover_front", "fuselage_truss_front", lambda c, side: station(c) < TRUSS_BREAK),
+    ("dorsal_cover_rear", "fuselage_truss_rear", lambda c, side: True)])
 for _sd, _x in (("L", 1.0), ("R", -1.0)):
     SPLITS["wing_skin_" + _sd] = ([((_x * bi.WING_CRANK, 0.0, 0.0), (1.0, 0.0, 0.0))], [
         ("wing_skin_%s_%s_%s" % (box, skin, _sd), ("wing_spar_" if box == "inner" else "wing_spar_outer_") + _sd,
@@ -399,10 +415,15 @@ def family(name):
     return "_".join(token for token in name.split("_") if token not in PIECE_CODES)
 
 
+def families(obj):
+    """The skin families an object's mesh holds: its own, and those of the pieces joined into it (chunks.join_bare)."""
+    return {family(obj.name)} | {family(piece) for piece in obj.get("joined", ())}
+
+
 def family_objects(icarus, name):
     """The meshes of one family by name: the family itself in a build that does not split it, its pieces in one that
-    does."""
-    return sorted((o for o in icarus.all_objects if o.type == "MESH" and family(o.name) == name), key=lambda o: o.name)
+    does, and a part a piece was joined into."""
+    return sorted((o for o in icarus.all_objects if o.type == "MESH" and name in families(o)), key=lambda o: o.name)
 
 
 def split_pieces(icarus, splits=None):
@@ -601,6 +622,37 @@ def restore_normals(me):
     me.normals_split_custom_set(vectors)
 
 
+def in_section(s, a, b):
+    """Whether a frame station falls in the section from a to b: rounded to 1e-6 (the stations are sums that land a
+    rounding off a break, 12.999999999999995), and one on a break goes to the section ahead of it."""
+    s = round(s, 6)
+    return (a <= s < b and not (s == a and a > 0)) or s == b
+
+
+def shell_points(p, opening):
+    """SHELL_POINTS from internals.shell_rings: the truss halves' points over the top of the mid section (above both
+    upper longerons' 45 degree lines through the body centre), each section's the rest, none inside opening."""
+    tree = BVHTree.FromObject(opening, bpy.context.evaluated_depsgraph_get())
+
+    def outside(c):
+        hit, normal, _, _ = tree.find_nearest(c)
+        return hit is None or (c - hit).dot(normal) > 0
+
+    SHELL_POINTS.clear()
+    for s, ring in interior.shell_rings(p):
+        for c in ring:
+            if not outside(c):
+                continue
+            over = c.z - bi.fuselage_shapes(p, s)[1] > abs(c.x)
+            if in_section(s, FORWARD_END, MID_END) and over:
+                name = "fuselage_truss_front" if in_section(s, FORWARD_END, TRUSS_BREAK) else "fuselage_truss_rear"
+            else:
+                name = next(n for n, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),
+                                              ("fuselage_aft", MID_END, TAIL_START), ("fuselage_tail", TAIL_START, 99.0))
+                            if in_section(s, a, b))
+            SHELL_POINTS.setdefault(name, []).append(c.copy())
+
+
 def organise(p, icarus, internals, structure_mat):
     """Turn the built exterior and internals into the part tree. Returns the parts by name."""
     prev, bi.TARGET = bi.TARGET, icarus
@@ -617,20 +669,14 @@ def _organise(p, icarus, internals, structure_mat):
         icarus.objects.link(o)
 
     fus = O["fuselage"]
-    # The canopy is its own loft on top of the body, so the body's top skin ran on under it as a floor across the
-    # cockpit, and the frames there closed over the pilot as full rings. The cockpit opening is whatever of the skin
-    # lies inside the canopy's closed shape; the frames stop canopy.FRAME_CLEAR clear of it, room for the flanges
-    # under its foot.
+    # The canopy is its own loft on top of the body, so the body's top skin runs on under it as a floor across the
+    # cockpit. The cockpit opening is whatever of the skin lies inside the canopy's closed shape; the sections' collider
+    # shells stop canopy.FRAME_CLEAR clear of it (shell_points), room for the flanges under its foot.
     canopy_solid = interior.outward(canopy.build_canopy(p, structure_mat))
     drop_inside(fus, canopy_solid)
-    frame_cut = interior.grown(canopy_solid, canopy.FRAME_CLEAR)
-    for obj in [o for o in icarus.objects if o.name.startswith("frame_")]:
-        drop_inside(obj, frame_cut)
-    # A stringer's faces run a frame bay or more, too long for drop_inside to clear the opening: cut it, 2 cm clear.
-    stringer_cut = interior.grown(canopy_solid, 0.02)
-    for obj in [o for o in icarus.objects if o.name.startswith("stringer_")]:
-        interior.subtract(obj, [stringer_cut])
-    for o in (canopy_solid, frame_cut, stringer_cut):
+    opening = interior.grown(canopy_solid, canopy.FRAME_CLEAR)
+    shell_points(p, opening)
+    for o in (canopy_solid, opening):
         bpy.data.objects.remove(o, do_unlink=True)
     side = lambda c: "L" if c.x >= 0 else "R"
     dorsal = lambda c: DORSAL[0] <= station(c) <= DORSAL[1] and c.z > DORSAL_Z and abs(c.x) < DORSAL_HALF_WIDTH
@@ -644,37 +690,14 @@ def _organise(p, icarus, internals, structure_mat):
                    lambda c, a=a, b=b, sd=sd: a <= station(c) < b and side(c) == sd and not dorsal(c))
     bpy.data.objects.remove(fus, do_unlink=True)
 
-    def section(o):
-        """Whether a member at its first corner's station falls between a and b: stations rounded to 1e-6 (the frame
-        loop's sums land a rounding off a break, frame 19 at 12.999999999999995), and a frame on a break goes to the
-        section ahead of it."""
-        s = round(station(o.matrix_world @ o.data.vertices[0].co), 6)
-        frame = o.name.startswith("frame_")
-        return lambda a, b: (a <= s < b and not (frame and s == a and a > 0)) or (frame and s == b)
-
-    # The truss (TRUSS): each mid section frame's arc over the top, above both upper longerons' 45 degree lines through
-    # the body centre (faces between the frame's columns 12 and 36), with the stringers between them, each half with
-    # the frames on its side of TRUSS_BREAK (frame 11, on it, goes ahead, as section() puts frames).
-    def over_top(c):
-        return c.z - bi.fuselage_shapes(p, station(c))[1] > abs(c.x)
-
-    truss = {"fuselage_truss_front": [], "fuselage_truss_rear": []}
-    for frame in [o for o in icarus.objects if o.name.startswith("frame_") and section(o)(FORWARD_END, MID_END)]:
-        half = "fuselage_truss_front" if section(frame)(FORWARD_END, TRUSS_BREAK) else "fuselage_truss_rear"
-        truss[half].append(subset(frame.name + "_arc", frame, over_top))
-        keep_faces(frame, lambda c: not over_top(c))
-    for c in TRUSS["columns"]:
-        truss["fuselage_truss_front"].append(O["stringer_%02d_1a" % c])
-        truss["fuselage_truss_rear"].append(O["stringer_%02d_1b" % c])
-    for name, members in truss.items():
-        join(name, members)
+    # No frame, stringer or break wall: each section is its gear well where it has one, its skin (chunks.fold) and its
+    # collider shells (SHELL_POINTS); the truss halves the shells and their dorsal covers.
+    for name in ("fuselage_truss_front", "fuselage_truss_rear"):
+        join(name, [])
     for name, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),
                        ("fuselage_aft", MID_END, TAIL_START), ("fuselage_tail", TAIL_START, 99.0)):
-        # joined members are gone from the list; gear wells belong to the structure they are cut into, and join after
-        # the members, so the core's first material slot is the frames' (parts.open_bays gives its cut faces slot 0)
-        members = [o for prefixes in (("frame_", "stringer_", "bulkhead_"), ("nose_gear_bay", "main_gear_bay"))
-                   for o in icarus.objects if o.name.startswith(prefixes) and section(o)(a, b)]
-        join(name, members)
+        join(name, [o for o in icarus.objects if o.name.startswith(("nose_gear_bay", "main_gear_bay"))
+                    and in_section(station(o.matrix_world @ o.data.vertices[0].co), a, b)])
 
     rename(O["cockpit_tub"], "cockpit_cell")
     join("radar_tray", [O["radar_dish"], O["radar_unit"], O["avionics_nose"]])
@@ -740,7 +763,7 @@ def _organise(p, icarus, internals, structure_mat):
             obj.parent = parts[parent]
             obj.matrix_world = world
     for name, (other, axis) in MOMENT_SPLITS.items():
-        split_moment(parts[name], parts[other], axis)
+        split_moment(parts[name], parts[other], axis, SPLIT_SHARES.get(name))
     root = ("fuselage_mid", "fuselage_truss_front", "fuselage_truss_rear")
     for name in root:  # IcarusAuthor A22 sums the three against the root's 910
         parts[name]["family"], parts[name]["family_mass_kg"] = root[0], sum(tree[n][1] for n in root)
@@ -768,13 +791,15 @@ def bounds(objs):
     return (Vector([min(p[i] for p in pts) for i in range(3)]), Vector([max(p[i] for p in pts) for i in range(3)]))
 
 
-def split_moment(part, other, axis):
+def split_moment(part, other, axis, share=None):
     """Share part's mass_kg (the family's) between part and other, keeping its first moment along axis about the
-    centre of their joint bounds: m_part + m_other = M, m_part c_part + m_other c_other = M c (MOMENT_SPLITS)."""
+    centre of their joint bounds: m_part + m_other = M, m_part c_part + m_other c_other = M c (MOMENT_SPLITS), or
+    giving other the share given (SPLIT_SHARES)."""
     total = part["mass_kg"]
-    centre = lambda objs: sum(bounds(objs), Vector())[axis] / 2
-    c, a, b = centre([part, other]), centre([part]), centre([other])
-    share = round(total * (c - a) / (b - a), 1)
+    if share is None:
+        centre = lambda objs: sum(bounds(objs), Vector())[axis] / 2
+        c, a, b = centre([part, other]), centre([part]), centre([other])
+        share = round(total * (c - a) / (b - a), 1)
     part["mass_kg"], other["mass_kg"] = round(total - share, 1), share
     for obj in (part, other):  # IcarusAuthor A22 sums the two against the family
         obj["family"], obj["family_mass_kg"] = part.name, total
@@ -937,8 +962,7 @@ def open_bays(icarus):
     """Open the gear wells to view from below, in the structure cores' render meshes only (their hulls are built).
     The internals build each bay as a closed box clipped to the inside of the skin and joined into its core, so from
     below a bay read as shut, its walls facing away from anyone looking in. The floor under the shut doors goes, the
-    rest of the bay turns to face inward, and the frames and stringers running through the bay are cut back to its
-    walls."""
+    rest of the bay turns to face inward."""
     O = bpy.data.objects
     main_boxes = interior.bay_boxes("main_gear_bay", 1) + interior.bay_boxes("main_gear_bay", -1)
     wells = {"fuselage_forward": (interior.bay_boxes("nose_gear_bay"), ("gear_door_N_L", "gear_door_N_R")),
@@ -947,17 +971,6 @@ def open_bays(icarus):
         core = O[core_name]
         bay_slot = [m.name for m in core.data.materials].index("Icarus_Duct")  # materials: "gear_bay"
         door_trees = [checks.tree(O[d + "_visible"]) for d in doors] + gear.bay_doors(core_name)
-        # the structure members, less the bay boxes run on down through the skin
-        members = core.copy()
-        members.data = core.data.copy()
-        icarus.objects.link(members)
-        bm = bmesh.new()
-        bm.from_mesh(members.data)
-        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == bay_slot], context="FACES")
-        bm.to_mesh(members.data)
-        bm.free()
-        cutters = bay_cutters(icarus, boxes)
-        cut = cut_shells(members, cutters)
         # the bay: its faces turned to face in, less the floor under each door (a ray out of it meets the shut door, or
         # the skin of a front-hinged door cuts it away from the hinge: that door is cut back off the skin's columns
         # under the wing root, so it ends partway across the floor's faces there)
@@ -1007,119 +1020,12 @@ def open_bays(icarus):
                 front_hinges.append((o, u, min(along), max(along)))
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if under_door(f) or before_hinge(f)], context="FACES")
         bmesh.ops.reverse_faces(bm, faces=bm.faces)
-        before = len(bm.faces)
-        bm.from_mesh(cut)  # appends the cut members, on the members' slots; the cut faces take the first, structure
-        bm.faces.ensure_lookup_table()
-        for f in bm.faces[before:]:
-            f.material_index = min(f.material_index, len(core.data.materials) - 1)
         # The well is exterior hardware: seen through the open doors, never an enclosed part (checks.interior_visibility).
         hardware = bm.faces.layers.int.get("exterior_hardware") or bm.faces.layers.int.new("exterior_hardware")
         for f in bm.faces:
             f[hardware] = int(f.material_index == bay_slot)
         bm.to_mesh(core.data)
         bm.free()
-        for o in cutters + [members]:
-            me = o.data
-            bpy.data.objects.remove(o)
-            bpy.data.meshes.remove(me)
-        bpy.data.meshes.remove(cut)
-    # The nose well runs on past FORWARD_END into the mid core's first frame and stringers.
-    cut_structure(icarus, O["fuselage_mid"], bay_cutters(icarus, interior.bay_boxes("nose_gear_bay")))
-
-
-def bay_cutters(icarus, boxes):
-    """A box cutter, world space, for each gear bay box (s from, s to, x from, x to, z from, z to), run on down
-    through the skin. Each is BAY_CUT_GROW wider than its box: the well's own boxes grow by fractions of a millimetre
-    (internals.boxes_solid), and a member cut on the box's plane would end just inside the well's wall, in view."""
-    cutters = []
-    g = BAY_CUT_GROW
-    for s0, s1, x0, x1, z0, z1 in ((s0 - g, s1 + g, x0 - g, x1 + g, z0, z1 + g) for s0, s1, x0, x1, z0, z1 in boxes):
-        me = bpy.data.meshes.new("bay_cutter")
-        me.from_pydata([bi.P(s, x, z) for s in (s0, s1) for x in (x0, x1) for z in (z0 - 0.3, z1)], [],
-                       [(0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)])
-        cutter = bpy.data.objects.new("bay_cutter", me)
-        icarus.objects.link(cutter)
-        cutters.append(cutter)
-    return cutters
-
-
-def cut_structure(icarus, core, cutters):
-    """Cut a structure core's frames, stringers and break walls (its Icarus_Frame faces) back to the cutters (closed,
-    world space), its other faces kept as they are; the cutters are used up."""
-    frame = [m.name for m in core.data.materials].index("Icarus_Frame")
-    members = core.copy()
-    members.data = core.data.copy()
-    icarus.objects.link(members)
-    bm = bmesh.new()
-    bm.from_mesh(members.data)
-    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index != frame], context="FACES")
-    bm.to_mesh(members.data)
-    bm.free()
-    cut = cut_shells(members, cutters)
-    for poly in cut.polygons:  # the members and the faces the cut adds are all structure
-        poly.material_index = frame
-    bm = bmesh.new()
-    bm.from_mesh(core.data)
-    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == frame], context="FACES")
-    bm.from_mesh(cut)
-    bm.to_mesh(core.data)
-    bm.free()
-    for o in cutters + [members]:
-        me = o.data
-        bpy.data.objects.remove(o)
-        bpy.data.meshes.remove(me)
-    bpy.data.meshes.remove(cut)
-
-
-def cut_shells(obj, cutters):
-    """obj's mesh less the cutters (identity-placed), as a new mesh in obj's space, one closed shell at a time. The
-    exact boolean reads a mesh of overlapping shells (stringers running through frames) as one broken solid and
-    leaves cutter faces in it; its self-intersection mode cuts every shell against every other instead, doubling
-    the triangles. A shell clear of every cutter's bounds is kept as it is."""
-    boxes = [(Vector([min(v.co[i] for v in c.data.vertices) for i in range(3)]),
-              Vector([max(v.co[i] for v in c.data.vertices) for i in range(3)])) for c in cutters]
-    bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    bm.transform(obj.matrix_world)
-    seen, out = set(), bmesh.new()
-    for start in bm.faces:
-        if start in seen:
-            continue
-        shell, todo = [], [start]
-        seen.add(start)
-        while todo:
-            f = todo.pop()
-            shell.append(f)
-            for g in {g for v in f.verts for g in v.link_faces} - seen:
-                seen.add(g)
-                todo.append(g)
-        verts = list({v for f in shell for v in f.verts})
-        index = {v: i for i, v in enumerate(verts)}
-        me = bpy.data.meshes.new("shell")
-        me.from_pydata([v.co for v in verts], [], [[index[v] for v in f.verts] for f in shell])
-        for poly, f in zip(me.polygons, shell):
-            poly.material_index = f.material_index
-        lo = Vector([min(v.co[i] for v in verts) for i in range(3)])
-        hi = Vector([max(v.co[i] for v in verts) for i in range(3)])
-        if any(all(lo[i] < b[i] and hi[i] > a[i] for i in range(3)) for a, b in boxes):
-            shell_obj = bpy.data.objects.new("shell", me)
-            obj.users_collection[0].objects.link(shell_obj)
-            for c in cutters:
-                mod = shell_obj.modifiers.new("bay", "BOOLEAN")
-                mod.operation, mod.solver, mod.object = "DIFFERENCE", "EXACT", c
-            bpy.context.view_layer.update()
-            cut = bpy.data.meshes.new_from_object(shell_obj.evaluated_get(bpy.context.evaluated_depsgraph_get()))
-            bpy.data.objects.remove(shell_obj)
-            bpy.data.meshes.remove(me)
-            me = cut
-        out.from_mesh(me)
-        bpy.data.meshes.remove(me)
-    bm.free()
-    out.transform(obj.matrix_world.inverted())
-    result = bpy.data.meshes.new(obj.name + "_cut")
-    out.to_mesh(result)
-    out.free()
-    return result
 
 
 def merge_details(icarus):

@@ -51,9 +51,9 @@ namespace Icarus.Editor
         private static string[] WingBoxes(Build b, string side) =>
             new[] { "wing_spar_" + side, "wing_spar_outer_" + side }.Where(b.Parts.ContainsKey).ToArray();
 
-        // The skin parts a box carries: the wing skin's pieces jointed to it (the whole skin on a box that keeps it).
+        // The skin a box carries: the wing skin's pieces folded into it (art/blender/chunks.py).
         private static string[] BoxSkins(Build b, string box, string side) =>
-            FamilyParts(b, "wing_skin_" + side).Where(n => b.Specs.Single(s => s.Name == n).Parent == box).ToArray();
+            FamilyParts(b, "wing_skin_" + side).Where(n => b.Blockout.Parts[n].Text("folded_into") == box).ToArray();
 
         // Each spar's lift acts at station 7.835 m, 1.584 m ahead of the quarter chord this author measured, sized for a
         // 5% MAC static margin empty and 8.7% at 20% fuel (its neutral point 9.326 m, MAC 3.491 m).
@@ -338,7 +338,7 @@ namespace Icarus.Editor
         {
             var spar = b.Parts[box].transform;
             var skins = BoxSkins(b, box, side);
-            var skinPoints = skins.SelectMany(n => WorldVertices(b.Parts[n].transform, b.Meshes[n].Render)).ToArray();
+            var skinPoints = skins.SelectMany(n => WorldVertices(Placed(b, n), b.Meshes[n].Render)).ToArray();
             var chordPoints = FamilyVertices(b, "wing_skin_" + side)
                 .Concat(new[] { "flap_", "aileron_", "lef_" }.SelectMany(s => WorldVertices(b.Visuals[s + side + "_visible"], b.Meshes[s + side + "_visible"].Render))).ToArray();
             var centroid = AreaCentroid(b, skins);

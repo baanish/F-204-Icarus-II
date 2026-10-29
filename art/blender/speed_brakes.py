@@ -14,7 +14,7 @@ lies on them. The parts follow the stock aircraft (the FS-12 Revoker's panel and
   floor that the cylinder lies in shut, down to the anchor fitting on frame 13.0 (Patch.channel). Its airframe stands
   on them a step lighter, on Icarus_WellDetail: ribs with rivet rows, two hydraulic lines and the anchor fitting
   (well_detail); the fixed hinge knuckles and the fitting's pin heads are on jet_mechanical. It joins the
-  fuselage_tail core (merge_into) and faces inward; clear_wells cuts the cores' frames and stringers back from it.
+  fuselage_tail core (merge_into) and faces inward.
 - speed_brake_<side>_cylinder on the tail cone (fuselage_aft until the late split) and speed_brake_<side>_rod on the hinge: the actuator, each with its
   origin at its eye and local Y along its axis toward the other's eye. The game turns only the hinge, so in Unity
   each aims at the other's eye with an AimConstraint that the Airbrake enables while the brakes are open, as the
@@ -71,7 +71,6 @@ SHAPE = {
     "engage": 0.03,  # least length of rod inside the barrel, fully open
     "least_arm": 0.12,  # the ram's least moment arm about the hinge over the travel (check)
     "engine_clear": 0.01,  # the well and the actuator this far from the engine (check)
-    "clear": 0.008,  # the core's structure cut back from the well, along the well's vertex normals (4.6 mm or more)
 }
 # The panel knuckle's and the fixed knuckles' sections about the hinge axis, degrees from aft toward out. Each piece
 # keeps to the angles the other side never sweeps: the panel's turns up to 60 degrees and so must stop short of 120
@@ -641,27 +640,6 @@ def cut_holes(patch):
     bm.free()
 
 
-def clear_wells(icarus):
-    """Cut the fuselage_tail and fuselage_aft cores' frames, stringers and break walls (their Icarus_Frame faces) back
-    SHAPE["clear"] from both wells and their channels, so an open well shows only its own walls, as parts.open_bays
-    clears the gear bays. The wells lie behind the tail cone's break, but frame 19's flange runs on into them from
-    fuselage_aft. Render meshes only: run after the hulls, which keep the whole frames."""
-    import internals
-    import parts
-
-    patch = Patch(bi.PARAMS)
-    for core in ("fuselage_aft", "fuselage_tail"):
-        cutters = []  # cut_structure uses them up
-        for side in (1, -1):
-            for verts, faces in patch.voids(side):
-                void = bi.mesh_object("speed_brake_void", verts, faces)  # world space, as cut_shells wants
-                cutters.append(internals.grown(void, SHAPE["clear"]))
-                me = void.data
-                bpy.data.objects.remove(void)
-                bpy.data.meshes.remove(me)
-        parts.cut_structure(icarus, bpy.data.objects[core], cutters)
-
-
 def aim_actuators():
     """Pose each actuator for its hinge's current turn as the AimConstraints do in game: the cylinder about its eye and
     the rod about its own, each aimed at the other's eye, turning about the hinge axis. Update the view layer first."""
@@ -779,7 +757,7 @@ def check(icarus):
     """Open each brake through its travel in steps of parts.SWEEP_STEP with its actuator aimed: the rod stays at least
     engage inside the barrel and short of its far end, the ram holds least_arm or more of moment arm about the hinge,
     and neither the panel nor either actuator piece meets the skin (its lip included), the fuselage_aft core (the
-    well, its channel, knuckles and anchor fitting, the frames) or the engine, nor the actuator the panel. The channel
+    well, its channel, knuckles and anchor fitting) or the engine, nor the actuator the panel. The channel
     keeps engine_clear from the engine, every view in through the holes ends on the well (well_sealed), and the
     outline stays on the skin's panel lines."""
     import budget

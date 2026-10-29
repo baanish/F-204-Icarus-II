@@ -86,21 +86,12 @@ def fuel_cell_clearance(icarus):
 
 
 def internals_inside_skin(icarus):
-    """Nothing under the skin may cut through it: radar, avionics, cockpit, gear, engine, fuel cells, and the
-    fuselage's frames, stringers and break walls (the structure cores' and the truss's Icarus_Frame faces) through the fuselage's own
-    skin. Those do cross the wing roots buried in the body, as a real wing carry-through does, and the wells joined
-    into the cores meet the skin at their openings."""
+    """Nothing under the skin may cut through it: radar, avionics, cockpit, gear, engine and fuel cells."""
     meshes = [o for o in icarus.all_objects if o.type == "MESH" and not o.name.endswith("_visible")]
     skins = [o for o in meshes if o.get("role") in ("skin", "canopy")]
     inside = [o for o in meshes if o.get("role") in ("radar", "avionics", "cockpit", "gear", "engine", "fuel_tank")]
-    from hulls import STRUCTURE_CORES, TRUSS
-
-    cores = [o for o in meshes if o.name in STRUCTURE_CORES or o.name.startswith(TRUSS)]
-    body = [o for o in skins if not o.name.startswith(("wing_skin_", "fin_skin"))]
     trees = {o.name: tree(o) for o in skins + inside}
-    grid = {o.name: tree(o, "Icarus_Frame") for o in cores}
     clashes = ["%s cuts %s" % (o.name, s.name) for o in inside for s in skins if trees[o.name].overlap(trees[s.name])]
-    clashes += ["%s cuts %s" % (o.name, s.name) for o in cores for s in body if grid[o.name].overlap(trees[s.name])]
     if clashes:
         raise ValueError("internals through the skin: " + "; ".join(clashes))
     return len(inside)
@@ -291,76 +282,6 @@ def _interior_visibility(icarus, allow_openings, doors_open):
         raise ValueError(message + "; " + "; ".join(failures))
     print(message + ": PASS", flush=True)
     return len(inside)
-
-
-def structure_clear_of_bays(icarus, spacing=0.01, tolerance=0.001):
-    """No frame, stringer or break wall (the structure cores' and the truss's Icarus_Frame faces) inside a bay or well, where an open
-    door or panel would show it: the gear bays (parts.open_bays' boxes), the speed brake wells (speed_brakes.Patch's
-    voids) and the conformal trough (stations.carve_shapes). The faces are sampled every spacing; a sample counts once
-    it is more than tolerance inside, so members cut back to a bay's wall pass."""
-    import build_icarus as bi
-    import internals as interior
-    import speed_brakes
-    import stations
-
-    p = bi.PARAMS
-    volumes = []  # (name, lower corner, upper corner, inside(q))
-    bays = [("nose gear bay", b) for b in interior.bay_boxes("nose_gear_bay")] + [
-        ("main gear bay " + "LR"[side < 0], b) for side in (1, -1) for b in interior.bay_boxes("main_gear_bay", side)]
-    for name, (s0, s1, x0, x1, z0, z1) in bays:
-        lo, hi = bi.P(s0, x0, z0 - 0.3), bi.P(s1, x1, z1)
-        volumes.append((name, lo, hi, lambda q, lo=lo, hi=hi: all(lo[i] + tolerance < q[i] < hi[i] - tolerance
-                                                                    for i in range(3))))
-    patch = speed_brakes.Patch(p)
-    for side in (1, -1):
-        for name, (verts, faces) in zip(("well", "channel"), patch.voids(side)):
-            shell = BVHTree.FromPolygons(verts, faces)
-            lo = Vector([min(v[i] for v in verts) for i in range(3)])
-            hi = Vector([max(v[i] for v in verts) for i in range(3)])
-            volumes.append(("speed brake %s %s" % (name, "LR"[side < 0]), lo, hi,
-                            lambda q, shell=shell: inside_closed(shell, q) and shell.find_nearest(q)[3] > tolerance))
-    fields = {}
-
-    def in_trough(q):
-        s = round(q.y + bi.S0, 3)
-        if s not in fields:
-            fields[s] = stations.carve_shapes(p, s)
-        return any(f(q.x, q.z) < -tolerance for f in fields[s])
-
-    ramps = stations.ramp_stations(p)
-    s0, s1 = min(lo for lo, _, _ in ramps), max(hi for _, hi, _ in ramps)
-    c = stations.CONFORMAL
-    volumes.append(("conformal trough", bi.P(s0, -c["x"] - 0.3, -1.0), bi.P(s1, c["x"] + 0.3, c["z"] + 0.3), in_trough))
-    found, sampled = {}, {}
-    from hulls import STRUCTURE_CORES, TRUSS
-
-    for core in (o for o in icarus.all_objects if o.name in STRUCTURE_CORES or o.name.startswith(TRUSS)):
-        slots = [m.name if m else "" for m in core.data.materials]
-        mesh = core.data
-        mesh.calc_loop_triangles()
-        for tri in mesh.loop_triangles:
-            if slots[mesh.polygons[tri.polygon_index].material_index] != "Icarus_Frame":
-                continue
-            a, b, c3 = (core.matrix_world @ mesh.vertices[i].co for i in tri.vertices)
-            near = [v for v in volumes if all(min(a[i], b[i], c3[i]) < v[2][i] and max(a[i], b[i], c3[i]) > v[1][i]
-                                              for i in range(3))]
-            if not near:
-                continue
-            nb, nc = (max(1, math.ceil(e.length / spacing)) for e in (b - a, c3 - a))
-            for i in range(nb + 1):
-                for j in range(math.floor(nc * (1 - i / nb) + 1e-9) + 1):
-                    q = a + (b - a) * (i / nb) + (c3 - a) * (j / nc)
-                    sampled[core.name] = sampled.get(core.name, 0) + 1
-                    for name, lo, hi, inside in near:
-                        if all(lo[k] <= q[k] <= hi[k] for k in range(3)) and inside(q):
-                            found.setdefault((name, core.name), []).append(q)
-    message = "structure clear of bays: %s frame samples near %d bays and wells" % (
-        ", ".join("%s %d" % kv for kv in sorted(sampled.items())), len(volumes))
-    if found:
-        raise ValueError(message + ": " + "; ".join(
-            "%d in the %s from %s, first at s %.3f x %.3f z %.3f" % (len(qs), name, core, qs[0].y + bi.S0, qs[0].x, qs[0].z)
-            for (name, core), qs in found.items()))
-    print(message + ": PASS", flush=True)
 
 
 def inside_closed(shell, q, direction=Vector((0.5773, 0.5774, 0.5774))):

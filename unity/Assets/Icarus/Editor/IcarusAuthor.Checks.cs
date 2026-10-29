@@ -221,8 +221,7 @@ namespace Icarus.Editor
             if (Prop(airbrake, "part").objectReferenceValue != b.Part("fuselage_tail")) p.Add("Airbrake part isn't fuselage_tail");
             var wing = new[] { "wing_spar_L", "wing_spar_R", "wing_spar_outer_L", "wing_spar_outer_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" }.Sum(n => GetFloat(b.Part(n), "wingArea"));
             if (Mathf.Abs(wing - WingArea) > 0.01f) p.Add($"main wing {wing:F2} m2, not the sized {WingArea}");
-            foreach (var skin in Tree.Where(s => s.Name.Contains("skin") || s.Name.StartsWith("dorsal_cover", StringComparison.Ordinal)))
-                if (GetFloat(b.Part(skin.Name), "wingArea") != 0) p.Add(skin.Name + " has lift; skins carry none by design");
+            if (GetFloat(b.Part("fin_skin"), "wingArea") != 0) p.Add("fin_skin has lift; skins carry none by design");
             var drag = All(b, "AeroPart").Sum(a => GetFloat(a, "dragArea"));
             if (Mathf.Abs(drag - DragAreaTotal) > 1e-3f) p.Add($"dragArea {drag:F3}, not the tuned {DragAreaTotal}");
             return $"airfoils [{string.Join(", ", names)}]; {surfaces.Length} ControlSurfaces (pitch {Sum("pitchRange")}, roll {Sum("rollRange")}, yaw {Sum("yawRange")}), {devices.Length} HighLiftDevices, two speed brakes; wing {wing:F2} m2, dragArea {drag:F2}";

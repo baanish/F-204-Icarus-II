@@ -90,9 +90,7 @@ sealed class NozzleDriver : MonoBehaviour
         IcarusPlugin.Log.Stage("nozzle", $"nozzle driver on {name}: {petals.Count} petals and seals, {links.Count} links, {rams.Count} rams");
     }
 
-    // A child of the nozzle part, or of the mover WingSkinFollow.cs draws the part's renderers under while the nozzle
-    // draws on the tail cone.
-    static Transform? Under(Transform part, string name) => part.Find(name) ?? part.Find(part.name + "_drawn/" + name);
+    static Transform? Under(Transform part, string name) => part.Find(name);
 
     void FindActuation()
     {

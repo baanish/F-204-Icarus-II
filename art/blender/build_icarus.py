@@ -1435,8 +1435,8 @@ def build_cached(repo=None, overrides=None, split=True):
 
 # The package modules, in check order. Each carries build(p, mats), check(icarus), a BUDGET (budget.py) and CLOSEUPS
 # (review_sheet.py).
-MODULES = ("parts", "speed_brakes", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "cockpit", "uvs",
-           "tip_tanks")
+MODULES = ("parts", "speed_brakes", "propulsion", "canopy", "gear", "lights", "stations", "hulls", "clearance", "cockpit",
+           "uvs", "tip_tanks")
 
 
 def modules():
@@ -1484,7 +1484,6 @@ def _build(repo, split=True):
 
     hull_count = hulls.build(TARGET)
     part_tree.open_bays(TARGET)  # render meshes only, after the hulls
-    speed_brakes.clear_wells(TARGET)
     import uvs
 
     uvs.unwrap(TARGET)
@@ -1500,6 +1499,14 @@ def _build(repo, split=True):
         tree = {name: obj for name, obj in tree.items() if name not in pieces}
         tree.update((piece.name, piece) for made in pieces.values() for piece in made)
     part_tree.drop_split_sides(TARGET)
+    import chunks
+    import clearance
+
+    if split:  # the unsplit build (the skin bake, the reviews) keeps its skin families whole, as panels.py reads them
+        print(chunks.fold(TARGET))  # the skin panels into the parts they hang on, as stock chunks
+    print(clearance.carve(TARGET))  # last, on the final hulls: unjointed parts stand apart
+    hull_count = {"colliders": len(bpy.data.collections["Colliders"].objects),
+                  "lods": len(bpy.data.collections["LOD1"].objects)}
     hulls.paint_lods()
     skin_normals(TARGET)
     import checks
@@ -1508,7 +1515,6 @@ def _build(repo, split=True):
     checks.fuel_cell_clearance(TARGET)
     checks.internals_inside_skin(TARGET)
     checks.interior_visibility(TARGET)
-    checks.structure_clear_of_bays(TARGET)
     checks.canopy_fit(TARGET)
     checks.pilot_eye_leaks(TARGET)
     for module in modules():
@@ -1516,6 +1522,9 @@ def _build(repo, split=True):
     import budget
 
     print(budget.report(TARGET))
+    if split:
+        print(chunks.join_bare(TARGET))
+    hull_count["lods"] = len(bpy.data.collections["LOD1"].objects)  # the joined panels' hulls now one each
     refs = build_references(p, repo)
     bpy.context.view_layer.update()  # children's world matrices follow their new parents only after an update
     out = metrics([o for o in TARGET.objects])

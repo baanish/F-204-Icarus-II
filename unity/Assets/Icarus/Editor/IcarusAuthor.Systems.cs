@@ -29,7 +29,7 @@ namespace Icarus.Editor
             var noseTip = b.Parts["radome"].GetComponent<MeshRenderer>().bounds.max.z;
             var tailEnd = renderers.Min(r => r.bounds.min.z);
             var belly = new[] { RootPart, "fuselage_forward", "fuselage_aft" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
-                .Min(n => b.Parts[n].GetComponent<MeshRenderer>().bounds.min.y);
+                .Min(n => Placed(b, n).GetComponent<MeshRenderer>().bounds.min.y);
 
             // Radar on the radome's Revoker nose, bound to the radar tray, whose loss disables the radar by design.
             var radar = b.Parts["radome"].GetComponent(GameType("Radar"));
@@ -52,7 +52,9 @@ namespace Icarus.Editor
                 var point = points.GetArrayElementAtIndex(i);
                 var t = (Transform)point.FindPropertyRelative("transform").objectReferenceValue;
                 var side = t.name.EndsWith("L", StringComparison.Ordinal) ? -1f : 1f;
-                var skin = BoundsOf(FamilyVertices(b, side < 0 ? "skin_aft_L" : "skin_aft_R"));
+                // the aft panel's front piece is joined into fuselage_aft's mesh (art/blender/chunks.py), its rear on the tail
+                var skin = BoundsOf(WorldVertices(b.Parts["fuselage_aft"].transform, b.Meshes["fuselage_aft"].Render).Where(v => v.x * side > 0)
+                    .Concat(FamilyVertices(b, side < 0 ? "skin_aft_L" : "skin_aft_R")));
                 t.SetParent(b.Parts["fuselage_aft"].transform, true);
                 t.SetPositionAndRotation(new Vector3(side < 0 ? skin.min.x : skin.max.x, skin.min.y + 0.15f, skin.center.z),
                     Quaternion.LookRotation(new Vector3(side * 0.8f, -0.55f, -0.25f), Vector3.up));
@@ -72,19 +74,19 @@ namespace Icarus.Editor
             var lights = new List<string>();
             foreach (var side in new[] { "L", "R" })
             {
-                // The wing skin part each lens's anchor hangs on in the export: the skin, or the outer piece under it.
+                // The wing skin mesh each lens's anchor hangs on in the export, on the part it folds into.
                 var upperSkin = b.Blockout.Parts["light_nav_" + side].BlenderParent;
                 var lowerSkin = b.Blockout.Parts["light_nav_lower_" + side].BlenderParent;
-                var skin = b.Parts[upperSkin].transform;
+                var skin = Placed(b, upperSkin);
                 var nav = root.Find("navlight_" + side);
                 nav.SetParent(skin, true);
                 nav.rotation = b.Blockout.Rotation("light_nav_" + side);
                 nav.localScale = Vector3.one;
                 nav.position = Lamp(nav, "light_nav_" + side);
-                NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part(upperSkin);
+                NavLightEntry(navLights, nav.GetComponent<Renderer>()).FindPropertyRelative("part").objectReferenceValue = b.Part(Host(b, upperSkin));
                 lights.Add($"{nav.name} at light_nav_{side}");
 
-                var lower = Object.Instantiate(nav.gameObject, b.Parts[lowerSkin].transform).transform;
+                var lower = Object.Instantiate(nav.gameObject, Placed(b, lowerSkin)).transform;
                 lower.name = "navlight_lower_" + side;
                 lower.rotation = b.Blockout.Rotation("light_nav_lower_" + side);
                 lower.position = Lamp(lower, "light_nav_lower_" + side);
@@ -95,7 +97,7 @@ namespace Icarus.Editor
                 var lowerEntry = navEntries.GetArrayElementAtIndex(sourceIndex);
                 var sourceEntry = navEntries.GetArrayElementAtIndex(sourceIndex + 1);
                 lowerEntry.FindPropertyRelative("renderer").objectReferenceValue = lower.GetComponent<Renderer>();
-                lowerEntry.FindPropertyRelative("part").objectReferenceValue = b.Part(lowerSkin);
+                lowerEntry.FindPropertyRelative("part").objectReferenceValue = b.Part(Host(b, lowerSkin));
                 lowerEntry.FindPropertyRelative("litMaterial").objectReferenceValue = sourceEntry.FindPropertyRelative("litMaterial").objectReferenceValue;
                 lowerEntry.FindPropertyRelative("controlState").intValue = sourceEntry.FindPropertyRelative("controlState").intValue;
                 lowerEntry.FindPropertyRelative("gear").objectReferenceValue = null;
@@ -113,7 +115,7 @@ namespace Icarus.Editor
                 foreach (var (formationName, owner) in FormationLenses(side))
                 {
                     var formation = new GameObject(formationName) { layer = b.Root.layer }.transform;
-                    formation.SetParent(b.Parts[owner].transform, true);
+                    formation.SetParent(Placed(b, owner), true);
                     formation.SetPositionAndRotation(b.Blockout.Local(formationName), b.Blockout.Rotation(formationName));
                     formation.gameObject.AddComponent<MeshFilter>().sharedMesh = b.Meshes[formationName].Render;
                     var formationRenderer = formation.gameObject.AddComponent<MeshRenderer>();
@@ -127,7 +129,7 @@ namespace Icarus.Editor
                     entry.FindPropertyRelative("renderer").objectReferenceValue = formationRenderer;
                     entry.FindPropertyRelative("objects").arraySize = 0;
                     entry.FindPropertyRelative("litMaterial").objectReferenceValue = b.Donor.FormationLit;
-                    entry.FindPropertyRelative("part").objectReferenceValue = b.Part(owner);
+                    entry.FindPropertyRelative("part").objectReferenceValue = b.Part(Host(b, owner));
                     entry.FindPropertyRelative("gear").objectReferenceValue = null;
                     entry.FindPropertyRelative("controlState").intValue = b.Donor.FormationState;
                     b.Placed.Add(formation);
@@ -164,7 +166,7 @@ namespace Icarus.Editor
             aftEntry.FindPropertyRelative("part").objectReferenceValue = b.Part("stabilator");
             aftEntry.FindPropertyRelative("gear").objectReferenceValue = null;
             aftEntry.FindPropertyRelative("litMaterial").objectReferenceValue = stockTailEntry.FindPropertyRelative("litMaterial").objectReferenceValue;
-            aftEntry.FindPropertyRelative("controlState").intValue = NavLightEntry(navLights, b.Parts[b.Blockout.Parts["light_nav_L"].BlenderParent].transform.Find("navlight_L").GetComponent<Renderer>())
+            aftEntry.FindPropertyRelative("controlState").intValue = NavLightEntry(navLights, Placed(b, b.Blockout.Parts["light_nav_L"].BlenderParent).Find("navlight_L").GetComponent<Renderer>())
                 .FindPropertyRelative("controlState").intValue;
             var stockTailObjects = stockTailEntry.FindPropertyRelative("objects");
             var aftObjects = aftEntry.FindPropertyRelative("objects");

@@ -53,34 +53,13 @@ INTERNALS = {
     # z0 is the axis height at the face, z1 at the nozzle; the face sits high enough for the stowed main wheels below.
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.35, "z1": 0.37, "mass_kg": 1450},
-    # The fuselage's semi-monocoque grid, laid on the skin's own columns (bi.RING round each section) so frames and
-    # stringers meet at shared points and follow the skin exactly. Frames: an L section, a flange along the skin and
-    # a web standing in from it, through every stringer's column and whatever others keep its straight runs within
-    # tolerance of the skin (more round the intake fillets, few on the round top). Stringers: on every sixth column,
-    # 16 round the body, about 0.25 m apart at the widest, so the bays between them and the 0.6 m frames read as
-    # skin panels, about 2.5 to 1, as on a real fuselage. The four at 45 degrees off the vertical, where a fuselage
-    # carries its corner longerons, are heavier. Each stringer runs inside one structure core, wall to wall (runs),
-    # straight between the fewest skin stations that keep it within tolerance of its column.
-    "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "tolerance": 0.02, "flange": 0.05, "web": 0.08,
-               "thickness": 0.008, "mass_kg_each": 9},
-    "stringers": {"column_step": 6, "size": (0.015, 0.025), "tolerance": 0.01,
-                  "longerons": (12, 36, 60, 84), "longeron_size": (0.03, 0.04),
-                  "runs": ((1.6, 5.57), (5.92, 10.97), (11.03, 12.97), (13.075, 14.8)),
-                  # the stringers over the top, between the upper longerons, part at the truss break (parts.TRUSS_BREAK)
-                  # into stringer_<column>_1a and _1b, each with its half of the mid section's truss
-                  "truss": {"columns": (18, 24, 30), "break": 8.2}},
-    # A thin wall just inside each fuselage break (parts.FORWARD_END 5.6, MID_END 11.0, TAIL_START 13.0 and the tail end
-    # at 14.8), so
-    # a section that comes away shows a closed, shaded face instead of open frames against the sky. Each is cut clear
-    # of whatever runs through it and has a torn rim. Stations (centres): 5.57 and 10.97 ahead of their joints,
-    # 11.03 behind its joint, 12.97 ahead of the tail cone's and 13.075 behind it, clear of frame 19's flange (13.0 to
-    # 13.05, on fuselage_aft) by the wall's clearance, 14.76 inside the last frame; the mid section's front wall stands
-    # at 5.92, behind the aux cell (to 5.90), which leaves with the forward section and would hole a wall at the joint
-    # down to its floor.
-    # The radome break at 1.6 needs none: the nose avionics box fills the section there.
-    "bulkheads": {"at": (5.57, 5.92, 10.97, 11.03, 12.97, 13.075, 14.76), "thickness": 0.02, "inset": 0.035, "points": 20,
-                  "tear": (0.0, 0.6, 0.15, 1.0, 0.35, 0.0, 0.8, 0.25, 0.5, 0.05), "tear_depth": 0.03,
-                  "clearance": 0.015, "hole_points": 12},
+    # The fuselage's frame stations: 0.6 m apart, as the painted panel lines are (art/textures/panels.py). No frame,
+    # stringer or wall is drawn, as on stock jets; the structure cores' and the truss's collider shells are cut from the
+    # skin's shape there, inset and inset plus web inside it, over each frame's flange (shell_rings, hulls.shell_groups),
+    # and just inside each break, at the ends ("ends": stations, thickness, inset), so each section's shells run to its
+    # breaks and its centre of mass (the hulls' box) stays where the balance pins it (IcarusAuthor A22).
+    "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "web": 0.08, "flange": 0.05,
+               "ends": ((5.57, 5.92, 10.97, 11.03, 12.97, 13.075, 14.76), 0.02, 0.035)},
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
     "spars": {"front_f": 0.175, "rear_f": 0.70, "rib_pitch": 0.45, "mass_kg_side": 140},
     # The gear wells, each a union of boxes (s from, s to, x from, x to, z from, z to) clipped to just inside the
@@ -407,6 +386,27 @@ def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
     return obj
 
 
+def shell_rings(p):
+    """The shape the structure cores' and the truss's collider shells are cut from (hulls.shell_groups), as (station,
+    points) with the station that places them: each frame station's skin section pulled in by the inset and by inset
+    plus web, at the station and its flange's aft edge, and each of the ends' sections pulled in by their inset either
+    side of the station. Stations are summed as they always were, so one lands a rounding off a break
+    (12.999999999999995), which parts.in_section puts ahead."""
+    f = INTERNALS["frames"]
+    aft = lambda ring, dy: [v + Vector((0.0, dy, 0.0)) for v in ring]
+    out, s = [], f["s0"]
+    while s <= f["s1"] + 1e-9:
+        ring = bi.skin_ring(p, s)
+        section = pulled(ring, f["inset"]) + pulled(ring, f["inset"] + f["web"])
+        out.append((s, section + aft(section, f["flange"])))
+        s += f["pitch"]
+    stations, thickness, inset = f["ends"]
+    for s in stations:
+        ring = pulled(bi.skin_ring(p, s), inset)
+        out.append((s, aft(ring, -thickness / 2) + aft(ring, thickness / 2)))
+    return out
+
+
 def section_points(obj, s):
     """Where obj's mesh crosses the station plane at s, as (x, z) points; empty if it does not."""
     bm = bmesh.new()
@@ -426,74 +426,6 @@ def inside(q, poly):
         if (z1 > q[1]) != (z2 > q[1]) and q[0] < x1 + (q[1] - z1) * (x2 - x1) / (z2 - z1):
             hit = not hit
     return hit
-
-
-def hull_2d(pts):
-    """Convex hull of (x, z) points, counter-clockwise (monotone chain)."""
-    pts = sorted(set(pts))
-    if len(pts) < 3:
-        return pts
-    cross = lambda o, a, b: (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-    lower, upper = [], []
-    for q in pts:
-        while len(lower) >= 2 and cross(lower[-2], lower[-1], q) <= 0:
-            lower.pop()
-        lower.append(q)
-    for q in reversed(pts):
-        while len(upper) >= 2 and cross(upper[-2], upper[-1], q) <= 0:
-            upper.pop()
-        upper.append(q)
-    return lower[:-1] + upper[:-1]
-
-
-def grown_hull(hull, by):
-    """A counter-clockwise convex polygon pushed out by `by` along its edge normals."""
-    out = []
-    for i, b in enumerate(hull):
-        a, c = hull[i - 1], hull[(i + 1) % len(hull)]
-        n1 = Vector((b[1] - a[1], -(b[0] - a[0]))).normalized()
-        n2 = Vector((c[1] - b[1], -(c[0] - b[0]))).normalized()
-        bis = (n1 + n2).normalized()
-        d = by / max(bis.dot(n1), 0.3)
-        out.append((b[0] + bis.x * d, b[1] + bis.y * d))
-    return out
-
-
-def bulkhead(p, name, s, crossing):
-    """A thin wall across the fuselage at s with a torn rim, holed clear of every object in crossing that runs
-    through it. A hole is the grown convex hull of that object's section inside the skin, kept to a few points: the
-    wall is seen at a break, not inspected."""
-    b = INTERNALS["bulkheads"]
-    ring = ring_at(p, s, b["inset"], count=b["points"])
-    cx = sum(v.x for v in ring) / len(ring)
-    cz = sum(v.z for v in ring) / len(ring)
-    rim = [v - Vector((v.x - cx, 0.0, v.z - cz)).normalized() * b["tear_depth"] * b["tear"][k % len(b["tear"])]
-           for k, v in enumerate(ring)]
-    half = Vector((0.0, b["thickness"] / 2, 0.0))
-    wall = outward(bi.loft(name, [[v - half for v in rim], [v + half for v in rim]], cap_back=True, cap_front=True))
-    skin = [(v.x, v.z) for v in ring_at(p, s, 0.01)]
-    cutters = []
-    for obj in crossing:
-        hull = hull_2d([q for q in section_points(obj, s) if inside(q, skin)])
-        if len(hull) < 3:
-            continue
-        if len(hull) > b["hole_points"]:
-            hull = hull_2d(resample_outline(hull, b["hole_points"]))
-        hole = grown_hull(hull, b["clearance"])
-        cutters.append(outward(bi.loft(obj.name + "_hole", [[bi.P(s + d, x, z) for x, z in hole] for d in (-0.1, 0.1)],
-                                       cap_back=True, cap_front=True)))
-    if cutters:
-        subtract(wall, cutters)
-        for c in cutters:
-            bpy.data.objects.remove(c, do_unlink=True)
-    bm = bmesh.new()  # as for the tanks: no boolean n-gons
-    bm.from_mesh(wall.data)
-    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
-    bm.to_mesh(wall.data)
-    bm.free()
-    if not wall.data.polygons:
-        raise ValueError("%s: nothing left of the wall at station %.2f" % (name, s))
-    return wall
 
 
 def cylinder_loft(name, profile, segments=32):
@@ -547,7 +479,7 @@ def _build(p, mats):
     bpy.data.objects.remove(inner, do_unlink=True)
     # The gear wells run out to just inside the skin: a well a compartment's inset short of it would leave a slot
     # round the open doors that looks past the well's walls into the structure. The main wells' roofs stand above the
-    # ducts' flattened floor where it dips at the wells' ends; cut clear of the ducts, as the frames are, or they stand
+    # ducts' flattened floor where it dips at the wells' ends; cut clear of the ducts, or they stand
     # inside the intakes. Over the middle the floor stands only 8 to 15 mm above the roof, so a wider clearance
     # would cut the whole roof down.
     ducts = duct_cutter(p, I["bay_duct_gap"])
@@ -613,35 +545,6 @@ def _build(p, mats):
                                               (e["end_s"], 0.0, e["z1"], e["ab_radius"])])
     parts.append(tag(bi.finish(ab, mats["engine"]), "engine", "fuselage", e["mass_kg"] * 0.2))
 
-    fr = I["frames"]
-    import stations
-
-    ramps = stations.ramp_stations(p)
-    trough_from, trough_to = ramps[0][0], ramps[-1][1]  # the trough with its ramps
-    s = fr["s0"]
-    k = 0
-    while s <= fr["s1"] + 1e-9:
-        skin = bi.skin_ring(p, s)  # pulled whole, about the same centre as the stringers
-        n = len(skin)
-        line = pulled(skin, fr["inset"]) + [pulled(skin, fr["inset"])[0]]
-        needed = simplified(line, 0, n // 2, fr["tolerance"]) | simplified(line, n // 2, n, fr["tolerance"])
-        round_trough = set()
-        if trough_from <= s <= trough_to:  # every column round the trough: a straight run between two cuts into it
-            lip0, lip1 = bi.TROUGH_LIP_COLUMNS
-            round_trough = set(range(lip0, lip1 + 1)) | {(n // 2 - c) % n for c in range(lip0, lip1 + 1)}
-        columns = sorted({c % n for c in needed} | set(range(0, n, I["stringers"]["column_step"])) | round_trough)
-        outer, web, inner = ([ring[c] for c in columns] for ring in
-                             (pulled(skin, fr["inset"] + d) for d in (0.0, fr["thickness"], fr["web"])))
-        aft = lambda ring, dy: [v + Vector((0, dy, 0)) for v in ring]
-        # the L section, round from the flange's skin face: flange, its edge, the web's aft face, the web's inner
-        # edge, its front face back to the skin; the last ring closes it
-        rings = [outer, aft(outer, fr["flange"]), aft(web, fr["flange"]), aft(web, fr["thickness"]),
-                 aft(inner, fr["thickness"]), inner, outer]
-        obj = bi.finish(bi.loft("frame_%02d" % k, rings), mats["frame"], smooth=False)
-        parts.append(tag(obj, "structure", "fuselage", fr["mass_kg_each"]))
-        s += fr["pitch"]
-        k += 1
-
     sp = I["spars"]
     for side, suffix in ((1, "_L"), (-1, "_R")):
         pieces = []
@@ -664,80 +567,5 @@ def _build(p, mats):
             bi.finish(obj, mats["structure"], smooth=False)
             parts.append(tag(obj, "structure", "wing" + suffix, sp["mass_kg_side"] / len(pieces)))
 
-    bh = I["bulkheads"]
-    # Everything built so far that may run through a wall, less the skin and the fin, whose root organise trims
-    # back to the skin.
-    crossing = [o for o in list(bpy.data.collections["Icarus"].objects) + list(bi.TARGET.objects)
-                if o.type == "MESH" and o.name not in ("fuselage", "fin") and not o.name.startswith("frame_")]
-    for s in bh["at"]:
-        wall = bulkhead(p, "bulkhead_%05.2f" % s, s, crossing)
-        parts.append(tag(bi.finish(wall, mats["frame"], smooth=False), "structure", "fuselage"))
-    for obj in stringers(p):
-        parts.append(tag(bi.finish(obj, mats["frame"], smooth=False), "structure", "fuselage"))
-    # A frame's web stands further in from the skin than the intake lobe clears its duct; cut the frames and
-    # stringers clear of the ducts, as the fuel cells are, or they show inside the intake mouths.
-    cutters = duct_cutter(p, I["duct_clearance"])
-    reach = [(Vector([min(v.co[i] for v in c.data.vertices) for i in range(3)]),
-              Vector([max(v.co[i] for v in c.data.vertices) for i in range(3)])) for c in cutters]
-    for obj in [o for o in parts if o.name.startswith(("frame_", "stringer_"))]:
-        co = [v.co for v in obj.data.vertices]
-        lo = Vector([min(v[i] for v in co) for i in range(3)])
-        hi = Vector([max(v[i] for v in co) for i in range(3)])
-        crossing = [c for c, (a, b) in zip(cutters, reach) if all(lo[i] < b[i] and hi[i] > a[i] for i in range(3))]
-        if crossing:
-            subtract(obj, crossing)
-    for c in cutters:
-        bpy.data.objects.remove(c, do_unlink=True)
     return parts
 
-
-def stringers(p):
-    """INTERNALS["stringers"]: each a box section along its skin column, one object per run."""
-    st, inset = INTERNALS["stringers"], INTERNALS["frames"]["inset"]
-    skin_stations = bi.fuselage_stations(p)
-    rings = {}
-
-    def ring(s):
-        if s not in rings:
-            rings[s] = bi.skin_ring(p, s)
-        return rings[s]
-
-    out = []
-    truss = st["truss"]
-    for run, (s0, s1) in enumerate(st["runs"]):
-        for c in range(0, bi.RING, st["column_step"]):
-            if s0 < truss["break"] < s1 and c in truss["columns"]:
-                out += [stringer(ring, st, inset, skin_stations, c, a, b, "%d%s" % (run, half))
-                        for a, b, half in ((s0, truss["break"], "a"), (truss["break"], s1, "b"))]
-            else:
-                out.append(stringer(ring, st, inset, skin_stations, c, s0, s1, run))
-    return out
-
-
-def stringer(ring, st, inset, skin_stations, c, s0, s1, run):
-    """One stringer on skin column c from s0 to s1, named stringer_<column>_<run>."""
-    stations = [s0] + [s for s in skin_stations if s0 < s < s1] + [s1]
-    width, depth = st["longeron_size"] if c in st["longerons"] else st["size"]
-    line = [pulled(ring(s), inset)[c] for s in stations]
-    keep = sorted(simplified(line, 0, len(line) - 1, st["tolerance"]) | {0, len(line) - 1})
-    sections = []
-    for i in keep:
-        skin = ring(stations[i])
-        side = (skin[(c + 1) % bi.RING] - skin[c - 1]).normalized() * (width / 2)
-        face, back = pulled(skin, inset)[c], pulled(skin, inset + depth)[c]
-        sections.append([face - side, face + side, back + side, back - side])
-    return bi.loft("stringer_%02d_%s" % (c, run), sections, cap_back=True, cap_front=True)
-
-
-def simplified(line, i, j, tolerance):
-    """The indices between i and j that a polyline needs to stay within tolerance of line (Douglas-Peucker)."""
-    a, b = line[i], line[j]
-    far, at = 0.0, None
-    for k in range(i + 1, j):
-        t = max(0.0, min(1.0, (line[k] - a).dot(b - a) / max((b - a).length_squared, 1e-12)))
-        d = (line[k] - a.lerp(b, t)).length
-        if d > far:
-            far, at = d, k
-    if at is None or far <= tolerance:
-        return set()
-    return {at} | simplified(line, i, at, tolerance) | simplified(line, at, j, tolerance)

@@ -140,7 +140,8 @@ namespace Icarus.Editor
                 SectionInertia.Pin(rb, SectionInertia.BoxesUnder(new[] { p.Part }), automaticCenter: !fuelled);
                 p.Rb = rb;
             }
-            // The Icarus's parts ignore one another (src/Icarus/SelfCollision.cs); stock parts sit apart.
+            // The bench measures flex alone, so its parts ignore one another; in the game, unjointed parts' hulls stand
+            // apart by more than this flex (art/blender/clearance.py).
             var colliders = parts.Values.Select(p => p.Part.GetComponentsInChildren<Collider>(true).Where(c => !c.isTrigger).ToArray()).ToArray();
             for (var i = 0; i < colliders.Length; i++)
                 for (var j = i + 1; j < colliders.Length; j++)
@@ -301,8 +302,7 @@ namespace Icarus.Editor
         // 570 kg, an empty one 70; art/blender/tip_tanks.py): its joint may carry at most half its break force on any bench
         // case, empty and full. Its tip's movement against the inner box, the physical seam where the two meet, is reported:
         // no solver setting or second brace brought it under 5 mm with a full tank (4.3 mm empty and 6.3 full at 48
-        // position and 16 velocity iterations, 5.3 and 8.1 as the game runs them), so src/Icarus/WingSkinFollow.cs draws
-        // the outer box on the inner while they are jointed and the seam never shows.
+        // position and 16 velocity iterations, 5.3 and 8.1 as the game runs them).
         private const float CrankLoadLimit = 0.5f;
         private static readonly float[] TipStores = { 70f, 570f };
 
@@ -310,10 +310,8 @@ namespace Icarus.Editor
         // its part): under full afterburner (65 kN core and 45 afterburner), vectored to its 4 degree limit, in a 9 g pull,
         // the core's, afterburner's, nozzle's and tail cone's joints, and the root braces of the core, tail cone and fin,
         // carry at most NozzleLoadLimit of their break forces. Reported: the thrust line's turn (the nozzle against the
-        // root), and the physical seams of the fixed shroud (the nozzle part's own mesh) against each aft rear skin panel it
-        // ends in and of the tail cone against the aft core. No brace held the shroud within 3 mm of the tail cone's skin
-        // (17 mm with the root braces, 8 before the tail cone split off), so src/Icarus/WingSkinFollow.cs draws the tail cone
-        // on the aft core, and the afterburner and nozzle on the tail cone, while they are jointed.
+        // root), and the physical seams of the fixed shroud (the nozzle part's own mesh) against the tail cone it ends in,
+        // whose skin it carries, and of the tail cone against the aft core.
         private const float NozzleLoadLimit = 0.7f;
         private static readonly BenchCase[] NozzleCases =
         {
@@ -331,13 +329,13 @@ namespace Icarus.Editor
         private static string CheckNozzleBench(Build b, List<string> p)
         {
             var worst = new Dictionary<string, float>();
-            var seams = new[] { ("nozzle", "skin_aft_rear_L", "nozzle"), ("nozzle", "skin_aft_rear_R", "nozzle"), ("fuselage_tail", "fuselage_aft", "fuselage_tail"),
+            var seams = new[] { ("nozzle", "fuselage_tail", "nozzle"), ("fuselage_tail", "fuselage_aft", "fuselage_tail"),
                 ("nozzle", "root", "thrust_vector") };
             Debug.Log("[Icarus] nozzle bench:\n" + RunTailBench(b.Root, new string[0], new[] { "stabilator" }, true, 0.5f, worst, null, seams,
                 new[] { "engine_core", "engine_afterburner", "nozzle", "fuselage_tail", "fin_spar" }, NozzleCases));
             KeyValuePair<string, float> Worst(string kind, string pair) =>
                 worst.Where(w => w.Key.Contains($" |{kind}| ") && w.Key.EndsWith(pair)).OrderByDescending(w => w.Value).First();
-            var shroud = Worst("seam", "vs skin_aft_rear_L").Value > Worst("seam", "vs skin_aft_rear_R").Value ? Worst("seam", "vs skin_aft_rear_L") : Worst("seam", "vs skin_aft_rear_R");
+            var shroud = Worst("seam", "nozzle vs fuselage_tail");
             var cone = Worst("seam", "fuselage_tail vs fuselage_aft");
             var coneTurn = Worst("turn", "fuselage_tail vs fuselage_aft");
             var thrust = Worst("turn", "nozzle vs root");

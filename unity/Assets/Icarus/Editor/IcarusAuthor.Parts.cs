@@ -86,10 +86,6 @@ namespace Icarus.Editor
             P("gear_leg_N", "cockpit_cell", JointClass.Primary, "fuselage/intake_L"),
             P("avionics_tray", "fuselage_forward", JointClass.Primary, "fuselage/cockpit/nose"),
             P("fuel_aux", "fuselage_forward", JointClass.Primary, "wing1b_L"),
-            P("skin_forward_L", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_forward_R", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_forward_belly_L", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_forward_belly_R", "fuselage_forward", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("fuselage_aft", RootPart, JointClass.Frame, "tail", "tail"),
             P("fuselage_tail", "fuselage_aft", JointClass.Section, "tail"),
             P("engine_core", "fuselage_aft", JointClass.Spar, "tail"),
@@ -100,27 +96,15 @@ namespace Icarus.Editor
             P("fin_skin", "fin_spar", JointClass.Panel, "vstab1/vstab2"),
             P("rudder", "fin_spar", JointClass.Surface, "vstab1/vstab2/rudder"),
             P("stabilator", "fin_spar", JointClass.Surface, "vstab1/vstab2"),
-            P("skin_aft_front_L", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_aft_front_R", "fuselage_aft", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_aft_rear_L", "fuselage_tail", JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_aft_rear_R", "fuselage_tail", JointClass.Panel, "fuselage/cockpit/cheek_L"),
             P("intake_duct_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("intake_duct_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("wing_spar_L", RootPart, JointClass.Spar, "fuselage/wing1a_L"),
             P("wing_spar_outer_L", "wing_spar_L", JointClass.OuterWing, "fuselage/wing1a_L/wing2_L/wingtip_L"),
-            P("wing_skin_inner_upper_L", "wing_spar_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("wing_skin_inner_lower_L", "wing_spar_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("wing_skin_outer_upper_L", "wing_spar_outer_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("wing_skin_outer_lower_L", "wing_spar_outer_L", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
             P("aileron_L", "wing_spar_outer_L", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("flap_L", "wing_spar_L", JointClass.Flap, "fuselage/wing1a_L/wing2_L/flap_L"),
             P("lef_L", "wing_spar_outer_L", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("wing_spar_R", RootPart, JointClass.Spar, "fuselage/wing1a_L"),
             P("wing_spar_outer_R", "wing_spar_R", JointClass.OuterWing, "fuselage/wing1a_L/wing2_L/wingtip_L"),
-            P("wing_skin_inner_upper_R", "wing_spar_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("wing_skin_inner_lower_R", "wing_spar_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("wing_skin_outer_upper_R", "wing_spar_outer_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
-            P("wing_skin_outer_lower_R", "wing_spar_outer_R", JointClass.Panel, "fuselage/wing1a_L/wing2_L"),
             P("aileron_R", "wing_spar_outer_R", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("flap_R", "wing_spar_R", JointClass.Flap, "fuselage/wing1a_L/wing2_L/flap_L"),
             P("lef_R", "wing_spar_outer_R", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
@@ -132,16 +116,6 @@ namespace Icarus.Editor
             P("fuel_aft_R", RootPart, JointClass.Primary, "wing1b_L"),
             P("fuselage_truss_front", RootPart, JointClass.Primary, ""),
             P("fuselage_truss_rear", RootPart, JointClass.Primary, ""),
-            P("skin_mid_front_L", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_rear_L", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_front_belly_L", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_rear_belly_L", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_front_R", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_rear_R", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_front_belly_R", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("skin_mid_rear_belly_R", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("dorsal_cover_front", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
-            P("dorsal_cover_rear", RootPart, JointClass.Panel, "fuselage/cockpit/cheek_L"),
         };
 
         private static readonly string[] R13Tanks = { "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R", "fuel_aux" };
@@ -184,13 +158,13 @@ namespace Icarus.Editor
                     throw new InvalidDataException($"{spec.Name}: its _visible mesh doesn't sit at its hinge, so its colliders can't sit on the part.");
                 SetColliders(b, go, entry.Name);
                 if (Array.IndexOf(StructureCores, spec.Name) >= 0)
-                    AddSectionInertia(go, b.Meshes[spec.Name].Render.bounds);
+                    AddSectionInertia(go, BoundsOf(b.Meshes[spec.Name].Colliders.SelectMany(c => c.vertices))); // the hulls: no frames drawn
                 if (!b.Blockout.Parts[spec.Name].IsHinge)
                 {
                     Ensure<MeshFilter>(go).sharedMesh = b.Meshes[spec.Name].Render;
                     Ensure<MeshRenderer>(go).sharedMaterials = b.Meshes[spec.Name].Materials;
                 }
-                ConfigurePart(b, go, b.Mass[spec.Name]);
+                ConfigurePart(b, go, spec.Name, b.Mass[spec.Name]);
                 if (spec.Parent != null)
                     b.Joints[spec.Name] = new List<string> { spec.Parent };
                 var fuel = b.Blockout.Parts[spec.Name].Number("fuel_kg");
@@ -314,7 +288,7 @@ namespace Icarus.Editor
             }
         }
 
-        private static void ConfigurePart(Build b, GameObject go, float mass)
+        private static void ConfigurePart(Build b, GameObject go, string name, float mass)
         {
             var so = new SerializedObject(go.GetComponent(GameType("AeroPart")));
             Prop(so, "parentUnit").objectReferenceValue = b.Aircraft;
@@ -331,12 +305,33 @@ namespace Icarus.Editor
             var renderers = Prop(so, "damageMaterial").FindPropertyRelative("renderers");
             var own = go.GetComponent<MeshRenderer>();
             SetList(renderers, own != null ? new Object[] { own } : new Object[0]);
-            // The mass centre for UnitPart.ModifyMass (fuel, stores): the centre of the hulls' bounds.
+            // The mass centre for UnitPart.ModifyMass (fuel, stores): the centre of the hulls' bounds, as they stood before
+            // the clearance carve.
             var com = go.transform.Find("CoM") ?? new GameObject("CoM") { layer = go.layer }.transform;
             com.SetParent(go.transform, false);
-            com.position = BoundsOf(go.GetComponents<MeshCollider>().SelectMany(c => Corners(c.sharedMesh.bounds).Select(go.transform.TransformPoint))).center;
+            com.position = PreCarveBox(b, name, "mass_box_local").center;
             Prop(so, "centerOfMass").objectReferenceValue = com;
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // The skin panels the export folded into the parts they hang on (art/blender/chunks.py folded_into): each panel's
+        // mesh under its part, where it was, as stock skins are part of their chunk. ListLiveryRenderers puts its skin on
+        // the part's livery and damage; its LOD1 hull hangs on it (AddLods).
+        private static void PlaceSkins(Build b)
+        {
+            var placed = 0;
+            foreach (var panel in b.Blockout.Parts.Values.Where(p => p.Fbx != null && p.Text("folded_into") != null).OrderBy(p => p.Name, StringComparer.Ordinal))
+            {
+                var host = b.Parts[panel.Text("folded_into")].transform;
+                var mesh = new GameObject(panel.Name) { layer = b.Root.layer };
+                mesh.transform.SetParent(host, true);
+                mesh.transform.SetPositionAndRotation(b.Blockout.Local(panel.Name), b.Blockout.Rotation(panel.Name));
+                mesh.AddComponent<MeshFilter>().sharedMesh = b.Meshes[panel.Name].Render;
+                mesh.AddComponent<MeshRenderer>().sharedMaterials = b.Meshes[panel.Name].Materials;
+                b.Visuals[panel.Name] = mesh.transform;
+                placed++;
+            }
+            b.Report.Add($"skins: {placed} panels placed on the parts they fold into");
         }
 
         // Armour, thresholds and hit points from each part's Revoker armour class; every part starts at 100 HP by design.
@@ -361,9 +356,8 @@ namespace Icarus.Editor
         }
 
         // Serialized PartJoints: one per part to its parent part (AeroPart.Awake reads joints[0]), then its Braces, each
-        // pinned where the two parts' colliders meet. No other cross joints brace touching neighbours: the
-        // Icarus's parts ignore one another's colliders at spawn (src/Icarus/SelfCollision.cs), so a neighbour can't push
-        // them apart, and a section shed in a breakup takes nothing but its children with it.
+        // pinned where the two parts' colliders meet. No other cross joints: parts with no joint between them stand apart
+        // (art/blender/clearance.py), and a section shed in a breakup takes nothing but its children with it.
         private static void WriteJoints(Build b)
         {
             var aeroType = GameType("AeroPart");

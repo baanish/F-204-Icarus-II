@@ -42,6 +42,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Icarus_FuelCell
+    second: {fileID: 2100000, guid: a36c21dd3ab3ef5449d82fda4b73f2f1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Icarus_Nozzle
     second: {fileID: 2100000, guid: 730fc93fdbb31754ea312a41da63a2af, type: 2}
   - first:
