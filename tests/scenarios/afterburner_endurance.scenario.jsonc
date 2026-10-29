@@ -1,4 +1,4 @@
-// Full-afterburner endurance from full internal fuel. R14 predicts 300 to 306 s: 2,400 kg at 5.50 kg per check of afterburner
+// Full-afterburner endurance from full internal fuel. The offline fuel model predicts 300 to 306 s: 2,400 kg at 5.50 kg per check of afterburner
 // plus 2.50 of core at full throttle, drawn about once a second; afterburner fuel doesn't fall with density, so altitude
 // doesn't matter. The Icarus starts over Ignus at 10 km heading east at 650 m/s, full fuel, clean, at throttle 1. About 715 m/s
 // for 300 s is 215 km, more than the map's 164 km, so after 140 s the hold reverses onto west in 15 deg heading steps every 8 s,
@@ -18,6 +18,8 @@
   "sample_hz": 2,
   "timeout": 480,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
+      "label": "loadout: all three hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 },
                             { "path": "own.fuel_frac", "gt": 0.99 } ] }, "label": "the Icarus airborne at 10 km with full fuel" },
     { "mark": { "label": "start" } },
@@ -30,7 +32,7 @@
     { "mark": { "label": "burn" } },
     { "record": { "path": "own.fuel_frac" }, "label": "fuel at the start of the burn (its t starts the clock)" },
     { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.fuel_frac", "gt": 0.002 } ] }, "for": 140, "label": "140 s east at full afterburner" },
-    { "record": { "path": "own.fuel_frac" }, "label": "fuel after 140 s (R14: 0.533)" },
+    { "record": { "path": "own.fuel_frac" }, "label": "fuel after 140 s (offline fuel model: 0.533)" },
     { "record": { "path": "own.pos.x" }, "label": "x after 140 s, m" },
     { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 75, "throttle": 1 } },
     { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.fuel_frac", "gt": 0.002 } ] }, "for": 8, "label": "turning: heading 075" },

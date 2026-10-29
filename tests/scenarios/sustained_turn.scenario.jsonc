@@ -1,4 +1,4 @@
-// Energy bleed in a hard turn: R14's recommended first cut predicts -1.155 m/s2 holding altitude in a 9 g turn at 10 km and
+// Energy bleed in a hard turn: the offline aero model predicts -1.155 m/s2 holding altitude in a 9 g turn at 10 km and
 // 400 m/s, full afterburner, half fuel (r14_turns.csv). The Icarus starts over Ignus at 10 km, heading east at 400 m/s, half fuel,
 // clean; a hold at throttle 1 is told to reverse onto 300, a left turn of 150 deg, and its autopilot pulls as hard as its
 // fly-by-wire lets it (5.75 g within 2.2 s in its first run). The runner can't command a load factor, so the run waits up to 8 s for 8 g and records
@@ -18,6 +18,8 @@
   "sample_hz": 20,
   "timeout": 180,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
+      "label": "loadout: all three hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
       "label": "the Icarus airborne at 10 km" },
     { "mark": { "label": "start" } },

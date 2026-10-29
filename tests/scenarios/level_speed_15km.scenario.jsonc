@@ -1,4 +1,4 @@
-// Level top speed at 15 km, full afterburner. R14's recommended first cut predicts 816.9 m/s, Mach 2.817 (the game's speed of
+// Level top speed at 15 km, full afterburner. The offline aero model predicts 816.9 m/s, Mach 2.817 (the game's speed of
 // sound is 290 m/s above 10 km), for a clean 7,000 kg Icarus, about half fuel. The Icarus starts over Ignus at 15 km, heading
 // east at 700 m/s with full fuel and about 160 km of map ahead; a hold keeps 15 km at throttle 1 (the afterburner runs from
 // 0.90 to 1.00). Full afterburner drains 2,400 kg in about 300 s, so half fuel comes about 150 s in, about 120 km east.
@@ -18,6 +18,8 @@
   "sample_hz": 2,
   "timeout": 420,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
+      "label": "loadout: all three hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 14500 } ] },
       "label": "the Icarus airborne at 15 km" },
     { "mark": { "label": "start" } },
@@ -27,7 +29,7 @@
     { "fly": { "mode": "hold", "alt_msl_m": 15000, "hdg_deg": 90, "throttle": 1 } },
     { "time": { "scale": 4 } },
     { "wait": { "path": "own.fuel_frac", "lt": 0.5 }, "timeout": 240, "label": "half fuel, about 7,000 kg" },
-    { "check": { "path": "own.mach", "between": [2.73, 2.9] }, "label": "Mach at half fuel within 3% of R14's 2.817" },
+    { "check": { "path": "own.mach", "between": [2.73, 2.9] }, "label": "Mach at half fuel within 3% of the offline aero model's predicted 2.817" },
     { "record": { "path": "own.mach" }, "label": "Mach at half fuel (target 2.82)" },
     { "record": { "path": "own.tas_mps" }, "label": "TAS at half fuel, m/s (target 817)" },
     { "record": { "path": "own.alt_msl_m" }, "label": "altitude at half fuel, m" },

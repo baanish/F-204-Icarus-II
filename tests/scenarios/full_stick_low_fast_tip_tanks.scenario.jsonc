@@ -16,6 +16,8 @@
   "sample_hz": 20,
   "timeout": 240,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "baanish_icarus_tip_tank||" }, "within": 3,
+      "label": "loadout: tip tanks only, inner and conformal sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 800 } ] },
       "label": "the Icarus airborne at 1 km" },
     { "mark": { "label": "start" } },

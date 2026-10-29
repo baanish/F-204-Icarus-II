@@ -55,6 +55,14 @@ public sealed class IcarusPlugin : BaseUnityPlugin
 
     void OnDestroy() => harmony?.UnpatchSelf();
 
+    /// <summary>The active loadout, including empty hardpoint sets, for scenario setup guards.</summary>
+    public object? AgenticState()
+    {
+        if (!GameManager.GetLocalAircraft(out var aircraft) || aircraft.definition.jsonKey != JsonKey ||
+            aircraft.Networkloadout == null) return null;
+        return new { loadout = string.Join("|", aircraft.Networkloadout.weapons.Select(m => m != null ? m.jsonKey : "")) };
+    }
+
     void Update()
     {
         Log.Tick();

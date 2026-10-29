@@ -71,7 +71,7 @@ save(m, "icarus_runway", "the player's Icarus for Primeva parked on Sandrift Air
 
 # Sandrift's runway Start is (27839, -19545), heading 4.3 (the framework's runway read, as its sortie example lands there).
 # 19 km out on its extended centreline at 1,200 m is the framework landing example's straight-in hand-over. 23% fuel leaves
-# about 20% on final after the roughly 100 s inbound at low throttle (core fuel 0.45 to 2.5 kg per check, R14).
+# about 20% on final after the roughly 100 s inbound at low throttle (offline fuel model: core fuel 0.45 to 2.5 kg per check).
 hdg = math.radians(4.3)
 m = template("airborne")
 icarus(m["aircraft"][0], 0.23, {"x": round(27839 - math.sin(hdg) * 19000, 1), "y": 1200.0, "z": round(-19545 - math.cos(hdg) * 19000, 1)},

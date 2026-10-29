@@ -1,0 +1,46 @@
+// Frame time with 8 Icarus aircraft at 10 km, 400 m/s and half fuel over Ignus.
+// Pass: the missile hits. Measure p95 over 10 s intact, 10 s after the hit and 30 s of debris.
+// Only the player's aircraft is hit; seven AI wingmen remain in the eight-aircraft comparison.
+// Compare alternating runs with tools/frame_gate.py at the first buildable change to parts, colliders or per-frame code.
+// From the repo root: no-agentic run --uncapped tests/scenarios/frames_baanish_icarus_8.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km_eight.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus"
+  ],
+  "measure": true,
+  "sample_hz": 4,
+  "timeout": 180,
+  "steps": [
+    {"require": {"all": [{"path": "own.alive", "eq": true}, {"path": "own.type", "eq": "baanish_icarus"}, {"path": "own.alt_msl_m", "gt": 9500}]}, "label": "the Icarus airborne at 10 km"},
+    {"require": {"path": "mods.baanish.icarus.loadout", "eq": "||"}, "label": "loadout: all three hardpoint sets empty", "within": 3},
+    {"fly": {"mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8}},
+    {"wait": {"path": "own.pitch_rate_dps", "between": [-1, 1]}, "hold": 5, "timeout": 30, "label": "settled"},
+    {"camera": {"mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 120, "pitch_deg": 10}},
+    {"mark": {"label": "start"}},
+    {"perf": {}},
+    {"wait": {"path": "sample_ms", "gt": -1}, "hold": 10, "timeout": 15, "label": "10 s of intact flight"},
+    {"perf": {"label": "intact"}},
+    {"spawn": {"kind": "missile", "type": "AAM2", "faction": "Boscali", "back_m": 3000, "left_m": 1500, "speed_mps": 600, "name": "m1"}},
+    {"mark": {"label": "launched"}},
+    {"wait": {"event": "missile_end", "since": "launched"}, "timeout": 40, "label": "the missile ends"},
+    {"check": {"event": "missile_end", "since": "launched", "result": "hit"}, "label": "the missile hits the Icarus"},
+    {"mark": {"label": "hit"}},
+    {"perf": {}},
+    {"screenshot": {"name": "hit"}},
+    {"wait": {"path": "sample_ms", "gt": -1}, "hold": 10, "timeout": 15, "label": "the 10 s after the hit"},
+    {"perf": {"label": "breakup"}},
+    {"perf": {}},
+    {"screenshot": {"name": "breakup"}},
+    {"wait": {"path": "sample_ms", "gt": -1}, "hold": 30, "timeout": 35, "label": "30 s of debris"},
+    {"perf": {"label": "debris"}},
+    {"screenshot": {"name": "debris"}},
+    {"record": {"event": "part_detached", "field": "part", "since": "launched"}, "label": "parts detached after the hit"},
+    {"record": {"event": "frames", "label": "intact", "field": "p95_ms", "since": "start"}, "label": "frame time p95, intact (ms)"},
+    {"record": {"event": "frames", "label": "breakup", "field": "p95_ms", "since": "start"}, "label": "frame time p95, 10 s after the hit (ms)"},
+    {"record": {"event": "frames", "label": "debris", "field": "p95_ms", "since": "start"}, "label": "frame time p95, 30 s of debris (ms)"}
+  ]
+}

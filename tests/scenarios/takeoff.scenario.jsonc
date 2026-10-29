@@ -1,9 +1,9 @@
 // Takeoff: the game's takeoff AI runs the Icarus off Sandrift's runway at full fuel (8,200 kg), clean. It holds full throttle
 // (full afterburner) on the roll and stops steering along the runway, pitching for the climb, once airspeed passes 0.7 times
 // AircraftParameters.takeoffSpeed (AIPilotTakeoffState.cs:97,137): 0.7 x 95 = 66.5 m/s. Liftoff is the game's own test,
-// radar altitude above 1 m (AIPilotTakeoffState.cs:105), here own.alt_agl_m, which reads 0 at rest. R14 puts the full-fuel
+// radar altitude above 1 m (AIPilotTakeoffState.cs:105), here own.alt_agl_m, which reads 0 at rest. The offline aero model puts the full-fuel
 // minimum speed at 71.75 m/s (its 86.1 m/s approach is 1.2 times it).
-// Pass: rotation (pitch past +2.5 deg, rest is +0.2) between 66.5 and 85 m/s; liftoff between 72 and 95 m/s (R14's full-fuel
+// Pass: rotation (pitch past +2.5 deg, rest is +0.2) between 66.5 and 85 m/s; liftoff between 72 and 95 m/s (the offline aero model's full-fuel
 // minimum speed, and the takeoffSpeed knob); the hold takes over by 75 m up with the gear coming up within 10 s; the airframe
 // intact and nothing detached throughout. Rotation and liftoff speeds are recorded; the verdict is MEASURED or FAIL.
 // From the repo root: no-agentic run tests/scenarios/takeoff.scenario.jsonc
@@ -19,6 +19,8 @@
   "sample_hz": 20,
   "timeout": 240,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
+      "label": "loadout: all three hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "lt": 1 },
                             { "path": "own.gear", "eq": "down" } ] }, "label": "the Icarus parked on the runway, gear down" },
     { "mark": { "label": "start" } },

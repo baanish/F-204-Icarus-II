@@ -15,6 +15,8 @@
   ],
   "timeout": 300,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "baanish_icarus_tip_tank||" }, "within": 3,
+      "label": "loadout: tip tanks only, inner and conformal sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
     { "mark": { "label": "start" } },
     { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1.0 } },

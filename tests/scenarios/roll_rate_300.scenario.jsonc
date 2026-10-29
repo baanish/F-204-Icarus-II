@@ -15,6 +15,8 @@
   "sample_hz": 20,
   "timeout": 120,
   "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
+      "label": "loadout: all three hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 2800 } ] },
       "label": "the Icarus airborne at 3 km" },
     { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0.7 } },
