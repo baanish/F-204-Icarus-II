@@ -15,8 +15,11 @@ namespace Icarus;
 /// the outer wing box's body has carried its tip (where its wingtip station was made) in the inner box's frame from where
 /// the joints made it, the physical seam the two boxes meet at, its peak over that second in mm, and the peak of the
 /// outer box's joint against its limit. A "thrust-line"
-/// line gives the nozzle's body's peak turn against the root over that second, exact for small turns: the JetNozzle rides
-/// that body, so this is how far the thrust line has turned off its authored axis before vectoring.
+/// line gives the peak turn against the root over that second of fuselage_aft, the body the JetNozzle rides, exact for small
+/// turns: this is how far the thrust line has turned off its authored axis before vectoring. An "approach-<part>-<other>" line gives how far
+/// a part has come toward an unjointed neighbour (each wing box toward fuselage_aft, the fin skin toward the tail cone):
+/// the most any of its nearest points has moved against the neighbour's surface over that second, in mm, beside that
+/// point's gap at rest.
 /// </summary>
 static class TailFlex
 {
@@ -69,6 +72,15 @@ sealed class TailFlexProbe : MonoBehaviour
     AeroPart? nozzle;
     Quaternion nozzleRest;
     float nozzlePeak;
+    // For each pair of unjointed neighbours (Approaches), the first part's nearest points to the second (WingAftPairs
+    // collider pairs): the point in the first part's frame, its rest point and the outward direction from the second part's
+    // surface in the second part's frame, the rest gap, and the peak distance the point has come toward it since the last
+    // line, mm.
+    (AeroPart Wing, AeroPart Aft, Vector3 Point, Vector3 Home, Vector3 Normal, float Gap)[] wingAft = null!;
+    float[] wingAftPeak = null!;
+    const int WingAftPairs = 3;
+    // The neighbours measured: every inner and outer wing box against fuselage_aft, and the fin skin against the tail cone.
+    static readonly (string Part, string Other)[] Approaches = { ("wing_spar_", "fuselage_aft"), ("fin_skin", "fuselage_tail") };
     // Each fuselage skin piece, the part it hangs on, its mesh's bounds corners in its own frame and their rest points in
     // that part's frame, and its peak movement since the last line, mm.
 
@@ -86,7 +98,10 @@ sealed class TailFlexProbe : MonoBehaviour
         cranks = found.ToArray();
         crankPeak = new float[cranks.Length];
         aircraft = owner;
-        nozzle = all.FirstOrDefault(p => p.name == "nozzle");
+        nozzle = all.FirstOrDefault(p => p.name == "fuselage_aft");
+        wingAft = Approaches.SelectMany(a => all.Where(p => p.name.StartsWith(a.Part))
+            .SelectMany(p => all.Where(o => o.name == a.Other).SelectMany(o => NearestPairs(p, o)))).ToArray();
+        wingAftPeak = new float[wingAft.Length];
         if (nozzle != null) nozzleRest = Quaternion.Inverse(aircraft.rb.rotation) * nozzle.rb.rotation;
         nozzlePeak = 0f;
         parts = tail;
@@ -98,6 +113,26 @@ sealed class TailFlexProbe : MonoBehaviour
         roll = new float[parts.Length];
         gPeak = 0f;
         reportAt = Time.time + ReportIntervalS;
+    }
+
+    // The WingAftPairs closest pairs of a wing box's and fuselage_aft's colliders, each as the wing's point in its own frame,
+    // that point and the outward normal of fuselage_aft's surface there in fuselage_aft's frame, and the gap.
+    static System.Collections.Generic.IEnumerable<(AeroPart, AeroPart, Vector3, Vector3, Vector3, float)> NearestPairs(AeroPart wing, AeroPart aft)
+    {
+        var pairs = new System.Collections.Generic.List<(float Gap, Vector3 OnWing, Vector3 OnAft)>();
+        foreach (Collider w in wing.GetComponents<Collider>().Where(c => c.enabled))
+            foreach (Collider a in aft.GetComponents<Collider>().Where(c => c.enabled))
+            {
+                Vector3 onWing = w.ClosestPoint(a.bounds.center), onAft = a.ClosestPoint(onWing);
+                for (int k = 0; k < 3; k++)
+                {
+                    onWing = w.ClosestPoint(onAft);
+                    onAft = a.ClosestPoint(onWing);
+                }
+                pairs.Add(((onWing - onAft).magnitude, onWing, onAft));
+            }
+        return pairs.OrderBy(x => x.Gap).Take(WingAftPairs).Select(x => (wing, aft, wing.transform.InverseTransformPoint(x.OnWing),
+            aft.transform.InverseTransformPoint(x.OnWing), aft.transform.InverseTransformDirection((x.OnWing - x.OnAft).normalized), x.Gap));
     }
 
     void FixedUpdate()
@@ -131,6 +166,14 @@ sealed class TailFlexProbe : MonoBehaviour
             crankPeak[i] = Mathf.Max(crankPeak[i], (c.Inner.transform.InverseTransformPoint(c.Outer.transform.TransformPoint(c.Tip)) - c.Home).magnitude * 1000f);
         }
 
+        for (int i = 0; i < wingAft.Length; i++)
+        {
+            var w = wingAft[i];
+            if (w.Wing.IsDetached() || w.Aft.IsDetached()) continue;
+            Vector3 at = w.Aft.transform.InverseTransformPoint(w.Wing.transform.TransformPoint(w.Point));
+            wingAftPeak[i] = Mathf.Max(wingAftPeak[i], -Vector3.Dot(at - w.Home, w.Normal) * 1000f);
+        }
+
         if (nozzle != null && !nozzle.IsDetached())
         {
             Quaternion d = Quaternion.Inverse(nozzleRest) * Quaternion.Inverse(aircraft.rb.rotation) * nozzle.rb.rotation;
@@ -154,8 +197,15 @@ sealed class TailFlexProbe : MonoBehaviour
                 $"tip_mm={crankPeak[i]:0.00} joint={(j < 0 ? float.NaN : jointPeak[j]):0.00}; peaks over 1 s, up to {gPeak:0.0} g");
         }
         System.Array.Clear(crankPeak, 0, crankPeak.Length);
+        foreach (var wing in wingAft.Select((w, i) => (w, i)).GroupBy(x => x.w.Wing.name + "-" + x.w.Aft.name))
+        {
+            var near = wing.OrderByDescending(x => wingAftPeak[x.i]).First();
+            IcarusPlugin.Log.Stage("approach-" + wing.Key, $"approach_mm={wingAftPeak[near.i]:0.00} rest_gap_mm={near.w.Gap * 1000f:0.0}; " +
+                $"least rest gap {wing.Min(x => x.w.Gap) * 1000f:0.0} mm; peaks over 1 s, up to {gPeak:0.0} g");
+        }
+        System.Array.Clear(wingAftPeak, 0, wingAftPeak.Length);
         if (nozzle != null)
-            IcarusPlugin.Log.Stage("thrust-line", nozzle.IsDetached() ? "nozzle detached" : $"turn_deg={nozzlePeak:0.000}; peaks over 1 s, up to {gPeak:0.0} g");
+            IcarusPlugin.Log.Stage("thrust-line", nozzle.IsDetached() ? nozzle.name + " detached" : $"turn_deg={nozzlePeak:0.000}; peaks over 1 s, up to {gPeak:0.0} g");
         nozzlePeak = 0f;
         System.Array.Clear(jointPeak, 0, jointPeak.Length);
         System.Array.Clear(peak, 0, peak.Length);

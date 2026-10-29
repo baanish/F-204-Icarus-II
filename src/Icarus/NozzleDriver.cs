@@ -55,8 +55,8 @@ sealed class NozzleDriver : MonoBehaviour
 
     void Start()
     {
-        // The JetNozzle sits on thrust_vector and nozzle_vector beside it, both under the nozzle part, which complex
-        // physics has unparented from the aircraft, so they are found from the engine's own reference.
+        // The JetNozzle sits on thrust_vector and nozzle_vector beside it, both under the nozzle's mesh on fuselage_aft,
+        // which complex physics has unparented from the aircraft, so they are found from the engine's own reference.
         Turbojet? engine = IcarusSystems.Engine(GetComponent<Aircraft>());
         nozzle = engine == null ? null : IcarusSystems.Nozzle(engine);
         thrust = nozzle != null ? nozzle.transform : null;

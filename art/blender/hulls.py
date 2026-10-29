@@ -89,16 +89,15 @@ BUDGET = {
     "lod1": {"target": 814, "cap": 814, "collection": "LOD1"},
     # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
     # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420), then every skin
-    # piece's own patches, the tail cone's and the truss's shells once the breakup split them (7,852), then the fuel
-    # cells' solid slices and the clearance carve's cut faces, with the skin panels folded into their parts (chunks.py,
-    # clearance.py; 11,986 measured, the cap 2% over).
-    "colliders": {"target": 11986, "cap": 12230, "collection": "Colliders"},
+    # piece's own patches, the tail cone's and the truss's shells once the breakup split them (7,852), then the
+    # clearance carve's cut faces, with the skin panels and internals folded into their parts (chunks.py, clearance.py;
+    # 9,760 measured, the cap 2% over).
+    "colliders": {"target": 9760, "cap": 9960, "collection": "Colliders"},
 }
 CLOSEUPS = {}
 # The same: 102 base hulls, 40 clearance cuts, 17 net for the section shells and about 20 where the gear doors' holes
-# and the trough ramps' deep ends split the skin, then the split's pieces and shells (266), then the fuel cells' 8 by 2
-# solid slices (clearance.sectors; 337 measured, the cap 2% over).
-COLLIDER_HULLS = 344
+# and the trough ramps' deep ends split the skin, then the split's pieces and shells (264 measured, the cap 2% over).
+COLLIDER_HULLS = 270
 
 
 def check(icarus):

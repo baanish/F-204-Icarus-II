@@ -42,7 +42,6 @@
         { "path": "own.alt_msl_m", "gt": 1000 },
         { "any": [ { "event": "part_detached", "since": "launched", "part": "wing_spar_L" },
                    { "event": "part_detached", "since": "launched", "part": "wing_spar_R" },
-                   { "event": "part_detached", "since": "launched", "part": "engine_core" },
                    { "event": "part_detached", "since": "launched", "part": "fuselage_forward" },
                    { "event": "part_detached", "since": "launched", "part": "fuselage_aft" } ] } ] },
       "within": 20, "label": "a primary structural part detaches in the air" },

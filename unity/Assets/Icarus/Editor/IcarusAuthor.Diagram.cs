@@ -98,9 +98,10 @@ namespace Icarus.Editor
                 {
                     Object.DestroyImmediate(template);
                 }
-                // The engine fire lamp moves onto the Icarus's engine, its caption staying where it was, and stays on top.
+                // The engine fire lamp moves onto fuselage_aft, the section the engine rides in, its caption staying where it
+                // was, and stays on top.
                 var fire = (RectTransform)((GameObject)Prop(so, "failureIndicators").GetArrayElementAtIndex(0).objectReferenceValue).transform;
-                var engine = (Dictionary<string, object>)((Dictionary<string, object>)layout["parts"])["engine_core"];
+                var engine = (Dictionary<string, object>)((Dictionary<string, object>)layout["parts"])["fuselage_aft"];
                 var shift = LayoutVector(engine["centre"]) - fire.anchoredPosition;
                 fire.anchoredPosition += shift;
                 fire.sizeDelta = LayoutVector(engine["size"]);

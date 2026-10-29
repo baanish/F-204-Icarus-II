@@ -46,15 +46,14 @@ namespace Icarus.Editor
         // it also joins the root, as the Revoker's wing2 does, with the inner box as its tensor (check A18 benches the crank).
         // That brace takes the most of the outer wing's load: 0.98 of an OuterWing joint's limit in a full-stick pull with
         // full tip tanks and fuel (tests/scenarios/full_stick_low_fast_tip_tanks.scenario.jsonc), so it holds at Spar class.
-        // fuselage_aft (213 kg) carries the engine core (738, with the afterburner's 412 and the nozzle behind it), the tail
-        // cone and the fin: on their own joints, in a 9 g pull, the tail cone sat 1.4 deg and the core 1.0 off it, and the fin
-        // turned 1.0 deg in a rolling pull. Each of the three also joins the root, with fuselage_aft as its tensor, which held
-        // them to 0.1, 0.2 and 0.3 deg (check A18). A brace with no class of its own takes its owner's.
+        // fuselage_aft carries the tail cone and the fin: on their own joints, in a 9 g pull, the tail cone sat 1.4 deg off it,
+        // and the fin turned 1.0 deg in a rolling pull. Each also joins the root, with fuselage_aft as its tensor, which held
+        // them to 0.1 and 0.3 deg (check A18). A brace with no class of its own takes its owner's.
         private static readonly (string Owner, string To, string Tensor, JointClass? Class)[] Braces =
         {
             ("stabilator", "fuselage_aft", "fin_spar", null), ("rudder", "fuselage_aft", "fin_spar", null), ("fin_skin", "fuselage_aft", "fin_spar", null),
             ("wing_spar_outer_L", RootPart, "wing_spar_L", JointClass.Spar), ("wing_spar_outer_R", RootPart, "wing_spar_R", JointClass.Spar),
-            ("fuselage_tail", RootPart, "fuselage_aft", null), ("engine_core", RootPart, "fuselage_aft", null), ("fin_spar", RootPart, "fuselage_aft", null),
+            ("fuselage_tail", RootPart, "fuselage_aft", null), ("fin_spar", RootPart, "fuselage_aft", null),
         };
 
         // The strength class of a part's joint i: its own for its parent joint, its brace's for a brace.
@@ -81,23 +80,14 @@ namespace Icarus.Editor
             P("fuselage_forward", RootPart, JointClass.ForwardSection, "fuselage", "fuselage"),
             P("cockpit_cell", "fuselage_forward", JointClass.Section, "fuselage/cockpit", "fuselage/cockpit"),
             P("radome", "cockpit_cell", JointClass.Panel, "fuselage/cockpit/nose", "fuselage/cockpit/nose"),
-            P("radar_tray", "cockpit_cell", JointClass.Primary, "fuselage/cockpit/nose"),
             P("canopy", "cockpit_cell", JointClass.Panel, "fuselage/cockpit/nose"),
             P("gear_leg_N", "cockpit_cell", JointClass.Primary, "fuselage/intake_L"),
-            P("avionics_tray", "fuselage_forward", JointClass.Primary, "fuselage/cockpit/nose"),
-            P("fuel_aux", "fuselage_forward", JointClass.Primary, "wing1b_L"),
             P("fuselage_aft", RootPart, JointClass.Frame, "tail", "tail"),
             P("fuselage_tail", "fuselage_aft", JointClass.Section, "tail"),
-            P("engine_core", "fuselage_aft", JointClass.Spar, "tail"),
-            // the afterburner carries the nozzle and its thrust (JetNozzle on nozzle), so it holds as the core does
-            P("engine_afterburner", "engine_core", JointClass.Spar, "tail"),
-            P("nozzle", "engine_afterburner", JointClass.Primary, "tail"),
             P("fin_spar", "fuselage_aft", JointClass.Spar, "vstab1"),
             P("fin_skin", "fin_spar", JointClass.Panel, "vstab1/vstab2"),
             P("rudder", "fin_spar", JointClass.Surface, "vstab1/vstab2/rudder"),
             P("stabilator", "fin_spar", JointClass.Surface, "vstab1/vstab2"),
-            P("intake_duct_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
-            P("intake_duct_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("wing_spar_L", RootPart, JointClass.Spar, "fuselage/wing1a_L"),
             P("wing_spar_outer_L", "wing_spar_L", JointClass.OuterWing, "fuselage/wing1a_L/wing2_L/wingtip_L"),
             P("aileron_L", "wing_spar_outer_L", JointClass.Surface, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
@@ -110,19 +100,9 @@ namespace Icarus.Editor
             P("lef_R", "wing_spar_outer_R", JointClass.Flap, "fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L"),
             P("gear_leg_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("gear_leg_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
-            P("fuel_forward_main", RootPart, JointClass.Primary, "wing1b_L"),
-            P("fuel_aft_center", RootPart, JointClass.Primary, "wing1b_L"),
-            P("fuel_aft_L", RootPart, JointClass.Primary, "wing1b_L"),
-            P("fuel_aft_R", RootPart, JointClass.Primary, "wing1b_L"),
             P("fuselage_truss_front", RootPart, JointClass.Primary, ""),
             P("fuselage_truss_rear", RootPart, JointClass.Primary, ""),
         };
-
-        private static readonly string[] R13Tanks = { "fuel_forward_main", "fuel_aft_center", "fuel_aft_L", "fuel_aft_R", "fuel_aux" };
-        // Fuel cells the export adds beyond the base tree carry no dry mass of their own; their dry mass is in their hosts. Each
-        // still becomes its own part, so its one collider and same-object FuelTank are hit on their own, and takes
-        // this much from its host, since a part needs mass.
-        private const float CellMass = 5f;
 
         // A part's export entry: its mesh, or for a hinged surface the hinge empty whose _visible child is the mesh.
         private static BlockoutPart MeshEntry(Blockout blockout, string name) =>
@@ -195,22 +175,6 @@ namespace Icarus.Editor
             b.Specs.AddRange(Tree);
             foreach (var spec in Tree.Where(s => b.Blockout.Has(s.Name)))
                 b.Mass[spec.Name] = MeshEntry(b.Blockout, spec.Name).Number("mass_kg");
-            foreach (var cell in b.Blockout.Parts.Values.Where(p => p.Text("role") == "fuel_tank" && !names.Contains(p.Name)).OrderBy(p => p.Name, StringComparer.Ordinal))
-            {
-                var host = cell.BlenderParent;
-                while (host != null && !names.Contains(host))
-                    host = b.Blockout.Parts[host].BlenderParent;
-                if (host == null || cell.Fbx == null)
-                {
-                    problems.Add($"fuel cell {cell.Name} has no mesh or no base-tree host");
-                    continue;
-                }
-                b.Specs.Add(P(cell.Name, host, JointClass.Primary, "wing1b_L"));
-                var own = cell.Number("mass_kg");
-                b.Mass[cell.Name] = own > 0 ? own : CellMass;
-                if (own <= 0 && b.Mass.ContainsKey(host))
-                    b.Mass[host] -= CellMass;
-            }
             b.Tanks.AddRange(b.Specs.Where(s => b.Blockout.Has(s.Name) && b.Blockout.Parts[s.Name].Number("fuel_kg") > 0).Select(s => s.Name));
             foreach (var spec in Tree)
             {
@@ -232,11 +196,11 @@ namespace Icarus.Editor
                 if (MeshEntry(b.Blockout, spec.Name).Number("mass_kg") <= 0)
                     problems.Add(spec.Name + " has no mass_kg");
             }
-            // Any other massive mesh would be a part the tree doesn't know.
+            // Any other massive mesh would be a part the tree doesn't know: a folded one carries none (art/blender/chunks.py).
             var planned = new HashSet<string>(b.Specs.Select(s => s.Name));
             foreach (var part in b.Blockout.Parts.Values.Where(p => p.Number("mass_kg") > 0 && !planned.Contains(p.Name)
                          && !(p.Name.EndsWith("_visible", StringComparison.Ordinal) && names.Contains(p.Name.Substring(0, p.Name.Length - 8)))))
-                problems.Add($"{part.Name} carries {part.Number("mass_kg")} kg but isn't a base-tree part or a fuel cell");
+                problems.Add($"{part.Name} carries {part.Number("mass_kg")} kg but isn't a base-tree part");
             var dry = b.Mass.Values.Sum();
             if (Mathf.Abs(dry - EmptyMass) > 1f)
                 problems.Add($"the parts' mass_kg add up to {dry}, not the designed {EmptyMass}");
@@ -245,12 +209,9 @@ namespace Icarus.Editor
             var fuel = b.Tanks.Sum(t => b.Blockout.Parts[t].Number("fuel_kg"));
             if (Mathf.Abs(fuel - FuelMass) > 1f)
                 problems.Add($"the tanks' fuel_kg add up to {fuel}, not the design load {FuelMass}");
-            foreach (var tank in R13Tanks)
-                if (!b.Tanks.Contains(tank) || b.Blockout.Parts[tank].Text("role") != "fuel_tank")
-                    problems.Add(tank + " isn't a fuel_tank with fuel_kg");
             if (problems.Count > 0)
                 throw new InvalidDataException("Designed part tree check failed:\n  " + string.Join("\n  ", problems));
-            Debug.Log($"[Icarus] check base tree PASS: {Tree.Length} base parts and {b.Specs.Count - Tree.Length} extra fuel cells [{string.Join(", ", b.Specs.Skip(Tree.Length).Select(s => s.Name + " on " + s.Parent))}], {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
+            Debug.Log($"[Icarus] check base tree PASS: {Tree.Length} parts, {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
         }
 
         // The fuselage cores' hulls are frame shells carved round what they hold (art/blender/hulls.py), and Unity takes a
@@ -314,9 +275,9 @@ namespace Icarus.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        // The skin panels the export folded into the parts they hang on (art/blender/chunks.py folded_into): each panel's
-        // mesh under its part, where it was, as stock skins are part of their chunk. ListLiveryRenderers puts its skin on
-        // the part's livery and damage; its LOD1 hull hangs on it (AddLods).
+        // The skin panels and internals the export folded into the parts they sit in (art/blender/chunks.py folded_into):
+        // each one's mesh under its part, where it was, as a stock part's skin and contents are part of its chunk.
+        // ListLiveryRenderers puts a skin on the part's livery and damage; a LOD1 hull hangs on its mesh (AddLods).
         private static void PlaceSkins(Build b)
         {
             var placed = 0;
@@ -331,7 +292,7 @@ namespace Icarus.Editor
                 b.Visuals[panel.Name] = mesh.transform;
                 placed++;
             }
-            b.Report.Add($"skins: {placed} panels placed on the parts they fold into");
+            b.Report.Add($"folded: {placed} panels and internals placed on the parts they fold into");
         }
 
         // Armour, thresholds and hit points from each part's Revoker armour class; every part starts at 100 HP by design.

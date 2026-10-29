@@ -204,7 +204,7 @@ namespace Icarus.Editor
             var seamTurnRest = seamPoints.ToDictionary(s => s, TurnIn);
             var seamMoved = seamPoints.ToDictionary(s => s, s => 0f);
             var seamTurned = seamPoints.ToDictionary(s => s, s => 0f);
-            // the JetNozzle's thrust transform, under the nozzle part, with each part now a body of its own
+            // the JetNozzle's thrust transform, under the nozzle's mesh on fuselage_aft, with each part now a body of its own
             var thrustAt = bench.Thrust > 0 ? parts.Values.Select(p => p.Part.transform.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "thrust_vector"))
                 .FirstOrDefault(t => t != null) ?? throw new InvalidOperationException(root.name + ": no thrust_vector to push") : null;
             var thrustBody = thrustAt == null ? null : thrustAt.GetComponentInParent<Rigidbody>();
@@ -287,7 +287,7 @@ namespace Icarus.Editor
         private static string CheckTailStiffness(Build b, List<string> p)
         {
             var worst = new Dictionary<string, float>();
-            RunTailBench(b.Root, TailParts, new[] { "stabilator" }, true, 0.5f, worst, null, null, new[] { "fin_spar", "fuselage_tail", "engine_core" });
+            RunTailBench(b.Root, TailParts, new[] { "stabilator" }, true, 0.5f, worst, null, null, new[] { "fin_spar", "fuselage_tail" });
             var loads = worst.Where(w => w.Key.Contains(" |joint| ")).ToArray();
             foreach (var w in worst.Except(loads).Where(w => w.Value > TailFlexLimitDeg))
                 p.Add($"{w.Key}: turns {w.Value:0.00} deg against the root, over {TailFlexLimitDeg}");
@@ -306,12 +306,12 @@ namespace Icarus.Editor
         private const float CrankLoadLimit = 0.5f;
         private static readonly float[] TipStores = { 70f, 570f };
 
-        // The nozzle hangs on the afterburner, which hangs on the engine core, and the nozzle carries the thrust (JetNozzle on
-        // its part): under full afterburner (65 kN core and 45 afterburner), vectored to its 4 degree limit, in a 9 g pull,
-        // the core's, afterburner's, nozzle's and tail cone's joints, and the root braces of the core, tail cone and fin,
-        // carry at most NozzleLoadLimit of their break forces. Reported: the thrust line's turn (the nozzle against the
-        // root), and the physical seams of the fixed shroud (the nozzle part's own mesh) against the tail cone it ends in,
-        // whose skin it carries, and of the tail cone against the aft core.
+        // The engine, afterburner and nozzle are meshes of fuselage_aft, which takes the thrust (JetNozzle on fuselage_aft,
+        // as the Revoker's sits on its tail part): under full afterburner (65 kN core and 45 afterburner), vectored to its 4
+        // degree limit, in a 9 g pull, fuselage_aft's own joint, the tail cone's and the root braces of the tail cone and fin
+        // carry at most NozzleLoadLimit of their break forces. Reported: the thrust line's turn (fuselage_aft against the
+        // root), and the physical seams of the fixed shroud (the nozzle's mesh) against the tail cone it ends in, whose skin
+        // it carries, and of the tail cone against fuselage_aft.
         private const float NozzleLoadLimit = 0.7f;
         private static readonly BenchCase[] NozzleCases =
         {
@@ -329,16 +329,16 @@ namespace Icarus.Editor
         private static string CheckNozzleBench(Build b, List<string> p)
         {
             var worst = new Dictionary<string, float>();
-            var seams = new[] { ("nozzle", "fuselage_tail", "nozzle"), ("fuselage_tail", "fuselage_aft", "fuselage_tail"),
-                ("nozzle", "root", "thrust_vector") };
+            var seams = new[] { ("fuselage_aft", "fuselage_tail", "nozzle"), ("fuselage_tail", "fuselage_aft", "fuselage_tail"),
+                ("fuselage_aft", "root", "thrust_vector") };
             Debug.Log("[Icarus] nozzle bench:\n" + RunTailBench(b.Root, new string[0], new[] { "stabilator" }, true, 0.5f, worst, null, seams,
-                new[] { "engine_core", "engine_afterburner", "nozzle", "fuselage_tail", "fin_spar" }, NozzleCases));
+                new[] { "fuselage_aft", "fuselage_tail", "fin_spar" }, NozzleCases));
             KeyValuePair<string, float> Worst(string kind, string pair) =>
                 worst.Where(w => w.Key.Contains($" |{kind}| ") && w.Key.EndsWith(pair)).OrderByDescending(w => w.Value).First();
-            var shroud = Worst("seam", "nozzle vs fuselage_tail");
+            var shroud = Worst("seam", "fuselage_aft vs fuselage_tail");
             var cone = Worst("seam", "fuselage_tail vs fuselage_aft");
             var coneTurn = Worst("turn", "fuselage_tail vs fuselage_aft");
-            var thrust = Worst("turn", "nozzle vs root");
+            var thrust = Worst("turn", "fuselage_aft vs root");
             var load = worst.Where(w => w.Key.Contains(" |joint| ")).OrderByDescending(w => w.Value).First();
             if (load.Value > NozzleLoadLimit) p.Add($"{load.Key} {load.Value:0.00} of its break, over {NozzleLoadLimit}");
             return $"thrust line turns {thrust.Value:0.00} deg ({thrust.Key}); physical seams: shroud {shroud.Value:0.00} mm ({shroud.Key}), tail cone {cone.Value:0.00} mm and " +

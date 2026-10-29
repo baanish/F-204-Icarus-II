@@ -9,11 +9,10 @@ most each flexes toward the other in flight (FLEX, measured in game and on the A
 
 carve() runs last on the collider set, after the split pieces have their hulls: each hull is cut flat on its best
 separating plane, REQUIRED short of every hull of a part that outranks it (RANK: moving surfaces and gear keep their
-shape over their whole travel, then the wing and fin structure, the canopy, skins and radome, the engine, ducts and the
-internals, and last the fuselage sections' shells), as hulls.shells() carves them. A fuel cell wraps the intake
-ducts, so its single hull is first split into solid slices round and along its centre line (sectors). The parts' mass
-boxes are recorded before the cut (mass_box), so the centres of mass the Unity author places from the hulls stay where
-they were.
+shape over their whole travel, then the wing and fin structure, the canopy, skins and radome, the hulls folded in from
+the engine, ducts and the other internals, and last the fuselage sections' shells), as hulls.shells() carves them. The
+parts' mass boxes are recorded before the cut (mass_box), so the centres of mass the Unity author places from the hulls
+stay where they were.
 
 check() fails the build where any two unjointed parts' hulls stand closer than REQUIRED, with every hinge turned
 through its travel (parts.surface_sweep's poses) and each gear leg retracted with its doors (gear.retraction_sweep's
@@ -32,27 +31,28 @@ CONTACT_OFFSET = 0.002
 # How far each part moves in flight against a neighbour on other joints, metres, by name prefix, first match, else
 # FLEX_DEFAULT; a pair's gap takes both parts' (REQUIRED). The outer wing at the crank in a 9 g pull, the inner wing box
 # bending at the root with its folded skins (struck the aft fuselage and the fuel cells across 13 and 19 mm gaps in the
-# full-stick pulls), the nozzle and afterburner under full vectored thrust, the tail cone and the fin top, the
-# flaps (tools/flight_peaks.py and A18 on 4b8710bd).
+# full-stick pulls), the tail cone and the fin top, the flaps (tools/flight_peaks.py and A18 on 4b8710bd).
 FLEX = (("wing_spar_outer_", 0.008), ("aileron_", 0.008), ("lef_", 0.008), ("wing_spar_", 0.020),
-        ("nozzle", 0.023), ("engine_afterburner", 0.012), ("fuselage_tail", 0.007), ("speed_brake", 0.007),
+        ("fuselage_tail", 0.007), ("speed_brake", 0.007),
         ("fin_", 0.009), ("rudder", 0.009), ("stabilator", 0.009), ("flap_", 0.005), ("radome", 0.0035), ("canopy", 0.0035))
 FLEX_DEFAULT = 0.001
+# How far two unjointed parts come toward each other in flight, measured as a pair where one part's flex alone would
+# not hold them apart: (prefix, prefix, metres), replacing their two FLEX values; src/Icarus/TailFlex.cs's approach line
+# in full_stick_low_fast at 9.2 g. Each inner wing box toward fuselage_aft, which carries the engine since the internals
+# fold into it (1,540 kg): 27.5 and 29.0 mm at the roll reversals, a tenth over. The fin skin toward the tail cone:
+# 21.2 mm, a tenth over. Both were measured before src/Icarus/OriginShiftPoses.cs, so they hold the floating-origin
+# shift's one-frame jumps; with it the wing boxes come no nearer than 0.2 mm in the same pull.
+FLEX_PAIRS = (("wing_spar_", "fuselage_aft", 0.032), ("fin_skin", "fuselage_tail", 0.024))
 # Who keeps its shape where two hulls are too close: the lower rank is cut, a folded skin hull by its panel's name.
 # Moving parts aren't listed: they rank above all. The fuselage sections' shells yield to everything inside them, as
 # hulls.build carves them last: their folded skin keeps them hulls all round.
 RANK = (("wing_spar_", 5), ("wing_skin_", 5), ("fin_spar", 5), ("fin_skin", 5), ("canopy", 4.5), ("skin_", 4),
         ("dorsal_cover", 4), ("radome", 4), ("nozzle", 2.5), ("engine_", 2.5), ("intake_duct_", 1.5), ("fuselage_", 0.5))
 RANK_MOVING, RANK_DEFAULT = 6, 1
-SECTORED = ("fuel_",)  # parts whose single hull wraps another part, split round their axis before the cut
-# Solid slices per sectored part, round its centre line and along it: a slice cut flat against a curved neighbour (a
-# duct, a shell's underside) leaves less of the part bare the narrower it is. 8 by 2 leaves 2 to 9% of straight paths
-# through a cell meeting none of its hulls (8 by 1: up to 14%; 16 by 2, twice the hulls: no better).
-CELL_SLICES, CELL_LENGTHS = 8, 2
 # Braces: second joints, as IcarusAuthor.Parts.cs Braces (A22 checks that table against the tree).
 BRACES = (("stabilator", "fuselage_aft"), ("rudder", "fuselage_aft"), ("fin_skin", "fuselage_aft"),
           ("wing_spar_outer_L", "fuselage_mid"), ("wing_spar_outer_R", "fuselage_mid"), ("fuselage_tail", "fuselage_mid"),
-          ("engine_core", "fuselage_mid"), ("fin_spar", "fuselage_mid"))
+          ("fin_spar", "fuselage_mid"))
 GEAR_FOLD_STEPS, GEAR_DOOR_STEPS = 24, 12
 TOLERANCE = 0.0002
 # The carve clears this much past REQUIRED: the axis test reads distance a little differently on a swept hull than on each
@@ -76,8 +76,8 @@ def part_of(col):
 # Two parts a joint holds together never collide while it holds, so a folded skin hull and its chunk's other parts, and a
 # fuselage section's shells and the parts jointed to it, need only stand apart, not REQUIRED: the blast trace
 # (DamageEffects.FragTrace) must cross the outer one's hull before the inner one's, and a part the joint lets go of starts
-# clear (a fuel cell freed inside the shells it overlapped took a 5 kN s kick getting out, enough to break the next cell's
-# joint). Other jointed pairs may overlap (the fin spar lies inside the fin skin's hulls); moving ones keep their sweeps.
+# clear (a part freed inside shells it overlaps takes a kick getting out, enough to break a neighbour's joint). Other
+# jointed pairs may overlap (the fin spar lies inside the fin skin's hulls); moving ones keep their sweeps.
 JOINTED_GAP = 0.001
 SECTIONS = ("fuselage_",)
 
@@ -88,7 +88,10 @@ def held_apart(a, b, moving):
 
 
 def required(a, b, jointed=False):
-    return JOINTED_GAP if jointed else 2 * CONTACT_OFFSET + first(FLEX, a, FLEX_DEFAULT) + first(FLEX, b, FLEX_DEFAULT)
+    if jointed:
+        return JOINTED_GAP
+    pair = next((f for x, y, f in FLEX_PAIRS if a.startswith(x) and b.startswith(y) or a.startswith(y) and b.startswith(x)), None)
+    return 2 * CONTACT_OFFSET + (pair if pair is not None else first(FLEX, a, FLEX_DEFAULT) + first(FLEX, b, FLEX_DEFAULT))
 
 
 def links(cols):
@@ -229,57 +232,11 @@ def mass_box(cols):
         owner["mass_box_world"] = [float(x) for x in np.concatenate([pts.min(0), pts.max(0)])]
 
 
-def sectors(cols):
-    """Each sectored part's hulls replaced by CELL_SLICES solid slices of their hull, cut along planes through its
-    centre line along the body (Blender y), each then cut across into CELL_LENGTHS, so the slices meet face to face and
-    fill the cell to its middle."""
-    colliders = bpy.data.collections["Colliders"]
-    owned = {}
-    for c in cols:
-        if part_of(c).name.startswith(SECTORED):
-            owned.setdefault(c.parent, []).append(c)
-    step = 2 * math.pi / CELL_SLICES
-    for owner, old in owned.items():
-        whole = hulls.convex([c.matrix_world @ v.co for c in old for v in c.data.vertices])
-        pts = [v.co for v in whole.verts]
-        mid = (Vector([min(p[i] for p in pts) for i in range(3)]) + Vector([max(p[i] for p in pts) for i in range(3)])) / 2
-        lo_y, hi_y = min(p.y for p in pts), max(p.y for p in pts)
-        shapes = []
-        for k in range(CELL_SLICES):
-            piece = whole.copy()
-            # angle round the line from up (+z) toward +x: the slice keeps k * step to (k + 1) * step
-            for a, sign in ((k * step, -1.0), ((k + 1) * step, 1.0)):
-                n = Vector((math.cos(a), 0.0, -math.sin(a))) * sign
-                nxt = hulls.cut(piece, n, n.dot(mid))
-                piece.free()
-                piece = nxt
-                if piece is None:
-                    break
-            if piece is None:
-                continue
-            for j in range(CELL_LENGTHS):  # across the body at even stations
-                y0, y1 = (lo_y + (hi_y - lo_y) * t / CELL_LENGTHS for t in (j, j + 1))
-                part = hulls.cut(piece, Vector((0.0, 1.0, 0.0)), y1) if j < CELL_LENGTHS - 1 else piece.copy()
-                if part is not None and j > 0:
-                    nxt = hulls.cut(part, Vector((0.0, -1.0, 0.0)), -y0)
-                    part.free()
-                    part = nxt
-                if part is not None:
-                    shapes.append(part)
-            piece.free()
-        whole.free()
-        for c in old:
-            bpy.data.objects.remove(c)
-        hulls.attach_colliders(owner, shapes, colliders)
-    return [c for c in colliders.objects if part_of(c) is not None]
-
-
 def carve(icarus):
     """Cut every hull clear of the hulls of unjointed parts that outrank it; returns a report line."""
     bpy.context.view_layer.update()  # the split pieces' hulls were parented since the last update: their world matrices are stale
     cols = [c for c in bpy.data.collections["Colliders"].objects if part_of(c) is not None]
     mass_box(cols)
-    cols = sectors(cols)
     linked = links(cols)
     hinges = hinge_poses(icarus)
     gears = gear_sequences(cols)

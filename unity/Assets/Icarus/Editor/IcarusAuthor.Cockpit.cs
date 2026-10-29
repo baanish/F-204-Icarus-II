@@ -94,7 +94,7 @@ namespace Icarus.Editor
             // Hidden in the cockpit view: the internals round the pilot, the outer glass, and the proxies standing in outside
             // for what the cockpit view draws.
             SetList(Prop(aircraft, "exteriorRenderers"), new[] { "cockpit_cell", "avionics_tray", "radar_tray" }
-                .Select(n => (Object)b.Parts[n].GetComponent<MeshRenderer>()).Append(b.Visuals["gear_leg_N_visible"].GetComponent<MeshRenderer>())
+                .Select(n => (Object)Placed(b, n).GetComponent<MeshRenderer>()).Append(b.Visuals["gear_leg_N_visible"].GetComponent<MeshRenderer>())
                 .Concat(fit.Exterior).Concat(proxies).ToArray());
             aircraft.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add($"cockpit: eye at {fit.Eye}, the stock seat and pilot rig and the ladder moved {delta}, the seat and pilot a further {drop} to clear the hood glass, the stick and throttle on their " +

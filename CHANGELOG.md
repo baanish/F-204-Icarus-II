@@ -6,10 +6,13 @@
 - The aircraft menu picks the Bare Metal livery for the Icarus by default, on both sides, instead of a random one.
 - The Icarus unlocks at rank 2, beside the Brawler, instead of rank 3.
 - The fuselage breaks up in sections, as a stock jet's does: the nose section, the two upper sections over the tanks, the aft section and the tail cone each come away whole with their skin, showing the tanks and engine inside.
-- Pieces that break off collide with the rest of the jet instead of passing through it, so a freed engine no longer slides out through the fuselage.
+- Pieces that break off collide with the rest of the jet instead of passing through it.
+- The fuel tanks, intake ducts, radar and avionics, and the engine with its afterburner and nozzle are part of the section they sit in, as on stock jets, so nothing is left wedged inside a broken section, scraping, and the engine dies with the aft section.
+- Full afterburner no longer tears the engine off in hard manoeuvres: the thrust goes into the aft section, as on stock jets, instead of through the engine's own joints.
+- The wings no longer strike the aft section in fast rolls. The game's floating-origin shift set each piece of the jet back to its interpolated position, a different distance for each, so in a fast roll the wings jumped up to 13 cm out of place for one frame.
 - The fuel cells look like rubberised fuel bladders instead of the generic equipment finish.
 - In multiplayer, losing the nose section no longer stops the rest of a breakup from reaching the other players.
-- The tail breaks up in more pieces: the tail cone with the speed brakes can come off behind the engine, and the afterburner section separates from the engine, which kills the engine. Braces keep the tail stiff in hard pulls, and no seam opens while the pieces are attached.
+- The tail breaks up in more pieces: the tail cone with the speed brakes can come off behind the engine. Braces keep the tail stiff in hard pulls, and no seam opens while the pieces are attached.
 - Each wing breaks up in more pieces: the outer wing can come off at the crank, taking its share of the lift with it.
 - The skin tears like a stock jet's: panel joints and rivet rows stay standing while damage opens the skin bay by bay with torn edges. It used to lose about half its skin in round holes by 80% health, starting with the clean metal.
 - The skin is drawn from both sides, as on most stock jets: a damage hole or a broken section shows the inside of the skin instead of the sky through the far wall.

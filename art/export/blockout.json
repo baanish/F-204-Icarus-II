@@ -580,23 +580,7 @@
    "props": {
     "role": "avionics",
     "owner": "fuselage",
-    "mass_kg": 100,
-    "mass_box_local": [
-     -0.41999998688697815,
-     -3.424999952316284,
-     -0.2652280330657959,
-     0.41999998688697815,
-     -3.2249999046325684,
-     0.43477195501327515
-    ],
-    "mass_box_world": [
-     -0.41999998688697815,
-     -3.424999952316284,
-     -0.2652280330657959,
-     0.41999998688697815,
-     -3.2249999046325684,
-     0.43477195501327515
-    ]
+    "folded_into": "fuselage_forward"
    },
    "bounds_unity": [
     [
@@ -610,7 +594,7 @@
      0.1
     ]
    ],
-   "sha256": "f3783e2c585c06f746f1173a31da0e8e5a2859054fca130ec0ba897b90a58b46",
+   "sha256": "b178989b2986f17be8c84ef3a75ca4d556265e6190bc5be5c247b2b8e49e94ef",
    "bounds_blender": [
     [
      -0.42,
@@ -633,25 +617,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "avionics_tray_colmesh0",
-     "verts": 27,
-     "tris": 50,
-     "bounds_unity": [
-      [
-       -0.42,
-       -0.35,
-       -0.1
-      ],
-      [
-       0.42,
-       0.35,
-       0.1
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "canopy": {
@@ -1124,22 +1090,27 @@
    "props": {
     "role": "cockpit",
     "owner": "fuselage",
-    "mass_kg": 480,
+    "mass_kg": 545.0,
+    "fold_centre": [
+     0.00011355973184074812,
+     -4.606753923587938,
+     0.1313104870116667
+    ],
     "mass_box_local": [
-     -0.3799999952316284,
-     -6.025000095367432,
-     -0.31522804498672485,
-     0.3799999952316284,
-     -3.4749999046325684,
-     0.4687696099281311
+     0.00011355973184074812,
+     -4.981753923587938,
+     -0.1339175460541292,
+     0.00011355973184074812,
+     -4.981753923587938,
+     -0.1339175460541292
     ],
     "mass_box_world": [
-     -0.3799999952316284,
-     -6.025000095367432,
-     -0.31522804498672485,
-     0.3799999952316284,
-     -3.4749999046325684,
-     0.4687696099281311
+     0.00011355973184074812,
+     -4.981753923587938,
+     -0.1339175460541292,
+     0.00011355973184074812,
+     -4.981753923587938,
+     -0.1339175460541292
     ]
    },
    "bounds_unity": [
@@ -1154,7 +1125,7 @@
      1.275
     ]
    ],
-   "sha256": "5475bc2c9f8a3f5611e8f1992f0b2ad1f13faa5a5111a901e719f709a8b2a789",
+   "sha256": "dfce0984fbe9cd7e4771a58c26b75b2470b1c135812fc2fb885930053eb21a97",
    "bounds_blender": [
     [
      -0.38,
@@ -1192,6 +1163,23 @@
        0.3769,
        0.39199,
        1.275
+      ]
+     ]
+    },
+    {
+     "name": "cockpit_cell_colmesh1",
+     "verts": 64,
+     "tris": 124,
+     "bounds_unity": [
+      [
+       -0.29922,
+       -0.58954,
+       1.325
+      ],
+      [
+       0.29922,
+       0.078,
+       2.675
       ]
      ]
     }
@@ -1987,30 +1975,7 @@
    "props": {
     "role": "engine",
     "owner": "fuselage",
-    "mass_kg": 412.3,
-    "family": "engine_core",
-    "family_mass_kg": 1150,
-    "fold_centre": [
-     0.0,
-     6.0499173998521725,
-     0.35820738285909526
-    ],
-    "mass_box_local": [
-     0.0,
-     5.6749173998521725,
-     0.09297934979329936,
-     0.0,
-     5.6749173998521725,
-     0.09297934979329936
-    ],
-    "mass_box_world": [
-     0.0,
-     5.6749173998521725,
-     0.09297934979329936,
-     0.0,
-     5.6749173998521725,
-     0.09297934979329936
-    ]
+    "folded_into": "fuselage_aft"
    },
    "bounds_unity": [
     [
@@ -2024,7 +1989,7 @@
      0.95
     ]
    ],
-   "sha256": "2df1b3991a33074b605791bf2b65572a57eee670425e9f63db691354a92ede91",
+   "sha256": "8c5a33142b54ec065c72a81ad38240b1f78326d9a3b04470467f446ce056bea3",
    "bounds_blender": [
     [
      -0.4416,
@@ -2047,25 +2012,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "engine_afterburner_colmesh0",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       -0.4416,
-       -0.4416,
-       -0.95
-      ],
-      [
-       0.4416,
-       0.4416,
-       0.95
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "engine_core": {
@@ -2101,30 +2048,7 @@
    "props": {
     "role": "engine",
     "owner": "fuselage",
-    "mass_kg": 737.7,
-    "family": "engine_core",
-    "family_mass_kg": 1150,
-    "fold_centre": [
-     0.0,
-     3.39991742369403,
-     0.35320740252862803
-    ],
-    "mass_box_local": [
-     0.0,
-     3.02491742369403,
-     0.08797936946283214,
-     0.0,
-     3.02491742369403,
-     0.08797936946283214
-    ],
-    "mass_box_world": [
-     0.0,
-     3.02491742369403,
-     0.08797936946283214,
-     0.0,
-     3.02491742369403,
-     0.08797936946283214
-    ]
+    "folded_into": "fuselage_aft"
    },
    "bounds_unity": [
     [
@@ -2138,7 +2062,7 @@
      2.65
     ]
    ],
-   "sha256": "223e05e34dc5b872e1c9c0f6c20c4037f1460f33a91d9bef5d624fca2d553473",
+   "sha256": "4383c229f1ff930c92cc2663677320c5e8de6cdb0000bdab167b5f6b2a01aa28",
    "bounds_blender": [
     [
      -0.46,
@@ -2161,25 +2085,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "engine_core_colmesh0",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.46,
-       -0.465,
-       -0.75
-      ],
-      [
-       0.46,
-       0.465,
-       2.65
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "fin_skin": {
@@ -2816,24 +2722,7 @@
     "volume_holds_kg": 409.2,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 20,
-    "fuel_kg": 409.2,
-    "mass_box_local": [
-     0.25999999046325684,
-     -0.625,
-     -0.4152280390262604,
-     0.9200000166893005,
-     1.1749999523162842,
-     0.5173251032829285
-    ],
-    "mass_box_world": [
-     0.25999999046325684,
-     -0.625,
-     -0.4152280390262604,
-     0.9200000166893005,
-     1.1749999523162842,
-     0.5173251032829285
-    ]
+    "folded_into": "fuselage_mid"
    },
    "bounds_unity": [
     [
@@ -2847,7 +2736,7 @@
      0.9
     ]
    ],
-   "sha256": "280db777368b3301e57a98e6a9c6cec23857714e257431779c703d18dfed83e6",
+   "sha256": "1cf9c0ea072f14783ca95f07699dc380af818cd7a31cf3c97ee0f3fe23fc878b",
    "bounds_blender": [
     [
      -0.33,
@@ -2868,280 +2757,7 @@
     ]
    ],
    "uv_layers": [],
-   "colliders": [
-    {
-     "name": "fuel_aft_L_colmesh0",
-     "verts": 21,
-     "tris": 38,
-     "bounds_unity": [
-      [
-       -0.19793,
-       0.0,
-       0.00285
-      ],
-      [
-       -0.0,
-       0.31175,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh1",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       -0.17109,
-       0.0,
-       -0.9
-      ],
-      [
-       -0.0,
-       0.29036,
-       -0.18588
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh2",
-     "verts": 7,
-     "tris": 10,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.23601,
-       -0.0
-      ],
-      [
-       0.23601,
-       0.0,
-       0.69318
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh3",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.21837,
-       -0.9
-      ],
-      [
-       0.21837,
-       0.0,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh4",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       0.15756,
-       0.13708,
-       -0.0
-      ],
-      [
-       0.33,
-       0.33,
-       0.7679
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh5",
-     "verts": 9,
-     "tris": 14,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.9
-      ],
-      [
-       0.21305,
-       0.20797,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh6",
-     "verts": 30,
-     "tris": 56,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.0,
-       -0.0
-      ],
-      [
-       0.33,
-       0.46628,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh7",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.0,
-       -0.9
-      ],
-      [
-       0.32906,
-       0.4647,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh8",
-     "verts": 24,
-     "tris": 44,
-     "bounds_unity": [
-      [
-       -0.29535,
-       0.0,
-       -0.0
-      ],
-      [
-       -0.0,
-       0.19793,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh9",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       -0.29757,
-       0.0,
-       -0.9
-      ],
-      [
-       -0.0,
-       0.17122,
-       -0.18146
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh10",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       -0.32742,
-       -0.10703,
-       0.03421
-      ],
-      [
-       -0.0,
-       0.0,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh11",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       -0.32156,
-       -0.06693,
-       -0.9
-      ],
-      [
-       -0.0,
-       0.0,
-       -0.175
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh12",
-     "verts": 26,
-     "tris": 48,
-     "bounds_unity": [
-      [
-       -0.30223,
-       -0.46628,
-       -0.0
-      ],
-      [
-       -0.0,
-       -0.13474,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh13",
-     "verts": 21,
-     "tris": 38,
-     "bounds_unity": [
-      [
-       -0.29548,
-       -0.42605,
-       -0.9
-      ],
-      [
-       -0.0,
-       -0.19113,
-       -0.15282
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh14",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       0.0361,
-       -0.46066,
-       -0.0
-      ],
-      [
-       0.32891,
-       -0.0361,
-       0.7679
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_L_colmesh15",
-     "verts": 15,
-     "tris": 26,
-     "bounds_unity": [
-      [
-       0.0361,
-       -0.43288,
-       -0.9
-      ],
-      [
-       0.32579,
-       -0.0361,
-       0.0
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "fuel_aft_R": {
@@ -3179,24 +2795,7 @@
     "volume_holds_kg": 410.0,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 20,
-    "fuel_kg": 410.0,
-    "mass_box_local": [
-     -0.9200000166893005,
-     -0.625,
-     -0.4152280390262604,
-     -0.25999999046325684,
-     1.1749999523162842,
-     0.5173251032829285
-    ],
-    "mass_box_world": [
-     -0.9200000166893005,
-     -0.625,
-     -0.4152280390262604,
-     -0.25999999046325684,
-     1.1749999523162842,
-     0.5173251032829285
-    ]
+    "folded_into": "fuselage_mid"
    },
    "bounds_unity": [
     [
@@ -3210,7 +2809,7 @@
      0.9
     ]
    ],
-   "sha256": "8db97ed2088c2fcd90df40c039806cde33ca82f9d301a87825d3fce585021f3c",
+   "sha256": "35d0f3ce27f6ceb17913c409dae90a2bc7614ede7a0ee06124470cdbd243cd7a",
    "bounds_blender": [
     [
      -0.33,
@@ -3231,280 +2830,7 @@
     ]
    ],
    "uv_layers": [],
-   "colliders": [
-    {
-     "name": "fuel_aft_R_colmesh0",
-     "verts": 29,
-     "tris": 54,
-     "bounds_unity": [
-      [
-       -0.33,
-       0.0,
-       -0.0
-      ],
-      [
-       -0.0,
-       0.46628,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh1",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       -0.33,
-       0.0,
-       -0.9
-      ],
-      [
-       -0.0,
-       0.4647,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh2",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.10703,
-       0.03421
-      ],
-      [
-       0.32742,
-       0.0,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh3",
-     "verts": 15,
-     "tris": 26,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.06693,
-       -0.9
-      ],
-      [
-       0.32156,
-       0.0,
-       -0.175
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh4",
-     "verts": 31,
-     "tris": 58,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.0
-      ],
-      [
-       0.29535,
-       0.19793,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh5",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.9
-      ],
-      [
-       0.29757,
-       0.17122,
-       -0.18146
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh6",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       0.00288
-      ],
-      [
-       0.19793,
-       0.31175,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh7",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.0,
-       -0.9
-      ],
-      [
-       0.17109,
-       0.29036,
-       -0.18588
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh8",
-     "verts": 9,
-     "tris": 14,
-     "bounds_unity": [
-      [
-       -0.33,
-       0.13708,
-       -0.0
-      ],
-      [
-       -0.15756,
-       0.33,
-       0.7679
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh9",
-     "verts": 9,
-     "tris": 14,
-     "bounds_unity": [
-      [
-       -0.21305,
-       0.0,
-       -0.9
-      ],
-      [
-       0.0,
-       0.20797,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh10",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       -0.23601,
-       -0.23601,
-       -0.0
-      ],
-      [
-       0.0,
-       0.0,
-       0.69318
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh11",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       -0.21837,
-       -0.21837,
-       -0.9
-      ],
-      [
-       -0.0,
-       0.0,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh12",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       -0.33,
-       -0.46066,
-       -0.0
-      ],
-      [
-       -0.0361,
-       -0.0361,
-       0.7679
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh13",
-     "verts": 15,
-     "tris": 26,
-     "bounds_unity": [
-      [
-       -0.33,
-       -0.43288,
-       -0.9
-      ],
-      [
-       -0.0361,
-       -0.0361,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh14",
-     "verts": 24,
-     "tris": 44,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.46628,
-       -0.0
-      ],
-      [
-       0.30223,
-       -0.13474,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_R_colmesh15",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.41807,
-       -0.9
-      ],
-      [
-       0.29548,
-       -0.19113,
-       -0.15343
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "fuel_aft_center": {
@@ -3542,24 +2868,7 @@
     "volume_holds_kg": 373.3,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 30,
-    "fuel_kg": 373.3,
-    "mass_box_local": [
-     -0.23999999463558197,
-     -0.625,
-     -0.4852280020713806,
-     0.23999999463558197,
-     1.1749999523162842,
-     0.7350674867630005
-    ],
-    "mass_box_world": [
-     -0.23999999463558197,
-     -0.625,
-     -0.4852280020713806,
-     0.23999999463558197,
-     1.1749999523162842,
-     0.7350674867630005
-    ]
+    "folded_into": "fuselage_mid"
    },
    "bounds_unity": [
     [
@@ -3573,7 +2882,7 @@
      0.9
     ]
    ],
-   "sha256": "391689fae5811e8300fc872d7ece7830815fbf31bdbfb85e444f3720545fceea",
+   "sha256": "4075a5807196e454115a3fecf09d4a1f4e50fd9f538f1df0dec00b8f9829a3c0",
    "bounds_blender": [
     [
      -0.24,
@@ -3594,246 +2903,7 @@
     ]
    ],
    "uv_layers": [],
-   "colliders": [
-    {
-     "name": "fuel_aft_center_colmesh0",
-     "verts": 21,
-     "tris": 38,
-     "bounds_unity": [
-      [
-       -0.197,
-       0.0,
-       -0.0
-      ],
-      [
-       0.0,
-       0.61015,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh1",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       -0.19624,
-       0.11289,
-       -0.9
-      ],
-      [
-       0.0,
-       0.59981,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh2",
-     "verts": 7,
-     "tris": 10,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.13811,
-       0.39106
-      ],
-      [
-       0.16559,
-       0.0,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh3",
-     "verts": 19,
-     "tris": 34,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.0,
-       0.2071
-      ],
-      [
-       0.2394,
-       0.2394,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh4",
-     "verts": 9,
-     "tris": 14,
-     "bounds_unity": [
-      [
-       0.15221,
-       0.14161,
-       -0.3679
-      ],
-      [
-       0.23545,
-       0.23441,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh5",
-     "verts": 24,
-     "tris": 44,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.0
-      ],
-      [
-       0.24,
-       0.61015,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh6",
-     "verts": 21,
-     "tris": 38,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.11289,
-       -0.9
-      ],
-      [
-       0.23441,
-       0.59981,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh7",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       -0.20816,
-       0.0,
-       0.2071
-      ],
-      [
-       0.0,
-       0.197,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh8",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       -0.19974,
-       0.14615,
-       -0.3679
-      ],
-      [
-       -0.15221,
-       0.19624,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh9",
-     "verts": 11,
-     "tris": 18,
-     "bounds_unity": [
-      [
-       -0.16559,
-       -0.13811,
-       0.39106
-      ],
-      [
-       0.0,
-       0.0,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh10",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.24,
-       -0.61015,
-       0.2071
-      ],
-      [
-       0.0,
-       -0.07201,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh11",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       -0.24,
-       -0.61015,
-       -0.9
-      ],
-      [
-       0.0,
-       -0.29353,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh12",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.61015,
-       0.2071
-      ],
-      [
-       0.21678,
-       -0.07201,
-       0.9
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aft_center_colmesh13",
-     "verts": 19,
-     "tris": 34,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.61015,
-       -0.9
-      ],
-      [
-       0.23637,
-       -0.29345,
-       -0.0
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "fuel_aux": {
@@ -3871,24 +2941,7 @@
     "volume_holds_kg": 578.7,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 15,
-    "fuel_kg": 578.7,
-    "mass_box_local": [
-     -0.5842462182044983,
-     -3.1750001907348633,
-     -0.46522802114486694,
-     0.5842462182044983,
-     -2.4749999046325684,
-     0.7319831252098083
-    ],
-    "mass_box_world": [
-     -0.5842462182044983,
-     -3.1750001907348633,
-     -0.46522802114486694,
-     0.5842462182044983,
-     -2.4749999046325684,
-     0.7319831252098083
-    ]
+    "folded_into": "fuselage_forward"
    },
    "bounds_unity": [
     [
@@ -3902,7 +2955,7 @@
      0.35
     ]
    ],
-   "sha256": "dd680a2c44e90fc42b3ff2893039300a9d8d2c4282919e04662d7e1fdda94d97",
+   "sha256": "2e5bf50796e362f75d441d3f8cd13e0b5931edafbb52194861c3cfd97fccd93d",
    "bounds_blender": [
     [
      -0.58425,
@@ -3923,280 +2976,7 @@
     ]
    ],
    "uv_layers": [],
-   "colliders": [
-    {
-     "name": "fuel_aux_colmesh0",
-     "verts": 11,
-     "tris": 18,
-     "bounds_unity": [
-      [
-       -0.31763,
-       0.0,
-       -0.0
-      ],
-      [
-       0.0,
-       0.58745,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh1",
-     "verts": 11,
-     "tris": 18,
-     "bounds_unity": [
-      [
-       -0.32858,
-       0.0,
-       -0.35
-      ],
-      [
-       0.0,
-       0.59861,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh2",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       0.0,
-       -0.51709,
-       -0.0
-      ],
-      [
-       0.53146,
-       0.0,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh3",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       0.0,
-       -0.51704,
-       -0.35
-      ],
-      [
-       0.54564,
-       0.0,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh4",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.0
-      ],
-      [
-       0.44337,
-       0.32043,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh5",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.35
-      ],
-      [
-       0.4498,
-       0.32433,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh6",
-     "verts": 11,
-     "tris": 18,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.0,
-       -0.0
-      ],
-      [
-       0.32043,
-       0.58745,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh7",
-     "verts": 8,
-     "tris": 12,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.35
-      ],
-      [
-       0.32433,
-       0.59861,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh8",
-     "verts": 12,
-     "tris": 20,
-     "bounds_unity": [
-      [
-       -0.44337,
-       -0.0,
-       -0.0
-      ],
-      [
-       0.0,
-       0.31763,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh9",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       -0.4498,
-       -0.0,
-       -0.35
-      ],
-      [
-       0.0,
-       0.32858,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh10",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       -0.53146,
-       -0.51709,
-       -0.0
-      ],
-      [
-       -0.0,
-       0.0,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh11",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.54253,
-       -0.50584,
-       -0.35
-      ],
-      [
-       0.0,
-       0.0,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh12",
-     "verts": 11,
-     "tris": 18,
-     "bounds_unity": [
-      [
-       -0.51709,
-       -0.59861,
-       -0.0
-      ],
-      [
-       0.0,
-       0.0,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh13",
-     "verts": 10,
-     "tris": 16,
-     "bounds_unity": [
-      [
-       -0.50584,
-       -0.59861,
-       -0.35
-      ],
-      [
-       0.0,
-       0.0,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh14",
-     "verts": 12,
-     "tris": 20,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.59861,
-       -0.0
-      ],
-      [
-       0.51709,
-       0.0,
-       0.35
-      ]
-     ]
-    },
-    {
-     "name": "fuel_aux_colmesh15",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.59861,
-       -0.35
-      ],
-      [
-       0.51704,
-       0.0,
-       -0.0
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "fuel_forward_main": {
@@ -4234,24 +3014,7 @@
     "volume_holds_kg": 980.6,
     "role": "fuel_tank",
     "owner": "fuselage",
-    "mass_kg": 35,
-    "fuel_kg": 980.6,
-    "mass_box_local": [
-     -0.9340659976005554,
-     -2.424999952316284,
-     -0.21522802114486694,
-     0.9340659976005554,
-     -0.675000011920929,
-     0.7347719073295593
-    ],
-    "mass_box_world": [
-     -0.9340659976005554,
-     -2.424999952316284,
-     -0.21522802114486694,
-     0.9340659976005554,
-     -0.675000011920929,
-     0.7347719073295593
-    ]
+    "folded_into": "fuselage_mid"
    },
    "bounds_unity": [
     [
@@ -4265,7 +3028,7 @@
      0.875
     ]
    ],
-   "sha256": "ec42f416614ceb3d7e12d578008c87f228dfbef0b067ceffa271b7294c7d8357",
+   "sha256": "c8ed1181a5ba660350b7e6c13ca860d1bc01abf6c92d2f6c326cd43d4c19c551",
    "bounds_blender": [
     [
      -0.93407,
@@ -4286,280 +3049,7 @@
     ]
    ],
    "uv_layers": [],
-   "colliders": [
-    {
-     "name": "fuel_forward_main_colmesh0",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       -0.27609,
-       0.0,
-       -0.0
-      ],
-      [
-       0.0,
-       0.475,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh1",
-     "verts": 9,
-     "tris": 14,
-     "bounds_unity": [
-      [
-       -0.27609,
-       0.0,
-       -0.875
-      ],
-      [
-       0.0,
-       0.475,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh2",
-     "verts": 23,
-     "tris": 42,
-     "bounds_unity": [
-      [
-       0.0,
-       -0.43651,
-       -0.0
-      ],
-      [
-       0.6005,
-       0.0,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh3",
-     "verts": 24,
-     "tris": 44,
-     "bounds_unity": [
-      [
-       0.42317,
-       -0.33979,
-       -0.875
-      ],
-      [
-       0.92719,
-       0.0,
-       -0.4821
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh4",
-     "verts": 19,
-     "tris": 34,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.0
-      ],
-      [
-       0.51339,
-       0.23705,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh5",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.875
-      ],
-      [
-       0.6593,
-       0.27609,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh6",
-     "verts": 13,
-     "tris": 22,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.0
-      ],
-      [
-       0.27609,
-       0.475,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh7",
-     "verts": 7,
-     "tris": 10,
-     "bounds_unity": [
-      [
-       -0.0,
-       0.0,
-       -0.875
-      ],
-      [
-       0.27609,
-       0.475,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh8",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       -0.51339,
-       0.0,
-       -0.0
-      ],
-      [
-       0.0,
-       0.26268,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh9",
-     "verts": 20,
-     "tris": 36,
-     "bounds_unity": [
-      [
-       -0.6593,
-       0.0,
-       -0.875
-      ],
-      [
-       0.0,
-       0.27609,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh10",
-     "verts": 36,
-     "tris": 68,
-     "bounds_unity": [
-      [
-       -0.59512,
-       -0.475,
-       -0.0
-      ],
-      [
-       0.0,
-       0.0,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh11",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       -0.92719,
-       -0.33998,
-       -0.875
-      ],
-      [
-       -0.42317,
-       0.0,
-       -0.4821
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh12",
-     "verts": 17,
-     "tris": 30,
-     "bounds_unity": [
-      [
-       -0.475,
-       -0.475,
-       -0.0
-      ],
-      [
-       0.0,
-       0.0,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh13",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.32975,
-       -0.475,
-       -0.875
-      ],
-      [
-       0.0,
-       0.0,
-       0.0
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh14",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.475,
-       -0.0
-      ],
-      [
-       0.4552,
-       0.0,
-       0.875
-      ]
-     ]
-    },
-    {
-     "name": "fuel_forward_main_colmesh15",
-     "verts": 15,
-     "tris": 26,
-     "bounds_unity": [
-      [
-       -0.0,
-       -0.475,
-       -0.875
-      ],
-      [
-       0.35818,
-       -0.04632,
-       0.0
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "fuselage_aft": {
@@ -4594,29 +3084,29 @@
    },
    "props": {
     "role": "structure",
-    "mass_kg": 259.824,
+    "mass_kg": 1539.824,
     "family": "fuselage_aft",
-    "family_mass_kg": 490.0,
+    "family_mass_kg": 1770.0,
     "fold_centre": [
-     -9.090143006469012e-05,
-     4.0495681091709095,
-     0.333286713583067
+     9.822137293406265e-05,
+     4.5429503739472805,
+     0.17256547671633554
     ],
     "mass_box_local": [
-     -9.090143006469012e-05,
-     3.6745681091709095,
-     0.0680586805172711,
-     -9.090143006469012e-05,
-     3.6745681091709095,
-     0.0680586805172711
+     9.822137293406265e-05,
+     4.1679503739472805,
+     -0.09266255634946036,
+     9.822137293406265e-05,
+     4.1679503739472805,
+     -0.09266255634946036
     ],
     "mass_box_world": [
-     -9.090143006469012e-05,
-     3.6745681091709095,
-     0.0680586805172711,
-     -9.090143006469012e-05,
-     3.6745681091709095,
-     0.0680586805172711
+     9.822137293406265e-05,
+     4.1679503739472805,
+     -0.09266255634946036,
+     9.822137293406265e-05,
+     4.1679503739472805,
+     -0.09266255634946036
     ],
     "joined": "['skin_aft_front_L', 'skin_aft_front_R']"
    },
@@ -4632,7 +3122,7 @@
      2.07041
     ]
    ],
-   "sha256": "efce9907e4db2e8d4128d0b4342f90eae03cba5e132ed1e09d82f73aadde37b0",
+   "sha256": "8d7287b23e9d92ca8decf051e1c2a38892ee6feebe0e88780a6f84d482f3d359",
    "bounds_blender": [
     [
      -0.90716,
@@ -4658,8 +3148,42 @@
    "colliders": [
     {
      "name": "fuselage_aft_colmesh0",
-     "verts": 23,
-     "tris": 42,
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.44185,
+       -0.42247,
+       -2.0
+      ],
+      [
+       0.44135,
+       0.46073,
+       -0.1
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_aft_colmesh1",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.46025,
+       -0.45087,
+       -0.1
+      ],
+      [
+       0.45975,
+       0.47913,
+       3.3
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_aft_colmesh2",
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        -0.38571,
@@ -4674,7 +3198,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh1",
+     "name": "fuselage_aft_colmesh3",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -4691,7 +3215,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh2",
+     "name": "fuselage_aft_colmesh4",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -4708,7 +3232,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh3",
+     "name": "fuselage_aft_colmesh5",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -4725,7 +3249,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh4",
+     "name": "fuselage_aft_colmesh6",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -4742,29 +3266,29 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh5",
-     "verts": 24,
-     "tris": 44,
+     "name": "fuselage_aft_colmesh7",
+     "verts": 23,
+     "tris": 42,
      "bounds_unity": [
       [
-       0.45729,
-       -0.22737,
+       0.4634,
+       -0.21203,
        -0.05
       ],
       [
-       0.70308,
+       0.69994,
        -0.00573,
-       1.81659
+       1.78401
       ]
      ]
     },
     {
-     "name": "fuselage_aft_colmesh6",
-     "verts": 26,
-     "tris": 48,
+     "name": "fuselage_aft_colmesh8",
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.32934,
+       0.29855,
        0.00228,
        -0.05
       ],
@@ -4776,7 +3300,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh7",
+     "name": "fuselage_aft_colmesh9",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -4793,7 +3317,24 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh8",
+     "name": "fuselage_aft_colmesh10",
+     "verts": 62,
+     "tris": 120,
+     "bounds_unity": [
+      [
+       -0.387,
+       -0.36478,
+       -2.31126
+      ],
+      [
+       0.38977,
+       0.41326,
+       -2.0
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_aft_colmesh11",
      "verts": 29,
      "tris": 54,
      "bounds_unity": [
@@ -4810,7 +3351,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh9",
+     "name": "fuselage_aft_colmesh12",
      "verts": 48,
      "tris": 92,
      "bounds_unity": [
@@ -4827,7 +3368,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh10",
+     "name": "fuselage_aft_colmesh13",
      "verts": 26,
      "tris": 48,
      "bounds_unity": [
@@ -4844,7 +3385,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh11",
+     "name": "fuselage_aft_colmesh14",
      "verts": 31,
      "tris": 58,
      "bounds_unity": [
@@ -4861,12 +3402,12 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh12",
-     "verts": 29,
-     "tris": 54,
+     "name": "fuselage_aft_colmesh15",
+     "verts": 31,
+     "tris": 58,
      "bounds_unity": [
       [
-       -0.80501,
+       -0.79515,
        -0.37173,
        -0.0
       ],
@@ -4878,24 +3419,24 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh13",
-     "verts": 34,
-     "tris": 64,
+     "name": "fuselage_aft_colmesh16",
+     "verts": 36,
+     "tris": 68,
      "bounds_unity": [
       [
-       -0.90078,
-       -0.17432,
+       -0.89603,
+       -0.16361,
        0.0021
       ],
       [
-       -0.60984,
+       -0.6116,
        -0.04087,
        2.06831
       ]
      ]
     },
     {
-     "name": "fuselage_aft_colmesh14",
+     "name": "fuselage_aft_colmesh17",
      "verts": 30,
      "tris": 56,
      "bounds_unity": [
@@ -4912,7 +3453,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh15",
+     "name": "fuselage_aft_colmesh18",
      "verts": 28,
      "tris": 52,
      "bounds_unity": [
@@ -4929,9 +3470,9 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh16",
-     "verts": 34,
-     "tris": 64,
+     "name": "fuselage_aft_colmesh19",
+     "verts": 32,
+     "tris": 60,
      "bounds_unity": [
       [
        0.52725,
@@ -4939,31 +3480,31 @@
        -0.0
       ],
       [
-       0.80356,
+       0.79373,
        -0.17607,
        2.06831
       ]
      ]
     },
     {
-     "name": "fuselage_aft_colmesh17",
-     "verts": 38,
-     "tris": 72,
+     "name": "fuselage_aft_colmesh20",
+     "verts": 42,
+     "tris": 80,
      "bounds_unity": [
       [
-       0.61305,
-       -0.17442,
+       0.61443,
+       -0.16356,
        0.0021
       ],
       [
-       0.90107,
+       0.89642,
        -0.00056,
        2.06831
       ]
      ]
     },
     {
-     "name": "fuselage_aft_colmesh18",
+     "name": "fuselage_aft_colmesh21",
      "verts": 29,
      "tris": 54,
      "bounds_unity": [
@@ -4980,7 +3521,7 @@
      ]
     },
     {
-     "name": "fuselage_aft_colmesh19",
+     "name": "fuselage_aft_colmesh22",
      "verts": 46,
      "tris": 88,
      "bounds_unity": [
@@ -5033,27 +3574,28 @@
    },
    "props": {
     "role": "structure",
-    "mass_kg": 570.0,
+    "mass_kg": 685.0,
+    "fuel_kg": 578.7,
     "fold_centre": [
-     -1.6961604879614754e-07,
-     -4.399503566340396,
-     -0.08754851207398531
+     -2.5506134005423734e-05,
+     -4.146721330939112,
+     0.02718643991089304
     ],
     "mass_box_local": [
-     -1.6961604879614754e-07,
-     -4.774503566340396,
-     -0.3527765451397812,
-     -1.6961604879614754e-07,
-     -4.774503566340396,
-     -0.3527765451397812
+     -2.5506134005423734e-05,
+     -4.521721330939112,
+     -0.23804159315490286,
+     -2.5506134005423734e-05,
+     -4.521721330939112,
+     -0.23804159315490286
     ],
     "mass_box_world": [
-     -1.6961604879614754e-07,
-     -4.774503566340396,
-     -0.3527765451397812,
-     -1.6961604879614754e-07,
-     -4.774503566340396,
-     -0.3527765451397812
+     -2.5506134005423734e-05,
+     -4.521721330939112,
+     -0.23804159315490286,
+     -2.5506134005423734e-05,
+     -4.521721330939112,
+     -0.23804159315490286
     ]
    },
    "bounds_unity": [
@@ -5068,7 +3610,7 @@
      -0.3997
     ]
    ],
-   "sha256": "248a2c8cbcb9f7334e83736aa9cbcb8e79b3206dbdedd097139036d62aa00f84",
+   "sha256": "3b30660a6edddff97eee55e96974fd257f1dfbbb1cc67727fed8ae654c0462e9",
    "bounds_blender": [
     [
      -0.3103,
@@ -5092,6 +3634,40 @@
    "colliders": [
     {
      "name": "fuselage_forward_colmesh0",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.42,
+       -0.25242,
+       -1.55
+      ],
+      [
+       0.42,
+       0.44758,
+       -1.35
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_forward_colmesh1",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.58425,
+       -0.45242,
+       -2.3
+      ],
+      [
+       0.58425,
+       0.74479,
+       -1.6
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_forward_colmesh2",
      "verts": 16,
      "tris": 28,
      "bounds_unity": [
@@ -5108,7 +3684,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh1",
+     "name": "fuselage_forward_colmesh3",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5125,7 +3701,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh2",
+     "name": "fuselage_forward_colmesh4",
      "verts": 12,
      "tris": 20,
      "bounds_unity": [
@@ -5142,7 +3718,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh3",
+     "name": "fuselage_forward_colmesh5",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5159,7 +3735,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh4",
+     "name": "fuselage_forward_colmesh6",
      "verts": 26,
      "tris": 48,
      "bounds_unity": [
@@ -5176,7 +3752,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh5",
+     "name": "fuselage_forward_colmesh7",
      "verts": 26,
      "tris": 48,
      "bounds_unity": [
@@ -5193,7 +3769,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh6",
+     "name": "fuselage_forward_colmesh8",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -5210,7 +3786,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh7",
+     "name": "fuselage_forward_colmesh9",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5227,7 +3803,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh8",
+     "name": "fuselage_forward_colmesh10",
      "verts": 11,
      "tris": 18,
      "bounds_unity": [
@@ -5244,7 +3820,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh9",
+     "name": "fuselage_forward_colmesh11",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -5261,7 +3837,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh10",
+     "name": "fuselage_forward_colmesh12",
      "verts": 33,
      "tris": 62,
      "bounds_unity": [
@@ -5278,7 +3854,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh11",
+     "name": "fuselage_forward_colmesh13",
      "verts": 28,
      "tris": 52,
      "bounds_unity": [
@@ -5295,7 +3871,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh12",
+     "name": "fuselage_forward_colmesh14",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5312,7 +3888,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh13",
+     "name": "fuselage_forward_colmesh15",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5329,7 +3905,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh14",
+     "name": "fuselage_forward_colmesh16",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5346,7 +3922,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh15",
+     "name": "fuselage_forward_colmesh17",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5363,7 +3939,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh16",
+     "name": "fuselage_forward_colmesh18",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -5380,7 +3956,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh17",
+     "name": "fuselage_forward_colmesh19",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5397,7 +3973,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh18",
+     "name": "fuselage_forward_colmesh20",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5414,7 +3990,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh19",
+     "name": "fuselage_forward_colmesh21",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5431,7 +4007,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh20",
+     "name": "fuselage_forward_colmesh22",
      "verts": 27,
      "tris": 50,
      "bounds_unity": [
@@ -5448,7 +4024,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh21",
+     "name": "fuselage_forward_colmesh23",
      "verts": 26,
      "tris": 48,
      "bounds_unity": [
@@ -5465,7 +4041,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh22",
+     "name": "fuselage_forward_colmesh24",
      "verts": 36,
      "tris": 68,
      "bounds_unity": [
@@ -5482,7 +4058,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh23",
+     "name": "fuselage_forward_colmesh25",
      "verts": 28,
      "tris": 52,
      "bounds_unity": [
@@ -5499,7 +4075,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh24",
+     "name": "fuselage_forward_colmesh26",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5516,7 +4092,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh25",
+     "name": "fuselage_forward_colmesh27",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5533,7 +4109,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh26",
+     "name": "fuselage_forward_colmesh28",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -5550,7 +4126,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh27",
+     "name": "fuselage_forward_colmesh29",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5567,7 +4143,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh28",
+     "name": "fuselage_forward_colmesh30",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -5584,7 +4160,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh29",
+     "name": "fuselage_forward_colmesh31",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5601,7 +4177,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh30",
+     "name": "fuselage_forward_colmesh32",
      "verts": 11,
      "tris": 18,
      "bounds_unity": [
@@ -5618,7 +4194,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh31",
+     "name": "fuselage_forward_colmesh33",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -5635,7 +4211,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh32",
+     "name": "fuselage_forward_colmesh34",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5652,7 +4228,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh33",
+     "name": "fuselage_forward_colmesh35",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5669,7 +4245,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh34",
+     "name": "fuselage_forward_colmesh36",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5686,7 +4262,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh35",
+     "name": "fuselage_forward_colmesh37",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5703,7 +4279,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh36",
+     "name": "fuselage_forward_colmesh38",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5720,7 +4296,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh37",
+     "name": "fuselage_forward_colmesh39",
      "verts": 17,
      "tris": 30,
      "bounds_unity": [
@@ -5737,7 +4313,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh38",
+     "name": "fuselage_forward_colmesh40",
      "verts": 20,
      "tris": 36,
      "bounds_unity": [
@@ -5754,7 +4330,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh39",
+     "name": "fuselage_forward_colmesh41",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5771,7 +4347,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh40",
+     "name": "fuselage_forward_colmesh42",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -5788,7 +4364,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh41",
+     "name": "fuselage_forward_colmesh43",
      "verts": 17,
      "tris": 30,
      "bounds_unity": [
@@ -5805,7 +4381,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh42",
+     "name": "fuselage_forward_colmesh44",
      "verts": 20,
      "tris": 36,
      "bounds_unity": [
@@ -5822,7 +4398,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh43",
+     "name": "fuselage_forward_colmesh45",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5839,7 +4415,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh44",
+     "name": "fuselage_forward_colmesh46",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -5856,7 +4432,7 @@
      ]
     },
     {
-     "name": "fuselage_forward_colmesh45",
+     "name": "fuselage_forward_colmesh47",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -5907,29 +4483,30 @@
    },
    "props": {
     "role": "structure",
-    "mass_kg": 910.0000000000002,
+    "mass_kg": 1214.9999999999998,
     "family": "fuselage_mid",
-    "family_mass_kg": 1040.0000000000002,
+    "family_mass_kg": 1344.9999999999998,
     "fold_centre": [
-     -3.9856914684668196e-05,
-     0.40865436462173843,
-     0.1985738343357508
+     -0.00021040891036403498,
+     0.2783178849215299,
+     0.5220611857295069
     ],
+    "fuel_kg": 2173.1,
     "mass_box_local": [
-     -3.9856914684668196e-05,
-     0.03365436462173843,
-     -0.0666541987300451,
-     -3.9856914684668196e-05,
-     0.03365436462173843,
-     -0.0666541987300451
+     -0.00021040891036403498,
+     -0.09668211507847008,
+     0.256833152663711,
+     -0.00021040891036403498,
+     -0.09668211507847008,
+     0.256833152663711
     ],
     "mass_box_world": [
-     -3.9856914684668196e-05,
-     0.03365436462173843,
-     -0.0666541987300451,
-     -3.9856914684668196e-05,
-     0.03365436462173843,
-     -0.0666541987300451
+     -0.00021040891036403498,
+     -0.09668211507847008,
+     0.256833152663711,
+     -0.00021040891036403498,
+     -0.09668211507847008,
+     0.256833152663711
     ]
    },
    "bounds_unity": [
@@ -5944,7 +4521,7 @@
      -0.3944
     ]
    ],
-   "sha256": "11a7311d47652359266e5732a99184d8fb30d8453dbc0239ec6bc44a730bfd38",
+   "sha256": "c10bdb46b4c8159b31d3bcd20ae9f0e08e8ba3b5ee4c319123863116372a709e",
    "bounds_blender": [
     [
      -0.9715,
@@ -5968,69 +4545,69 @@
    "colliders": [
     {
      "name": "fuselage_mid_colmesh0",
-     "verts": 15,
-     "tris": 26,
+     "verts": 17,
+     "tris": 30,
      "bounds_unity": [
       [
-       -0.90839,
-       0.05097,
-       -2.605
+       -0.81581,
+       -0.28973,
+       -1.175
       ],
       [
-       -0.37942,
-       0.37357,
-       -1.1771
+       -0.26,
+       0.51733,
+       0.625
       ]
      ]
     },
     {
      "name": "fuselage_mid_colmesh1",
-     "verts": 21,
-     "tris": 38,
+     "verts": 13,
+     "tris": 22,
      "bounds_unity": [
       [
-       -0.926,
-       -0.47872,
-       -1.625
+       0.26,
+       -0.19631,
+       -1.175
       ],
       [
-       -0.45653,
-       -0.21257,
-       -0.33101
+       0.88381,
+       0.51733,
+       0.625
       ]
      ]
     },
     {
      "name": "fuselage_mid_colmesh2",
-     "verts": 25,
-     "tris": 46,
+     "verts": 14,
+     "tris": 24,
      "bounds_unity": [
       [
-       -0.4662,
-       -0.74393,
-       -1.73683
+       -0.24,
+       -0.48523,
+       -1.175
       ],
       [
-       -0.03469,
-       -0.40488,
-       2.575
+       0.24,
+       0.73507,
+       0.625
       ]
      ]
     },
     {
      "name": "fuselage_mid_colmesh3",
-     "verts": 23,
-     "tris": 42,
+     "verts": 26,
+     "tris": 48,
      "bounds_unity": [
       [
-       0.0,
-       -0.74523,
-       -2.01814
+       -0.8781,
+       -0.21523,
+       0.675
       ],
       [
-       0.4662,
-       -0.3973,
-       2.575
+       0.89065,
+       0.73477,
+       2.425
       ]
      ]
     },
@@ -6040,36 +4617,308 @@
      "tris": 32,
      "bounds_unity": [
       [
-       0.396,
-       -0.47259,
+       -0.98645,
+       0.00324,
        -2.605
       ],
       [
-       0.85477,
-       -0.18988,
-       -1.1771
+       -0.37942,
+       0.39365,
+       2.575
       ]
      ]
     },
     {
      "name": "fuselage_mid_colmesh5",
-     "verts": 14,
-     "tris": 24,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.37595,
-       0.01397,
-       -2.605
+       -0.934,
+       -0.47872,
+       -1.625
       ],
       [
-       0.955,
-       0.37357,
-       -1.1771
+       -0.39624,
+       -0.10023,
+       2.4649
       ]
      ]
     },
     {
      "name": "fuselage_mid_colmesh6",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       -0.4662,
+       -0.74393,
+       -1.73683
+      ],
+      [
+       -0.03469,
+       -0.38838,
+       2.575
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh7",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.0,
+       -0.74523,
+       -2.31516
+      ],
+      [
+       0.4662,
+       -0.38862,
+       2.575
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh8",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.396,
+       -0.47872,
+       -2.605
+      ],
+      [
+       0.92868,
+       -0.11753,
+       2.4649
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh9",
+     "verts": 18,
+     "tris": 32,
+     "bounds_unity": [
+      [
+       0.37595,
+       0.00324,
+       -2.605
+      ],
+      [
+       0.98645,
+       0.39365,
+       2.575
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh10",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.6812,
+       -0.14643,
+       1.65
+      ],
+      [
+       -0.4788,
+       0.05597,
+       2.225
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh11",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.91054,
+       -0.43121,
+       1.075
+      ],
+      [
+       -0.24443,
+       0.35363,
+       1.65
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh12",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.70959,
+       -0.27022,
+       0.5
+      ],
+      [
+       -0.11303,
+       0.21817,
+       1.075
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh13",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.5761,
+       -0.24489,
+       -0.075
+      ],
+      [
+       -0.0,
+       0.24895,
+       0.5
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh14",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.4434,
+       -0.21519,
+       -0.65
+      ],
+      [
+       -0.0,
+       0.32081,
+       -0.075
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh15",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.44628,
+       -0.22023,
+       -1.225
+      ],
+      [
+       -0.0,
+       0.53147,
+       -0.65
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh16",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       0.4788,
+       -0.14643,
+       1.65
+      ],
+      [
+       0.6812,
+       0.05597,
+       2.225
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh17",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       0.24443,
+       -0.43121,
+       1.075
+      ],
+      [
+       0.91054,
+       0.35363,
+       1.65
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh18",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       0.11303,
+       -0.27022,
+       0.5
+      ],
+      [
+       0.70959,
+       0.21817,
+       1.075
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh19",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.0,
+       -0.24489,
+       -0.075
+      ],
+      [
+       0.5761,
+       0.24895,
+       0.5
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh20",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.0,
+       -0.21519,
+       -0.65
+      ],
+      [
+       0.4434,
+       0.32081,
+       -0.075
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh21",
+     "verts": 14,
+     "tris": 24,
+     "bounds_unity": [
+      [
+       -0.0,
+       -0.22023,
+       -1.225
+      ],
+      [
+       0.44628,
+       0.53147,
+       -0.65
+      ]
+     ]
+    },
+    {
+     "name": "fuselage_mid_colmesh22",
      "verts": 26,
      "tris": 48,
      "bounds_unity": [
@@ -6086,7 +4935,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh7",
+     "name": "fuselage_mid_colmesh23",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6103,7 +4952,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh8",
+     "name": "fuselage_mid_colmesh24",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -6120,7 +4969,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh9",
+     "name": "fuselage_mid_colmesh25",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6137,7 +4986,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh10",
+     "name": "fuselage_mid_colmesh26",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6154,7 +5003,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh11",
+     "name": "fuselage_mid_colmesh27",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6171,7 +5020,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh12",
+     "name": "fuselage_mid_colmesh28",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6188,7 +5037,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh13",
+     "name": "fuselage_mid_colmesh29",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6205,7 +5054,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh14",
+     "name": "fuselage_mid_colmesh30",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6222,7 +5071,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh15",
+     "name": "fuselage_mid_colmesh31",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6239,7 +5088,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh16",
+     "name": "fuselage_mid_colmesh32",
      "verts": 16,
      "tris": 28,
      "bounds_unity": [
@@ -6256,7 +5105,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh17",
+     "name": "fuselage_mid_colmesh33",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6273,7 +5122,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh18",
+     "name": "fuselage_mid_colmesh34",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -6290,7 +5139,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh19",
+     "name": "fuselage_mid_colmesh35",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6307,7 +5156,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh20",
+     "name": "fuselage_mid_colmesh36",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6324,7 +5173,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh21",
+     "name": "fuselage_mid_colmesh37",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -6341,7 +5190,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh22",
+     "name": "fuselage_mid_colmesh38",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6358,7 +5207,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh23",
+     "name": "fuselage_mid_colmesh39",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6375,7 +5224,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh24",
+     "name": "fuselage_mid_colmesh40",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6392,7 +5241,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh25",
+     "name": "fuselage_mid_colmesh41",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6409,7 +5258,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh26",
+     "name": "fuselage_mid_colmesh42",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6426,7 +5275,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh27",
+     "name": "fuselage_mid_colmesh43",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6443,7 +5292,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh28",
+     "name": "fuselage_mid_colmesh44",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6460,7 +5309,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh29",
+     "name": "fuselage_mid_colmesh45",
      "verts": 16,
      "tris": 28,
      "bounds_unity": [
@@ -6477,7 +5326,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh30",
+     "name": "fuselage_mid_colmesh46",
      "verts": 9,
      "tris": 14,
      "bounds_unity": [
@@ -6494,7 +5343,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh31",
+     "name": "fuselage_mid_colmesh47",
      "verts": 8,
      "tris": 12,
      "bounds_unity": [
@@ -6511,7 +5360,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh32",
+     "name": "fuselage_mid_colmesh48",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6528,7 +5377,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh33",
+     "name": "fuselage_mid_colmesh49",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6545,7 +5394,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh34",
+     "name": "fuselage_mid_colmesh50",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6562,7 +5411,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh35",
+     "name": "fuselage_mid_colmesh51",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6579,7 +5428,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh36",
+     "name": "fuselage_mid_colmesh52",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6596,7 +5445,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh37",
+     "name": "fuselage_mid_colmesh53",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6613,7 +5462,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh38",
+     "name": "fuselage_mid_colmesh54",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6630,7 +5479,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh39",
+     "name": "fuselage_mid_colmesh55",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6647,7 +5496,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh40",
+     "name": "fuselage_mid_colmesh56",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6664,7 +5513,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh41",
+     "name": "fuselage_mid_colmesh57",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6681,7 +5530,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh42",
+     "name": "fuselage_mid_colmesh58",
      "verts": 33,
      "tris": 62,
      "bounds_unity": [
@@ -6698,7 +5547,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh43",
+     "name": "fuselage_mid_colmesh59",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6715,7 +5564,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh44",
+     "name": "fuselage_mid_colmesh60",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6732,7 +5581,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh45",
+     "name": "fuselage_mid_colmesh61",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6749,7 +5598,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh46",
+     "name": "fuselage_mid_colmesh62",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -6766,7 +5615,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh47",
+     "name": "fuselage_mid_colmesh63",
      "verts": 13,
      "tris": 22,
      "bounds_unity": [
@@ -6783,7 +5632,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh48",
+     "name": "fuselage_mid_colmesh64",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -6800,7 +5649,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh49",
+     "name": "fuselage_mid_colmesh65",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6817,7 +5666,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh50",
+     "name": "fuselage_mid_colmesh66",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6834,7 +5683,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh51",
+     "name": "fuselage_mid_colmesh67",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6851,7 +5700,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh52",
+     "name": "fuselage_mid_colmesh68",
      "verts": 15,
      "tris": 26,
      "bounds_unity": [
@@ -6868,7 +5717,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh53",
+     "name": "fuselage_mid_colmesh69",
      "verts": 15,
      "tris": 26,
      "bounds_unity": [
@@ -6885,7 +5734,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh54",
+     "name": "fuselage_mid_colmesh70",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6902,7 +5751,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh55",
+     "name": "fuselage_mid_colmesh71",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -6919,7 +5768,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh56",
+     "name": "fuselage_mid_colmesh72",
      "verts": 21,
      "tris": 38,
      "bounds_unity": [
@@ -6936,7 +5785,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh57",
+     "name": "fuselage_mid_colmesh73",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -6953,7 +5802,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh58",
+     "name": "fuselage_mid_colmesh74",
      "verts": 12,
      "tris": 20,
      "bounds_unity": [
@@ -6970,7 +5819,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh59",
+     "name": "fuselage_mid_colmesh75",
      "verts": 22,
      "tris": 40,
      "bounds_unity": [
@@ -6987,7 +5836,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh60",
+     "name": "fuselage_mid_colmesh76",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7004,7 +5853,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh61",
+     "name": "fuselage_mid_colmesh77",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7021,7 +5870,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh62",
+     "name": "fuselage_mid_colmesh78",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7038,7 +5887,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh63",
+     "name": "fuselage_mid_colmesh79",
      "verts": 32,
      "tris": 60,
      "bounds_unity": [
@@ -7055,7 +5904,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh64",
+     "name": "fuselage_mid_colmesh80",
      "verts": 24,
      "tris": 44,
      "bounds_unity": [
@@ -7072,7 +5921,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh65",
+     "name": "fuselage_mid_colmesh81",
      "verts": 15,
      "tris": 26,
      "bounds_unity": [
@@ -7089,7 +5938,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh66",
+     "name": "fuselage_mid_colmesh82",
      "verts": 15,
      "tris": 26,
      "bounds_unity": [
@@ -7106,7 +5955,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh67",
+     "name": "fuselage_mid_colmesh83",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7123,7 +5972,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh68",
+     "name": "fuselage_mid_colmesh84",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7140,7 +5989,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh69",
+     "name": "fuselage_mid_colmesh85",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7157,7 +6006,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh70",
+     "name": "fuselage_mid_colmesh86",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7174,7 +6023,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh71",
+     "name": "fuselage_mid_colmesh87",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7191,7 +6040,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh72",
+     "name": "fuselage_mid_colmesh88",
      "verts": 25,
      "tris": 46,
      "bounds_unity": [
@@ -7208,7 +6057,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh73",
+     "name": "fuselage_mid_colmesh89",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7225,7 +6074,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh74",
+     "name": "fuselage_mid_colmesh90",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7242,7 +6091,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh75",
+     "name": "fuselage_mid_colmesh91",
      "verts": 16,
      "tris": 28,
      "bounds_unity": [
@@ -7259,7 +6108,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh76",
+     "name": "fuselage_mid_colmesh92",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7276,7 +6125,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh77",
+     "name": "fuselage_mid_colmesh93",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7293,7 +6142,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh78",
+     "name": "fuselage_mid_colmesh94",
      "verts": 11,
      "tris": 18,
      "bounds_unity": [
@@ -7310,7 +6159,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh79",
+     "name": "fuselage_mid_colmesh95",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7327,7 +6176,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh80",
+     "name": "fuselage_mid_colmesh96",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7344,7 +6193,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh81",
+     "name": "fuselage_mid_colmesh97",
      "verts": 16,
      "tris": 28,
      "bounds_unity": [
@@ -7361,7 +6210,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh82",
+     "name": "fuselage_mid_colmesh98",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7378,7 +6227,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh83",
+     "name": "fuselage_mid_colmesh99",
      "verts": 18,
      "tris": 32,
      "bounds_unity": [
@@ -7395,7 +6244,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh84",
+     "name": "fuselage_mid_colmesh100",
      "verts": 11,
      "tris": 18,
      "bounds_unity": [
@@ -7412,7 +6261,7 @@
      ]
     },
     {
-     "name": "fuselage_mid_colmesh85",
+     "name": "fuselage_mid_colmesh101",
      "verts": 23,
      "tris": 42,
      "bounds_unity": [
@@ -7465,7 +6314,7 @@
     "role": "structure",
     "mass_kg": 230.17600000000002,
     "family": "fuselage_aft",
-    "family_mass_kg": 490.0,
+    "family_mass_kg": 1770.0,
     "fold_centre": [
      2.832148971450361e-06,
      5.985231531459773,
@@ -7500,7 +6349,7 @@
      0.96075
     ]
    ],
-   "sha256": "b76d48ee57d4abec3cdb166d3f67f6c1e09e54ccc5f8684406ca666ace3d9176",
+   "sha256": "095cbb8aa9ce6a9c27c24261080cc7680173117d7f6e48b7484fe7863508954b",
    "bounds_blender": [
     [
      -0.62692,
@@ -7534,25 +6383,25 @@
    "colliders": [
     {
      "name": "fuselage_tail_colmesh0",
-     "verts": 34,
-     "tris": 64,
+     "verts": 29,
+     "tris": 54,
      "bounds_unity": [
       [
        -0.3921,
-       0.32786,
+       0.31533,
        -0.8925
       ],
       [
        -0.0,
-       0.61242,
+       0.60439,
        0.8925
       ]
      ]
     },
     {
      "name": "fuselage_tail_colmesh1",
-     "verts": 22,
-     "tris": 40,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        -0.60387,
@@ -7560,7 +6409,7 @@
        -0.8925
       ],
       [
-       -0.28939,
+       -0.28689,
        0.37893,
        0.8925
       ]
@@ -7568,8 +6417,8 @@
     },
     {
      "name": "fuselage_tail_colmesh2",
-     "verts": 24,
-     "tris": 44,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        -0.61023,
@@ -7577,7 +6426,7 @@
        -0.8925
       ],
       [
-       -0.264,
+       -0.25413,
        -0.01115,
        0.8925
       ]
@@ -7585,8 +6434,8 @@
     },
     {
      "name": "fuselage_tail_colmesh3",
-     "verts": 24,
-     "tris": 44,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        -0.2921,
@@ -7594,16 +6443,16 @@
        -0.8925
       ],
       [
-       -0.05065,
-       -0.29113,
+       -0.04468,
+       -0.27967,
        0.3575
       ]
      ]
     },
     {
      "name": "fuselage_tail_colmesh4",
-     "verts": 22,
-     "tris": 40,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
        0.0,
@@ -7612,18 +6461,18 @@
       ],
       [
        0.42788,
-       -0.3025,
+       -0.29091,
        0.8925
       ]
      ]
     },
     {
      "name": "fuselage_tail_colmesh5",
-     "verts": 24,
-     "tris": 44,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.27586,
+       0.26585,
        -0.42846,
        -0.8925
       ],
@@ -7636,11 +6485,11 @@
     },
     {
      "name": "fuselage_tail_colmesh6",
-     "verts": 23,
-     "tris": 42,
+     "verts": 18,
+     "tris": 32,
      "bounds_unity": [
       [
-       0.28985,
+       0.28689,
        0.00662,
        -0.8925
       ],
@@ -7653,17 +6502,17 @@
     },
     {
      "name": "fuselage_tail_colmesh7",
-     "verts": 35,
-     "tris": 66,
+     "verts": 30,
+     "tris": 56,
      "bounds_unity": [
       [
-       0.02017,
-       0.29191,
+       0.01929,
+       0.27943,
        -0.8925
       ],
       [
        0.3921,
-       0.61258,
+       0.60458,
        0.8925
       ]
      ]
@@ -7730,8 +6579,8 @@
        -1.2425
       ],
       [
-       -0.0453,
-       0.65362,
+       -0.05263,
+       0.65139,
        0.9575
       ]
      ]
@@ -7823,17 +6672,17 @@
     },
     {
      "name": "fuselage_tail_colmesh17",
-     "verts": 27,
-     "tris": 50,
+     "verts": 29,
+     "tris": 54,
      "bounds_unity": [
       [
-       0.04384,
+       0.05124,
        0.26571,
        -1.2425
       ],
       [
        0.42909,
-       0.65355,
+       0.65129,
        0.9575
       ]
      ]
@@ -7909,7 +6758,7 @@
     "role": "structure",
     "mass_kg": 61.436,
     "family": "fuselage_mid",
-    "family_mass_kg": 1040.0000000000002,
+    "family_mass_kg": 1344.9999999999998,
     "fold_centre": [
      0.0035891327450335714,
      -1.4713443260188954,
@@ -8110,7 +6959,7 @@
     "role": "structure",
     "mass_kg": 68.564,
     "family": "fuselage_mid",
-    "family_mass_kg": 1040.0000000000002,
+    "family_mass_kg": 1344.9999999999998,
     "fold_centre": [
      -0.003183157342045384,
      1.8634897239439114,
@@ -10902,23 +9751,7 @@
    },
    "props": {
     "role": "intake",
-    "mass_kg": 100,
-    "mass_box_local": [
-     0.0,
-     -2.225000023841858,
-     -0.431205153465271,
-     0.9105352163314819,
-     1.225000023841858,
-     0.5314719676971436
-    ],
-    "mass_box_world": [
-     0.0,
-     -2.225000023841858,
-     -0.431205153465271,
-     0.9105352163314819,
-     1.225000023841858,
-     0.5314719676971436
-    ]
+    "folded_into": "fuselage_mid"
    },
    "bounds_unity": [
     [
@@ -10932,7 +9765,7 @@
      1.725
     ]
    ],
-   "sha256": "5acd7957a93ea3dae32c7997325473e723d23de06d1031240d6d5c0e75f3501b",
+   "sha256": "0702c044a420b918138ef63fcab847851119e1e564ac4ea8346b8d568d565c28",
    "bounds_blender": [
     [
      -0.4505,
@@ -10963,110 +9796,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "intake_duct_L_colmesh0",
-     "verts": 18,
-     "tris": 32,
-     "bounds_unity": [
-      [
-       -0.18108,
-       -0.19656,
-       1.15
-      ],
-      [
-       -0.0283,
-       0.00584,
-       1.725
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_L_colmesh1",
-     "verts": 27,
-     "tris": 50,
-     "bounds_unity": [
-      [
-       -0.38654,
-       -0.48134,
-       0.575
-      ],
-      [
-       0.20607,
-       0.28474,
-       1.11992
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_L_colmesh2",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.25909,
-       -0.32036,
-       -0.0
-      ],
-      [
-       0.33747,
-       0.16804,
-       0.575
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_L_colmesh3",
-     "verts": 19,
-     "tris": 34,
-     "bounds_unity": [
-      [
-       -0.1256,
-       -0.29503,
-       -0.575
-      ],
-      [
-       0.4434,
-       0.19881,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_L_colmesh4",
-     "verts": 21,
-     "tris": 38,
-     "bounds_unity": [
-      [
-       0.0071,
-       -0.26533,
-       -1.15
-      ],
-      [
-       0.4434,
-       0.27068,
-       -0.575
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_L_colmesh5",
-     "verts": 22,
-     "tris": 40,
-     "bounds_unity": [
-      [
-       0.00422,
-       -0.27036,
-       -1.725
-      ],
-      [
-       0.4434,
-       0.4792,
-       -1.1571
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "intake_duct_R": {
@@ -11101,23 +9831,7 @@
    },
    "props": {
     "role": "intake",
-    "mass_kg": 100,
-    "mass_box_local": [
-     -0.9105352163314819,
-     -2.225000023841858,
-     -0.431205153465271,
-     0.0,
-     1.225000023841858,
-     0.5314719676971436
-    ],
-    "mass_box_world": [
-     -0.9105352163314819,
-     -2.225000023841858,
-     -0.431205153465271,
-     0.0,
-     1.225000023841858,
-     0.5314719676971436
-    ]
+    "folded_into": "fuselage_mid"
    },
    "bounds_unity": [
     [
@@ -11131,7 +9845,7 @@
      1.725
     ]
    ],
-   "sha256": "d071bd8c71fbee634889ec785b7891ae4872b91400e1cafcd17afd129bf0876d",
+   "sha256": "e4c9bd9b1f8a96532b2b3df398c2ec51650c3c22053e7e921e554d724225ed75",
    "bounds_blender": [
     [
      -0.46004,
@@ -11162,110 +9876,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "intake_duct_R_colmesh0",
-     "verts": 16,
-     "tris": 28,
-     "bounds_unity": [
-      [
-       0.0283,
-       -0.19656,
-       1.15
-      ],
-      [
-       0.18197,
-       0.00584,
-       1.725
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_R_colmesh1",
-     "verts": 27,
-     "tris": 50,
-     "bounds_unity": [
-      [
-       -0.20607,
-       -0.48134,
-       0.575
-      ],
-      [
-       0.38654,
-       0.28474,
-       1.11992
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_R_colmesh2",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.33747,
-       -0.32036,
-       -0.0
-      ],
-      [
-       0.25909,
-       0.16804,
-       0.575
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_R_colmesh3",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.4505,
-       -0.29503,
-       -0.575
-      ],
-      [
-       0.1256,
-       0.19881,
-       -0.0
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_R_colmesh4",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.4505,
-       -0.26533,
-       -1.15
-      ],
-      [
-       -0.0071,
-       0.27068,
-       -0.575
-      ]
-     ]
-    },
-    {
-     "name": "intake_duct_R_colmesh5",
-     "verts": 14,
-     "tris": 24,
-     "bounds_unity": [
-      [
-       -0.4505,
-       -0.27036,
-       -1.725
-      ],
-      [
-       -0.00422,
-       0.48134,
-       -1.15
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "lef_L": {
@@ -12388,23 +10999,7 @@
    },
    "props": {
     "role": "engine",
-    "mass_kg": 130,
-    "mass_box_local": [
-     -0.3919999897480011,
-     6.625,
-     -0.30018413066864014,
-     0.3919999897480011,
-     6.936258316040039,
-     0.5097281336784363
-    ],
-    "mass_box_world": [
-     -0.3919999897480011,
-     6.625,
-     -0.30018413066864014,
-     0.3919999897480011,
-     6.936258316040039,
-     0.5097281336784363
-    ]
+    "folded_into": "fuselage_aft"
    },
    "bounds_unity": [
     [
@@ -12418,7 +11013,7 @@
      0.15
     ]
    ],
-   "sha256": "256ca35b6270f16f5dc7632dd3faba1935fcb16f490cbb59669f8e9c00a8bd52",
+   "sha256": "21656f177217ae08bbb8be438591ebde42c3a0e04d1a26625a75f27340c553f7",
    "bounds_blender": [
     [
      -0.392,
@@ -12449,25 +11044,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "nozzle_colmesh0",
-     "verts": 44,
-     "tris": 84,
-     "bounds_unity": [
-      [
-       -0.36699,
-       -0.37509,
-       -0.16126
-      ],
-      [
-       0.37049,
-       0.35251,
-       0.15
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": {
     "tris": 32
    }
@@ -18897,23 +17474,7 @@
    },
    "props": {
     "role": "radar",
-    "mass_kg": 65,
-    "mass_box_local": [
-     -0.30000001192092896,
-     -7.425000190734863,
-     -0.5152280330657959,
-     0.30000001192092896,
-     -6.074999809265137,
-     0.15477192401885986
-    ],
-    "mass_box_world": [
-     -0.30000001192092896,
-     -7.425000190734863,
-     -0.5152280330657959,
-     0.30000001192092896,
-     -6.074999809265137,
-     0.15477192401885986
-    ]
+    "folded_into": "cockpit_cell"
    },
    "bounds_unity": [
     [
@@ -18927,7 +17488,7 @@
      0.675
     ]
    ],
-   "sha256": "9bed7eb53136f5d411329ff43c621bfef95800ad44d0d2bdd25604cf2572efc7",
+   "sha256": "0987dc1db3bc952227c12ffefaa8002e91b3989cd3ba334b0c0d424750881e57",
    "bounds_blender": [
     [
      -0.3,
@@ -18950,25 +17511,7 @@
    "uv_layers": [
     "UVMap"
    ],
-   "colliders": [
-    {
-     "name": "radar_tray_colmesh0",
-     "verts": 55,
-     "tris": 106,
-     "bounds_unity": [
-      [
-       -0.29728,
-       -0.33228,
-       -0.675
-      ],
-      [
-       0.29729,
-       0.335,
-       0.675
-      ]
-     ]
-    }
-   ],
+   "colliders": [],
    "lod1": null
   },
   "radome": {

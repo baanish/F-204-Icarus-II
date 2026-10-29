@@ -34,21 +34,6 @@
      703
     ]
    },
-   "avionics_tray": {
-    "sprite": "Icarus_status_avionics_tray.png",
-    "centre": [
-     0.0,
-     41.66
-    ],
-    "size": [
-     13.71,
-     4.22
-    ],
-    "px": [
-     486,
-     346
-    ]
-   },
    "canopy": {
     "sprite": "Icarus_status_canopy.png",
     "centre": [
@@ -68,45 +53,15 @@
     "sprite": "Icarus_status_cockpit_cell.png",
     "centre": [
      0.0,
-     61.7
+     71.98
     ],
     "size": [
      17.93,
-     42.19
+     62.23
     ],
     "px": [
      478,
-     198
-    ]
-   },
-   "engine_afterburner": {
-    "sprite": "Icarus_status_engine_afterburner.png",
-    "centre": [
-     0.0,
-     -92.02
-    ],
-    "size": [
-     14.77,
-     29.53
-    ],
-    "px": [
-     484,
-     805
-    ]
-   },
-   "engine_core": {
-    "sprite": "Icarus_status_engine_core.png",
-    "centre": [
-     0.0,
-     -53.0
-    ],
-    "size": [
-     14.77,
-     52.73
-    ],
-    "px": [
-     484,
-     613
+     121
     ]
    },
    "fin_skin": {
@@ -169,124 +124,49 @@
      686
     ]
    },
-   "fuel_aft_L": {
-    "sprite": "Icarus_status_fuel_aft_L.png",
-    "centre": [
-     -8.44,
-     -11.87
-    ],
-    "size": [
-     11.6,
-     28.48
-    ],
-    "px": [
-     458,
-     503
-    ]
-   },
-   "fuel_aft_R": {
-    "sprite": "Icarus_status_fuel_aft_R.png",
-    "centre": [
-     8.44,
-     -11.87
-    ],
-    "size": [
-     11.6,
-     28.48
-    ],
-    "px": [
-     522,
-     503
-    ]
-   },
-   "fuel_aft_center": {
-    "sprite": "Icarus_status_fuel_aft_center.png",
-    "centre": [
-     0.0,
-     -11.87
-    ],
-    "size": [
-     8.44,
-     28.48
-    ],
-    "px": [
-     496,
-     503
-    ]
-   },
-   "fuel_aux": {
-    "sprite": "Icarus_status_fuel_aux.png",
-    "centre": [
-     0.0,
-     34.28
-    ],
-    "size": [
-     18.98,
-     11.6
-    ],
-    "px": [
-     476,
-     360
-    ]
-   },
-   "fuel_forward_main": {
-    "sprite": "Icarus_status_fuel_forward_main.png",
-    "centre": [
-     0.0,
-     15.29
-    ],
-    "size": [
-     29.53,
-     27.42
-    ],
-    "px": [
-     456,
-     402
-    ]
-   },
    "fuselage_aft": {
     "sprite": "Icarus_status_fuselage_aft.png",
     "centre": [
      0.0,
-     -61.7
+     -72.51
     ],
     "size": [
      28.48,
-     33.75
+     91.76
     ],
     "px": [
      458,
-     682
+     613
     ]
    },
    "fuselage_forward": {
     "sprite": "Icarus_status_fuselage_forward.png",
     "centre": [
      0.0,
-     63.02
+     60.64
     ],
     "size": [
      20.04,
-     61.17
+     65.39
     ],
     "px": [
      474,
-     157
+     158
     ]
    },
    "fuselage_mid": {
     "sprite": "Icarus_status_fuselage_mid.png",
     "centre": [
      0.0,
-     -12.92
+     -6.33
     ],
     "size": [
      33.75,
-     109.69
+     80.16
     ],
     "px": [
      448,
-     353
+     384
     ]
    },
    "fuselage_tail": {
@@ -308,29 +188,29 @@
     "sprite": "Icarus_status_fuselage_truss_front.png",
     "centre": [
      0.0,
-     12.13
+     17.67
     ],
     "size": [
-     16.88,
-     37.97
+     10.55,
+     48.52
     ],
     "px": [
-     480,
-     394
+     492,
+     353
     ]
    },
    "fuselage_truss_rear": {
     "sprite": "Icarus_status_fuselage_truss_rear.png",
     "centre": [
      0.0,
-     -26.1
+     -36.12
     ],
     "size": [
-     15.82,
-     43.24
+     10.55,
+     63.28
     ],
     "px": [
-     482,
+     492,
      529
     ]
    },
@@ -379,36 +259,6 @@
      602
     ]
    },
-   "intake_duct_L": {
-    "sprite": "Icarus_status_intake_duct_L.png",
-    "centre": [
-     -6.86,
-     -0.26
-    ],
-    "size": [
-     14.77,
-     52.73
-    ],
-    "px": [
-     458,
-     413
-    ]
-   },
-   "intake_duct_R": {
-    "sprite": "Icarus_status_intake_duct_R.png",
-    "centre": [
-     6.86,
-     -0.26
-    ],
-    "size": [
-     14.77,
-     52.73
-    ],
-    "px": [
-     510,
-     413
-    ]
-   },
    "lef_L": {
     "sprite": "Icarus_status_lef_L.png",
     "centre": [
@@ -437,36 +287,6 @@
     "px": [
      619,
      600
-    ]
-   },
-   "nozzle": {
-    "sprite": "Icarus_status_nozzle.png",
-    "centre": [
-     0.0,
-     -112.06
-    ],
-    "size": [
-     13.71,
-     13.71
-    ],
-    "px": [
-     486,
-     911
-    ]
-   },
-   "radar_tray": {
-    "sprite": "Icarus_status_radar_tray.png",
-    "centre": [
-     0.0,
-     92.02
-    ],
-    "size": [
-     10.55,
-     22.15
-    ],
-    "px": [
-     492,
-     121
     ]
    },
    "radome": {

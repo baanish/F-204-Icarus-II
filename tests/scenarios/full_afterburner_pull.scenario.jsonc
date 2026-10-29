@@ -1,0 +1,46 @@
+// Full afterburner, vectored, in a 9 g pull: a 0.1.0 player saw the engine come off above some thrust. The thrust goes in
+// at the JetNozzle, which rides fuselage_aft as the Revoker's rides its tail part, so only the section's own joint carries
+// it. The Icarus starts over Ignus at 1,000 m, heading east at 410 m/s, half fuel, clean; at full afterburner a hold
+// reverses onto 270, saturating the stick (full aft stick vectors the nozzle to its 4 degrees below 1,000 m/s) past 8 g,
+// then pulls up for 5,000 m. Pass: nothing comes off. Damage is left to full_stick_low_fast. The plugin's
+// "[Icarus] thrust-line:" line gives fuselage_aft's peak turn against the root, its "tail-flex:" line the peak load factor
+// and its "joint-load:" line the joints nearest their break (src/Icarus/TailFlex.cs).
+// From the repo root: no-agentic run tests/scenarios/full_afterburner_pull.scenario.jsonc
+{
+  "mission": "icarus_ignus_1km_fast.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.1.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "timeout": 180,
+  "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||" }, "within": 3,
+      "label": "loadout: all three hardpoint sets empty" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 800 } ] },
+      "label": "the Icarus airborne at 1 km" },
+    { "mark": { "label": "start" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 1000, "hdg_deg": 90, "throttle": 1 } },
+    { "wait": { "path": "own.engines.0.throttle", "gt": 0.99 }, "hold": 5, "timeout": 15, "label": "5 s at full afterburner" },
+    { "record": { "path": "own.engines.0.thrust_n" }, "label": "thrust at full afterburner before the pull, N" },
+    { "mark": { "label": "pull" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 1000, "hdg_deg": 270, "throttle": 1 } },
+    { "wait": { "any": [ { "path": "own.load_g", "gt": 8 }, { "event": "part_detached", "since": "start" } ] }, "timeout": 10,
+      "label": "the hold pulls past 8 g (or a part comes off first)" },
+    { "record": { "path": "own.ctl.in.pitch" }, "label": "pitch command in the pull (-1 is full aft stick, full vectoring)" },
+    { "record": { "path": "own.engines.0.thrust_n" }, "label": "thrust in the pull, N" },
+    { "check": { "not": { "event": "part_detached", "since": "start" } }, "for": 12,
+      "label": "12 s through the reversal at full afterburner, vectored, past 8 g: nothing comes off" },
+    { "record": { "log_value": { "match": "tail-flex: .*up to ([0-9.]+) g", "since": "pull" } }, "label": "peak load factor in the last second of the turn" },
+    { "record": { "log_value": { "match": "thrust-line: turn_deg=([0-9.]+)", "since": "pull" } }, "label": "thrust line's turn against the root, deg" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "since": "pull" } }, "label": "nearest joint to breaking, load over limit" },
+    { "mark": { "label": "pullup" } },
+    { "fly": { "mode": "hold", "alt_msl_m": 5000, "hdg_deg": 270, "throttle": 1 } },
+    { "check": { "not": { "event": "part_detached", "since": "start" } }, "for": 8,
+      "label": "8 s into the pull-up at full afterburner: nothing comes off" },
+    { "record": { "event": "part_detached", "field": "part", "since": "start" }, "label": "parts detached" }
+  ]
+}

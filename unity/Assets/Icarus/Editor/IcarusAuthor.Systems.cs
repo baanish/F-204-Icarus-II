@@ -31,9 +31,9 @@ namespace Icarus.Editor
             var belly = new[] { RootPart, "fuselage_forward", "fuselage_aft" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
                 .Min(n => Placed(b, n).GetComponent<MeshRenderer>().bounds.min.y);
 
-            // Radar on the radome's Revoker nose, bound to the radar tray, whose loss disables the radar by design.
+            // Radar on the radome's Revoker nose, bound to the part the radar tray folds into, whose loss disables it.
             var radar = b.Parts["radome"].GetComponent(GameType("Radar"));
-            Set(radar, "part", b.Part("radar_tray"));
+            Set(radar, "part", b.Part(Host(b, "radar_tray")));
 
             var targetCam = new SerializedObject(b.Parts["radome"].GetComponent(GameType("TargetCam")));
             var forward = (Transform)Prop(targetCam, "camMountForward").objectReferenceValue;
@@ -207,7 +207,7 @@ namespace Icarus.Editor
             var sparks = b.Find("contactSparks");
             sparks.position = new Vector3(0f, belly, 0f);
             b.Placed.UnionWith(new[] { cone, downwash, sparks });
-            b.Report.Add($"systems: radar bound to radar_tray; target cameras F {forward.position}, R {rear.position}, landing {landing.position}; flares, nav lights, vortices, vapour (cone scaled {cone.localScale.x:F2}), downwash and sparks placed on the Icarus");
+            b.Report.Add($"systems: radar bound to {Host(b, "radar_tray")}; target cameras F {forward.position}, R {rear.position}, landing {landing.position}; flares, nav lights, vortices, vapour (cone scaled {cone.localScale.x:F2}), downwash and sparks placed on the Icarus");
         }
 
         private sealed class Leg

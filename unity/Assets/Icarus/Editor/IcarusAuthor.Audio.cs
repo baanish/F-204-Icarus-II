@@ -55,7 +55,7 @@ namespace Icarus.Editor
             var turbine = (AudioSource)GetRef(engine, "turbineAudio");
             turbine.clip = ImportEngineClip(TurbineClipPath);
 
-            var thrust = b.Parts["nozzle"].transform.Find("thrust_vector");
+            var thrust = Placed(b, "nozzle").Find("thrust_vector");
             var jet = thrust.GetComponent(GameType("JetNozzle"));
             var dry = (AudioSource)GetRef(jet, "thrustAudio");
             dry.clip = ImportEngineClip(DryClipPath);

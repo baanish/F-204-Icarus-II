@@ -123,18 +123,18 @@ namespace Icarus.Editor
             if (Prop(te, "thrustVectoringGain").vector3Value.z != 0) p.Add("roll gain isn't zero");
             if (Prop(te, "thrustVectoringMaxAirspeed").floatValue != VectoringMaxAirspeed) p.Add("vectoring cutoff " + Prop(te, "thrustVectoringMaxAirspeed").floatValue);
             var vectoring = GetList(Prop(te, "vectoringTransforms"));
-            var thrust = b.Parts["nozzle"].transform.Find("thrust_vector");
+            var thrust = Placed(b, "nozzle").Find("thrust_vector");
             if (vectoring.Length != 1 || vectoring[0] != thrust) p.Add("vectoringTransforms isn't [thrust_vector]");
             if (thrust != null && Quaternion.Angle(thrust.localRotation, Quaternion.identity) > 0.01f) p.Add("thrust_vector isn't at rest (the Turbojet writes absolute angles)");
             if (thrust != null && thrust.GetComponent(GameType("JetNozzle")) != nozzles[0]) p.Add("the JetNozzle isn't on thrust_vector");
             var critical = GetList(Prop(te, "criticalParts"));
-            if (critical.Length != 2 || critical[0] != b.Part("engine_core") || critical[1] != b.Part("nozzle")) p.Add("criticalParts isn't [engine_core, nozzle]");
+            if (critical.Length != 1 || critical[0] != b.Part("fuselage_aft")) p.Add("criticalParts isn't [fuselage_aft]");
             if (Prop(te, "damageThreshold").floatValue != EngineDamageThreshold) p.Add("damageThreshold " + Prop(te, "damageThreshold").floatValue);
             if (GetList(Prop(te, "nozzles")).SingleOrDefault() != nozzles[0]) p.Add("Turbojet.nozzles isn't the JetNozzle");
             if (Prop(te, "maxThrust").floatValue != MaxThrust || Prop(te, "maxSpeed").floatValue != EngineMaxSpeed) p.Add("core thrust or maxSpeed off the first-cut design");
             var jet = new SerializedObject(nozzles[0]);
             if (Prop(jet, "vectorTransforms").arraySize != 0) p.Add("JetNozzle.vectorTransforms isn't empty");
-            if (Prop(jet, "part").objectReferenceValue != b.Part("nozzle")) p.Add("JetNozzle.part isn't the nozzle part");
+            if (Prop(jet, "part").objectReferenceValue != b.Part("fuselage_aft")) p.Add("JetNozzle.part isn't fuselage_aft, the section the nozzle is a mesh of");
             var axis = (Transform)Prop(jet, "thrustTransform").objectReferenceValue;
             if (axis == null || !axis.IsChildOf(thrust) || Vector3.Angle(axis.forward, Vector3.forward) > 2f) p.Add("the thrust axis doesn't ride on thrust_vector pointing forward");
             var afterburners = Prop(jet, "afterburners");
@@ -148,7 +148,7 @@ namespace Icarus.Editor
             }
             var petals = b.Visuals["nozzle_vector"].Cast<Transform>().Count(t => t.name.StartsWith("nozzle_petal_", StringComparison.Ordinal) || t.name.StartsWith("nozzle_seal_", StringComparison.Ordinal));
             if (petals == 0) p.Add("no petals under nozzle_vector for NozzleDriver");
-            return $"one Turbojet ({MaxThrust / 1000:0} kN, maxSpeed {EngineMaxSpeed}), vectoring {ThrustVectoring} below {VectoringMaxAirspeed} m/s on thrust_vector, criticalParts engine_core and nozzle at {EngineDamageThreshold}, one afterburner, {petals} petals";
+            return $"one Turbojet ({MaxThrust / 1000:0} kN, maxSpeed {EngineMaxSpeed}), vectoring {ThrustVectoring} below {VectoringMaxAirspeed} m/s on thrust_vector, criticalParts fuselage_aft at {EngineDamageThreshold}, one afterburner, {petals} petals";
         }
 
         private static string CheckStripped(Build b, List<string> p)
@@ -236,19 +236,21 @@ namespace Icarus.Editor
             {
                 var so = new SerializedObject(tank);
                 var part = Prop(so, "part").objectReferenceValue as Component;
-                if (!b.Tanks.Contains(tank.name)) p.Add("a FuelTank on " + tank.name);
-                if (part == null || part.gameObject != tank.gameObject || part.GetType().Name != "AeroPart") p.Add(tank.name + ": tank.part isn't its own AeroPart");
+                var name = tank.gameObject == b.Root ? RootPart : tank.name;
+                if (!b.Tanks.Contains(name)) p.Add("a FuelTank on " + name);
+                else if (Mathf.Abs(Prop(so, "fuelCapacity").floatValue - b.Blockout.Parts[name].Number("fuel_kg")) > 0.01f) p.Add(name + ": capacity isn't its part's fuel_kg");
+                if (part == null || part.gameObject != tank.gameObject || part.GetType().Name != "AeroPart") p.Add(name + ": tank.part isn't its own AeroPart");
                 if (GetList(Prop(so, "connectedTanks")).Any(c => c == null || !Inside(b, c))) p.Add(tank.name + ": a dead connected tank");
                 total += Prop(so, "fuelCapacity").floatValue;
             }
             if (Mathf.Abs(total - FuelMass) > 1f) p.Add($"capacity {total} kg, not the design load {FuelMass}");
-            return $"{tanks.Length} bladder tanks on their own parts, {total:0} kg";
+            return $"{tanks.Length} tanks on the fuselage and wing parts the cells fold into, {total:0} kg ({string.Join(", ", tanks.Select(t => t.gameObject == b.Root ? RootPart : t.name))})";
         }
 
         private static string CheckSensors(Build b, List<string> p)
         {
             var radar = new SerializedObject(b.Parts["radome"].GetComponent(GameType("Radar")));
-            if (Prop(radar, "attachedUnit").objectReferenceValue != b.Aircraft || Prop(radar, "part").objectReferenceValue != b.Part("radar_tray")) p.Add("the radar isn't bound to the aircraft and radar_tray");
+            if (Prop(radar, "attachedUnit").objectReferenceValue != b.Aircraft || Prop(radar, "part").objectReferenceValue != b.Part(Host(b, "radar_tray"))) p.Add("the radar isn't bound to the aircraft and the radar tray's part");
             // Exact types: the Radar is itself a TargetDetector.
             foreach (var type in new[] { "TargetDetector", "RadarLocator", "LaserDesignator", "RadarJammer", "FlareEjector", "PowerSupply", "Radar" })
             {
@@ -266,7 +268,7 @@ namespace Icarus.Editor
                 if (t == null || part == null || !t.IsChildOf(part.transform)) p.Add($"flare point {i} doesn't sit on its part");
             }
             if (flares.arraySize == 0) p.Add("no flare points");
-            return $"radar on radar_tray, detector, locator, laser, jammer, {flares.arraySize} flare points, {sources.Length} power sources";
+            return $"radar on {Host(b, "radar_tray")} (the radar tray's part), detector, locator, laser, jammer, {flares.arraySize} flare points, {sources.Length} power sources";
         }
     }
 }

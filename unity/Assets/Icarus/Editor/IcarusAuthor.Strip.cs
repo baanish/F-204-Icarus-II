@@ -182,7 +182,7 @@ namespace Icarus.Editor
                 meshes.AddRange(go.GetComponents<MeshFilter>());
             }
             DestroyWithReferences(b, meshes);
-            // The JetNozzle's GameObject becomes the thrust vector pivot; "nozzle" is now the Icarus part it sits in.
+            // The JetNozzle's GameObject becomes the thrust vector pivot; "nozzle" is now the Icarus nozzle's mesh it hangs from.
             b.Find("tail/nozzle").name = "thrust_vector";
             b.Report.Add($"strip: {doomed.Count} Revoker objects and components removed with their references");
         }

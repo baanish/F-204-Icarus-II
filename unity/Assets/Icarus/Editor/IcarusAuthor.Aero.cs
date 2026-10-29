@@ -39,11 +39,12 @@ namespace Icarus.Editor
         private const float WingArea = 20.8079f, TailArea = 3.0f, BodyArea = 2.0f;
         // Aggregate clean dragArea, shared over exposed parts in the offline model's proportions. It modelled 0.55; in
         // game that left the jet 4% short of Mach 2.46 at 10 km, and 0.47 holds the model's level speeds at 10 and 15 km.
+        // The nozzle's share is fuselage_aft's and the intake ducts' the root's, the sections they fold into.
         private const float DragAreaR14 = 0.55f, DragAreaTotal = 0.47f;
         private static readonly Dictionary<string, float> DragAreas = new Dictionary<string, float>
         {
-            { RootPart, 0.135f }, { "fuselage_forward", 0.11f }, { "canopy", 0.04f }, { "radome", 0.02f }, { "fuselage_aft", 0.09f },
-            { "nozzle", 0.02f }, { "intake_duct_L", 0.03f }, { "intake_duct_R", 0.03f }, { "wing_spar_L", 0.02f }, { "wing_spar_R", 0.02f },
+            { RootPart, 0.135f + 0.03f + 0.03f }, { "fuselage_forward", 0.11f }, { "canopy", 0.04f }, { "radome", 0.02f },
+            { "fuselage_aft", 0.09f + 0.02f }, { "wing_spar_L", 0.02f }, { "wing_spar_R", 0.02f },
             { "fin_spar", 0.015f }, { "stabilator", 0.02f },
         }.ToDictionary(e => e.Key, e => e.Value * DragAreaTotal / DragAreaR14);
         // The wing's boxes on one side, root first: the inner box at the root and the outer box beyond the crank

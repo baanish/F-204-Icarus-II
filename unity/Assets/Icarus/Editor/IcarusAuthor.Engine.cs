@@ -25,18 +25,21 @@ namespace Icarus.Editor
         // (912 m/s, where the thrust taper ends): the Revoker's 250 m/s left the Icarus, rarely that slow, without it.
         private static readonly Vector3 ThrustVectoring = new Vector3(4f, 4f, 0f);
         private const float VectoringMaxAirspeed = 1000f;
-        // The engine fails from its core and nozzle by design, at the Revoker's threshold.
+        // The engine fails with fuselage_aft, the section it rides in, as the Revoker's fails with its tail, at its threshold.
         private const float EngineDamageThreshold = 50f;
         // fighter1_afterburner_nozzle's bounds: the glow cylinder the Revoker's nozzle is sized to.
         private const float RevokerGlowRadius = 0.517f, RevokerGlowLength = 0.6f;
 
         // The Revoker's Turbojet stays on the root. Its JetNozzle's GameObject becomes thrust_vector, an identity pivot at
-        // the petal ring's centre under the Icarus nozzle part that the Turbojet turns for vectoring; the thrust axis, flame
-        // and glow ride on it. The petals and seals hang from nozzle_vector, which stays still: NozzleDriver (src/Icarus)
-        // opens them with afterburner and deflects them to follow thrust_vector.
+        // the petal ring's centre under the nozzle's mesh, which the Turbojet turns for vectoring; the thrust axis, flame
+        // and glow ride on it. The nozzle, like the engine and afterburner, is a mesh of fuselage_aft (art/blender/chunks.py),
+        // as the Revoker's JetNozzle sits on its tail part: the thrust goes in where the section's own joint carries it.
+        // The petals and seals hang from nozzle_vector, which stays still: NozzleDriver (src/Icarus) opens them with
+        // afterburner and deflects them to follow thrust_vector.
         private static void BuildEngine(Build b)
         {
-            var nozzlePart = b.Parts["nozzle"].transform;
+            var nozzlePart = Placed(b, "nozzle");
+            var aft = b.Part("fuselage_aft");
             var ring = new GameObject("nozzle_vector") { layer = nozzlePart.gameObject.layer }.transform;
             ring.SetParent(nozzlePart, false);
             ring.SetPositionAndRotation(b.Blockout.Local("nozzle_vector"), b.Blockout.Rotation("nozzle_vector"));
@@ -78,11 +81,12 @@ namespace Icarus.Editor
             var rams = b.Blockout.Parts.Keys.Count(n => n.StartsWith("nozzle_ram_") && n.EndsWith("_rod"));
             if (rams == 0 || sync.transform.childCount != 16 + rams || nozzleRenderers.Count != 34 + 16 + 2 * rams)
                 throw new InvalidDataException($"A2: nozzle actuation has {sync.transform.childCount} links and rods on its ring and {nozzleRenderers.Count - 34} pieces in all, expected 16 links and {rams} rams");
-            var nozzleDamage = new SerializedObject(b.Part("nozzle"));
-            SetList(Prop(nozzleDamage, "damageMaterial").FindPropertyRelative("renderers"), nozzleRenderers);
-            nozzleDamage.ApplyModifiedPropertiesWithoutUndo();
-            if (GetList(Prop(new SerializedObject(b.Part("nozzle")), "damageMaterial").FindPropertyRelative("renderers")).Length != nozzleRenderers.Count)
-                throw new InvalidDataException("A2: nozzle damage must cover the shroud, all 32 petal and seal renderers and every actuation piece");
+            var aftDamage = new SerializedObject(aft);
+            var damaged = Prop(aftDamage, "damageMaterial").FindPropertyRelative("renderers");
+            SetList(damaged, GetList(damaged).Concat(nozzleRenderers).ToArray());
+            aftDamage.ApplyModifiedPropertiesWithoutUndo();
+            if (nozzleRenderers.Except(GetList(Prop(new SerializedObject(aft), "damageMaterial").FindPropertyRelative("renderers"))).Any())
+                throw new InvalidDataException("A2: fuselage_aft's damage must cover the nozzle's shroud, all 32 petal and seal renderers and every actuation piece");
 
             var thrust = b.Parts["fuselage_aft"].transform.Find("thrust_vector") ?? throw new MissingReferenceException("fuselage_aft/thrust_vector");
             var jet = thrust.GetComponent(GameType("JetNozzle"));
@@ -108,7 +112,7 @@ namespace Icarus.Editor
             b.Placed.UnionWith(new[] { thrust, flame, glow, heatHaze, thrust.Find("thrustTransform") });
 
             var so = new SerializedObject(jet);
-            Prop(so, "part").objectReferenceValue = b.Part("nozzle");
+            Prop(so, "part").objectReferenceValue = aft;
             Prop(so, "vectorTransforms").arraySize = 0;
             var afterburners = Prop(so, "afterburners");
             if (afterburners.arraySize != 1)
@@ -140,7 +144,7 @@ namespace Icarus.Editor
             Prop(te, "thrustVectoringMaxAirspeed").floatValue = VectoringMaxAirspeed;
             Prop(te, "damageThreshold").floatValue = EngineDamageThreshold;
             SetList(Prop(te, "vectoringTransforms"), new Object[] { thrust });
-            SetList(Prop(te, "criticalParts"), new Object[] { b.Part("engine_core"), b.Part("nozzle") });
+            SetList(Prop(te, "criticalParts"), new Object[] { aft });
             SetList(Prop(te, "nozzles"), new Object[] { jet });
             te.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add($"engine: {MaxThrust / 1000:0} kN core + {AfterburnerThrust / 1000:0} kN afterburner, maxSpeed {EngineMaxSpeed}, fuel {FuelMin}..{FuelMax} + {AfterburnerFuel}, " +

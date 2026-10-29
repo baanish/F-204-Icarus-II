@@ -2,6 +2,7 @@
 
 python tools/status_diagram.py           # build, dump and draw
 python tools/status_diagram.py --draw    # draw again from the last dump in .cache/diagram
+python tools/status_diagram.py --check   # the coverage check alone, on the diagram as it is on disk
 
 Builds the Icarus in Blender (through tools/Run-Blender.ps1) and dumps every render mesh's world triangles, each
 under the damageable part that carries it in Unity (its nearest ancestor with mass_kg). Back outside Blender it draws,
@@ -14,6 +15,11 @@ in the style of the stock diagrams (white on black under an additive material, t
 The PNGs go to unity/Assets/Blueprinter/Mods/icarus/Diagram and their layout, in the stock prefabs' UI units, to
 art/diagram.json, which IcarusAuthor reads. A review sheet with the Revoker's own diagram beside the Icarus's (from
 tools/local-paths.json's game export, when it is there) goes to .cache/review/diagram.
+
+Every draw ends with the coverage check: each pixel the reference release's diagram (REFERENCE) covers, inside its
+outline or under a part's silhouette, must still be covered, so a surface a part took over (a skin panel joined into
+a section, an internal folded into one) is still drawn. It writes the reference, HEAD and the new diagram side by side
+to .cache/review/diagram/compare.png.
 """
 import json
 import subprocess
@@ -33,6 +39,8 @@ STATUS_PX, STATUS_UNITS, STATUS_TOP, STATUS_BOTTOM, STATUS_LINE, STATUS_GREY = 1
 FRONT_PX, FRONT_UNITS, FRONT_WIDTH, FRONT_HEIGHT, FRONT_LINE, FRONT_GREY = (512, 256), (320.0, 160.0), 499, 244, 2, 198
 SUPERSAMPLE = 4
 PREFIX = "Icarus_status"
+REFERENCE = "v0.1.0"  # the release whose diagram the coverage check holds every later one to
+EDGE_PX = 2  # the reference's coverage is shrunk by this much first: antialiasing and the tip fairing's redraw
 
 
 # --- inside Blender ---------------------------------------------------------------------------------------------
@@ -69,7 +77,8 @@ def blender_main(out):
         world = co.reshape(-1, 3) @ m[:3, :3].T + m[:3, 3]
         tris[obj.name] = world[index.reshape(-1, 3)]
         evaluated.to_mesh_clear()
-        owners[obj.name] = {"part": owner.name.removesuffix("_visible"), "role": obj.get("role")}
+        owners[obj.name] = {"part": owner.name.removesuffix("_visible"), "role": obj.get("role"),
+                            "joined": bool(obj.get("joined"))}
 
     # Station points on the front profile, Blender (x, z), left side; the right mirrors them. As IcarusAuthor.Stations
     # places them: the wingtip on the tip face at mid-thickness, the inner pylon at its lowest point, and the conformal
@@ -171,8 +180,9 @@ def filled(mask):
 
 
 def outside(name, info):
-    """Whether a mesh is the aircraft's outer surface: skins, glass, intakes, the hinged panels and the nozzle."""
-    return (info["role"] in ("skin", "canopy", "intake") or info["part"] in ("canopy", "nozzle")
+    """Whether a mesh is the aircraft's outer surface: skins, glass, intakes, the hinged panels, the nozzle, and a part
+    whose mesh is skin panels joined into it (chunks.join_bare: fuselage_aft and the truss halves)."""
+    return (info["role"] in ("skin", "canopy", "intake") or info["part"] in ("canopy", "nozzle") or info.get("joined")
             or (name.endswith("_visible") and info["role"] == "structure"))
 
 
@@ -246,7 +256,8 @@ FRONT_GROUPS = (("wing_", ("wing_spar_", "wing_skin_", "lef_", "aileron_", "flap
 
 
 def front_group(name, info):
-    """The piece of the front profile a mesh outlines; None leaves it out."""
+    """The piece of the front profile a mesh outlines, by its part or, for one folded into a section (an intake duct),
+    by its own name; None leaves it out."""
     if info["role"] == "gear" or info["part"].startswith("gear_") or name.startswith("light_"):
         return None  # in flight the gear is up and the doors shut
     if info["role"] == "canopy":
@@ -256,7 +267,7 @@ def front_group(name, info):
     if name.startswith("ventral_fin"):
         return "ventral_fin"
     for group, prefixes in FRONT_GROUPS:
-        if info["part"].startswith(prefixes):
+        if info["part"].startswith(prefixes) or name.startswith(prefixes):
             return group + (info["part"][-1] if group.endswith("_") else "")
     return "body"
 
@@ -336,8 +347,89 @@ def review(background, images, layout, profile, markers):
     return REVIEW / "diagram_review.png"
 
 
+def diagram_at(ref):
+    """(background, {part: sprite}, layout) of the status diagram at a git ref, or on disk for None."""
+    import io
+
+    from PIL import Image
+
+    def read(path):
+        if ref is None:
+            return (REPO / path).read_bytes()
+        pointer = subprocess.run(["git", "show", f"{ref}:{path}"], cwd=REPO, capture_output=True, check=True).stdout
+        return subprocess.run(["git", "lfs", "smudge"], cwd=REPO, input=pointer, capture_output=True, check=True).stdout
+
+    rel = OUT.relative_to(REPO).as_posix()
+    layout = json.loads(read(LAYOUT.relative_to(REPO).as_posix()))["status"]
+    background = Image.open(io.BytesIO(read(f"{rel}/{layout['background']}"))).convert("L")
+    sprites = {p: Image.open(io.BytesIO(read(f"{rel}/{entry['sprite']}"))).convert("L") for p, entry in layout["parts"].items()}
+    return background, sprites, layout["parts"]
+
+
+def coverage(background, sprites, layout):
+    """The pixels a diagram covers: inside its outline (the background's lines, filled from outside), and under every
+    part's silhouette where the game places it."""
+    import numpy as np
+    from PIL import Image, ImageDraw
+
+    lines = np.asarray(background) > 100
+    probe = Image.fromarray(np.where(lines, 255, 0).astype(np.uint8)).copy()  # its own pixels, for the fill to write
+    ImageDraw.floodfill(probe, (0, 0), 128, thresh=0)
+    covered = np.asarray(probe) != 128
+    parts = Image.new("L", background.size, 0)
+    for p, sprite in sprites.items():
+        parts.paste(sprite, tuple(layout[p]["px"]), sprite.point(lambda v: 255 if v > 100 else 0))
+    return covered | (np.asarray(parts) > 100)
+
+
+def shrunk(mask, px):
+    import numpy as np
+
+    out = mask.copy()
+    for _ in range(px):
+        out[1:-1, 1:-1] &= out[:-2, 1:-1] & out[2:, 1:-1] & out[1:-1, :-2] & out[1:-1, 2:]
+    return out
+
+
+def check_coverage():
+    """Fail where the reference release's diagram covers a pixel the current one leaves bare; write the comparison."""
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+
+    sets = [(REFERENCE, diagram_at(REFERENCE)), ("HEAD", diagram_at("HEAD")), ("now", diagram_at(None))]
+    masks = {name: coverage(*d) for name, d in sets}
+    bare = shrunk(masks[REFERENCE], EDGE_PX) & ~masks["now"]
+    font = ImageFont.truetype("arialbd.ttf", 28)
+    tiles = []
+    for name, (background, sprites, layout) in sets:
+        tile = Image.new("RGB", background.size, (0, 0, 0))
+        fill = Image.new("L", background.size, 0)
+        for p, sprite in sprites.items():
+            fill.paste(sprite, tuple(layout[p]["px"]))
+        tile.paste((90, 90, 90), (0, 0), fill.point(lambda v: 255 if v > 100 else 0))
+        tile.paste((235, 235, 235), (0, 0), background.point(lambda v: 255 if v > 100 else 0))
+        if name == "now" and bare.any():
+            tile.paste((255, 40, 40), (0, 0), Image.fromarray(np.where(bare, 255, 0).astype(np.uint8)))
+        ImageDraw.Draw(tile).text((16, 12), name, fill=(255, 220, 120), font=font)
+        tiles.append(tile)
+    out = Image.new("RGB", (sum(t.width for t in tiles), tiles[0].height))
+    for i, t in enumerate(tiles):
+        out.paste(t, (i * t.width, 0))
+    REVIEW.mkdir(parents=True, exist_ok=True)
+    out.save(REVIEW / "compare.png")
+    if bare.any():
+        ys, xs = np.nonzero(bare)
+        raise SystemExit(f"STATUS DIAGRAM COVERAGE FAIL: {int(bare.sum())} px {REFERENCE} covers are bare now, within x "
+                         f"{xs.min()}..{xs.max()}, y {ys.min()}..{ys.max()} (red in {REVIEW / 'compare.png'})")
+    print(f"STATUS DIAGRAM COVERAGE PASS: every px {REFERENCE}'s diagram covers ({int(masks[REFERENCE].sum())}) is covered; "
+          f"comparison {REVIEW / 'compare.png'}")
+
+
 def main():
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
+    if args and args[0] == "--check":
+        check_coverage()
+        return
     if args and args[0] == "--blender":
         sys.path[:0] = [str(REPO / "tools"), str(REPO / "art/blender")]
         blender_main(Path(args[1]))
@@ -365,6 +457,9 @@ def main():
     for p, image in images.items():
         image.convert("RGB").save(OUT / layout[p]["sprite"])
     profile.convert("RGB").save(OUT / "Icarus_front.png")
+    for meta in OUT.glob(PREFIX + "*.png.meta"):  # a part folded away takes its sprite's import settings with it
+        if not meta.with_suffix("").is_file():
+            meta.unlink()
     LAYOUT.write_text(json.dumps({
         "generator": "tools/status_diagram.py",
         "status": {"background": f"{PREFIX}.png", "units": STATUS_UNITS, "parts": layout},
@@ -372,6 +467,7 @@ def main():
     }, indent=1) + "\n", encoding="utf-8", newline="\n")
     sheet = review(background, images, layout, profile, markers)
     print(f"STATUS DIAGRAM: {len(images)} part images, background and front profile in {OUT}, layout {LAYOUT}, review {sheet}")
+    check_coverage()
 
 
 if __name__ == "__main__":
