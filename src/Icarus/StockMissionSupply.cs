@@ -8,13 +8,16 @@ namespace Icarus;
 
 /// <summary>
 /// Puts the Icarus into Primeva's AI supply in the stock operations and has one Primeva Revoker factory in each build
-/// Icarus instead, behind Missions.StockMissionSupply, default on (owner, 2026-10-20). The host's
+/// the Icarus and the Revoker in turn, behind Missions.StockMissionSupply, default on (owner, 2026-10-20). The host's
 /// setting decides, read at each mission load. Only the built-in missions in <see cref="Factories"/> change: the
 /// numbered scenarios, Altercation and Carrier Duel keep their stock supply, and the mission editor is left alone, since
 /// it saves a factory's live production type back into the mission (Building.CreateBuiltInSavedUnit).
 /// The reserve goes in from the delayed server pass after <see cref="AiSupplyRepair"/>, once FactionHQ.OnMissionLoad has
 /// reset the inventory and the Icarus is surely in Encyclopedia.Lookup. The factory is repointed in a prefix on its
-/// first SetFactory, because a second call starts another production timer instead of replacing the first.
+/// first SetFactory, because a second call starts another production timer instead of replacing the first; after each
+/// unit it builds, a postfix on ProduceUnit swaps its production to the other type, which the timer reads at its next
+/// call. The factory alternates instead of a second factory being added, since the Icarus at rank 2 joins the Revoker
+/// rather than replacing it (owner, 2026-10-29).
 /// </summary>
 static class StockMissionSupply
 {
@@ -27,8 +30,7 @@ static class StockMissionSupply
 
     /// <summary>
     /// Built-in mission name (MissionKey.Name) to the UniqueName of the Primeva factory whose Revoker production becomes
-    /// the Icarus's, at the factory's own interval. Co-op variants carry the same buildings. Domination and Confrontation
-    /// have no other Revoker factory; Breakout, Escalation and Terminal Control keep one.
+    /// shared with the Icarus, alternating at the factory's own interval. Co-op variants carry the same buildings.
     /// </summary>
     internal static readonly Dictionary<string, string> Factories = new()
     {
@@ -51,6 +53,8 @@ static class StockMissionSupply
     {
         new("stock-supply", typeof(Factory), nameof(Factory.SetFactory), new[] { typeof(string), typeof(float) },
             prefix: AccessTools.Method(typeof(StockMissionSupply), nameof(BeforeSetFactory))),
+        new("stock-supply", typeof(Factory), "ProduceUnit",
+            postfix: AccessTools.Method(typeof(StockMissionSupply), nameof(AfterProduceUnit))),
     };
 
     static ConfigEntry<bool> enabled = null!;
@@ -58,7 +62,7 @@ static class StockMissionSupply
     internal static void Install(ConfigFile config, IcarusLog log)
     {
         enabled = config.Bind("Missions", "StockMissionSupply", true,
-            $"In the stock operations (Breakout, Confrontation, Domination, Escalation, Terminal Control and their co-op variants), add {StartingReserve} Icarus to {Faction}'s AI supply and have one {Faction} Revoker factory build the Icarus instead. The host's setting applies, from the next mission load");
+            $"In the stock operations (Breakout, Confrontation, Domination, Escalation, Terminal Control and their co-op variants), add {StartingReserve} Icarus to {Faction}'s AI supply and have one {Faction} Revoker factory build the Icarus and the Revoker in turn. The host's setting applies, from the next mission load");
         log.Info($"Missions.StockMissionSupply={enabled.Value}");
     }
 
@@ -122,6 +126,25 @@ static class StockMissionSupply
         }
 
         productionType = IcarusPlugin.JsonKey;
-        IcarusPlugin.Log.Info($"stock supply: {factory} in {mission!.Name} builds {IcarusPlugin.JsonKey} instead of {Revoker}");
+        IcarusPlugin.Log.Info($"stock supply: {factory} in {mission!.Name} builds {IcarusPlugin.JsonKey} and {Revoker} in turn");
+    }
+
+    static void AfterProduceUnit(Factory __instance)
+    {
+        if (IcarusPlugin.FeaturesOff.Contains("stock-supply") || __instance.attachedUnit == null || __instance.attachedUnit.NetworkHQ == null
+            || __instance.attachedUnit.UniqueName != CoveredFactory(MissionManager.CurrentMission))
+        {
+            return;
+        }
+
+        string next = __instance.productionUnit?.jsonKey == IcarusPlugin.JsonKey ? Revoker : IcarusPlugin.JsonKey;
+        if (!Encyclopedia.Lookup.TryGetValue(next, out UnitDefinition unit))
+        {
+            return;
+        }
+
+        __instance.NetworkproductionUnit = unit;
+        __instance.attachedUnit.NetworkunitName = unit.code + " factory";
+        IcarusPlugin.Log.Info($"stock supply: {__instance.attachedUnit.UniqueName} built {(next == Revoker ? IcarusPlugin.JsonKey : Revoker)}, builds {next} next");
     }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
+
 ## 0.2.0 (2026-10-29)
 
 - The Icarus no longer falls apart in a Boscali hangar's aircraft preview, and Boscali players can fly it from the aircraft menu. With no Boscali livery, the menu failed before it set the preview up; Boscali players now get all four PALA liveries there.

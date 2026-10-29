@@ -2,8 +2,8 @@
 
 python -I tools/stock_supply.py
 
-src/Icarus/StockMissionSupply.cs names, per built-in mission, the Primeva factory whose Revoker production becomes the
-Icarus's. The plugin matches the factory by UniqueName and its stock production type, so a wrong name does nothing in
+src/Icarus/StockMissionSupply.cs names, per built-in mission, the Primeva Revoker factory that builds the Icarus
+and the Revoker in turn. The plugin matches the factory by UniqueName and its stock production type, so a wrong name does nothing in
 game. This reads the table and the missions in tools/local-paths.json's game export (Resources/missions) and checks each
 entry names one building there, of the plugin's faction, building the plugin's Revoker key. It prints each mission's
 Revoker supply before and after, and any mission with a Primeva Revoker factory the table leaves out. The last line is
@@ -58,7 +58,7 @@ def main():
                             f"every {options.get('productionTime')} s, not {faction} building {revoker}")
             continue
         others = [b["UniqueName"] for b in factories if b["UniqueName"] != target]
-        print(f"{path.stem}: {target} builds the Icarus every {options['productionTime']:.0f} s; {faction} starts with "
+        print(f"{path.stem}: {target} builds the Icarus and {revoker} in turn, one every {options['productionTime']:.0f} s; {faction} starts with "
               f"{reserve} Icarus and {start} {revoker}; {revoker} factories left {others}")
     problems += [f"{name}: no {name}.json in {missions}" for name in sorted(table)]
     if problems:
