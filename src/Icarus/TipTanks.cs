@@ -121,7 +121,7 @@ sealed class TipTanks : MonoBehaviour
             foreach (Weapon weapon in station.Weapons)
             {
                 if (weapon == null || tanks.Exists(t => t.Weapon == weapon)) continue;
-                bool attached = weapon.GetAmmoLoaded() > 0;
+                bool attached = weapon.IsAttached() && weapon.GetAmmoLoaded() > 0;
                 Renderer[] lenses = weapon.GetComponentsInChildren<Renderer>(true);
                 var tank = new Tank
                 {
@@ -198,14 +198,22 @@ sealed class TipTanks : MonoBehaviour
         bool released = false;
         foreach (Tank t in tanks)
         {
-            bool attached = t.Weapon.GetAmmoLoaded() > 0;
+            // A tank whose wing box came off left with it: the game keeps its ammo count but never fires a store from a
+            // detached part (Weapon.IsAttached), so its fuel is gone and its partner stays on.
+            bool lost = !t.Weapon.IsAttached();
+            bool attached = !lost && t.Weapon.GetAmmoLoaded() > 0;
             if (t.Attached && !attached)
             {
-                // The game took the full store mass off the wing; what already went to the cells came back first (ReturnMoved).
-                IcarusPlugin.Log.Stage("tip-tanks-release", $"tip tank {t.Side} released with {t.Fuel:0} kg; {t.Returned:0} kg had moved to the cells; mass {aircraft.GetMass():0} kg", everyOccurrence: true);
+                if (lost)
+                    IcarusPlugin.Log.Stage("tip-tanks-lost", $"tip tank {t.Side} lost with its wing, {t.Fuel:0} kg in it", everyOccurrence: true);
+                else
+                {
+                    // The game took the full store mass off the wing; what already went to the cells came back first (ReturnMoved).
+                    IcarusPlugin.Log.Stage("tip-tanks-release", $"tip tank {t.Side} released with {t.Fuel:0} kg; {t.Returned:0} kg had moved to the cells; mass {aircraft.GetMass():0} kg", everyOccurrence: true);
+                    released = true;
+                }
                 t.Returned = 0f;
                 t.Fuel = 0f;
-                released = true;
             }
             else if (!t.Attached && attached)
             {
