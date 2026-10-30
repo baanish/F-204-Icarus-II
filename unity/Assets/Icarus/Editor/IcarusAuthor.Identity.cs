@@ -152,13 +152,15 @@ namespace Icarus.Editor
             new AnimationCurve(keys.Select(k => new Keyframe(k[0], k[1], k[2], k[3])).ToArray()) { preWrapMode = WrapMode.ClampForever, postWrapMode = WrapMode.ClampForever };
 
         // AI numbers. The landing AI flies landingSpeed x sqrt(mass / maxWeight) (AIPilotLandingState.cs:96), so the
-        // field is the approach speed at MaxWeight. 88 m/s keeps a full-weight carrier approach under the 100 m/s above
-        // which the game's TailHook retracts (TailHook.CheckDeployConditions): the AI flies about 5 m/s over its target
-        // down to the deck, and at 96 m/s two heavy Icarus crossed the Hyperion's deck at 99 to 100 with the hook up
-        // (tests/scenarios/carrier_ai.scenario.jsonc). At 20% fuel (LowFuelLandingMass) it gives about 69 m/s.
+        // field is the approach speed at MaxWeight. The AI slows on final only with the speed brakes (IcarusAuthor.Aero.cs
+        // SpeedBrakeDrag), which hold it within a few m/s of its target, so the field sits as high as the game's TailHook
+        // allows: it retracts above 100 m/s (TailHook.CheckDeployConditions). 95 m/s brings a full-weight Icarus to 30 m
+        // at 95 to 98, where the jet still has lift in hand to hold the glide path; at 88 a heavy Icarus at 89 m/s needed
+        // about 12 deg of its 12.6 deg stall and sank under the path into the Hyperion's stern, and at 93 both heavy
+        // approaches sank short (tests/scenarios/carrier_ai.scenario.jsonc). At 20% fuel (LowFuelLandingMass) it gives about 74 m/s.
         private const float MaxWeight = EmptyMass + FuelMass + 2000f; // 2 t of stores
         private const float LowFuelLandingMass = EmptyMass + 0.2f * FuelMass;
-        private const float LandingSpeedField = 88f;
+        private const float LandingSpeedField = 95f;
         private const float ApproachAtLowFuel = 75f; // the short-landing AI's target (shortLandingSpeed)
 
         private static Object AuthorParameters(Stations stations, List<LiveryEntry> liveries, GameObject statusDisplay, GameObject hudExtras)

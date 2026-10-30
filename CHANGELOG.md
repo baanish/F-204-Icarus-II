@@ -9,7 +9,7 @@
 - An arrestor hook, faired into a longer ventral fin, comes on every standard loadout in its own Tail Hook slot. It lowers itself on a carrier approach and catches the wire.
 - The hook and its fairing add a little weight and drag: 70 kg and about 3% more drag in all.
 - The cockpit and forward fuselage are stronger to carry the heavier radar, so a hard launch or a hard pull doesn't snap the nose off.
-- AI pilots fly a slower landing approach, so their hook stays down over the deck.
+- The speed brakes are twice as strong, and AI pilots come down a carrier approach at a steady speed, slow enough that their hook stays down over the deck.
 
 ## 0.2.0 (2026-10-29)
 

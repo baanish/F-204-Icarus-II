@@ -162,6 +162,16 @@ namespace Icarus.Editor
         // with their pivots at their eyes, the cylinder on the tail cone and the rod on the opener, each aimed at the
         // other's eye by an AimConstraint about the hinge axis; the Airbrake enables its constraints while the brakes are
         // open, as the stock VTOLTrainer1 aims its piston.
+        // The brakes' drag: the stock Airbrake pulls dragAmount x air density x speed squared against the velocity while the
+        // throttle is at 0, the landing AI's only way to slow. The stock 1 (Revoker, Compass, Vortex) sits on draggier
+        // airframes; on the slick Icarus it gave a heavy jet about 1.2 m/s2 at 105 m/s, so a full-weight AI came down a
+        // carrier final at 112 m/s against its 88 target, fell below the glide path and stalled pulling out
+        // (tests/scenarios/carrier_ai.scenario.jsonc). The landing AI's speed schedule asks 0.015 m/s per metre, about 1.5
+        // m/s2 at 100 m/s, and the glide slope adds about 0.7, so a heavy Icarus (11.5 t) needs about 2.2 m/s2 from the
+        // brakes at 100 m/s at sea level: 25 kN, which is 2. The force grows with speed squared, so at 250 m/s and 3 km it
+        // is about 1.5 g on a clean half-fuel jet, brakes a pilot feels.
+        private const float SpeedBrakeDrag = 2f;
+
         private static void BuildSpeedBrakes(Build b)
         {
             var aft = b.Parts["fuselage_tail"].transform;  // the brakes run from the tail cone's break back
@@ -201,6 +211,7 @@ namespace Icarus.Editor
             if (Deflection(b, "speed_brake_L") != Deflection(b, "speed_brake_R"))
                 throw new InvalidDataException("the speed brakes open by different angles; the one Airbrake turns both alike");
             Prop(so, "maxAngle").floatValue = Deflection(b, "speed_brake_L");
+            Num(so, "dragAmount", SpeedBrakeDrag);
             so.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add($"speed brakes: {openers.Count} panels open {Prop(so, "maxAngle").floatValue} deg outward on fuselage_tail, drag {Prop(so, "dragAmount").floatValue}; {constraints.Count} actuator pieces aimed");
         }
