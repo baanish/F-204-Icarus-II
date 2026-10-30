@@ -328,7 +328,7 @@ namespace Icarus.Editor
                 if (hung.GetComponentInParent(GameType("UnitPart")) != b.Part(partName)) p.Add("the hung hook finds a part other than " + partName);
                 length = Vector3.Distance(liveArm.position, liveEnd.position);
                 if (Mathf.Abs(length - Convert.ToSingle(layout["length"])) > TailHookTolerance) p.Add($"hook length {length:F4} m, export {layout["length"]}");
-                var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer
+                var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger
                     && !(c is MeshCollider m && m.sharedMesh == null) && !c.transform.IsChildOf(hung.transform)).ToHashSet();
                 for (var k = 0; k <= TailHookSweepSteps; k++)
                 {

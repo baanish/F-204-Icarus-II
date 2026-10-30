@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Big missions run at full frame rate again with the mod installed. The mod searched every aircraft in the mission on every frame, whether or not an Icarus was flying, which halved the frame rate in operations like Escalation. Each Icarus also does less work every physics step: its fuselage sections take their weight distribution from their own collision shapes, as stock jets do, and the tip tanks no longer search the jet twice a second.
 - Diagnostics are off by default. The mod no longer patches the game's bullet code, fixing conflicts with other mods that patch it.
 - AI pilots drop the tip tanks when they start landing, even if the tanks still contain fuel.
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.

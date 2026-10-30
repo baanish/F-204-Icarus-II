@@ -56,7 +56,6 @@ namespace Icarus.Editor
             Item("A17", "engine and aircraft audio", p => CheckEngineAudio(b, p) + "; " + CheckAircraftSounds(b, p));
             Item("A18", "tail and wing crank stiffness under flight loads", p => CheckTailStiffness(b, p));
             Item("A19", "bullet collider ownership", p => CheckBulletColliders(b, p));
-            Item("A20", "section inertia pinned with the boxes disabled", p => CheckSectionInertia(b, p));
             Item("A21", "map and HUD icons", p => CheckIcons(definition, p));
             Item("A22", "breakup tree", p => CheckBreakupTree(b, p));
             Item("A23", "tail hook and carrier hangars", p => CheckTailHook(b, parameters, p));

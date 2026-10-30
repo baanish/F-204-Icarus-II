@@ -107,7 +107,7 @@ namespace Icarus.Editor
             // The seat rides its rail out after the canopy goes; the capsule must clear every other airframe collider.
             var crew = new HashSet<Collider>(pilots.SelectMany(x => x.GetComponentsInChildren<Collider>(true)));
             var airframe = b.Root.GetComponentsInChildren<Collider>(true)
-                .Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !crew.Contains(c) && !c.transform.IsChildOf(b.Parts["canopy"].transform) && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
+                .Where(c => c.enabled && !c.isTrigger && !crew.Contains(c) && !c.transform.IsChildOf(b.Parts["canopy"].transform) && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
             var probe = new GameObject("escape_probe").AddComponent<CapsuleCollider>();
             try
             {

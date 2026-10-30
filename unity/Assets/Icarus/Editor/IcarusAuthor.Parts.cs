@@ -142,8 +142,6 @@ namespace Icarus.Editor
                     || Quaternion.Angle(entry.Rotation, b.Blockout.Rotation(spec.Name)) > 0.01f))
                     throw new InvalidDataException($"{spec.Name}: its _visible mesh doesn't sit at its hinge, so its colliders can't sit on the part.");
                 SetColliders(b, go, entry.Name);
-                if (Array.IndexOf(StructureCores, spec.Name) >= 0)
-                    AddSectionInertia(go, BoundsOf(b.Meshes[spec.Name].Colliders.SelectMany(c => c.vertices))); // the hulls: no frames drawn
                 if (!b.Blockout.Parts[spec.Name].IsHinge)
                 {
                     Ensure<MeshFilter>(go).sharedMesh = b.Meshes[spec.Name].Render;
@@ -217,25 +215,6 @@ namespace Icarus.Editor
             if (problems.Count > 0)
                 throw new InvalidDataException("Designed part tree check failed:\n  " + string.Join("\n  ", problems));
             Debug.Log($"[Icarus] check base tree PASS: {Tree.Length} parts, {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
-        }
-
-        // The fuselage cores' hulls are frame shells carved round what they hold (art/blender/hulls.py), and Unity takes a
-        // Rigidbody's inertia from its colliders, so a core with hulls on only part of its section spins wrong: the main
-        // tyres' side force, a metre and a half below the root, flipped the root's roll every physics step and the jet
-        // reared up on the runway. A box over the core's whole section gives it a fuselage section's inertia. The box ships
-        // disabled, since an enabled one stops bullets and blasts on any layer but 13, which the AI's terrain checks hit;
-        // src/Icarus/SectionInertia.cs enables it only while Unity computes the body's mass properties, then pins them.
-        private static readonly string[] StructureCores = { RootPart, "fuselage_forward", "fuselage_aft", "fuselage_tail" };
-        internal const int IgnoreCollisionsLayer = 15; // PhysicsLayers.IgnoreCollisions
-
-        private static void AddSectionInertia(GameObject part, Bounds section)
-        {
-            var box = new GameObject(part.name + SectionInertia.BoxSuffix) { layer = IgnoreCollisionsLayer };
-            box.transform.SetParent(part.transform, false);
-            var collider = box.AddComponent<BoxCollider>();
-            collider.center = section.center;
-            collider.size = section.size;
-            collider.enabled = false;
         }
 
         // The export's convex pieces, in the part's own frame (the part sits where its mesh does).
@@ -359,7 +338,7 @@ namespace Icarus.Editor
         // Where two parts meet: the middle of their colliders' common bounds, or of the gap between them.
         private static Transform JointAnchor(GameObject part, GameObject other)
         {
-            Bounds Hull(GameObject go) => go.GetComponents<Collider>().Where(c => c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null)).Select(c => c.bounds).Aggregate((a, c) => { a.Encapsulate(c); return a; });
+            Bounds Hull(GameObject go) => go.GetComponents<Collider>().Where(c => !(c is MeshCollider m && m.sharedMesh == null)).Select(c => c.bounds).Aggregate((a, c) => { a.Encapsulate(c); return a; });
             var a = Hull(part);
             var o = Hull(other);
             var lo = Vector3.Max(a.min, o.min);

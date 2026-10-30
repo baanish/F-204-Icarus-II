@@ -92,7 +92,7 @@ namespace Icarus.Editor
             }
             // Each leg's ground cast, castPoint down suspensionTravel, must meet no collider of the aircraft.
             Physics.SyncTransforms();
-            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
+            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
             foreach (var g in gears)
             {
                 var so = new SerializedObject(g);

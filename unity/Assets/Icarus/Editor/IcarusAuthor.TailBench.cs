@@ -134,10 +134,8 @@ namespace Icarus.Editor
                 rb.ResetInertiaTensor();
                 // UnitPart.ModifyMass, from a tank's fuel.
                 var com = (Transform)Prop(so, "centerOfMass").objectReferenceValue;
-                var fuelled = (fuel.ContainsKey(p.Part) || stores.ContainsKey(p.Name)) && com != null;
-                if (fuelled)
+                if ((fuel.ContainsKey(p.Part) || stores.ContainsKey(p.Name)) && com != null)
                     rb.centerOfMass = com.localPosition;
-                SectionInertia.Pin(rb, SectionInertia.BoxesUnder(new[] { p.Part }), automaticCenter: !fuelled);
                 p.Rb = rb;
             }
             // The bench measures flex alone, so its parts ignore one another; in the game, unjointed parts' hulls stand

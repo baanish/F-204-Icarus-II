@@ -88,7 +88,7 @@ namespace Icarus.Editor
         {
             var unitPart = GameType("UnitPart");
             Physics.SyncTransforms();
-            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
+            var airframe = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null)).ToArray();
             var sets = Prop(new SerializedObject(b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager"))), "hardpointSets");
             var worst = (Depth: 0f, Where: "none");
             var hung = 0;

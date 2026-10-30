@@ -89,7 +89,7 @@ namespace Icarus.Editor
                 }
             }
             Physics.SyncTransforms();
-            var colliders = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && c.gameObject.layer != IgnoreCollisionsLayer && !(c is MeshCollider m && m.sharedMesh == null))
+            var colliders = b.Root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider m && m.sharedMesh == null))
                 .Select(c => (collider: c, part: (Object)c.GetComponentInParent(aeroType, true))).ToArray();
             var overlaps = new List<string>();
             for (var i = 0; i < colliders.Length; i++)
