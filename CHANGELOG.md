@@ -5,6 +5,7 @@
 - AI pilots drop the tip tanks when they start landing, even if the tanks still contain fuel.
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
 - The stock operations also get their Icarus supply and factory when started after changing their settings in Customize Mission. Before, that skipped them, so the AI had no Icarus to fly.
+- AI pilots taxi the Icarus at no more than 8 m/s, so it no longer tips onto a wingtip in taxiway turns and gets parked before it reaches the runway.
 - A bigger engine: 90 kN dry and 135 kN with afterburner (was 65 and 110), afterburner fuel burn up 20%, and the engine weighs 1,500 kg instead of 1,150.
 - An interceptor's radar: 60 km range (was 40), a narrower 20 degree cone off the nose (was 30), twice the power draw, and 271 kg instead of 65, which keeps the jet's balance with the heavier engine and the tail hook. Empty weight is 6,356 kg.
 - The Icarus can fly from the Hyperion carrier: it spawns on the deck and launches over the ski jump.
