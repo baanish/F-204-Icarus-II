@@ -78,10 +78,22 @@ sealed class TipTanks : MonoBehaviour
         public bool Attached;
         public Renderer? Skin;
         public Renderer? Top, Bottom;
+        // The livery last put on the skin: SetLivery and BareMetalLivery change the wing's material in place.
+        public (Texture? Paint, Texture? Metallic, float? Gloss) Painted;
+        public bool IsPainted;
+    }
+
+    // The wing skin beside a tip: its nav lenses (NavLights swaps their materials) and the skin mesh the upper sits on.
+    sealed class Wing
+    {
+        public Transform Lens = null!;
+        public Renderer? Upper, Lower, Skin;
     }
 
     Aircraft aircraft = null!;
     readonly List<Tank> tanks = new();
+    // Found once per side, so the refresh doesn't search the airframe's transforms.
+    readonly Dictionary<string, Wing?> wings = new();
     readonly MaterialPropertyBlock paint = new();
     float nextRefresh, nextReport, nextPose;
 
@@ -320,35 +332,63 @@ sealed class TipTanks : MonoBehaviour
     }
 
     // Each hanging tank's lenses show the wing lens beside them (NavLights swaps that lens's material), and its skin the
-    // livery the wing wears (UnitPart.SetLivery sets _Livery and _Glossiness, BareMetalLivery the _Metallic map).
+    // livery the wing wears (UnitPart.SetLivery sets _Livery and _Glossiness, BareMetalLivery the _Metallic map). Either
+    // can change at any refresh, so each compares what the wing wears with what the tank has and copies only a change.
     void Dress()
     {
-        if (tanks.Count == 0) return;
-        AeroPart[] parts = IcarusSystems.Parts(aircraft);
         foreach (Tank t in tanks)
         {
-            if (t.Attached) DressStore(parts, t.Side, t.Skin, t.Top, t.Bottom, paint);
+            if (!t.Attached) continue;
+            if (!wings.TryGetValue(t.Side, out Wing? wing) || wing != null && wing.Lens == null)
+                wings[t.Side] = wing = FindWing(IcarusSystems.Parts(aircraft), t.Side);
+            if (wing == null) continue;
+            DressLenses(wing, t.Top, t.Bottom);
+            var livery = LiveryOf(wing);
+            if (t.Skin == null || livery == null || t.IsPainted && t.Painted == livery.Value) continue;
+            Paint(t.Skin, livery.Value, paint);
+            t.Painted = livery.Value;
+            t.IsPainted = true;
         }
     }
 
-    static void DressStore(AeroPart[] parts, string side, Renderer? skin, Renderer? top, Renderer? bottom, MaterialPropertyBlock block)
+    static Wing? FindWing(AeroPart[] parts, string side)
     {
         // The wing skin meshes that carry the lenses (the outer upper and lower pieces of the wing skin), on the outer box.
         Transform? Lens(string name) => parts.Where(p => p != null).SelectMany(p => p.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == name);
         Transform? upperLens = Lens("navlight_" + side);
         AeroPart? wing = upperLens == null ? null : upperLens.GetComponentInParent<AeroPart>();
-        if (wing == null) return;
-        Renderer? upper = upperLens!.GetComponent<Renderer>();
-        Renderer? lower = Lens("navlight_lower_" + side)?.GetComponent<Renderer>();
-        if (top != null && upper != null) top.sharedMaterial = upper.sharedMaterial;
-        if (bottom != null && lower != null) bottom.sharedMaterial = lower.sharedMaterial;
-        // the skin mesh the lens sits on
-        Material? livery = upperLens.parent != null ? upperLens.parent.GetComponent<Renderer>()?.sharedMaterial : null;
-        if (skin == null || livery == null) return;
+        if (wing == null) return null;
+        return new Wing
+        {
+            Lens = upperLens!,
+            Upper = upperLens!.GetComponent<Renderer>(),
+            Lower = Lens("navlight_lower_" + side)?.GetComponent<Renderer>(),
+            // the skin mesh the lens sits on
+            Skin = upperLens.parent != null ? upperLens.parent.GetComponent<Renderer>() : null,
+        };
+    }
+
+    static void DressLenses(Wing wing, Renderer? top, Renderer? bottom)
+    {
+        if (top != null && wing.Upper != null && top.sharedMaterial != wing.Upper.sharedMaterial) top.sharedMaterial = wing.Upper.sharedMaterial;
+        if (bottom != null && wing.Lower != null && bottom.sharedMaterial != wing.Lower.sharedMaterial) bottom.sharedMaterial = wing.Lower.sharedMaterial;
+    }
+
+    static (Texture? Paint, Texture? Metallic, float? Gloss)? LiveryOf(Wing wing)
+    {
+        Material? livery = wing.Skin != null ? wing.Skin.sharedMaterial : null;
+        if (livery == null) return null;
+        return (livery.HasProperty(LiveryId) ? livery.GetTexture(LiveryId) : null,
+            livery.HasProperty(MetallicId) ? livery.GetTexture(MetallicId) : null,
+            livery.HasProperty(GlossId) ? livery.GetFloat(GlossId) : null);
+    }
+
+    static void Paint(Renderer skin, (Texture? Paint, Texture? Metallic, float? Gloss) livery, MaterialPropertyBlock block)
+    {
         skin.GetPropertyBlock(block);
-        if (livery.HasProperty(LiveryId) && livery.GetTexture(LiveryId) is Texture paint) block.SetTexture(LiveryId, paint);
-        if (livery.HasProperty(MetallicId) && livery.GetTexture(MetallicId) is Texture metallic) block.SetTexture(MetallicId, metallic);
-        if (livery.HasProperty(GlossId)) block.SetFloat(GlossId, livery.GetFloat(GlossId));
+        if (livery.Paint is not null) block.SetTexture(LiveryId, livery.Paint);
+        if (livery.Metallic is not null) block.SetTexture(MetallicId, livery.Metallic);
+        if (livery.Gloss is float gloss) block.SetFloat(GlossId, gloss);
         skin.SetPropertyBlock(block);
     }
 
@@ -382,9 +422,14 @@ sealed class TipTanks : MonoBehaviour
             || __instance.owner is not Aircraft aircraft) return;
         string side = aircraft.transform.InverseTransformPoint(__instance.transform.position).x < 0 ? "L" : "R";
         Renderer[] renderers = __instance.GetComponentsInChildren<Renderer>(true);
-        DressStore(IcarusSystems.Parts(aircraft), side, __instance.GetComponent<Renderer>(),
-            renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
-            new MaterialPropertyBlock());
+        Wing? wing = FindWing(IcarusSystems.Parts(aircraft), side);
+        if (wing != null)
+        {
+            DressLenses(wing, renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"));
+            Renderer? skin = __instance.GetComponent<Renderer>();
+            var livery = LiveryOf(wing);
+            if (skin != null && livery != null) Paint(skin, livery.Value, new MaterialPropertyBlock());
+        }
         Vector3 spawn = aircraft.transform.InverseTransformPoint(__instance.transform.position);
         if (IcarusPlugin.Log.StageEnabled)
             IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery, spawned at ({spawn.x:0.000}, {spawn.y:0.000}, {spawn.z:0.000}), " +
