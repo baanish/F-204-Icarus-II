@@ -27,6 +27,9 @@ namespace Icarus.Editor
         // takes its label mass from the TailHook), and the stock hooks' is 0, so both carry the 100 kg; the drag adds to
         // the tail cone's dragArea (AeroPart.ModifyDrag). parts.py's radar weight holds the empty margin with it fitted.
         private const float TailHookMass = 100f, TailHookDrag = 0.05f * DragAreaTotal;
+        // The stock Compass hook's castPoint, under its point (TailHook_Trainer).
+        private const string TailHookCastPoint = "castPoint";
+        private const float CastPointFromEnd = 1.731f;
 
         private static Dictionary<string, object> TailHookLayout() =>
             (Dictionary<string, object>)((Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(ExportFolder, "blockout.json"))))["tail_hook"];
@@ -99,6 +102,18 @@ namespace Icarus.Editor
                 arm.GetComponent<MeshFilter>().sharedMesh = mesh;
                 arm.GetComponent<MeshRenderer>().sharedMaterials = new[] { TailHookMaterial() };
                 end.localPosition = new Vector3(0f, 0f, -Convert.ToSingle(layout["length"]));
+                // TailHook.ApplyForce reads the cable's pull against castPoint's axes: the Compass's, on the point, turned half
+                // a turn about X and CastPointFromEnd back up the arm (the Icarus arm is the Compass's length).
+                var cast = end.Find(TailHookCastPoint) ?? new GameObject(TailHookCastPoint).transform;
+                cast.SetParent(end, false);
+                cast.localPosition = new Vector3(0f, 0f, CastPointFromEnd);
+                cast.localRotation = Quaternion.Euler(180f, 0f, 0f);
+                // Every reference the game and A23 read, set here rather than left as the copied stock prefab imported them.
+                Prop(hook, "hinge").objectReferenceValue = hinge;
+                Prop(hook, "hook").objectReferenceValue = arm;
+                Prop(hook, "hookEnd").objectReferenceValue = end;
+                Prop(hook, "castPoint").objectReferenceValue = cast;
+                Prop(hook, "unitPart").objectReferenceValue = null;
                 Num(hook, "mass", TailHookMass);
                 Num(hook, "stowedAngle", stowed);
                 Num(hook, "deployedAngle", Convert.ToSingle(layout["deployed_deg"]));
@@ -224,7 +239,13 @@ namespace Icarus.Editor
             var arm = (Transform)Prop(hook, "hook").objectReferenceValue;
             var end = (Transform)Prop(hook, "hookEnd").objectReferenceValue;
             var cast = (Transform)Prop(hook, "castPoint").objectReferenceValue;
-            if (new[] { hinge, arm, end, cast }.Any(t => t == null || !t.IsChildOf(prefab.transform))) { p.Add("hook transforms not all in the mount"); return "broken chain"; }
+            var outside = new[] { ("hinge", hinge), ("hook", arm), ("hookEnd", end), ("castPoint", cast) }
+                .Where(r => r.Item2 == null || !r.Item2.IsChildOf(prefab.transform))
+                .Select(r => r.Item2 == null ? r.Item1 + " none" : $"{r.Item1} {r.Item2.name} in {AssetDatabase.GetAssetPath(r.Item2)}").ToArray();
+            if (outside.Length > 0) { p.Add("hook transforms not all in the mount: " + string.Join(", ", outside)); return "broken chain"; }
+            if (cast.parent != end || Vector3.Distance(cast.localPosition, new Vector3(0f, 0f, CastPointFromEnd)) > TailHookTolerance
+                || Quaternion.Angle(cast.localRotation, Quaternion.Euler(180f, 0f, 0f)) > 0.01f)
+                p.Add("castPoint isn't the Compass's, on the point");
             if (arm.GetComponent<MeshFilter>().sharedMesh?.name != "tail_hook" || arm.GetComponent<MeshRenderer>().sharedMaterials.Single() != TailHookMaterial())
                 p.Add("the arm doesn't draw the Icarus hook in the airframe skin");
             if (Prop(hook, "mass").floatValue != TailHookMass) p.Add($"TailHook mass {Prop(hook, "mass").floatValue}, not {TailHookMass}");
