@@ -5,10 +5,11 @@ namespace Icarus;
 
 /// <summary>
 /// Turns the cockpit's live instruments: the standby attitude indicator's ball, steady in pitch and roll about the
-/// instrument case's own axes as ArtificialHorizon reads the attitude, the fuel gauge's needle, and the clock's hands
-/// from the game's time of day. The export builds each as its own mesh with its origin on its pivot, the ball's horizon
-/// across its window and every needle pointing straight up (art/blender/cockpit_front.py STANDBY and NEEDLES). The game
-/// draws them only in the cockpit view, and they turn only while drawn.
+/// instrument case's own axes as ArtificialHorizon reads the attitude, the fuel gauge's needle, the clock's hands
+/// from the game's time of day, and shortens the tip tank tape's bars to the fuel left in each tank. The export builds
+/// each as its own mesh with its origin on its pivot, the ball's horizon across its window, every needle pointing
+/// straight up and every bar full (art/blender/cockpit_front.py STANDBY, NEEDLES and TIP_BARS). The game draws them
+/// only in the cockpit view, and they move only while drawn.
 /// </summary>
 sealed class StandbyInstruments : MonoBehaviour
 {
@@ -30,6 +31,8 @@ sealed class StandbyInstruments : MonoBehaviour
     Transform ball = null!;
     Renderer shown = null!;
     Needle? fuel, hour, minute;
+    TipTanks? tips;
+    Transform? tipLeft, tipRight;
     Quaternion aircraftInParent, ballRest;
     readonly Quaternion caseTilt = Quaternion.AngleAxis(CaseTiltDeg, Vector3.right);
 
@@ -54,7 +57,11 @@ sealed class StandbyInstruments : MonoBehaviour
         fuel = Pointer(Find("cockpit_fuel_needle"));
         hour = Pointer(Find("cockpit_clock_hour"));
         minute = Pointer(Find("cockpit_clock_minute"));
-        IcarusPlugin.Log.Stage("instruments", $"standby instruments: ball, fuel needle {fuel != null}, clock hands {hour != null && minute != null}");
+        tips = GetComponent<TipTanks>();
+        tipLeft = Bar(Find("cockpit_tip_fuel_L"));
+        tipRight = Bar(Find("cockpit_tip_fuel_R"));
+        IcarusPlugin.Log.Stage("instruments", $"standby instruments: ball, fuel needle {fuel != null}, clock hands {hour != null && minute != null}, " +
+            $"tip tank tape {tipLeft != null && tipRight != null} reading {(tips != null ? "the tanks" : "nothing")}");
     }
 
     // A needle's axis: its mesh is the needle's top faces only, so their mean normal is the dial's, out toward the pilot.
@@ -80,6 +87,29 @@ sealed class StandbyInstruments : MonoBehaviour
         if (needle != null) needle.Pivot.localRotation = needle.Rest * Quaternion.AngleAxis(degrees, needle.Clockwise);
     }
 
+    // A tape's bar: its origin is its foot, so its mesh's middle lies half the bar up the lane. A parent on the foot,
+    // its up turned along the lane, shortens the bar toward its foot by its Y scale alone. Returns that parent.
+    Transform? Bar(Transform? t)
+    {
+        Mesh? mesh = t != null ? t.GetComponent<MeshFilter>()?.sharedMesh : null;
+        if (t == null || mesh == null)
+        {
+            IcarusPlugin.Log.Error($"standby instruments: missing {(t == null ? "tip tank bar" : t.name + "'s mesh")}; it stays full");
+            return null;
+        }
+
+        var foot = new GameObject(t.name + "_foot").transform;
+        foot.SetParent(t.parent, false);
+        foot.SetPositionAndRotation(t.position, Quaternion.FromToRotation(Vector3.up, t.TransformVector(mesh.bounds.center)));
+        t.SetParent(foot, true);
+        return foot;
+    }
+
+    static void Fill(Transform? foot, float share)
+    {
+        if (foot != null) foot.localScale = new Vector3(1f, Mathf.Clamp01(share), 1f);
+    }
+
     void LateUpdate()
     {
         if (!shown.enabled) return;
@@ -93,6 +123,8 @@ sealed class StandbyInstruments : MonoBehaviour
         ball.rotation = attitude * caseTilt * Quaternion.Inverse(level) * Quaternion.Inverse(caseTilt) * ballRest;
 
         Turn(fuel, FuelEmptyDeg + FuelSweepDeg * Mathf.Clamp01(aircraft.GetFuelLevel()));
+        Fill(tipLeft, tips != null ? tips.Fill("L") : 0f);
+        Fill(tipRight, tips != null ? tips.Fill("R") : 0f);
         LevelInfo? info = NetworkSceneSingleton<LevelInfo>.i;
         if (info != null)
         {

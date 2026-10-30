@@ -434,6 +434,37 @@ def needles(atlas, m, dial, r):
         MOVERS[name] = (g, m @ Vector((0.0, 0.0, 0.0)))
 
 
+# The tip tanks' fuel tape beside the main fuel gauge: a lane for each tank, so one lost with its wing reads apart from
+# the other, and in each a white bar standing from E to F at rest. The plugin shortens each bar toward its foot by the
+# fuel left in its tank (StandbyInstruments.cs); a tank never fitted, dropped or lost reads empty. The bar's origin is its
+# foot on its own plane, so its mesh's middle lies half the bar straight up the lane: the plugin scales along that.
+TIP_BARS = {"cockpit_tip_fuel_L": -1, "cockpit_tip_fuel_R": 1}  # each bar's lane: face X to the pilot's right
+TIP_CASE = {"wall": 3 * MM, "height": 5 * MM, "face": 2.5 * MM}  # round the painted face, as Kit.dial's, a size down
+
+
+def tip_tape(g, kit, atlas, m):
+    """The tip tank fuel tape at placement m (on its plate): a rounded rectangular case in Kit.dial's section round
+    its painted face (cockpit_atlas TIP_TAPE), and its two bars, each its own Gather in MOVERS."""
+    t, c = cockpit_atlas.TIP_TAPE, TIP_CASE
+    fw, fh = t["face"][0] / 2, t["face"][1] / 2
+    w = c["wall"]
+    rings = [ring_rect(fw + w, fh + w, 0.0, 2.5 * MM, 2), ring_rect(fw + w, fh + w, c["height"], 2.5 * MM, 2),
+             ring_rect(fw + w / 2, fh + w / 2, c["height"], 1.5 * MM, 2), ring_rect(fw, fh, c["face"], 0.5 * MM, 2)]
+    g.put(stack(kit.uv, rings, ["bezel", "bezel", "recess"], top_uv=atlas.tile("dial_tip"), bottom_hidden=True), m,
+          "front")
+    tile = atlas.tile("needle")
+    z = c["face"] + 0.0003
+    for name, side in TIP_BARS.items():
+        x, hw = side * t["lane_x"], t["bar_w"] / 2
+        pts = [Vector((x - hw, t["empty_y"], z)), Vector((x + hw, t["empty_y"], z)), Vector((x + hw, t["full_y"], z)),
+               Vector((x - hw, t["full_y"], z))]
+        piece = Piece(sheet=True, keep=True)
+        piece.add(pts, [(0, 1, 2, 3)], [ck.rect_uvs(pts, tile)])
+        bar = ck.Gather(name)
+        bar.put(piece, m, "needle")
+        MOVERS[name] = (bar, m @ Vector((x, t["empty_y"], z)))
+
+
 SUNK = 0.0035  # the small displays' wells run this far under their plates; the screen 2 mm above the well's floor
 
 
@@ -506,8 +537,7 @@ WINGS = {
         ("HOOK", -0.084, -0.086, -0.006, -0.026, 4, [("toggle", 0.0, -0.004, "HOOK")])],
     -1: [("SYS STATUS", -0.080, -0.030, 0.042, 0.088, 4, [("display", -0.002, -0.003, "D")]),
          ("CAUTION", 0.045, -0.030, 0.084, 0.088, 4, [("caution", 0.0, -0.004, None)]),
-         ("FUEL", -0.084, -0.090, 0.000, -0.035, 4, [("dial", -0.014, -0.001, "dial_fuel"), ("key", 0.026, 0.010, "FWD"),
-                                                       ("key", 0.026, -0.010, "AFT")]),
+         ("FUEL", -0.084, -0.090, 0.000, -0.035, 4, [("dial", -0.014, -0.001, "dial_fuel"), ("tip_tape", 0.0225, 0.0, None)]),
          ("CLOCK", 0.004, -0.090, 0.084, -0.035, 4, [("dial", -0.012, -0.001, "dial_clock"), ("knob", 0.026, -0.006, "SET")])],
 }
 
@@ -564,6 +594,8 @@ def control(g, kit, atlas, top, kind, x, y, legend):
     elif kind == "dial":
         g.put(kit.dial(legend, 0.0235), top(x, y), "front")
         needles(atlas, top(x, y), legend, 0.0235 - 4 * MM)
+    elif kind == "tip_tape":
+        tip_tape(g, kit, atlas, top(x, y))
     elif kind == "gear":
         gear_handle(g, kit, top, x, y)
 

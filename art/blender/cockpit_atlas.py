@@ -90,7 +90,7 @@ ChartPoint = namedtuple("ChartPoint", "chart x y")
 TILES = {  # name -> (w, h) px
     "knob_top": (48, 48), "knob_top_large": (64, 64), "fastener_top": (24, 24), "lens_green": (32, 32),
     "lens_amber": (32, 32), "lens_red": (32, 32), "lens_clear": (32, 32), "lens_off": (32, 32), "hatch": (64, 64),
-    "standby_ring": (128, 128), "standby_ball": (160, 224), "needle": (8, 8), "dial_fuel": (128, 128), "dial_clock": (128, 128), "dial_alt": (128, 128),
+    "standby_ring": (128, 128), "standby_ball": (160, 224), "needle": (8, 8), "dial_fuel": (128, 128), "dial_tip": (60, 112), "dial_clock": (128, 128), "dial_alt": (128, 128),
     "dial_asi": (128, 128), "pedal": (96, 128), "breaker_top": (24, 24), "toggle_ball": (24, 24),
 }
 # Full-width strips along the bottom, top to bottom: name -> (height px, px per metre along U and V).
@@ -324,18 +324,22 @@ def paint_hatch(layer):
     layer.noise("hatch", 0.10, 2)
 
 
+def _stamp(layer, text, cx, cy, cap_px):
+    """White text centred on pixel (cx, cy), clipped to the layer."""
+    mask = text_mask([text], cap_px)
+    h, w = mask.shape
+    x, y = int(round(cx - w / 2)), int(round(cy - h / 2))
+    sub = (slice(max(y, 0), min(y + h, layer.h)), slice(max(x, 0), min(x + w, layer.w)))
+    m = mask[sub[0].start - y:sub[0].stop - y, sub[1].start - x:sub[1].stop - x]
+    layer.albedo[sub] = layer.albedo[sub] * (1 - m[..., None]) + _rgb("white") * m[..., None]
+
+
 def _ring_text(layer, values, radius, cap_px, start_deg, step_deg):
     """Numerals round a dial face, upright."""
     c = (layer.w - 1) / 2
     for i, text in enumerate(values):
         a = math.radians(start_deg + step_deg * i)
-        mask = text_mask([text], cap_px)
-        h, w = mask.shape
-        x = int(round(c + radius * math.sin(a) - w / 2))
-        y = int(round(c - radius * math.cos(a) - h / 2))
-        sub = (slice(max(y, 0), min(y + h, layer.h)), slice(max(x, 0), min(x + w, layer.w)))
-        m = mask[sub[0].start - y:sub[0].stop - y, sub[1].start - x:sub[1].stop - x]
-        layer.albedo[sub] = layer.albedo[sub] * (1 - m[..., None]) + _rgb("white") * m[..., None]
+        _stamp(layer, text, c + radius * math.sin(a), c - radius * math.cos(a), cap_px)
 
 
 def _dial(layer, ticks, needle_deg, numerals=None, start=0.0, step=30.0, name=None):
@@ -405,6 +409,42 @@ def paint_standby_ball(layer):
     layer.smooth[:] = 0.70
 
 
+# The tip tank fuel tape's face (cockpit_front.tip_tape), metres from its centre, X to the pilot's right, Y up: its size,
+# each lane's centre off the middle (L at -X, R at +X) and width, and E and F up the lanes. The bars the plugin shortens
+# toward E (StandbyInstruments.cs) stand on the lanes, bar_w wide.
+TIP_TAPE = {"face": (0.015, 0.028), "lane_x": 0.0040, "lane_w": 0.0040, "bar_w": 0.0030, "empty_y": -0.0080,
+            "full_y": 0.0120}
+
+
+def paint_tip_tape(layer):
+    """The tip tank fuel tape's face: matt black, an outlined lane for each tank, a scale between them (E, the
+    quarters, F), L and R under the lanes, all under the cover glass."""
+    t = TIP_TAPE
+    yy, xx = layer.grid()
+    px = layer.w / t["face"][0]  # pixels a metre
+    x = (xx + 0.5) / px - t["face"][0] / 2
+    y = t["face"][1] / 2 - (yy + 0.5) / px
+    layer.fill(np.ones_like(x, bool), "recess")
+    e, f, inner = t["empty_y"], t["full_y"], t["lane_x"] - t["lane_w"] / 2
+    for side in (-1, 1):
+        dx, dy = np.abs(x - side * t["lane_x"]), np.abs(y - (e + f) / 2)
+        out = (dx < t["lane_w"] / 2 + 0.0004) & (dy < (f - e) / 2 + 0.0006)
+        layer.fill(out & ~((dx < t["lane_w"] / 2) & (dy < (f - e) / 2 + 0.0002)), "panel")
+    for k in range(5):
+        ty = e + (f - e) * k / 4
+        tick = (np.abs(y - ty) < 0.0002) & (np.abs(x) < inner)
+        if k != 2:  # half full runs across; E, F and the quarters stand short off each lane
+            tick &= np.abs(x) > inner - 0.0009
+        layer.fill(tick, "white")
+    for text, ty in (("F", f), ("E", e)):
+        _stamp(layer, text, layer.w / 2, t["face"][1] / 2 * px - ty * px, 0.0019 * px)
+    for text, side in (("L", -1), ("R", 1)):
+        _stamp(layer, text, layer.w / 2 + side * t["lane_x"] * px, (t["face"][1] / 2 - e + 0.0032) * px, 0.0024 * px)
+    layer.smooth[:] = 0.88  # the cover glass
+    edge = np.minimum(t["face"][0] / 2 - np.abs(x), t["face"][1] / 2 - np.abs(y))
+    layer.ao *= 0.55 + 0.45 * np.clip(edge / 0.0015, 0, 1)
+
+
 def paint_pedal(layer):
     layer.fill(np.ones((layer.h, layer.w), bool), "structure")
     yy, xx = layer.grid()
@@ -472,6 +512,7 @@ TILE_PAINTERS = {
     # live dials: their needles and hands are meshes the plugin turns (StandbyInstruments.cs)
     "dial_fuel": lambda l: _dial(l, [-135.0, -67.5, 0.0, 67.5, 135.0], None, ["E", "1/4", "1/2", "3/4", "F"], -135, 67.5,
                                  "FUEL"),
+    "dial_tip": paint_tip_tape,
     "dial_clock": lambda l: _dial(l, list(range(0, 331, 30)), None, ["12", "3", "6", "9"], 0, 90),
     "dial_alt": lambda l: _dial(l, list(range(0, 325, 36)), 200, [str(i) for i in range(10)], 0, 36, "ALT"),
     "dial_asi": lambda l: _dial(l, list(range(-150, 151, 30)), -40, ["0", "100", "200", "300", "400", "500", "600"],

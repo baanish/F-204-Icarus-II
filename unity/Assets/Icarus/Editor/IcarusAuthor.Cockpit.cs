@@ -61,8 +61,8 @@ namespace Icarus.Editor
             var hood = b.Visuals["canopy_glass_inner"].parent;
             var screen = MeshVisual(b, "cockpit_tac_screen", interior);
             var lamps = MeshVisual(b, "cockpit_warning_lamps", interior);
-            // The standby ball, the fuel needle and the clock's hands, each on its own pivot; the plugin turns them
-            // (src/Icarus/StandbyInstruments.cs finds them by these names).
+            // The standby ball, the fuel needle, the clock's hands and the tip tank tape's bars, each on its own pivot; the
+            // plugin turns or shortens them (src/Icarus/StandbyInstruments.cs finds them by these names).
             var instruments = CockpitInstruments.Select(n => (Renderer)MeshVisual(b, n, interior)).ToArray();
             // The lever from the grip down through the quadrant's gate rides the transform Cockpit.throttles turns, so it
             // moves with the grip; its origin is the export's throttle pivot, where that transform stands.
@@ -107,7 +107,7 @@ namespace Icarus.Editor
 
         // The instruments' moving parts (art/blender/cockpit.py INSTRUMENTS).
         private static readonly string[] CockpitInstruments =
-            { "cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute" };
+            { "cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute", "cockpit_tip_fuel_L", "cockpit_tip_fuel_R" };
 
         private const string ThrottleLever = "cockpit_throttle_lever"; // art/blender/cockpit.py LEVER
     }

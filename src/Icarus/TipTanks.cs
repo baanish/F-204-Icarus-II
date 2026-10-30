@@ -88,6 +88,10 @@ sealed class TipTanks : MonoBehaviour
     float External => tanks.Where(t => t.Attached).Sum(t => t.Fuel);
     float ExternalCapacity => tanks.Count(t => t.Attached) * FuelKg;
 
+    /// <summary>The share of a full tank left in the tank hanging on <paramref name="side"/> ("L" or "R"): 0 with none
+    /// there, never fitted, dropped or lost with its wing. The cockpit's tip tank tape reads it (StandbyInstruments).</summary>
+    internal float Fill(string side) => tanks.Where(t => t.Attached && t.Side == side).Sum(t => t.Fuel) / FuelKg;
+
     void Start()
     {
         aircraft = GetComponent<Aircraft>();

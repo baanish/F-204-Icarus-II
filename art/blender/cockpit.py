@@ -44,8 +44,9 @@ TAC_SCREEN, WARNING_LAMPS = "cockpit_tac_screen", "cockpit_warning_lamps"
 PROXIES = ("cockpit_proxy", "canopy_frame_proxy")
 PIVOTS = ("cockpit_stick_pivot", "cockpit_throttle_pivot")  # empties the stock stick and throttle hang from
 # The instruments' moving parts, each its own renderer with its origin on its pivot (cockpit_front.MOVERS); the plugin
-# turns them (StandbyInstruments.cs).
-INSTRUMENTS = ("cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute")
+# turns or shortens them (StandbyInstruments.cs).
+INSTRUMENTS = ("cockpit_standby_ball", "cockpit_fuel_needle", "cockpit_clock_hour", "cockpit_clock_minute",
+               "cockpit_tip_fuel_L", "cockpit_tip_fuel_R")
 SEAT = "cockpit_seat"  # an empty where the stock seat's origin goes
 LEVER = "cockpit_throttle_lever"  # its origin on the throttle pivot; the Unity author hangs it from the stock throttle
 SLOT = "Icarus_Cockpit"

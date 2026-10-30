@@ -132,10 +132,12 @@ namespace Icarus.Editor
 
         // The renderers the cockpit view draws (Cockpit rule 1): the joined interior, both inner frames, both inner panes, the
         // tac screen, the stock stick and throttle, the throttle lever, and the instruments' moving parts (the standby ball, the
-        // fuel needle, the clock's hands); the lever and the instruments move, so they cannot join the interior.
+        // fuel needle, the clock's hands, the tip tank tape's bars); the lever and the instruments move, so they cannot join the
+        // interior.
         private static readonly string[] CockpitViewRenderers =
             { "canopy_frame_inner", "canopy_glass_inner", "cockpit_clock_hour", "cockpit_clock_minute", "cockpit_fuel_needle", "cockpit_interior",
-              "cockpit_standby_ball", "cockpit_tac_screen", ThrottleLever, "joystick", "throttle", "windscreen_frame_inner", "windscreen_inner" };
+              "cockpit_standby_ball", "cockpit_tac_screen", ThrottleLever, "cockpit_tip_fuel_L", "cockpit_tip_fuel_R", "joystick", "throttle",
+              "windscreen_frame_inner", "windscreen_inner" };
 
         // A15: Cockpit rules 20 to 24 (lists, layers, serialized states, proxies in LOD0), the materials each renderer wears,
         // and the triangle bands of rules 2, 3, 20, 23 and 26.
@@ -155,6 +157,15 @@ namespace Icarus.Editor
             Renderer Named(string n) => view.FirstOrDefault(r => r.name == n);
             foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner", ThrottleLever }.Concat(CockpitInstruments))
                 if (Named(n) != null && (Named(n).sharedMaterials.Length != 1 || Named(n).sharedMaterial.name != CockpitSlot)) p.Add(n + " isn't on the cockpit atlas");
+            // The plugin shortens each tip tank bar toward its origin along its mesh's middle (src/Icarus/StandbyInstruments.cs
+            // Bar), so the origin must be the bar's foot on the bar's own plane.
+            foreach (var n in new[] { "cockpit_tip_fuel_L", "cockpit_tip_fuel_R" })
+            {
+                var mesh = Named(n) == null ? null : Named(n).GetComponent<MeshFilter>().sharedMesh;
+                var up = mesh == null ? Vector3.zero : mesh.bounds.center;
+                if (mesh != null && (up.magnitude < 0.005f || mesh.normals.Any(v => Mathf.Abs(Vector3.Dot(v, up.normalized)) > 0.01f)))
+                    p.Add(n + "'s origin isn't its foot: its mesh's middle should lie up the bar, in its plane");
+            }
             // The inner panes are the Canopy's glassRenderers on the stock inner glass alone: the plugin takes their grime off
             // through that list (src/Icarus/InnerGlass.cs), and the game cracks them through it.
             var canopy = b.Parts["canopy"].GetComponent(GameType("Canopy"));

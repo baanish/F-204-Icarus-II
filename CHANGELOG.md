@@ -13,6 +13,7 @@
 - Fitting the hook swaps the ventral fin for a longer one with a fairing for the hook. Without the hook the Icarus has its original fin.
 - The hook and its fairing weigh 100 kg and add 5% drag, only when fitted.
 - The ventral fin, the hook fairing and the hook wear the livery's paint in every livery.
+- A tip tank gauge in the cockpit, beside the fuel dial, shows the fuel left in each tip tank. A tank that is dropped or lost with its wing reads empty.
 - The cockpit and forward fuselage are stronger to carry the heavier radar, so a hard launch or a hard pull doesn't snap the nose off.
 - The speed brakes are twice as strong, and AI pilots come down a carrier approach at a steady speed, slow enough that their hook stays down over the deck.
 
