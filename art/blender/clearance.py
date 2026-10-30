@@ -7,12 +7,12 @@ hulls must stand apart by REQUIRED: both colliders' contact offset (CONTACT_OFFS
 Icarus collider, src/Icarus/ContactOffset.cs; Unity's 10 mm default would make contacts across a 20 mm gap) plus the
 most each flexes toward the other in flight (FLEX, measured in game and on the A18 bench).
 
-carve() runs last on the collider set, after the split pieces have their hulls: each hull is cut flat on its best
-separating plane, REQUIRED short of every hull of a part that outranks it (RANK: moving surfaces and gear keep their
-shape over their whole travel, then the wing and fin structure, the canopy, skins and radome, the hulls folded in from
-the engine, ducts and the other internals, and last the fuselage sections' shells), as hulls.shells() carves them. The
-parts' mass boxes are recorded before the cut (mass_box), so the centres of mass the Unity author places from the hulls
-stay where they were.
+carve() runs last on the collider set, after hulls.merge: each hull is cut flat on its best separating plane, or split
+round the other part where one cut would keep too little of it (hulls.clear), REQUIRED short of every hull of a part
+that outranks it (RANK: moving surfaces and gear keep their shape over their whole travel, then the wing and fin
+structure, the canopy and radome, and last the fuselage sections). Then each centreline part's hulls are cut to their
+mirror images (hulls.symmetric), so the cuts leave the jet the same both sides. The parts' mass boxes are recorded
+before the cut (mass_box), so the centres of mass the Unity author places from the hulls stay where they were.
 
 check() fails the build where any two unjointed parts' hulls stand closer than REQUIRED, with every hinge turned
 through its travel (parts.surface_sweep's poses) and each gear leg retracted with its doors (gear.retraction_sweep's
@@ -20,6 +20,7 @@ sequence).
 """
 import math
 
+import bmesh
 import bpy
 import numpy as np
 from mathutils import Matrix, Vector
@@ -43,9 +44,8 @@ FLEX_DEFAULT = 0.001
 # 21.2 mm, a tenth over. Both were measured before src/Icarus/OriginShiftPoses.cs, so they hold the floating-origin
 # shift's one-frame jumps; with it the wing boxes come no nearer than 0.2 mm in the same pull.
 FLEX_PAIRS = (("wing_spar_", "fuselage_aft", 0.032), ("fin_skin", "fuselage_tail", 0.024))
-# Who keeps its shape where two hulls are too close: the lower rank is cut, a folded skin hull by its panel's name.
-# Moving parts aren't listed: they rank above all. The fuselage sections' shells yield to everything inside them, as
-# hulls.build carves them last: their folded skin keeps them hulls all round.
+# Who keeps its shape where two hulls are too close: the lower rank is cut.
+# Moving parts aren't listed: they rank above all. Fuselage sections yield to the parts inside them.
 RANK = (("wing_spar_", 5), ("wing_skin_", 5), ("fin_spar", 5), ("fin_skin", 5), ("canopy", 4.5), ("skin_", 4),
         ("dorsal_cover", 4), ("radome", 4), ("nozzle", 2.5), ("engine_", 2.5), ("intake_duct_", 1.5), ("fuselage_", 0.5))
 RANK_MOVING, RANK_DEFAULT = 6, 1
@@ -73,18 +73,22 @@ def part_of(col):
     return o
 
 
-# Two parts a joint holds together never collide while it holds, so a folded skin hull and its chunk's other parts, and a
-# fuselage section's shells and the parts jointed to it, need only stand apart, not REQUIRED: the blast trace
-# (DamageEffects.FragTrace) must cross the outer one's hull before the inner one's, and a part the joint lets go of starts
-# clear (a part freed inside shells it overlaps takes a kick getting out, enough to break a neighbour's joint). Other
-# jointed pairs may overlap (the fin spar lies inside the fin skin's hulls); moving ones keep their sweeps.
+# Two parts a joint holds together never collide while it holds, but a fuselage section and a still part jointed to it,
+# and a still part and a moving part jointed to it (over the moving one's whole travel), still stand apart, so a part
+# starts clear when its joint breaks: one freed inside a hull it overlaps takes a kick getting out, enough to break a
+# neighbour's joint. Other jointed pairs may overlap (the fin spar lies inside the fin skin's hull).
 JOINTED_GAP = 0.001
 SECTIONS = ("fuselage_",)
+# Jointed pairs left to overlap: the stabilator pivots on the fin spar's top and swings 34 mm into it at full travel.
+OVERLAPPING = ({"fin_spar", "stabilator"},)
 
 
 def held_apart(a, b, moving):
-    """Whether two jointed parts must still stand JOINTED_GAP apart: a fuselage section and a still part jointed to it."""
-    return (a.startswith(SECTIONS) or b.startswith(SECTIONS)) and not {a, b} & moving
+    """Whether two jointed parts must still stand JOINTED_GAP apart: a fuselage section and a still part jointed to it,
+    or a still part and a moving part jointed to it, unless OVERLAPPING lists them."""
+    if {a, b} in OVERLAPPING:
+        return False
+    return (a in moving) != (b in moving) or (a.startswith(SECTIONS) or b.startswith(SECTIONS)) and not {a, b} & moving
 
 
 def required(a, b, jointed=False):
@@ -197,7 +201,7 @@ def swept(seq_points):
 def keep_most(s, o, need, sat_axis):
     """The cut that clears hull s from obstacle o by need and keeps the most of s: of the face normals of either (both
     ways) and the separating axis, the one whose plane need short of o leaves the largest share of s's extent. Cutting
-    along the separating axis alone can slice a thin skin patch through its thickness."""
+    along the separating axis alone can slice a shallow hull through its thickness."""
     axes = np.vstack([o[1], -o[1], s[1], -s[1], np.asarray(sat_axis)[None, :]]) if len(o[1]) and len(s[1]) else np.asarray(sat_axis)[None, :]
     ps, po = s[0] @ axes.T, o[0] @ axes.T
     at = po.min(0) - need - 1e-4
@@ -242,7 +246,7 @@ def carve(icarus):
     gears = gear_sequences(cols)
     gear_parts = {part_of(c).name for c in cols if any(c.name in seq[0] for seq in gears.values())}
     moving = set(hinges) | gear_parts
-    rank = lambda c: (RANK_MOVING if part_of(c).name in moving else first(RANK, c.get("folded_from") or part_of(c).name,
+    rank = lambda c: (RANK_MOVING if part_of(c).name in moving else first(RANK, part_of(c).name,
                                                                            RANK_DEFAULT), part_of(c).name)
 
     cache = {}
@@ -272,56 +276,65 @@ def carve(icarus):
         # a hull yields to every part ranked above it; moving parts also clear one another's sweeps both ways
         others = [o for o in (order if pc in moving else order[i + 1:]) if o is not c and o.name not in dropped
                   and (pc not in moving or part_of(o).name in moving)]
-        # a folded skin hull keeps the clearance its panel had from parts jointed to the chunk it joined, moving ones too
-        folded = c.get("folded_from") is not None
-        others = [o for o in others if part_of(o).name != pc and ((pc, part_of(o).name) not in linked or folded
-                                                                  or o.get("folded_from") or held_apart(pc, part_of(o).name, moving))]
+        others = [o for o in others if part_of(o).name != pc and ((pc, part_of(o).name) not in linked
+                                                                  or held_apart(pc, part_of(o).name, moving))]
         if not others:
             continue
         shapes = [(s, required(pc, part_of(o).name, (pc, part_of(o).name) in linked) + CARVE_SLACK)
                   for o in others for s in obstacles(o)]
         bm = hulls.convex([Vector(p) for p in world(c)])
-        cuts = 0
-        for _ in range(400):
-            s = hulls.bm_shape(bm)
-            lo, hi = s[0].min(0) - 0.05, s[0].max(0) + 0.05
-            near = [(hulls.separation(s, o), o, need) for o, need in shapes
-                    if np.all(o[0].min(0) <= hi) and np.all(lo <= o[0].max(0))]
-            bad = [(sep, axis, o, need) for (sep, axis), o, need in near if sep < need - TOLERANCE]
-            if not bad:
-                break
-            sep, axis, o, need = min(bad, key=lambda r: r[0] - r[3])
-            axis, at = keep_most(s, o, need, axis)
-            nxt = hulls.cut(bm, Vector(axis), at)
-            bm.free()
-            bm = nxt
-            cuts += 1
-            if bm is None:
-                break
-        else:
-            raise ValueError("clearance: %s would not come clear of its neighbours" % c.name)
-        if cuts == 0:
+        pts = np.array([v.co[:] for v in bm.verts])
+        lo, hi = pts.min(0) - 0.05, pts.max(0) + 0.05
+        near = [{"shape": o, "gap": need - TOLERANCE} for o, need in shapes
+                if np.all(o[0].min(0) <= hi) and np.all(lo <= o[0].max(0))]
+        # a section round a part jointed inside it splits round that part, as the keep-outs do (hulls.clear), rather
+        # than losing most of its hull to one cut
+        pieces = hulls.clear(bm, near)
+        if pieces == [bm]:
             bm.free()
             continue
-        cut_count += cuts
+        cut_count += 1
         cache.pop(c.name, None)
-        if bm is None:
+        if not pieces:
             dropped.append(c.name)  # removed after the pass: later hulls still read the list
             continue
-        bm.transform(c.parent.matrix_world.inverted())
-        bm.to_mesh(c.data)
-        bm.free()
+        to_local = c.parent.matrix_world.inverted()
+        for k, piece in enumerate(pieces):
+            piece.transform(to_local)
+            if k == 0:
+                piece.to_mesh(c.data)
+            else:
+                me = bpy.data.meshes.new("%s_%d" % (c.name, k))
+                piece.to_mesh(me)
+                hulls.attach(me.name, me, c.parent, bpy.data.collections["Colliders"]).display_type = "WIRE"
+            piece.free()
     lost = sorted({part_of(c).name for c in cols} - {part_of(c).name for c in cols if c.name not in dropped})
     for c in [c for c in cols if c.name in dropped]:
         bpy.data.objects.remove(c)
     if lost:
         raise ValueError("clearance: carving left %s with no collider" % ", ".join(lost))
+    bpy.context.view_layer.update()  # the pieces the split added have no world matrix yet
+    centreline = {}
+    for c in bpy.data.collections["Colliders"].objects:
+        if part_of(c) is not None and not part_of(c).name.endswith(("_L", "_R")):
+            centreline.setdefault(part_of(c).name, []).append(c)
+    for cs in centreline.values():
+        shapes = []
+        for c in cs:
+            bm = bmesh.new()
+            bm.from_mesh(c.data)
+            bm.transform(c.matrix_world)
+            shapes.append(bm)
+        for c, bm in zip(cs, hulls.symmetric(shapes)):
+            bm.transform(c.matrix_world.inverted())
+            bm.to_mesh(c.data)
+            bm.free()
     after = {}
     for c in bpy.data.collections["Colliders"].objects:
         if part_of(c) is not None:
             after[part_of(c).name] = after.get(part_of(c).name, 0.0) + volume(c)
     kept = sorted((after.get(n, 0.0) / v, n) for n, v in before.items() if v > 0)
-    return "clearance carve: %d cuts, %d hulls dropped (%s); hull volume kept, least: %s" % (
+    return "clearance carve: %d hulls cut, %d dropped (%s); hull volume kept, least: %s" % (
         cut_count, len(dropped), ", ".join(dropped[:12]), ", ".join("%s %.0f%%" % (n, 100 * f) for f, n in kept[:12]))
 
 
@@ -352,11 +365,9 @@ def check(icarus):
             problems.append("%s and %s%s %.1f mm apart, need %.1f" % (a, b, where, sep * 1000, need * 1000))
 
     names = [c.name for c in cols]
-    by_name = {c.name: c for c in cols}
     for i, a in enumerate(names):
         for b in names[i + 1:]:
-            folded = by_name[a].get("folded_from") or by_name[b].get("folded_from")
-            if part[a] == part[b] or (part[a], part[b]) in linked and not folded and not held_apart(part[a], part[b], moving):
+            if part[a] == part[b] or (part[a], part[b]) in linked and not held_apart(part[a], part[b], moving):
                 continue
             if a in leg_of and b in leg_of and leg_of[a] == leg_of[b]:
                 continue  # one leg's own doors: judged along its retraction sequence below
@@ -367,14 +378,14 @@ def check(icarus):
             for k, m in enumerate(poses):
                 sp = shape_of(np.array([((m @ c.matrix_world) @ Vector(p))[:] for p in pts]))
                 for b in names:
-                    if part[b] != hinge and (hinge, part[b]) not in linked:
+                    if part[b] != hinge and ((hinge, part[b]) not in linked or held_apart(hinge, part[b], moving)):
                         judge(c.name, sp, b, rest[b], " (%s pose %d)" % (hinge, k))
     for leg, seq in gears.items():
         for k, pose in enumerate(seq):
             for a, pts in pose.items():
                 sp = shape_of(pts)
                 for b in names:
-                    if part[b] == part[a] or (part[a], part[b]) in linked:
+                    if part[b] == part[a] or (part[a], part[b]) in linked and not held_apart(part[a], part[b], moving):
                         continue
                     sb = shape_of(pose[b]) if b in pose else rest[b]
                     if b in pose and b < a:

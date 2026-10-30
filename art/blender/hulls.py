@@ -15,16 +15,12 @@ it and its corners the UVs of that surface's island, so the livery Unity puts on
 reach the hull too. Stock LOD1 meshes wear one flat grey (the Revoker's carry no colour at all), which on the Icarus
 dropped every livery at range.
 
-A hit lands on the part whose collider it touches, so colliders follow what the part is, and only parts get them
-(the Unity author makes a part of every mesh with mass and of every fuel cell). Compact parts use their LOD1 hull, or
-one capped at COLLIDER_TRIS. Curved skin panels and the wing and fin skins get up to PATCHES thin patches, each split
-where its hull sits deepest under the skin: one hull of a curved panel would be a solid block hiding the fuel cells
-and gear wells under it, and the LandingGear ground cast would meet it. Near the conformal stores every patch also
-keeps to one side of each stations.collider_splits() plane, which can take a panel past PATCHES. The structure cores
-carry SHELLS pieces of their section's shell round the body axis (shells()), and the intake ducts short chunks. A fuel cell
-keeps one hull even though its duct cut-out makes it concave: clearing the ducts takes a dozen pieces round each, and a
-round penetrates through successive colliders anyway, so a shot into the duct area may also reach the cell wrapped
-round it. Hulls built here may overlap other parts'; clearance.carve() cuts them apart once every hull is made.
+A hit lands on the part whose collider it touches, and the game recasts 0.1 m past each hit and lets blasts through
+damageable hulls (DamageEffects.ArmorPenetrate, FragTrace), so each part's colliders are solid, as a stock jet's are: one
+convex hull of the part and everything folded into it (merge(), after chunks.fold), capped at MERGED_TRIS like the
+Revoker's 8 to 56 triangle hulls. clear() cuts it clear of the four keep-outs the Unity author checks (keepouts(): the
+seat's escape path, the gear's ground casts, the hook's catch line, the conformal stores), with a second or third piece
+only where one cut would keep less than KEEP_SHARE of it; clearance.carve() then stands parts that can collide apart.
 """
 import math
 
@@ -61,49 +57,25 @@ LOD1_PER_HULL, LOD1_TOTAL = 56, 814
 # which the ventral fin's stands in for: a LOD1 hull is always drawn, and the fins take turns.
 LOD1_HIDDEN = ("fuselage_", "wing_spar_", "fin_spar", "engine_core", "engine_afterburner", "cockpit_cell", "radar_tray", "avionics_tray",
                "fuel_", "intake_duct_", "ventral_fin_hooked")
-COLLIDER_TRIS = 24  # a collider piece of a part with no LOD1 hull
-# Thin skin patches: at most PATCHES a panel (more only where the trough's cuts make them) of PATCH_TRIS triangles,
-# split no further once each stands no thicker than PATCH_DEPTH on average (hull volume over skin area). A patch
-# with no volume (a flat stretch of skin) is thickened THIN inward, since PhysX cooks no convex collider without it.
-PATCHED = ("skin_", "radome", "dorsal_cover", "wing_skin_", "fin_skin")
-BODY = ("skin_", "radome", "dorsal_cover")  # panels round the body axis, which also split by angle round it
-PATCHES, PATCH_TRIS = 6, 32
-PATCH_DEPTH = 0.04
-THIN = 0.01
-BODY_AXIS_Z = 0.3  # height of the axis body patches split by angle around
-# A panel is cut round a box SPLIT_NEAR beyond each side's conformal store capsules, and the patches inside it keep
-# to one side of each collider_splits() plane; a patch reaching less than SPLIT_SLACK past a plane does not count as
-# crossing it (Unity's A14 allows 0.005 m). Away from the stores there is no trough for a patch to span.
-SPLIT_NEAR, SPLIT_SLACK = 0.05, 0.004
-DUCT_CHUNKS = 6
-STRUCTURE_CORES = ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail")
-# A core's shell as SHELLS pieces round its axis, each cut SHELL_GAP clear of the other parts' hulls: past A12's
-# 0.005 m, so the Unity author braces no part to a shell. The parts jointed to the core may overlap it (no brace),
-# except the cockpit and the gear legs: A9's seat path and A8's ground casts run through them.
-SHELLS, SHELL_GAP = 8, 0.01
-# The mid section's truss over the top (parts.TRUSS): as an ordinary hidden part it would get one hull over all of it, a
-# lid across the section that would catch the rounds and blasts meant for the tanks under it. It takes the root's top
-# two shell sectors instead (0 and 7, either side of the top, round the root's axis), each a shallow arc.
-TRUSS = "fuselage_truss_"
+COLLIDER_TRIS = 24  # a mesh's own hull before the merge
+MERGED_TRIS = 48  # a part's hull, or each piece of it
+KEEP_SHARE = 0.6
+MIN_WIDTH = 0.002  # thinner, a hull is a plane: bmesh's hull of coplanar points can still show faces and a volume
 
 # LOD1 and collider limits, by collection: triangles in total (budget.py sums them).
 BUDGET = {
     "lod1": {"target": 814, "cap": 814, "collection": "LOD1"},
-    # The base set (~2,950) plus the stations' clearance cuts (~1,100), the section shells blast must reach (~560), the
-    # skin hulls split round the gear doors' holes (~190) and at the trough ramps' deep ends (~420), then every skin
-    # piece's own patches, the tail cone's and the truss's shells once the breakup split them (7,852), then the
-    # clearance carve's cut faces, with the skin panels and internals folded into their parts (chunks.py, clearance.py;
-    # 9,760 measured, the cap 2% over).
-    "colliders": {"target": 9760, "cap": 9960, "collection": "Colliders"},
+    # 26 parts' hulls and the pieces round the cockpit cell and the tail cone's front (1,370 measured, the cap 2% over)
+    "colliders": {"target": 1370, "cap": 1400, "collection": "Colliders"},
 }
 CLOSEUPS = {}
-# The same: 102 base hulls, 40 clearance cuts, 17 net for the section shells and about 20 where the gear doors' holes
-# and the trough ramps' deep ends split the skin, then the split's pieces and shells (264 measured, the cap 2% over).
-COLLIDER_HULLS = 270
+# One hull for each of the 26 parts, four each for the forward and aft sections (32 measured; the Revoker has 28).
+COLLIDER_HULLS = 32
 
 
 def check(icarus):
     import budget
+    from clearance import part_of
     from uvs import SKIN
 
     lods = [o for o in bpy.data.collections["LOD1"].objects]
@@ -136,6 +108,20 @@ def check(icarus):
             point_faces += abs((b - a).cross(c - a)) / 2 < POINT_UV_AREA
     if problems:
         raise ValueError("hulls check: LOD1 paint: " + "; ".join(problems))
+    bpy.context.view_layer.update()
+    obstacles = keepouts()
+    for col in cols:
+        s = shape([col.matrix_world @ v.co for v in col.data.vertices],
+                  [list(f.vertices) for f in col.data.polygons])
+        for obstacle in obstacles:
+            if part_of(col).name in obstacle["exclude"]:
+                continue
+            distance, _ = separation(s, obstacle["shape"])
+            if distance < obstacle["gap"] - 1e-7:
+                problems.append("%s %.4f m from %s, need %.4f (Unity penetration limit %.3f)" %
+                                (col.name, distance, obstacle["name"], obstacle["gap"], obstacle["limit"]))
+    if problems:
+        raise ValueError("hulls check: keep-outs: " + "; ".join(problems))
     col_tris = sum(budget.tris(o) for o in cols)
     if len(cols) > COLLIDER_HULLS or col_tris > BUDGET["colliders"]["cap"]:
         raise ValueError("hulls check: colliders %d hulls, %d triangles, over %d or %d" % (
@@ -175,15 +161,28 @@ def outside(bm, pts):
     return out
 
 
-def capped(points, max_tris):
+def capped(points, max_tris, paired=False):
     """Convex hull of points in at most max_tris triangles, as a bmesh: the extremes along each axis, then the point
-    furthest outside, one at a time, while the hull stays under the cap. It lies inside the points' own hull."""
+    furthest outside, one at a time, while the hull stays under the cap. It lies inside the points' own hull. paired
+    takes each point with its mirror image across Blender x = 0 where the points hold one, so a symmetric set stays
+    symmetric."""
     bm = convex(points)
     if tris_of(bm) <= max_tris:
         return bm
     full = np.array([v.co[:] for v in bm.verts])
     bm.free()
-    chosen = list(dict.fromkeys(int(i) for k in range(3) for i in (full[:, k].argmin(), full[:, k].argmax())))
+
+    def grow(ids, js):
+        for j in js:
+            add = [j]
+            if paired:
+                d = np.linalg.norm(full - full[j] * (-1, 1, 1), axis=1)
+                if d.min() < 1e-4:
+                    add.append(int(d.argmin()))
+            ids = list(dict.fromkeys(ids + add))
+        return ids
+
+    chosen = grow([], [int(i) for k in range(3) for i in (full[:, k].argmin(), full[:, k].argmax())])
     best = convex([full[i] for i in chosen])
     while True:
         out = outside(best, full)
@@ -191,17 +190,23 @@ def capped(points, max_tris):
         j = int(out.argmax())
         if out[j] <= 1e-6:
             return best
-        trial = convex([full[i] for i in chosen + [j]])
+        trial_ids = grow(chosen, [j])
+        trial = convex([full[i] for i in trial_ids])
         if tris_of(trial) > max_tris:
             trial.free()
             return best
         best.free()
-        best, chosen = trial, chosen + [j]
+        best, chosen = trial, trial_ids
 
 
 def solid(bm):
-    """A hull fit to be a convex collider: four faces or more and some volume."""
-    return len(bm.faces) >= 4 and bm.calc_volume() >= 1e-4
+    """A hull fit to be a convex collider: four faces or more, some volume and MIN_WIDTH across every face. bmesh's hull
+    of points on one plane (a split half that keeps only its cut face) can still come out with faces and a volume."""
+    if len(bm.faces) < 4 or bm.calc_volume() < 1e-4:
+        return False
+    bm.normal_update()
+    pts = np.array([v.co[:] for v in bm.verts])
+    return min(np.ptp(pts @ np.array(f.normal[:])) for f in bm.faces) >= MIN_WIDTH
 
 
 def hull_mesh(name, points, max_tris):
@@ -228,184 +233,6 @@ def attach(name, mesh, owner, col):
 def lod_tris(name):
     return next((n for prefix, n in LOD1_TRIS if name.startswith(prefix)), LOD1_DEFAULT)
 
-
-# --- splitting a mesh into pieces ---------------------------------------------------------------------------------
-
-def world_bm(owner):
-    bm = bmesh.new()
-    bm.from_mesh(owner.data)
-    bm.transform(owner.matrix_world)
-    return bm
-
-
-def halves(bm, co, no):
-    """The two sides of bm cut by the plane (co, no), each keeping the cut edge, so their hulls meet on it."""
-    out = []
-    for keep_front in (False, True):
-        half = bm.copy()
-        bmesh.ops.bisect_plane(half, geom=list(half.verts) + list(half.edges) + list(half.faces), dist=1e-6,
-                               plane_co=co, plane_no=no, clear_inner=keep_front, clear_outer=not keep_front)
-        out.append(half)
-    return out
-
-
-def points_of(bm):
-    return [v.co.copy() for v in bm.verts]
-
-
-def crosses(pts, co, no, slack=SPLIT_SLACK):
-    d = [(p - co).dot(no) for p in pts]
-    return min(d) < -slack and max(d) > slack
-
-
-def axis_planes(pts):
-    """Mid planes across each axis of the points' bounds that spans more than 5 cm."""
-    lo = Vector([min(p[k] for p in pts) for k in range(3)])
-    hi = Vector([max(p[k] for p in pts) for k in range(3)])
-    out = []
-    for k in range(3):
-        if hi[k] - lo[k] > 0.05:
-            no = Vector((0, 0, 0))
-            no[k] = 1
-            out.append(((lo + hi) / 2, no))
-    return out
-
-
-def angle_plane(pts):
-    """The plane through the body axis at the middle of a one-sided piece's angle round it, or None."""
-    side = 1 if sum(p.x for p in pts) >= 0 else -1
-    if any(p.x * side < -0.01 for p in pts):
-        return None
-    angles = [math.atan2(side * p.x, p.z - BODY_AXIS_Z) for p in pts]
-    a = (min(angles) + max(angles)) / 2
-    if max(angles) - min(angles) < math.radians(10):
-        return None
-    return Vector((0, 0, BODY_AXIS_Z)), Vector((side * math.cos(a), 0, -math.sin(a)))
-
-
-def best_first(pieces, excess, planes, limit):
-    """Split the piece with the most excess by whichever candidate plane leaves its halves the least excess in all,
-    until no piece has any (excess > 0) or there are limit pieces. A piece no candidate improves is left whole.
-    pieces are bmeshes."""
-    scored = [(excess(p), p) for p in pieces]
-    stuck = set()
-    while len(scored) < limit:
-        open_ = [i for i, (e, p) in enumerate(scored) if e > 0 and id(p) not in stuck]
-        if not open_:
-            break
-        worst = max(open_, key=lambda i: scored[i][0])
-        score, piece = scored[worst]
-        best = []
-        for co, no in planes(points_of(piece)):
-            trial = halves(piece, co, no)
-            scored_trial = [(excess(h), h) for h in trial] if min(len(h.verts) for h in trial) >= 4 else []
-            if scored_trial and (not best or sum(e for e, _ in scored_trial) < sum(e for e, _ in best)):
-                best, trial = scored_trial, [h for _, h in best]
-            for h in trial:
-                h.free()
-        if not best or sum(e for e, _ in best) >= score:
-            for _, h in best:
-                h.free()
-            stuck.add(id(piece))
-            continue
-        piece.free()
-        scored[worst:worst + 1] = best
-    return [p for _, p in scored]
-
-
-# --- skin patches --------------------------------------------------------------------------------------------------
-
-def patch_hull(pts, normals=None):
-    """A patch's hull bmesh, thickened THIN inward if it has no volume, or None."""
-    bm = capped(pts, PATCH_TRIS)
-    if not solid(bm) and normals:
-        bm.free()
-        bm = capped(pts + [p - n * THIN for p, n in zip(pts, normals)], PATCH_TRIS)
-    if not solid(bm):
-        bm.free()
-        return None
-    return bm
-
-
-def thickness(hull, piece):
-    """A patch's hull volume over its skin's area: how thick it stands on average."""
-    return hull.calc_volume() / max(1e-9, sum(f.calc_area() for f in piece.faces))
-
-
-def store_boxes():
-    """Each side's conformal store capsules together as one box grown by SPLIT_NEAR, (lo, hi), Blender world space."""
-    out = []
-    for side in (1, -1):
-        caps = stations.capsules(side)
-        out.append((Vector([min(min(a[k], b[k]) - r for _, a, b, r in caps) - SPLIT_NEAR for k in range(3)]),
-                    Vector([max(max(a[k], b[k]) + r for _, a, b, r in caps) + SPLIT_NEAR for k in range(3)])))
-    return out
-
-
-def in_box(pts, box):
-    """Whether the points' bounds reach more than SPLIT_SLACK into the box."""
-    lo, hi = box
-    return all(max(p[k] for p in pts) > lo[k] + SPLIT_SLACK and min(p[k] for p in pts) < hi[k] - SPLIT_SLACK
-               for k in range(3))
-
-
-def cut_all(pieces, co, no, where):
-    """Each piece that where(points) picks and the plane crosses, cut in two along it."""
-    out = []
-    for piece in pieces:
-        pts = points_of(piece)
-        if not (where(pts) and crosses(pts, co, no)):
-            out.append(piece)
-            continue
-        for half in halves(piece, co, no):
-            if len(half.verts) >= 4:
-                out.append(half)
-            else:
-                half.free()
-        piece.free()
-    return out
-
-
-def skin_patches(owner):
-    """The panel cut into thin patches, world-space bmeshes, and how many more patches the trough's cuts make.
-    A body panel round both sides is first cut down the centre line, which no cut through the axis would choose
-    alone (each half is as thick), but which lets the angle cuts follow. The panel is cut round each side's store
-    box, and the pieces in a box by every collider_splits() plane. Then the piece whose hull stands thickest past
-    PATCH_DEPTH (by volume) is split, by station, height, span or angle round the body, until none does or there are
-    PATCHES besides those the trough's cuts made."""
-    body = owner.name.startswith(BODY)
-    boxes = store_boxes()
-    pieces = [world_bm(owner)]
-    if body:
-        pieces = cut_all(pieces, Vector(), Vector((1, 0, 0)), lambda pts: True)
-    before = len(pieces)
-    for box in boxes:
-        lo, hi = box
-        for k in range(3):
-            no = Vector((0, 0, 0))
-            no[k] = 1
-            for co in (lo, hi):
-                pieces = cut_all(pieces, co, no, lambda pts, box=box: in_box(pts, box))
-    near = lambda pts: any(in_box(pts, box) for box in boxes)
-    for co, no in stations.collider_splits():
-        pieces = cut_all(pieces, co, no, near)
-    trough = len(pieces) - before
-
-    def excess(piece):  # on the uncapped hull, whose volume a cut can only shrink
-        hull = convex(points_of(piece))
-        out = hull.calc_volume() - PATCH_DEPTH * sum(f.calc_area() for f in piece.faces)
-        hull.free()
-        return out
-
-    def planes(pts):
-        out = axis_planes(pts)
-        a = angle_plane(pts) if body else None
-        return out + ([a] if a else [])
-
-    return best_first(pieces, excess, planes, PATCHES + trough), trough
-
-
-# --- the structure cores' shells -------------------------------------------------------------------------------------
 
 def shape(points, faces):
     """A convex hull as arrays for separation(): world vertices, unit face normals and unit edge directions."""
@@ -465,92 +292,223 @@ def cut(bm, n, c):
     return out
 
 
-# --- the rest --------------------------------------------------------------------------------------------------------
+def keepouts():
+    """World convex shapes, gaps and excluded parts matching Unity's A9, A8, A23 and A14 checks."""
+    import cockpit
+    import tail_hook
 
-def chunks(owner, n):
-    """The mesh cut across its length (Blender y) into n chunks, world-space bmeshes."""
-    pieces = [world_bm(owner)]
-    ys = [v.co.y for v in pieces[0].verts]
-    lo, hi = min(ys), max(ys)
-    for i in range(1, n):
-        rest = pieces.pop()
-        pieces += halves(rest, Vector((0, lo + (hi - lo) * i / n, 0)), Vector((0, 1, 0)))
-        rest.free()
-    return pieces
-
-
-def piece_hulls(pieces):
-    """Each piece's hull at COLLIDER_TRIS, world space; the pieces are freed."""
-    out = [capped(points_of(p), COLLIDER_TRIS) for p in pieces]
-    for p in pieces:
-        p.free()
-    return out
-
-
-def jointed(core, owner):
-    """Whether a joint joins core to owner's part: its parent or a child in the part tree (a hinged surface's part is
-    its hinge empty, its _visible mesh's parent)."""
-    part = owner.parent if owner.name.endswith("_visible") else owner
-    return part.parent == core or core.parent == part
-
-
-# Each structure core's shell points by sector, world space, as build() found them: rebuild_pieces carves a core's shells again from these when the parts round it change.
-SHELL_GROUPS = {}
-
-
-def shell_groups(owner):
-    """A structure core's world vertices in SHELLS sectors round its axis (through its origin, along Blender y); a truss
-    part's in the root's top two sectors, split at the centre line."""
-    import parts
-
-    # from the skin's shape at the frame stations (parts.shell_points), as no frame is drawn
-    world = parts.SHELL_POINTS.get(owner.name) or [owner.matrix_world @ v.co for v in owner.data.vertices]
-    groups = [[] for _ in range(SHELLS)]
-    if owner.name.startswith(TRUSS):
-        for w in world:
-            groups[0 if w.x >= 0 else SHELLS - 1].append(w)
-        return groups
-    zc = owner.matrix_world.translation.z
-    for w in world:
-        a = math.atan2(w.x, w.z - zc)  # pieces meet on the centre line, so each side's are cut alike
-        groups[min(SHELLS - 1, int((a % (2 * math.pi)) // (2 * math.pi / SHELLS)))].append(w)
-    return groups
-
-
-def shells(owner, others, groups=None):
-    """A structure core's shell as SHELLS pieces round its axis (shell_groups, or the groups given), each cut flat
-    SHELL_GAP clear of every hull in others (separation() shapes), closest first, world space. A blast hits a part only
-    where its trace toward the part's origin meets that part's own collider (DamageEffects.FragTrace), so the core
-    needs hulls all round its axis, not a keel under it."""
-    groups = shell_groups(owner) if groups is None else groups
     out = []
-    for g in groups:
-        bm = capped(g, PATCH_TRIS) if len(g) >= 4 else None
-        for _ in range(500):
-            if bm is None:
-                break
-            s = bm_shape(bm)
-            lo, hi = s[0].min(0) - SHELL_GAP, s[0].max(0) + SHELL_GAP
-            near = [(separation(s, o), o) for o in others if np.all(o[0].min(0) <= hi) and np.all(lo <= o[0].max(0))]
-            (sep, axis), o = min(near, key=lambda r: r[0][0], default=((np.inf, None), None))
-            if sep >= SHELL_GAP:
-                out.append(capped(points_of(bm), PATCH_TRIS))
-                bm.free()
-                break
-            # the other hull starts at its lowest point along the axis; the shell keeps SHELL_GAP short of it
-            nxt = cut(bm, Vector(axis), float((o[0] @ axis).min()) - SHELL_GAP - 1e-4)
-            bm.free()
-            bm = nxt
-        else:
-            raise ValueError("hulls: %s's shell would not come clear of its neighbours" % owner.name)
+    sphere = bmesh.new()
+    bmesh.ops.create_icosphere(sphere, subdivisions=2, radius=1.0)
+    sphere.normal_update()
+    # Scaling by the least face radius circumscribes the sphere, so no capsule surface escapes the polyhedron.
+    inset = min(abs(f.normal.dot(f.verts[0].co)) for f in sphere.faces)
+    round_points = [v.co.copy() / inset for v in sphere.verts]
+    sphere.free()
+
+    def add(name, points, gap, exclude=(), limit=0.0):
+        bm = convex(points)
+        out.append({"name": name, "shape": bm_shape(bm), "gap": gap, "exclude": exclude, "limit": limit})
+        bm.free()
+
+    def capsule(name, a, b, radius, gap, exclude=(), limit=0.0):
+        add(name, [end + p * radius for end in (a, b) for p in round_points], gap, exclude, limit)
+
+    # Fighter1's EjectionSeat is offset (0, .021817982, -.04099989) from pilot, rotated -6.83 degrees on X.
+    # BuildCockpit moves the seat to cockpit_seat, preserving that world offset from the pilot.
+    angle = math.radians(-6.83)
+    y, z = 0.021817982, -0.04099989
+    offset = Vector((0, -(y * math.sin(angle) + z * math.cos(angle)),
+                     y * math.cos(angle) - z * math.sin(angle)))
+    frame = bpy.data.objects["cockpit_cell"].matrix_world.to_quaternion()
+    pilot = bpy.data.objects[cockpit.SEAT].matrix_world.translation - frame @ offset
+    rail = frame @ Vector((0.024, -0.230, 0.973))
+    for distance in (1.44, 1.50):
+        centre = pilot + rail * distance
+        # Unity's height includes the hemispheres: the end centres are a radius inside the .40/.90 ends.
+        capsule("seat %.2f" % distance, centre + Vector((0, 0, -0.40 + 0.25)),
+                centre + Vector((0, 0, 0.90 - 0.25)), 0.25, 0.001 + 0.004, ("canopy",))
+
+    for leg in ("N", "L", "R"):
+        # BuildGear resets castPoint to the bump stop, at the tyre centre + GearStroke, world vertical.
+        # Its travel is wheel radius + GearStroke; the donor castPoint's local offset is discarded.
+        wheel = bpy.data.objects["gear_wheel_" + leg + "_visible"]
+        points = np.array([(wheel.matrix_world @ v.co)[:] for v in wheel.data.vertices])
+        centre = (points.min(0) + points.max(0)) / 2
+        delta = points - centre
+        _, axes = np.linalg.eigh(delta.T @ delta)
+        axle = axes[:, 0]
+        radius = float(np.sqrt(np.maximum(0, (delta * delta).sum(1) - (delta @ axle) ** 2)).max())
+        a = Vector(centre) + Vector((0, 0, 0.3))
+        b = a - Vector((0, 0, radius + 0.3))
+        # A microscopic box gives the line a full-dimensional SAT shape without changing the 5 mm rule.
+        add("gear cast " + leg, [p + Vector((x, y, z)) for p in (a, b)
+                                for x in (-1e-6, 1e-6) for y in (-1e-6, 1e-6) for z in (-1e-6, 1e-6)],
+            0.005, ("gear_leg_N", "gear_leg_L", "gear_leg_R"))
+
+    hook = bpy.data.objects[tail_hook.NAME]
+    rest = hook.matrix_world.copy()
+    points = [rest.translation.copy()]
+    try:
+        swing = hook["stowed_deg"] - hook["deployed_deg"]
+        for i in range(tail_hook.SWEEP_STEPS + 1):
+            tail_hook.pose_hook(hook, swing * i / tail_hook.SWEEP_STEPS)
+            points.append(tail_hook.hook_point(hook))
+    finally:
+        hook.matrix_world = rest
+        bpy.context.view_layer.update()
+    # The swept catch line is planar. A microscopic thickness makes its convex shape unambiguous.
+    add("hook catch line", [p + Vector((x, 0, 0)) for p in points for x in (-1e-6, 1e-6)],
+        tail_hook.CLEAR["line_to_hulls"] + 0.003)
+
+    for side in (1, -1):
+        for name, a, b, radius in stations.capsules(side):
+            capsule("store %s %s" % (name, side), a, b, radius, 0.0, ("fuselage_mid",), 0.005)
     return out
+
+
+def clear(bm, keepouts, depth=0):
+    """Consume a world hull, keeping the most volume clear of every keep-out, with at most two split levels."""
+    from clearance import keep_most
+
+    if not solid(bm):
+        bm.free()
+        return []
+    s = bm_shape(bm)
+    bad = [(obstacle, separation(s, obstacle["shape"])) for obstacle in keepouts]
+    bad = [(o, result) for o, result in bad if result[0] < o["gap"] - 1e-7]
+    if not bad:
+        return [bm]
+    obstacle, (_, axis) = min(bad, key=lambda item: item[1][0] - item[0]["gap"])
+    normal, at = keep_most(s, obstacle["shape"], obstacle["gap"], axis)
+    single = cut(bm, Vector(normal), at)
+    volume = abs(bm.calc_volume())
+    share = abs(single.calc_volume()) / volume if single is not None else 0.0
+    if share >= KEEP_SHARE or depth >= 2:
+        bm.free()
+        return clear(single, keepouts, depth) if single is not None else []
+    best = clear(single, keepouts, depth) if single is not None else []
+    best_volume = sum(abs(p.calc_volume()) for p in best)
+    centre = obstacle["shape"][0].mean(0)
+    for i in range(3):
+        normal = Vector(tuple(1 if j == i else 0 for j in range(3)))
+        halves = [cut(bm, normal, float(centre[i])), cut(bm, -normal, -float(centre[i]))]
+        pieces = [piece for half in halves if half is not None for piece in clear(half, keepouts, depth + 1)]
+        kept = sum(abs(p.calc_volume()) for p in pieces)
+        if kept > best_volume:
+            for p in best:
+                p.free()
+            best, best_volume = pieces, kept
+        else:
+            for p in pieces:
+                p.free()
+    bm.free()
+    return best
+
+
+def symmetric(pieces):
+    """A centreline part's world hulls, each cut to the mirror image (across Blender x = 0) of its twin: the piece whose
+    reflection overlaps it most, itself for one astride the centre plane. The greedy cuts round a pair of obstacles need
+    not pick mirrored planes, and a lopsided hull tilts the part's inertia. Cutting only shrinks a piece, so it stays
+    clear of whatever it was cleared from; a piece the cut would leave unfit keeps its shape. Each is then capped at
+    MERGED_TRIS again, still symmetric: one astride the centre plane keeps its points in mirror pairs (capped's paired),
+    and of a mirrored pair the second is the first's reflection (the two cuts are each other's mirror images)."""
+    def box(bm, sign=1):
+        pts = np.array([(sign * v.co.x, v.co.y, v.co.z) for v in bm.verts])
+        return pts.min(0), pts.max(0)
+
+    def overlap(a, b):
+        return float(np.prod(np.clip(np.minimum(a[1], b[1]) - np.maximum(a[0], b[0]), 0, None)))
+
+    def reflect(bm):
+        return [Vector((-v.co.x, v.co.y, v.co.z)) for v in bm.verts]
+
+    twins = [max(range(len(pieces)), key=lambda j: overlap(box(p), box(pieces[j], -1))) for p in pieces]
+    cuts = []
+    for p, t in zip(pieces, twins):
+        mirror = convex(reflect(pieces[t]))
+        pts = np.array([v.co[:] for v in mirror.verts])
+        planes = []
+        for f in mirror.faces:
+            # only planes every vertex lies behind: bmesh's hull keeps sliver faces whose planes cut through it (shape())
+            n = Vector(f.normal)
+            d = pts @ np.array(n[:]) - n.dot(f.verts[0].co)
+            if d.max() <= 1e-6:
+                planes.append((n, n.dot(f.verts[0].co)))
+            elif d.min() >= -1e-6:
+                planes.append((-n, -n.dot(f.verts[0].co)))
+        mirror.free()
+        cut_piece = p.copy()
+        for n, d in planes:
+            nxt = cut(cut_piece, n, d + 1e-6)
+            cut_piece.free()
+            cut_piece = nxt
+            if cut_piece is None:
+                break
+        if cut_piece is not None and solid(cut_piece):
+            cuts.append(cut_piece)
+        else:
+            if cut_piece is not None:
+                cut_piece.free()
+            cuts.append(None)
+    out = []
+    for i, (p, t, c) in enumerate(zip(pieces, twins, cuts)):
+        if c is None:
+            out.append(capped([v.co.copy() for v in p.verts], MERGED_TRIS))
+        elif t < i and twins[t] == i and cuts[t] is not None:
+            out.append(convex(reflect(out[t])))
+        else:
+            out.append(capped([v.co.copy() for v in c.verts], MERGED_TRIS, paired=t == i))
+    for bm in pieces + [c for c in cuts if c is not None]:
+        bm.free()
+    return out
+
+
+def merge(icarus):
+    """Replace each part's colliders by its capped hull, cut only for hard keep-outs."""
+    from clearance import part_of
+
+    bpy.context.view_layer.update()
+    colliders = bpy.data.collections["Colliders"]
+    owned = {}
+    for c in colliders.objects:
+        owned.setdefault(c.parent, []).append(c)
+    obstacles = keepouts()
+    report = []
+    for owner, cols in sorted(owned.items(), key=lambda item: item[0].name):
+        bm = capped([c.matrix_world @ v.co for c in cols for v in c.data.vertices], MERGED_TRIS)
+        volume = abs(bm.calc_volume())
+        name = part_of(cols[0]).name
+        pieces = clear(bm, [o for o in obstacles if name not in o["exclude"]])
+        kept = []
+        for piece in pieces:
+            limited = capped([v.co.copy() for v in piece.verts], MERGED_TRIS)
+            piece.free()
+            if solid(limited):
+                kept.append(limited)
+            else:
+                limited.free()
+        share = sum(abs(p.calc_volume()) for p in kept) / volume if volume else 0.0
+        for c in cols:
+            data = c.data
+            bpy.data.objects.remove(c, do_unlink=True)
+            if data.users == 0:
+                bpy.data.meshes.remove(data)
+        count = attach_colliders(owner, kept, colliders)
+        report.append("%s %d hulls, %.1f%% volume" % (owner.name, count, share * 100))
+        if not count:
+            raise ValueError("hulls merge: %s lost every hull to keep-outs" % owner.name)
+    for c in colliders.objects:
+        c.display_type = "WIRE"
+    bpy.context.view_layer.update()
+    print("hulls merge: " + "; ".join(report))
 
 
 def build(icarus):
     colliders = bi.collection("Colliders")
     lods = bi.collection("LOD1")
     count = {"colliders": 0, "lods": 0}
-    report, owned, cores = [], {}, []
+    owned = {}
     for owner in [o for o in icarus.all_objects
                   if o.type == "MESH" and not o.name.startswith(SKIP) and o.get("role") not in SKIP_ROLES]:
         name = owner.name
@@ -560,17 +518,13 @@ def build(icarus):
         # Unity makes a part of every mesh with mass and of every fuel cell, and takes colliders from those alone
         if owner.get("mass_kg", 0) <= 0 and owner.get("role") != "fuel_tank":
             shapes = []
-        elif name.startswith(PATCHED):
-            shapes = patches(owner, report)
-        elif name.startswith("intake_duct_"):
-            shapes = piece_hulls(chunks(owner, DUCT_CHUNKS))
-        elif name in STRUCTURE_CORES or name.startswith(TRUSS):  # its shells fill round the other parts' hulls, so they come last
-            shapes = []
-            cores.append(owner)
-        elif lod is not None:
-            shapes = [convex([owner.matrix_world @ v.co for v in lod.vertices])]
         else:
-            shapes = [capped([owner.matrix_world @ v.co for v in owner.data.vertices], COLLIDER_TRIS)]
+            import parts
+
+            points = [owner.matrix_world @ v.co for v in owner.data.vertices]
+            if not points:
+                points = parts.SHELL_POINTS.get(name, [])
+            shapes = [capped(points, COLLIDER_TRIS)] if len(points) >= 4 else []
         kept = [bm for bm in shapes if solid(bm)]
         for bm in shapes:
             if bm not in kept:
@@ -581,43 +535,13 @@ def build(icarus):
             continue
         attach(name + "_lod1", lod, owner, lods)
         count["lods"] += 1
-    for core in cores:
-        SHELL_GROUPS[core.name] = shell_groups(core)
-        owned[core] = shells(core, others_of(core, owned), SHELL_GROUPS[core.name])
-        report.append("%s %d shells" % (core.name, len(owned[core])))
     for owner, shapes in owned.items():
         count["colliders"] += attach_colliders(owner, shapes, colliders)
-    print("hulls: " + "; ".join(report))
     for col in (colliders, lods):  # wireframe and out of renders, but still evaluated for the exporter
         col.hide_render = True
         for obj in col.objects:
             obj.display_type = "WIRE"
     return count
-
-
-def patches(owner, report):
-    """A skin panel's thin patch hulls (skin_patches), world space, with a line for the report."""
-    pieces, trough = skin_patches(owner)
-    shapes, thick = [], 0.0
-    for piece in pieces:
-        piece.normal_update()
-        hull = patch_hull(points_of(piece), [v.normal.copy() for v in piece.verts])
-        if hull:
-            shapes.append(hull)
-            thick = max(thick, thickness(hull, piece))
-        piece.free()
-    report.append("%s %d patches%s, thickest %.3f m" % (
-        owner.name, len(shapes), " (%d more for the trough)" % trough if trough else "", thick))
-    return shapes
-
-
-def others_of(core, owned):
-    """The separation() shapes a core's shells keep clear of: every other part's hulls but those jointed to the core,
-    the cockpit's and the gear's excepted. A truss part, which the skin over it is not jointed to, may overlap that skin
-    as a core does the panels on it, and keeps clear of the tanks under it."""
-    overlaps = lambda o: jointed(core, o) or core.name.startswith(TRUSS) and o.get("role") == "skin"
-    return [bm_shape(bm) for o, bms in owned.items()
-            if o != core and (not overlaps(o) or o.get("role") in ("cockpit", "gear")) for bm in bms]
 
 
 def attach_colliders(owner, shapes, colliders):
@@ -633,54 +557,27 @@ def attach_colliders(owner, shapes, colliders):
 
 
 def rebuild_pieces(made):
-    """Hulls for the skin pieces parts.split_pieces made, {family: [pieces]}: each piece its own skin_patches in full
-    and a LOD1 hull with its family's LOD1_TRIS shared by skin area (LOD1_DEFAULT at least). A structure core that a
-    piece hangs on in place of the family's own parent, or that loses such a piece, has its shells carved again from
-    SHELL_GROUPS, clear of the parts round it now (a core's shells keep clear only of parts not jointed to it)."""
-    from parts import LATE_PARENTS, full_tree
+    """One collider per split piece, with its family's LOD1 triangles shared by skin area."""
     from uvs import SKIN
 
     colliders, lods = bpy.data.collections["Colliders"], bpy.data.collections["LOD1"]
-    report, cores = [], set()
     for name, pieces in made.items():
         areas = [sum(f.area for f in p.data.polygons if p.data.materials[f.material_index].name == SKIN) for p in pieces]
         for piece, area in zip(pieces, areas):
-            moved = {piece.parent.name, full_tree()[name][0]}
-            if len(moved) > 1:
-                cores.update(moved & set(STRUCTURE_CORES))
             tris = max(LOD1_DEFAULT, round(lod_tris(name) * area / sum(areas)))
             lod = hull_mesh(piece.name + "_lod1", [v.co.copy() for v in piece.data.vertices], tris)
             if lod is not None:
                 attach(piece.name + "_lod1", lod, piece, lods)
-            if piece.get("mass_kg", 0) > 0:
-                attach_colliders(piece, patches(piece, report), colliders)
-    for name, parent in LATE_PARENTS.items():  # a part moved after the unwrap leaves one core's joint for another's
-        if name in full_tree() and full_tree()[name][0] != parent:
-            cores.update({full_tree()[name][0], parent} & set(STRUCTURE_CORES))
-    for name in sorted(cores):
-        core = bpy.data.objects[name]
-        for c in [c for c in core.children if c.name in colliders.objects]:
-            data = c.data
-            bpy.data.objects.remove(c, do_unlink=True)
-            bpy.data.meshes.remove(data)
-        owned = {}
-        for c in colliders.objects:
-            if c.parent != core:
-                bm = bmesh.new()
-                bm.from_mesh(c.data)
-                bm.transform(c.parent.matrix_world)
-                owned.setdefault(c.parent, []).append(bm)
-        carved = shells(core, others_of(core, owned), SHELL_GROUPS[name])
-        for bms in owned.values():
-            for bm in bms:
-                bm.free()
-        attach_colliders(core, carved, colliders)
-        report.append("%s %d shells" % (name, len(carved)))
+            if piece.get("mass_kg", 0) > 0 or piece.get("role") == "fuel_tank":
+                bm = capped([piece.matrix_world @ v.co for v in piece.data.vertices], COLLIDER_TRIS)
+                if solid(bm):
+                    attach_colliders(piece, [bm], colliders)
+                else:
+                    bm.free()
     for col in (colliders, lods):
         col.hide_render = True
         for obj in col.objects:
             obj.display_type = "WIRE"
-    print("hulls: pieces: " + "; ".join(report))
 
 
 # --- LOD1 paint ---------------------------------------------------------------------------------------------------

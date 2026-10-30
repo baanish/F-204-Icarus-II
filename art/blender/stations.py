@@ -427,20 +427,6 @@ def ramp_lips(p, s):
     return None
 
 
-def collider_splits():
-    """Planes (point, normal), Blender world space, that no skin collider patch may cross (hulls.groups): the
-    trough's centre line each side, level planes through each body's axis and 45 degrees up its arch, and a cross
-    plane at each ramp's deep end, so no patch hull spans the trough, cuts the corner of its arch or takes in a ramp's
-    closing walls beside the stores."""
-    levels = set()
-    for m in MOUNTS.values():
-        a = missile_axis(m, CONFORMAL["s"])[1]
-        levels |= {round(a, 2), round(a + math.sqrt(0.5) * (radius(m) + GAP), 2)}
-    return [(Vector((side * CONFORMAL["x"], 0, 0)), Vector((1, 0, 0))) for side in (1, -1)] + \
-        [(Vector((0, 0, z)), Vector((0, 0, 1))) for z in sorted(levels)] + \
-        [(bi.P(rings[0], 0, 0), Vector((0, 1, 0))) for _, _, rings in ramp_stations(bi.PARAMS)]
-
-
 def body_points(m, side, step=0.05):
     """Points round the top half of a mount's envelope, Blender world space, with the envelope radius."""
     out = []

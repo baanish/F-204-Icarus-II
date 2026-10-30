@@ -18,7 +18,7 @@ import cycles_device
 from cache_root import cache_root
 
 
-COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References", "Stores", "TailHook", "TailHookHulls")
+COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References", "Stores", "TailHook")
 TEXTURES = tuple("Icarus_Cockpit_" + suffix + ".png" for suffix in ("b", "n", "m", "ao"))
 
 

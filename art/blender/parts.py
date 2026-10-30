@@ -169,7 +169,7 @@ DORSAL = (5.0, 12.4)
 # two parts at TRUSS_BREAK, frame 11 and the butt joint art/textures/panels.py draws there; the skin panels and the
 # dorsal cover over it part there too (SPLITS).
 TRUSS_BREAK = 8.2
-# The collider shells' points of each structure core and truss half (hulls.shell_groups): the skin's shape at the frame
+# The fallback hull points and pivot bounds of each meshless structure core and truss half: the skin's shape at the frame
 # stations (internals.shell_rings), the truss's over the top, the cores' the rest, none inside the canopy's opening.
 SHELL_POINTS = {}
 # A family's dry mass shared between two parts split from it so that its first moment along the axis that separates
@@ -304,7 +304,7 @@ def recentre(obj):
     if obj.type != "MESH":
         return
     pins = {**CORE_ORIGINS, **SPLIT_ORIGINS}
-    # a truss half or a section with nothing drawn of its own yet: its pin, or its collider shells' centre
+    # A meshless truss half or section uses its pin, or its fallback hull's centre.
     pts = [v.co for v in obj.data.vertices] or SHELL_POINTS.get(obj.name, [])
     if not pts:
         return
@@ -674,8 +674,8 @@ def _organise(p, icarus, internals, structure_mat):
 
     fus = O["fuselage"]
     # The canopy is its own loft on top of the body, so the body's top skin runs on under it as a floor across the
-    # cockpit. The cockpit opening is whatever of the skin lies inside the canopy's closed shape; the sections' collider
-    # shells stop canopy.FRAME_CLEAR clear of it (shell_points), room for the flanges under its foot.
+    # cockpit. The cockpit opening is whatever of the skin lies inside the canopy's closed shape; fallback hull points
+    # stop canopy.FRAME_CLEAR clear of it (shell_points), room for the flanges under its foot.
     canopy_solid = interior.outward(canopy.build_canopy(p, structure_mat))
     drop_inside(fus, canopy_solid)
     opening = interior.grown(canopy_solid, canopy.FRAME_CLEAR)
@@ -695,7 +695,7 @@ def _organise(p, icarus, internals, structure_mat):
     bpy.data.objects.remove(fus, do_unlink=True)
 
     # No frame, stringer or break wall: each section is its gear well where it has one, its skin (chunks.fold) and its
-    # collider shells (SHELL_POINTS); the truss halves the shells and their dorsal covers.
+    # fallback hull points (SHELL_POINTS); the truss halves carry their dorsal covers.
     for name in ("fuselage_truss_front", "fuselage_truss_rear"):
         join(name, [])
     for name, a, b in (("fuselage_forward", 0.0, FORWARD_END), ("fuselage_mid", FORWARD_END, MID_END),

@@ -54,10 +54,8 @@ INTERNALS = {
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.35, "z1": 0.37, "mass_kg": 1450},
     # The fuselage's frame stations: 0.6 m apart, as the painted panel lines are (art/textures/panels.py). No frame,
-    # stringer or wall is drawn, as on stock jets; the structure cores' and the truss's collider shells are cut from the
-    # skin's shape there, inset and inset plus web inside it, over each frame's flange (shell_rings, hulls.shell_groups),
-    # and just inside each break, at the ends ("ends": stations, thickness, inset), so each section's shells run to its
-    # breaks and its centre of mass (the hulls' box) stays where the balance pins it (IcarusAuthor A22).
+    # stringer or wall is drawn, as on stock jets. Meshless cores and truss halves use inset skin points at these
+    # stations and just inside each break for their fallback hulls and pivot bounds (shell_rings, parts.shell_points).
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "web": 0.08, "flange": 0.05,
                "ends": ((5.57, 5.92, 10.97, 11.03, 12.97, 13.075, 14.76), 0.02, 0.035)},
     # the front spar on the fixed box, behind the leading-edge flap's cut (0.166 of the chord)
@@ -387,10 +385,10 @@ def tank(p, name, s0, s1, inset, floor, x_lo, x_hi, mat, cutters):
 
 
 def shell_rings(p):
-    """The shape the structure cores' and the truss's collider shells are cut from (hulls.shell_groups), as (station,
+    """Fallback hull and pivot points for meshless structure cores and truss halves, as (station,
     points) with the station that places them: each frame station's skin section pulled in by the inset and by inset
     plus web, at the station and its flange's aft edge, and each of the ends' sections pulled in by their inset either
-    side of the station. Stations are summed as they always were, so one lands a rounding off a break
+    side of the station. Summed stations can land a rounding off a break
     (12.999999999999995), which parts.in_section puts ahead."""
     f = INTERNALS["frames"]
     aft = lambda ring, dy: [v + Vector((0.0, dy, 0.0)) for v in ring]

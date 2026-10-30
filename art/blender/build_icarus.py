@@ -1502,13 +1502,14 @@ def _build(repo, split=True):
                       "lods": len(bpy.data.collections["LOD1"].objects)}
         tree = {name: obj for name, obj in tree.items() if name not in pieces}
         tree.update((piece.name, piece) for made in pieces.values() for piece in made)
-    tail_hook.fin_hulls(TARGET)  # after the tail cone's shells are carved afresh
+    tail_hook.fin_hulls(TARGET)  # include the variant fins before the part hulls merge
     part_tree.drop_split_sides(TARGET)
     import chunks
     import clearance
 
     if split:  # the unsplit build (the skin bake, the reviews) keeps its skin families whole, as panels.py reads them
         print(chunks.fold(TARGET))  # the skin panels into the parts they hang on, as stock chunks
+    hulls.merge(TARGET)
     print(clearance.carve(TARGET))  # last, on the final hulls: unjointed parts stand apart
     hull_count = {"colliders": len(bpy.data.collections["Colliders"].objects),
                   "lods": len(bpy.data.collections["LOD1"].objects)}

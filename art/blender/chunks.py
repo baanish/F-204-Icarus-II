@@ -5,7 +5,8 @@ A Revoker part carries its own skin and sheds nothing separately (every part's d
 that breaks off collides like any other, and nothing inside a section is a part of its own: its FuelTanks sit on the
 fuselage and wing parts, its engine in the tail part, which takes the JetNozzle's thrust. Here each skin panel (FOLDED),
 fuel cell and internal (INTERNALS) stays a mesh of its own, so its UVs, livery and damage stay as they are, but stops
-being a part: its mass, fuel and collider hulls go to the part it sits in, and the Unity author places its mesh under
+being a part: its mass, fuel and collider hulls go to the part it sits in. hulls.merge replaces those hulls with the
+receiving part's own convex hull, cut clear of hard keep-outs. The Unity author places each folded mesh under
 that part as a visual (IcarusAuthor.Parts.cs PlaceSkins), whose skin renderers take the part's livery and damage
 (ListLiveryRenderers). A part with no mesh of its own (fuselage_aft and the truss halves) takes its skin panels into its
 mesh instead (join_bare). The receiving part's centre of mass becomes the mass-weighted centre of what it carries
@@ -134,7 +135,6 @@ def fold(icarus):
             host["fuel_kg"] = round(float(host.get("fuel_kg", 0.0)) + float(panel["fuel_kg"]), 3)
             del panel["fuel_kg"]
         for c in hulls_of(panel):
-            c["folded_from"] = panel.name  # clearance keeps it clear of what the panel was clear of
             world = c.matrix_world.copy()
             c.parent = host
             c.matrix_parent_inverse.identity()
