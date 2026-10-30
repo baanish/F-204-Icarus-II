@@ -13,7 +13,9 @@ from there its web runs on aft to the nozzle, and its lower edge widens into a p
 below the tail cone. The hook lies in a slot in the pod's bottom on a straight line (LINE) with its hinge at HINGE_S,
 behind the original fin's trailing edge, so it never swings toward either fin, and its point under the nozzle. The
 fairing is a skin patch (the generator's own smooth-union fields: the body's, the web's and the pod's) joined into
-HOOKED_FIN's mesh, lying just outside the belly's loft, which stays whole (the well's floor is below it at every
+HOOKED_FIN's mesh and welded to the kept fin at the cut, its first row the fin's own end section vertex for vertex and its
+columns following the fin's root and tip corner aft (row), so the two are one surface. It lies just outside the
+belly's loft where it covers it, which stays whole (the well's floor is below it at every
 station), so it rides the tail cone with the fins (parts.LATE_PARENTS) and takes their livery; the slot's well is dark
 like the gear wells. The Tail Hook hardpoint shows one fin or the other, the stock way (Hardpoint.Plug and pylonOptions,
 IcarusAuthor.TailHook.cs). The original fin gets collider hulls on the tail cone, and HOOKED_FIN's web and pod get theirs
@@ -60,8 +62,12 @@ OVERTRAVEL = 0.15
 # UVs spread over SPREAD of the atlas round the point (a few texels), so Unity can build tangents.
 PAINT_S, SPREAD = 13.70, 0.0008
 PATCH_OUT = 0.0006  # the patch stands this far outside the true surface, over the old skin's facets
+PATCH_FADE = 0.01  # and lies on the true surface where it stands this far off the old skin: the web, flush with the fin
 ROW_STEP = 0.10  # metres between the patch's rows; the hook's are finer at its point
-COLUMNS = (14, 7, 14)  # points across the patch left of the slot, across it, and right of it
+# Points across each half of the patch: over the body to the web's root, down the web to the split (the slot's edge, or
+# ahead of the slot the web's lower corner), and across between the splits.
+COLUMNS = (6, 9, 7)
+SEAM = 0.001  # most the fairing's first row may stand off the kept fin's end section (check)
 # Clearances the swing must keep (check): the fin and fairing ahead of the slot, the engine and nozzle, the well and
 # skin, and the hook's line to every collider hull of the jet.
 CLEAR = {"fin_ahead_of_slot": 0.030, "afterburner_nozzle": 0.040, "well_and_skin": 0.002, "line_to_hulls": 0.010}
@@ -102,10 +108,13 @@ def fin_cut(p):
 
 
 def fin_web_half(p, z):
-    """The ventral fin's half thickness at its thickest line, at height z."""
+    """The ventral fin's half thickness at its thickest line, at height z, as its loft draws it: the cut crosses the facet
+    between the chord points either side of the line (bi.lifting_surface), which share a thickness, the biconvex's being
+    symmetric."""
     _, z_root, c_root, _, z_tip, c_tip = fin_sections(p)
     f = min(1.0, max(0.0, (z - z_tip) / (z_root - z_tip)))
-    return p["ventral_fin"]["thickness"] * (c_tip + (c_root - c_tip) * f) * bi.airfoil(0.5)
+    t = 0.5 * (1 - math.cos(math.pi * ((bi.CHORD - 1) // 2) / (bi.CHORD - 1)))
+    return p["ventral_fin"]["thickness"] * (c_tip + (c_root - c_tip) * f) * bi.airfoil(t)
 
 
 def zline(p, s):
@@ -229,20 +238,68 @@ def resample(seg, n):
     return np.column_stack([np.interp(t, d, seg[:, 0]), np.interp(t, d, seg[:, 1])])
 
 
-def row(p, s, w):
-    """The outline at s split at x = -w and w: (left, slot, right) resampled to COLUMNS, the slot's ends shared."""
+def nearest(c, q):
+    """The point of polyline c nearest q, and the index of the segment it lies on."""
+    a, d = c[:-1], np.diff(c, axis=0)
+    t = np.clip(((q - a) * d).sum(1) / np.maximum((d * d).sum(1), 1e-18), 0, 1)
+    pts = a + d * t[:, None]
+    k = int(np.argmin(np.linalg.norm(pts - q, axis=1)))
+    return pts[k], k
+
+
+def web_root(p, s):
+    """Where the web's left flank meets the body before their fillet, (x, z): at the cut, the kept fin's root on the skin."""
+    body, zc = body_field(p, s), bi.skin_field(p, s)[1]
+    lo, hi = zline(p, s), zc
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if body(-fin_web_half(p, mid), mid) > 0 else (lo, mid)
+    return np.array([-fin_web_half(p, lo), lo])
+
+
+def row(p, s, w, slot):
+    """The outline at s as (left, mid, right), mirrored about the centre line and resampled to COLUMNS: left runs over
+    the body to the web's root, then down the web (and the pod) to the split at x = -w in the slot, ahead of it at the
+    web's lower corner; mid runs across between the splits, its ends shared. Each column follows one feature of the
+    section from row to row, so from the cut on the fairing's columns are the kept fin's own root and tip corner."""
     c = contour(p, s)
-    (pl, kl), (pr, kr) = at_x(c, -w, -1), at_x(c, w, 1)
-    left = np.vstack([c[:kl], pl])
-    mid = np.vstack([pl, c[kl:kr + 1], pr])
-    right = np.vstack([pr, c[kr + 1:]])
-    return resample(left, COLUMNS[0]), resample(mid, COLUMNS[1]), resample(right, COLUMNS[2])
+    root, kr = nearest(c, web_root(p, s))
+    zb = zline(p, s)
+    if slot:
+        split, ks = at_x(c, -w, -1)
+        ks -= 1
+    else:
+        split, ks = nearest(c, np.array([-fin_web_half(p, zb), zb]))
+    centre, kc = at_x(c, 0.0, -1)
+    kc -= 1
+    if not kr <= ks <= kc:
+        raise ValueError("tail hook: the section at s %.3f runs out of order (root, split, centre)" % s)
+    body = np.vstack([c[:kr + 1], root])
+    side = np.vstack([root, c[kr + 1:ks + 1], split])
+    left = np.vstack([resample(body, COLUMNS[0]), resample(side, COLUMNS[1])[1:]])
+    half = resample(np.vstack([split, c[ks + 1:kc + 1], centre]), (COLUMNS[2] + 1) // 2)
+    mirror = lambda q: q[::-1] * (-1, 1)
+    return left, np.vstack([half, mirror(half)[1:]]), mirror(left)
+
+
+def fin_section(p, pts):
+    """The cut row put on the kept fin's end section: its root and flank columns on the flank, its splits on the tip's
+    corners, the columns between on the tip. Returns the row and its web part, the seam hooked_fin splits the fin at."""
+    z_tip = fin_sections(p)[4]
+    root, corner = COLUMNS[0] - 1, COLUMNS[0] + COLUMNS[1] - 2
+    out, n = pts.copy(), len(pts)
+    for k in range(root, n - root):
+        x, z = pts[k]
+        j, sign = min(k, n - 1 - k), (-1 if k < n / 2 else 1)
+        out[k] = ((sign * fin_web_half(p, z), z) if j < corner else
+                  (sign * fin_web_half(p, z_tip), z_tip) if j == corner else (x, z_tip))
+    return out, out[root:n - root]
 
 
 def offset(pts, d):
     t = np.gradient(pts, axis=0)
     t /= np.linalg.norm(t, axis=1)[:, None]
-    return pts + np.column_stack([t[:, 1], -t[:, 0]]) * d
+    return pts + np.column_stack([t[:, 1], -t[:, 0]]) * np.asarray(d)[:, None]
 
 
 def W(s, x, z):
@@ -297,15 +354,17 @@ def patch_rows(hook):
 
 
 def build_fairing(p, mats, hook):
-    """The fairing patch with its slot and well, tagged to join the ventral fin (parts.merge_details)."""
+    """The fairing patch with its slot and well, tagged to join the ventral fin (parts.merge_details), and the web part
+    of its first row, which is the kept fin's end section (fin_section)."""
     rows = patch_rows(hook)
     verts, faces, skin_faces, grid, slot_cols, well_rows = [], [], [], [], None, []
     for s in rows:
         w = hook.width(s) + GAP
-        if not hook.in_slot(s):  # split inside the web, which is narrower than the slot ahead of the pod
-            w = min(w, 0.6 * fin_web_half(p, fin_sections(p)[4]))
-        left, mid, right = row(p, s, w)
-        out = offset(np.vstack([left, mid[1:-1], right]), PATCH_OUT)
+        left, mid, right = row(p, s, w, hook.in_slot(s))
+        pts, body = np.vstack([left, mid[1:-1], right]), body_field(p, s)
+        out = offset(pts, [PATCH_OUT * (1 - smooth(body(x, z) / PATCH_FADE)) for x, z in pts])
+        if s == hook.cut:
+            out, seam = fin_section(p, out)
         grid.append(len(verts))
         verts += [W(s, x, z) for x, z in out]
         slot_cols = (len(left) - 1, len(left) - 1 + len(mid) - 1)
@@ -359,7 +418,7 @@ def build_fairing(p, mats, hook):
         lifted.update((k, lift(k)) for k in ks)
         strip([grid[-1] + k for k in ks], [lifted[k] for k in ks])
     floor_l, floor_r = fl[-1] + 1, fl[-1] + 2
-    xs = np.linspace(-w, w, COLUMNS[1])
+    xs = np.linspace(-w, w, COLUMNS[2])
     bottom = [floor_l]
     for x in xs[1:-1]:
         verts.append(W(s, x, z_floor[s]))
@@ -371,17 +430,20 @@ def build_fairing(p, mats, hook):
         upper.append(len(verts) - 1)
     strip(bottom, upper)
     edge_l, edge_r = grid[-1] + slot_cols[0], grid[-1] + slot_cols[1]  # the mouth band's sides, across the walls' foot
-    skin_faces.append((edge_l, floor_l, upper[0], lifted[slot_cols[0]]))
-    skin_faces.append((floor_r, edge_r, lifted[slot_cols[1]], upper[-1]))
+    for face in ((edge_l, floor_l, upper[0], lifted[slot_cols[0]]), (floor_r, edge_r, lifted[slot_cols[1]], upper[-1])):
+        xz = [(verts[i].x, verts[i].z) for i in face]
+        if abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(xz, xz[1:] + xz[:1]))) > 1e-9:  # none where the wall's foot is on the outline
+            skin_faces.append(face)
     obj = bi.mesh_object(FAIRING, verts, skin_faces + well_faces)
     obj.data.materials.append(mats["body"])
     obj.data.materials.append(mats["gear_bay"])
     for poly in obj.data.polygons:
         poly.material_index = 1 if poly.index >= len(skin_faces) else 0
         poly.use_smooth = poly.material_index == 0
+    obj.data.set_sharp_from_angle(angle=math.radians(40))  # as bi.finish shades the fin: its tip's corner runs on sharp
     orient(obj, p, hook, z_floor)
     obj["merge_into"] = HOOKED_FIN
-    return obj, z_floor
+    return obj, z_floor, seam
 
 
 def orient(obj, p, hook, z_floor):
@@ -407,8 +469,9 @@ def orient(obj, p, hook, z_floor):
     bm.free()
 
 
-def hooked_fin():
-    """HOOKED_FIN: a copy of the ventral fin that keeps its forward half; the fairing's web runs on from the cut."""
+def hooked_fin(seam):
+    """HOOKED_FIN: a copy of the ventral fin that keeps its forward half; the fairing's web runs on from the cut. The cut's
+    edges are split at the fairing's first row (seam, (x, z) on the cut), so the two weld there (weld_seam)."""
     fin = bpy.data.objects["ventral_fin"]
     ob = fin.copy()
     ob.data = fin.data.copy()
@@ -419,11 +482,46 @@ def hooked_fin():
     bm.from_mesh(ob.data)
     mwi = ob.matrix_world.inverted()
     cut = fin_cut(bi.PARAMS)
-    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=mwi @ W(cut, 0, 0),
-                           plane_no=(mwi.to_3x3() @ Vector((0, 1, 0))).normalized(), clear_outer=True)
+    res = bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=mwi @ W(cut, 0, 0),
+                                 plane_no=(mwi.to_3x3() @ Vector((0, 1, 0))).normalized(), clear_outer=True)
+    edges = [e for e in res["geom_cut"] if isinstance(e, bmesh.types.BMEdge) and e.is_valid]
+    for x, z in seam:
+        co = mwi @ W(cut, x, z)
+        if any((v.co - co).length < 1e-5 for e in edges for v in e.verts):
+            continue
+        e = min(edges, key=lambda e: segment_distance(co, *(v.co for v in e.verts)))
+        if segment_distance(co, *(v.co for v in e.verts)) > 1e-5:
+            raise ValueError("tail hook: the fairing's first row leaves the kept fin's end section at x %.4f z %.4f" % (x, z))
+        a, b = e.verts
+        new, v = bmesh.utils.edge_split(e, a, (co - a.co).dot(b.co - a.co) / (b.co - a.co).length_squared)
+        v.co = co
+        edges.append(new)
     bm.to_mesh(ob.data)
     bm.free()
     return ob
+
+
+def segment_distance(q, a, b):
+    d = b - a
+    t = min(1.0, max(0.0, (q - a).dot(d) / d.length_squared)) if d.length_squared else 0.0
+    return (a + d * t - q).length
+
+
+def weld_seam(icarus):
+    """Weld the fairing's first row to the kept fin's cut edges, which hooked_fin split at its points, so fin and fairing
+    are one surface: shading and UVs run on across the cut. Runs after parts.merge_details joins the fairing in."""
+    fin = bpy.data.objects[HOOKED_FIN]
+    y = fin_cut(bi.PARAMS) - S0
+    mw = fin.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(fin.data)
+    on_cut = [v for v in bm.verts if abs((mw @ v.co).y - y) < 1e-5]
+    bmesh.ops.remove_doubles(bm, verts=on_cut, dist=1e-5)
+    for e in bm.edges:  # the cut runs between faces tangent across it; the fin's corner is its chordwise edges
+        if len(e.link_faces) == 2 and all(abs((mw @ v.co).y - y) < 1e-5 for v in e.verts):
+            e.smooth = True
+    bm.to_mesh(fin.data)
+    bm.free()
 
 
 def hook_mesh(p, hook):
@@ -484,8 +582,8 @@ def build(p, mats):
     """Variant D's fin and fairing beside the original fin, and the hook in its collection, posed stowed."""
     _contours.clear()
     hook = Hook(p)
-    fairing, z_floor = build_fairing(p, mats, hook)
-    fin = hooked_fin()
+    fairing, z_floor, seam = build_fairing(p, mats, hook)
+    fin = hooked_fin(seam)
     verts, faces = hook_mesh(p, hook)
     hinge = W(hook.s_h, 0.0, hook.z_h)
     stowed = 180.0 + hook.stowed_tip_deg()
@@ -654,10 +752,44 @@ def segment_gap(tree, a, b, steps=40):
     return least, hit
 
 
+def seam_fit(p):
+    """How the fairing meets the kept fin below the old skin: the farthest its first row stands off the original fin's
+    section at the cut, the farthest a corner of that section lies from the row, and how many of HOOKED_FIN's edges on
+    the cut stay open."""
+    cut = fin_cut(p)
+    body = body_field(p, cut)
+    outside = lambda v: body(v.x, v.z) > SEAM
+    on_cut = lambda v: abs(v.co.y + S0 - cut) < 1e-4
+    fin = bpy.data.objects["ventral_fin"]
+    bm = bmesh.new()
+    bm.from_mesh(fin.data)
+    bm.transform(fin.matrix_world)
+    res = bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=W(cut, 0, 0),
+                                 plane_no=Vector((0, 1, 0)))
+    section = [[v.co.copy() for v in e.verts] for e in res["geom_cut"] if isinstance(e, bmesh.types.BMEdge)]
+    corners = [v.co.copy() for v in res["geom_cut"] if isinstance(v, bmesh.types.BMVert) and outside(v.co)]
+    bm.free()
+    hooked = bpy.data.objects[HOOKED_FIN]
+    bm = bmesh.new()
+    bm.from_mesh(hooked.data)
+    bm.transform(hooked.matrix_world)
+    first = [v.co.copy() for v in bm.verts if on_cut(v) and outside(v.co)
+             and any(f.calc_center_median().y + S0 > cut for f in v.link_faces)]
+    open_edges = sum(1 for e in bm.edges if e.is_boundary and all(on_cut(v) for v in e.verts)
+                     and outside((e.verts[0].co + e.verts[1].co) / 2))
+    bm.free()
+    if not first or not corners:
+        return math.inf, math.inf, open_edges
+    off = max(min(segment_distance(v, a, b) for a, b in section) for v in first)
+    missed = max(min((v - c).length for v in first) for c in corners)
+    return off, missed, open_edges
+
+
 def check(icarus):
     """Swing the hook stowed to deployed: it keeps CLEAR from the fin and fairing ahead of the slot, the engine and
     nozzle, and the well and skin, and its line from hinge to point (the game's catch linecast) keeps CLEAR from
-    every collider hull and never crosses one. Its length is the Compass's; it hangs from the tail cone."""
+    every collider hull and never crosses one. Its length is the Compass's; it hangs from the tail cone. The fairing
+    starts on the kept fin's own section, welded to it (seam_fit)."""
     import budget
     import checks
 
@@ -683,6 +815,10 @@ def check(icarus):
     belly = min(float(at_x(contour(p, s, fairing=False), 0.0, 1)[0][1]) - z for s, z in obj["well_floor"])
     if belly < PATCH_OUT:
         problems.append("the well's floor comes within %.4f m of the original belly" % belly)
+    seam = seam_fit(p)
+    if max(seam[:2]) > SEAM or seam[2]:
+        problems.append("the fairing's first row stands %.4f m off the kept fin's end section, %.4f m from its corners, "
+                        "with %d edges open on the cut (needs %.3f, none open)" % (*seam, SEAM))
     hinge = obj.matrix_world.translation.copy()
     length = (hook_point(obj) - hinge).length
     if abs(length - LENGTH) > 0.001:
@@ -737,9 +873,10 @@ def check(icarus):
     if problems:
         raise ValueError("tail hook check: " + "; ".join(problems))
     print("tail hook check PASS: %d triangles, hinge s %.3f z %.3f, length %.4f m, local X %.2f stowed / %.2f deployed "
-          "(swing %.2f deg); least: %s; deployed point %.3f m past the deck level, %.3f m at %.1f deg; tail strike %.2f deg"
+          "(swing %.2f deg); least: %s; deployed point %.3f m past the deck level, %.3f m at %.1f deg; tail strike %.2f deg; "
+          "seam %.5f m off the fin's section, %.5f m from its corners"
           % (budget.tris(obj), obj["hinge_s_z"][0], obj["hinge_s_z"][1], length, obj["stowed_deg"], obj["deployed_deg"], swing,
-             ", ".join("%s %.4f" % kv for kv in least.items()), reach[0.0], reach[AOA], AOA, strike))
+             ", ".join("%s %.4f" % kv for kv in least.items()), reach[0.0], reach[AOA], AOA, strike, *seam[:2]))
 
 
 def export(to_unity, icarus):

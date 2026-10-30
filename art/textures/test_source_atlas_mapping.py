@@ -9,7 +9,8 @@ import uuid
 import numpy as np
 from PIL import Image
 
-from source_atlas_mapping import FIELDS, donor_part, infer_donor, nearest_parent, remap_fields, restore_inventory, sha256, validate_indices
+from source_atlas_mapping import (FIELDS, POLICY, donor_part, infer_donor, nearest_parent, remap_fields, restore_inventory,
+                                  sha256, validate_indices)
 
 
 class SourceAtlasMappingTests(unittest.TestCase):
@@ -139,7 +140,7 @@ class SourceAtlasMappingTests(unittest.TestCase):
             old(source_image): sha256(source_image)}, 'groups': {}})
         write(current / 'coverage.json', {'rules': []})
         write(current / 'parts.json', {
-            'source_atlas_manifest': old(native / 'parts.json'),
+            'source_atlas_manifest': old(native / 'parts.json'), 'mapping_policy_sha256': sha256(POLICY),
             'bake': old(bake / 'geometry_maps.npz'), 'coverage': old(current / 'coverage.json'),
             'input_sha256': {old(native / 'parts.json'): sha256(native / 'parts.json'),
                              old(current / 'coverage.json'): sha256(current / 'coverage.json'),
@@ -152,6 +153,13 @@ class SourceAtlasMappingTests(unittest.TestCase):
             self.assertTrue((output / 'parts.json').is_file())
             self.assertEqual(source_image.read_bytes(), b'immutable native image')
             restore_inventory(bake, output)
+            # maps made under other donor rules, on the same geometry, are rebuilt rather than restored
+            stale = json.loads((current / 'parts.json').read_text(encoding='utf-8'))
+            write(current / 'parts.json', {**stale, 'mapping_policy_sha256': 'other rules'})
+            with patch('source_atlas_mapping.rebuild_inventory', return_value={'rebuilt': True}) as rebuild:
+                self.assertEqual(restore_inventory(bake, output), {'rebuilt': True})
+            rebuild.assert_called_once()
+            write(current / 'parts.json', stale)
             source_image.write_bytes(b'altered')
             with self.assertRaisesRegex(ValueError, 'dependency differs'):
                 restore_inventory(bake, output)
@@ -185,6 +193,7 @@ class SourceAtlasMappingTests(unittest.TestCase):
         self.assertEqual(donor_part('gear_door_N2_R_visible', names), ('gear_door_N_L_visible', True))
         self.assertEqual(donor_part('gear_door_flap_L_visible', names), ('gear_door_main_L_visible', False))
         self.assertEqual(donor_part('gear_door_flap_R_visible', names), ('gear_door_main_L_visible', True))
+        self.assertEqual(donor_part('ventral_fin_hooked', names), ('ventral_fin', False))  # fin paint, never the skin's
         self.assertIsNone(donor_part('new_unknown_part', names))
 
     def test_world_normal_disambiguates_coincident_faces(self):

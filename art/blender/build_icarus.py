@@ -1480,6 +1480,7 @@ def _build(repo, split=True):
 
     tree = part_tree.organise(p, TARGET, bpy.data.collections["Internals"], mats["structure"])
     part_tree.merge_details(TARGET)
+    tail_hook.weld_seam(TARGET)  # the fairing, joined into the hooked fin, welds to it before the UVs unwrap
     parts += cockpit.build(p, mats)  # hangs from the organised part tree
     bpy.context.view_layer.update()
     import hulls

@@ -1,268 +1,259 @@
 {
   "schema_version": 2,
-  "canonical_texels": 2486514,
-  "assigned_texels": 2486514,
+  "canonical_texels": 2559198,
+  "assigned_texels": 2559198,
   "unassigned_texels": 0,
   "unassigned_islands": [],
   "direct_texels": 0,
-  "transferred_texels": 2486514,
-  "native_reuse_texels": 2026897,
-  "unmatched_surface_texels": 459617,
+  "transferred_texels": 2559198,
+  "native_reuse_texels": 2084867,
+  "unmatched_surface_texels": 474331,
   "parts": {
     "aileron_L_visible": {
-      "canonical_texels": 24261,
-      "assigned_texels": 24261,
-      "native_reuse_texels": 15191,
-      "parent_paint_texels": 9070,
+      "canonical_texels": 24801,
+      "assigned_texels": 24801,
+      "native_reuse_texels": 15603,
+      "parent_paint_texels": 9198,
       "groups": [
         "aileron_L_all"
       ]
     },
     "aileron_R_visible": {
-      "canonical_texels": 24259,
-      "assigned_texels": 24259,
-      "native_reuse_texels": 15121,
-      "parent_paint_texels": 9138,
+      "canonical_texels": 24962,
+      "assigned_texels": 24962,
+      "native_reuse_texels": 15444,
+      "parent_paint_texels": 9518,
       "groups": [
         "aileron_L_all"
       ]
     },
     "canopy_visible": {
-      "canonical_texels": 17086,
-      "assigned_texels": 17086,
-      "native_reuse_texels": 15675,
-      "parent_paint_texels": 1411,
+      "canonical_texels": 17536,
+      "assigned_texels": 17536,
+      "native_reuse_texels": 16155,
+      "parent_paint_texels": 1381,
       "groups": [
         "canopy_all"
       ]
     },
     "dorsal_cover": {
-      "canonical_texels": 96622,
-      "assigned_texels": 96622,
-      "native_reuse_texels": 96291,
-      "parent_paint_texels": 331,
+      "canonical_texels": 99244,
+      "assigned_texels": 99244,
+      "native_reuse_texels": 98900,
+      "parent_paint_texels": 344,
       "groups": [
         "dorsal_cover_upper_front",
         "dorsal_cover_upper_rear"
       ]
     },
     "fin_skin": {
-      "canonical_texels": 178045,
-      "assigned_texels": 178045,
-      "native_reuse_texels": 118083,
-      "parent_paint_texels": 59962,
+      "canonical_texels": 183214,
+      "assigned_texels": 183214,
+      "native_reuse_texels": 121549,
+      "parent_paint_texels": 61665,
       "groups": [
         "fin_left"
       ]
     },
     "flap_L_visible": {
-      "canonical_texels": 30482,
-      "assigned_texels": 30482,
-      "native_reuse_texels": 23878,
-      "parent_paint_texels": 6604,
+      "canonical_texels": 31838,
+      "assigned_texels": 31838,
+      "native_reuse_texels": 24641,
+      "parent_paint_texels": 7197,
       "groups": [
         "flap_L_all"
       ]
     },
     "flap_R_visible": {
-      "canonical_texels": 30862,
-      "assigned_texels": 30862,
-      "native_reuse_texels": 24135,
-      "parent_paint_texels": 6727,
+      "canonical_texels": 31741,
+      "assigned_texels": 31741,
+      "native_reuse_texels": 24532,
+      "parent_paint_texels": 7209,
       "groups": [
         "flap_L_all"
       ]
     },
     "gear_door_N2_L_visible": {
-      "canonical_texels": 537,
-      "assigned_texels": 537,
+      "canonical_texels": 603,
+      "assigned_texels": 603,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 537,
+      "parent_paint_texels": 603,
       "groups": [
         "gear_door_N_L_all"
       ]
     },
     "gear_door_N2_R_visible": {
-      "canonical_texels": 512,
-      "assigned_texels": 512,
+      "canonical_texels": 515,
+      "assigned_texels": 515,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 512,
+      "parent_paint_texels": 515,
       "groups": [
         "gear_door_N_L_all"
       ]
     },
     "gear_door_N_L_visible": {
-      "canonical_texels": 7349,
-      "assigned_texels": 7349,
+      "canonical_texels": 7489,
+      "assigned_texels": 7489,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 7349,
+      "parent_paint_texels": 7489,
       "groups": [
         "gear_door_N_L_all"
       ]
     },
     "gear_door_flap_L_visible": {
-      "canonical_texels": 9777,
-      "assigned_texels": 9777,
+      "canonical_texels": 10059,
+      "assigned_texels": 10059,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 9777,
+      "parent_paint_texels": 10059,
       "groups": [
         "gear_door_main_L_all"
       ]
     },
     "gear_door_flap_R_visible": {
-      "canonical_texels": 9673,
-      "assigned_texels": 9673,
+      "canonical_texels": 9974,
+      "assigned_texels": 9974,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 9673,
+      "parent_paint_texels": 9974,
       "groups": [
         "gear_door_main_L_all"
       ]
     },
     "gear_door_flap_out_L_visible": {
-      "canonical_texels": 14789,
-      "assigned_texels": 14789,
+      "canonical_texels": 15346,
+      "assigned_texels": 15346,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 14789,
+      "parent_paint_texels": 15346,
       "groups": [
         "gear_door_main_L_all"
       ]
     },
     "gear_door_flap_out_R_visible": {
-      "canonical_texels": 14861,
-      "assigned_texels": 14861,
+      "canonical_texels": 15337,
+      "assigned_texels": 15337,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 14861,
+      "parent_paint_texels": 15337,
       "groups": [
         "gear_door_main_L_all"
       ]
     },
     "gear_door_main_L_visible": {
-      "canonical_texels": 3109,
-      "assigned_texels": 3109,
+      "canonical_texels": 3211,
+      "assigned_texels": 3211,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 3109,
+      "parent_paint_texels": 3211,
       "groups": [
         "gear_door_main_L_all"
       ]
     },
     "intake_duct_L": {
-      "canonical_texels": 81208,
-      "assigned_texels": 81208,
-      "native_reuse_texels": 6737,
-      "parent_paint_texels": 74471,
+      "canonical_texels": 83531,
+      "assigned_texels": 83531,
+      "native_reuse_texels": 6946,
+      "parent_paint_texels": 76585,
       "groups": [
         "intake_duct_L_all"
       ]
     },
     "lef_L_visible": {
-      "canonical_texels": 16812,
-      "assigned_texels": 16812,
-      "native_reuse_texels": 12853,
-      "parent_paint_texels": 3959,
+      "canonical_texels": 17435,
+      "assigned_texels": 17435,
+      "native_reuse_texels": 13425,
+      "parent_paint_texels": 4010,
       "groups": [
         "lef_L_all"
       ]
     },
     "nozzle": {
-      "canonical_texels": 19634,
-      "assigned_texels": 19634,
-      "native_reuse_texels": 19634,
+      "canonical_texels": 20068,
+      "assigned_texels": 20068,
+      "native_reuse_texels": 20068,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_all"
       ]
     },
     "nozzle_petal_00_visible": {
-      "canonical_texels": 1351,
-      "assigned_texels": 1351,
-      "native_reuse_texels": 1351,
+      "canonical_texels": 1317,
+      "assigned_texels": 1317,
+      "native_reuse_texels": 1317,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_01_visible": {
-      "canonical_texels": 1362,
-      "assigned_texels": 1362,
-      "native_reuse_texels": 1362,
+      "canonical_texels": 1392,
+      "assigned_texels": 1392,
+      "native_reuse_texels": 1392,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_02_visible": {
-      "canonical_texels": 1422,
-      "assigned_texels": 1422,
-      "native_reuse_texels": 1422,
+      "canonical_texels": 1460,
+      "assigned_texels": 1460,
+      "native_reuse_texels": 1460,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_03_visible": {
-      "canonical_texels": 1421,
-      "assigned_texels": 1421,
-      "native_reuse_texels": 1421,
+      "canonical_texels": 1392,
+      "assigned_texels": 1392,
+      "native_reuse_texels": 1392,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_04_visible": {
-      "canonical_texels": 1420,
-      "assigned_texels": 1420,
-      "native_reuse_texels": 1420,
+      "canonical_texels": 1380,
+      "assigned_texels": 1380,
+      "native_reuse_texels": 1380,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_05_visible": {
-      "canonical_texels": 1493,
-      "assigned_texels": 1493,
-      "native_reuse_texels": 1493,
+      "canonical_texels": 1378,
+      "assigned_texels": 1378,
+      "native_reuse_texels": 1378,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_06_visible": {
-      "canonical_texels": 1341,
-      "assigned_texels": 1341,
-      "native_reuse_texels": 1276,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1461,
+      "assigned_texels": 1461,
+      "native_reuse_texels": 1395,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_07_visible": {
-      "canonical_texels": 1497,
-      "assigned_texels": 1497,
-      "native_reuse_texels": 1432,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1376,
+      "assigned_texels": 1376,
+      "native_reuse_texels": 1376,
+      "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_08_visible": {
-      "canonical_texels": 1355,
-      "assigned_texels": 1355,
-      "native_reuse_texels": 1355,
+      "canonical_texels": 1442,
+      "assigned_texels": 1442,
+      "native_reuse_texels": 1442,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_09_visible": {
-      "canonical_texels": 1422,
-      "assigned_texels": 1422,
-      "native_reuse_texels": 1422,
-      "parent_paint_texels": 0,
-      "groups": [
-        "nozzle_petal_00_all"
-      ]
-    },
-    "nozzle_petal_10_visible": {
       "canonical_texels": 1408,
       "assigned_texels": 1408,
       "native_reuse_texels": 1408,
@@ -271,236 +262,245 @@
         "nozzle_petal_00_all"
       ]
     },
+    "nozzle_petal_10_visible": {
+      "canonical_texels": 1374,
+      "assigned_texels": 1374,
+      "native_reuse_texels": 1374,
+      "parent_paint_texels": 0,
+      "groups": [
+        "nozzle_petal_00_all"
+      ]
+    },
     "nozzle_petal_11_visible": {
-      "canonical_texels": 1405,
-      "assigned_texels": 1405,
-      "native_reuse_texels": 1341,
-      "parent_paint_texels": 64,
+      "canonical_texels": 1392,
+      "assigned_texels": 1392,
+      "native_reuse_texels": 1326,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_12_visible": {
-      "canonical_texels": 1437,
-      "assigned_texels": 1437,
-      "native_reuse_texels": 1437,
+      "canonical_texels": 1393,
+      "assigned_texels": 1393,
+      "native_reuse_texels": 1393,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_13_visible": {
-      "canonical_texels": 1406,
-      "assigned_texels": 1406,
-      "native_reuse_texels": 1406,
+      "canonical_texels": 1394,
+      "assigned_texels": 1394,
+      "native_reuse_texels": 1394,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_14_visible": {
-      "canonical_texels": 1369,
-      "assigned_texels": 1369,
-      "native_reuse_texels": 1304,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1471,
+      "assigned_texels": 1471,
+      "native_reuse_texels": 1405,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_petal_15_visible": {
-      "canonical_texels": 1486,
-      "assigned_texels": 1486,
-      "native_reuse_texels": 1421,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1508,
+      "assigned_texels": 1508,
+      "native_reuse_texels": 1442,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_petal_00_all"
       ]
     },
     "nozzle_seal_00_visible": {
-      "canonical_texels": 967,
-      "assigned_texels": 967,
-      "native_reuse_texels": 967,
+      "canonical_texels": 1085,
+      "assigned_texels": 1085,
+      "native_reuse_texels": 1085,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_01_visible": {
-      "canonical_texels": 987,
-      "assigned_texels": 987,
-      "native_reuse_texels": 922,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1130,
+      "assigned_texels": 1130,
+      "native_reuse_texels": 1064,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_02_visible": {
-      "canonical_texels": 1062,
-      "assigned_texels": 1062,
-      "native_reuse_texels": 1062,
+      "canonical_texels": 1011,
+      "assigned_texels": 1011,
+      "native_reuse_texels": 1011,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_03_visible": {
-      "canonical_texels": 976,
-      "assigned_texels": 976,
-      "native_reuse_texels": 976,
+      "canonical_texels": 1078,
+      "assigned_texels": 1078,
+      "native_reuse_texels": 1078,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_04_visible": {
-      "canonical_texels": 1124,
-      "assigned_texels": 1124,
-      "native_reuse_texels": 1059,
-      "parent_paint_texels": 65,
+      "canonical_texels": 968,
+      "assigned_texels": 968,
+      "native_reuse_texels": 968,
+      "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_05_visible": {
-      "canonical_texels": 1126,
-      "assigned_texels": 1126,
-      "native_reuse_texels": 1061,
+      "canonical_texels": 1078,
+      "assigned_texels": 1078,
+      "native_reuse_texels": 1013,
       "parent_paint_texels": 65,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_06_visible": {
-      "canonical_texels": 1054,
-      "assigned_texels": 1054,
-      "native_reuse_texels": 1054,
+      "canonical_texels": 1014,
+      "assigned_texels": 1014,
+      "native_reuse_texels": 1014,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_07_visible": {
-      "canonical_texels": 998,
-      "assigned_texels": 998,
-      "native_reuse_texels": 998,
-      "parent_paint_texels": 0,
+      "canonical_texels": 1074,
+      "assigned_texels": 1074,
+      "native_reuse_texels": 943,
+      "parent_paint_texels": 131,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_08_visible": {
-      "canonical_texels": 981,
-      "assigned_texels": 981,
-      "native_reuse_texels": 981,
-      "parent_paint_texels": 0,
+      "canonical_texels": 1011,
+      "assigned_texels": 1011,
+      "native_reuse_texels": 945,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_09_visible": {
-      "canonical_texels": 1074,
-      "assigned_texels": 1074,
-      "native_reuse_texels": 1074,
+      "canonical_texels": 1090,
+      "assigned_texels": 1090,
+      "native_reuse_texels": 1090,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_10_visible": {
-      "canonical_texels": 989,
-      "assigned_texels": 989,
-      "native_reuse_texels": 925,
-      "parent_paint_texels": 64,
+      "canonical_texels": 1086,
+      "assigned_texels": 1086,
+      "native_reuse_texels": 1020,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_11_visible": {
-      "canonical_texels": 1007,
-      "assigned_texels": 1007,
-      "native_reuse_texels": 942,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1152,
+      "assigned_texels": 1152,
+      "native_reuse_texels": 1086,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_12_visible": {
-      "canonical_texels": 986,
-      "assigned_texels": 986,
-      "native_reuse_texels": 986,
+      "canonical_texels": 1014,
+      "assigned_texels": 1014,
+      "native_reuse_texels": 1014,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_13_visible": {
-      "canonical_texels": 1060,
-      "assigned_texels": 1060,
-      "native_reuse_texels": 995,
-      "parent_paint_texels": 65,
+      "canonical_texels": 1085,
+      "assigned_texels": 1085,
+      "native_reuse_texels": 1085,
+      "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_14_visible": {
-      "canonical_texels": 1057,
-      "assigned_texels": 1057,
-      "native_reuse_texels": 993,
-      "parent_paint_texels": 64,
+      "canonical_texels": 1084,
+      "assigned_texels": 1084,
+      "native_reuse_texels": 1018,
+      "parent_paint_texels": 66,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "nozzle_seal_15_visible": {
-      "canonical_texels": 932,
-      "assigned_texels": 932,
-      "native_reuse_texels": 932,
+      "canonical_texels": 1082,
+      "assigned_texels": 1082,
+      "native_reuse_texels": 1082,
       "parent_paint_texels": 0,
       "groups": [
         "nozzle_seal_00_all"
       ]
     },
     "pylon_inner_L": {
-      "canonical_texels": 15767,
-      "assigned_texels": 15767,
-      "native_reuse_texels": 15767,
+      "canonical_texels": 16149,
+      "assigned_texels": 16149,
+      "native_reuse_texels": 16149,
       "parent_paint_texels": 0,
       "groups": [
         "pylon_inner_L_all"
       ]
     },
     "pylon_inner_plug_L": {
-      "canonical_texels": 9546,
-      "assigned_texels": 9546,
-      "native_reuse_texels": 9546,
+      "canonical_texels": 9426,
+      "assigned_texels": 9426,
+      "native_reuse_texels": 9426,
       "parent_paint_texels": 0,
       "groups": [
         "pylon_inner_plug_L_all"
       ]
     },
     "radome": {
-      "canonical_texels": 42414,
-      "assigned_texels": 42414,
-      "native_reuse_texels": 42178,
-      "parent_paint_texels": 236,
+      "canonical_texels": 43636,
+      "assigned_texels": 43636,
+      "native_reuse_texels": 43405,
+      "parent_paint_texels": 231,
       "groups": [
         "radome"
       ]
     },
     "rudder_visible": {
-      "canonical_texels": 41996,
-      "assigned_texels": 41996,
-      "native_reuse_texels": 13257,
-      "parent_paint_texels": 28739,
+      "canonical_texels": 43426,
+      "assigned_texels": 43426,
+      "native_reuse_texels": 13812,
+      "parent_paint_texels": 29614,
       "groups": [
         "rudder_all"
       ]
     },
     "skin_aft_L": {
-      "canonical_texels": 144047,
-      "assigned_texels": 144047,
-      "native_reuse_texels": 141903,
-      "parent_paint_texels": 2144,
+      "canonical_texels": 148396,
+      "assigned_texels": 148396,
+      "native_reuse_texels": 146158,
+      "parent_paint_texels": 2238,
       "groups": [
         "skin_aft_L_lower",
         "skin_aft_L_out",
@@ -508,10 +508,10 @@
       ]
     },
     "skin_aft_R": {
-      "canonical_texels": 144209,
-      "assigned_texels": 144209,
-      "native_reuse_texels": 141974,
-      "parent_paint_texels": 2235,
+      "canonical_texels": 148256,
+      "assigned_texels": 148256,
+      "native_reuse_texels": 145982,
+      "parent_paint_texels": 2274,
       "groups": [
         "skin_aft_L_lower",
         "skin_aft_L_out",
@@ -519,30 +519,30 @@
       ]
     },
     "skin_forward_L": {
-      "canonical_texels": 119791,
-      "assigned_texels": 119791,
-      "native_reuse_texels": 108042,
-      "parent_paint_texels": 11749,
+      "canonical_texels": 123556,
+      "assigned_texels": 123556,
+      "native_reuse_texels": 111241,
+      "parent_paint_texels": 12315,
       "groups": [
         "forward_left",
         "skin_forward_L_lower"
       ]
     },
     "skin_forward_R": {
-      "canonical_texels": 120147,
-      "assigned_texels": 120147,
-      "native_reuse_texels": 108131,
-      "parent_paint_texels": 12016,
+      "canonical_texels": 123529,
+      "assigned_texels": 123529,
+      "native_reuse_texels": 111165,
+      "parent_paint_texels": 12364,
       "groups": [
         "forward_left",
         "skin_forward_L_lower"
       ]
     },
     "skin_mid_L": {
-      "canonical_texels": 191921,
-      "assigned_texels": 191921,
-      "native_reuse_texels": 186031,
-      "parent_paint_texels": 5890,
+      "canonical_texels": 197998,
+      "assigned_texels": 197998,
+      "native_reuse_texels": 191904,
+      "parent_paint_texels": 6094,
       "groups": [
         "skin_mid_L_lower",
         "skin_mid_L_out",
@@ -550,10 +550,10 @@
       ]
     },
     "skin_mid_R": {
-      "canonical_texels": 191116,
-      "assigned_texels": 191116,
-      "native_reuse_texels": 185242,
-      "parent_paint_texels": 5874,
+      "canonical_texels": 196871,
+      "assigned_texels": 196871,
+      "native_reuse_texels": 190831,
+      "parent_paint_texels": 6040,
       "groups": [
         "skin_mid_L_lower",
         "skin_mid_L_out",
@@ -561,47 +561,47 @@
       ]
     },
     "speed_brake_L_visible": {
-      "canonical_texels": 5790,
-      "assigned_texels": 5790,
+      "canonical_texels": 6006,
+      "assigned_texels": 6006,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 5790,
+      "parent_paint_texels": 6006,
       "groups": [
         "speed_brake_L_all"
       ]
     },
     "stabilator_visible": {
-      "canonical_texels": 213745,
-      "assigned_texels": 213745,
-      "native_reuse_texels": 195959,
-      "parent_paint_texels": 17786,
+      "canonical_texels": 220215,
+      "assigned_texels": 220215,
+      "native_reuse_texels": 201409,
+      "parent_paint_texels": 18806,
       "groups": [
         "stabilator_lower",
         "stabilator_upper"
       ]
     },
     "ventral_fin": {
-      "canonical_texels": 38356,
-      "assigned_texels": 38356,
-      "native_reuse_texels": 38305,
-      "parent_paint_texels": 51,
+      "canonical_texels": 39315,
+      "assigned_texels": 39315,
+      "native_reuse_texels": 39277,
+      "parent_paint_texels": 38,
       "groups": [
         "ventral_fin_all"
       ]
     },
     "ventral_fin_hooked": {
-      "canonical_texels": 72987,
-      "assigned_texels": 72987,
+      "canonical_texels": 75376,
+      "assigned_texels": 75376,
       "native_reuse_texels": 0,
-      "parent_paint_texels": 72987,
+      "parent_paint_texels": 75376,
       "groups": [
-        "skin_aft_L_lower"
+        "ventral_fin_all"
       ]
     },
     "wing_skin_L": {
-      "canonical_texels": 258012,
-      "assigned_texels": 258012,
-      "native_reuse_texels": 228031,
-      "parent_paint_texels": 29981,
+      "canonical_texels": 265366,
+      "assigned_texels": 265366,
+      "native_reuse_texels": 234620,
+      "parent_paint_texels": 30746,
       "groups": [
         "wing_root",
         "wing_upper",
@@ -610,10 +610,10 @@
       ]
     },
     "wing_skin_R": {
-      "canonical_texels": 257817,
-      "assigned_texels": 257817,
-      "native_reuse_texels": 226735,
-      "parent_paint_texels": 31082,
+      "canonical_texels": 265193,
+      "assigned_texels": 265193,
+      "native_reuse_texels": 233435,
+      "parent_paint_texels": 31758,
       "groups": [
         "wing_root",
         "wing_upper",
@@ -635,12 +635,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 24261,
-      "geometric_matches": 15191,
-      "native_reuse_texels": 15191,
-      "unmatched_surface_texels": 9070,
-      "max_distance_m": 0.04430324211716652,
-      "p95_distance_m": 0.016492700204253197,
+      "target_texels": 24801,
+      "geometric_matches": 15603,
+      "native_reuse_texels": 15603,
+      "unmatched_surface_texels": 9198,
+      "max_distance_m": 0.04397924616932869,
+      "p95_distance_m": 0.016560811549425125,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -661,12 +661,12 @@
         "policy": "reflected_same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 24259,
-      "geometric_matches": 15121,
-      "native_reuse_texels": 15121,
-      "unmatched_surface_texels": 9138,
-      "max_distance_m": 0.04514821246266365,
-      "p95_distance_m": 0.015386439859867096,
+      "target_texels": 24962,
+      "geometric_matches": 15444,
+      "native_reuse_texels": 15444,
+      "unmatched_surface_texels": 9518,
+      "max_distance_m": 0.04346020519733429,
+      "p95_distance_m": 0.01637323573231697,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -687,12 +687,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 17086,
-      "geometric_matches": 15675,
-      "native_reuse_texels": 15675,
-      "unmatched_surface_texels": 1411,
-      "max_distance_m": 0.024089721962809563,
-      "p95_distance_m": 0.007153104059398174,
+      "target_texels": 17536,
+      "geometric_matches": 16155,
+      "native_reuse_texels": 16155,
+      "unmatched_surface_texels": 1381,
+      "max_distance_m": 0.025295812636613846,
+      "p95_distance_m": 0.00722985714673996,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -713,12 +713,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 96622,
-      "geometric_matches": 96291,
-      "native_reuse_texels": 96291,
-      "unmatched_surface_texels": 331,
-      "max_distance_m": 0.045097820460796356,
-      "p95_distance_m": 0.004048523958772421,
+      "target_texels": 99244,
+      "geometric_matches": 98900,
+      "native_reuse_texels": 98900,
+      "unmatched_surface_texels": 344,
+      "max_distance_m": 0.04664625972509384,
+      "p95_distance_m": 0.004054937046021223,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -740,12 +740,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 178045,
-      "geometric_matches": 118083,
-      "native_reuse_texels": 118083,
-      "unmatched_surface_texels": 59962,
-      "max_distance_m": 0.5415835380554199,
-      "p95_distance_m": 0.1827278882265091,
+      "target_texels": 183214,
+      "geometric_matches": 121549,
+      "native_reuse_texels": 121549,
+      "unmatched_surface_texels": 61665,
+      "max_distance_m": 0.5445020198822021,
+      "p95_distance_m": 0.1814657300710678,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -766,12 +766,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 30482,
-      "geometric_matches": 23878,
-      "native_reuse_texels": 23878,
-      "unmatched_surface_texels": 6604,
-      "max_distance_m": 0.09745996445417404,
-      "p95_distance_m": 0.051397036761045456,
+      "target_texels": 31838,
+      "geometric_matches": 24641,
+      "native_reuse_texels": 24641,
+      "unmatched_surface_texels": 7197,
+      "max_distance_m": 0.09603425860404968,
+      "p95_distance_m": 0.05278293043375015,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -792,12 +792,12 @@
         "policy": "reflected_same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 30862,
-      "geometric_matches": 24135,
-      "native_reuse_texels": 24135,
-      "unmatched_surface_texels": 6727,
-      "max_distance_m": 0.09667591005563736,
-      "p95_distance_m": 0.05291835218667984,
+      "target_texels": 31741,
+      "geometric_matches": 24532,
+      "native_reuse_texels": 24532,
+      "unmatched_surface_texels": 7209,
+      "max_distance_m": 0.09695954620838165,
+      "p95_distance_m": 0.052759308367967606,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -818,12 +818,12 @@
         "policy": "named_gear_door_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 537,
+      "target_texels": 603,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 537,
-      "max_distance_m": 0.07329278439283371,
-      "p95_distance_m": 0.06305292993783951,
+      "unmatched_surface_texels": 603,
+      "max_distance_m": 0.0732453316450119,
+      "p95_distance_m": 0.06570401787757874,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -844,12 +844,12 @@
         "policy": "named_gear_door_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 512,
+      "target_texels": 515,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 512,
-      "max_distance_m": 0.07328073680400848,
-      "p95_distance_m": 0.06385702639818192,
+      "unmatched_surface_texels": 515,
+      "max_distance_m": 0.07361334562301636,
+      "p95_distance_m": 0.06916611641645432,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -870,12 +870,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": false
       },
-      "target_texels": 7349,
+      "target_texels": 7489,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 7349,
-      "max_distance_m": 0.16590049862861633,
-      "p95_distance_m": 0.15747559070587158,
+      "unmatched_surface_texels": 7489,
+      "max_distance_m": 0.16561046242713928,
+      "p95_distance_m": 0.1568853110074997,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -896,12 +896,12 @@
         "policy": "named_gear_door_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 9777,
+      "target_texels": 10059,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 9777,
-      "max_distance_m": 0.2742719352245331,
-      "p95_distance_m": 0.20050176978111267,
+      "unmatched_surface_texels": 10059,
+      "max_distance_m": 0.27435508370399475,
+      "p95_distance_m": 0.19625559449195862,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -922,12 +922,12 @@
         "policy": "named_gear_door_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 9673,
+      "target_texels": 9974,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 9673,
-      "max_distance_m": 0.2743355631828308,
-      "p95_distance_m": 0.19510117173194885,
+      "unmatched_surface_texels": 9974,
+      "max_distance_m": 0.2743639051914215,
+      "p95_distance_m": 0.19654326140880585,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -948,12 +948,12 @@
         "policy": "named_gear_door_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 14789,
+      "target_texels": 15346,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 14789,
-      "max_distance_m": 0.456906259059906,
-      "p95_distance_m": 0.3339401185512543,
+      "unmatched_surface_texels": 15346,
+      "max_distance_m": 0.45820352435112,
+      "p95_distance_m": 0.335903525352478,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -974,12 +974,12 @@
         "policy": "named_gear_door_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 14861,
+      "target_texels": 15337,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 14861,
-      "max_distance_m": 0.45893776416778564,
-      "p95_distance_m": 0.3361070454120636,
+      "unmatched_surface_texels": 15337,
+      "max_distance_m": 0.45798930525779724,
+      "p95_distance_m": 0.33945608139038086,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1000,12 +1000,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": false
       },
-      "target_texels": 3109,
+      "target_texels": 3211,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 3109,
-      "max_distance_m": 0.6637870669364929,
-      "p95_distance_m": 0.6117027401924133,
+      "unmatched_surface_texels": 3211,
+      "max_distance_m": 0.6638873815536499,
+      "p95_distance_m": 0.613406240940094,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1026,12 +1026,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 81208,
-      "geometric_matches": 6737,
-      "native_reuse_texels": 6737,
-      "unmatched_surface_texels": 74471,
-      "max_distance_m": 2.2552857398986816,
-      "p95_distance_m": 2.0466012954711914,
+      "target_texels": 83531,
+      "geometric_matches": 6946,
+      "native_reuse_texels": 6946,
+      "unmatched_surface_texels": 76585,
+      "max_distance_m": 2.2588601112365723,
+      "p95_distance_m": 2.0468759536743164,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1052,12 +1052,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 16812,
-      "geometric_matches": 12853,
-      "native_reuse_texels": 12853,
-      "unmatched_surface_texels": 3959,
-      "max_distance_m": 0.032000575214624405,
-      "p95_distance_m": 0.014224866405129433,
+      "target_texels": 17435,
+      "geometric_matches": 13425,
+      "native_reuse_texels": 13425,
+      "unmatched_surface_texels": 4010,
+      "max_distance_m": 0.033031247556209564,
+      "p95_distance_m": 0.01475854404270649,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1078,12 +1078,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 19634,
-      "geometric_matches": 19634,
-      "native_reuse_texels": 19634,
+      "target_texels": 20068,
+      "geometric_matches": 20068,
+      "native_reuse_texels": 20068,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006488981191068888,
-      "p95_distance_m": 0.004156951792538166,
+      "max_distance_m": 0.006921617779880762,
+      "p95_distance_m": 0.004103562328964472,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1104,12 +1104,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1351,
-      "geometric_matches": 1351,
-      "native_reuse_texels": 1351,
+      "target_texels": 1317,
+      "geometric_matches": 1317,
+      "native_reuse_texels": 1317,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006048882380127907,
-      "p95_distance_m": 0.003968706354498863,
+      "max_distance_m": 0.005356610752642155,
+      "p95_distance_m": 0.004218763206154108,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1130,12 +1130,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1362,
-      "geometric_matches": 1362,
-      "native_reuse_texels": 1362,
+      "target_texels": 1392,
+      "geometric_matches": 1392,
+      "native_reuse_texels": 1392,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.00465730857104063,
-      "p95_distance_m": 0.003942601382732391,
+      "max_distance_m": 0.006382646504789591,
+      "p95_distance_m": 0.004474347457289696,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1156,12 +1156,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1422,
-      "geometric_matches": 1422,
-      "native_reuse_texels": 1422,
+      "target_texels": 1460,
+      "geometric_matches": 1460,
+      "native_reuse_texels": 1460,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.00658409995958209,
-      "p95_distance_m": 0.004106117412447929,
+      "max_distance_m": 0.006451900117099285,
+      "p95_distance_m": 0.003989114426076412,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1182,12 +1182,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1421,
-      "geometric_matches": 1421,
-      "native_reuse_texels": 1421,
+      "target_texels": 1392,
+      "geometric_matches": 1392,
+      "native_reuse_texels": 1392,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006076672580093145,
-      "p95_distance_m": 0.004231405444443226,
+      "max_distance_m": 0.006518758833408356,
+      "p95_distance_m": 0.004032605327665806,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1208,12 +1208,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1420,
-      "geometric_matches": 1420,
-      "native_reuse_texels": 1420,
+      "target_texels": 1380,
+      "geometric_matches": 1380,
+      "native_reuse_texels": 1380,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.0067995167337358,
-      "p95_distance_m": 0.004116216208785772,
+      "max_distance_m": 0.005539720878005028,
+      "p95_distance_m": 0.004240483045578003,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1234,12 +1234,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1493,
-      "geometric_matches": 1493,
-      "native_reuse_texels": 1493,
+      "target_texels": 1378,
+      "geometric_matches": 1378,
+      "native_reuse_texels": 1378,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.007043647579848766,
-      "p95_distance_m": 0.004211965017020702,
+      "max_distance_m": 0.006516106426715851,
+      "p95_distance_m": 0.004394798073917627,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1260,12 +1260,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1341,
-      "geometric_matches": 1276,
-      "native_reuse_texels": 1276,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.005828984081745148,
-      "p95_distance_m": 0.004575994797050953,
+      "target_texels": 1461,
+      "geometric_matches": 1395,
+      "native_reuse_texels": 1395,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.006876773200929165,
+      "p95_distance_m": 0.004321567248553038,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1286,12 +1286,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1497,
-      "geometric_matches": 1432,
-      "native_reuse_texels": 1432,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.007306347601115704,
-      "p95_distance_m": 0.004397212993353605,
+      "target_texels": 1376,
+      "geometric_matches": 1376,
+      "native_reuse_texels": 1376,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006882710848003626,
+      "p95_distance_m": 0.004596078768372536,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1312,12 +1312,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1355,
-      "geometric_matches": 1355,
-      "native_reuse_texels": 1355,
+      "target_texels": 1442,
+      "geometric_matches": 1442,
+      "native_reuse_texels": 1442,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006003853399306536,
-      "p95_distance_m": 0.0038951269816607237,
+      "max_distance_m": 0.00657064700499177,
+      "p95_distance_m": 0.004426348954439163,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1338,12 +1338,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1422,
-      "geometric_matches": 1422,
-      "native_reuse_texels": 1422,
+      "target_texels": 1408,
+      "geometric_matches": 1408,
+      "native_reuse_texels": 1408,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.00612957589328289,
-      "p95_distance_m": 0.003995129838585854,
+      "max_distance_m": 0.006643395405262709,
+      "p95_distance_m": 0.0041940342634916306,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1364,12 +1364,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1408,
-      "geometric_matches": 1408,
-      "native_reuse_texels": 1408,
+      "target_texels": 1374,
+      "geometric_matches": 1374,
+      "native_reuse_texels": 1374,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006643378175795078,
-      "p95_distance_m": 0.004133111797273159,
+      "max_distance_m": 0.006923295091837645,
+      "p95_distance_m": 0.005232879891991615,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1390,12 +1390,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1405,
-      "geometric_matches": 1341,
-      "native_reuse_texels": 1341,
-      "unmatched_surface_texels": 64,
-      "max_distance_m": 0.006544671952724457,
-      "p95_distance_m": 0.004399729892611504,
+      "target_texels": 1392,
+      "geometric_matches": 1326,
+      "native_reuse_texels": 1326,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.005322984419763088,
+      "p95_distance_m": 0.004040886182337999,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1416,12 +1416,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1437,
-      "geometric_matches": 1437,
-      "native_reuse_texels": 1437,
+      "target_texels": 1393,
+      "geometric_matches": 1393,
+      "native_reuse_texels": 1393,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.008375988341867924,
-      "p95_distance_m": 0.004237692337483168,
+      "max_distance_m": 0.006454558111727238,
+      "p95_distance_m": 0.004045807756483555,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1442,12 +1442,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1406,
-      "geometric_matches": 1406,
-      "native_reuse_texels": 1406,
+      "target_texels": 1394,
+      "geometric_matches": 1394,
+      "native_reuse_texels": 1394,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006045222282409668,
-      "p95_distance_m": 0.004151483997702599,
+      "max_distance_m": 0.006668720860034227,
+      "p95_distance_m": 0.003973032813519239,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1468,12 +1468,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1369,
-      "geometric_matches": 1304,
-      "native_reuse_texels": 1304,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.006609497591853142,
-      "p95_distance_m": 0.003997603431344032,
+      "target_texels": 1471,
+      "geometric_matches": 1405,
+      "native_reuse_texels": 1405,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.005848773755133152,
+      "p95_distance_m": 0.004308130592107773,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1494,12 +1494,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1486,
-      "geometric_matches": 1421,
-      "native_reuse_texels": 1421,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.006753221154212952,
-      "p95_distance_m": 0.004395779222249985,
+      "target_texels": 1508,
+      "geometric_matches": 1442,
+      "native_reuse_texels": 1442,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.005795958451926708,
+      "p95_distance_m": 0.004475615452975035,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1520,12 +1520,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 967,
-      "geometric_matches": 967,
-      "native_reuse_texels": 967,
+      "target_texels": 1085,
+      "geometric_matches": 1085,
+      "native_reuse_texels": 1085,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006629193667322397,
-      "p95_distance_m": 0.004279674496501684,
+      "max_distance_m": 0.006494882982224226,
+      "p95_distance_m": 0.004106000531464815,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1546,12 +1546,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 987,
-      "geometric_matches": 922,
-      "native_reuse_texels": 922,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.007870588451623917,
-      "p95_distance_m": 0.00504052871838212,
+      "target_texels": 1130,
+      "geometric_matches": 1064,
+      "native_reuse_texels": 1064,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.007309392094612122,
+      "p95_distance_m": 0.006135464180260897,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1572,12 +1572,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1062,
-      "geometric_matches": 1062,
-      "native_reuse_texels": 1062,
+      "target_texels": 1011,
+      "geometric_matches": 1011,
+      "native_reuse_texels": 1011,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006040629930794239,
-      "p95_distance_m": 0.004460853990167379,
+      "max_distance_m": 0.005703460890799761,
+      "p95_distance_m": 0.0040600914508104324,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1598,12 +1598,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 976,
-      "geometric_matches": 976,
-      "native_reuse_texels": 976,
+      "target_texels": 1078,
+      "geometric_matches": 1078,
+      "native_reuse_texels": 1078,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006103656720370054,
-      "p95_distance_m": 0.004068839363753796,
+      "max_distance_m": 0.006820128299295902,
+      "p95_distance_m": 0.005166398826986551,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1624,12 +1624,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1124,
-      "geometric_matches": 1059,
-      "native_reuse_texels": 1059,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.006687105167657137,
-      "p95_distance_m": 0.005838459823280573,
+      "target_texels": 968,
+      "geometric_matches": 968,
+      "native_reuse_texels": 968,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006937119644135237,
+      "p95_distance_m": 0.004185804165899754,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1650,12 +1650,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1126,
-      "geometric_matches": 1061,
-      "native_reuse_texels": 1061,
+      "target_texels": 1078,
+      "geometric_matches": 1013,
+      "native_reuse_texels": 1013,
       "unmatched_surface_texels": 65,
-      "max_distance_m": 0.0066514406353235245,
-      "p95_distance_m": 0.004953297786414623,
+      "max_distance_m": 0.006712563801556826,
+      "p95_distance_m": 0.004835905972868204,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1676,12 +1676,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1054,
-      "geometric_matches": 1054,
-      "native_reuse_texels": 1054,
+      "target_texels": 1014,
+      "geometric_matches": 1014,
+      "native_reuse_texels": 1014,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.00619447510689497,
-      "p95_distance_m": 0.004065566696226597,
+      "max_distance_m": 0.005819456186145544,
+      "p95_distance_m": 0.004055383615195751,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1702,12 +1702,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 998,
-      "geometric_matches": 998,
-      "native_reuse_texels": 998,
-      "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006315852981060743,
-      "p95_distance_m": 0.004153096582740545,
+      "target_texels": 1074,
+      "geometric_matches": 943,
+      "native_reuse_texels": 943,
+      "unmatched_surface_texels": 131,
+      "max_distance_m": 0.005596507806330919,
+      "p95_distance_m": 0.0038865746464580297,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1728,12 +1728,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 981,
-      "geometric_matches": 981,
-      "native_reuse_texels": 981,
-      "unmatched_surface_texels": 0,
-      "max_distance_m": 0.004608760587871075,
-      "p95_distance_m": 0.004136358387768269,
+      "target_texels": 1011,
+      "geometric_matches": 945,
+      "native_reuse_texels": 945,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.004924284294247627,
+      "p95_distance_m": 0.00398636981844902,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1754,12 +1754,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1074,
-      "geometric_matches": 1074,
-      "native_reuse_texels": 1074,
+      "target_texels": 1090,
+      "geometric_matches": 1090,
+      "native_reuse_texels": 1090,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.005489066708832979,
-      "p95_distance_m": 0.004167263861745596,
+      "max_distance_m": 0.004743738099932671,
+      "p95_distance_m": 0.0037975155282765627,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1780,12 +1780,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 989,
-      "geometric_matches": 925,
-      "native_reuse_texels": 925,
-      "unmatched_surface_texels": 64,
-      "max_distance_m": 0.006284723058342934,
-      "p95_distance_m": 0.00415002228692174,
+      "target_texels": 1086,
+      "geometric_matches": 1020,
+      "native_reuse_texels": 1020,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.0066370065324008465,
+      "p95_distance_m": 0.0045707556419074535,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1806,12 +1806,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1007,
-      "geometric_matches": 942,
-      "native_reuse_texels": 942,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.006722908932715654,
-      "p95_distance_m": 0.004171590320765972,
+      "target_texels": 1152,
+      "geometric_matches": 1086,
+      "native_reuse_texels": 1086,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.006411700509488583,
+      "p95_distance_m": 0.005194121040403843,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1832,12 +1832,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 986,
-      "geometric_matches": 986,
-      "native_reuse_texels": 986,
+      "target_texels": 1014,
+      "geometric_matches": 1014,
+      "native_reuse_texels": 1014,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.005692495498806238,
-      "p95_distance_m": 0.004115908406674862,
+      "max_distance_m": 0.007060231175273657,
+      "p95_distance_m": 0.004342912696301937,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1858,12 +1858,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1060,
-      "geometric_matches": 995,
-      "native_reuse_texels": 995,
-      "unmatched_surface_texels": 65,
-      "max_distance_m": 0.006177854724228382,
-      "p95_distance_m": 0.004290265496820211,
+      "target_texels": 1085,
+      "geometric_matches": 1085,
+      "native_reuse_texels": 1085,
+      "unmatched_surface_texels": 0,
+      "max_distance_m": 0.006368913687765598,
+      "p95_distance_m": 0.004193934146314859,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1884,12 +1884,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 1057,
-      "geometric_matches": 993,
-      "native_reuse_texels": 993,
-      "unmatched_surface_texels": 64,
-      "max_distance_m": 0.006138000171631575,
-      "p95_distance_m": 0.004073344171047211,
+      "target_texels": 1084,
+      "geometric_matches": 1018,
+      "native_reuse_texels": 1018,
+      "unmatched_surface_texels": 66,
+      "max_distance_m": 0.00691909808665514,
+      "p95_distance_m": 0.004116119351238012,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1910,12 +1910,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 932,
-      "geometric_matches": 932,
-      "native_reuse_texels": 932,
+      "target_texels": 1082,
+      "geometric_matches": 1082,
+      "native_reuse_texels": 1082,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.007179053965955973,
-      "p95_distance_m": 0.004343522246927023,
+      "max_distance_m": 0.007268452551215887,
+      "p95_distance_m": 0.004404893144965172,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1936,12 +1936,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 15767,
-      "geometric_matches": 15767,
-      "native_reuse_texels": 15767,
+      "target_texels": 16149,
+      "geometric_matches": 16149,
+      "native_reuse_texels": 16149,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.006582672707736492,
-      "p95_distance_m": 0.0040199002251029015,
+      "max_distance_m": 0.006825798656791449,
+      "p95_distance_m": 0.0040766457095742226,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1962,12 +1962,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 9546,
-      "geometric_matches": 9546,
-      "native_reuse_texels": 9546,
+      "target_texels": 9426,
+      "geometric_matches": 9426,
+      "native_reuse_texels": 9426,
       "unmatched_surface_texels": 0,
-      "max_distance_m": 0.0057937684468925,
-      "p95_distance_m": 0.004141825716942549,
+      "max_distance_m": 0.00671825697645545,
+      "p95_distance_m": 0.004077175632119179,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -1988,12 +1988,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 42414,
-      "geometric_matches": 42178,
-      "native_reuse_texels": 42178,
-      "unmatched_surface_texels": 236,
-      "max_distance_m": 0.03442645072937012,
-      "p95_distance_m": 0.004115492105484009,
+      "target_texels": 43636,
+      "geometric_matches": 43405,
+      "native_reuse_texels": 43405,
+      "unmatched_surface_texels": 231,
+      "max_distance_m": 0.03294852748513222,
+      "p95_distance_m": 0.004136540926992893,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2014,12 +2014,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 41996,
-      "geometric_matches": 13257,
-      "native_reuse_texels": 13257,
-      "unmatched_surface_texels": 28739,
-      "max_distance_m": 0.20272406935691833,
-      "p95_distance_m": 0.15454119443893433,
+      "target_texels": 43426,
+      "geometric_matches": 13812,
+      "native_reuse_texels": 13812,
+      "unmatched_surface_texels": 29614,
+      "max_distance_m": 0.2056056261062622,
+      "p95_distance_m": 0.1564815193414688,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2040,12 +2040,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 144047,
-      "geometric_matches": 141903,
-      "native_reuse_texels": 141903,
-      "unmatched_surface_texels": 2144,
-      "max_distance_m": 0.15827997028827667,
-      "p95_distance_m": 0.00412987545132637,
+      "target_texels": 148396,
+      "geometric_matches": 146158,
+      "native_reuse_texels": 146158,
+      "unmatched_surface_texels": 2238,
+      "max_distance_m": 0.15847541391849518,
+      "p95_distance_m": 0.004130496643483639,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2068,12 +2068,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 144209,
-      "geometric_matches": 141974,
-      "native_reuse_texels": 141974,
-      "unmatched_surface_texels": 2235,
-      "max_distance_m": 0.1625611037015915,
-      "p95_distance_m": 0.004127178341150284,
+      "target_texels": 148256,
+      "geometric_matches": 145982,
+      "native_reuse_texels": 145982,
+      "unmatched_surface_texels": 2274,
+      "max_distance_m": 0.16332849860191345,
+      "p95_distance_m": 0.004131635185331106,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2096,12 +2096,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 119791,
-      "geometric_matches": 108042,
-      "native_reuse_texels": 108042,
-      "unmatched_surface_texels": 11749,
-      "max_distance_m": 0.19032464921474457,
-      "p95_distance_m": 0.017940405756235123,
+      "target_texels": 123556,
+      "geometric_matches": 111241,
+      "native_reuse_texels": 111241,
+      "unmatched_surface_texels": 12315,
+      "max_distance_m": 0.1844223141670227,
+      "p95_distance_m": 0.018385620787739754,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2123,12 +2123,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 120147,
-      "geometric_matches": 108131,
-      "native_reuse_texels": 108131,
-      "unmatched_surface_texels": 12016,
-      "max_distance_m": 0.19130675494670868,
-      "p95_distance_m": 0.018628425896167755,
+      "target_texels": 123529,
+      "geometric_matches": 111165,
+      "native_reuse_texels": 111165,
+      "unmatched_surface_texels": 12364,
+      "max_distance_m": 0.1915627121925354,
+      "p95_distance_m": 0.018110858276486397,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2150,12 +2150,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 191921,
-      "geometric_matches": 186031,
-      "native_reuse_texels": 186031,
-      "unmatched_surface_texels": 5890,
-      "max_distance_m": 0.22492633759975433,
-      "p95_distance_m": 0.007813239470124245,
+      "target_texels": 197998,
+      "geometric_matches": 191904,
+      "native_reuse_texels": 191904,
+      "unmatched_surface_texels": 6094,
+      "max_distance_m": 0.22431832551956177,
+      "p95_distance_m": 0.007786293979734182,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2178,12 +2178,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 191116,
-      "geometric_matches": 185242,
-      "native_reuse_texels": 185242,
-      "unmatched_surface_texels": 5874,
-      "max_distance_m": 0.22527183592319489,
-      "p95_distance_m": 0.007639514282345772,
+      "target_texels": 196871,
+      "geometric_matches": 190831,
+      "native_reuse_texels": 190831,
+      "unmatched_surface_texels": 6040,
+      "max_distance_m": 0.2260151505470276,
+      "p95_distance_m": 0.007687553763389587,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2206,12 +2206,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": false
       },
-      "target_texels": 5790,
+      "target_texels": 6006,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 5790,
-      "max_distance_m": 0.2602440118789673,
-      "p95_distance_m": 0.22561374306678772,
+      "unmatched_surface_texels": 6006,
+      "max_distance_m": 0.259721040725708,
+      "p95_distance_m": 0.22637800872325897,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2232,12 +2232,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 213745,
-      "geometric_matches": 195959,
-      "native_reuse_texels": 195959,
-      "unmatched_surface_texels": 17786,
-      "max_distance_m": 0.04149774834513664,
-      "p95_distance_m": 0.0041162921115756035,
+      "target_texels": 220215,
+      "geometric_matches": 201409,
+      "native_reuse_texels": 201409,
+      "unmatched_surface_texels": 18806,
+      "max_distance_m": 0.04217597469687462,
+      "p95_distance_m": 0.00414622388780117,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2259,12 +2259,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 38356,
-      "geometric_matches": 38305,
-      "native_reuse_texels": 38305,
-      "unmatched_surface_texels": 51,
-      "max_distance_m": 0.0104729188606143,
-      "p95_distance_m": 0.004032232332974672,
+      "target_texels": 39315,
+      "geometric_matches": 39277,
+      "native_reuse_texels": 39277,
+      "unmatched_surface_texels": 38,
+      "max_distance_m": 0.008716021664440632,
+      "p95_distance_m": 0.004023029934614897,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2279,83 +2279,22 @@
       "source_space": "generation_atlas",
       "map": "art/textures/generated/full/source-atlas/current/ventral_fin_hooked.source-transfer.npz",
       "target_part": "ventral_fin_hooked",
-      "source_part": "skin_aft_L",
+      "source_part": "ventral_fin",
       "reflect_world_x": false,
       "donor_decision": {
-        "policy": "minimum_whole_part_rms_world_position_and_normal",
-        "normal_weight_m": 0.02,
-        "score_m": 0.15267330408096313,
-        "candidate_scores_m": {
-          "aileron_L_visible": 2.5728118419647217,
-          "canopy_visible": 7.948309421539307,
-          "dorsal_cover": 1.6874333620071411,
-          "fin_skin": 1.4353718757629395,
-          "flap_L_visible": 1.830580711364746,
-          "gear_door_N_L_visible": 7.744303226470947,
-          "gear_door_main_L_visible": 2.1474196910858154,
-          "intake_duct_L": 5.625476360321045,
-          "lef_L_visible": 3.7915921211242676,
-          "nozzle": 2.4431188106536865,
-          "nozzle_petal_00_visible": 2.7885046005249023,
-          "nozzle_petal_01_visible": 2.8256516456604004,
-          "nozzle_petal_02_visible": 2.8570523262023926,
-          "nozzle_petal_03_visible": 2.882739543914795,
-          "nozzle_petal_04_visible": 2.8921658992767334,
-          "nozzle_petal_05_visible": 2.881596088409424,
-          "nozzle_petal_06_visible": 2.8572781085968018,
-          "nozzle_petal_07_visible": 2.825432777404785,
-          "nozzle_petal_08_visible": 2.789290189743042,
-          "nozzle_petal_09_visible": 2.7542567253112793,
-          "nozzle_petal_10_visible": 2.7293951511383057,
-          "nozzle_petal_11_visible": 2.7163150310516357,
-          "nozzle_petal_12_visible": 2.7104930877685547,
-          "nozzle_petal_13_visible": 2.7129499912261963,
-          "nozzle_petal_14_visible": 2.729066848754883,
-          "nozzle_petal_15_visible": 2.753350257873535,
-          "nozzle_seal_00_visible": 2.8109986782073975,
-          "nozzle_seal_01_visible": 2.8423149585723877,
-          "nozzle_seal_02_visible": 2.869354009628296,
-          "nozzle_seal_03_visible": 2.8852529525756836,
-          "nozzle_seal_04_visible": 2.886277675628662,
-          "nozzle_seal_05_visible": 2.871828317642212,
-          "nozzle_seal_06_visible": 2.8421523571014404,
-          "nozzle_seal_07_visible": 2.8116486072540283,
-          "nozzle_seal_08_visible": 2.778980255126953,
-          "nozzle_seal_09_visible": 2.7464444637298584,
-          "nozzle_seal_10_visible": 2.723144769668579,
-          "nozzle_seal_11_visible": 2.713862895965576,
-          "nozzle_seal_12_visible": 2.715609550476074,
-          "nozzle_seal_13_visible": 2.726092576980591,
-          "nozzle_seal_14_visible": 2.748237371444702,
-          "nozzle_seal_15_visible": 2.7764644622802734,
-          "pylon_inner_L": 2.7997074127197266,
-          "pylon_inner_plug_L": 2.805128335952759,
-          "radome": 11.333671569824219,
-          "rudder_visible": 2.626197099685669,
-          "skin_aft_L": 0.15267330408096313,
-          "skin_aft_R": 0.1526910960674286,
-          "skin_forward_L": 7.344030857086182,
-          "skin_forward_R": 7.343919277191162,
-          "skin_mid_L": 2.2775511741638184,
-          "skin_mid_R": 2.2742624282836914,
-          "speed_brake_L_visible": 0.9722099304199219,
-          "stabilator_visible": 3.878077745437622,
-          "ventral_fin": 0.7287253141403198,
-          "wing_skin_L": 1.5994312763214111
-        },
-        "tie_break": "lexical source part name",
+        "policy": "named_parent",
         "matched_detail_claim": false
       },
-      "target_texels": 72987,
+      "target_texels": 75376,
       "geometric_matches": 0,
       "native_reuse_texels": 0,
-      "unmatched_surface_texels": 72987,
-      "max_distance_m": 0.3007872402667999,
-      "p95_distance_m": 0.2688092589378357,
+      "unmatched_surface_texels": 75376,
+      "max_distance_m": 2.066434144973755,
+      "p95_distance_m": 1.7452569007873535,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
-        "skin_aft_L_lower"
+        "ventral_fin_all"
       ],
       "unmatched_policy": "nearest accepted parent paint; no new mechanical-detail claim",
       "target_mask": "art/textures/generated/full/source-atlas/current/ventral_fin_hooked.source-transfer.mask.png"
@@ -2372,12 +2311,12 @@
         "policy": "same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 258012,
-      "geometric_matches": 228031,
-      "native_reuse_texels": 228031,
-      "unmatched_surface_texels": 29981,
-      "max_distance_m": 0.056451644748449326,
-      "p95_distance_m": 0.005294314585626125,
+      "target_texels": 265366,
+      "geometric_matches": 234620,
+      "native_reuse_texels": 234620,
+      "unmatched_surface_texels": 30746,
+      "max_distance_m": 0.05519206076860428,
+      "p95_distance_m": 0.005205805413424969,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2401,12 +2340,12 @@
         "policy": "reflected_same_physical_part",
         "matched_detail_claim": true
       },
-      "target_texels": 257817,
-      "geometric_matches": 226735,
-      "native_reuse_texels": 226735,
-      "unmatched_surface_texels": 31082,
-      "max_distance_m": 0.05691296607255936,
-      "p95_distance_m": 0.005530014168471098,
+      "target_texels": 265193,
+      "geometric_matches": 233435,
+      "native_reuse_texels": 233435,
+      "unmatched_surface_texels": 31758,
+      "max_distance_m": 0.056106436997652054,
+      "p95_distance_m": 0.0053977202624082565,
       "match_tolerance_m": 0.015,
       "normal_cosine_min": 0.95,
       "source_groups": [
@@ -2420,9 +2359,7 @@
     }
   ],
   "owner_map": "art/textures/generated/full/source-atlas/current/ownership.npz",
-  "inferred_parent_parts": [
-    "ventral_fin_hooked"
-  ],
+  "inferred_parent_parts": [],
   "transfer_index_convention": "row-major atlas indices; source indices address immutable generation atlas; target indices address current atlas; apply rules in listed order",
   "field_contract": [
     "base",

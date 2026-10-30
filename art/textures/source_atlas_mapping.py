@@ -18,6 +18,7 @@ from record_paths import portable_record, portable_text, resolve_record
 from rasterize import ROOT, SOURCE, PAINT_SIZE as ATLAS_SIZE
 
 FIELDS = ('base', 'height', 'roughness', 'height_valid', 'roughness_valid', 'used')
+POLICY = Path(__file__).resolve()  # the donor rules here: current/parts.json records its hash, so changing them rebuilds
 POSITION_TOLERANCE_M = .015
 NORMAL_COSINE = .95
 
@@ -46,7 +47,8 @@ def nearest_parent(target_positions, target_normals, source_positions, source_no
 
 
 def donor_part(name, source_names):
-    """Split wing UVs reuse reflected left paint; new small doors inherit accepted parent paint."""
+    """Split wing UVs reuse reflected left paint; new small doors inherit accepted parent paint, and the hooked ventral
+    fin, its fairing too, the original fin's (the owner's call: fin paint, never the tail cone's)."""
     if name in source_names:
         return name, False
     replacements = {
@@ -59,6 +61,7 @@ def donor_part(name, source_names):
         'gear_door_flap_R_visible': ('gear_door_main_L_visible', True),
         'gear_door_flap_out_L_visible': ('gear_door_main_L_visible', False),
         'gear_door_flap_out_R_visible': ('gear_door_main_L_visible', True),
+        'ventral_fin_hooked': ('ventral_fin', False),
     }
     return replacements.get(name)
 
@@ -293,7 +296,8 @@ def rebuild_inventory(bake, output):
             donor, mirror = named_donor
             split_wing = name in ('wing_skin_R', 'flap_R_visible', 'aileron_R_visible')
             decision = {'policy': ('reflected_same_physical_part' if split_wing else
-                                   'same_physical_part' if name == donor else 'named_gear_door_parent'),
+                                   'same_physical_part' if name == donor else
+                                   'named_gear_door_parent' if name.startswith('gear_door_') else 'named_parent'),
                         'matched_detail_claim': (name == donor or split_wing) and
                                                 not name.startswith(('gear_door_', 'speed_brake_'))}
         source = np.flatnonzero(old_part == old_names.index(donor) + 1)
@@ -361,6 +365,7 @@ def rebuild_inventory(bake, output):
     manifest = {'schema_version': 2, 'guide_size': source_manifest['guide_size'],
                 'minimum_native_px_per_m': 180, 'shared_style': source_manifest['shared_style'],
                 'bake': current_path.as_posix(), 'structure': source_manifest['structure'],
+                'mapping_policy_sha256': sha256(POLICY),
                 'source_atlas_manifest': (persistent / 'native/parts.json').as_posix(),
                 'input_sha256': hashes, 'groups': groups,
                 'coverage': (output / 'coverage.json').as_posix(),
@@ -492,6 +497,8 @@ def restore_inventory(bake, output):
         if manifest != original:
             write_json(path, manifest)
             changed_metadata.add(path.as_posix())
+        if folder == current and manifest.get('mapping_policy_sha256') != sha256(POLICY):
+            geometry_changed = True  # mapped under other donor rules (or before they were recorded)
     if geometry_changed:
         print('CURRENT GEOMETRY CHANGED; rebuilding world maps from frozen native inputs')
         return rebuild_inventory(bake, output)

@@ -21,13 +21,18 @@ def painted_parts(position, normal, part, names):
     return radome, glare
 
 
+def painted_fins(part, names):
+    """The ventral fins, the hook's fairing with them: the scheme's paint, never sheet metal or a band (the owner, 2026-10-29)."""
+    return np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith('ventral_fin')])
+
+
 def surface_map(shared, position, normal, part, names, decal_coverage, sheet_tone, relief):
     """Match compose's exact paint masks; the exhaust fields blend in by the shared map's own bare weight.
 
     `protected` is that weight: 1 keeps the shared exhaust values verbatim, 0 is polished sheet.
     """
     radome, glare = painted_parts(position, normal, part, names)
-    paint = 1 - (1 - visibility_bands(position)) * (1 - glare) * (1 - decal_coverage)
+    paint = np.maximum(1 - (1 - visibility_bands(position)) * (1 - glare) * (1 - decal_coverage), painted_fins(part, names))
     protected_ids = [i + 1 for i, name in enumerate(names)
                      if name == 'nozzle' or name.startswith(('nozzle_petal_', 'nozzle_seal_'))]
     protected = np.maximum(shared[..., 0], np.isin(part, protected_ids))
