@@ -51,7 +51,7 @@ namespace Icarus.Editor
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
             ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook }),
-            ("Air Superiority", new[] { "AAM1_single", "AAM1_double", ConformalAAM2, TailHook }),
+            ("Air Superiority", new[] { "AAM1_single", "AAM2_double", ConformalAAM2, TailHook }),
             ("Strike", new[] { "AAM1_single", "bomb_500_single", ConformalAAM2, TailHook }),
             ("Close Support", new[] { "AAM1_single", "Rocket2_4Pod", ConformalAAM2, TailHook }),
         };
