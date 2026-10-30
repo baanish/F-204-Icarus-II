@@ -44,15 +44,16 @@ namespace Icarus.Editor
         }
 
         // Standard loadouts by mount jsonKey, one per set in SetNames order. loadouts[1], the default, is the first: the
-        // Interceptor carries the tip tanks on its wingtips (the owner's call), the others their wingtip missiles. Every one
+        // Interceptor carries the tip tanks on its wingtips (the owner's call), the others an MMR-S3 on each wingtip, never the
+        // IRM-S2, and every one the AAM-29 Scythe on the conformal stations (the owner's call, 2026-10-30). Every one
         // carries the hook (the owner's call): the faction AI spawns a jet on the Hyperion with any standard loadout, and
         // its landing AI looks for an arrestor deck only when the equipped mount says it has a hook.
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
             ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook }),
-            ("Air Superiority", new[] { "AAM3_single", "AAM1_double", ConformalAAM2, TailHook }),
-            ("Strike", new[] { "AAM3_single", "bomb_500_single", ConformalAAM1, TailHook }),
-            ("Close Support", new[] { "AAM3_single", "Rocket2_4Pod", ConformalAAM1, TailHook }),
+            ("Air Superiority", new[] { "AAM1_single", "AAM1_double", ConformalAAM2, TailHook }),
+            ("Strike", new[] { "AAM1_single", "bomb_500_single", ConformalAAM2, TailHook }),
+            ("Close Support", new[] { "AAM1_single", "Rocket2_4Pod", ConformalAAM2, TailHook }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
