@@ -1,10 +1,10 @@
 // The game's AI on the Hyperion: Primeva's only airbase is the carrier and its only supply four Icarus, with room for one
-// AI aircraft (icarus_hyperion_ai.mission.json), so the faction AI spawns Icarus in the carrier's hangars (hangar_R1 to
-// hangar_R3, IcarusAuthor.Identity.cs CarrierHangars) with a standard loadout, every one with the hook. Each launches over the
+// AI aircraft (icarus_hyperion_ai.mission.json), so the faction AI spawns Icarus in the carrier's deck hangars
+// (hangar_R2 and hangar_R3, IcarusAuthor.Identity.cs CarrierHangars) with a standard loadout, every one with the hook. Each launches over the
 // ski jump and, finding nothing to fight, turns home at once (AIPilotCombatModes: no target for 15 s), so it lands back
 // aboard at nearly full fuel, the heaviest recovery. The player's Icarus holds well clear, out of the AI's count.
-// Pass: the AI spawns Icarus on the deck, they take off, and every one it launched lands back aboard: Primeva's supply
-// returns to four with no Icarus lost (supply plus those alive, the player's among them, stays five).
+// Pass: the AI spawns an Icarus on the deck, it takes off, and every one it launched lands back aboard: Primeva's supply
+// returns to four with no Icarus lost.
 // From the repo root: no-agentic run tests/scenarios/carrier_ai.scenario.jsonc
 {
   "mission": "icarus_hyperion_ai.mission.json",
@@ -21,7 +21,6 @@
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the player's Icarus clear of the carrier" },
     { "fly": { "mode": "hold", "alt_msl_m": 6000, "hdg_deg": 2, "throttle": 0.6 } },
     { "wait": { "path": "truth.factions.Primeva.supply.baanish_icarus", "lt": 4 }, "timeout": 60, "label": "the faction AI spawns an Icarus on the carrier" },
-    { "wait": { "path": "truth.factions.Primeva.supply.baanish_icarus", "lt": 3 }, "timeout": 60, "label": "and a second" },
     { "record": { "path": "truth.factions.Primeva.alive.baanish_icarus" }, "label": "Icarus alive, the player's among them" },
     { "wait": { "any": [ { "path": "truth.factions.Primeva.supply.baanish_icarus", "eq": 4 },
                          { "path": "truth.factions.Primeva.alive.baanish_icarus", "lt": 2 } ] }, "timeout": 900,

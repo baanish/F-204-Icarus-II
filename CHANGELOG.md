@@ -4,7 +4,12 @@
 
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
 - A bigger engine: 90 kN dry and 135 kN with afterburner (was 65 and 110), afterburner fuel burn up 20%, and the engine weighs 1,500 kg instead of 1,150.
-- An interceptor's radar: 60 km range (was 40), a narrower 20 degree cone off the nose (was 30), twice the power draw, and 215 kg instead of 65, which keeps the jet's balance with the heavier engine. Empty weight is 6,300 kg.
+- An interceptor's radar: 60 km range (was 40), a narrower 20 degree cone off the nose (was 30), twice the power draw, and 260 kg instead of 65, which keeps the jet's balance with the heavier engine and the tail hook. Empty weight is 6,365 kg.
+- The Icarus can fly from the Hyperion carrier: it spawns on the deck and launches over the ski jump.
+- An arrestor hook, faired into a longer ventral fin, comes on every standard loadout in its own Tail Hook slot. It lowers itself on a carrier approach and catches the wire.
+- The hook and its fairing add a little weight and drag: 70 kg and about 3% more drag in all.
+- The cockpit and forward fuselage are stronger to carry the heavier radar, so a hard launch or a hard pull doesn't snap the nose off.
+- AI pilots fly a slower landing approach, so their hook stays down over the deck.
 
 ## 0.2.0 (2026-10-29)
 

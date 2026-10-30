@@ -297,11 +297,13 @@ namespace Icarus.Editor
 
         // The hangars the Revoker uses, every one of each unit, and every stock mount on the sets that offer it.
         private static readonly string[] HangarUnitKeys = { "hangar_med", "shelter1", "Helipad" };
-        // The Hyperion's fixed-wing deck spawns, as the Compass and Ifrit use them (the owner's call): hangar_R2 and hangar_R3 on the deck
-        // and hangar_R1 on the right elevator, not hangar_F, its helicopter elevator. The jet launches under its own thrust over
-        // the ski jump; the game has no catapult.
+        // The Hyperion's fixed-wing deck spawns, as the Compass and Ifrit use them: hangar_R2 and hangar_R3 on the deck. Not
+        // hangar_R1, the right elevator: it turns the jet across the lowered elevator, and with tip tanks (7.8 m) a spawn there
+        // can start both outer wing boxes inside the hull's collider and break their braces (tests/scenarios/carrier_ai.scenario.jsonc,
+        // 2 of 6 spawns). Not hangar_F, the helicopter elevator. The jet launches under its own thrust over the ski jump; the
+        // game has no catapult.
         private const string CarrierKey = "FleetCarrier1";
-        private static readonly string[] CarrierHangars = { "hangar_R1", "hangar_R2", "hangar_R3" };
+        private static readonly string[] CarrierHangars = { "hangar_R2", "hangar_R3" };
 
         private static void AuthorOps(Stations stations)
         {
