@@ -948,7 +948,7 @@ MonoBehaviour:
   landingSpeed: 95
   shortLandingSpeed: 75
   cruiseThrottle: 0.85
-  minimumRadarAlt: 7000
+  minimumRadarAlt: 50
   levelBias: 0.15
   hoverTiltFactor: 1
   collectivePID: {x: 0, y: 0, z: 0}

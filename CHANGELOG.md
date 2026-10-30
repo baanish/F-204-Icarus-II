@@ -15,7 +15,7 @@
 - The hook and its fairing weigh 100 kg and add 5% drag, only when fitted.
 - The ventral fin, the hook fairing and the hook wear the livery's paint in every livery.
 - A tip tank gauge in the cockpit, beside the fuel dial, shows the fuel left in each tip tank. A tank that is dropped or lost with its wing reads empty.
-- AI pilots fight the Icarus high and fast: they hold at least 7 km above the ground in combat and fire down at their targets. Low down the Icarus is too fast to turn with anything. The new Tuning.AI MinimumCombatAltitude setting adjusts it.
+- New setting Tuning.AI MinimumCombatAltitude: the least height above the ground the AI holds while it fights the Icarus, live while you play.
 - The Air Superiority, Strike and Close Support loadouts carry an MMR-S3 on each wingtip instead of the IRM-S2, every standard loadout carries AAM-29 Scythes on the conformal stations, Air Superiority carries twin racks of Scythes on its pylons instead of MMR-S3s, and Close Support an AGM-68 on each pylon instead of a rocket pod.
 - The cockpit and forward fuselage are stronger to carry the heavier radar, so a hard launch or a hard pull doesn't snap the nose off.
 - The speed brakes are twice as strong, and AI pilots come down a carrier approach at a steady speed, slow enough that their hook stays down over the deck.
