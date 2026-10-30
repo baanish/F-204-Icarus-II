@@ -48,6 +48,8 @@ namespace Icarus.Editor
         // IRM-S2, and every one the AAM-29 Scythe on the conformal stations (the owner's call, 2026-10-30). Every one
         // carries the hook (the owner's call): the faction AI spawns a jet on the Hyperion with any standard loadout, and
         // its landing AI looks for an arrestor deck only when the equipped mount says it has a hook.
+        private const float MinimumCombatAltitude = 7000f;
+
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
             ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook }),
@@ -228,6 +230,11 @@ namespace Icarus.Editor
             Num(so, "shortLandingSpeed", ApproachAtLowFuel);
             // Full dry by design: throttleRemap ends at 0.88 and the afterburner starts at 0.9.
             Num(so, "cruiseThrottle", 0.85f);
+            // The combat AI holds at least this height above the ground while it fights (AIPilotCombatModes.ManageAltitude
+            // lerps its target height up to it; it caps the target height at 8000 m). Low down the Icarus is too fast to
+            // turn, so it fights as a sniper: high and fast, its missiles fired down with all the energy it can give them
+            // (the owner's call, 2026-10-30).
+            Num(so, "minimumRadarAlt", MinimumCombatAltitude);
             // Tier 2, the owner's call: unlocked a rank before the Revoker it is built on, beside the Brawler.
             Prop(so, "rankRequired").intValue = 2;
             so.ApplyModifiedPropertiesWithoutUndo();

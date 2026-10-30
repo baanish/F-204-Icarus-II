@@ -102,6 +102,7 @@ static class Tuning
         Bind("Tuning.AI", "LandingSpeed", "m/s", "AircraftParameters.landingSpeed; an AI already on approach keeps its cached speed");
         Bind("Tuning.AI", "TakeoffSpeed", "m/s", "AircraftParameters.takeoffSpeed");
         Bind("Tuning.AI", "TurningRadius", "m", "AircraftParameters.turningRadius");
+        Bind("Tuning.AI", "MinimumCombatAltitude", "m", "AircraftParameters.minimumRadarAlt: the least height above the ground the combat AI holds while it fights (the game caps it at 8000)");
         nozzleOpen = config.Bind("Nozzle", "OpenDegrees", DefaultNozzleOpen, "Degrees each nozzle petal opens at full afterburner (visual)");
 
         foreach (Knob knob in knobs)
@@ -175,6 +176,7 @@ static class Tuning
             shippedParameters["landingSpeed"] = parameters.landingSpeed;
             shippedParameters["takeoffSpeed"] = parameters.takeoffSpeed;
             shippedParameters["turningRadius"] = parameters.turningRadius;
+            shippedParameters["minimumRadarAlt"] = parameters.minimumRadarAlt;
         }
 
         records.Add(record);
@@ -182,7 +184,7 @@ static class Tuning
             + Invariant($"AltitudeThrust '{CurveText(record.ShippedAltitude)}', Afterburner.Thrust {Shipped(record, "ab0.thrust")}, Afterburner.Fuel {Shipped(record, "ab0.fuel")}, ")
             + Invariant($"Vectoring.PitchDegrees {record.ShippedVectoring.x}, Vectoring.YawDegrees {record.ShippedVectoring.y}, Vectoring.MaxAirspeed {record.Shipped["thrustVectoringMaxAirspeed"]}, ")
             + Invariant($"WingArea {record.Parts.Where(p => p.MainWing).Sum(p => p.ShippedArea):0.###} (flaps retracted), DragArea {record.Parts.Sum(p => p.ShippedDrag):0.###}, ")
-            + Invariant($"CornerSpeed {shippedParameters["cornerSpeed"]}, LandingSpeed {shippedParameters["landingSpeed"]}, TakeoffSpeed {shippedParameters["takeoffSpeed"]}, TurningRadius {shippedParameters["turningRadius"]}"));
+            + Invariant($"CornerSpeed {shippedParameters["cornerSpeed"]}, LandingSpeed {shippedParameters["landingSpeed"]}, TakeoffSpeed {shippedParameters["takeoffSpeed"]}, TurningRadius {shippedParameters["turningRadius"]}, MinimumCombatAltitude {shippedParameters["minimumRadarAlt"]}"));
     }
 
     static float Shipped(Record record, string key) => record.Shipped.TryGetValue(key, out float value) ? value : float.NaN;
@@ -315,6 +317,7 @@ static class Tuning
             parameters.landingSpeed = Value("LandingSpeed", shippedParameters["landingSpeed"]);
             parameters.takeoffSpeed = Value("TakeoffSpeed", shippedParameters["takeoffSpeed"]);
             parameters.turningRadius = Value("TurningRadius", shippedParameters["turningRadius"]);
+            parameters.minimumRadarAlt = Value("MinimumCombatAltitude", shippedParameters["minimumRadarAlt"]);
         }
 
         // Readback: every knob as the aircraft now holds it, and a hash peers can compare.
@@ -323,7 +326,7 @@ static class Tuning
             + Invariant($"Afterburner.Thrust {r.Nozzle.GetMaxThrust()} Afterburner.Fuel {(r.Afterburners.Length > 0 ? AfterburnerField(r.Afterburners[0], "fuelConsumption").GetValue(r.Afterburners[0]) : 0f)} ")
             + Invariant($"Vectoring {(Vector3)AccessTools.Field(typeof(Turbojet), "thrustVectoring").GetValue(engine)} MaxAirspeed {GetField(engine, "thrustVectoringMaxAirspeed")} ")
             + Invariant($"WingArea {r.Parts.Where(p => p.MainWing && p.Aero != null).Sum(p => p.Device != null ? (float)HldRetracted.GetValue(p.Device) : p.Aero.GetWingArea()):0.###} (retracted) DragArea {r.Parts.Where(p => p.Aero != null).Sum(p => p.Aero.dragArea):0.###} ")
-            + (parameters == null ? "" : Invariant($"CornerSpeed {parameters.cornerSpeed} LandingSpeed {parameters.landingSpeed} TakeoffSpeed {parameters.takeoffSpeed} TurningRadius {parameters.turningRadius}"));
+            + (parameters == null ? "" : Invariant($"CornerSpeed {parameters.cornerSpeed} LandingSpeed {parameters.landingSpeed} TakeoffSpeed {parameters.takeoffSpeed} TurningRadius {parameters.turningRadius} MinimumCombatAltitude {parameters.minimumRadarAlt}"));
         if (summary != lastSummary || !r.Applied)
         {
             lastSummary = summary;
