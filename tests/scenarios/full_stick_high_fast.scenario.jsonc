@@ -4,6 +4,7 @@
 // Pass: nothing detached and no damage through every manoeuvre, with the pull past 8 g.
 // From the repo root: no-agentic run tests/scenarios/full_stick_high_fast.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_ignus_10km.mission.json",
   "mods": "clean",
   "plugins": [

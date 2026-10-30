@@ -8,6 +8,7 @@
 // tools/breakup_report.py sees every part that comes off. Run uncapped (no-agentic run --uncapped) for the frame times.
 // From the repo root: no-agentic run --uncapped tests/scenarios/breakup_missile_hit_eight.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_ignus_10km_eight.mission.json",
   "mods": "clean",
   "plugins": [

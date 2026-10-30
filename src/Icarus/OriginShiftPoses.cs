@@ -53,8 +53,9 @@ static class OriginShiftPoses
                 body.position = position + shift;
                 body.rotation = rotation;
             }
-            IcarusPlugin.Log.Stage("origin-shift-poses", $"shift {shift.magnitude:0} m: {held.Count} interpolated bodies put back on their physics poses",
-                everyOccurrence: true);
+            if (IcarusPlugin.Log.StageEnabled)
+                IcarusPlugin.Log.Stage("origin-shift-poses", $"shift {shift.magnitude:0} m: {held.Count} interpolated bodies put back on their physics poses",
+                    everyOccurrence: true);
         }
         held.Clear();
     }

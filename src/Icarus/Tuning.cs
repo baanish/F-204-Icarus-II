@@ -203,7 +203,8 @@ static class Tuning
             catch (IOException e)
             {
                 fileChanged = true; // still being written; try next frame
-                log.Stage("tuning-file", $"reload deferred: {e.Message}");
+                if (log.StageEnabled)
+                    log.Stage("tuning-file", $"reload deferred: {e.Message}");
             }
         }
 

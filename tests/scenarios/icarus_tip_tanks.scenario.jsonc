@@ -13,6 +13,7 @@
 // 9,100 kg after the release, the station is empty, no joint breaks all run, and the Icarus is undamaged for 10 s after it.
 // From the repo root: no-agentic run tests/scenarios/icarus_tip_tanks.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_tip_tanks.mission.json",
   "mods": "clean",
   "plugins": [

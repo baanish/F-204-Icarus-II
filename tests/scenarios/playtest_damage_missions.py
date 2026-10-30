@@ -18,16 +18,6 @@ ICARUS = "baanish_icarus"
 AIR_TO_AIR = ["AAM1_single", "AAM4_single", "baanish_icarus_AAM2_conformal", ""]
 INTERCEPTOR = ["autocannon_27mm_internal", "AAM4_triple_internal", "AAM4_triple_internal",
                "AAM3_single_internal", "AAM2_double", "AAM1_double", ""]
-# The Ifrit's stock loadout: the gun, three AAM-29 Scythes in each main bay, an IRM-S2 in each side bay.
-IFRIT_STANDARD = ["autocannon_27mm_internal", "AAM2_triple_internal", "AAM2_triple_internal", "AAM3_single_internal", "", "", ""]
-TARGET = ["", "bomb_500_single", "", ""]
-# Combat AI clamps targetHeight to 8000 in AIPilotCombatModes.cs:1261. Starting
-# there avoids its +5 m/s target-height drift at lower altitudes (:506-516).
-# This is an AGL cap, not an MSL hold: Autopilot.cs:215-231 adds terrain height.
-TARGET_ALTITUDE = 8000
-# The targets' waypoint: 103 km north of their start, about 8 minutes at 200 m/s, and clear of the airfield at
-# z 34,000. Targets that reach their waypoint circle and descend, so it must lie beyond the fight.
-ROUTE_END_Z = 70000
 
 
 def rotation(heading):
@@ -100,45 +90,8 @@ def shot_down():
     return mission
 
 
-def gun_kills():
-    mission, template = base()
-    mission["missionSettings"]["description"] = (
-        "Icarus - gun kills. Fly a Primeva KR-67 Ifrit at 8,000 m MSL, heading 000, "
-        "330 m/s, in its standard loadout: the 27 mm gun with 540 rounds, six AAM-29 Scythes and two IRM-S2s. Four Boscali F-204 Icarus II "
-        "targets start level at 8,000 m and 200 m/s, in trail 1 km apart, the first 1.8 km ahead. "
-        "They follow a distant same-altitude northbound waypoint along western Ignus, with two GPO-500 "
-        "bombs each and all other stations empty. The bombs prevent the unarmed AI's return to base "
-        "without giving it an air-to-air weapon. Starting at the AI's 8,000 m AGL cap avoids the "
-        "usual sustained climb over sea. Saved missions cannot enforce an exact MSL altitude or speed: "
-        "terrain following, radar warnings, avoidance and damage can change flight, and cruise throttle "
-        "can accelerate the targets. Approach promptly with radar off. No escorts or reinforcements. "
-        "Restart to repeat. Level flight is a source-based best effort, not a flight-tested guarantee.")
-    mission["aircraft"].append(aircraft(template, "Agentic_Own", "Multirole1", "Primeva",
-                                       (-74000, TARGET_ALTITUDE, -35000), 0, 330, IFRIT_STANDARD, player=True))
-    names = []
-    for i in range(1, 5):
-        name = f"Gun target {i}"
-        names.append(name)
-        mission["aircraft"].append(aircraft(template, name, ICARUS, "Boscali",
-                                           (-74000, TARGET_ALTITUDE, -33200 + (i - 1) * 1000), 0, 200, TARGET))
-    mission["objectives"] = [
-        objective("None", "Mission Start", "Primeva", ["Start flight route", "Show gun targets"]),
-        objective("ReachWaypoints", "Icarus northbound route", "Boscali", completeOrder="CompleteAny",
-                  completeSomePercent=0.5, completeOnEnterRange=False,
-                  waypoints=[{"Position": {"x": -74000, "y": TARGET_ALTITUDE, "z": ROUTE_END_Z}, "Range": 1000}]),
-        objective("DestroyUnits", "Shoot down four Icarus targets", "Primeva", hidden=False,
-                  completeOrder="CompleteAll", completeSomePercent=1.0, targetUnits=names),
-    ]
-    mission["outcomes"] = [
-        {"Type": "StartObjective", "UniqueName": "Start flight route",
-         "objectivesToStart": ["Icarus northbound route", "Shoot down four Icarus targets"]},
-        {"Type": "RevealUnit", "UniqueName": "Show gun targets", "UnitsToReveal": names},
-    ]
-    return mission
-
-
 def artifacts():
-    for name, mission in (("shot_down", shot_down()), ("gun_kills", gun_kills())):
+    for name, mission in (("shot_down", shot_down()),):
         stem = f"playtest_{name}"
         keys = {ICARUS}
         for unit in mission["aircraft"]:
@@ -155,23 +108,13 @@ def artifacts():
 
 
 def verify_contracts():
-    shot, gun = shot_down(), gun_kills()
+    shot = shot_down()
     assert len(shot["aircraft"]) == 7
     assert shot["aircraft"][0]["globalPosition"]["y"] == 9000
     assert shot["aircraft"][0]["savedLoadout"]["Selected"] == [{"Key": k} for k in AIR_TO_AIR]
     assert shot["objectives"][1]["seconds"] == 120
     assert shot["outcomes"][1]["UnitsToSpawn"] == [f"Interceptor {i}" for i in range(3, 7)]
-    assert len(gun["aircraft"]) == 5
-    assert gun["aircraft"][0]["savedLoadout"]["Selected"] == [{"Key": k} for k in IFRIT_STANDARD]
-    targets = gun["aircraft"][1:]
-    assert [u["globalPosition"] for u in targets] == [
-        {"x": -74000, "y": 8000, "z": z} for z in (-33200, -32200, -31200, -30200)]
-    assert all(u["startingSpeed"] == 200 and u["rotation"] == rotation(0) for u in targets)
-    assert all(u["savedLoadout"]["Selected"] == [{"Key": k} for k in TARGET]
-               for u in targets)
-    assert gun["objectives"][1]["waypoints"] == [
-        {"Position": {"x": -74000, "y": 8000, "z": ROUTE_END_Z}, "Range": 1000}]
-    for mission in (shot, gun):
+    for mission in (shot,):
         assert sum(u["playerControlled"] for u in mission["aircraft"]) == 1
         assert all(f["AIAircraftLimit"] == 0 and not f["supplies"] for f in mission["factions"])
         units = {u["UniqueName"] for u in mission["aircraft"]}
@@ -183,7 +126,7 @@ def verify_contracts():
         for outcome in mission["outcomes"]:
             assert set(outcome.get("objectivesToStart", [])) <= objectives
             assert set(outcome.get("UnitsToSpawn", []) + outcome.get("UnitsToReveal", [])) <= units
-    print("VERIFIED mission contracts: wave timing, loadouts, altitude policy, spacing and references")
+    print("VERIFIED mission contracts: wave timing, loadouts, altitude and references")
 
 
 def main():

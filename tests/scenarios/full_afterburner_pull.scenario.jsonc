@@ -7,6 +7,7 @@
 // and its "joint-load:" line the joints nearest their break (src/Icarus/TailFlex.cs).
 // From the repo root: no-agentic run tests/scenarios/full_afterburner_pull.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_ignus_1km_fast.mission.json",
   "mods": "clean",
   "plugins": [

@@ -6,6 +6,7 @@
 // after the run, python tools/detach_check.py rearm <run>.
 // From the repo root: no-agentic run tests/scenarios/damage_rearm_kill.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_default_loadout.mission.json",
   "mods": "clean",
   "plugins": [

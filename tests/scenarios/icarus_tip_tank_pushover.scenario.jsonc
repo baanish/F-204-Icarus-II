@@ -6,6 +6,7 @@
 // contact is logged for 10 s after the release, and no joint breaks. The load at the release is recorded.
 // From the repo root: no-agentic run tests/scenarios/icarus_tip_tank_pushover.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_tip_tanks.mission.json",
   "mods": "clean",
   "plugins": [

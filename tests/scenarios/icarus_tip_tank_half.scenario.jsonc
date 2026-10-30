@@ -6,6 +6,7 @@
 // at full health for 10 s after it, and no joint breaks.
 // From the repo root: no-agentic run tests/scenarios/icarus_tip_tank_half.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_tip_tanks.mission.json",
   "mods": "clean",
   "plugins": [

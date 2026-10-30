@@ -12,6 +12,7 @@
 // The peak over the trap: python tools/flight_peaks.py <run folder> --since trap
 // From the repo root: no-agentic run tests/scenarios/carrier_trap.scenario.jsonc realtime=true
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_hyperion_final.mission.json",
   "mods": "clean",
   "plugins": [

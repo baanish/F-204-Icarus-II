@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Diagnostics are off by default. The mod no longer patches the game's bullet code, fixing conflicts with other mods that patch it.
 - AI pilots drop the tip tanks when they start landing, even if the tanks still contain fuel.
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
 - The stock operations also get their Icarus supply and factory when started after changing their settings in Customize Mission. Before, that skipped them, so the AI had no Icarus to fly.

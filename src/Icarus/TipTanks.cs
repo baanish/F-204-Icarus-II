@@ -136,12 +136,13 @@ sealed class TipTanks : MonoBehaviour
                     Bottom = lenses.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
                 };
                 tanks.Add(tank);
-                IcarusPlugin.Log.Stage("tip-tanks-" + tank.Side, $"tip tank {tank.Side} on {aircraft.persistentID}: attached {attached}, {tank.Fuel:0} kg, lenses {tank.Top != null && tank.Bottom != null}, local sim {aircraft.LocalSim}");
+                if (IcarusPlugin.Log.StageEnabled)
+                    IcarusPlugin.Log.Stage("tip-tanks-" + tank.Side, $"tip tank {tank.Side} on {aircraft.persistentID}: attached {attached}, {tank.Fuel:0} kg, lenses {tank.Top != null && tank.Bottom != null}, local sim {aircraft.LocalSim}");
             }
         }
 
         Dress();
-        if (Time.time < nextPose) return;
+        if (!IcarusPlugin.Log.StageEnabled || Time.time < nextPose) return;
         nextPose = Time.time + ReportS;
         foreach (Tank t in tanks.Where(t => t.Attached))
         {
@@ -175,7 +176,8 @@ sealed class TipTanks : MonoBehaviour
         ShiftStoreMass(t, t.Moved);
         t.Returned = t.Moved;
         t.Moved = 0f;
-        IcarusPlugin.Log.Stage("tip-tanks-return", $"tip tank {t.Side}: {t.Returned:0} kg given back to its hardpoint ahead of the release", everyOccurrence: true);
+        if (IcarusPlugin.Log.StageEnabled)
+            IcarusPlugin.Log.Stage("tip-tanks-return", $"tip tank {t.Side}: {t.Returned:0} kg given back to its hardpoint ahead of the release", everyOccurrence: true);
     }
 
     static void BeforeFire(MountedMissile __instance, Unit owner)
@@ -209,11 +211,15 @@ sealed class TipTanks : MonoBehaviour
             if (t.Attached && !attached)
             {
                 if (lost)
-                    IcarusPlugin.Log.Stage("tip-tanks-lost", $"tip tank {t.Side} lost with its wing, {t.Fuel:0} kg in it", everyOccurrence: true);
+                {
+                    if (IcarusPlugin.Log.StageEnabled)
+                        IcarusPlugin.Log.Stage("tip-tanks-lost", $"tip tank {t.Side} lost with its wing, {t.Fuel:0} kg in it", everyOccurrence: true);
+                }
                 else
                 {
                     // The game took the full store mass off the wing; what already went to the cells came back first (ReturnMoved).
-                    IcarusPlugin.Log.Stage("tip-tanks-release", $"tip tank {t.Side} released with {t.Fuel:0} kg; {t.Returned:0} kg had moved to the cells; mass {aircraft.GetMass():0} kg", everyOccurrence: true);
+                    if (IcarusPlugin.Log.StageEnabled)
+                        IcarusPlugin.Log.Stage("tip-tanks-release", $"tip tank {t.Side} released with {t.Fuel:0} kg; {t.Returned:0} kg had moved to the cells; mass {aircraft.GetMass():0} kg", everyOccurrence: true);
                     released = true;
                 }
                 t.Returned = 0f;
@@ -279,7 +285,7 @@ sealed class TipTanks : MonoBehaviour
 
     void Report()
     {
-        if (Time.time < nextReport || ExternalCapacity <= 0f) return;
+        if (!IcarusPlugin.Log.StageEnabled || Time.time < nextReport || ExternalCapacity <= 0f) return;
         nextReport = Time.time + ReportS;
         float cells = aircraft.GetFuelTanks().Sum(c => c == null ? 0f : c.fuelMass);
         IcarusPlugin.Log.Stage("tip-tanks-fuel", $"tip tanks {External:0} of {ExternalCapacity:0} kg, internal {cells:0} kg, fuel level {aircraft.GetFuelLevel():P1}, mass {aircraft.GetMass():0} kg");
@@ -305,7 +311,8 @@ sealed class TipTanks : MonoBehaviour
             {
                 if (!station.SafetyIsOn(aircraft))
                 {
-                    IcarusPlugin.Log.Stage("tip-tanks-ai-release", $"AI {aircraft.persistentID} releasing tip tanks: {(landing ? "landing" : "dry")}, fuel {External:0} kg, mass {aircraft.GetMass():0} kg", everyOccurrence: true);
+                    if (IcarusPlugin.Log.StageEnabled)
+                        IcarusPlugin.Log.Stage("tip-tanks-ai-release", $"AI {aircraft.persistentID} releasing tip tanks: {(landing ? "landing" : "dry")}, fuel {External:0} kg, mass {aircraft.GetMass():0} kg", everyOccurrence: true);
                     station.LaunchMount(aircraft, null, aircraft.GlobalPosition() + aircraft.transform.forward * 1000f);
                 }
             }
@@ -360,8 +367,9 @@ sealed class TipTanks : MonoBehaviour
             if (turned) rack!.RotateAround(store.transform.position, store.transform.forward, 180f);
             Vector3 local = root.InverseTransformPoint(store.transform.position);
             if (local.x > 0f) RailOf(store) = MountedMissile.RailDirection.Right;
-            IcarusPlugin.Log.Stage("tip-tank-flip", $"tip tank {(local.x < 0f ? "L" : "R")} {(turned ? "turned" : "kept")}: at ({local.x:0.000}, {local.y:0.000}, {local.z:0.000}), " +
-                $"up {Vector3.Dot(store.transform.up, root.up):0.000}, forward {Vector3.Dot(store.transform.forward, root.forward):0.000}, rail {RailOf(store)}", everyOccurrence: true);
+            if (IcarusPlugin.Log.StageEnabled)
+                IcarusPlugin.Log.Stage("tip-tank-flip", $"tip tank {(local.x < 0f ? "L" : "R")} {(turned ? "turned" : "kept")}: at ({local.x:0.000}, {local.y:0.000}, {local.z:0.000}), " +
+                    $"up {Vector3.Dot(store.transform.up, root.up):0.000}, forward {Vector3.Dot(store.transform.forward, root.forward):0.000}, rail {RailOf(store)}", everyOccurrence: true);
         }
     }
 
@@ -378,8 +386,9 @@ sealed class TipTanks : MonoBehaviour
             renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
             new MaterialPropertyBlock());
         Vector3 spawn = aircraft.transform.InverseTransformPoint(__instance.transform.position);
-        IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery, spawned at ({spawn.x:0.000}, {spawn.y:0.000}, {spawn.z:0.000}), " +
-            $"up {Vector3.Dot(__instance.transform.up, aircraft.transform.up):0.000}", everyOccurrence: true);
+        if (IcarusPlugin.Log.StageEnabled)
+            IcarusPlugin.Log.Stage("tip-tanks-round", $"tip tank round {side} from {aircraft.persistentID} dressed in the jet's livery, spawned at ({spawn.x:0.000}, {spawn.y:0.000}, {spawn.z:0.000}), " +
+                $"up {Vector3.Dot(__instance.transform.up, aircraft.transform.up):0.000}", everyOccurrence: true);
     }
 
     // The tank is authored as a bomb (the game releases it like one), so the HUD would draw the bombing sight (pipper, fall
@@ -395,7 +404,8 @@ sealed class TipTanks : MonoBehaviour
         Destroy(___weaponState.gameObject);
         ___weaponState = Instantiate(___NoWeaponUI, SceneSingleton<FlightHud>.i.GetHUDCenter()).GetComponent<HUDWeaponState>();
         ___weaponState.SetHUDWeaponState(__instance.targetDesignator, __instance.aircraft, weaponStation);
-        IcarusPlugin.Log.Stage("tip-tank-hud", $"tip tank selected, no weapon sight (selection {++hudSwaps})", everyOccurrence: true);
+        if (IcarusPlugin.Log.StageEnabled)
+            IcarusPlugin.Log.Stage("tip-tank-hud", $"tip tank selected, no weapon sight (selection {++hudSwaps})", everyOccurrence: true);
     }
 
     static void AfterGetFuelLevel(Aircraft __instance, ref float __result)

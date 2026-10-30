@@ -8,6 +8,7 @@
 // is undamaged. It ends by releasing the full tanks: the tank still drops, with no joint break. The verdict on what the HUD and the panel show is read from the screenshots.
 // From the repo root: no-agentic run tests/scenarios/icarus_tip_tank_hud.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_tip_tank_hud.mission.json",
   "mods": "clean",
   "plugins": [

@@ -64,6 +64,8 @@ The Icarus uses the game's normal controls, with no new key bindings.
 
 ### Tuning
 
+Diagnostic logging is off by default. To enable it, set `StageLogging = true` under `[Diagnostics]` in `BepInEx/config/baanish.icarus.cfg`, then restart the game. Restart after turning it off too, so the diagnostic patches are removed.
+
 The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine, afterburner, thrust vectoring, wing and drag area and AI speed values. Saving the file applies them to every Icarus in flight. A value below 0 means the shipped value. While another player is connected, every machine uses the shipped values. The [vision](docs/VISION.md#tuning) lists what is live and what is not.
 
 ## Known issues

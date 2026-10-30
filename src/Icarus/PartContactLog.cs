@@ -15,13 +15,13 @@ static class PartContactLog
     internal static readonly PatchTarget[] PatchTargets =
     {
         new("part-contact-log", typeof(AeroPart), "OnCollisionEnter",
-            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeCollision))),
+            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeCollision)), diagnostic: true),
         new("part-contact-log", typeof(UnitPart), "OnJointBreak",
-            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeJointBreak))),
+            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeJointBreak)), diagnostic: true),
         new("part-contact-log", typeof(UnitPart), "TakeDamage",
-            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeTakeDamage))),
+            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeTakeDamage)), diagnostic: true),
         new("part-contact-log", typeof(UnitPart), nameof(UnitPart.Detach),
-            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeDetach))),
+            prefix: AccessTools.Method(typeof(PartContactLog), nameof(BeforeDetach)), diagnostic: true),
     };
 
     static bool IsIcarus(UnitPart part) =>

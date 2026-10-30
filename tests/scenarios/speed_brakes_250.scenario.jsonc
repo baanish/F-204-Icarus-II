@@ -5,6 +5,7 @@
 // tail open and closed, the first one 40 s after setup, once the join notice has gone.
 // From the repo root: no-agentic run tests/scenarios/speed_brakes_250.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_ignus_3km_250.mission.json",
   "mods": "clean",
   "plugins": [

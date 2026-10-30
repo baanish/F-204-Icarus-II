@@ -18,6 +18,8 @@ def generate():
         for count in (1, 8):
             source = "icarus_ignus_10km_half" if count == 1 else "icarus_ignus_10km_eight"
             scenario = copy.deepcopy(template)
+            # Measure normal player settings, without the template's diagnostic probes.
+            scenario.pop("config", None)
             scenario["steps"] = [s for s in scenario["steps"]
                                  if s.get("label") != "a primary structural part detaches in the air"]
             scenario["steps"][0]["require"]["all"][1]["eq"] = jet

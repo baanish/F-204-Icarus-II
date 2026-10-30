@@ -8,6 +8,7 @@
 // keeps below that height for its first second, the Icarus is undamaged for 8 s, and the missile hits T1.
 // From the repo root: no-agentic run tests/scenarios/icarus_conformal_eject.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_conformal_eject.mission.json",
   "mods": "clean",
   "plugins": [

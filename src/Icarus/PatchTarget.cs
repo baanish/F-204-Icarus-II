@@ -11,7 +11,7 @@ namespace Icarus;
 /// </summary>
 public sealed class PatchTarget
 {
-    public PatchTarget(string feature, Type type, string method, Type[]? parameters = null, MethodInfo? prefix = null, MethodInfo? postfix = null, MethodInfo? transpiler = null)
+    public PatchTarget(string feature, Type type, string method, Type[]? parameters = null, MethodInfo? prefix = null, MethodInfo? postfix = null, MethodInfo? transpiler = null, bool diagnostic = false)
     {
         Feature = feature;
         Type = type;
@@ -20,6 +20,7 @@ public sealed class PatchTarget
         Prefix = prefix;
         Postfix = postfix;
         Transpiler = transpiler;
+        Diagnostic = diagnostic;
     }
 
     public string Feature { get; }
@@ -29,6 +30,9 @@ public sealed class PatchTarget
     public MethodInfo? Prefix { get; }
     public MethodInfo? Postfix { get; }
     public MethodInfo? Transpiler { get; }
+    /// <summary>Exists only to measure or log: installed only when Diagnostics.StageLogging is on at startup, so players
+    /// run no diagnostic hooks (AGENTS.md rule 12).</summary>
+    public bool Diagnostic { get; }
 
     string Name => Type.Name + "." + Method;
 
@@ -43,6 +47,12 @@ public sealed class PatchTarget
         log.Info($"Harmony: {targets.Count} patch targets");
         foreach (PatchTarget target in targets)
         {
+            if (target.Diagnostic && !log.StageEnabled)
+            {
+                off.Add(target.Feature);
+                log.Info($"patch {target.Feature}: {target.Name} off (Diagnostics.StageLogging=false at startup)");
+                continue;
+            }
             if (off.Contains(target.Feature)) continue;
             try
             {

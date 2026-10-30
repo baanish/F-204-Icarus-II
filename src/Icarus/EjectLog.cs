@@ -39,6 +39,7 @@ sealed class EjectLog : MonoBehaviour
 
     void Launched(Missile missile)
     {
+        if (!IcarusPlugin.Log.StageEnabled) return;
         var flight = new Flight { Missile = missile };
         flight.Path.Add(Offset(missile));
         flights.Add(flight);
@@ -52,6 +53,11 @@ sealed class EjectLog : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!IcarusPlugin.Log.StageEnabled)
+        {
+            flights.Clear();
+            return;
+        }
         for (int i = flights.Count - 1; i >= 0; i--)
         {
             Flight flight = flights[i];

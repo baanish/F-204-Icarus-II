@@ -4,6 +4,7 @@
 // the next two stations are the AAM-36 and the AAM-29, and the Icarus is undamaged.
 // From the repo root: no-agentic run tests/scenarios/icarus_default_loadout.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_default_loadout.mission.json",
   "mods": "clean",
   "plugins": [

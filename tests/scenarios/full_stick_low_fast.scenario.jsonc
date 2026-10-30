@@ -8,6 +8,7 @@
 // (src/Icarus/TailFlex.cs), and a "joint-break" line names any joint that lets go (src/Icarus/PartContactLog.cs).
 // From the repo root: no-agentic run tests/scenarios/full_stick_low_fast.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_ignus_1km_fast.mission.json",
   "mods": "clean",
   "plugins": [

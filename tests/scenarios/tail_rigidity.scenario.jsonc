@@ -9,6 +9,7 @@
 // line from the turn's start to its end; the rudder and fin_spar are recorded.
 // From the repo root: no-agentic run tests/scenarios/tail_rigidity.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_ignus_10km_half.mission.json",
   "mods": "clean",
   "plugins": [

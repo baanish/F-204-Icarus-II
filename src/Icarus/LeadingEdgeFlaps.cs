@@ -39,6 +39,5 @@ static class LeadingEdgeFlaps
         float alpha = Mathf.Abs(Mathf.Atan2(velocity.y, velocity.z) * Mathf.Rad2Deg);
         AlphaMin(__instance) = alpha - 1f;
         AlphaFactor(__instance) = Mathf.Min(Mathf.InverseLerp(AlphaStartDeg, AlphaFullDeg, alpha), 1f - bySpeed);
-        IcarusPlugin.Log.Stage("lef-aoa", $"{__instance.name}: AoA {alpha:0.0} deg, {aircraft.speed:0} m/s, droop share by speed {bySpeed:0.00} plus by AoA {AlphaFactor(__instance):0.00}");
     }
 }

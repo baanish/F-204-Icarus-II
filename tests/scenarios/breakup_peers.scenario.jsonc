@@ -9,6 +9,7 @@
   "mission": "icarus_group.mission.json",
   "peers": {
     "host": {
+      "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
       "role": "host", "mods": "clean",
       "plugins": [
         "installed:com.nikkorap.blueprinter",
@@ -17,6 +18,7 @@
       ],
     },
     "client": {
+      "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
       "role": "client", "mods": "clean",
       "plugins": [
         "installed:com.nikkorap.blueprinter",
