@@ -53,7 +53,7 @@ namespace Icarus.Editor
             ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook }),
             ("Air Superiority", new[] { "AAM1_single", "AAM2_double", ConformalAAM2, TailHook }),
             ("Strike", new[] { "AAM1_single", "bomb_500_single", ConformalAAM2, TailHook }),
-            ("Close Support", new[] { "AAM1_single", "Rocket2_4Pod", ConformalAAM2, TailHook }),
+            ("Close Support", new[] { "AAM1_single", "AGM_heavy_single", ConformalAAM2, TailHook }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
