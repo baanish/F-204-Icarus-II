@@ -67,9 +67,12 @@ static class StockMissionSupply
     }
 
     /// <summary>The covered mission's Icarus factory, or null when this mission keeps its stock supply.</summary>
+    /// A built-in mission opened in the Customize Mission menu loads as its Temp copy (CustomizeMissionMenu saves it as
+    /// "CurrentMission" under the original Name), so the Temp group counts too.
     static string? CoveredFactory(Mission? mission) =>
         enabled.Value && GameManager.gameState != GameState.Editor && mission?.LoadKey is { } key
-        && key.Group == MissionGroup.BuiltIn && Factories.TryGetValue(key.Name, out string factory) ? factory : null;
+        && (key.Group == MissionGroup.BuiltIn || key.Group == MissionGroup.Temp)
+        && Factories.TryGetValue(key.Name, out string factory) ? factory : null;
 
     public static void Apply(IcarusLog log)
     {
