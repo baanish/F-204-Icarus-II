@@ -48,6 +48,9 @@ sealed class NozzleDriver : MonoBehaviour
     readonly List<Link> links = new();
     readonly List<(Aimed Cylinder, Aimed Rod)> rams = new();
     JetNozzle? nozzle;
+    // A petal's drawn mesh: Unity marks it visible while any camera, its shadows included, draws it, and not once the
+    // nozzle's LOD swaps it for the hull, so the actuation is posed only while someone can see it.
+    Renderer? shown;
     Transform? ring, thrust, sync;
     Vector3 syncPosition, axis;
     Quaternion syncRotation;
@@ -87,6 +90,7 @@ sealed class NozzleDriver : MonoBehaviour
         }
 
         FindActuation();
+        shown = petals.Count > 0 ? petals[0].Hinge.GetComponentInChildren<Renderer>() : null;
         IcarusPlugin.Log.Stage("nozzle", $"nozzle driver on {name}: {petals.Count} petals and seals, {links.Count} links, {rams.Count} rams");
     }
 
@@ -188,6 +192,8 @@ sealed class NozzleDriver : MonoBehaviour
             enabled = false;
             return;
         }
+
+        if (shown != null && !shown.isVisible) return;
 
         float max = nozzle.GetMaxThrust();
         float afterburner = max > 0f ? Mathf.Clamp01(nozzle.GetTotalThrust() / max) : 0f;
