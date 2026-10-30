@@ -18,16 +18,21 @@ namespace Icarus.Editor
         // wing spar, and the aft section with the engine and the T-tail, hang on one joint anchored where the parts meet,
         // so that joint takes the whole bending moment and gets the Revoker's fuselage strength: at 50 and 60 kN the aft
         // section tore off at hp 100 in a full-stick 8.4 g pull at Mach 1.25, the tailless jet then shedding its wings
-        // (tests/scenarios/full_stick_low_fast.scenario.jsonc). The forward section breaks at 60, the cockpit at the VT-7
-        // Vagrant's 50.
+        // (tests/scenarios/full_stick_low_fast.scenario.jsonc). The forward section broke at 60 and the cockpit at the VT-7
+        // Vagrant's 50 when they carried 0.2.0's nose; the heavier radar (art/blender/parts.py radar_tray, 65 kg then, 260
+        // now) left them each the weakest joint for its load (an AI launch off the Hyperion's ski jump broke both, and the
+        // forward section's came to 0.61 of its limit in a full-stick pull, from 0.53). Each is now that strength times
+        // the larger of the growth in the mass and in the first moment it carries about its joint, as both force and torque
+        // break it: the cockpit's 910 kg and 1,723 kg m from 715 and 1,084 (x1.59, so 80 kN), the forward section's 1,595
+        // kg and 3,525 kg m empty from 1,400 and 2,753 (x1.28, so 77).
         // OuterWing joins the outer wing box to the inner at the crank: stock outer wing joints are 35 to 50 kN, and at 9 g
         // and 8 t the outer box's lift about 0.6 m out from the crank is about 81 kN, with up to 690 kg of tip tank and box
         // on it (art/blender/parts.py TREE, the breakup design's joint table).
-        private enum JointClass { Frame, ForwardSection, Section, Spar, OuterWing, Primary, Surface, Flap, Panel }
+        private enum JointClass { Frame, ForwardSection, Cockpit, Section, Spar, OuterWing, Primary, Surface, Flap, Panel }
 
         private static readonly Dictionary<JointClass, float> JointForces = new Dictionary<JointClass, float>
         {
-            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 60000f }, { JointClass.Section, 50000f },
+            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 77000f }, { JointClass.Cockpit, 80000f }, { JointClass.Section, 50000f },
             { JointClass.Spar, 100000f }, { JointClass.OuterWing, 60000f }, { JointClass.Primary, 40000f },
             { JointClass.Surface, 30000f }, { JointClass.Flap, 15000f }, { JointClass.Panel, 10000f },
         };
@@ -78,7 +83,7 @@ namespace Icarus.Editor
         {
             P(RootPart, null, JointClass.Frame, "", ""),
             P("fuselage_forward", RootPart, JointClass.ForwardSection, "fuselage", "fuselage"),
-            P("cockpit_cell", "fuselage_forward", JointClass.Section, "fuselage/cockpit", "fuselage/cockpit"),
+            P("cockpit_cell", "fuselage_forward", JointClass.Cockpit, "fuselage/cockpit", "fuselage/cockpit"),
             P("radome", "cockpit_cell", JointClass.Panel, "fuselage/cockpit/nose", "fuselage/cockpit/nose"),
             P("canopy", "cockpit_cell", JointClass.Panel, "fuselage/cockpit/nose"),
             P("gear_leg_N", "cockpit_cell", JointClass.Primary, "fuselage/intake_L"),

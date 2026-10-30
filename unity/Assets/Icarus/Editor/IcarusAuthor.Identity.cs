@@ -152,11 +152,14 @@ namespace Icarus.Editor
             new AnimationCurve(keys.Select(k => new Keyframe(k[0], k[1], k[2], k[3])).ToArray()) { preWrapMode = WrapMode.ClampForever, postWrapMode = WrapMode.ClampForever };
 
         // AI numbers. The landing AI flies landingSpeed x sqrt(mass / maxWeight) (AIPilotLandingState.cs:96), so the
-        // field is the speed at MaxWeight that gives the target 75 m/s approach at 20% fuel (LowFuelLandingMass).
+        // field is the approach speed at MaxWeight. 88 m/s keeps a full-weight carrier approach under the 100 m/s above
+        // which the game's TailHook retracts (TailHook.CheckDeployConditions): the AI flies about 5 m/s over its target
+        // down to the deck, and at 96 m/s two heavy Icarus crossed the Hyperion's deck at 99 to 100 with the hook up
+        // (tests/scenarios/carrier_ai.scenario.jsonc). At 20% fuel (LowFuelLandingMass) it gives about 69 m/s.
         private const float MaxWeight = EmptyMass + FuelMass + 2000f; // 2 t of stores
         private const float LowFuelLandingMass = EmptyMass + 0.2f * FuelMass;
-        private const float ApproachAtLowFuel = 75f;
-        private static float LandingSpeedField => ApproachAtLowFuel * Mathf.Sqrt(MaxWeight / LowFuelLandingMass);
+        private const float LandingSpeedField = 88f;
+        private const float ApproachAtLowFuel = 75f; // the short-landing AI's target (shortLandingSpeed)
 
         private static Object AuthorParameters(Stations stations, List<LiveryEntry> liveries, GameObject statusDisplay, GameObject hudExtras)
         {
@@ -225,7 +228,7 @@ namespace Icarus.Editor
             // Tier 2, the owner's call: unlocked a rank before the Revoker it is built on, beside the Brawler.
             Prop(so, "rankRequired").intValue = 2;
             so.ApplyModifiedPropertiesWithoutUndo();
-            Debug.Log($"[Icarus] stage: parameters {Airfoils.Length} airfoils, {StandardLoadouts.Length} standard loadouts, landingSpeed {LandingSpeedField:F1} (75 m/s at {LowFuelLandingMass:0} kg of {MaxWeight:0})");
+            Debug.Log($"[Icarus] stage: parameters {Airfoils.Length} airfoils, {StandardLoadouts.Length} standard loadouts, landingSpeed {LandingSpeedField:F1} ({LandingSpeedField * Mathf.Sqrt(LowFuelLandingMass / MaxWeight):F1} m/s at {LowFuelLandingMass:0} kg of {MaxWeight:0})");
             return SaveAsset(parameters, ParametersPath);
         }
 

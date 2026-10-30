@@ -11,7 +11,8 @@ namespace Icarus;
 /// a part flex as far as its joints' conditioning allows; tests/scenarios/tail_rigidity.scenario.jsonc reads the line.
 /// fin_skin is the fin the player sees; fin_spar is the structure inside it. A "joint-load" line beside it gives the three
 /// joints that came nearest their break limits over that second, each as its peak load over its limit (force or torque,
-/// whichever is nearer; a joint breaks at 1), which the full_stick scenarios read. A "wing-crank-<side>" line gives how far
+/// whichever is nearer; a joint breaks at 1), which the full_stick scenarios read, and a "nose-load <aircraft>" line the
+/// same for the cockpit and forward sections' joints, whichever are nearest. A "wing-crank-<side>" line gives how far
 /// the outer wing box's body has carried its tip (where its wingtip station was made) in the inner box's frame from where
 /// the joints made it, the physical seam the two boxes meet at, its peak over that second in mm, and the peak of the
 /// outer box's joint against its limit. A "thrust-line"
@@ -79,6 +80,9 @@ sealed class TailFlexProbe : MonoBehaviour
     (AeroPart Wing, AeroPart Aft, Vector3 Point, Vector3 Home, Vector3 Normal, float Gap)[] wingAft = null!;
     float[] wingAftPeak = null!;
     const int WingAftPairs = 3;
+    // The nose's joints, which carry the cockpit section's crew, radar and nose gear and the forward section's: a
+    // "nose-load <aircraft>" line gives each one's peak over its limit, every second, per aircraft.
+    static readonly string[] NoseJoints = { "cockpit_cell->fuselage_forward", "fuselage_forward->Icarus" };
     // The neighbours measured: every inner and outer wing box against fuselage_aft, and the fin skin against the tail cone.
     static readonly (string Part, string Other)[] Approaches = { ("wing_spar_", "fuselage_aft"), ("fin_skin", "fuselage_tail") };
     // Each fuselage skin piece, the part it hangs on, its mesh's bounds corners in its own frame and their rest points in
@@ -190,6 +194,9 @@ sealed class TailFlexProbe : MonoBehaviour
         string worst = string.Join(", ", Enumerable.Range(0, joints.Length).OrderByDescending(i => jointPeak[i]).Take(3)
             .Select(i => $"{joints[i].Name} {jointPeak[i]:0.00}"));
         IcarusPlugin.Log.Stage("joint-load", $"nearest break: {worst}; peaks over 1 s, up to {gPeak:0.0} g");
+        string nose = string.Join(", ", Enumerable.Range(0, joints.Length).Where(i => NoseJoints.Contains(joints[i].Name))
+            .Select(i => $"{joints[i].Name} {jointPeak[i]:0.00}"));
+        IcarusPlugin.Log.Stage($"nose-load {aircraft.persistentID}", $"{nose}; peaks over 1 s, up to {gPeak:0.0} g");
         for (int i = 0; i < cranks.Length; i++)
         {
             int j = System.Array.FindIndex(joints, x => x.Joint == cranks[i].Outer.Joints.FirstOrDefault());

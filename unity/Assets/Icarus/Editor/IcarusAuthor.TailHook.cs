@@ -20,11 +20,13 @@ namespace Icarus.Editor
         // The set's place in SetNames: appended after the wing and conformal sets, so loadouts saved before it keep their
         // indices. One hardpoint, on the tail cone, HardpointIndex -1 as on the Compass and the Ifrit.
         private const int TailHookSet = 3;
-        // The hook's cost, as stock hooks have one (the owner's call): the Compass's 50 kg, and half its 0.1 drag, as it
-        // lies flush in its fairing. Hardpoint.SpawnMount puts only a mount's emptyMass on its part (WeaponMount takes
-        // its label mass from the TailHook), and the stock hooks' is 0, so both carry the 50 kg; the drag adds to the
-        // tail cone's dragArea (AeroPart.ModifyDrag). parts.py's radar weight holds the empty margin with it fitted.
-        private const float TailHookMass = 50f, TailHookDrag = 0.05f;
+        // The hook's cost, as stock hooks have one (the owner's call: a minor one): the Compass's 50 kg, and 2% of the clean
+        // airframe's dragArea (IcarusAuthor.Aero.cs DragAreaTotal), so that with the fairing's 1% (FairingDragArea) the
+        // carrier fit costs about 3%; the Compass's own 0.1 is a quarter of its airframe's. Hardpoint.SpawnMount puts
+        // only a mount's emptyMass on its part (WeaponMount takes its label mass from the TailHook), and the stock
+        // hooks' is 0, so both carry the 50 kg; the drag adds to the tail cone's dragArea (AeroPart.ModifyDrag).
+        // parts.py's radar weight holds the empty margin with it fitted.
+        private const float TailHookMass = 50f, TailHookDrag = 0.02f * DragAreaTotal;
 
         private static Dictionary<string, object> TailHookLayout() =>
             (Dictionary<string, object>)((Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(ExportFolder, "blockout.json"))))["tail_hook"];

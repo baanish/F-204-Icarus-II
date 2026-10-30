@@ -1,6 +1,7 @@
 // Approach speed at 20% fuel: the game's landing AI flies AircraftParameters.landingSpeed scaled by the square root of mass over
-// maxWeight (the build logs "landingSpeed 95.6 (75 m/s at 6280 kg of 10200)"), so at 20% fuel, 6,280 kg, it targets 75 m/s,
-// the offline aero model's predicted 75.35 m/s (1.2 times the minimum speed). This checks the Icarus flies that approach stably: on its glideslope with the
+// maxWeight (the build logs "landingSpeed 88.0 (68.7 m/s at 6981 kg of 11447)"), so at 20% fuel it targets 68.7 m/s and flies
+// about 5 m/s over it, near the offline aero model's predicted 75.35 m/s (1.2 times the minimum speed); 88 keeps a full-weight
+// carrier approach under the arrestor hook's 100 m/s (IcarusAuthor.Identity.cs). This checks the Icarus flies that approach stably: on its glideslope with the
 // gear down, not stalling, and touches down undamaged. The Icarus starts 19 km out on Sandrift's runway centreline at 1,200 m,
 // 23% fuel, which is about 20% on final.
 // Pass: TAS on final (gear down, 150 m and 30 m above the ground) within 10% of 75.35 m/s (67.8 to 82.9), fuel 15 to 25%

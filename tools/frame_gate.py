@@ -78,7 +78,7 @@ def main():
         scenario = f"frames_{jet}_{count}"
         runs = ROOT / ".agentic/runs"
         before = set(runs.glob(f"*-{scenario}"))
-        subprocess.run([args.runner, "run", "--uncapped", f"tests/scenarios/{scenario}.scenario.jsonc"], cwd=ROOT, check=True)
+        subprocess.run([args.runner, "run", f"tests/scenarios/{scenario}.scenario.jsonc", "--uncapped"], cwd=ROOT, check=True)
         created = set(runs.glob(f"*-{scenario}")) - before
         if len(created) != 1:
             raise ValueError(f"expected one new run for {scenario}, found {len(created)}")

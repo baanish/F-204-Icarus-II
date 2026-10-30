@@ -25,7 +25,7 @@
     { "record": { "path": "truth.factions.Primeva.alive.baanish_icarus" }, "label": "Icarus alive, the player's among them" },
     { "wait": { "any": [ { "path": "truth.factions.Primeva.supply.baanish_icarus", "eq": 4 },
                          { "path": "truth.factions.Primeva.alive.baanish_icarus", "lt": 2 } ] }, "timeout": 900,
-      "label": "both back aboard, or one lost" },
+      "label": "every AI Icarus back aboard or lost (alive: the player's alone)" },
     { "record": { "path": "truth.factions.Primeva.supply.baanish_icarus" }, "label": "Icarus in Primeva's supply" },
     { "record": { "path": "truth.factions.Primeva.alive.baanish_icarus" }, "label": "Icarus alive" },
     { "check": { "path": "truth.factions.Primeva.supply.baanish_icarus", "eq": 4 }, "label": "every Icarus the AI launched landed back aboard" },
