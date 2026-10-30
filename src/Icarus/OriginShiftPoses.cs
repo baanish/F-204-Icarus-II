@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -13,7 +14,9 @@ namespace Icarus;
 /// roll the wing boxes landed 80 mm off the root, the joints snapped them back next step, and a wing box struck
 /// fuselage_aft. After the shift, each interpolated Icarus body is put back on the physics pose it had, moved by the shift.
 /// Bodies without interpolation (a remote copy, which Aircraft.SetLocalSim turns off and the network transform moves) are
-/// left alone, since their transform is their pose.
+/// left alone, since their transform is their pose. The camera calls OriginShift every frame and the game decides inside
+/// it whether to shift, so the prefix asks ShouldShift first and searches for Icarus bodies only on a real shift: the
+/// search over every aircraft ran each frame in 0.2.0, Icarus or not.
 /// </summary>
 static class OriginShiftPoses
 {
@@ -24,14 +27,17 @@ static class OriginShiftPoses
             postfix: AccessTools.Method(typeof(OriginShiftPoses), nameof(AfterOriginShift))),
     };
 
+    static readonly Func<FloatingOrigin, Vector3, bool> ShouldShift =
+        AccessTools.MethodDelegate<Func<FloatingOrigin, Vector3, bool>>(AccessTools.Method(typeof(FloatingOrigin), "ShouldShift"));
+
     static readonly List<(Rigidbody Body, Vector3 Position, Quaternion Rotation)> held = new List<(Rigidbody, Vector3, Quaternion)>();
     static Vector3 originBefore;
 
-    static void BeforeOriginShift()
+    static void BeforeOriginShift(FloatingOrigin __instance, Vector3 cameraPosition)
     {
         held.Clear();
-        if (IcarusPlugin.FeaturesOff.Contains("origin-shift-poses") || Datum.origin == null) return;
-        foreach (Aircraft aircraft in Object.FindObjectsOfType<Aircraft>())
+        if (IcarusPlugin.FeaturesOff.Contains("origin-shift-poses") || Datum.origin == null || !ShouldShift(__instance, cameraPosition)) return;
+        foreach (Aircraft aircraft in UnityEngine.Object.FindObjectsOfType<Aircraft>())
         {
             if (aircraft.definition == null || aircraft.definition.jsonKey != IcarusPlugin.JsonKey) continue;
             foreach (Rigidbody body in IcarusSystems.Parts(aircraft).Select(p => p.rb).Append(aircraft.rb)
