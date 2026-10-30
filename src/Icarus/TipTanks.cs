@@ -22,7 +22,7 @@ namespace Icarus;
 /// The fuel readouts (HUD gauge, status bar and warnings, the cockpit needle, the AI's fuel check) read
 /// Aircraft.GetFuelLevel and GetFuelQuantity, which know only the internal cells: the patches add the tanks' fuel and
 /// capacity while they hang. Firing one tank releases the other on the same station, so the pair goes together and the
-/// jet never flies with one full tank on one tip. An AI-flown Icarus drops its tanks once they are dry.
+/// jet never flies with one full tank on one tip. An AI-flown Icarus drops its tanks once dry or when it starts landing.
 ///
 /// Each tank's nav lenses show the state and colour of the wing lens beside them, and its skin takes the jet's livery.
 ///
@@ -291,12 +291,19 @@ sealed class TipTanks : MonoBehaviour
         }
 
         if (!aircraft.LocalSim || !aircraft.IsServer || GameManager.IsLocalAircraft(aircraft)) return;
-        // An AI-flown Icarus drops its tanks once they are dry; ReleasePairs takes the second of each pair.
-        if (tanks.Any(t => t.Attached) && External < 1f)
+        Pilot pilot = aircraft.pilots[0];
+        if (pilot == null || pilot.player != null || pilot.playerControlled) return;
+        bool landing = pilot.currentState is AIPilotLandingState;
+        // ReleasePairs takes the second of each pair after the first station launch.
+        if (tanks.Any(t => t.Attached) && (External < 1f || landing))
         {
             foreach (WeaponStation station in tanks.Where(t => t.Attached).Select(t => t.Station).Distinct().ToArray())
             {
-                if (!station.SafetyIsOn(aircraft)) station.LaunchMount(aircraft, null, aircraft.GlobalPosition() + aircraft.transform.forward * 1000f);
+                if (!station.SafetyIsOn(aircraft))
+                {
+                    IcarusPlugin.Log.Stage("tip-tanks-ai-release", $"AI {aircraft.persistentID} releasing tip tanks: {(landing ? "landing" : "dry")}, fuel {External:0} kg, mass {aircraft.GetMass():0} kg", everyOccurrence: true);
+                    station.LaunchMount(aircraft, null, aircraft.GlobalPosition() + aircraft.transform.forward * 1000f);
+                }
             }
         }
     }

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- AI pilots drop the tip tanks when they start landing, even if the tanks still contain fuel.
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
 - A bigger engine: 90 kN dry and 135 kN with afterburner (was 65 and 110), afterburner fuel burn up 20%, and the engine weighs 1,500 kg instead of 1,150.
 - An interceptor's radar: 60 km range (was 40), a narrower 20 degree cone off the nose (was 30), twice the power draw, and 260 kg instead of 65, which keeps the jet's balance with the heavier engine and the tail hook. Empty weight is 6,365 kg.
