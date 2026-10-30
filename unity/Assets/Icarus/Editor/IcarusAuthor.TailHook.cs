@@ -20,18 +20,22 @@ namespace Icarus.Editor
         // The set's place in SetNames: appended after the wing and conformal sets, so loadouts saved before it keep their
         // indices. One hardpoint, on the tail cone, HardpointIndex -1 as on the Compass and the Ifrit.
         private const int TailHookSet = 3;
-        // The hook's cost, as stock hooks have one (the owner's call: a minor one): the Compass's 50 kg, and 2% of the clean
-        // airframe's dragArea (IcarusAuthor.Aero.cs DragAreaTotal), so that with the fairing's 1% (FairingDragArea) the
-        // carrier fit costs about 3%; the Compass's own 0.1 is a quarter of its airframe's. Hardpoint.SpawnMount puts
-        // only a mount's emptyMass on its part (WeaponMount takes its label mass from the TailHook), and the stock
-        // hooks' is 0, so both carry the 50 kg; the drag adds to the tail cone's dragArea (AeroPart.ModifyDrag).
-        // parts.py's radar weight holds the empty margin with it fitted.
-        private const float TailHookMass = 50f, TailHookDrag = 0.02f * DragAreaTotal;
+        // The cost of the hook and the fairing that comes with it (art/blender/tail_hook.py HOOKED_FIN), the owner's call
+        // since the stock hooks are much smaller: 100 kg and 5% of the clean airframe's dragArea (IcarusAuthor.Aero.cs
+        // DragAreaTotal) together, all on the mount; the airframe without the hook carries neither. The Compass's own
+        // 0.1 is a quarter of its airframe's. Hardpoint.SpawnMount puts only a mount's emptyMass on its part (WeaponMount
+        // takes its label mass from the TailHook), and the stock hooks' is 0, so both carry the 100 kg; the drag adds to
+        // the tail cone's dragArea (AeroPart.ModifyDrag). parts.py's radar weight holds the empty margin with it fitted.
+        private const float TailHookMass = 100f, TailHookDrag = 0.05f * DragAreaTotal;
 
         private static Dictionary<string, object> TailHookLayout() =>
             (Dictionary<string, object>)((Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(ExportFolder, "blockout.json"))))["tail_hook"];
 
-        private static Mesh ImportTailHookMesh(Dictionary<string, object> layout)
+        private static List<Dictionary<string, object>> TailHookHulls(Dictionary<string, object> layout) =>
+            ((List<object>)layout["hulls"]).Cast<Dictionary<string, object>>().ToList();
+
+        // The hook's mesh, and the hooked fin's hulls in its part's frame (export_blockout.py), from the one FBX.
+        private static (Mesh Hook, Mesh[] Hulls) ImportTailHookMeshes(Dictionary<string, object> layout)
         {
             var fbx = (string)layout["fbx"];
             var bytes = File.ReadAllBytes(Path.Combine(ExportFolder, fbx));
@@ -43,17 +47,22 @@ namespace Icarus.Editor
                 File.WriteAllBytes(target, bytes);
                 AssetDatabase.ImportAsset(target, ImportAssetOptions.ForceSynchronousImport);
             }
-            ConfigureModelImporter(target, new Dictionary<string, Material> { { "Icarus_Strut", TailHookMaterial() } });
-            var mesh = AssetDatabase.LoadAllAssetsAtPath(target).OfType<Mesh>().SingleOrDefault(m => m.name == "tail_hook")
-                ?? throw new InvalidDataException(target + " has no tail_hook mesh");
-            var bounds = (List<object>)layout["bounds_unity"];
-            if ((mesh.bounds.min - Vec3(bounds[0])).magnitude > 0.02f || (mesh.bounds.max - Vec3(bounds[1])).magnitude > 0.02f)
-                throw new InvalidDataException($"tail_hook: imported bounds {mesh.bounds.min}..{mesh.bounds.max} differ from the export's");
-            return mesh;
+            ConfigureModelImporter(target, new Dictionary<string, Material> { { SkinSlot, Load<Material>(SkinPath) } });
+            var meshes = AssetDatabase.LoadAllAssetsAtPath(target).OfType<Mesh>().ToArray();
+            Mesh Imported(string name, object bounds)
+            {
+                var mesh = meshes.SingleOrDefault(m => m.name == name) ?? throw new InvalidDataException($"{target} has no {name} mesh");
+                var box = (List<object>)bounds;
+                if ((mesh.bounds.min - Vec3(box[0])).magnitude > 0.02f || (mesh.bounds.max - Vec3(box[1])).magnitude > 0.02f)
+                    throw new InvalidDataException($"{name}: imported bounds {mesh.bounds.min}..{mesh.bounds.max} differ from the export's");
+                return mesh;
+            }
+            return (Imported("tail_hook", layout["bounds_unity"]), TailHookHulls(layout).Select(h => Imported((string)h["name"], h["bounds_unity"])).ToArray());
         }
 
-        // Bare steel, as the probe: the same in every livery (ImportBlockout authors the slot's material first).
-        private static Material TailHookMaterial() => Load<Material>(SkinFolder + "/Icarus_Strut.mat");
+        // The airframe skin, its UVs on the fairing's paint (art/blender/tail_hook.py paint), as the tip tank wears the
+        // wing's: the plugin hands the hook the livery the jet wears (src/Icarus/TailHookFairing.cs).
+        private static Material TailHookMaterial() => Load<Material>(SkinPath);
 
         private static Object AuthorTailHookMount()
         {
@@ -61,7 +70,7 @@ namespace Icarus.Editor
             var layout = TailHookLayout();
             if ((string)layout["key"] != TailHook)
                 throw new InvalidDataException($"blockout.json's tail hook is {layout["key"]}, not {TailHook}");
-            var mesh = ImportTailHookMesh(layout);
+            var (mesh, hulls) = ImportTailHookMeshes(layout);
             var prefabPath = MountFolder + "/" + TailHook + ".prefab";
             var assetPath = MountFolder + "/" + TailHook + ".asset";
             var copies = new[] { ("GameObject/TailHook_Trainer_PLACEHOLDER.prefab", prefabPath), ("MonoBehaviour/TailHook_Trainer_PLACEHOLDER.asset", assetPath) };
@@ -94,6 +103,17 @@ namespace Icarus.Editor
                 Num(hook, "stowedAngle", stowed);
                 Num(hook, "deployedAngle", Convert.ToSingle(layout["deployed_deg"]));
                 hook.ApplyModifiedPropertiesWithoutUndo();
+                // The hooked fin's hulls, which the plugin puts on the part while the hook is fitted
+                // (src/Icarus/TailHookFairing.cs): disabled here, where a round that hit one would find no damage receiver.
+                var holder = new GameObject(TailHookFairing.HullHolder).transform;
+                holder.SetParent(root.transform, false);
+                foreach (var hull in hulls)
+                {
+                    var collider = holder.gameObject.AddComponent<MeshCollider>();
+                    collider.convex = true;
+                    collider.sharedMesh = hull;
+                    collider.enabled = false;
+                }
                 SavePrefab(root, prefabPath);
             }
             finally
@@ -115,11 +135,14 @@ namespace Icarus.Editor
             EditorUtility.SetDirty(mount);
             AssetDatabase.SaveAssets();
             Debug.Log($"[Icarus] stage: tail hook mount {TailHook}: {layout["length"]} m, local X {layout["stowed_deg"]} stowed / {layout["deployed_deg"]} deployed, " +
-                      $"{mesh.triangles.Length / 3} triangles");
+                      $"{mesh.triangles.Length / 3} triangles, {hulls.Length} fairing hulls");
             return mount;
         }
 
-        // The Tail Hook set: its one hardpoint on the tail cone at the export's hinge, square to the aircraft.
+        // The Tail Hook set: its one hardpoint on the tail cone at the export's hinge, square to the aircraft. The fins take
+        // turns on it the stock way (Hardpoint.ShowPylon): the original ventral fin is its plug, drawn while it is empty,
+        // and variant D's fin and fairing the pylon for the hook, drawn while that is fitted, as the Compass draws its
+        // hook's. The prefab starts as an empty hardpoint shows.
         private static string BuildTailHookStation(Build b, SerializedProperty set)
         {
             var layout = TailHookLayout();
@@ -142,20 +165,31 @@ namespace Icarus.Editor
             hp.FindPropertyRelative("part").objectReferenceValue = b.Part((string)layout["part"]);
             hp.FindPropertyRelative("bayDoors").arraySize = 0;
             hp.FindPropertyRelative("doorOpenDuration").floatValue = 0f;
-            hp.FindPropertyRelative("pylonOptions").arraySize = 0;
-            hp.FindPropertyRelative("Pylon").objectReferenceValue = null;
-            hp.FindPropertyRelative("Plug").objectReferenceValue = null;
+            var fin = b.Visuals[(string)layout["fin"]].GetComponent<MeshRenderer>();
+            var hooked = b.Visuals[(string)layout["hooked_fin"]].GetComponent<MeshRenderer>();
+            var pylons = hp.FindPropertyRelative("pylonOptions");
+            pylons.arraySize = 1;
+            var pylon = pylons.GetArrayElementAtIndex(0);
+            pylon.FindPropertyRelative("cargo").boolValue = false;
+            pylon.FindPropertyRelative("mount").objectReferenceValue = Load<Object>(MountFolder + "/" + TailHook + ".asset");
+            pylon.FindPropertyRelative("renderer").objectReferenceValue = hooked;
+            hp.FindPropertyRelative("Pylon").objectReferenceValue = hooked;
+            hp.FindPropertyRelative("Plug").objectReferenceValue = fin;
+            fin.enabled = true;
+            hooked.enabled = false;
             hp.FindPropertyRelative("BuiltInWeapons").arraySize = 0;
             hp.FindPropertyRelative("BuiltInTurrets").arraySize = 0;
             hp.FindPropertyRelative("HardpointIndex").intValue = -1;
-            return $"{point.name} #-1 on {layout["part"]} at {point.position.ToString("F3")}";
+            return $"{point.name} #-1 on {layout["part"]} at {point.position.ToString("F3")}, plug {fin.name}, pylon {hooked.name}";
         }
 
         // A23: the hook mount is the Icarus's own (key, prefab, mesh and material, no stock mesh left), its chain turns
         // as the game turns it and reaches the Compass's length, the set holds one hardpoint where the export put the
-        // hinge on the tail cone, every standard loadout carries the hook, the game's catch linecast from hinge to point
-        // meets no collider of the jet stowed, deployed or between. The Hyperion's hangars are checked with the
-        // registrations (AuthorOps), which are written after the prefab.
+        // hinge on the tail cone, every standard loadout carries the hook. Both fits: without the hook the original
+        // ventral fin shows and its hulls are the tail cone's; with it the hooked fin shows, and its hulls, which the
+        // mount carries disabled, go on the tail cone, so both fins come off with it. The game's catch linecast from
+        // hinge to point meets no collider of the hooked jet stowed, deployed or between. The Hyperion's hangars are
+        // checked with the registrations (AuthorOps), which are written after the prefab.
         private const int TailHookSweepSteps = 40;
         private const float TailHookTolerance = 0.001f;
 
@@ -192,7 +226,7 @@ namespace Icarus.Editor
             var cast = (Transform)Prop(hook, "castPoint").objectReferenceValue;
             if (new[] { hinge, arm, end, cast }.Any(t => t == null || !t.IsChildOf(prefab.transform))) { p.Add("hook transforms not all in the mount"); return "broken chain"; }
             if (arm.GetComponent<MeshFilter>().sharedMesh?.name != "tail_hook" || arm.GetComponent<MeshRenderer>().sharedMaterials.Single() != TailHookMaterial())
-                p.Add("the arm doesn't draw the Icarus hook in bare steel");
+                p.Add("the arm doesn't draw the Icarus hook in the airframe skin");
             if (Prop(hook, "mass").floatValue != TailHookMass) p.Add($"TailHook mass {Prop(hook, "mass").floatValue}, not {TailHookMass}");
             var stowed = Prop(hook, "stowedAngle").floatValue;
             var deployed = Prop(hook, "deployedAngle").floatValue;
@@ -201,6 +235,15 @@ namespace Icarus.Editor
             if (!(deployed < stowed && stowed > 180f && deployed < 180f)) p.Add($"angles {stowed:F2} / {deployed:F2} don't swing the point from above the hinge to below it");
             if (Quaternion.Angle(hinge.localRotation, Quaternion.Euler(180f, 0f, 0f)) > 0.01f || hinge.localPosition.magnitude > 1e-5f)
                 p.Add("the hinge isn't half a turn about X on the hardpoint");
+            var holder = prefab.transform.Find(TailHookFairing.HullHolder);
+            var hulls = holder != null ? holder.GetComponents<MeshCollider>() : new MeshCollider[0];
+            var hullNames = TailHookHulls(layout).Select(h => (string)h["name"]).OrderBy(n => n, StringComparer.Ordinal).ToArray();
+            if (hullNames.Length == 0 || !hulls.Select(c => c.sharedMesh != null ? c.sharedMesh.name : null).OrderBy(n => n, StringComparer.Ordinal).SequenceEqual(hullNames))
+                p.Add($"the mount's fairing hulls [{string.Join(", ", hulls.Select(c => c.sharedMesh?.name))}], not the export's [{string.Join(", ", hullNames)}]");
+            if (hulls.Any(c => c.enabled || !c.convex))
+                p.Add("the mount's fairing hulls must be disabled and convex: enabled there, a round that hit one would find no damage receiver");
+            if (prefab.GetComponentsInChildren<Collider>(true).Any(c => c.enabled))
+                p.Add("the mount has an enabled collider");
 
             var sets = Prop(new SerializedObject(b.Parts["cockpit_cell"].GetComponent(GameType("WeaponManager"))), "hardpointSets");
             if (sets.arraySize != SetNames.Length || sets.GetArrayElementAtIndex(TailHookSet).FindPropertyRelative("name").stringValue != "Tail Hook")
@@ -215,6 +258,18 @@ namespace Icarus.Editor
             if (hp.FindPropertyRelative("HardpointIndex").intValue != -1) p.Add("Tail Hook HardpointIndex " + hp.FindPropertyRelative("HardpointIndex").intValue);
             var place = Vec3(layout["hinge_unity"]) - b.Blockout.Origin;
             if (Vector3.Distance(point.position, place) > TailHookTolerance) p.Add($"hinge {point.position.ToString("F4")}, export {place.ToString("F4")}");
+            var fin = b.Visuals.TryGetValue((string)layout["fin"], out var finAt) ? finAt.GetComponent<MeshRenderer>() : null;
+            var hooked = b.Visuals.TryGetValue((string)layout["hooked_fin"], out var hookedAt) ? hookedAt.GetComponent<MeshRenderer>() : null;
+            var pylons = hp.FindPropertyRelative("pylonOptions");
+            if (fin == null || hooked == null) { p.Add("no ventral fin or hooked fin renderer"); return "no fins"; }
+            if (hp.FindPropertyRelative("Plug").objectReferenceValue != fin) p.Add("the Tail Hook plug isn't the ventral fin");
+            if (pylons.arraySize != 1 || pylons.GetArrayElementAtIndex(0).FindPropertyRelative("renderer").objectReferenceValue != hooked
+                || pylons.GetArrayElementAtIndex(0).FindPropertyRelative("mount").objectReferenceValue != mount
+                || pylons.GetArrayElementAtIndex(0).FindPropertyRelative("cargo").boolValue)
+                p.Add("the Tail Hook pylon isn't the hooked fin, for the hook mount alone");
+            if (!fin.enabled || hooked.enabled) p.Add("the prefab doesn't start as an empty hardpoint shows: the ventral fin drawn, the hooked fin not");
+            foreach (var renderer in new[] { fin, hooked })
+                if (renderer.GetComponentInParent(GameType("UnitPart")) != b.Part(partName)) p.Add($"{renderer.name} doesn't ride {partName}, so it wouldn't come off with it");
 
             var std = Prop(new SerializedObject(parameters), "StandardLoadouts");
             var bare = new List<string>();
@@ -228,8 +283,16 @@ namespace Icarus.Editor
             if (fallback.Length != SetNames.Length || fallback[TailHookSet] != mount) bare.Add("loadouts[1]");
             if (bare.Count > 0) p.Add("no hook on " + string.Join(", ", bare));
 
-            // Hung on its hardpoint in the built jet, as Hardpoint.SpawnMount hangs it: its part, length and catch line.
+            // Hung on its hardpoint in the built jet, as Hardpoint.SpawnMount hangs it, with the fairing hulls on its part as
+            // the plugin puts them: its part, length and catch line.
             var hung = (GameObject)Object.Instantiate(prefab, point, false);
+            var fitted = hulls.Select(h =>
+            {
+                var c = b.Parts[partName].AddComponent<MeshCollider>();
+                c.convex = true;
+                c.sharedMesh = h.sharedMesh;
+                return c;
+            }).ToArray();
             float length = 0, least = float.MaxValue;
             var tipStowed = Vector3.zero;
             var tipDeployed = Vector3.zero;
@@ -267,13 +330,16 @@ namespace Icarus.Editor
             finally
             {
                 Object.DestroyImmediate(hung);
+                foreach (var c in fitted)
+                    Object.DestroyImmediate(c);
             }
             if (crossings.Count > 0) p.Add("the catch linecast meets the jet's own colliders at " + string.Join("; ", crossings.Take(5)));
             if (!(tipStowed.z < 0f && tipStowed.y > 0f && tipDeployed.z < 0f && tipDeployed.y < 0f)) p.Add($"point stowed {tipStowed.ToString("F3")}, deployed {tipDeployed.ToString("F3")} from the hinge, expected aft and up, then aft and down");
 
             return $"{TailHook} on {partName} at {point.position.ToString("F3")}, {length:F3} m, local X {stowed:F2} / {deployed:F2}, " +
                    $"point {tipStowed.ToString("F2")} stowed and {tipDeployed.ToString("F2")} deployed from the hinge; on all {std.arraySize} standard loadouts; " +
-                   $"catch line {least:F3} m from the jet's colliders over {TailHookSweepSteps + 1} poses";
+                   $"catch line {least:F3} m from the jet's colliders, the {fitted.Length} fairing hulls among them, over {TailHookSweepSteps + 1} poses; " +
+                   $"plug {fin.name}, pylon {hooked.name}";
         }
     }
 }

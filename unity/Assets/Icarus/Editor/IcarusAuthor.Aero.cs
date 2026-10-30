@@ -41,13 +41,6 @@ namespace Icarus.Editor
         // game that left the jet 4% short of Mach 2.46 at 10 km, and 0.47 holds the model's level speeds at 10 and 15 km.
         // The nozzle's share is fuselage_aft's and the intake ducts' the root's, the sections they fold into.
         private const float DragAreaR14 = 0.55f, DragAreaTotal = 0.47f;
-        // The ventral fin's hook fairing (art/blender/tail_hook.py), on the tail cone for good: a streamlined pod of
-        // fineness about 12 adding at most 0.053 m2 of section (its frontal area, at station 12.9), at a frontal drag
-        // coefficient of 0.05: 0.0027 m2 of CdA, which the game counts twice in dragArea (Tuning.cs DragArea), scaled as
-        // the offline model's areas are (DragAreaTotal / DragAreaR14): 0.0045, about 1% of the clean airframe's. Its net
-        // wetted area, 0.20 m2 more skin over the 135 m2 it joins, gives 0.0007 by skin friction alone, so this holds
-        // the larger.
-        private const float FairingDragArea = 0.0045f;
         private static readonly Dictionary<string, float> DragAreas = new Dictionary<string, float>
         {
             { RootPart, 0.135f + 0.03f + 0.03f }, { "fuselage_forward", 0.11f }, { "canopy", 0.04f }, { "radome", 0.02f },
@@ -330,8 +323,8 @@ namespace Icarus.Editor
                 var (area, airfoil) = aero.TryGetValue(spec.Name, out var a) ? a : (0f, BodyAirfoil);
                 Prop(so, "wingArea").floatValue = area;
                 Prop(so, "airfoil").intValue = airfoil;
-                Prop(so, "dragArea").floatValue = (dragShare.TryGetValue(spec.Name, out var split) ? DragAreas[split.Of] * split.Share
-                    : DragAreas.TryGetValue(spec.Name, out var drag) ? drag : 0f) + (spec.Name == "fuselage_tail" ? FairingDragArea : 0f);
+                Prop(so, "dragArea").floatValue = dragShare.TryGetValue(spec.Name, out var split) ? DragAreas[split.Of] * split.Share
+                    : DragAreas.TryGetValue(spec.Name, out var drag) ? drag : 0f;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
@@ -452,12 +445,13 @@ namespace Icarus.Editor
             var full = (cg * EmptyMass + fuelMoment) / (EmptyMass + fuel);
             var low = (cg * EmptyMass + 0.2f * fuelMoment) / (EmptyMass + 0.2f * fuel);
             string Margin(Vector3 at) => $"{at.z - np:F3} m ({(at.z - np) / WingMac:P1} MAC)";
-            // Every standard loadout carries the hook, whose mass Hardpoint.SpawnMount puts at its part's centre of mass.
+            // Every standard loadout carries the hook and its fairing, whose mass Hardpoint.SpawnMount puts at its part's
+            // centre of mass.
             var hookAt = ((Transform)GetRef(b.Part((string)TailHookLayout()["part"]), "centerOfMass")).position;
             var hooked = (cg * EmptyMass + TailHookMass * hookAt) / (EmptyMass + TailHookMass);
             b.Report.Add($"balance: CG station {Station(b, cg.z):F3} m empty, {Station(b, low.z):F3} m at 20% fuel, {Station(b, full.z):F3} m full ({fuel:0} kg); " +
                 $"neutral point estimate station {Station(b, np):F3} m; static margin {Margin(cg)} empty, {Margin(low)} at 20% fuel, {Margin(full)} full; " +
-                $"with the {TailHookMass:0} kg tail hook, CG station {Station(b, hooked.z):F3} m and margin {Margin(hooked)} empty");
+                $"with the {TailHookMass:0} kg tail hook and fairing, CG station {Station(b, hooked.z):F3} m and margin {Margin(hooked)} empty");
         }
 
         // The generator's station (metres aft of the radome tip, art/blender/build_icarus.py) of a prefab z: its station 0

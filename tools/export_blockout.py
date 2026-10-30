@@ -8,7 +8,8 @@ be identity-parented to their owner. Pivots and axes are world-space; mesh bound
 are part-local. hinge_axis_unity is world-space positive Blender hinge X. Each mesh part lists its uv_layers, and
 design_eye is the canopy's design eye point (canopy.EYE), world-space, and conformal the conformal
 hardpoint and the Icarus's own conformal mounts (stations.export), and tip_tank the tip tank store (tip_tanks.export) and
-tail_hook the arrestor hook (tail_hook.export), each with its own FBX, in the mount's frame.
+tail_hook the arrestor hook (tail_hook.export), each with its own FBX, in the mount's frame; the hook's FBX also holds the
+hooked ventral fin's collider hulls, in the frame of the part the hook hangs on.
 Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
 """
 
@@ -224,19 +225,31 @@ def main():
                  bounds_unity=bounds_unity(lo, hi), materials=material_tris(mesh), uv_layers=[l.name for l in mesh.uv_layers])
     bpy.data.objects.remove(temp, do_unlink=True)
     bpy.data.meshes.remove(mesh)
-    # The hook, a store too: its mesh in the hook transform's frame.
+    # The hook, a store too: its mesh in the hook transform's frame, and the hooked fin's hulls in its part's.
     hook = bpy.data.objects[tail_hook.NAME]
-    hook.name = "source_" + tail_hook.NAME
+    hook.name = hook.data.name = "source_" + tail_hook.NAME
     mesh = evaluated_mesh(hook, tail_hook.NAME)
-    temp = bpy.data.objects.new(tail_hook.NAME, mesh)
-    scratch.objects.link(temp)
+    hulls = []
+    for name in hook_layout["hulls"]:
+        hull = bpy.data.objects[name]
+        hull.name = hull.data.name = "source_" + name
+        hulls.append(evaluated_mesh(hull, name))
+    temps = [bpy.data.objects.new(m.name, m) for m in [mesh] + hulls]
+    if [t.name for t in temps] != [tail_hook.NAME] + hook_layout["hulls"]:
+        raise ValueError(f"tail hook FBX nodes {[t.name for t in temps]} aren't named as blockout.json lists them")
+    for temp in temps:
+        scratch.objects.link(temp)
     fbx = out / f"{tail_hook.NAME}.fbx"
-    export_fbx(fbx, [temp])
+    export_fbx(fbx, temps)
     lo, hi = mesh_bounds(mesh)
     hook_store = dict(hook_layout, fbx=fbx.name, sha256=sha256(fbx), tris=tris(mesh), bounds_unity=bounds_unity(lo, hi),
-                      materials=material_tris(mesh), uv_layers=[l.name for l in mesh.uv_layers])
-    bpy.data.objects.remove(temp, do_unlink=True)
-    bpy.data.meshes.remove(mesh)
+                      materials=material_tris(mesh), uv_layers=[l.name for l in mesh.uv_layers],
+                      hulls=[{"name": m.name, "verts": len(m.vertices), "tris": tris(m), "bounds_unity": bounds_unity(*mesh_bounds(m))}
+                             for m in hulls])
+    for temp in temps:
+        bpy.data.objects.remove(temp, do_unlink=True)
+    for m in [mesh] + hulls:
+        bpy.data.meshes.remove(m)
     source = REPO / "art/blender/build_icarus.py"
     eye = build_icarus.P(*canopy.EYE)
     manifest = {"source_generator": source.relative_to(REPO).as_posix(), "source_sha256": sha256(source),

@@ -6,16 +6,20 @@ one (TailHook.FixedUpdate's Physics.Linecast). It is a store on its own Tail Hoo
 module builds its arm, shoe and trunnion in its own collection (as tip_tanks.py keeps the tank in Stores), its mesh in the hook transform's frame (export), and
 IcarusAuthor.TailHook.cs clones the Compass mount around it.
 
-It stows flush in a fairing grown from the ventral fin, the owner's pick of four designs (variant D, 2026-10-29): the
-fin keeps its forward half; from its thickest line (FIN_CUT, chord fraction 0.5 at root and tip, where its web is as
-thick as it gets) its web runs on aft to the nozzle, and its lower edge widens into a pod POD wide that hangs up to
-0.26 m below the tail cone. The hook lies in a slot in the pod's bottom on a straight line (LINE) with its hinge at
-HINGE_S, behind the kept fin, so it never swings toward it, and its point under the nozzle. The fairing is a skin patch
-(the generator's own smooth-union fields: the body's, the web's and the pod's) joined into the ventral fin's mesh, so it
-rides the tail cone with the fin (parts.LATE_PARENTS), takes the fin's livery and adds no renderer; the loft's faces it
-covers are deleted, and the slot's well is dark like the gear wells. The fin gets collider hulls on the tail cone
-(hulls.fin_hulls), kept off the hook's line from hinge to point in every pose (check): the linecast has no layer mask,
-and a hit on the jet's own collider backs the hook off as it would a deck.
+It stows flush in a fairing grown from the ventral fin, the owner's pick of four designs (variant D, 2026-10-29), which
+comes with the hook: without it the Icarus keeps its original ventral fin. Variant D's fin (HOOKED_FIN) is a copy of the
+original cut at its thickest line (FIN_CUT, chord fraction 0.5 at root and tip, where its web is as thick as it gets);
+from there its web runs on aft to the nozzle, and its lower edge widens into a pod POD wide that hangs up to 0.26 m
+below the tail cone. The hook lies in a slot in the pod's bottom on a straight line (LINE) with its hinge at HINGE_S,
+behind the original fin's trailing edge, so it never swings toward either fin, and its point under the nozzle. The
+fairing is a skin patch (the generator's own smooth-union fields: the body's, the web's and the pod's) joined into
+HOOKED_FIN's mesh, lying just outside the belly's loft, which stays whole (the well's floor is below it at every
+station), so it rides the tail cone with the fins (parts.LATE_PARENTS) and takes their livery; the slot's well is dark
+like the gear wells. The Tail Hook hardpoint shows one fin or the other, the stock way (Hardpoint.Plug and pylonOptions,
+IcarusAuthor.TailHook.cs). The original fin gets collider hulls on the tail cone, and HOOKED_FIN's web and pod get theirs
+in their own collection (fin_hulls), which the mount carries and the plugin puts on the tail cone while the hook is
+fitted (src/Icarus/TailHookFairing.cs). Both sets keep off the hook's line from hinge to point in every pose (check):
+the linecast has no layer mask, and a hit on the jet's own collider backs the hook off as it would a deck.
 
 Frame: Blender, nose -Y, up +Z, left +X; station s = y + 8.
 """
@@ -32,6 +36,9 @@ KEY = "baanish_icarus_tail_hook"
 NAME = "tail_hook"
 COLLECTION = "TailHook"
 FAIRING = "ventral_fin_fairing"
+HOOKED_FIN = "ventral_fin_hooked"  # variant D's fin and fairing, drawn only with the hook fitted
+HULL = "tail_hook_hull"  # HOOKED_FIN's own collider hulls, exported with the hook
+HULLS = "TailHookHulls"  # their collection
 LENGTH = 1.953  # the Compass hook, hinge to hookEnd (TailHook_Trainer.prefab), so the catch reach is the donor's
 HINGE_S = 13.20  # behind the kept fin's trailing edge
 # The pod's bottom, the hook's line: (s, z) at two stations, the fin's tip height ahead of it, rounded into it over CORNER.
@@ -47,6 +54,11 @@ ARM_W, SHOE_W, D0, D1, SHOE, TAPER, GAP = 0.045, 0.070, 0.11, 0.085, 0.30, 0.12,
 # Deployed, the point sits this far below the deck at level attitude with the gear free, so it reaches the deck at
 # every nose-up attitude (the Compass's reaches 0.17 m).
 OVERTRAVEL = 0.15
+# The hook wears the airframe skin with every UV on one point of the atlas, as the tip tank does: the fairing's left
+# flank at PAINT_S, mid-height on the pod, a clean panel well ahead of its joint (art/textures/panels.py
+# BARE_AFT_JOINT_S), so it takes the fin's paint in every livery, and the plugin hands it the livery the jet wears. Its
+# UVs spread over SPREAD of the atlas round the point (a few texels), so Unity can build tangents.
+PAINT_S, SPREAD = 13.70, 0.0008
 PATCH_OUT = 0.0006  # the patch stands this far outside the true surface, over the old skin's facets
 ROW_STEP = 0.10  # metres between the patch's rows; the hook's are finer at its point
 COLUMNS = (14, 7, 14)  # points across the patch left of the slot, across it, and right of it
@@ -368,7 +380,7 @@ def build_fairing(p, mats, hook):
         poly.material_index = 1 if poly.index >= len(skin_faces) else 0
         poly.use_smooth = poly.material_index == 0
     orient(obj, p, hook, z_floor)
-    obj["merge_into"] = "ventral_fin"
+    obj["merge_into"] = HOOKED_FIN
     return obj, z_floor
 
 
@@ -395,9 +407,14 @@ def orient(obj, p, hook, z_floor):
     bm.free()
 
 
-def cut_fin():
-    """Today's fin keeps its forward half; the fairing's web runs on from the cut."""
-    ob = bpy.data.objects["ventral_fin"]
+def hooked_fin():
+    """HOOKED_FIN: a copy of the ventral fin that keeps its forward half; the fairing's web runs on from the cut."""
+    fin = bpy.data.objects["ventral_fin"]
+    ob = fin.copy()
+    ob.data = fin.data.copy()
+    ob.name = ob.data.name = HOOKED_FIN
+    for coll in fin.users_collection:
+        coll.objects.link(ob)
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     mwi = ob.matrix_world.inverted()
@@ -406,28 +423,7 @@ def cut_fin():
                            plane_no=(mwi.to_3x3() @ Vector((0, 1, 0))).normalized(), clear_outer=True)
     bm.to_mesh(ob.data)
     bm.free()
-
-
-def clear_loft(p, hook, z_floor):
-    """Delete the loft's faces the fairing covers, and those inside the slot that the well's floor would not hide."""
-    ob = bpy.data.objects["fuselage"]
-    bm = bmesh.new()
-    bm.from_mesh(ob.data)
-    mw = ob.matrix_world
-    kill = []
-    for f in bm.faces:
-        c = mw @ f.calc_center_median()
-        s = c.y + S0
-        vs = [mw @ v.co for v in f.verts]
-        if all(hook.cut <= v.y + S0 <= hook.s_t and abs(v.x) < x_edge(p, v.y + S0) for v in vs) and c.z < 0.3:
-            kill.append(f)
-        elif hook.s_f - 0.02 <= s <= hook.s_t + 0.01 and abs(c.x) < hook.width(min(max(s, hook.s_f), hook.s_t)) + GAP + 0.025:
-            if c.z < z_floor[min(z_floor, key=lambda r: abs(r - s))] + 0.005:
-                kill.append(f)
-    bmesh.ops.delete(bm, geom=kill, context="FACES")
-    bm.to_mesh(ob.data)
-    bm.free()
-    return len(kill)
+    return ob
 
 
 def hook_mesh(p, hook):
@@ -485,12 +481,11 @@ def hook_rotation(local_x_deg):
 
 
 def build(p, mats):
-    """The fairing, the fin's cut, the loft's faces under it, and the hook in its collection, posed stowed."""
+    """Variant D's fin and fairing beside the original fin, and the hook in its collection, posed stowed."""
     _contours.clear()
     hook = Hook(p)
     fairing, z_floor = build_fairing(p, mats, hook)
-    cut_fin()
-    cleared = clear_loft(p, hook, z_floor)
+    fin = hooked_fin()
     verts, faces = hook_mesh(p, hook)
     hinge = W(hook.s_h, 0.0, hook.z_h)
     stowed = 180.0 + hook.stowed_tip_deg()
@@ -503,22 +498,45 @@ def build(p, mats):
     obj = bpy.data.objects.new(NAME, me)
     bi.collection(COLLECTION).objects.link(obj)
     obj.matrix_world = frame
-    bi.finish(obj, mats["strut"], smooth=False)
-    layer = me.uv_layers.new(name="UVMap")  # a flat bare-metal slot, but Unity builds tangents from UVs
-    for loop in me.loops:
-        co = me.vertices[loop.vertex_index].co
-        layer.data[loop.index].uv = (co.y + co.x, co.z + co.x)
+    bi.finish(obj, mats["body"], smooth=False)
+    me.uv_layers.new(name="UVMap")  # on the fairing's paint once the atlas is unwrapped (paint)
     obj["stowed_deg"] = stowed
     obj["hinge_s_z"] = [hook.s_h, hook.z_h]
     obj["point_s_z"] = [hook.s_t, hook.z_t]
     obj["slot_front_s"] = hook.s_f
     obj["fin_cut_s"] = hook.cut
-    obj["loft_faces_cleared"] = cleared
     obj["well_floor"] = [[s, z] for s, z in sorted(z_floor.items())]
     obj["main_contact_s_z"] = list(main_contact())
     pose_hook(obj, 0.0)
     obj["deployed_deg"] = stowed - deployed_swing(obj)
-    return fairing, obj
+    return fairing, fin, obj
+
+
+def paint(icarus):
+    """The hook's UVs round the fairing's paint point (PAINT_S). Runs after uvs.unwrap."""
+    from mathutils.bvhtree import BVHTree
+    from mathutils.geometry import barycentric_transform
+
+    import uvs
+
+    fin, obj = bpy.data.objects[HOOKED_FIN], bpy.data.objects[NAME]
+    me = fin.data
+    me.calc_loop_triangles()
+    uv = me.uv_layers["UVMap"].data
+    tris = [t for t in me.loop_triangles if me.materials[t.material_index].name == uvs.SKIN]
+    corners = [[fin.matrix_world @ me.vertices[i].co for i in t.vertices] for t in tris]
+    tree = BVHTree.FromPolygons([v for c in corners for v in c], [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(len(tris))],
+                                all_triangles=True)
+    at, _, index, _ = tree.ray_cast(W(PAINT_S, 1.0, zline(bi.PARAMS, PAINT_S) + POD[1]), Vector((-1, 0, 0)), 2.0)
+    if at is None:
+        raise ValueError("tail hook paint: no fairing skin at the paint point")
+    point = barycentric_transform(at, *corners[index], *[Vector((*uv[i].uv, 0)) for i in tris[index].loops]).to_2d()
+    layer = obj.data.uv_layers["UVMap"]
+    for loop in obj.data.loops:
+        co = obj.data.vertices[loop.vertex_index].co
+        layer.data[loop.index].uv = point + SPREAD * Vector((co.x / ARM_W / 4, co.z / LENGTH))
+    obj["paint_uv"] = list(point)
+    return point
 
 
 def main_contact():
@@ -567,14 +585,16 @@ FIN_HULL_INSIDE = 0.01  # how far a fin hull reaches up inside the body's skin, 
 
 
 def fin_hulls(icarus):
-    """The ventral fin's collider hulls, on the tail cone it rides (parts.LATE_PARENTS): the kept fin, the pod ahead of
-    the slot, and the pod above the well's floor in two lengths, each clipped FIN_HULL_INSIDE inside the body's skin.
-    None reaches the slot, so the hook's line from hinge to point meets none in any pose (check). Runs after
-    hulls.rebuild_pieces, which carves the tail cone's shells afresh; returns how many."""
+    """The fins' collider hulls, each clipped FIN_HULL_INSIDE inside the body's skin. The original fin's, ahead of the
+    cut and behind it, go on the tail cone it rides (parts.LATE_PARENTS) for every loadout. HOOKED_FIN's web ahead of
+    the slot and its pod above the well's floor, in two lengths, go in their own collection (HULLS; its kept half is
+    the original fin's), which the mount carries (export). None reaches the slot, so the hook's line from hinge
+    to point meets none in any pose (check). Runs after hulls.rebuild_pieces, which carves the tail cone's shells afresh;
+    returns how many go on the tail cone."""
     import hulls
     from parts import LATE_PARENTS
 
-    p, obj, fin = bi.PARAMS, bpy.data.objects[NAME], bpy.data.objects["ventral_fin"]
+    p, obj = bi.PARAMS, bpy.data.objects[NAME]
     cut, s_f = obj["fin_cut_s"], obj["slot_front_s"]
     floor = np.array(obj["well_floor"])
     host = bpy.data.objects[LATE_PARENTS["ventral_fin"]]
@@ -585,23 +605,45 @@ def fin_hulls(icarus):
         top = float(at_x(contour(p, min(max(s, cut), floor[-1, 0]), fairing=False), 0.0, 1)[0][1]) + FIN_HULL_INSIDE
         return Vector((v.x, v.y, min(v.z, top)))
 
-    pts = [fin.matrix_world @ v.co for v in fin.data.vertices]
+    def shapes(groups):
+        out = []
+        for group in groups:
+            if len(group) < 8:
+                continue
+            bm = hulls.capped([inside(v) for v in group], FIN_HULL_TRIS)
+            if hulls.solid(bm):
+                out.append(bm)
+            else:
+                bm.free()
+        return out
+
+    def points(name):
+        fin = bpy.data.objects[name]
+        return [fin.matrix_world @ v.co for v in fin.data.vertices]
+
+    pts = points("ventral_fin")
+    original = shapes([[v for v in pts if v.y + S0 < cut + 0.002], [v for v in pts if v.y + S0 > cut - 0.002]])
+    pts = points(HOOKED_FIN)
     above = lambda v: v.z > np.interp(v.y + S0, floor[:, 0], floor[:, 1]) + FIN_HULL_INSIDE
     mid = (s_f + floor[-1, 0]) / 2
-    groups = [[v for v in pts if v.y + S0 < cut + 0.002],
-              [v for v in pts if cut - 0.002 < v.y + S0 < s_f - 0.005],
-              [v for v in pts if s_f - 0.005 <= v.y + S0 < mid + 0.05 and above(v)],
-              [v for v in pts if mid - 0.05 <= v.y + S0 and above(v)]]
-    shapes = []
-    for group in groups:
-        if len(group) < 8:
-            continue
-        bm = hulls.capped([inside(v) for v in group], FIN_HULL_TRIS)
-        if hulls.solid(bm):
-            shapes.append(bm)
-        else:
-            bm.free()
-    return hulls.attach_colliders(host, shapes, bpy.data.collections["Colliders"])
+    hooked = shapes([[v for v in pts if cut - 0.002 < v.y + S0 < s_f - 0.005],
+                     [v for v in pts if s_f - 0.005 <= v.y + S0 < mid + 0.05 and above(v)],
+                     [v for v in pts if mid - 0.05 <= v.y + S0 and above(v)]])
+    store = bi.collection(HULLS)
+    store.hide_render = True
+    for i, bm in enumerate(hooked):
+        me = bpy.data.meshes.new("%s%d" % (HULL, i))
+        bm.to_mesh(me)
+        bm.free()
+        hull = bpy.data.objects.new(me.name, me)
+        store.objects.link(hull)
+        hull.display_type = "WIRE"
+    return hulls.attach_colliders(host, original, bpy.data.collections["Colliders"])
+
+
+def hull_objects():
+    """HOOKED_FIN's collider hulls (fin_hulls), world space."""
+    return sorted(bpy.data.collections[HULLS].objects, key=lambda o: o.name) if HULLS in bpy.data.collections else []
 
 
 def segment_gap(tree, a, b, steps=40):
@@ -627,13 +669,25 @@ def check(icarus):
     from parts import LATE_PARENTS, TREE
 
     # the tail cone in a split build; until the split (the skin bake's whole build), its tree parent
-    if O["ventral_fin"].parent is None or O["ventral_fin"].parent.name not in (LATE_PARENTS["ventral_fin"], TREE["ventral_fin"][0]):
-        problems.append("the ventral fin hangs on %s, not the tail cone" % O["ventral_fin"].parent)
+    for name in ("ventral_fin", HOOKED_FIN):
+        if O[name].parent is None or O[name].parent.name not in (LATE_PARENTS[name], TREE[name][0]):
+            problems.append("%s hangs on %s, not the tail cone" % (name, O[name].parent))
+    p = bi.PARAMS
+    le_root, _, c_root, _, _, _ = fin_sections(p)
+    aft = max((O["ventral_fin"].matrix_world @ v.co).y + S0 for v in O["ventral_fin"].data.vertices)
+    if abs(aft - (le_root + c_root)) > 0.005:
+        problems.append("the original fin ends at s %.3f, not its trailing edge %.3f" % (aft, le_root + c_root))
+    # the belly's loft stays whole under the fairing, so the well's floor must stay below it, at least as far as the
+    # patch stands over it (it meets the belly at the slot's aft end, where the cap closes the well)
+    _contours.clear()
+    belly = min(float(at_x(contour(p, s, fairing=False), 0.0, 1)[0][1]) - z for s, z in obj["well_floor"])
+    if belly < PATCH_OUT:
+        problems.append("the well's floor comes within %.4f m of the original belly" % belly)
     hinge = obj.matrix_world.translation.copy()
     length = (hook_point(obj) - hinge).length
     if abs(length - LENGTH) > 0.001:
         problems.append("hinge to point %.4f m, not the Compass's %.3f" % (length, LENGTH))
-    fin = O["ventral_fin"]
+    fin = O[HOOKED_FIN]
     s_f = obj["slot_front_s"]
     fin_ahead = checks.tree(fin)
     fin_ahead_faces = [(fin.matrix_world @ f.center).y + S0 < s_f - 0.003 for f in fin.data.polygons]
@@ -649,7 +703,10 @@ def check(icarus):
                                                  and o.name.startswith(("engine_afterburner", "nozzle"))]),
              "well_and_skin": checks.tree([fin] + [o for o in icarus.all_objects if o.type == "MESH"
                                                    and o.name.startswith("skin_aft_rear_")])}
-    colliders = [o for o in bpy.data.collections["Colliders"].objects if o.type == "MESH"]
+    # the jet's colliders with the hook fitted: the airframe's and the mount's
+    colliders = [o for o in bpy.data.collections["Colliders"].objects if o.type == "MESH"] + hull_objects()
+    if not hull_objects():
+        problems.append("no %s hulls in %s" % (HOOKED_FIN, HULLS))
     hulls = checks.tree(colliders)
     swing = obj["stowed_deg"] - obj["deployed_deg"]
     least = {k: math.inf for k in list(trees) + ["line_to_hulls"]}
@@ -686,8 +743,17 @@ def check(icarus):
 
 
 def export(to_unity, icarus):
-    """The hook for blockout.json: its key, the part it hangs on, its hinge (world, Unity axes) and TailHook's angles.
-    Its mesh is in the hook transform's frame, which the mount turns 180 degrees about X at the hinge."""
+    """The hook for blockout.json: its key, the part it hangs on, its hinge (world, Unity axes), TailHook's angles, the
+    fin it shows and HOOKED_FIN's hulls. Its mesh is in the hook transform's frame, which the mount turns 180 degrees
+    about X at the hinge; the hulls, moved here into the part's frame, go on the part as its own colliders."""
+    from parts import LATE_PARENTS
+
     obj = bpy.data.objects[NAME]
-    return {"key": KEY, "part": "fuselage_tail", "hinge_unity": to_unity(obj.matrix_world.translation),
-            "length": LENGTH, "stowed_deg": round(obj["stowed_deg"], 3), "deployed_deg": round(obj["deployed_deg"], 3)}
+    part = LATE_PARENTS["ventral_fin"]
+    to_part = bpy.data.objects[part].matrix_world.inverted()
+    for hull in hull_objects():
+        hull.data.transform(to_part @ hull.matrix_world)
+        hull.matrix_world = Matrix.Identity(4)
+    return {"key": KEY, "part": part, "hinge_unity": to_unity(obj.matrix_world.translation),
+            "length": LENGTH, "stowed_deg": round(obj["stowed_deg"], 3), "deployed_deg": round(obj["deployed_deg"], 3),
+            "fin": "ventral_fin", "hooked_fin": HOOKED_FIN, "hulls": [hull.name for hull in hull_objects()]}

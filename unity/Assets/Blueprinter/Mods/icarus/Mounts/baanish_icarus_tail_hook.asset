@@ -31,10 +31,10 @@ MonoBehaviour:
   GroundSafety: 1
   GunAmmo: 0
   emptyCost: 0.002
-  emptyMass: 50
-  mass: 50
-  drag: 0.0094
-  emptyDrag: 0.0094
+  emptyMass: 100
+  mass: 100
+  drag: 0.023500001
+  emptyDrag: 0.023500001
   RCS: 0
   emptyRCS: 0
   disabled: 0

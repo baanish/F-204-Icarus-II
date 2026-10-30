@@ -43,9 +43,9 @@ BUDGET = {
     **{surface: {"target": 400, "cap": 400, "objects": (surface + "_visible",)}
        for surface in ("lef_L", "lef_R", "flap_L", "flap_R", "aileron_L", "aileron_R", "rudder")},
     "stabilator": {"target": 1700, "cap": 1700, "objects": ("stabilator_visible",)},
-    # The fin-tip fairing, a blade 1.85 m long as on the F-104, takes about 1,030 of the fins' 2,340; the ventral fin's
-    # fairing and hook well (tail_hook.py), 3.1 m long, about 2,160 more.
-    "fins": {"target": 4500, "cap": 4500, "objects": ("fin_skin", "ventral_fin")},
+    # The fin-tip fairing, a blade 1.85 m long as on the F-104, takes about 1,030 of the fins' 2,340; variant D's ventral
+    # fin with its fairing and hook well (tail_hook.py HOOKED_FIN), 3.1 m long and drawn only with the hook, 2,321 more.
+    "fins": {"target": 4661, "cap": 4700, "objects": ("fin_skin", "ventral_fin")},
     # No frame, stringer or wall is drawn: the gear wells, unions of boxes clipped to the skin, and the speed brake
     # wells' ribs, rivets, lines and anchor brackets (joined into fuselage_tail), 3,078 measured.
     "structure_cores": {"target": 3100, "cap": 3140, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail",
@@ -77,12 +77,12 @@ TREE = {
     "fuselage_forward": ("fuselage_mid", 500),
     "cockpit_cell": ("fuselage_forward", 480),
     "radome": ("cockpit_cell", 35),
-    # an interceptor radar, which balances the 1,500 kg engine, and since the hook fairing the 70 kg of hook and fairing
-    # aft (the owner's choice of balancing mass): 45 kg more holds the empty margin with the hook fitted
-    "radar_tray": ("cockpit_cell", 260),
+    # an interceptor radar, which balances the 1,500 kg engine; 56 kg of it (271 against 215) balance the 100 kg tail
+    # hook mount on the tail cone (the owner's choice of balancing mass), holding the empty margin with the hook fitted
+    "radar_tray": ("cockpit_cell", 271),
     "avionics_tray": ("fuselage_forward", 100),
     "canopy": ("cockpit_cell", 60),
-    "fuselage_aft": ("fuselage_mid", 420),  # 20 kg of it the ventral fin's hook fairing, on the tail cone (SPLIT_SHARES)
+    "fuselage_aft": ("fuselage_mid", 400),
     "fuselage_tail": ("fuselage_aft", 0),  # its share of fuselage_aft's 400 (MOMENT_SPLITS)
     "engine_core": ("fuselage_aft", 1500),
     "engine_afterburner": ("engine_core", 0),  # its share of engine_core's 1,500
@@ -128,6 +128,7 @@ TREE = {
     "speed_brake_L": ("fuselage_aft", 0),  # the tail cone's in a split build (LATE_PARENTS)
     "speed_brake_R": ("fuselage_aft", 0),
     "ventral_fin": ("fuselage_aft", 0),
+    "ventral_fin_hooked": ("fuselage_aft", 0),  # variant D's, in place of the ventral fin with the hook (tail_hook.py)
 }
 
 ROLE = {"fuel_": "fuel_tank", "skin_": "skin", "dorsal": "skin", "wing_skin": "skin", "fin_skin": "skin",
@@ -159,9 +160,9 @@ SPLIT_ORIGINS = {"wing_spar_L": (1.9800000190734863, 1.5572816133499146, -0.0254
                  "engine_core": (0.0, 4.349999904632568, 0.35499998927116394)}
 # Parts that move to a part split off their parent only after the atlas is unwrapped (split_pieces), for the reason
 # above: the surfaces beyond the crank ride the outer wing box in a split build and the inner box until then, the
-# nozzle the afterburner, and the speed brakes (their actuators' cylinders too) and the ventral fin the tail cone.
+# nozzle the afterburner, and the speed brakes (their actuators' cylinders too) and the ventral fins the tail cone.
 LATE_PARENTS = {**{name + _sd: "wing_spar_outer_" + _sd for name in ("aileron_", "lef_") for _sd in ("L", "R")},
-                "nozzle": "engine_afterburner", "ventral_fin": "fuselage_tail",
+                "nozzle": "engine_afterburner", "ventral_fin": "fuselage_tail", "ventral_fin_hooked": "fuselage_tail",
                 **{"speed_brake_" + _sd + end: "fuselage_tail" for _sd in ("L", "R") for end in ("", "_cylinder")}}
 DORSAL = (5.0, 12.4)
 # The mid section's truss: the structure over the top, between the upper longerons (45 degrees either side of it), in
@@ -180,8 +181,8 @@ MOMENT_SPLITS = {"wing_spar_L": ("wing_spar_outer_L", 0), "wing_spar_R": ("wing_
 # The fuselage sections and truss halves draw no structure, so neither their split nor their balance may come from their
 # meshes or collider shells. Each one's centre-of-mass box, Blender world (lo, hi), is the box its frames', stringers'
 # and walls' hulls made (584dfc37's export), read by chunks.markers in place of its hulls; the tail cone's share of
-# fuselage_aft's 400 kg is the one their bounds made then (split_moment), plus the 20 kg hook fairing it carries
-# (tail_hook.py). Together they hold the dry balance on IcarusAuthor A22's pin.
+# fuselage_aft's 400 kg is the one their bounds made then (split_moment). Together they hold the dry balance on
+# IcarusAuthor A22's pin.
 CORE_MASS_BOXES = {
     "fuselage_forward": ((-0.5983, -6.3841, -0.5044), (0.5983, -2.42, 0.2345)),
     "fuselage_mid": ((-0.9865, -2.2, -0.48), (0.9865, 2.98, 1.0025)),
@@ -189,7 +190,7 @@ CORE_MASS_BOXES = {
     "fuselage_tail": ((-0.6265, 5.0, -0.2807), (0.6265, 6.85, 0.9811)),
     "fuselage_truss_front": ((-0.3662, -2.2, 0.7301), (0.376, -0.8399, 1.0076)),
     "fuselage_truss_rear": ((-0.413, 0.3067, 0.6888), (0.4033, 2.97, 1.0002))}
-SPLIT_SHARES = {"fuselage_aft": 207.3}
+SPLIT_SHARES = {"fuselage_aft": 187.3}
 DORSAL_Z, DORSAL_HALF_WIDTH = 0.80, 0.30
 
 

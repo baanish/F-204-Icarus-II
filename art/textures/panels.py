@@ -39,7 +39,8 @@ BARE_AFT_JOINT_S = 14.2
 # (span axis, chord fractions with a joint, chord fractions with a fastener row only, rib pitch m or None)
 LIFTING = {'fin_skin': ('z', (.18,), (.92,), None),
            'stabilator_visible': ('x', (.2,), (.72,), None),
-           'ventral_fin': ('z', (), (.5,), None),  # the forward half it keeps (ventral_fairing): its quarter chord
+           'ventral_fin': ('z', (), (.25, .8), None),
+           'ventral_fin_hooked': ('z', (), (.5,), None),  # the forward half it keeps (ventral_fairing): its quarter chord
            'lef_L_visible': ('x', (), (.9,), .32),
            'flap_L_visible': ('x', (), (.1,), .32),
            'aileron_L_visible': ('x', (), (.1,), .32),
@@ -287,10 +288,10 @@ def lifting(layout, where, pos, name, report):
 
 
 def ventral_fairing(layout, where, pos, structure, report):
-    """The ventral fin's hook fairing, aft of the kept fin's thickest line (art/blender/tail_hook.py): one panel with the
-    kept fin's aft one, up to a butt joint on BARE_AFT_JOINT_S, past which it is hot metal like the fuselage's last ring.
-    The joint is a plane section ending on the fairing's edges and its slot; none runs along its front edge, which is
-    the part's own edge."""
+    """The hooked ventral fin's fairing, aft of the kept fin's thickest line (art/blender/tail_hook.py): one panel with the
+    kept fin's aft one, up to a butt joint on BARE_AFT_JOINT_S, and painted past it too, unlike the fuselage's last ring
+    (bare_aft). The joint is a plane section ending on the fairing's edges and its slot; none runs along its front edge,
+    which is the part's own edge."""
     s = pos[:, 1] + structure['S0']
     layout.add_seam(where, s - BARE_AFT_JOINT_S, 'ventral_fairing_seam')
     layout.cell[where] = 1 + offset_to_line(s, [BARE_AFT_JOINT_S])[1]  # the kept fin's aft cell (lifting, its .5 row)
@@ -311,7 +312,7 @@ def layout_fields(position, normal, part, names, domain, structure):
              breaks, report)
     selected = np.isin(part_names, ('wing_skin_L', 'wing_skin_R'))
     wing(layout, np.flatnonzero(selected), pos[selected], nrm[selected], structure, report)
-    fairing = (part_names == 'ventral_fin') & (pos[:, 1] + structure['S0'] >= structure['ventral_fin_cut_s'])
+    fairing = (part_names == 'ventral_fin_hooked') & (pos[:, 1] + structure['S0'] >= structure['ventral_fin_cut_s'])
     for name in LIFTING:
         selected = np.isin(part_names, (name, name.replace('_L_', '_R_'))) & ~fairing
         if selected.any():
@@ -347,7 +348,8 @@ def bare_aft(position, part, names, structure):
         raise ValueError(f'The hot ring must start on the last butt joint {lines["joints"]}')
     s = position[..., 1] + structure['S0']
     ramp = lambda d: (lambda t: t * t * (3 - 2 * t))(np.clip(d / (2 * SEAM_HALF_WIDTH) + .5, 0, 1))
-    skin = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith((*FUSELAGE, 'speed_brake_', 'ventral_fin'))])
+    # the ventral fins and the hook's fairing are painted in every livery, aft of the joint too
+    skin = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith((*FUSELAGE, 'speed_brake_'))])
     nozzle = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith('nozzle')])
     return np.where(skin, ramp(s - BARE_AFT_JOINT_S), nozzle.astype(np.float64))
 
