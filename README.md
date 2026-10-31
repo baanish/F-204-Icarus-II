@@ -1,6 +1,6 @@
 # F-204 Icarus II
 
-A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): a Primeva interceptor that runs past Mach 2.5 on a modern afterburning turbojet. It was built by AI agents, with a person reviewing every iteration, and the [devlog](docs/devlog/) shows how.
+A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): a Primeva interceptor that runs past Mach 2.6 at 10 km on a modern afterburning turbojet. It was built by AI agents, with a person reviewing every iteration, and the [devlog](docs/devlog/) shows how.
 
 ![The Icarus II in the Bare Metal livery](docs/img/icarus-bare-metal.jpg)
 
@@ -11,6 +11,7 @@ Version 0.3.0, an early prerelease. It flies, fights and comes apart in game, an
 - A flyable Primeva jet with a damage model built like the stock jets': the fuselage and wings break up in whole sections that collide with the rest of the jet, a missile hit tears off wings, the tail and the aft section with the engine, and an undamaged airframe holds together in full-stick pulls.
 - A custom cockpit on the game's own displays and HUD, with a live standby attitude ball, fuel gauge and clock.
 - Six stations: a wingtip that carries a droppable Starfighter tip tank or a missile rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
+- Carrier operations from the Hyperion. It spawns on the deck and launches over the ski jump, and an arrestor hook on every standard loadout catches the wire on recovery.
 - An iris nozzle that opens with afterburner and vectors thrust up to 4 degrees in pitch and yaw.
 - Four PALA liveries: Navy, Black, Desert splinter, and Bare Metal with high-visibility bands.
 - Its own engine, gear and belly-scrape sounds.
@@ -49,7 +50,7 @@ The Icarus uses the game's normal controls, with no new key bindings.
 - **Where to find it.** It is a Primeva aircraft, offered at hardened aircraft shelters and medium hangars. In the stock operations Breakout, Confrontation, Domination, Escalation and Terminal Control, and their co-op versions, Primeva's AI also starts with four, and one Primeva factory per mission builds more. To turn that off, set `StockMissionSupply = false` under `[Missions]` in `BepInEx/config/baanish.icarus.cfg`. The host's setting applies from the next mission load.
 - **Loadouts.** Interceptor is the default, with Air Superiority, Strike and Close Support beside it. Interceptor carries the tip tanks, 170 US gal each, which burn before the internal fuel. To drop the pair, select them and fire. Any fuel left in them goes with them. The other loadouts carry an MMR-S3 on each wingtip, and every standard loadout carries AAM-29 Scythes on the conformal stations. The wingtips take the tip tanks, the MMR-S3 or the IRM-S2. The pylon takes one store or a twin air-to-air rack. The conformal stations take the MMR-S3, IRM-S2 and AAM-29.
 - **Conformal missiles drop before they light.** Each slides 1.5 m down out of its trough first, so expect a short pause between the trigger and the motor.
-- **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the internal tanks in an estimated six and a half minutes.
+- **It is fast, not agile.** Use speed and climb. It bleeds energy in a sustained turn, and full afterburner empties the internal tanks in about five and a half minutes.
 - **Flaps are automatic.** The leading-edge and trailing-edge flaps come out with low airspeed.
 
 ![The gear retracting and extending in flight, in the Navy livery](docs/img/icarus-gear.gif)
@@ -74,13 +75,13 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 - The flight model was tuned before the latest fuel and tail changes, so takeoff, top speed and handling may drift until it is flown again.
 - Rolling hard at high dynamic pressure, above about Mach 1.4 low down, gives a quick yaw twitch that settles within a second.
 - Near Mach 2.8 at 60,000 ft the jet can porpoise in pitch by several degrees.
-- The flaps, nozzle and canopy move silently. Only the engine, gear and belly scrape have new sounds; the rest keep the stock or donor sounds.
+- The flaps, nozzle and canopy move silently. Only the engine, gear and belly scrape have new sounds. The rest keep the stock or donor sounds.
 - Small visual gaps remain: a notch shows behind the stabilator at full travel, and a sliver of gear-bay interior can show with the doors open.
 - Opening the speed brakes at top speed below about 5 km can tear off the tail cone, from about Mach 1.70 near sea level.
 - A heavily loaded AI Icarus often fails to recover aboard the Hyperion carrier.
 - About 1 in 8 heavily loaded AI ski-jump launches clips the right wingtip on the carrier's bow.
 - The Fun > HelipadSpawn setting is single player only: in multiplayer a joining player's Icarus breaks apart on the pad as it spawns.
-- The stock-mission supply loads, but nobody has yet checked mission by mission that Primeva's AI fields and builds the Icarus.
+- Primeva's AI has been seen fielding and flying the Icarus in Escalation only. The other stock operations load its supply but are not yet checked in play.
 
 ## Credits
 

@@ -2,7 +2,8 @@
 
 ## 0.3.0
 
-- Big missions run faster with the mod installed. A search through every aircraft on every frame halved the frame rate in operations like Escalation, even without an Icarus flying; it now runs only when the game shifts the world origin. Each Icarus also uses simple collision hulls instead of hundreds of separate shapes, takes its weight distribution from those shapes as stock jets do, and no longer searches for its tip tanks twice a second.
+- Big missions run at nearly the unmodded frame rate. The mod searched every aircraft in the mission on every frame, even with no Icarus flying, which halved the frame rate in operations like Escalation. It now searches only when the game shifts the world origin.
+- Each Icarus costs less to simulate: 32 simple collision shapes instead of 266, about as many as the Revoker, a weight distribution taken from those shapes as stock jets do, and no search for its tip tanks twice a second.
 - Diagnostics are off by default. The mod no longer patches the game's bullet code, fixing conflicts with other mods that patch it.
 - AI pilots drop the tip tanks when they start landing, even if the tanks still contain fuel.
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
@@ -15,7 +16,7 @@
 - An arrestor hook comes on every standard loadout in its own Tail Hook slot. It lowers itself on a carrier approach and catches the wire.
 - Fitting the hook swaps the ventral fin for a longer one with a fairing for the hook. Without the hook the Icarus has its original fin.
 - The hook and its fairing weigh 100 kg and add 5% drag, only when fitted.
-- The ventral fin, the hook fairing and the hook wear the livery's paint; Bare Metal leaves them metal.
+- The ventral fin, the hook fairing and the hook wear the livery's paint. Bare Metal leaves them bare metal.
 - A tip tank gauge in the cockpit, beside the fuel dial, shows the fuel left in each tip tank. A tank that is dropped or lost with its wing reads empty.
 - New setting Tuning.AI MinimumCombatAltitude: the least height above the ground the AI holds while it fights the Icarus, live while you play.
 - The Air Superiority, Strike and Close Support loadouts carry an MMR-S3 on each wingtip instead of the IRM-S2, every standard loadout carries AAM-29 Scythes on the conformal stations, Air Superiority carries twin racks of Scythes on its pylons instead of MMR-S3s, and Close Support an AGM-68 on each pylon instead of a rocket pod.
