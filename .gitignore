@@ -33,6 +33,7 @@ unity/Assets/Plugins/Icarus.dll.meta
 unity/Assets/TextMesh Pro/
 unity/Assets/TextMesh Pro.meta
 unity/.vsconfig
+unity/.vscode/
 # Two-sided skin meshes the Unity author writes on every build (IcarusAuthor.SkinFirst).
 unity/Assets/Blueprinter/Mods/icarus/Meshes/*_twosided.asset
 unity/Assets/Blueprinter/Mods/icarus/Meshes/*_twosided.asset.meta
