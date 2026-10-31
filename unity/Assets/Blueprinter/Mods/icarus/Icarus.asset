@@ -66,5 +66,5 @@ MonoBehaviour:
     maxSpeed: 2750
     stallSpeed: 230
     maneuverability: 6
-    maxWeight: 11438
+    maxWeight: 11600
   restRotation: {x: -0.34145716, y: 0, z: 0}

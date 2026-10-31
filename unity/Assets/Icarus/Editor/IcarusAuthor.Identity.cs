@@ -161,10 +161,17 @@ namespace Icarus.Editor
         // at 95 to 98, where the jet still has lift in hand to hold the glide path; at 88 a heavy Icarus at 89 m/s needed
         // about 12 deg of its 12.6 deg stall and sank under the path into the Hyperion's stern, and at 93 both heavy
         // approaches sank short (tests/scenarios/carrier_ai.scenario.jsonc). At 20% fuel (LowFuelLandingMass) it gives about 74 m/s.
-        private const float MaxWeight = EmptyMass + FuelMass + 2000f; // 2 t of stores
+        // Interceptor is heaviest: empty + internal fuel + two full tanks, Scimitars and Scythes + hook
+        // = 11,528 kg. Read the store masses from their authoring inputs and leave 72 kg of margin (11,600 kg).
+        private static float MaxWeight => EmptyMass + FuelMass + 2f * (TipTankMass(TipTankLayout())
+            + new SerializedObject(Load<Object>(MountPlaceholders + "AAM4_single_PLACEHOLDER.asset")).FindProperty("mass").floatValue
+            + new SerializedObject(Load<Object>(MountPlaceholders + "AAM2_single_PLACEHOLDER.asset")).FindProperty("mass").floatValue) + TailHookMass + 72f;
         private const float LowFuelLandingMass = EmptyMass + 0.2f * FuelMass;
-        private const float LandingSpeedField = 95f;
-        private const float ApproachAtLowFuel = 75f; // the short-landing AI's target (shortLandingSpeed)
+        // Preserve the carrier tune at the former 11,438 kg limit. AIPilotLandingState scales by sqrt(mass/maxWeight);
+        // AIPilotShortLandingState.CheckApproachParameters instead scales shortLandingSpeed by (mass/maxWeight)^2.
+        private const float TunedMaxWeight = 11438f;
+        private static float LandingSpeedField => 95f * Mathf.Sqrt(MaxWeight / TunedMaxWeight);
+        private static float ApproachAtLowFuel => 75f * Mathf.Pow(MaxWeight / TunedMaxWeight, 2f);
 
         private static Object AuthorParameters(Stations stations, List<LiveryEntry> liveries, GameObject statusDisplay, GameObject hudExtras)
         {
