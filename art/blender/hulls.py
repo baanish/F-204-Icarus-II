@@ -23,6 +23,7 @@ seat's escape path, the gear's ground casts, the hook's catch line, the conforma
 only where one cut would keep less than KEEP_SHARE of it; clearance.carve() then stands parts that can collide apart.
 """
 import math
+from collections import namedtuple
 
 import bmesh
 import bpy
@@ -122,14 +123,21 @@ def check(icarus):
                                 (col.name, distance, obstacle["name"], obstacle["gap"], obstacle["limit"]))
     if problems:
         raise ValueError("hulls check: keep-outs: " + "; ".join(problems))
+    skin = visible_skin(icarus)
+    reach = sorted(((skin_reach(skin, [col.matrix_world @ v.co for v in col.data.vertices]), col.name) for col in cols),
+                   key=lambda r: -r[0][0])
+    problems = ["%s %.3f m at %s" % (name, d, tuple(round(x, 3) for x in at)) for (d, at), name in reach if d > SKIN_REACH]
+    if problems:
+        raise ValueError("hulls check: colliders outside the visible skin by more than %.2f m: %s" % (SKIN_REACH, "; ".join(problems)))
     col_tris = sum(budget.tris(o) for o in cols)
     if len(cols) > COLLIDER_HULLS or col_tris > BUDGET["colliders"]["cap"]:
         raise ValueError("hulls check: colliders %d hulls, %d triangles, over %d or %d" % (
             len(cols), col_tris, COLLIDER_HULLS, BUDGET["colliders"]["cap"]))
     print("hulls check PASS: LOD1 %d hulls, %d triangles, largest %d, %d skin faces (%d on a point of the atlas); "
-          "colliders %d hulls (cap %d), %d triangles (cap %d)"
+          "colliders %d hulls (cap %d), %d triangles (cap %d), outside the skin by at most %.3f m (cap %.2f): %s"
           % (len(lods), sum(sizes), max(sizes), skin_faces, point_faces, len(cols), COLLIDER_HULLS, col_tris,
-             BUDGET["colliders"]["cap"]))
+             BUDGET["colliders"]["cap"], reach[0][0][0], SKIN_REACH,
+             ", ".join("%s %.3f" % (name, d) for (d, _), name in reach if d > 0)))
 
 
 def tris_of(bm):
@@ -159,6 +167,59 @@ def outside(bm, pts):
         side = n.dot(c - centre)
         out = np.maximum(out, d if side > 1e-9 else -d if side < -1e-9 else np.abs(d))
     return out
+
+
+# How far a hull's corner may stand outside the jet's visible skin, metres: a hull stands in for its part, so a round
+# through the air beside the jet must hit nothing. The coverage measure's tolerance; clearance.fill grows no hull past
+# it and clearance.trim cuts any back to it.
+SKIN_REACH = 0.10
+# A point the visible skin winds round more than this is inside it. The skin is many overlapping meshes, not all
+# closed, so its winding number decides what it encloses: rays from the point can all meet a wall of a notch whose
+# opening none of them points through.
+SKIN_INSIDE = 0.5
+Skin = namedtuple("Skin", "tree tris")
+
+
+def visible_skin(icarus):
+    """Every mesh of the jet the game draws outside, in world space, as a BVH tree and an array of triangles (n, 3, 3):
+    not the hulls, the LOD1 stand-ins (other collections) or the cockpit view's."""
+    tris = []
+    for o in icarus.all_objects:
+        if o.type != "MESH" or o.get("role") == "cockpit_view":
+            continue
+        o.data.calc_loop_triangles()
+        if not o.data.loop_triangles:
+            continue
+        m = np.array(o.matrix_world)
+        co = np.array([v.co[:] for v in o.data.vertices]) @ m[:3, :3].T + m[:3, 3]
+        tris.append(co[np.array([t.vertices[:] for t in o.data.loop_triangles])])
+    tris = np.concatenate(tris)
+    tree = BVHTree.FromPolygons([Vector(p) for p in tris.reshape(-1, 3)], [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(len(tris))],
+                                all_triangles=True)
+    return Skin(tree, tris)
+
+
+def winding(tris, p):
+    """The generalized winding number of triangles (n, 3, 3) round point p: the solid angle they subtend over 4 pi
+    (Van Oosterom and Strackee's triangle formula), 1 inside a closed outward mesh, 0 outside, summed over meshes."""
+    a, b, c = (tris[:, k] - p for k in range(3))
+    la, lb, lc = (np.linalg.norm(x, axis=1) for x in (a, b, c))
+    dot = lambda x, y: np.einsum("ij,ij->i", x, y)
+    det = dot(a, np.cross(b, c))
+    return float(np.arctan2(det, la * lb * lc + dot(a, b) * lc + dot(b, c) * la + dot(c, a) * lb).sum() / (2 * math.pi))
+
+
+def skin_reach(skin, points):
+    """How far the farthest of points stands outside the visible skin (visible_skin's), metres, and where: a point the
+    skin winds round no more than SKIN_INSIDE stands its distance to the nearest surface. 0 where every point is
+    inside."""
+    worst, at = 0.0, None
+    for p in points:
+        p = Vector(p)
+        distance = skin.tree.find_nearest(p)[3]
+        if distance > worst and winding(skin.tris, np.array(p[:])) <= SKIN_INSIDE:
+            worst, at = distance, p
+    return worst, at
 
 
 def capped(points, max_tris, paired=False):

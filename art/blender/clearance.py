@@ -185,6 +185,112 @@ def mass_box(cols):
         owner["mass_box_world"] = [float(x) for x in np.concatenate([pts.min(0), pts.max(0)])]
 
 
+# The farthest fill() carries a hull's end toward the hull across a gap from it, metres.
+FILL_REACH = 0.4
+
+
+def fill(icarus, linked, moving):
+    """Square each hull's ends off toward its neighbours, as the stock hulls abut: where the hull across a gap from it
+    along an axis covers the same ground, its outline is carried out to that hull's face (the convex hull of its points
+    and their projections onto that face), then cut back clear of every other part's hull and the keep-outs as the carve
+    clears them (hulls.clear). A tapered end that left a wedge open to its neighbour comes out square, but no corner
+    may stand further outside the visible skin than hulls.SKIN_REACH: the fin spar's swept edge, carried forward,
+    stood 0.8 m clear of the fin in the air ahead of it. Only the body's
+    still centreline parts grow, along and up and down it, so they stay the same both sides: the hinged surfaces already
+    stand JOINTED_GAP off their carriers, and a wing grown toward its neighbours reached into the pylon stores' room
+    (IcarusAuthor A14), which no keep-out here stands for. Returns the hulls that grew."""
+    obstacles = hulls.keepouts()
+    skin = hulls.visible_skin(icarus)
+    grown = []
+    for c in sorted((c for c in bpy.data.collections["Colliders"].objects
+                     if part_of(c) is not None and not part_of(c).name.startswith(GEAR)), key=lambda c: c.name):
+        cols = [o for o in bpy.data.collections["Colliders"].objects
+                if part_of(o) is not None and not part_of(o).name.startswith(GEAR) and o is not c]
+        pc = part_of(c).name
+        if pc in moving or pc.endswith(("_L", "_R")):
+            continue
+        near = [{"shape": shape_of(world(o)), "gap": required(pc, part_of(o).name, (pc, part_of(o).name) in linked) + CARVE_SLACK}
+                for o in cols if part_of(o).name != pc
+                and ((pc, part_of(o).name) not in linked or held_apart(pc, part_of(o).name, moving))]
+        near += [o for o in obstacles if pc not in o["exclude"]]
+        pts = world(c)
+        start = hulls.convex([Vector(p) for p in pts]).calc_volume()
+        # one direction at a time, each kept where it grows the hull in one piece and gives up no ground elsewhere: grown
+        # all ways at once, a hull that reaches round a neighbour is cut into pieces and keeps none of it, and a cut that
+        # trims an end back opens the gap the growth was to close
+        for k in (1, 2):
+            for sign in (1, -1):
+                lo, hi = pts.min(0), pts.max(0)
+                face = hi[k] if sign > 0 else lo[k]
+                across = []
+                for o in cols:
+                    q = world(o)
+                    qlo, qhi = q.min(0), q.max(0)
+                    if any(min(hi[j], qhi[j]) - max(lo[j], qlo[j]) <= 0.01 for j in range(3) if j != k):
+                        continue
+                    gap = (qlo[k] - face) if sign > 0 else (face - qhi[k])
+                    if 0.001 < gap < FILL_REACH:
+                        across.append(gap)
+                if not across:
+                    continue
+                moved = pts.copy()
+                moved[:, k] = face + sign * min(across)
+                pieces = hulls.clear(hulls.convex([Vector(p) for p in np.vstack([pts, moved])]), near)
+                if len(pieces) == 1 and abs(pieces[0].calc_volume()) > hulls.convex([Vector(p) for p in pts]).calc_volume() * 1.001:
+                    new = np.array([v.co[:] for v in pieces[0].verts])
+                    if (np.all(new.min(0) <= lo + 0.01) and np.all(new.max(0) >= hi - 0.01)
+                            and hulls.skin_reach(skin, new)[0] <= hulls.SKIN_REACH):
+                        pts = new
+                for piece in pieces:
+                    piece.free()
+        piece = hulls.capped([Vector(p) for p in pts], hulls.MERGED_TRIS)
+        if hulls.solid(piece) and abs(piece.calc_volume()) > start * 1.001:
+            piece.transform(c.matrix_world.inverted())
+            piece.to_mesh(c.data)
+            grown.append(c.name)
+        piece.free()
+    bpy.context.view_layer.update()
+    return grown
+
+
+def trim(icarus):
+    """Cut each hull back where a corner stands further outside the visible skin than hulls.SKIN_REACH: on the plane
+    SKIN_REACH out from the skin across that corner, in turn while one does. Runs after hulls.symmetric, whose mirror
+    cuts make corners on hull faces that span air (the rear truss's above the dorsal covers' gap); a centreline hull is
+    cut on the mirror plane too, and recapped in mirror pairs, so it stays symmetric. Cutting only shrinks a hull, so it
+    stays clear of what it was cleared from. Returns the hulls cut."""
+    skin = hulls.visible_skin(icarus)
+    trimmed = []
+    for c in sorted(bpy.data.collections["Colliders"].objects, key=lambda c: c.name):
+        centreline = not part_of(c).name.endswith(("_L", "_R"))
+        bm = hulls.convex([Vector(p) for p in world(c)])
+        cut = False
+        for _ in range(8):
+            worst, at = hulls.skin_reach(skin, [v.co for v in bm.verts])
+            if worst <= hulls.SKIN_REACH:
+                break
+            q = skin.tree.find_nearest(at)[0]
+            n = (at - q).normalized()
+            for normal in [n, Vector((-n.x, n.y, n.z))][:2 if centreline else 1]:
+                piece = hulls.cut(bm, normal, n.dot(q) + hulls.SKIN_REACH - 0.001)
+                if piece is None:
+                    break
+                bm.free()
+                bm, cut = piece, True
+            if piece is None:
+                break
+        if cut:
+            capped = hulls.capped([v.co.copy() for v in bm.verts], hulls.MERGED_TRIS, paired=centreline)
+            bm.free()
+            bm = capped
+            bm.transform(c.matrix_world.inverted())
+            bm.to_mesh(c.data)
+            trimmed.append(c.name)
+        bm.free()
+    bpy.context.view_layer.update()
+    return trimmed
+
+
 def carve(icarus):
     """Cut every hull clear of the hulls of unjointed parts that outrank it; returns a report line."""
     bpy.context.view_layer.update()  # the split pieces' hulls were parented since the last update: their world matrices are stale
@@ -244,6 +350,8 @@ def carve(icarus):
     if lost:
         raise ValueError("clearance: carving left %s with no collider" % ", ".join(lost))
     bpy.context.view_layer.update()  # the pieces the split added have no world matrix yet
+    grown = fill(icarus, links([c for c in bpy.data.collections["Colliders"].objects
+                                if part_of(c) is not None and not part_of(c).name.startswith(GEAR)]), moving)
     centreline = {}
     for c in bpy.data.collections["Colliders"].objects:
         if part_of(c) is not None and not part_of(c).name.endswith(("_L", "_R")):
@@ -259,13 +367,16 @@ def carve(icarus):
             bm.transform(c.matrix_world.inverted())
             bm.to_mesh(c.data)
             bm.free()
+    trimmed = trim(icarus)
     after = {}
     for c in bpy.data.collections["Colliders"].objects:
         if part_of(c) is not None:
             after[part_of(c).name] = after.get(part_of(c).name, 0.0) + volume(c)
     kept = sorted((after.get(n, 0.0) / v, n) for n, v in before.items() if v > 0)
-    return "clearance carve: %d hulls cut, %d dropped (%s); hull volume kept, least: %s" % (
-        cut_count, len(dropped), ", ".join(dropped[:12]), ", ".join("%s %.0f%%" % (n, 100 * f) for f, n in kept[:12]))
+    return ("clearance carve: %d hulls cut, %d dropped (%s), %d squared off toward their neighbours (%s), %d trimmed to "
+            "the skin (%s); hull volume kept, least: %s") % (
+        cut_count, len(dropped), ", ".join(dropped[:12]), len(grown), ", ".join(grown), len(trimmed), ", ".join(trimmed),
+        ", ".join("%s %.0f%%" % (n, 100 * f) for f, n in kept[:12]))
 
 
 # --- the check -------------------------------------------------------------------------------------------------------
