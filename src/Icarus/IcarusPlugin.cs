@@ -16,7 +16,7 @@ namespace Icarus;
 public sealed class IcarusPlugin : BaseUnityPlugin
 {
     public const string Guid = "baanish.icarus";
-    public const string Version = "0.2.0";
+    public const string Version = "0.3.0";
 
     /// <summary>AircraftDefinition.jsonKey of the Icarus (IcarusAuthor.JsonKey).</summary>
     public const string JsonKey = "baanish_icarus";
@@ -71,7 +71,6 @@ public sealed class IcarusPlugin : BaseUnityPlugin
         if (running && !missionRunning)
         {
             supplyRepairAt = Time.unscaledTime + SupplyRepairDelayS;
-            Log.Stage("mission", "mission started");
         }
         else if (!running)
         {

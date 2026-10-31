@@ -5,12 +5,13 @@
 // "damage-registrations" lines give before the first reload (the spawn count) and after the first and the third.
 // From the repo root: no-agentic run tests/scenarios/damage_registrations.scenario.jsonc
 {
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
   "mission": "icarus_default_loadout.mission.json",
   "mods": "clean",
   "plugins": [
     "installed:com.nikkorap.blueprinter",
     "../../.cache/build-staging/dotnet",
-    "content:../../build/icarus_0.2.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+    "content:../../build/icarus_0.3.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
   "measure": true,
   "timeout": 120,

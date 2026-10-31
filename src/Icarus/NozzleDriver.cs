@@ -91,7 +91,6 @@ sealed class NozzleDriver : MonoBehaviour
 
         FindActuation();
         shown = petals.Count > 0 ? petals[0].Hinge.GetComponentInChildren<Renderer>() : null;
-        IcarusPlugin.Log.Stage("nozzle", $"nozzle driver on {name}: {petals.Count} petals and seals, {links.Count} links, {rams.Count} rams");
     }
 
     static Transform? Under(Transform part, string name) => part.Find(name);

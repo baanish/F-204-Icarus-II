@@ -37,20 +37,17 @@ public sealed class PatchTarget
     string Name => Type.Name + "." + Method;
 
     /// <summary>
-    /// Patches each target and logs one line per target: "found/patched" or "missing: feature off". Returns the features
-    /// switched off, so their code can stand down.
+    /// Patches enabled targets and reports failures. Returns the features switched off, so their code can stand down.
     /// </summary>
     public static HashSet<string> InstallAll(Harmony harmony, IReadOnlyList<PatchTarget> targets, IcarusLog log)
     {
         var off = new HashSet<string>();
         var installed = new List<(PatchTarget Target, MethodInfo Original)>();
-        log.Info($"Harmony: {targets.Count} patch targets");
         foreach (PatchTarget target in targets)
         {
             if (target.Diagnostic && !log.StageEnabled)
             {
                 off.Add(target.Feature);
-                log.Info($"patch {target.Feature}: {target.Name} off (Diagnostics.StageLogging=false at startup)");
                 continue;
             }
             if (off.Contains(target.Feature)) continue;
@@ -64,7 +61,6 @@ public sealed class PatchTarget
                     target.Prefix == null ? null : new HarmonyMethod(target.Prefix),
                     target.Postfix == null ? null : new HarmonyMethod(target.Postfix),
                     target.Transpiler == null ? null : new HarmonyMethod(target.Transpiler));
-                log.Info($"patch {target.Feature}: {target.Name} found/patched");
             }
             catch (Exception e)
             {
@@ -82,6 +78,10 @@ public sealed class PatchTarget
             }
         }
 
+        int diagnosticCount = 0;
+        foreach (var entry in installed)
+            if (entry.Target.Diagnostic && !off.Contains(entry.Target.Feature)) diagnosticCount++;
+        log.Info($"diagnostic patches: {diagnosticCount} installed (StageLogging={log.StageEnabled})");
         return off;
     }
 }

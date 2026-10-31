@@ -52,8 +52,8 @@ class BareMetalTests(unittest.TestCase):
         decal = np.zeros((1, 8))
         decal[0, [1, 7]] = 1
         result, masks = surface_map(shared, position, normal, part, names, decal, np.zeros(part.shape), np.zeros(part.shape))
-        np.testing.assert_allclose(result[0, :, 0], [.98, 0, 0, 0, 0, 1, 0, 0])
-        np.testing.assert_allclose(result[0, :, 3], [.90, .42, .42, .18, .42, .6, .6, .42])
+        np.testing.assert_allclose(result[0, :, 0], [.98, 0, 0, 0, .98, 1, 0, 0])
+        np.testing.assert_allclose(result[0, :, 3], [.90, .42, .42, .18, .90, .6, .6, .42])
         np.testing.assert_array_equal(result[0, 5], shared[0, 5])
         np.testing.assert_array_equal(result[0, 6], shared[0, 6])
         self.assertEqual(float(masks['anti_glare'][0, 3]), 1.)

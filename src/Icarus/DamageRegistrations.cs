@@ -16,11 +16,12 @@ static class DamageRegistrations
     internal static readonly PatchTarget[] PatchTargets =
     {
         new("damage-registrations", typeof(WeaponManager), nameof(WeaponManager.SpawnWeapons),
-            postfix: AccessTools.Method(typeof(DamageRegistrations), nameof(AfterSpawnWeapons))),
+            postfix: AccessTools.Method(typeof(DamageRegistrations), nameof(AfterSpawnWeapons)), diagnostic: true),
     };
 
     internal static void Install(BepInEx.Configuration.ConfigFile config)
     {
+        if (!IcarusPlugin.Log.StageEnabled) return;
         var reload = config.Bind("Diagnostics", "ReloadLoadout", 0,
             "Test support: raising it gives every Icarus this machine's server owns a fresh copy of its loadout, respawning its mounts");
         reload.SettingChanged += (_, _) => ReloadAll();
@@ -28,6 +29,7 @@ static class DamageRegistrations
 
     static void AfterSpawnWeapons(WeaponManager __instance)
     {
+        if (!IcarusPlugin.Log.StageEnabled) return;
         Aircraft aircraft = AircraftOf(__instance);
         if (aircraft == null || aircraft.definition == null || aircraft.definition.jsonKey != IcarusPlugin.JsonKey) return;
         IcarusPlugin.Log.Info($"damage-registrations {aircraft.UniqueName}: {aircraft.damageables.Count} after a loadout spawn");
@@ -35,6 +37,7 @@ static class DamageRegistrations
 
     static void ReloadAll()
     {
+        if (!IcarusPlugin.Log.StageEnabled) return;
         Aircraft[] all = Object.FindObjectsOfType<Aircraft>();
         IcarusPlugin.Log.Info($"damage-registrations: reload requested, {all.Length} aircraft");
         foreach (Aircraft aircraft in all)

@@ -1,15 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
-- Big missions run at full frame rate again with the mod installed. The mod searched every aircraft in the mission on every frame, whether or not an Icarus was flying, which halved the frame rate in operations like Escalation. Each Icarus also does less work every physics step: its fuselage sections take their weight distribution from their own collision shapes, as stock jets do, it collides with 32 simple shapes instead of 266, about as many as the Revoker, and the tip tanks no longer search the jet twice a second.
+- Big missions run faster with the mod installed. A search through every aircraft on every frame halved the frame rate in operations like Escalation, even without an Icarus flying; it now runs only when the game shifts the world origin. Each Icarus also uses simple collision hulls instead of hundreds of separate shapes, takes its weight distribution from those shapes as stock jets do, and no longer searches for its tip tanks twice a second.
 - Diagnostics are off by default. The mod no longer patches the game's bullet code, fixing conflicts with other mods that patch it.
 - AI pilots drop the tip tanks when they start landing, even if the tanks still contain fuel.
 - In the stock operations, the Primeva factory that built the Icarus instead of the Revoker now builds the two in turn, so Domination and Confrontation keep their Revoker production.
 - The stock operations also get their Icarus supply and factory when started after changing their settings in Customize Mission. Before, that skipped them, so the AI had no Icarus to fly.
 - AI pilots taxi the Icarus at no more than 8 m/s, so it no longer tips onto a wingtip in taxiway turns and gets parked before it reaches the runway.
 - A bigger engine: 90 kN dry and 135 kN with afterburner (was 65 and 110), afterburner fuel burn up 20%, and the engine weighs 1,500 kg instead of 1,150.
-- An interceptor's radar: 60 km range (was 40), a narrower 20 degree cone off the nose (was 30), twice the power draw, and 271 kg instead of 65, which keeps the jet's balance with the heavier engine and the tail hook. Empty weight is 6,356 kg.
+- An interceptor's radar: 60 km range (was 40), a narrower 20 degree cone off the nose (was 30), twice the power draw, and 271 kg instead of 65, which keeps the jet's balance with the heavier engine and the tail hook. Empty weight is 6,356 kg. Maximum takeoff weight is 11,600 kg, covering every standard loadout at full fuel.
 - The Icarus can fly from the Hyperion carrier: it spawns on the deck and launches over the ski jump.
 - An arrestor hook comes on every standard loadout in its own Tail Hook slot. It lowers itself on a carrier approach and catches the wire.
 - Fitting the hook swaps the ventral fin for a longer one with a fairing for the hook. Without the hook the Icarus has its original fin.
@@ -20,8 +20,8 @@
 - The Air Superiority, Strike and Close Support loadouts carry an MMR-S3 on each wingtip instead of the IRM-S2, every standard loadout carries AAM-29 Scythes on the conformal stations, Air Superiority carries twin racks of Scythes on its pylons instead of MMR-S3s, and Close Support an AGM-68 on each pylon instead of a rocket pod.
 - The cockpit and forward fuselage are stronger to carry the heavier radar, so a hard launch or a hard pull doesn't snap the nose off.
 - A stiffer nose gear spring, matched to the KR-67 Ifrit's under the heavier nose, so the nose no longer sags on the ski jump, and the nose gear no longer snaps off rolling over the carrier deck.
-- The tail cone's joint is 10% stronger, so opening the speed brakes at top speed low down tears it off only from about Mach 1.70 near sea level, up from 1.62.
-- The speed brakes are twice as strong, and AI pilots come down a carrier approach at a steady speed, slow enough that their hook stays down over the deck.
+- The speed brakes produce twice the drag to help AI pilots slow down on carrier approaches. Heavy AI aircraft can still miss the recovery.
+- The tail cone's joint is 10% stronger at 55 kN. Opening the speed brakes at top speed below about 5 km can still tear it off, from about Mach 1.70 near sea level, up from 1.62.
 
 ## 0.2.0 (2026-10-29)
 

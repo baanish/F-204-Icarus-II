@@ -30,7 +30,7 @@ static class TailFlex
 
     static void AfterSetComplexPhysics(Aircraft __instance)
     {
-        if (IcarusPlugin.FeaturesOff.Contains("tail-flex")) return;
+        if (!IcarusPlugin.Log.StageEnabled || IcarusPlugin.FeaturesOff.Contains("tail-flex")) return;
         if (__instance.definition == null || __instance.definition.jsonKey != IcarusPlugin.JsonKey) return;
         AeroPart[] all = IcarusSystems.Parts(__instance);
         AeroPart?[] tail = Parts.Select(n => all.FirstOrDefault(p => p.name == n)).ToArray();

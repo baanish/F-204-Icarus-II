@@ -4,7 +4,7 @@ A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.c
 
 ![The Icarus II in the Bare Metal livery](docs/img/icarus-bare-metal.jpg)
 
-Version 0.2.0, an early prerelease. It flies, fights and comes apart in game, and it is still being tuned and polished.
+Version 0.3.0, an early prerelease. It flies, fights and comes apart in game, and it is still being tuned and polished.
 
 ## What you get
 
@@ -36,7 +36,7 @@ The mod contains no game files. It needs your own copy of the game, whose assets
 1. Download `Icarus-v<version>-plugin-only.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). It holds the two files that make up the mod, `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle, in `BepInEx/plugins/baanish.icarus/`. To build them yourself instead, follow [BUILD.md](BUILD.md).
 2. Close the game.
 3. Extract the ZIP into the game folder, so both files land in `BepInEx/plugins/baanish.icarus/`. They only work as a pair, so always replace both together. Keep only one copy. If a second `icarus_<version>.nobp` sits anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
-4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.2.0 (baanish.icarus)`.
+4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.3.0 (baanish.icarus)`.
 
 ### Mod managers
 
@@ -76,7 +76,9 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 - Near Mach 2.8 at 60,000 ft the jet can porpoise in pitch by several degrees.
 - The flaps, nozzle and canopy move silently. Only the engine, gear and belly scrape have new sounds; the rest keep the stock or donor sounds.
 - Small visual gaps remain: a notch shows behind the stabilator at full travel, and a sliver of gear-bay interior can show with the doors open.
-- The damage model takes the stock Revoker's armour and still needs balancing in play.
+- Opening the speed brakes at top speed below about 5 km can tear off the tail cone, from about Mach 1.70 near sea level.
+- A heavily loaded AI Icarus often fails to recover aboard the Hyperion carrier.
+- About 1 in 8 heavily loaded AI ski-jump launches clips the right wingtip on the carrier's bow.
 - The Fun > HelipadSpawn setting is single player only: in multiplayer a joining player's Icarus breaks apart on the pad as it spawns.
 - The stock-mission supply loads, but nobody has yet checked mission by mission that Primeva's AI fields and builds the Icarus.
 

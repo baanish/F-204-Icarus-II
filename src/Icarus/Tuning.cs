@@ -180,14 +180,7 @@ static class Tuning
         }
 
         records.Add(record);
-        log.Info(Invariant($"tuning: shipped values of {aircraft.name}: MaxThrust {record.Shipped["maxThrust"]}, MaxSpeed {record.Shipped["maxSpeed"]}, MinDensity {record.Shipped["minDensity"]}, SpoolRate {record.Shipped["spoolRate"]}, FuelMin {record.Shipped["fuelConsumptionMin"]}, FuelMax {record.Shipped["fuelConsumptionMax"]}, ")
-            + Invariant($"AltitudeThrust '{CurveText(record.ShippedAltitude)}', Afterburner.Thrust {Shipped(record, "ab0.thrust")}, Afterburner.Fuel {Shipped(record, "ab0.fuel")}, ")
-            + Invariant($"Vectoring.PitchDegrees {record.ShippedVectoring.x}, Vectoring.YawDegrees {record.ShippedVectoring.y}, Vectoring.MaxAirspeed {record.Shipped["thrustVectoringMaxAirspeed"]}, ")
-            + Invariant($"WingArea {record.Parts.Where(p => p.MainWing).Sum(p => p.ShippedArea):0.###} (flaps retracted), DragArea {record.Parts.Sum(p => p.ShippedDrag):0.###}, ")
-            + Invariant($"CornerSpeed {shippedParameters["cornerSpeed"]}, LandingSpeed {shippedParameters["landingSpeed"]}, TakeoffSpeed {shippedParameters["takeoffSpeed"]}, TurningRadius {shippedParameters["turningRadius"]}, MinimumCombatAltitude {shippedParameters["minimumRadarAlt"]}"));
     }
-
-    static float Shipped(Record record, string key) => record.Shipped.TryGetValue(key, out float value) ? value : float.NaN;
 
     public static void Update()
     {
@@ -321,6 +314,8 @@ static class Tuning
             parameters.minimumRadarAlt = Value("MinimumCombatAltitude", shippedParameters["minimumRadarAlt"]);
         }
 
+        if (!log.StageEnabled) return;
+
         // Readback: every knob as the aircraft now holds it, and a hash peers can compare.
         string summary = Invariant($"MaxThrust {engine.maxThrust} MaxSpeed {GetField(engine, "maxSpeed")} MinDensity {GetField(engine, "minDensity")} SpoolRate {GetField(engine, "spoolRate")} ")
             + Invariant($"FuelMin {GetField(engine, "fuelConsumptionMin")} FuelMax {GetField(engine, "fuelConsumptionMax")} AltitudeThrust '{CurveText((AnimationCurve)AccessTools.Field(typeof(Turbojet), "altitudeThrust").GetValue(engine))}' ")
@@ -363,7 +358,8 @@ static class Tuning
         }
         catch (Exception e)
         {
-            log.Stage("tuning-curve", $"AltitudeThrust '{text}' doesn't parse ({e.Message}); using the shipped curve");
+            if (log.StageEnabled)
+                log.Stage("tuning-curve", $"AltitudeThrust '{text}' doesn't parse ({e.Message}); using the shipped curve");
             return null;
         }
     }

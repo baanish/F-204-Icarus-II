@@ -26,7 +26,6 @@ static class ContactOffset
     {
         if (IcarusPlugin.FeaturesOff.Contains("contact-offset")) return;
         if (__instance.definition == null || __instance.definition.jsonKey != IcarusPlugin.JsonKey) return;
-        int count = 0;
         foreach (AeroPart part in IcarusSystems.Parts(__instance))
         {
             // the hulls only: the gear's ground colliders keep the default
@@ -34,9 +33,7 @@ static class ContactOffset
             {
                 if (collider.isTrigger) continue;
                 collider.contactOffset = Offset;
-                count++;
             }
         }
-        IcarusPlugin.Log.Stage("contact-offset", $"Icarus {__instance.persistentID}: {count} colliders at {Offset * 1000:0} mm contact offset");
     }
 }

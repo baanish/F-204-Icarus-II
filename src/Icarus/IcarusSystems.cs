@@ -34,7 +34,7 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<StandbyInstruments>();
         }
 
-        if (!__instance.TryGetComponent<EjectLog>(out _))
+        if (IcarusPlugin.Log.StageEnabled && !__instance.TryGetComponent<EjectLog>(out _))
         {
             __instance.gameObject.AddComponent<EjectLog>();
         }
@@ -58,7 +58,6 @@ static class IcarusSystems
             reheat.gameObject.AddComponent<ReheatGain>();
         }
 
-        IcarusPlugin.Log.Stage("spawn", $"Icarus {__instance.persistentID} seen, local sim {localSim}");
         Tuning.Track(__instance);
     }
 

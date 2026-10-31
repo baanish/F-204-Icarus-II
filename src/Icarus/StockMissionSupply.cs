@@ -148,6 +148,7 @@ static class StockMissionSupply
 
         __instance.NetworkproductionUnit = unit;
         __instance.attachedUnit.NetworkunitName = unit.code + " factory";
-        IcarusPlugin.Log.Info($"stock supply: {__instance.attachedUnit.UniqueName} built {(next == Revoker ? IcarusPlugin.JsonKey : Revoker)}, builds {next} next");
+        if (IcarusPlugin.Log.StageEnabled)
+            IcarusPlugin.Log.Info($"stock supply: {__instance.attachedUnit.UniqueName} built {(next == Revoker ? IcarusPlugin.JsonKey : Revoker)}, builds {next} next");
     }
 }

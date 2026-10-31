@@ -60,8 +60,6 @@ sealed class StandbyInstruments : MonoBehaviour
         tips = GetComponent<TipTanks>();
         tipLeft = Bar(Find("cockpit_tip_fuel_L"));
         tipRight = Bar(Find("cockpit_tip_fuel_R"));
-        IcarusPlugin.Log.Stage("instruments", $"standby instruments: ball, fuel needle {fuel != null}, clock hands {hour != null && minute != null}, " +
-            $"tip tank tape {tipLeft != null && tipRight != null} reading {(tips != null ? "the tanks" : "nothing")}");
     }
 
     // A needle's axis: its mesh is the needle's top faces only, so their mean normal is the dial's, out toward the pilot.
