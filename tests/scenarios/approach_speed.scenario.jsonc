@@ -16,6 +16,7 @@
     "content:../../build/icarus_0.3.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
   "measure": true,
+  "speed": 1,
   "timeout": 420,
   "steps": [
     { "require": { "path": "mods.baanish.icarus.loadout", "eq": "|||" }, "within": 3,

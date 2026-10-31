@@ -24,7 +24,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Seconds between a mission starting and the supply repair and stock-mission supply, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(ContactOffset.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(AiTaxiSpeed.PatchTargets).Concat(TipTanks.PatchTargets).Concat(TailHookFairing.PatchTargets).Concat(LiveryFallback.PatchTargets).Concat(HelipadLaunch.PatchTargets).Concat(LeadingEdgeFlaps.PatchTargets).Concat(DamageRegistrations.PatchTargets).Concat(OriginShiftPoses.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(ContactOffset.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(AiTaxiSpeed.PatchTargets).Concat(TipTanks.PatchTargets).Concat(TailHookFairing.PatchTargets).Concat(LiveryFallback.PatchTargets).Concat(HelipadLaunch.PatchTargets).Concat(LeadingEdgeFlaps.PatchTargets).Concat(DamageRegistrations.PatchTargets).Concat(OriginShiftPoses.PatchTargets).Concat(AiApproachSpeed.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 
