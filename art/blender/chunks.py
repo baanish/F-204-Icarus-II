@@ -104,6 +104,38 @@ def markers(icarus):
     return out
 
 
+def host_of(panel):
+    """The part a panel, fuel cell or internal sits in: its nearest ancestor that is a part and doesn't fold."""
+    host = panel.parent
+    while host is not None and (not is_part(host) or folds(host)):
+        host = host.parent
+    if host is None:
+        raise ValueError("chunks: %s hangs on no part" % panel.name)
+    return host
+
+
+def move_hulls(panel, host):
+    for c in hulls_of(panel):
+        world = c.matrix_world.copy()
+        c.parent = host
+        c.matrix_parent_inverse.identity()
+        c.matrix_basis.identity()
+        c.data.transform(host.matrix_world.inverted() @ world)
+
+
+def fold_hulls(icarus):
+    """The unsplit build's fold (the skin bake, the reviews): every panel's, fuel cell's and internal's hulls into the
+    part it sits in, as fold() moves them, while their mass and fuel stay where they are, as the reviews read them. Its
+    colliders then come out as the split build's do, one hull per part: a curved panel's own hull is a solid block
+    over the parts under it, which clearance.carve cuts away entirely. Returns a report line."""
+    bpy.context.view_layer.update()
+    panels = sorted((o for o in icarus.all_objects if o.type == "MESH" and folds(o)), key=lambda o: o.name)
+    for panel in panels:
+        move_hulls(panel, host_of(panel))
+    bpy.context.view_layer.update()
+    return "chunks: %d panels' and internals' hulls folded into their parts" % len(panels)
+
+
 def fold(icarus):
     """Fold every panel, fuel cell and internal into the part it sits in; returns a report line."""
     bpy.context.view_layer.update()
@@ -116,11 +148,7 @@ def fold(icarus):
             o["fold_centre"] = [float(x) for x in at]
     carried, fuel, inner = {}, {}, set()
     for panel in panels:
-        host = panel.parent
-        while host is not None and (not is_part(host) or folds(host)):
-            host = host.parent
-        if host is None:
-            raise ValueError("chunks: %s hangs on no part" % panel.name)
+        host = host_of(panel)
         if "family" in panel and any(o.get("family") == panel["family"] and not folds(o) for o in icarus.all_objects):
             raise ValueError("chunks: %s folds away from its split family" % panel.name)
         entry = carried.setdefault(host, [(float(host["mass_kg"]), marker[host])])
@@ -134,12 +162,7 @@ def fold(icarus):
             fuel.setdefault(host, []).append((float(panel["fuel_kg"]), marker[panel]))
             host["fuel_kg"] = round(float(host.get("fuel_kg", 0.0)) + float(panel["fuel_kg"]), 3)
             del panel["fuel_kg"]
-        for c in hulls_of(panel):
-            world = c.matrix_world.copy()
-            c.parent = host
-            c.matrix_parent_inverse.identity()
-            c.matrix_basis.identity()
-            c.data.transform(host.matrix_world.inverted() @ world)
+        move_hulls(panel, host)
         family = host.get("family")
         if family is not None:
             for o in icarus.all_objects:

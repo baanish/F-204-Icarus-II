@@ -1,6 +1,6 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "8e7d0ac151a34f22cb114d5ef94578a38faaf9e0d456dbdbdbd71f829cc38419",
+ "source_sha256": "bc27be31a7a97e1fb89116c5d5e553d7715ddbd8cf6151d7df6b195525139b92",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
  "design_eye": {
   "blender": [

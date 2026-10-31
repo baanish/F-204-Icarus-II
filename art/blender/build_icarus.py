@@ -1509,6 +1509,8 @@ def _build(repo, split=True):
 
     if split:  # the unsplit build (the skin bake, the reviews) keeps its skin families whole, as panels.py reads them
         print(chunks.fold(TARGET))  # the skin panels into the parts they hang on, as stock chunks
+    else:
+        print(chunks.fold_hulls(TARGET))
     hulls.merge(TARGET)
     print(clearance.carve(TARGET))  # last, on the final hulls: unjointed parts stand apart
     hull_count = {"colliders": len(bpy.data.collections["Colliders"].objects),

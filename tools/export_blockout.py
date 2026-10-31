@@ -15,6 +15,7 @@ Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -135,6 +136,12 @@ def main():
     parser.add_argument("--out", type=Path, default=REPO / "art/export")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     out = args.out.resolve()
+    # The skin bake and the reviews build the aircraft with its skin families whole (split=False): that build's
+    # checks must pass too, in a Blender of its own (one scene holds one build), before this one exports.
+    unsplit = "import sys; sys.path.insert(0, %r); import build_icarus; build_icarus.build_cached(split=False)" % str(REPO / "art/blender")
+    threads = sys.argv[sys.argv.index("--threads"):sys.argv.index("--threads") + 2] if "--threads" in sys.argv else []  # Run-Blender's share
+    subprocess.run([bpy.app.binary_path, *threads, "--background", "--factory-startup", "--python-exit-code", "1", "--python-expr", unsplit],
+                   check=True)
     build_icarus.build_cached()
     coll = bpy.data.collections.get("Icarus")
     if coll is None:
