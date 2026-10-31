@@ -1,9 +1,14 @@
 // Hands-off pitch hold below half fuel: the owner's Icarus kept pitching down in level cruise once fuel fell under about
 // half, while the fly-by-wire read no pitch rate (the cockpit body's angular velocity stayed near 0 as the airframe's
-// attitude fell 0.3 to 0.9 deg/s). The Icarus starts over Ignus at 13 km, 520 m/s, 40% fuel; a hold settles it for 20 s,
-// then the stick is let go for 60 s with the throttle where the hold left it. Pass: pitch stays within -1.5 to 3 deg and load
+// attitude fell 0.3 to 0.9 deg/s). The Icarus starts over Ignus at 13 km, 520 m/s, 40% fuel; the altitude hold runs for 20 s,
+// then releases the stick. Settle at neutral stick before observing 60 s with the throttle where the hold left it.
+// Pass: pitch stays within -1.5 to 3 deg and load
 // within 0.1 g of 1 for the hands-off minute. .cache/pitchdown/fuelbins.py <run>/trace.jsonl measures the drift the
 // fly-by-wire missed (attitude change minus integrated measured rate), which must stay within 0.05 deg/s.
+// Settling uses throttle 0.23: at 13 km and 520 m/s the offline aero model needs about 19.61 kN, while the current
+// 90 kN core makes 58.5 kN there. Its RPM mapping gives (19.61/58.5 - 0.075) x 0.88 = 0.229 throttle.
+// The altitude hold keeps making pitch corrections, so its instantaneous pitch rate cannot reliably stay below 0.2 deg/s
+// for 20 s. Apply that unchanged settling gate after releasing the hold; keep the same hands-off pitch/load limits.
 // From the repo root: no-agentic run tests/scenarios/pitch_hold_handsoff.scenario.jsonc
 {
   "mission": "icarus_ignus_13km_40.mission.json",
@@ -15,16 +20,17 @@
   ],
   "measure": true,
   "sample_hz": 10,
-  "timeout": 240,
+  "timeout": 360,
   "steps": [
     { "require": { "path": "mods.baanish.icarus.loadout", "eq": "|||" }, "within": 3,
       "label": "loadout: all four hardpoint sets empty" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 12500 } ] },
       "label": "the Icarus airborne at 13 km" },
-    { "fly": { "mode": "hold", "alt_msl_m": 13000, "hdg_deg": 90, "throttle": 0.85 } },
-    { "wait": { "path": "own.pitch_rate_dps", "between": [-0.2, 0.2] }, "hold": 20, "timeout": 60, "label": "settled level under the hold" },
+    { "fly": { "mode": "hold", "alt_msl_m": 13000, "hdg_deg": 90, "throttle": 0.23 } },
+    { "wait": { "path": "own.alive", "eq": true }, "hold": 20, "timeout": 25, "label": "cruise under the altitude hold" },
     { "record": { "path": "own.pitch_deg" }, "label": "pitch when let go, deg" },
     { "fly": { "mode": "off" } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-0.2, 0.2] }, "hold": 20, "timeout": 120, "label": "settled with neutral stick" },
     { "mark": { "label": "hands_off" } },
     { "check": { "all": [ { "path": "own.pitch_deg", "between": [-1.5, 3.0] }, { "path": "own.load_g", "near": 1, "tol": 0.1 } ] }, "for": 60,
       "label": "pitch and load hold for a hands-off minute" },

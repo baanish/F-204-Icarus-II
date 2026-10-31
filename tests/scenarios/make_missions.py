@@ -99,6 +99,15 @@ for name, alt, speed, fuel, what in [
     save(m, name, f"the player's Icarus for Primeva airborne over Ignus at {alt:,.0f} m MSL (x {IGNUS_X:.0f}, z {IGNUS_Z:.0f}), heading 090, "
          f"{speed:.0f} m/s, with about 160 km of map ahead; {what}; clean; no opponent.")
 
+# Start the HUD check at bombing altitude: its sight and tank-release checks do not need a descent from 10 km.
+m = template("airborne")
+m["MapKey"] = IGNUS
+icarus(m["aircraft"][0], 1.0, {"x": IGNUS_X, "y": 2500.0, "z": IGNUS_Z}, rotation(90, 0), 250.0)
+for index, key in enumerate(("baanish_icarus_tip_tank", "bomb_500_single", "baanish_icarus_AAM2_conformal", "")):
+    m["aircraft"][0]["savedLoadout"]["Selected"][index]["Key"] = key
+save(m, "icarus_tip_tank_hud", f"the player's Icarus for Primeva airborne over Ignus at 2,500 m MSL (x {IGNUS_X:.0f}, z {IGNUS_Z:.0f}), "
+     "heading 090, 250 m/s, full internal fuel, a GPO-500, a conformal missile and a full tip tank on each wingtip; no opponent.")
+
 # Full-stick loads with a full tip tank on each wingtip (the Wingtip set's baanish_icarus_tip_tank mount) and full fuel:
 # 570 kg on each outer wing box, the heaviest the crank between the boxes carries.
 m = template("airborne")

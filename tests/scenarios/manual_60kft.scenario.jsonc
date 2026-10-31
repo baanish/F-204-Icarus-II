@@ -1,6 +1,8 @@
-// A hand-flown session at 60,000 ft (18,288 m) over Ignus, heading east at 700 m/s with full fuel, on the owner's own
-// installed mod stack (mirror) with this build swapped in. No steps: launch it with input on and fly.
-// From the repo root: no-agentic launch tests/scenarios/manual_60kft.scenario.jsonc --input --monitor 2560x1440
+// Smoke check for the hand-flown 60,000 ft (18,288 m) fixture over Ignus: heading east at 700 m/s, full fuel,
+// on the installed mod stack (mirror) with this build swapped in. The automated run checks the aircraft, altitude and
+// intact airframe for five seconds and records speed and fuel. The same fixture remains available for hand flying.
+// Automated: no-agentic run tests/scenarios/manual_60kft.scenario.jsonc --realtime
+// Hand flown: no-agentic launch tests/scenarios/manual_60kft.scenario.jsonc --input --monitor 2560x1440
 {
   "mission": "icarus_ignus_60kft.mission.json",
   "mods": "mirror",
@@ -9,5 +11,17 @@
     "../../.cache/build-staging/dotnet",
     "content:../../build/icarus_0.3.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
-  "steps": [],
+  "measure": true,
+  "sample_hz": 2,
+  "timeout": 90,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] },
+      "label": "the Icarus is the player's aircraft" },
+    { "mark": { "label": "spawn" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.alt_msl_m", "near": 18288, "tol": 300 },
+                          { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "part_detached", "since": "spawn" } } ] }, "for": 5,
+      "label": "intact at 60,000 ft for five seconds" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at 60,000 ft, m/s" },
+    { "record": { "path": "own.fuel_frac" }, "label": "fuel at 60,000 ft" },
+  ],
 }

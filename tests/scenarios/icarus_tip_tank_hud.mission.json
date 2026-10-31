@@ -5,7 +5,7 @@
     "Path": "Terrain_naval"
   },
   "missionSettings": {
-    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva airborne over Ignus at 10,000 m MSL (x -78000, z -25000), heading 090, 650 m/s, full internal fuel, a PAB-500, a conformal missile and a full tip tank on each wingtip; no opponent.",
+    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva airborne over Ignus at 2,500 m MSL (x -78000, z -25000), heading 090, 250 m/s, full internal fuel, a GPO-500, a conformal missile and a full tip tank on each wingtip; no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",
@@ -60,7 +60,7 @@
       "UniqueName": "Agentic_Own",
       "globalPosition": {
         "x": -78000.0,
-        "y": 10000.0,
+        "y": 2500.0,
         "z": -25000.0
       },
       "rotation": {
@@ -101,7 +101,7 @@
       "fuel": 1.0,
       "skill": 1.0,
       "bravery": 0.5,
-      "startingSpeed": 650.0
+      "startingSpeed": 250.0
     }
   ],
   "vehicles": [],

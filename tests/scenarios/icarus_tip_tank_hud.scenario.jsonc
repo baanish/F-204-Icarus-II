@@ -1,11 +1,13 @@
-// Tip tank HUD and icon: the Icarus flies level at 10,000 m with a tip tank on each wingtip (station 0), a PAB-500 (station 1) and
+// Tip tank HUD and icon: the Icarus flies level at 2,500 m with a tip tank on each wingtip (station 0), a GPO-500 (station 1) and
 // a conformal missile (station 2). With the tip tank selected the plugin's "tip-tank-hud" stage line shows it
 // swapped the bombing sight for the game's no-weapon state, and the shot shows the HUD with no pipper, fall line or time
-// of flight and the weapon panel with the tank's own line art. The missile and the PAB-500 are then selected for shots
+// of flight and the weapon panel with the tank's own line art. The missile and the GPO-500 are then selected for shots
 // of their own sights, which the patch leaves alone: the log carries no further "tip-tank-hud" selection for them.
 // The tank is the first station, so the spawn selects it (selection 1) and the step's own selection is the second.
 // Pass: the stations select by name, the tank's selection is the only one the patch swaps, and the Icarus
 // is undamaged. It ends by releasing the full tanks: the tank still drops, with no joint break. The verdict on what the HUD and the panel show is read from the screenshots.
+// Start at bombing altitude so selecting a bomb does not depend on a long descent and recovery; keep the same level,
+// station, sight, fuel-at-release and damage checks.
 // From the repo root: no-agentic run tests/scenarios/icarus_tip_tank_hud.scenario.jsonc
 {
   "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
@@ -19,7 +21,7 @@
   "timeout": 180,
   "steps": [
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
-    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "fly": { "mode": "hold", "alt_msl_m": 2500, "hdg_deg": 90, "throttle": 0.35 } },
     { "wait": { "path": "own.alive", "eq": true }, "timeout": 50, "hold": 40, "label": "level and steady; the join notice has gone" },
     { "mark": { "label": "tank" } },
     { "act": { "station": 0 } },
@@ -34,10 +36,8 @@
     { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the HUD settles" },
     { "screenshot": { "name": "missile_selected" } },
     { "fly": { "mode": "hold", "alt_msl_m": 2500, "hdg_deg": 90, "throttle": 0.35 } },
-    { "time": { "scale": 4 } },
-    { "wait": { "path": "own.alt_msl_m", "lt": 2650 }, "timeout": 120, "label": "down to 2,500 m, where a bomb's sight has a solution" },
+    { "wait": { "path": "own.alt_msl_m", "lt": 2650 }, "timeout": 120, "label": "at bombing altitude, where the sight has a solution" },
     { "wait": { "path": "own.vs_mps", "between": [-3, 3] }, "timeout": 60, "hold": 5, "label": "level" },
-    { "time": { "scale": 1 } },
     { "wait": { "path": "own.vs_mps", "between": [-3, 3] }, "timeout": 30, "hold": 5, "label": "level at normal time, the way a pilot releases" },
     { "act": { "station": 1 } },
     { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 2, "label": "the HUD settles" },
@@ -48,7 +48,7 @@
     { "mark": { "label": "release" } },
     { "act": { "fire": 0.2 } },
     { "check": { "log_value": { "match": "^\\[Icarus\\] tip-tanks-release: tip tank R released with (\\d+) kg", "source": "F-204 Icarus II", "since": "release", "gt": 300 } },
-      "within": 3, "label": "the tanks release with the fuel the descent left in them: the tank still drops" },
+      "within": 3, "label": "the tanks release with more than 300 kg of fuel: the tank still drops" },
     { "check": { "path": "own.station.ammo", "eq": 0 }, "within": 3, "label": "the station is empty" },
     { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "gt": 0.999 }, { "not": { "event": "damage", "since": "tank" } } ] }, "for": 5, "label": "the Icarus is undamaged" },
     { "check": { "not": { "log": "joint-break", "since": "tank" } }, "label": "no joint broke" },

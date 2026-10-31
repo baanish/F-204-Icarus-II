@@ -1,11 +1,12 @@
-// Level top speed at 10 km, full afterburner. The offline aero model predicts 735.8 m/s, Mach 2.537 (the game's speed of
-// sound is 290 m/s above 10 km), for a clean 7,000 kg Icarus, about half fuel. The Icarus starts over Ignus at 10 km, heading
-// east at 650 m/s with full fuel and about 160 km of map ahead; a hold keeps 10 km at throttle 1 (the afterburner runs from
-// 0.90 to 1.00). Full afterburner drains 2,400 kg in about 300 s, so half fuel comes about 150 s in, about 105 km east.
-// Records Mach and TAS at half fuel (the predicted case) and again at 40% fuel, about 30 s later: the two agree within
-// 0.01 Mach once the speed has settled. Pass: Mach at half fuel within 3% of 2.537 (2.46 to 2.61), level within 300 m; the
-// verdict is MEASURED with the records, or FAIL outside the band. The airframe must be intact 5 s after spawn, else FAIL.
-// From the repo root: no-agentic run tests/scenarios/level_speed_10km.scenario.jsonc
+// Level top speed at 10 km, full afterburner. Rerunning the original offline point-mass aero model with the current
+// authoring inputs gives 790.061 m/s / 290 m/s (the game's speed of sound) = Mach 2.72435; the same 3% band is 2.64262 to 2.80608.
+// Inputs: 6,356 kg empty + 0.5 x 3,082 kg fuel = 7,897 kg, clean; 90 kN core + 45 kN afterburner, maxSpeed 760 m/s,
+// altitude factors 1/.8/.55/.3 at 0/10/15/19 km; wing/tail/body areas 20.8079/3/2 m2, wing anhedral 10 deg, dragArea 0.47.
+// The model solves lift = weight and forward thrust = drag using IcarusAuthor.Identity.cs's current airfoil curves and
+// IcarusAuthor.Engine.cs's engine constants. It omits pitch trim and moving control surfaces. This is a prediction, not a fitted speed.
+// The Icarus starts at 650 m/s with full fuel. At 9.1 kg per fuel check, half fuel takes about 169 to 173 s.
+// Record Mach and TAS at half fuel and again at 40%; check level within 300 m and an intact airframe after spawn.
+// From the repo root: no-agentic run tests/scenarios/level_speed_10km.scenario.jsonc --realtime
 {
   "mission": "icarus_ignus_10km.mission.json",
   "mods": "clean",
@@ -27,18 +28,16 @@
       "label": "the airframe is intact 5 s after spawn" },
     { "require": { "path": "own.hp_frac", "eq": 1 }, "label": "gate: the steps after need an intact airframe" },
     { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1 } },
-    { "time": { "scale": 4 } },
-    { "wait": { "path": "own.fuel_frac", "lt": 0.5 }, "timeout": 240, "label": "half fuel, about 7,000 kg" },
-    { "check": { "path": "own.mach", "between": [2.46, 2.61] }, "label": "Mach at half fuel within 3% of the offline aero model's predicted 2.537" },
-    { "record": { "path": "own.mach" }, "label": "Mach at half fuel (target 2.54)" },
-    { "record": { "path": "own.tas_mps" }, "label": "TAS at half fuel, m/s (target 736)" },
+    { "wait": { "path": "own.fuel_frac", "lt": 0.5 }, "timeout": 240, "label": "half fuel, about 7,897 kg" },
+    { "check": { "path": "own.mach", "between": [2.64262, 2.80608] }, "label": "Mach at half fuel within 3% of the offline aero model's predicted 2.72435" },
+    { "record": { "path": "own.mach" }, "label": "Mach at half fuel (target 2.72435)" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at half fuel, m/s (target 790.061)" },
     { "record": { "path": "own.alt_msl_m" }, "label": "altitude at half fuel, m" },
     { "record": { "path": "own.engines.0.thrust_n" }, "label": "thrust at half fuel, N" },
     { "wait": { "path": "own.fuel_frac", "lt": 0.4 }, "timeout": 60, "label": "40% fuel" },
     { "record": { "path": "own.mach" }, "label": "Mach at 40% fuel (settled if within 0.01 of half fuel's)" },
     { "record": { "path": "own.alt_msl_m" }, "label": "altitude at 40% fuel, m" },
     { "record": { "path": "own.pos.x" }, "label": "x at 40% fuel, m (map edge 81,920)" },
-    { "time": { "scale": 1 } },
     { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.alt_msl_m", "near": 10000, "tol": 300 } ] },
       "label": "alive and within 300 m of 10 km at the end" },
   ],
