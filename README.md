@@ -41,7 +41,7 @@ The mod contains no game files. It needs your own copy of the game, whose assets
 
 ### Mod managers
 
-NOMM and Thunderstore packages are coming. This section will say how to install from them once they exist.
+The Icarus is listed in NOMM. Install it from there, with BepInEx 5 and Blueprinter 2.1.1 or later installed and Blueprinter enabled.
 
 ## Flying it
 
