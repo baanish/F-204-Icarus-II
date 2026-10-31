@@ -139,13 +139,6 @@ for slot in m["aircraft"]:
 save(m, "icarus_group", "two player slots, an Icarus each for Primeva at 3,000 m MSL heading north at 220 m/s, 1 km apart, "
      "7 km south of Sandrift Airbase (Heartland), half fuel, clean, for a loopback host and client; no opponent.")
 
-# South Boscali General Aviation (Primeva here) has revetments, a medium hangar and two helipads; the Icarus is offered only at its
-# helipads, so two peers joining there each take one. With no player slots the peers join at the airbase as a player does from the map.
-m = template("group_airborne")
-m["aircraft"] = []
-save(m, "icarus_helipad", "no player slots, for peers that join at South Boscali General Aviation (Heartland, Primeva), whose two "
-     "helipads are the only hangars that take an Icarus; no opponent.")
-
 # The Hyperion, Primeva's, where the game's own Carrier Duel puts it on Ignus (FleetCarrier1, heading about 092, open
 # sea), holding still: no waypoints. Primeva's supply holds Icarus airframes for a player who joins on the carrier.
 CARRIER = {"type": "FleetCarrier1", "faction": "Primeva", "globalPosition": {"x": -44692.49, "y": 5.63970947, "z": -36468.8672},
