@@ -28,11 +28,14 @@ namespace Icarus.Editor
         // OuterWing joins the outer wing box to the inner at the crank: stock outer wing joints are 35 to 50 kN, and at 9 g
         // and 8 t the outer box's lift about 0.6 m out from the crank is about 81 kN, with up to 690 kg of tip tank and box
         // on it (art/blender/parts.py TREE, the breakup design's joint table).
+        // Section is the tail cone's joint, which the speed brakes load alone (their drag sits on the tail cone): at 50 kN
+        // they tore it off from about Mach 1.62 at 0.3 km; 55 kN moves that to about Mach 1.70, the owner's call to make
+        // the breakup harder to reach.
         private enum JointClass { Frame, ForwardSection, Cockpit, Section, Spar, OuterWing, Primary, Surface, Flap, Panel }
 
         private static readonly Dictionary<JointClass, float> JointForces = new Dictionary<JointClass, float>
         {
-            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 77000f }, { JointClass.Cockpit, 80000f }, { JointClass.Section, 50000f },
+            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 77000f }, { JointClass.Cockpit, 80000f }, { JointClass.Section, 55000f },
             { JointClass.Spar, 100000f }, { JointClass.OuterWing, 60000f }, { JointClass.Primary, 40000f },
             { JointClass.Surface, 30000f }, { JointClass.Flap, 15000f }, { JointClass.Panel, 10000f },
         };
