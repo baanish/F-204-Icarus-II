@@ -1,6 +1,6 @@
-// A missile from above: the Icarus holds 10 km at 400 m/s over Ignus and a Boscali AAM2 is spawned 2 km above and 2 km
-// to its left, abeam the mid section (straight overhead it cannot turn in, and self-destructs; from behind its fuze
-// goes off over the tail), so the blast reaches the top of the mid section,
+// A missile from above: the Icarus holds 10 km over Ignus and a Boscali AAM2 is spawned 2 km above and 6 km
+// ahead, aimed at the Icarus. A head-on descent closes the range without the large crossing turn of an abeam shot;
+// the missile approaches the upper fuselage instead of chasing the tail, so the blast can reach the mid section,
 // the dorsal cover and the truss over the fuel tanks (art/blender/parts.py TRUSS). The camera looks down on the spine;
 // the shot after the hit shows what came off the top and what stands under it. tools/breakup_report.py reads what came apart.
 // From the repo root: no-agentic run tests/scenarios/breakup_missile_above.scenario.jsonc
@@ -13,6 +13,7 @@
     "content:../../build/icarus_0.2.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
   "measure": true,
+  "speed": 1,
   "sample_hz": 4,
   "timeout": 150,
   "steps": [
@@ -22,7 +23,7 @@
     { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
     { "camera": { "mode": "orbit", "target": "own", "distance_m": 25, "hdg_deg": 150, "pitch_deg": 55 } },
     { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 30, "timeout": 35, "label": "30 s level; the join notice has gone" },
-    { "spawn": { "kind": "missile", "type": "AAM2", "faction": "Boscali", "back_m": 0, "left_m": 2000, "down_m": -2000, "speed_mps": 600, "name": "m1" } },
+    { "spawn": { "kind": "missile", "type": "AAM2", "faction": "Boscali", "target": "own", "back_m": -6000, "left_m": 0, "down_m": -2000, "speed_mps": 600, "name": "m1" } },
     { "mark": { "label": "launched" } },
     { "wait": { "event": "missile_end", "since": "launched" }, "timeout": 40, "label": "the missile ends" },
     { "check": { "event": "missile_end", "since": "launched", "result": "hit" }, "label": "the missile hits the Icarus" },
