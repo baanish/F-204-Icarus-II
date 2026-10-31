@@ -4,8 +4,9 @@ the jet as a stock part does, and nothing touches while attached.
 Unity's joints switch collision off between the two bodies each joins (AeroPart.CreateJoints sets enableCollision false;
 a HingeJoint's default is false) until the joint breaks. Every other pair of the Icarus's colliders collides, so their
 hulls must stand apart by REQUIRED: both colliders' contact offset (CONTACT_OFFSET, which the plugin pins on every
-Icarus collider, src/Icarus/ContactOffset.cs; Unity's 10 mm default would make contacts across a 20 mm gap) plus the
-most each flexes toward the other in flight (FLEX, measured in game and on the A18 bench).
+Icarus hull, src/Icarus/ContactOffset.cs; Unity's 10 mm default would make contacts across a 20 mm gap, and a gear leg's
+hinge box keeps it, GEAR_CONTACT_OFFSET) plus the most each flexes toward the other in flight (FLEX, measured in game
+and on the A18 bench).
 
 carve() runs last on the collider set, after hulls.merge: each hull is cut flat on its best separating plane, or split
 round the other part where one cut would keep too little of it (hulls.clear), REQUIRED short of every hull of a part
@@ -27,13 +28,17 @@ from mathutils import Matrix, Vector
 
 import hulls
 
-# Unity's contact offset for each Icarus collider, metres; the plugin sets it at spawn (Unity serializes none).
+# Unity's contact offset for each Icarus collider, metres; the plugin sets it at spawn (Unity serializes none). It pins
+# the hulls alone (src/Icarus/ContactOffset.cs): a gear leg's hinge box keeps Unity's default, GEAR_CONTACT_OFFSET.
 CONTACT_OFFSET = 0.002
+GEAR_CONTACT_OFFSET = 0.01
 # How far each part moves in flight against a neighbour on other joints, metres, by name prefix, first match, else
 # FLEX_DEFAULT; a pair's gap takes both parts' (REQUIRED). The outer wing at the crank in a 9 g pull, the inner wing box
 # bending at the root with its folded skins (struck the aft fuselage and the fuel cells across 13 and 19 mm gaps in the
-# full-stick pulls), the tail cone and the fin top, the flaps (tools/flight_peaks.py and A18 on 4b8710bd).
-FLEX = (("wing_spar_outer_", 0.008), ("aileron_", 0.008), ("lef_", 0.008), ("wing_spar_", 0.020),
+# full-stick pulls), the tail cone and the fin top, the flaps (tools/flight_peaks.py and A18 on 4b8710bd). A gear leg
+# hangs on its carrier's joint and takes the touchdown: the nose leg struck fuselage_forward across 6.9 mm in the carrier
+# trap's touchdowns (c2ded446) and never came within contact of it across 25 mm (19c27217).
+FLEX = (("wing_spar_outer_", 0.008), ("aileron_", 0.008), ("lef_", 0.008), ("wing_spar_", 0.020), ("gear_leg_", 0.012),
         ("fuselage_tail", 0.007), ("speed_brake", 0.007),
         ("fin_", 0.009), ("rudder", 0.009), ("stabilator", 0.009), ("flap_", 0.005), ("radome", 0.0035), ("canopy", 0.0035))
 FLEX_DEFAULT = 0.001
@@ -95,7 +100,8 @@ def required(a, b, jointed=False):
     if jointed:
         return JOINTED_GAP
     pair = next((f for x, y, f in FLEX_PAIRS if a.startswith(x) and b.startswith(y) or a.startswith(y) and b.startswith(x)), None)
-    return 2 * CONTACT_OFFSET + (pair if pair is not None else first(FLEX, a, FLEX_DEFAULT) + first(FLEX, b, FLEX_DEFAULT))
+    offsets = sum(GEAR_CONTACT_OFFSET if n.startswith("gear_leg_") else CONTACT_OFFSET for n in (a, b))
+    return offsets + (pair if pair is not None else first(FLEX, a, FLEX_DEFAULT) + first(FLEX, b, FLEX_DEFAULT))
 
 
 def links(cols):
@@ -289,7 +295,7 @@ def carve(icarus):
                 if np.all(o[0].min(0) <= hi) and np.all(lo <= o[0].max(0))]
         # a section round a part jointed inside it splits round that part, as the keep-outs do (hulls.clear), rather
         # than losing most of its hull to one cut
-        pieces = hulls.clear(bm, near)
+        pieces = hulls.clear(bm, near, centre_first=not pc.endswith(("_L", "_R")))
         if pieces == [bm]:
             bm.free()
             continue
