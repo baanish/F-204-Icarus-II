@@ -348,7 +348,7 @@ def bare_aft(position, part, names, structure):
         raise ValueError(f'The hot ring must start on the last butt joint {lines["joints"]}')
     s = position[..., 1] + structure['S0']
     ramp = lambda d: (lambda t: t * t * (3 - 2 * t))(np.clip(d / (2 * SEAM_HALF_WIDTH) + .5, 0, 1))
-    # the ventral fins and the hook's fairing are painted in every livery, aft of the joint too
+    # Painted liveries keep paint on the ventral fins and hook fairing, aft of the joint too.
     skin = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith((*FUSELAGE, 'speed_brake_'))])
     nozzle = np.isin(part, [i + 1 for i, name in enumerate(names) if name.startswith('nozzle')])
     return np.where(skin, ramp(s - BARE_AFT_JOINT_S), nozzle.astype(np.float64))

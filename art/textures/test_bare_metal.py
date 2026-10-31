@@ -58,6 +58,19 @@ class BareMetalTests(unittest.TestCase):
         np.testing.assert_array_equal(result[0, 6], shared[0, 6])
         self.assertEqual(float(masks['anti_glare'][0, 3]), 1.)
 
+    def test_ventral_fins_and_hook_fairing_match_fuselage_metal(self):
+        names = ['skin_aft_L', 'ventral_fin', 'ventral_fin_hooked', 'ventral_fin_fairing']
+        part = np.arange(1, 5)[None, :]
+        position = np.zeros((1, 4, 3))
+        position[..., 1] = 5.5
+        shared = np.zeros((1, 4, 4))
+        shared[..., 3] = .42
+        result, masks = surface_map(shared, position, np.zeros_like(position), part, names,
+                                    np.zeros(part.shape), np.zeros(part.shape), np.zeros(part.shape))
+        np.testing.assert_array_equal(masks['paint'], 0)
+        np.testing.assert_allclose(result[..., 0], .98)
+        np.testing.assert_allclose(result[..., 3], .90)
+
     def test_partial_decal_alpha_blends_metal_response_exactly(self):
         shared = np.array([[[0., 0., 0., .4]]])
         position = np.zeros((1, 1, 3))

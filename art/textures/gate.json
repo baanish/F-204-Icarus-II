@@ -1,15 +1,15 @@
 {
   "pipeline_accepted": false,
-  "geometry_commit": "dc8f54a117238f8c9b6496939166be05c61bf18c",
+  "geometry_commit": "bedb11723d8fb7492a3125d3acbca7816066c26f",
   "inputs": {
-    "art/export-manifest.json": "7ebdb9bfdfb52178493fa6a409aa7d2405215d0ed3e6ea44ced9ff1fbfde1547",
+    "art/export-manifest.json": "9c33f1745affdc01e384760f11bf19d3d6d57e74a08b0fa4d709b1960cdea5f1",
     ".cache/review/wave2/p9b/02/geometry_maps.npz": "892a8c524e9a2ae339ebe61b9741752f440be849488906b3078a4d4792b17df3",
     ".cache/review/wave2/p9b/02/atlas_geometry.npz": "7b74d33f5d4656f808f851c36eb4b3a776b8c12f724d4df245e886ab083fba28",
     ".cache/review/wave2/p9b/02/ao_maps.npz": "700485223a8828957e3ca77ed0fc43708c2e070b7f161193a0de44c02909fef6",
     ".cache/review/wave2/p9b-round2/structure.json": "d8465368f0a7abdb26c2f90c10bae5d30c18f7346537e03499f6fd77aa23b11b",
-    "art/textures/bare_metal.py": "b3c271d32b04b21034e44ec86b20bfe2d3c5f62dac30265efe6ac199b00c25fb",
+    "art/textures/bare_metal.py": "48f55117f44b7b5fdfe8681ff7db1098c2674ed953913aaaa2cb7036d2e6d5e8",
     "art/textures/bare_metal_checks.py": "a47da1a726b0894b3b170e298eaf4903464ebcaa4a639dd01f82ecd2fcde86d7",
-    "art/textures/compose_skin.py": "9bc7f766859e92cda34bb8806566838c3cf07628fa501adef9ef80f3eb0b1dea",
+    "art/textures/compose_skin.py": "55f3f69550a2189b1a64d67da114bcd18d4982b185d6519334077be3ac6a7815",
     "art/textures/damage.py": "6ceaaa3db4931a2c69db084b6699446a9642ee2b9cd80b2b12cbb1e9a08d92cc",
     "art/textures/decal_checks.py": "a8554e3165681f14d08bea4cf0cbed862e2c0774f31fbb0f0e09737546186568",
     "art/textures/full_skin_calls.py": "51957e9d9ae97834ba4d7856221e6d988be954687be70c9a24c2ecf4c2fd5328",
@@ -22,14 +22,14 @@
     "art/textures/liveries.py": "df77998da1e092031fe44b4667510333493b8f9be0467171a5aff1293f4db358",
     "art/textures/measure_trims.py": "bb9eb33902e645c7f2eb2108c41da712afbd167106301727d1155446faf74564",
     "art/textures/panel_checks.py": "04344b1353e913f3420ab2d7d3f7a05b0d63c7e858d15545404ed2cccf2f7d1d",
-    "art/textures/panels.py": "6fe6cf6250ec4a51f99df38603e385b3e115de5ba4cafac21e9cd8772815207b",
+    "art/textures/panels.py": "c9b6be5eafb3cd2704b3c4b6b454b9a65345df22430eac9c4289f3df05b7c244",
     "art/textures/pilot2_parts.py": "d9b6e81aa4cad48520c06d691d4e09abe5803684369e32b0fbcc675b17b1fda6",
     "art/textures/pilot2_review.py": "072dde0d613bae932afcb501c2adc1611d4e3c3dfdbff7bf23f8d92a8138e2d2",
     "art/textures/rasterize.py": "029ee953f0bfec46f28915cb03baf7a51c053a3b63d05dcad29405faac850c8a",
     "art/textures/record_paths.py": "052dfbc0384d1813ef7fb51590c5f0715752ddba4886a29abc1dcffdb960224d",
     "art/textures/review_skin.py": "cfdf16a276b8b19c7e451f6692cf7a76abe64ccc590ab9bd098edccf872eca75",
     "art/textures/source_atlas_mapping.py": "446e0044f0ccd403e90867429a47c2aac706b151afe0a61052c1944bd386c7ff",
-    "art/textures/test_bare_metal.py": "545e1b96efb199f901df04f0a7f24bed23bef88b70006bfb3a7db4a5929f5e5f",
+    "art/textures/test_bare_metal.py": "0f49eff4c59f88538a5779e3b61f3e12121f792fd2b407ade5cd7000e9776bed",
     "art/textures/test_compose_skin.py": "6eb0d9886a37a0668dc9b58361c7419ae94f9663e6484aec8ce0a41fad760e44",
     "art/textures/test_full_skin_checks.py": "0adefda88ee8ee623737852c08199d70558c9ce67354036c24c802987f222f9f",
     "art/textures/test_full_skin_compose.py": "b744872efa3baab1c92f59794a85c230a5f5554c3e9036d55651ac49fe114be6",
@@ -1259,7 +1259,7 @@
     "Icarus_livery_1.png": "4817a74a976ffa3746ebf309cdb7ee4eddf4d95c3b2f45c0ee625d48e6c8da30",
     "Icarus_livery_2.png": "7bf22bc55918c65d69f057db82ed084db2750f885a9dfc9d1f64f249f6740881",
     "Icarus_livery_3.png": "8d4bdc632b862ba4846232682aeeb34d804b28d439cf940072ad01dbff69d3a8",
-    "Icarus_livery_4.png": "a134122badda2f209cec30ceabae7bb6e6d33c7e8696bdf380b360b817e30cb8",
-    "Icarus_livery_4_m.png": "9e14b97cd8c30347170f51bdf92c78d15c16527bd1900b8301991e522e430844"
+    "Icarus_livery_4.png": "4cb38f361ce0d1c9f14b4c9a50ec82f6b1b3d3982511187d5fa35784ce3a6a27",
+    "Icarus_livery_4_m.png": "48497088c9d5eb465bc0bf9328cdfb0073324db8cc375d15ac1806977da2e492"
   }
 }

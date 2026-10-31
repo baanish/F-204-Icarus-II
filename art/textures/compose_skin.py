@@ -143,10 +143,8 @@ def compose(part_manifest=None):
         source = soften(read_source(spec['source']))
         baseline = paint(pos, normal, source, spec)
         if spec['id'] == 4:
-            from bare_metal import finish, painted_fins, painted_parts, surface_map, METALLIC_MAP
+            from bare_metal import finish, painted_parts, surface_map, METALLIC_MAP
             baseline, sheet_tone, metal_report = finish(baseline, pos, normal, fields['panel'], used)
-            fins = painted_fins(part, names)
-            baseline[fins] = paint(pos[fins], normal[fins], source, {**spec, 'pattern': 'scheme'})  # no band, no sheet
             report['bare_metal'] = metal_report
             report['bare_metal']['analytic_reflection_scope'] = 'world scheme before atlas sheet tones; current UV seam samples check the finished atlas'
         colour = np.clip(baseline * (1 + residual[..., None]), 0, 1)
