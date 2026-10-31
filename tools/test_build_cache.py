@@ -40,7 +40,9 @@ def test_repo():
 class GeometryCacheTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.original = original_functions("art/blender/build_icarus.py", {"blended_ring", "skin_ring"}, vars(bi))
+        # the rings computed afresh, past the cache: the cache must hand back exactly what they give. Not a past commit's
+        # rings, since the loft is meant to change.
+        cls.original = {name: getattr(bi, name).__wrapped__ for name in ("blended_ring", "skin_ring")}
 
     def tearDown(self):
         geometry_cache.clear()
