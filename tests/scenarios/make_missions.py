@@ -169,6 +169,21 @@ m["aircraft"][0]["savedLoadout"]["Selected"][3]["Key"] = HOOK
 save(m, "icarus_hyperion_final", f"the player's Icarus for Primeva 15 km astern of the Hyperion carrier (Ignus) at 1,200 m MSL, 150 m/s, "
      f"heading {CARRIER_HDG:03.0f} as the carrier, 20% fuel, clean but for its arrestor hook, for fly mode=land onto the deck; no opponent.")
 
+# The Hyperion turned to face north, its Short Ski-jump runway (FleetCarrier1: Start (0.8, 10.2, -51.7), End
+# (0.32, 15.4, 132.3) about the carrier's centre) running along +z, and the player's Icarus at rest on it 5 m ahead of its
+# Start, at the Icarus's 1.4845788 m spawn height and aimed along the runway, at full fuel with the standard Interceptor
+# loadout and the hook, the heaviest it launches: for fly mode=takeoff over the ski jump.
+m = carrier_mission("airborne")
+m["ships"][0]["rotation"] = {"x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0}
+yaw = math.atan2(0.32 - 0.8, 132.3 - -51.7)
+icarus(m["aircraft"][0], 1.0, {"x": round(c["x"] + 0.8, 2), "y": round(c["y"] + 10.2 + 1.4845788, 8), "z": round(c["z"] - 51.7 + 5.0, 4)},
+       {"x": 0.0, "y": math.sin(yaw / 2), "z": 0.0, "w": math.cos(yaw / 2)}, 0.0)
+for station, key in enumerate(("baanish_icarus_tip_tank", "AAM4_single", "baanish_icarus_AAM2_conformal", HOOK)):
+    m["aircraft"][0]["savedLoadout"]["Selected"][station]["Key"] = key
+save(m, "icarus_hyperion_takeoff", "the player's Icarus for Primeva at rest on the Hyperion carrier's Short Ski-jump (Ignus, the carrier "
+     "turned to face north), full fuel, the standard Interceptor loadout with its arrestor hook, for fly mode=takeoff over the ski jump; "
+     "no opponent.")
+
 # The game's own AI on the Hyperion: Primeva holds only Icarus airframes and no airbase but the carrier (Ignus's fields
 # held by nobody and disabled, as the game's Carrier Duel holds them), with room for one AI aircraft, so the faction AI
 # spawns an Icarus in one of the carrier's hangars with a standard loadout (every one carries the hook), launches it

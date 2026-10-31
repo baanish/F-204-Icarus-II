@@ -23,6 +23,14 @@ namespace Icarus.Editor
         // gear arm aims at its unsprung. Its shock strut is two pieces aimed at each other's eyes: the cylinder on the
         // leg's mount, the piston on the swing, as the stock trucks aim theirs.
         private const float GearStroke = 0.3f, GearMaxCompression = 0.5f, GearHingeBox = 0.15f;
+        // The nose leg sits as far down its travel at its maximum weight as the KR-67 Ifrit's (Multirole1), the stock jet
+        // that takes off over a carrier's ski jump. Each at its maxWeight with its heaviest standard load's CG
+        // (LandingGear.cs:596-600, force = springRate x compression): the Ifrit, 30000 kg, CG z -0.575, mains z -1.484,
+        // wheelbase 7.115 m, puts 3830 kg on its nose; 300000 N/m gives 0.125 m, 17.9% of its 0.7 m travel. The Icarus,
+        // 11438 kg, CG z -0.414, mains z -1.465, wheelbase 4.640 m, puts 2590 kg on its nose: 268698 N/m gives the same
+        // share of its 0.5285 m travel (the Revoker's 200000 sat it at 24.0%). Damping keeps the Ifrit nose's ratio, 0.443,
+        // on the 2590 kg it carries.
+        private const float NoseSpringRate = 268698f, NoseDampingRate = 23347f;
         // The share of a leg's carrier mass that leaves with it when the wheel breaks off: LandingGear.BreakWheel takes
         // LandingGear.mass from the carrier's Rigidbody and gives it to the falling leg, so it must stay under the carrier's.
         private const float GearBreakShare = 0.5f;
@@ -158,11 +166,16 @@ namespace Icarus.Editor
                 var (_, hinge, strut) = HingeRig(b, leg, null, mount, flip: fold < 0);
                 fold = Mathf.Abs(fold);
                 // LandingGear finds the ground with a linecast that also sees the aircraft's own colliders (layer 14), so
-                // a strut collider over the wheel would read as full compression and lock the leg. The part keeps a small
-                // box at its hinge in the well; the strut's export pieces go unused.
+                // a strut collider over the wheel would read as full compression and lock the leg; the strut's export
+                // pieces go unused. A stock leg carries no collider while attached (its gearCollider wakes only when the
+                // wheel breaks off, round the whole strut), so the part keeps a small box at its hinge as a trigger: rounds
+                // and blasts still hit it (the game queries triggers, CheckBulletColliders), but it touches nothing, not the
+                // well's sections, the deck, nor the broken-off leg's gearCollider.
                 foreach (var piece in part.GetComponents<MeshCollider>())
                     Object.DestroyImmediate(piece);
-                part.gameObject.AddComponent<BoxCollider>().size = Vector3.one * GearHingeBox;
+                var hingeBox = part.gameObject.AddComponent<BoxCollider>();
+                hingeBox.size = Vector3.one * GearHingeBox;
+                hingeBox.isTrigger = true;
 
                 var rig = b.Root.transform.Find(rigName) ?? throw new MissingReferenceException("rescued gear rig " + rigName);
                 var gear = rig.GetComponentInChildren(gearType, true);
@@ -315,6 +328,11 @@ namespace Icarus.Editor
                 Prop(so, "suspensionTravel").floatValue = travel;
                 Prop(so, "wheelRadius").floatValue = radius;
                 Prop(so, "maxCompression").floatValue = GearMaxCompression;
+                if (tag == "N")
+                {
+                    Prop(so, "springRate").floatValue = NoseSpringRate;
+                    Prop(so, "dampingRate").floatValue = NoseDampingRate;
+                }
                 // LandingGear writes extendedDrag over the host's whole dragArea, so it carries the host's own share and the
                 // drag of every leg on that host (both mains write the same value onto the root).
                 var extendedDrag = (DragAreas.TryGetValue(carrier, out var carrierDrag) ? carrierDrag : 0f)

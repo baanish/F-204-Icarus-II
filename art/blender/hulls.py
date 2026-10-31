@@ -367,11 +367,8 @@ def keepouts():
     return out
 
 
-def clear(bm, keepouts, depth=0, centre_first=False):
-    """Consume a world hull, keeping the most volume clear of every keep-out, with at most two split levels.
-    centre_first: a centreline part that must split splits first on its centre plane (Blender x = 0), a piece a side,
-    so its pieces keep its skin on both flanks round what they clear; by volume alone the forward section kept one
-    block behind the cockpit and left its sides to the cockpit cell's hull."""
+def clear(bm, keepouts, depth=0):
+    """Consume a world hull, keeping the most volume clear of every keep-out, with at most two split levels."""
     from clearance import keep_most
 
     if not solid(bm):
@@ -383,19 +380,12 @@ def clear(bm, keepouts, depth=0, centre_first=False):
     if not bad:
         return [bm]
     obstacle, (_, axis) = min(bad, key=lambda item: item[1][0] - item[0]["gap"])
-    normal, at = keep_most(s, obstacle["shape"], obstacle["gap"], axis)
-    single = cut(bm, Vector(normal), at)
+    single = keep_most(bm, s, obstacle["shape"], obstacle["gap"], axis)
     volume = abs(bm.calc_volume())
     share = abs(single.calc_volume()) / volume if single is not None else 0.0
     if share >= KEEP_SHARE or depth >= 2:
         bm.free()
-        return clear(single, keepouts, depth, centre_first) if single is not None else []
-    if centre_first and depth == 0:
-        if single is not None:
-            single.free()
-        halves = [cut(bm, Vector((1, 0, 0)), 0.0), cut(bm, Vector((-1, 0, 0)), 0.0)]
-        bm.free()
-        return [p for half in halves if half is not None for p in clear(half, keepouts, 1)]
+        return clear(single, keepouts, depth) if single is not None else []
     best = clear(single, keepouts, depth) if single is not None else []
     best_volume = sum(abs(p.calc_volume()) for p in best)
     centre = obstacle["shape"][0].mean(0)

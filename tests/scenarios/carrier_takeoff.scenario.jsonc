@@ -1,0 +1,65 @@
+// Heavy carrier takeoff: the player's Icarus runs off the Hyperion's Short Ski-jump at its heaviest, full fuel with the
+// standard Interceptor loadout (two full tip tanks, Scimitars, conformal Scythes) and the tail hook, from rest on the
+// runway (icarus_hyperion_takeoff.mission.json). The game's takeoff AI flies it as a player would: full afterburner,
+// brakes off, along the runway and over the ramp (AIPilotTakeoffState's SkiJump branch), then a climb. It guards the nose
+// leg on the deck: its spring holds it up the ramp, and its hinge box touches nothing (IcarusAuthor.Gear.cs).
+// Pass: the jet leaves the deck and climbs past 100 m, and from spawn to 20 s after liftoff every part stays attached,
+// with no damage, no joint broken ("joint-break"), no nose-leg contact ("contact gear_leg_N", src/Icarus/PartContactLog.cs)
+// and no joint at its break limit (a "joint-load" value of 1 or more, src/Icarus/TailFlex.cs).
+// Recorded: TAS and pitch at the deck edge, and the joint nearest its break limit after the launch and after the climb.
+// Run at 1x: the plugin's stage lines are throttled by wall time, so at 4x most seconds of the launch go unlogged.
+// The peak over the launch: python tools/flight_peaks.py <run folder> --since takeoff
+// From the repo root: no-agentic run tests/scenarios/carrier_takeoff.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "icarus_hyperion_takeoff.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.2.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "measure": true,
+  "sample_hz": 20,
+  "speed": 1,
+  "timeout": 180,
+  "steps": [
+    { "mark": { "label": "spawn" } },
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "baanish_icarus_tip_tank|AAM4_single|baanish_icarus_AAM2_conformal|baanish_icarus_tail_hook" }, "within": 3,
+      "label": "standard Interceptor loadout, full tip tanks and tail hook included" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" },
+                            { "path": "own.fuel_frac", "gt": 0.999 }, { "path": "own.hp_frac", "eq": 1 },
+                            { "path": "own.gear", "eq": "down" }, { "path": "own.gs_mps", "lt": 1 },
+                            { "path": "own.alt_msl_m", "between": [16, 19] }, { "path": "own.alt_agl_m", "lt": 1 } ] },
+      "label": "full fuel, intact and stationary on the carrier deck with gear down" },
+    { "require": { "path": "truth.units.Hyperion.alive", "eq": true }, "label": "Hyperion exists beside the player slot" },
+    { "mark": { "label": "takeoff" } },
+    { "fly": { "mode": "takeoff", "alt_msl_m": 1200, "hdg_deg": 0, "throttle": 1 } },
+    { "require": { "all": [ { "path": "fly.mode", "eq": "takeoff" },
+                            { "path": "own.inputs.throttle", "eq": 1 }, { "path": "own.inputs.brake", "eq": 0 } ] }, "within": 3,
+      "label": "the ski-jump takeoff AI commands full afterburner with brakes released" },
+    { "wait": { "path": "own.pos.z", "gt": -36336.5672 }, "timeout": 60,
+      "label": "crossing the north-facing ramp's deck edge, local z 132.3 m" },
+    { "record": { "path": "own.tas_mps" }, "label": "TAS at the first sample beyond the deck edge, m/s" },
+    { "record": { "path": "own.pitch_deg" }, "label": "pitch just beyond the deck edge, deg, not the ramp maximum" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "source": "F-204 Icarus II", "since": "takeoff" } },
+      "label": "nearest joint to breaking in the latest launch log, load over limit" },
+    { "wait": { "all": [ { "path": "own.alt_agl_m", "gt": 3 }, { "path": "own.vs_mps", "gt": 0 } ] }, "timeout": 10,
+      "label": "liftoff confirmed beyond the deck edge, above the sea and climbing" },
+    { "mark": { "label": "liftoff" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 },
+                          { "not": { "event": "damage", "since": "spawn" } },
+                          { "not": { "event": "part_detached", "since": "spawn" } },
+                          { "not": { "log": "joint-break", "source": "F-204 Icarus II", "since": "spawn" } },
+                          { "not": { "log": "contact gear_leg_N", "source": "F-204 Icarus II", "since": "spawn" } },
+                          { "not": { "log": "joint-load: nearest break: [^ ]+ (?:[1-9][0-9]*\\.[0-9]+|Infinity|NaN)", "source": "F-204 Icarus II", "since": "spawn" } } ] }, "for": 20,
+      "label": "intact from spawn through 20 s after liftoff, no nose-leg contact or joint at its break limit" },
+    { "check": { "all": [ { "path": "own.alt_agl_m", "gt": 100 }, { "path": "own.vs_mps", "gt": 0 },
+                          { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 } ] },
+      "label": "airborne and climbing above 100 m after the 20 s observation" },
+    { "require": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "source": "F-204 Icarus II", "since": "liftoff", "lt": 1 } },
+      "label": "joint telemetry is present and below its break limit" },
+    { "record": { "log_value": { "match": "joint-load: nearest break: [^ ]+ ([0-9.]+)", "source": "F-204 Icarus II", "since": "takeoff" } },
+      "label": "nearest joint to breaking in the latest climb log, load over limit" },
+  ],
+}

@@ -19,6 +19,7 @@
 - New setting Tuning.AI MinimumCombatAltitude: the least height above the ground the AI holds while it fights the Icarus, live while you play.
 - The Air Superiority, Strike and Close Support loadouts carry an MMR-S3 on each wingtip instead of the IRM-S2, every standard loadout carries AAM-29 Scythes on the conformal stations, Air Superiority carries twin racks of Scythes on its pylons instead of MMR-S3s, and Close Support an AGM-68 on each pylon instead of a rocket pod.
 - The cockpit and forward fuselage are stronger to carry the heavier radar, so a hard launch or a hard pull doesn't snap the nose off.
+- A stiffer nose gear spring, matched to the KR-67 Ifrit's under the heavier nose, so the nose no longer sags on the ski jump, and the nose gear no longer snaps off rolling over the carrier deck.
 - The speed brakes are twice as strong, and AI pilots come down a carrier approach at a steady speed, slow enough that their hook stays down over the deck.
 
 ## 0.2.0 (2026-10-29)
