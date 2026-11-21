@@ -18,7 +18,8 @@ NATIVE_FILE = b"Original|ApplicationNativeFile"
 ABSOLUTE_PATH = re.compile(rb"^(?:[A-Za-z]:[\\/]|/|\\\\)")
 
 
-def read_tree(data):
+def read_tree(data, *, normalize_paths=True):
+    """Read the node tree and scrub spans. Normalize scrubbed properties for tree comparisons by default."""
     if data[:23] != b"Kaydara FBX Binary  \x00\x1a\x00":
         raise ValueError("expected binary FBX")
     wide = struct.unpack_from("<I", data, 23)[0] >= 7500
@@ -63,10 +64,11 @@ def read_tree(data):
             name == b"P" and strings and data[slice(*strings[0])] == b"Path")
         value = data[slice(*strings[-1])] if strings else b""
         if native or (texture and (ABSOLUTE_PATH.match(value) or not value.strip())):
-            if len(strings) != count:
+            if not strings or len(strings) != count:
                 raise ValueError("unexpected FBX path property")
             spans.append(strings[-1])
-            props[-1] = b"blanked path metadata"
+            if normalize_paths:
+                props[-1] = b"blanked path metadata"
         children = []
         while pos < end:
             child, pos = node(pos)

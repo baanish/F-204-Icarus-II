@@ -10,7 +10,7 @@ To package from a worktree, first run `pwsh -NoProfile -File tools/Link-Worktree
 
 Package the release from the checkout that built its skin. That checkout has the texture sources for the release ZIP and the skin bake the livery kit needs. The kit reads `.cache/review/wave2/p9b/02/skin.blend` from the bake that matches the release's pinned exports and maps.
 
-If the skin needs rebuilding, run `tools/Rebuild-Skin.ps1` as described in [the skin build guide](../art/textures/README.md). Commit the rebuilt `art/textures/gate.json` with the skin changes before packaging.
+If the UV layout changed, export the geometry before running `tools/Rebuild-Skin.ps1` so the exported atlas matches the new bake. Follow the export and compose order in [the skin build guide](../art/textures/README.md). Commit the rebuilt `art/textures/gate.json` with the skin changes before packaging.
 
 A clean checkout can fetch a published release's texture sources only if they match the hashes pinned in `art/textures/texture-sources.json`. Once the same version is published, run:
 
@@ -18,13 +18,13 @@ A clean checkout can fetch a published release's texture sources only if they ma
 pwsh -NoProfile -File tools/Fetch-TextureSources.ps1
 ```
 
-Build the release on the same machine that built the committed mesh assets. On other hardware, Unity can change the last digits of floating-point values in ten joined control surface meshes. The packager rejects those changes to tracked inputs.
+The packager compares tracked files before and after the build. It allows changes only to regenerated prefabs. On different hardware, Unity can change the last digits of floating-point values in joined control surface meshes and fail that check. If this happens, build on the hardware that produced the committed meshes, or review and commit the regenerated meshes as a separate change before packaging again.
 
 ```powershell
 pwsh -NoProfile -File tools/Package-Release.ps1
 ```
 
-The command refuses to run while any tracked file is modified or any untracked file exists. It checks the versions, export manifest and texture sources, then runs the offline release tests. It builds both mod payloads with `tools/Build-Icarus.ps1`, packs the texture sources with `tools/Build-TextureSources.ps1` and builds the livery kit with `tools/Build-LiveryKit.ps1`. The tracked build inputs come from the release commit. The build must leave every tracked input unchanged except the prefab fileIDs Unity regenerates. Text hashes normalize CRLF line endings before comparing. To change an existing CRLF file with Python, use `read_bytes` and `write_bytes` so its line endings survive.
+The command refuses to run while any tracked file is modified or any untracked file exists. It checks the versions, export manifest and texture sources, then runs the offline release tests. It builds both mod payloads with `tools/Build-Icarus.ps1`, packs the texture sources with `tools/Build-TextureSources.ps1` and builds the livery kit with `tools/Build-LiveryKit.ps1`. The tracked build inputs come from the release commit. Text hashes normalize CRLF line endings before comparing. To change an existing CRLF file with Python, use `read_bytes` and `write_bytes` so its line endings survive.
 
 The final line must say `RELEASE PASS`. Outputs are under `.cache/release/v<version>-<UTC time>/`:
 

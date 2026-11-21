@@ -197,7 +197,9 @@ def check_clean(paths, record, hashes=HASHES, *, require_references=False):
     forbidden = {}
     if hashes.is_file():
         forbidden.update({sha: f'the painted {name}' for name, sha in json.loads(hashes.read_text())['outputs'].items()})
-    roundels = {faction: path for faction, path in roundel_paths(record).items() if path.is_file()}
+    roundels = {}
+    if os.environ.get('ICARUS_SKIP_ROUNDEL_EXPORT') != '1':
+        roundels = {faction: path for faction, path in roundel_paths(record).items() if path.is_file()}
     forbidden.update({sha256(path): f'the stock {path.name}' for path in roundels.values()})
     if not forbidden:
         missing = 'no stock roundels from the local game export or recorded painted-output hashes are available'

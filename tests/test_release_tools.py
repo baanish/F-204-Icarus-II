@@ -3,6 +3,7 @@
 import hashlib
 import io
 import json
+import os
 import struct
 import subprocess
 import sys
@@ -32,6 +33,7 @@ class ReleaseToolsTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(dir=REPO / ".cache")
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.env = self.painted_hashes(b"painted livery")
 
     def package(self, *, local=False, extra=None, mismatch=False, metadata=None, sources=None, kit_root=None,
                 invalid_kit_png=None, invalid_kit_data=b"placeholder text"):
@@ -108,7 +110,7 @@ class ReleaseToolsTests(unittest.TestCase):
         return subprocess.run([
             "pwsh", "-NoProfile", "-File", str(REPO / "tools/Verify-Release.ps1"),
             "-Directory", str(self.root), "-Tag", TAG, *args,
-        ], capture_output=True, text=True)
+        ], capture_output=True, text=True, env=self.env)
 
     def test_valid_pair_and_rehearsal_policy(self):
         self.package()
@@ -118,6 +120,16 @@ class ReleaseToolsTests(unittest.TestCase):
         self.assertNotEqual(self.verify().returncode, 0)
         result = self.verify("-AllowLocal")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_verification_requires_roundel_references(self):
+        self.package()
+        Path(self.env["ICARUS_FACTION_MARKS_HASHES"]).unlink()
+        self.env["ICARUS_SKIP_ROUNDEL_EXPORT"] = "1"
+        result = self.verify()
+        self.assertNotEqual(result.returncode, 0)
+        diagnostic = " ".join(line.lstrip(" |") for line in result.stderr.splitlines())
+        self.assertIn("no stock roundels from the local game export or recorded painted-output hashes are available",
+                      diagnostic)
 
     def test_allowlist_rejects_loader_debug_and_path_entries(self):
         for extra in ("BepInEx.dll", "Blueprinter.dll", "Icarus.pdb", "Icarus.xml", "Icarus.deps.json", "../outside"):
@@ -217,20 +229,17 @@ class ReleaseToolsTests(unittest.TestCase):
         """A stand-in for faction_marks.py's record of the liveries it painted with the game's roundels."""
         path = self.root / "marks.json"
         path.write_text(json.dumps({"inputs": {}, "outputs": {"Icarus_livery_1.png": sha256(data)}}))
-        return {**__import__("os").environ, "ICARUS_FACTION_MARKS_HASHES": str(path)}
+        return {**os.environ, "ICARUS_FACTION_MARKS_HASHES": str(path)}
 
     def test_texture_sources_reject_a_painted_livery(self):
-        env = self.painted_hashes(b"painted livery")
         self.package(sources=lambda e: e.update({"art/textures/generated/full/painted.png": b"painted livery"}) or
                      e.update({"texture-sources.json": json.dumps({"files": {
                          path: sha256(data) for path, data in e.items() if path != "texture-sources.json"}}).encode()}))
-        result = subprocess.run(["pwsh", "-NoProfile", "-File", str(REPO / "tools/Verify-Release.ps1"),
-                                 "-Directory", str(self.root), "-Tag", TAG], capture_output=True, text=True, env=env)
+        result = self.verify()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Game art in", result.stderr + result.stdout)
 
     def test_public_check_rejects_a_painted_livery_in_a_tracked_path(self):
-        env = self.painted_hashes(b"painted livery")
         repo = self.root / "repo"
         (repo / "art").mkdir(parents=True)
         subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -238,7 +247,7 @@ class ReleaseToolsTests(unittest.TestCase):
             (repo / "art" / name).write_bytes(data)
             subprocess.run(["git", "-C", str(repo), "add", "art/" + name], check=True)
             result = subprocess.run(["pwsh", "-NoProfile", "-File", str(REPO / "tools/Check-Public.ps1"), "-Repo", str(repo)],
-                                    capture_output=True, text=True, env=env)
+                                    capture_output=True, text=True, env=self.env)
             subprocess.run(["git", "-C", str(repo), "rm", "-q", "--cached", "art/" + name], check=True)
             return result
         result = check("clean.png", b"logo-free")

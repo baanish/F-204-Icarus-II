@@ -387,12 +387,17 @@ def fbx_texture_paths(data):
 
     def walk(nodes):
         for name, props, children in nodes:
-            strings = [p[5:].decode('utf-8', 'replace') for p in props if p[:1] == b'S']
-            if strings and (name.lower() in (b'filename', b'relativefilename') or name == b'P' and strings[0] == 'Path'):
-                if strings[-1].strip():
-                    found.append(strings[-1])
+            if name.lower() in (b'filename', b'relativefilename'):
+                path_props = props
+            elif name == b'P' and props and props[0][:1] == b'S' and props[0][5:] == b'Path':
+                # The first four properties are the name, type, subtype and flags.
+                path_props = props[4:]
+            else:
+                path_props = ()
+            strings = (p[5:].decode('utf-8', 'replace') for p in path_props if p[:1] == b'S')
+            found.extend(value for value in strings if value.strip())
             walk(children)
-    walk(read_tree(data)[0])
+    walk(read_tree(data, normalize_paths=False)[0])
     return found
 
 

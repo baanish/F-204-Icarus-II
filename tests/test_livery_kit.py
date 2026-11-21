@@ -62,12 +62,14 @@ class LiveryKitContractTests(unittest.TestCase):
         return stage
 
     @staticmethod
-    def fbx_storing(path):
-        """A binary FBX holding one RelativeFilename node."""
-        name, value = b"RelativeFilename", path.encode()
-        prop = b"S" + struct.pack("<I", len(value)) + value
-        node = struct.pack("<IIIB", 27 + 13 + len(name) + len(prop), 1, len(prop), len(name)) + name + prop
-        return b"Kaydara FBX Binary  \x00\x1a\x00" + struct.pack("<I", 7400) + node + bytes(13)
+    def fbx_storing(*nodes):
+        """A binary FBX holding the given nodes and their string properties."""
+        data = b"Kaydara FBX Binary  \x00\x1a\x00" + struct.pack("<I", 7400)
+        for name, *values in nodes:
+            props = b"".join(b"S" + struct.pack("<I", len(value)) + value for value in values)
+            end = len(data) + 13 + len(name) + len(props)
+            data += struct.pack("<IIIB", end, len(values), len(props), len(name)) + name + props
+        return data + bytes(13)
 
     @staticmethod
     def blend_storing(path):
@@ -82,7 +84,7 @@ class LiveryKitContractTests(unittest.TestCase):
         payloads.update({f"maps/{name}": (kit.EXPORT / name).read_bytes() for name in kit.SHARED_MAPS})
         payloads["install/IcarusLiveryBuilder.cs"] = (kit.DOCS / "IcarusLiveryBuilder.cs").read_bytes()
         payloads["install/meta.json"] = kit.meta_example().encode()
-        payloads["model/icarus_paint_model.fbx"] = self.fbx_storing(fbx_path)
+        payloads["model/icarus_paint_model.fbx"] = self.fbx_storing((b"RelativeFilename", fbx_path.encode()))
         payloads["model/icarus_paint_model.blend"] = self.blend_storing(blend_path)
         return names, payloads
 
@@ -108,6 +110,30 @@ class LiveryKitContractTests(unittest.TestCase):
             kit.write_zip(self.stage(names, payloads), path, TOP)
             with self.assertRaises(SystemExit, msg=(fbx_path, blend_path)):
                 kit.check_zip(path, TOP, SPECS)
+
+    def test_fbx_with_a_relative_and_an_absolute_texture_path_fails(self):
+        names, payloads = self.payloads()
+        relative = b"../examples/Icarus_livery_1.png"
+        absolute = b"Z:/outside/another_texture.png"
+        path = self.root / "paths.zip"
+        for nodes in (
+            ((b"RelativeFilename", relative), (b"FileName", absolute)),
+            ((b"FileName", absolute, relative),),
+            ((b"P", b"Path", b"KString", b"Url", b"", absolute, relative),),
+        ):
+            with self.subTest(nodes=nodes):
+                payloads["model/icarus_paint_model.fbx"] = self.fbx_storing(*nodes)
+                kit.write_zip(self.stage(names, payloads), path, TOP)
+                with self.assertRaisesRegex(SystemExit, "stores texture path 'Z:/outside/another_texture.png'"):
+                    kit.check_zip(path, TOP, SPECS)
+
+    def test_fbx_with_a_filename_node_without_properties_fails(self):
+        names, payloads = self.payloads()
+        payloads["model/icarus_paint_model.fbx"] = self.fbx_storing((b"FileName",))
+        path = self.root / "paths.zip"
+        kit.write_zip(self.stage(names, payloads), path, TOP)
+        with self.assertRaisesRegex(SystemExit, "icarus_paint_model.fbx cannot be read"):
+            kit.check_zip(path, TOP, SPECS)
 
     def test_panel_line_overlay_darkens_paint_as_compose_did(self):
         seam = np.array([[0, 1, .5, 0]], np.float64)
