@@ -162,7 +162,10 @@ def layers(spec, bake, painted, seam, fastener, used):
 
 
 def panel_lines(seam, fastener, used):
-    """Black at the alpha that darkens paint as compose did: over any colour c it gives c * shade."""
+    """Black at the alpha that darkens paint as compose did: over any colour c it gives c * shade. One layer, at the
+    painted finish's strength, since a player's livery always gets the painted finish in game; the two Bare Metal
+    examples were composed with the lighter metal strength, so this layer over their base darkens their joints a little
+    more than their shipped maps (the guide says so)."""
     alpha = (SEAM_SHADE['paint'] * seam + FASTENER_SHADE['paint'] * fastener) * used
     out = np.zeros((*alpha.shape, 4), np.uint8)
     out[..., 3] = np.uint8(np.clip(alpha, 0, 1) * 255 + .5)
