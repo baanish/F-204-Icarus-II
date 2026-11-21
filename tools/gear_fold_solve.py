@@ -26,7 +26,7 @@ STORE_GAP = 0.05  # Stores rule 12
 LEG_R = 0.06  # the leg's half-width about its line, pivot to wheel centre
 # Stores the folding gear must keep STORE_GAP from, by hardpoint name part, and the airframe it cannot pass through,
 # by mesh name prefix: everything else on its way is skin a door opens or structure a well clears.
-STORE_HARDPOINTS = ("innerwing_L", "conformal_L")
+STORE_HARDPOINTS = ("innerwing_L", "conformal_L", "centreline")
 HARD = ("wing_skin_inner_upper_L", "wing_skin_inner_lower_L", "wing_skin_outer_upper_L", "wing_skin_outer_lower_L",
         "intake_duct_L", "engine_core")
 # And skin no door can open, as (s from, s to, x from, x to) boxes of skin faces wholly inside them below z -0.1: the
@@ -160,7 +160,7 @@ def clearance_scene(nobp):
                 keep |= np.all((c[..., 1] + 8 > s0) & (c[..., 1] + 8 < s1) & (c[..., 0] > x0) & (c[..., 0] < x1)
                                & (c[..., 2] < -0.1), axis=1)
             hard.append(surface_points(v, tris[keep], 0.008))  # the tyre passes these closest
-    stores = []
+    stores, unswept = [], set()
     for s, (set_name, hardpoints) in enumerate(plane.sets):
         for hp_name, hp in hardpoints:
             if not any(k in hp_name for k in STORE_HARDPOINTS):
@@ -173,19 +173,23 @@ def clearance_scene(nobp):
                     meshes = [mesh]
                 else:
                     holder = next((bundle for bundle in holders if key in bundle.bundle_mounts), None)
-                    if holder is None:
-                        raise SystemExit(f"{key}, offered on {set_name}, is missing from the game export, "
-                                         "the Icarus bundle and the mod_bundles in tools/local-paths.json")
+                    if holder is None:  # a weapon pack's mount, with no mod_bundles entry for its pack
+                        unswept.add(key)
+                        continue
                     if seat is None:
                         mesh, _ = holder.mount(key, stock_mesh)
                         meshes = [mesh]
                     else:
                         launches = holder.seated(key, seat, CONFORMAL_PITCH_DEG, CONFORMAL_EJECT, stock_mesh)
                         meshes = [mesh for mesh, _, _ in launches]
+                        if not meshes:
+                            raise SystemExit(f"{key}, seated on {set_name}, has no MountedMissile to seat")
                 lift = MERIDIAN_MOUNT_LIFTS.get((hp_name, key), 0.0)
                 for verts, tris in meshes:
                     hung = pos + (verts + (0.0, lift, 0.0)) @ rotm.T
                     stores.append(surface_points(blender(hung), np.asarray(tris).reshape(-1, 3)))
+    if unswept:
+        print("not swept, in no mod_bundles bundle of tools/local-paths.json: " + ", ".join(sorted(unswept)))
     centre = blender(plane.posed(next(t for t, m in plane.meshes.items() if m[0] == "gear_wheel_L_visible"))[0]).mean(0)
     stores, hard = np.concatenate(stores), np.concatenate(hard)
     return {"tyre": tyre - centre, "centre": centre, "stores": cKDTree(stores), "hard": cKDTree(hard),
