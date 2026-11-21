@@ -13,7 +13,7 @@
   "timeout": 150,
   "steps": [
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
-    { "require": { "path": "mods.baanish.icarus.livery", "eq": "PALA Bare Metal" }, "within": 3, "label": "it wears PALA Bare Metal" },
+    { "require": { "path": "mods.baanish.icarus.livery", "eq": "PALA Bare Metal" }, "within": 3, "label": "PALA Bare Metal is selected" },
     { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
     { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 330, "pitch_deg": 10 } },
     { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: front-left orbit" },

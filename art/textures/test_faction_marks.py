@@ -1,6 +1,9 @@
 """faction_marks.py on a synthetic 64-texel atlas and a synthetic roundel: no game files are read."""
+import builtins
 import hashlib
 import json
+import runpy
+import sys
 
 import numpy as np
 import pytest
@@ -10,6 +13,25 @@ import faction_marks
 from insignia import PAD
 
 SIZE = 64
+
+
+@pytest.mark.parametrize(('import_name', 'missing_module', 'package'), [
+    ('numpy', 'numpy', 'NumPy'),
+    ('PIL', 'PIL', 'Pillow'),
+    ('insignia', 'scipy.ndimage', 'SciPy'),
+])
+def test_missing_package_names_the_install_command(import_name, missing_module, package, monkeypatch):
+    original_import = builtins.__import__
+
+    def import_with_missing_package(name, *args, **kwargs):
+        if name == import_name:
+            raise ImportError(name=missing_module)
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, '__import__', import_with_missing_package)
+    with pytest.raises(SystemExit) as error:
+        runpy.run_path(faction_marks.__file__, run_name='__main__')
+    assert str(error.value) == f'FACTION MARKS FAIL: {package} is unavailable. Run python -m pip install {package}'
 
 
 def roundel():
@@ -100,4 +122,37 @@ def test_a_checkout_without_the_export_still_checks_hashes(setup, tmp_path, monk
     assert faction_marks.roundel_paths(record) == {}
     problems, note = faction_marks.check_clean([out / 'Icarus_livery_1.png'], record, hashes)
     assert [p.split(': is ')[1] for p in problems] == ['the painted Icarus_livery_1.png']
-    assert note == 'no asset export, so only painted-output hashes were checked'
+    assert note == 'stock roundels are missing from the local game export. Checked only available references'
+
+
+@pytest.mark.parametrize(('references', 'required', 'exit_code'), [
+    ('none', False, 0),
+    ('none', True, 1),
+    ('empty hash record', True, 1),
+    ('hashes only', True, 0),
+    ('roundel only', True, 0),
+    ('both', True, 0),
+])
+def test_check_clean_cli_references(references, required, exit_code, setup, monkeypatch, capsys):
+    _, maps, _, hashes, _ = setup
+    if references not in ('roundel only', 'both'):
+        monkeypatch.setattr(faction_marks, 'roundel_paths', lambda record: {})
+    if references not in ('hashes only', 'both'):
+        if references == 'empty hash record':
+            hashes.write_text(json.dumps({'outputs': {}}))
+        else:
+            hashes.unlink()
+    monkeypatch.setenv('ICARUS_FACTION_MARKS_HASHES', str(hashes))
+    args = ['check-clean'] + (['--require-references'] if required else [])
+    monkeypatch.setattr(sys, 'argv', ['faction_marks.py', *args, str(maps / 'Icarus_livery_1.png')])
+    capsys.readouterr()
+
+    assert faction_marks.main() == exit_code
+    lines = capsys.readouterr().out.splitlines()
+    missing = 'no stock roundels from the local game export or recorded painted-output hashes are available'
+    if exit_code:
+        assert lines == [f'ROUNDEL FAIL: {missing}', 'ROUNDEL CHECK FAIL: 1 files']
+    else:
+        assert lines[-1] == 'ROUNDEL CHECK PASS: 1 files'
+        if references == 'none':
+            assert lines[0] == f'ROUNDEL NOTE: {missing}'

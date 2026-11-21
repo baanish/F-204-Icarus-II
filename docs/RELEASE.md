@@ -8,13 +8,17 @@ Set the same numeric version in `src/Icarus/IcarusPlugin.cs`, `src/Icarus/Icarus
 
 To package from a worktree, first run `pwsh -NoProfile -File tools/Link-WorktreeAssets.ps1` and provide the ignored `tools/local-paths.json` described in BUILD.md. Each checkout writes its own `build/` and `.cache/release/`.
 
-Every release also carries the texture-sources ZIP, so the checkout needs the texture sources that git ignores. In a checkout without them, fetch the previous release's first:
+Package the release from the checkout that built its skin. That checkout has the texture sources for the release ZIP and the skin bake the livery kit needs. The kit reads `.cache/review/wave2/p9b/02/skin.blend` from the bake that matches the release's pinned exports and maps.
+
+If the skin needs rebuilding, run `tools/Rebuild-Skin.ps1` as described in [the skin build guide](../art/textures/README.md). Commit the rebuilt `art/textures/gate.json` with the skin changes before packaging.
+
+A clean checkout can fetch a published release's texture sources only if they match the hashes pinned in `art/textures/texture-sources.json`. Once the same version is published, run:
 
 ```powershell
-pwsh -NoProfile -File tools/Fetch-TextureSources.ps1 -Version <previous version>
+pwsh -NoProfile -File tools/Fetch-TextureSources.ps1
 ```
 
-The livery kit needs the skin bake that matches the release's pinned exports and maps. Prepare it with `tools/Rebuild-Skin.ps1` as described in [the skin build guide](../art/textures/README.md) before packaging.
+Build the release on the same machine that built the committed mesh assets. On other hardware, Unity can change the last digits of floating-point values in ten joined control surface meshes. The packager rejects those changes to tracked inputs.
 
 ```powershell
 pwsh -NoProfile -File tools/Package-Release.ps1
@@ -52,7 +56,7 @@ Full Unity rebuilds are not byte-reproducible: authoring regenerates prefab obje
 
 ## Verify a package
 
-Verify a release without Unity:
+Verify a release without Unity. The roundel scan needs stock roundels from the local game asset export or recorded painted-output hashes from `faction_marks.py`.
 
 ```powershell
 pwsh -NoProfile -File tools/Verify-Release.ps1 -Directory <package-directory> -Tag v0.4.0

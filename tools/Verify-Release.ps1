@@ -72,8 +72,8 @@ try {
         $extracted = @(Get-ChildItem -LiteralPath $scan -File | ForEach-Object FullName)
         for ($first = 0; $first -lt $extracted.Count; $first += 100) {
             $batch = @($extracted[$first..([Math]::Min($first + 99, $extracted.Count - 1))])
-            $clean = @(& python (Join-Path $PSScriptRoot '../art/textures/faction_marks.py') check-clean @batch 2>&1)
-            if ($LASTEXITCODE -ne 0) { throw "Game art in ${sourcesName}: $(@($clean | Where-Object { "$_" -match '^ROUNDEL FAIL' })[0])" }
+            $clean = @(& python (Join-Path $PSScriptRoot '../art/textures/faction_marks.py') check-clean --require-references @batch 2>&1)
+            if ($LASTEXITCODE -ne 0) { throw "Game art in $sourcesName could not be ruled out: $($clean | Select-Object -First 1)" }
         }
     } finally { Remove-Item -LiteralPath $scan -Recurse -Force }
 } finally { $archive.Dispose() }

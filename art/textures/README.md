@@ -14,10 +14,10 @@ When `generated/full/source-policy.json` is present, rebuild the source mapping 
 pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python art/blender/bake_skin.py -- prepare
 pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python art/blender/bake_skin.py -- audit
 pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python art/blender/pilot2_skin.py -- structure
+pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python tools/export_blockout.py
 python art/textures/compose_skin.py compose
 python art/textures/panel_checks.py
 python art/textures/decal_checks.py
-pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python tools/export_blockout.py
 python tools/export_manifest.py --write
 python art/textures/compose_skin.py measure
 pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python art/blender/bake_skin.py -- review

@@ -49,8 +49,8 @@ foreach ($path in $onDisk.Keys) {
 $packed = @($onDisk.Values)
 for ($first = 0; $first -lt $packed.Count; $first += 100) {
     $batch = @($packed[$first..([Math]::Min($first + 99, $packed.Count - 1))])
-    $clean = @(& python (Join-Path $repo 'art/textures/faction_marks.py') check-clean @batch 2>&1)
-    if ($LASTEXITCODE -ne 0) { Fail "game art in the texture sources: $(@($clean | Where-Object { "$_" -match '^ROUNDEL FAIL' })[0])" }
+    $clean = @(& python (Join-Path $repo 'art/textures/faction_marks.py') check-clean --require-references @batch 2>&1)
+    if ($LASTEXITCODE -ne 0) { Fail "roundel scan of the texture sources failed: $($clean | Select-Object -First 1)" }
 }
 # The provenance records pin the same bytes; a pack must not drift from them.
 & python (Join-Path $repo 'tools/Make-TextureRecordsPortable.py') --check

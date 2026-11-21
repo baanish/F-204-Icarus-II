@@ -10,7 +10,7 @@ compose would have (16 supersamples a texel, the same seam and fastener shading,
 
   python art/textures/faction_marks.py [--maps DIR] [--out DIR]   paint (Rebuild-Skin.ps1 and Build-Icarus.ps1 run it)
   python art/textures/faction_marks.py verify-marked              the Unity textures are painted and show every roundel
-  python art/textures/faction_marks.py check-clean FILE...        no file is game art or shows a roundel (Check-Public.ps1)
+  python art/textures/faction_marks.py check-clean [--require-references] FILE...   no file is game art or shows a roundel
 """
 import argparse
 import hashlib
@@ -19,11 +19,17 @@ import os
 from pathlib import Path
 import sys
 
-import numpy as np
-from PIL import Image
+try:
+    import numpy as np
+    from PIL import Image
 
-from insignia import SUBSAMPLES, faction_roundel, ink_to_uv, mark_basis
-from rasterize import EXPORT, ROOT, sample
+    from insignia import SUBSAMPLES, faction_roundel, ink_to_uv, mark_basis
+    from rasterize import EXPORT, ROOT, sample
+except ImportError as error:
+    package = {'numpy': 'NumPy', 'PIL': 'Pillow', 'scipy': 'SciPy'}.get((error.name or '').split('.')[0])
+    if package is None:
+        raise
+    raise SystemExit(f'FACTION MARKS FAIL: {package} is unavailable. Run python -m pip install {package}') from None
 
 sys.path.insert(0, str(ROOT / 'art/blender'))
 import atlas_guard  # noqa: E402
@@ -183,17 +189,19 @@ def verify_marked(record, folder=UNITY, hashes=HASHES):
     return problems
 
 
-def check_clean(paths, record, hashes=HASHES):
+def check_clean(paths, record, hashes=HASHES, *, require_references=False):
     """No file is a painted livery or a stock roundel, and no livery-sized map shows a roundel at a footprint.
 
-    Returns problems and a note. Without the asset export the roundels can't be read, so only the painted outputs'
-    hashes are checked: a checkout without the export cannot have painted a roundel itself.
+    Returns problems and a note. Release scans require stock roundels or recorded painted-output hashes.
     """
     forbidden = {}
     if hashes.is_file():
         forbidden.update({sha: f'the painted {name}' for name, sha in json.loads(hashes.read_text())['outputs'].items()})
     roundels = {faction: path for faction, path in roundel_paths(record).items() if path.is_file()}
     forbidden.update({sha256(path): f'the stock {path.name}' for path in roundels.values()})
+    if not forbidden:
+        missing = 'no stock roundels from the local game export or recorded painted-output hashes are available'
+        return ([missing], None) if require_references else ([], missing)
     decals = {faction: faction_roundel(faction) for faction in roundels}
     by_map = {livery['map']: livery['faction'] for livery in record['liveries'].values()}
     problems = []
@@ -212,7 +220,9 @@ def check_clean(paths, record, hashes=HASHES):
         scores = roundel_correlations(rgb, record, faction, decals[faction])
         if scores and max(scores) > CLEAN_MAX:
             problems.append(f'{path}: shows the {faction} roundel (correlation {max(scores):.2f}, limit {CLEAN_MAX})')
-    note = None if len(decals) == len(record['roundels']) else 'no asset export, so only painted-output hashes were checked'
+    note = None
+    if len(decals) < len(record['roundels']):
+        note = 'stock roundels are missing from the local game export. Checked only available references'
     return problems, note
 
 
@@ -226,12 +236,18 @@ def main():
         print('FACTION MARKS VERIFY ' + ('FAIL' if problems else 'PASS: every livery Unity builds carries its roundels'))
         return 1 if problems else 0
     if len(sys.argv) > 1 and sys.argv[1] == 'check-clean':
-        problems, note = check_clean(sys.argv[2:], json.loads(record_path.read_text()), hashes)
+        parser = argparse.ArgumentParser(prog=f'{Path(sys.argv[0]).name} check-clean')
+        parser.add_argument('--require-references', action='store_true',
+                            help='fail if neither stock roundels nor recorded painted-output hashes are available')
+        parser.add_argument('files', nargs='*')
+        args = parser.parse_args(sys.argv[2:])
+        problems, note = check_clean(args.files, json.loads(record_path.read_text()), hashes,
+                                     require_references=args.require_references)
         for problem in problems:
             print('ROUNDEL FAIL:', problem)
         if note:
             print('ROUNDEL NOTE:', note)
-        print(f'ROUNDEL CHECK {"FAIL" if problems else "PASS"}: {len(sys.argv) - 2} files')
+        print(f'ROUNDEL CHECK {"FAIL" if problems else "PASS"}: {len(args.files)} files')
         return 1 if problems else 0
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--maps', type=Path, default=EXPORT, help='logo-free maps (default art/export/textures)')
