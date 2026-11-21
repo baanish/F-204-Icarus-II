@@ -8,7 +8,7 @@ The build has only been run on the developer's machine. If a step fails on yours
 
 - Windows, PowerShell 7, Git and [Git LFS](https://git-lfs.com/). The textures are stored in Git LFS, so a clone without it holds small pointer files instead of images.
 - The .NET SDK (8 or later).
-- Python 3.9 or later, available as `python`. The build and the public file check need NumPy, Pillow and SciPy. Install them with `python -m pip install numpy pillow scipy`.
+- Python 3.10 or later, available as `python`. The build and the public file check need NumPy, Pillow and SciPy. Install them with `python -m pip install numpy pillow scipy`.
 - Unity Editor **2022.3.62f2**.
 - A purchased copy of Nuclear Option **0.34.2** with BepInEx 5 installed in it. The build reads the game's assemblies and BepInEx's from there. The build finds the game in your Steam libraries. If it can't, set `NUCLEAR_OPTION_DIR` to the game folder.
 - An export of your game install from **AssetRipper 2.0.0** (Script Content Level **Level 1**, Script Export Format **Decompilation**). The repository holds no game assets; the build clones the FS-12 Revoker and other stock settings from your local import.

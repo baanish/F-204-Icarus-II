@@ -39,9 +39,9 @@ foreach ($path in @('README.md', 'LICENSE', 'tools/Verify-Release.ps1') + @($cre
 }
 & python (Join-Path $repo 'tools/export_manifest.py')
 if ($LASTEXITCODE -ne 0) { Fail 'exports do not match art/export-manifest.json' }
-# The release also carries the texture-sources ZIP; a checkout without the sources gets them from the last release.
+# The release also carries the texture-sources ZIP; the checkout that built the skin has the sources (docs/RELEASE.md).
 & python (Join-Path $repo 'art/textures/texture_sources.py')
-if ($LASTEXITCODE -ne 0) { Fail 'texture sources are missing; fetch the last release''s with: pwsh -NoProfile -File tools/Fetch-TextureSources.ps1 -Version <its version>' }
+if ($LASTEXITCODE -ne 0) { Fail 'texture sources are missing; package from the checkout that built this skin, or fetch sources that match art/textures/texture-sources.json (docs/RELEASE.md)' }
 if ($CheckOnly) { Write-Output "RELEASE CHECK PASS: $version at $commit; no build performed"; exit 0 }
 & python -m unittest discover -s (Join-Path $repo 'tests') -p test_release_tools.py
 if ($LASTEXITCODE -ne 0) { Fail 'release tool tests failed' }
