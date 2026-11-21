@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-#if ICARUS_DEV
 using System.IO;
-#endif
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -74,13 +72,14 @@ static class Tuning
     static readonly FieldInfo HldPosition = AccessTools.Field(typeof(HighLiftDevice), "position");
     static readonly FieldInfo HldPart = AccessTools.Field(typeof(HighLiftDevice), "aeroPart");
 
-#if ICARUS_DEV
-    static readonly List<Knob> knobs = new();
+    // The plugin's one config file, reloaded when it is saved on disk, in every build: the player options live there too.
     static ConfigFile config = null!;
-    static ConfigEntry<float>? nozzleOpen;
-    static ConfigEntry<string> altitudeThrust = null!;
     static FileSystemWatcher? watcher;
     static volatile bool fileChanged;
+#if ICARUS_DEV
+    static readonly List<Knob> knobs = new();
+    static ConfigEntry<float>? nozzleOpen;
+    static ConfigEntry<string> altitudeThrust = null!;
 #endif
     static readonly List<Record> records = new();
     static IcarusLog log = null!;
@@ -92,8 +91,15 @@ static class Tuning
     public static void Install(ConfigFile file, IcarusLog logger)
     {
         log = logger;
-#if ICARUS_DEV
         config = file;
+        string path = config.ConfigFilePath;
+        watcher = new FileSystemWatcher(Path.GetDirectoryName(path), Path.GetFileName(path))
+        {
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size,
+            EnableRaisingEvents = true,
+        };
+        watcher.Changed += (_, _) => fileChanged = true;
+#if ICARUS_DEV
         Bind("Tuning.Engine", "MaxThrust", "N", "Turbojet core thrust at sea level, before altitudeThrust (Turbojet.maxThrust)");
         Bind("Tuning.Engine", "MaxSpeed", "m/s", "Core thrust falls linearly to zero from this speed to 1.2 times it (Turbojet.maxSpeed)");
         Bind("Tuning.Engine", "MinDensity", "kg/m3", "The engine runs only above this air density (Turbojet.minDensity)");
@@ -122,13 +128,6 @@ static class Tuning
         }
 
         altitudeThrust.SettingChanged += (_, _) => pending = true;
-        string path = config.ConfigFilePath;
-        watcher = new FileSystemWatcher(Path.GetDirectoryName(path), Path.GetFileName(path))
-        {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size,
-            EnableRaisingEvents = true,
-        };
-        watcher.Changed += (_, _) => fileChanged = true;
         log.Info($"tuning: watching {Path.GetFileName(path)}; {knobs.Count + 1} live knobs, below 0 (or blank) is the shipped value");
 #endif
     }
@@ -198,7 +197,6 @@ static class Tuning
 
     public static void Update()
     {
-#if ICARUS_DEV
         if (fileChanged)
         {
             fileChanged = false;
@@ -215,7 +213,6 @@ static class Tuning
                     log.Stage("tuning-file", $"reload deferred: {e.Message}");
             }
         }
-#endif
 
         // Every frame, so a peer that connects is under shipped values within the frame, before its scene load and spawns.
         RefreshLock();

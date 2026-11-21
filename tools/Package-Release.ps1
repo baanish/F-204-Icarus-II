@@ -73,7 +73,14 @@ if (-not $SkipBuild) {
     if ($builtName -cne $nobpName) { Fail "the build wrote $builtName, expected $nobpName" }
     if ((@(Get-InputState) -join "`n") -cne $before) { Fail 'the build changed tracked inputs other than generated prefabs' }
     if (-not $AllowDirty -and @(Invoke-Git ls-files --others --exclude-standard).Count) { Fail 'the build created untracked inputs; review and commit them first' }
-} else { Write-Output "release: reusing build/$nobpName and build/Icarus.dll for a local packaging check" }
+} else {
+    Write-Output "release: reusing build/$nobpName and build/Icarus.dll for a local packaging check"
+    # The verifier refuses a dev build's plugin at the end; say so before the archives and kit are built.
+    $marker = [Text.Encoding]::Latin1.GetString([Text.Encoding]::Unicode.GetBytes('StageLogging'))
+    if ([Text.Encoding]::Latin1.GetString([IO.File]::ReadAllBytes((Join-Path $repo 'build/Icarus.dll'))).Contains($marker, [StringComparison]::Ordinal)) {
+        Fail 'build/Icarus.dll is a dev build; run tools/Build-Icarus.ps1 without -Dev first'
+    }
+}
 # The bundle's liveries are the textures faction_marks.py painted: each must carry its roundels, never a logo-free map.
 $marks = @(& python (Join-Path $repo 'art/textures/faction_marks.py') verify-marked 2>&1)
 if ($LASTEXITCODE -ne 0) { Fail "the liveries lack their faction roundels: $(@($marks | Where-Object { "$_" -match '^FACTION MARKS FAIL' })[0])" }

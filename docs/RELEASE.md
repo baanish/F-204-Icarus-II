@@ -46,7 +46,7 @@ Options:
 - `-NotesFile <markdown-file>` adds release-specific changes to the notes.
 - `-CheckOnly` checks the tree, versions, credits and exports without building.
 - `-AllowDirty` permits an uncommitted local rehearsal. Archive names and the output directory carry `-LOCAL`, and `meta.json` records `local: true`. `sourceCommit` then identifies the base commit, not all payload changes. Version disagreement and build failures still stop packaging. These outputs cannot be published.
-- `-SkipBuild -AllowDirty` reuses this checkout's `build/Icarus.dll` and `build/icarus_<version>.nobp` after checking their hashes against `build/SHA256SUMS.txt`. It still builds the livery kit, which runs Blender if the paint model is uncached. Publishable packages always require a fresh build.
+- `-SkipBuild -AllowDirty` reuses this checkout's `build/Icarus.dll` and `build/icarus_<version>.nobp` after checking their hashes against `build/SHA256SUMS.txt`. The reused build must be a release build, made without `-Dev`; the packager stops at once on a dev build. It still builds the livery kit, which runs Blender if the paint model is uncached. Publishable packages always require a fresh build.
 
 ## Packaging is reproducible, Unity builds are not
 
