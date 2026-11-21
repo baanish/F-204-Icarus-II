@@ -25,7 +25,7 @@
   "speed": 1,
   "timeout": 420,
   "steps": [
-    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "|||baanish_icarus_tail_hook" }, "within": 3,
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "|||baanish_icarus_tail_hook|" }, "within": 3,
       "label": "loadout: the tail hook alone" },
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "gt": 800 },
                             { "path": "contacts.Hyperion.live", "eq": true } ] },

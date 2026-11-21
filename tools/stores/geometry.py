@@ -17,6 +17,55 @@ def quat_matrix(q):
 
 
 TURNED_MOUNTS = ("baanish_icarus_tip_tank",)  # the mounts src/Icarus/TipTanks.cs turns upright as they spawn
+# The mounts of other weapon packs src/Icarus/PackMountFit.cs seats in the conformal troughs as they spawn: the
+# missile alone, its origin here in the hardpoint frame, pitched nose down, ejected straight down before it lights.
+CONFORMAL_SEATS = {
+    "Aryx_SRIRM1_Single": (0.0, -0.1017, -0.15), "Aryx_HeavyRocket1_x1": (0.0, -0.1867, 0.2),
+    "MeridianSRM8_single": (0.0, -0.1206, 0.18), "MeridianSRM20_single": (0.0, -0.1176, 0.18),
+    "MeridianAAM63_single": (0.0, -0.1405, 0.29),
+    "MeridianJackal_single": (0.0, -0.1386, 0.18),
+    "MeridianAGM58F_single": (0.0, -0.1296, 0.18), "MeridianBlackArrow_single": (0.0, -0.1356, 0.18),
+}
+CONFORMAL_PITCH_DEG, CONFORMAL_EJECT = 0.5, 1.5
+
+# Spawn-time lift in metres along the mount's +Y, as Meridian Works' Diagnostics log reports it on the Icarus.
+# Mirrors Meridian Works 1.3.0.
+MERIDIAN_MOUNT_LIFTS = {
+    ("hardpoint_innerwing_L", "MeridianAAM63_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianAAM63_single"): 0.0736,
+    ("hardpoint_innerwing_L", "MeridianAAM7_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianAAM7_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianAGM33L_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianAGM33L_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianAGM58F_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianAGM58F_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianAGM58F_x2"): 0.122,
+    ("hardpoint_innerwing_R", "MeridianAGM58F_x2"): 0.122,
+    ("hardpoint_innerwing_L", "MeridianAMRAAM_double"): 0.124,
+    ("hardpoint_innerwing_R", "MeridianAMRAAM_double"): 0.124,
+    ("hardpoint_innerwing_L", "MeridianAMRAAM_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianAMRAAM_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianBlackArrow_single"): 0.0775,
+    ("hardpoint_innerwing_R", "MeridianBlackArrow_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianBlackArrow_x2"): 0.129,
+    ("hardpoint_innerwing_R", "MeridianBlackArrow_x2"): 0.129,
+    ("hardpoint_innerwing_L", "MeridianJackal_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianJackal_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianJackal_x2"): 0.103,
+    ("hardpoint_innerwing_R", "MeridianJackal_x2"): 0.103,
+    ("hardpoint_innerwing_L", "MeridianSRM20_double"): 0.124,
+    ("hardpoint_innerwing_R", "MeridianSRM20_double"): 0.124,
+    ("hardpoint_innerwing_L", "MeridianSRM20_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianSRM20_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianSRM8_double_compact"): 0.130,
+    ("hardpoint_innerwing_R", "MeridianSRM8_double_compact"): 0.130,
+    ("hardpoint_innerwing_L", "MeridianSRM8_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianSRM8_single"): 0.0500,
+    ("hardpoint_innerwing_L", "MeridianScreamer_double"): 0.131,
+    ("hardpoint_innerwing_R", "MeridianScreamer_double"): 0.131,
+    ("hardpoint_innerwing_L", "MeridianScreamer_single"): 0.0500,
+    ("hardpoint_innerwing_R", "MeridianScreamer_single"): 0.0755,
+}
 
 
 def turn_upright(key, mount, rot):

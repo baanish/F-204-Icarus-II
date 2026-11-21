@@ -28,7 +28,7 @@ AIRCRAFT, TITLE = "baanish_icarus", "F-204 Icarus II"
 # -0.21 (nose up). Four hardpoint sets (Wingtip, Inner Wing, Conformal, Tail Hook); four empty keys fly it clean, and a
 # list of any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
 SPAWN_UP, REST_PITCH = 1.49, -0.21
-CLEAN = {"Selected": [{"Key": ""} for _ in range(4)]}
+CLEAN = {"Selected": [{"Key": ""} for _ in range(5)]}
 HOOK = "baanish_icarus_tail_hook"  # the Tail Hook set's one mount (IcarusAuthor.TailHook.cs)
 
 # Sandrift's runway surface under runway_start's spot (x 27877, z -19300) is 136.93 m, as the framework's make_missions.py
@@ -256,3 +256,22 @@ for faction in m["factions"]:
 save(m, "icarus_hyperion_ai", "the player's Icarus 30 km north of the Hyperion at 6,000 m, out of the AI's count; Primeva's only airbase the Hyperion carrier (Ignus, at rest where the game's Carrier Duel "
      "puts it) and its only supply four Icarus, room for one AI aircraft, for the game's AI to spawn, launch and recover an Icarus there; "
      "Boscali flies nothing.")
+
+# The Centreline station (hardpoint set 4) loaded, on missions made above or kept beside this script: the 500 kg bomb on
+# Sandrift's runway for the takeoff run, 19 km out for the landing and astern of the Hyperion with the hook for the trap,
+# to see the bomb clear the ground and the deck; and each centreline bomb at height for its release, the GPO-N in the
+# mission that allows nuclear weapons.
+CENTRELINE = 4
+for name, base, key, what in [
+    ("icarus_centreline_runway", "icarus_runway", "bomb_500_single", "parked on Sandrift Airbase's runway (Heartland), full fuel, for fly mode=takeoff"),
+    ("icarus_centreline_final_19km", "icarus_sandrift_final_19km", "bomb_500_single", "19 km out on Sandrift Airbase's runway centreline at 1,200 m, 23% fuel, for a straight-in fly mode=land"),
+    ("icarus_centreline_hyperion_final", "icarus_hyperion_final", "bomb_500_single", "15 km astern of the Hyperion carrier (Ignus) with its arrestor hook, 20% fuel, for fly mode=land onto the deck"),
+    ("icarus_centreline_bomb", "icarus_ignus_3km_300", "bomb_500_single", "at 3,000 m MSL and 300 m/s over the sea (Ignus), half fuel, for the release"),
+    ("icarus_centreline_gpo_n", "icarus_gpo_n", "nuclearBomb1_external", "at 10,000 m in the mission that allows nuclear weapons, for the release"),
+    ("icarus_centreline_gpo_n_strategic", "icarus_gpo_n", "nuclearBomb1_strategic_external", "at 10,000 m in the mission that allows nuclear weapons, for the release"),
+]:
+    m = json.loads((here / f"{base}.mission.json").read_text(encoding="utf-8"))
+    if base == "icarus_gpo_n":
+        m["aircraft"][0]["savedLoadout"]["Selected"][1]["Key"] = ""
+    m["aircraft"][0]["savedLoadout"]["Selected"][CENTRELINE]["Key"] = key
+    save(m, name, f"the player's Icarus for Primeva with {key} on its Centreline station, {what}; no opponent.")

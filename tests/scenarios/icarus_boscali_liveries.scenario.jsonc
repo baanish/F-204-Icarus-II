@@ -19,7 +19,7 @@
     { "check": { "not": { "log": "patch bare-metal-first-pick", "source": "F-204 Icarus II" } }, "label": "the first-pick patch installed (a failed patch logs its feature name)" },
     { "check": { "path": "mods.baanish.icarus.first_livery", "eq": "BDF Matte Gray" }, "label": "Boscali's first livery is BDF Matte Gray, its first listed" },
     { "check": { "path": "mods.baanish.icarus.livery", "eq": "BDF Bare Metal" }, "label": "the jet wears BDF Bare Metal" },
-    { "check": { "path": "mods.baanish.icarus.loadout", "eq": "baanish_icarus_tip_tank|||baanish_icarus_tail_hook" }, "label": "tip tanks and hook fitted" },
+    { "check": { "path": "mods.baanish.icarus.loadout", "eq": "baanish_icarus_tip_tank|||baanish_icarus_tail_hook|" }, "label": "tip tanks and hook fitted" },
     { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
     { "camera": { "mode": "orbit", "target": "own", "distance_m": 11, "hdg_deg": 300, "pitch_deg": 12 } },
     { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: tip tank and hook from the left rear" },

@@ -73,7 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4884547391421755}
   - component: {fileID: 114099118695303065}
-  - component: {fileID: 4679623747976510804}
+  - component: {fileID: 6418501922242139758}
   m_Layer: 0
   m_Name: baanish_icarus_tail_hook
   m_TagString: Untagged
@@ -117,7 +117,7 @@ MonoBehaviour:
   mass: 100
   stowedAngle: 189.946
   deployedAngle: 151.543
---- !u!114 &4679623747976510804
+--- !u!114 &6418501922242139758
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

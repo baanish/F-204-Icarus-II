@@ -852,11 +852,13 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
+    - {fileID: 0}
   - weapons:
     - {fileID: 11400000, guid: 74cb9ee272ed6824e9ee531ac5a45054, type: 2}
     - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
     - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
     - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+    - {fileID: 0}
   StandardLoadouts:
   - disabled: 0
     Name: Interceptor
@@ -866,6 +868,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   - disabled: 0
     Name: Air Superiority
@@ -875,6 +878,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 69b5e66560c97414da73449d867e708a, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   - disabled: 0
     Name: Strike
@@ -884,6 +888,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 5bc769201eee23f4bb7308f851746cbc, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   - disabled: 0
     Name: Close Support
@@ -893,6 +898,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 0c2cc046e6d0fce4ab6dbcbefc89824d, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   DefaultFuelLevel: 1
   liveries:

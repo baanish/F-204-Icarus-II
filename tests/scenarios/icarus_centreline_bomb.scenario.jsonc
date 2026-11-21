@@ -1,0 +1,31 @@
+// Centreline bomb: the Icarus flies level at 3,000 m and 300 m/s with one 500 kg bomb on its Centreline station (hardpoint
+// set 4, bomb_500_single in icarus_centreline_bomb.mission.json's savedLoadout) and drops it. Pass: the station carries one
+// round, it leaves on the trigger, and the Icarus takes no damage and loses no part for 8 s after.
+// From the repo root: no-agentic run tests/scenarios/icarus_centreline_bomb.scenario.jsonc
+{
+  "mission": "icarus_centreline_bomb.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 180,
+  "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||||bomb_500_single" }, "within": 3, "label": "loadout: the 500 kg bomb on the Centreline station alone" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "fly": { "mode": "hold", "alt_msl_m": 3000, "hdg_deg": 90, "throttle": 0.6 } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 9, "hdg_deg": 230, "pitch_deg": -22 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 8, "hold": 3, "label": "the camera settles" },
+    { "screenshot": { "name": "centreline_bomb_hung" } },
+    { "act": { "station": 0 } },
+    { "check": { "path": "own.station.ammo", "eq": 1 }, "within": 3, "label": "one bomb on the Centreline station" },
+    { "mark": { "label": "release" } },
+    { "act": { "fire": 0.2 } },
+    { "check": { "path": "own.station.ammo", "eq": 0 }, "within": 3, "label": "the bomb left the station" },
+    { "screenshot": { "name": "centreline_bomb_released" } },
+    { "camera": { "mode": "game" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "damage", "since": "release" } },
+                          { "not": { "event": "part_detached", "since": "release" } } ] }, "for": 8, "label": "no damage and nothing detached for 8 s after the release" },
+  ],
+}

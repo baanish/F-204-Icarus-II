@@ -1,0 +1,32 @@
+// GPO-N (1.5kt) on the Centreline station: the Icarus flies level at 10,000 m in a mission that allows nuclear weapons and
+// drops its one bomb. The bomb leaves the station, falls as a live contact and is gone again within two minutes, which is the
+// game's own detonation, and the Icarus flies on. The release is flown at the game's own speed: with the clock run four
+// times faster through it, the bomb struck the tail cone (the stock wing pylon release does not).
+// From the repo root: no-agentic run tests/scenarios/icarus_centreline_gpo_n.scenario.jsonc
+{
+  "mission": "icarus_centreline_gpo_n.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 300,
+  "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||||nuclearBomb1_external" }, "within": 3, "label": "loadout: the GPO-N on the Centreline station alone" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 20, "hold": 15, "label": "level and steady" },
+    { "act": { "station": 0 } },
+    { "check": { "all": [ { "path": "own.station.name", "eq": "GPO-N (1.5kt)" }, { "path": "own.station.ammo", "eq": 1 } ] }, "within": 3, "label": "one GPO-N on the Centreline station" },
+    { "mark": { "label": "release" } },
+    { "act": { "fire": 0.2 } },
+    { "check": { "path": "own.station.ammo", "eq": 0 }, "within": 3, "label": "the bomb left the station" },
+    { "wait": { "path": "contacts.count", "gt": 0 }, "timeout": 10, "label": "the bomb falls as a live contact" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "damage", "since": "release" } },
+                          { "not": { "event": "part_detached", "since": "release" } } ] }, "for": 8, "label": "no damage and nothing detached for 8 s after the release" },
+    { "time": { "scale": 4 } },
+    { "wait": { "path": "contacts.count", "eq": 0 }, "timeout": 150, "label": "the bomb detonates and is gone" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "gt": 0.5 }, { "not": { "event": "part_detached", "since": "release" } } ] }, "label": "the Icarus is still flying, whole" },
+  ],
+}

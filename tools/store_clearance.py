@@ -5,7 +5,7 @@ python tools/store_clearance.py --lights-blockout .cache/review/wave2/p7/01/ligh
 
 Reads the built bundle for the airframe, the hardpoint sets and the mounts registered on them (twin racks included),
 the LandingGear components, the rest pose and the mod's own mounts (the conformal ones), and tools/local-paths.json's
-game export for the stock mounts. Prints a verdict per check and exits nonzero on any FAIL:
+game export for the stock mounts and mod_bundles for the mounts of other mods. Prints a verdict per check and exits nonzero on any FAIL:
 
 - Stores rule 12: every store's rendered mesh (rail included) at least 0.05 m from every gear leg, tyre and open gear
   door: with the suspension free, at rest and bottomed (LandingGear.maxCompression, past which the game breaks the
@@ -39,8 +39,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stores import paths
 
 LOCAL = paths.load()
-from stores.bundle import Aircraft  # noqa: E402
+from stores.bundle import Aircraft, Bundle  # noqa: E402
 from stores.geometry import axis_quat, bounds, box_gap, mesh_distance, quat_matrix, segment_distance, turn_upright  # noqa: E402
+from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS  # noqa: E402
 from stores import meshverts  # noqa: E402
 from stores.bodies import mesh_path  # noqa: E402
 from stores.mounts import load_mount  # noqa: E402
@@ -135,6 +136,7 @@ def main():
     if nobp is None or not nobp.exists():
         raise SystemExit("no built bundle: run tools/Build-Icarus.ps1 or pass a .nobp")
     plane = Aircraft(nobp)
+    holders = [plane] + [Bundle(bundle) for bundle in LOCAL["mod_bundles"]]
     root, index = LOCAL["game_export"], asset_index(LOCAL["game_export"], "Mesh")
     print(f"# {nobp}: {len(plane.meshes)} rendered meshes; game export {root}")
 
@@ -210,10 +212,22 @@ def main():
               f"{sorted(plane.meshes[t][0] for t in leg['meshes'])}")
 
     def stock_mesh(name):
-        """The stock mesh a mod mount's renderer shows, named like its GameObject (aam1 shows AAM1); the tip tank's lenses
-        show the stock nav lens (IcarusAuthor.DressTipTank)."""
-        path = mesh_path(index, "fighter1_navLight_L" if name.startswith("tip_tank_lens_") else name)
+        """The stock mesh a mod mount's renderer shows, by the name its bundle's manifest gives it."""
+        path = mesh_path(index, name)
         return np.array(meshverts.positions(path), float), np.asarray(meshverts.triangles(path), int).reshape(-1, 3)
+
+    def holder_of(key, set_name):
+        holder = next((b for b in holders if key in b.bundle_mounts), None)
+        if holder is None:
+            raise SystemExit(f"{key}, offered on {set_name}, is in neither the game export, the Icarus bundle nor a "
+                             "mod_bundles entry of tools/local-paths.json: it cannot be checked")
+        return holder
+
+    def launches(key, set_name):
+        """A bundle mount's missiles on a set, as Bundle.ejected gives them; a seated mount's as its seat hangs them."""
+        if set_name == "Conformal" and key in CONFORMAL_SEATS:
+            return holder_of(key, set_name).seated(key, CONFORMAL_SEATS[key], CONFORMAL_PITCH_DEG, CONFORMAL_EJECT, stock_mesh)
+        return holder_of(key, set_name).ejected(key, stock_mesh)
 
     mounts = {}
     rule12, rule13 = [], []
@@ -224,11 +238,23 @@ def main():
         for hp_name, hp in hardpoints:
             pos, rot, _ = plane.world(hp)
             for key in plane.mounts[s]:
-                if key not in mounts:
-                    # a stock mount from the game export; the mod's own from the bundle, which carries its prefab
+                seated = set_name == "Conformal" and key in CONFORMAL_SEATS
+                if (key, seated) not in mounts:
+                    # a stock mount from the game export; a mod's from the bundle that carries its prefab; a seated one
+                    # is its missile alone (its capsule goes unreported)
                     stock = (root / "GameObject" / (key + ".prefab")).exists()
-                    mounts[key] = load_mount(root, index, key) if stock else plane.mount(key, stock_mesh)
-                (verts, tris), colliders = turn_upright(key, mounts[key], rot)
+                    if seated:
+                        meshes = [mesh for mesh, _, _ in launches(key, set_name)]
+                        starts = np.cumsum([0] + [len(v) for v, _ in meshes[:-1]])
+                        mounts[key, seated] = ((np.concatenate([v for v, _ in meshes]), np.concatenate([t + n for (_, t), n in zip(meshes, starts)])), [])
+                    else:
+                        mounts[key, seated] = load_mount(root, index, key) if stock else holder_of(key, set_name).mount(key, stock_mesh)
+                (verts, tris), colliders = turn_upright(key, mounts[key, seated], rot)
+                lift = MERIDIAN_MOUNT_LIFTS.get((hp_name, key), 0.0)
+                if lift:
+                    offset = (0.0, lift, 0.0)
+                    verts = verts + offset
+                    colliders = [dict(c, centre=np.asarray(c["centre"]) + offset) for c in colliders]
                 store = (pos + verts @ rot.T, tris)
                 store_bounds = bounds(store[0])
                 angle = strike(store[0])
@@ -287,7 +313,7 @@ def main():
         for hp_name, hp in hardpoints:
             pos, rot, _ = plane.world(hp)
             for key in plane.mounts[s]:
-                for (verts, tris), direction, length in plane.ejected(key, stock_mesh):
+                for (verts, tris), direction, length in launches(key, set_name):
                     body, along = pos + verts @ rot.T, rot @ direction
                     lit = (body + along * length, tris)
                     reach = EJECT_CLEAR + REACH
@@ -342,7 +368,7 @@ def main():
         print("Stores rule 14 FAIL: no Wingtip set in the bundle")
     else:
         tip_stations = [(name, *plane.world(hp)[:2]) for name, hp in plane.sets[found[0]][1]]
-        failed |= not check_tip_lamps(tip_stations, lamps, {key: mounts[key] for key in plane.mounts[found[0]]})
+        failed |= not check_tip_lamps(tip_stations, lamps, {key: mounts[key, False] for key in plane.mounts[found[0]]})
     gap, hp, key, where = min(rule12)
     ok = gap >= GAP
     failed |= not ok

@@ -92,6 +92,9 @@
           },
           {
             "Key": ""
+          },
+          {
+            "Key": ""
           }
         ]
       },
@@ -130,6 +133,9 @@
       "playerControlledPriority": -1,
       "savedLoadout": {
         "Selected": [
+          {
+            "Key": ""
+          },
           {
             "Key": ""
           },
