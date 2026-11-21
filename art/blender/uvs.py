@@ -30,6 +30,9 @@ MIRROR_PAIRS = (
     ("pylon_inner_L", "pylon_inner_R"),
     ("pylon_inner_plug_L", "pylon_inner_plug_R"),
 )
+# Twins a split build cuts from MIRROR_PAIRS twins after the unwrap (the Y-duct halves, parts.split_intakes): checked
+# where they exist, so their shared islands are declared.
+SPLIT_MIRROR_PAIRS = (("duct_L", "duct_R"),)
 BUDGET = {}
 CLOSEUPS = {}
 
@@ -40,6 +43,17 @@ def skin_faces(obj):
 
 def skin_objects(icarus):
     return sorted((o for o in icarus.all_objects if o.type == "MESH" and skin_faces(o)), key=lambda o: o.name)
+
+
+def atlas_record(icarus):
+    """The skin atlas's UVs as atlas_guard records them: the Blender version, the atlas size, and per skin part a digest
+    of its skin loops' UVs, after the pack."""
+    import atlas_guard
+
+    uv = lambda o: o.data.uv_layers.active.data
+    return {"blender": bpy.app.version_string, "size": ATLAS_SIZE,
+            "skin_uv_sha256": {o.name: atlas_guard.uv_digest((tuple(uv(o)[i].uv) for f in skin_faces(o) for i in f.loop_indices),
+                                                             ATLAS_SIZE) for o in skin_objects(icarus)}}
 
 
 def mirror_loops(left, right):
@@ -332,7 +346,8 @@ def check(icarus):
     objects = skin_objects(icarus)
     by_name = {o.name: o for o in objects}
     mirrors = []
-    for a, b in MIRROR_PAIRS:
+    pairs = MIRROR_PAIRS + tuple(pair for pair in SPLIT_MIRROR_PAIRS if pair[0] in by_name)
+    for a, b in pairs:
         left, right = by_name[a], by_name[b]
         loops, error = mirror_loops(left, right)
         lu, ru = left.data.uv_layers.active.data, right.data.uv_layers.active.data
@@ -343,7 +358,7 @@ def check(icarus):
             raise ValueError("uvs: %s has %d unmatched mirror loops" % (b, unmatched))
         mirrors.append({"left": a, "right": b, "symmetry_error_m": error, "unmatched_loops": unmatched,
                         "skin_loops": len(skin_loops)})
-    right_names = {b for _, b in MIRROR_PAIRS}
+    right_names = {b for _, b in pairs}
     values, unique_triangles, zero, outside = [], [], [], []
     area = 0.0
     for obj in objects:

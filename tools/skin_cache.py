@@ -22,9 +22,10 @@ from cache_root import cache_root
 BAKE = '.cache/review/wave2/p9b/02'
 REVIEW = '.cache/review/wave2/p9b-round2'
 ATLAS = 'art/textures/generated/full/source-atlas'
-MAPS = tuple(f'art/export/textures/Icarus_livery_{i}.png' for i in range(1, 5)) + tuple(
+MAPS = tuple(f'art/export/textures/Icarus_livery_{i}.png' for i in range(1, 8)) + tuple(
     f'art/export/textures/Icarus_skin_{s}.png' for s in ('n', 'm', 'ao', 'dmg_b', 'dmg_n')) + (
-    'art/export/textures/Icarus_livery_4_m.png',)
+    'art/export/textures/Icarus_livery_4_m.png', 'art/export/textures/Icarus_livery_7_m.png',
+    'art/textures/faction_marks.json')
 COCKPIT_MAPS = tuple('art/export/textures/Icarus_Cockpit_' + suffix + '.png'
                      for suffix in ('b', 'n', 'm', 'ao'))
 REQUIRED = MAPS + COCKPIT_MAPS + ('art/export-manifest.json', 'art/textures/gate.json',

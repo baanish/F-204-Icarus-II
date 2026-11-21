@@ -74,6 +74,9 @@ if (-not $SkipBuild) {
     if ((@(Get-InputState) -join "`n") -cne $before) { Fail 'the build changed tracked inputs other than generated prefabs' }
     if (-not $AllowDirty -and @(Invoke-Git ls-files --others --exclude-standard).Count) { Fail 'the build created untracked inputs; review and commit them first' }
 } else { Write-Output "release: reusing build/$nobpName and build/Icarus.dll for a local packaging check" }
+# The bundle's liveries are the textures faction_marks.py painted: each must carry its roundels, never a logo-free map.
+$marks = @(& python (Join-Path $repo 'art/textures/faction_marks.py') verify-marked 2>&1)
+if ($LASTEXITCODE -ne 0) { Fail "the liveries lack their faction roundels: $(@($marks | Where-Object { "$_" -match '^FACTION MARKS FAIL' })[0])" }
 
 # Match the build's machine-wide mutex while checking and copying its paired outputs.
 $buildLock = [Threading.Mutex]::new($false, 'Global\IcarusBuild')
@@ -158,6 +161,13 @@ if ($LASTEXITCODE -ne 0) { Fail "the texture-sources ZIP did not build: $sources
 $sourcesZip = Join-Path $out "Icarus-$tag-texture-sources.zip"
 if ($tag -cne "v$version") { Move-Item -LiteralPath (Join-Path $out "Icarus-v$version-texture-sources.zip") -Destination $sourcesZip }
 
+$kitLast = $null
+& pwsh -NoProfile -File (Join-Path $repo 'tools/Build-LiveryKit.ps1') | ForEach-Object { Write-Output "  $_"; $kitLast = $_ }
+if ($LASTEXITCODE -ne 0) { Fail "the livery kit ZIP did not build: $kitLast" }
+$kitName = "icarus_livery_kit_$version$local.zip"
+$kitZip = Join-Path $out $kitName
+Copy-Item -LiteralPath (Join-Path $build "icarus_livery_kit_$version.zip") -Destination $kitZip
+
 $releaseUrl = "https://github.com/$repository/releases/download/$tag"
 $notes = @(
     "# F-204 Icarus II $tag", '',
@@ -172,12 +182,13 @@ $notes += @(
     "For manual installation, extract [Icarus-$tag-plugin-only.zip]($releaseUrl/Icarus-$tag-plugin-only.zip) beside NuclearOption.exe. It includes BepInEx/plugins/baanish.icarus/.", '',
     "[Install instructions]($sourceUrl/README.md#install) | [Known issues]($sourceUrl/README.md#known-issues)", '',
     "[Icarus-$tag-texture-sources.zip]($releaseUrl/Icarus-$tag-texture-sources.zip) holds the generated texture source images for rebuilding the skin; installing and playing do not need it.", '',
+    "[$kitName]($releaseUrl/$kitName) holds the paint model, templates and builder for custom liveries. See the [livery kit guide]($sourceUrl/docs/livery-kit/README.md).", '',
     "Source commit: [$commit](https://github.com/$repository/commit/$commit).", '',
-    "[SHA256SUMS.txt]($releaseUrl/SHA256SUMS.txt) covers the three archives and these notes."
+    "[SHA256SUMS.txt]($releaseUrl/SHA256SUMS.txt) covers the four archives and these notes."
 )
 if ($AllowDirty) { $notes = @('LOCAL REHEARSAL. NEVER PUBLISH. sourceCommit names the base commit; the payload includes uncommitted changes.', '') + $notes }
 $notes | Set-Content -LiteralPath (Join-Path $out 'RELEASE-NOTES.md') -Encoding utf8NoBOM
-$zips += $sourcesZip
+$zips += @($sourcesZip, $kitZip)
 $assets = @($zips) + (Join-Path $out 'RELEASE-NOTES.md')
 [IO.File]::WriteAllLines((Join-Path $out 'SHA256SUMS.txt'), [string[]]@($assets | ForEach-Object { (Get-Sha256 $_) + '  ' + (Split-Path -Leaf $_) }))
 $verifyArgs = @('-Directory', $out, '-Tag', "v$version")

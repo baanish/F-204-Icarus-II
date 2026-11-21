@@ -44,6 +44,14 @@ if ($extra.Count) { Fail "$($extra.Count) files are not pinned (first: $($extra[
 foreach ($path in $onDisk.Keys) {
     if ((Get-Sha256 $onDisk[$path]) -cne $manifest[$path]) { Fail "$path differs from art/textures/texture-sources.json" }
 }
+# The pack is public: no file in it may be the game's roundel art or a livery painted with it.
+# In batches: every path in one command line passes Windows' length limit, and python then fails to start.
+$packed = @($onDisk.Values)
+for ($first = 0; $first -lt $packed.Count; $first += 100) {
+    $batch = @($packed[$first..([Math]::Min($first + 99, $packed.Count - 1))])
+    $clean = @(& python (Join-Path $repo 'art/textures/faction_marks.py') check-clean @batch 2>&1)
+    if ($LASTEXITCODE -ne 0) { Fail "game art in the texture sources: $(@($clean | Where-Object { "$_" -match '^ROUNDEL FAIL' })[0])" }
+}
 # The provenance records pin the same bytes; a pack must not drift from them.
 & python (Join-Path $repo 'tools/Make-TextureRecordsPortable.py') --check
 if ($LASTEXITCODE -ne 0) { Fail 'texture records pin other hashes than these files' }

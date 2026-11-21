@@ -1,0 +1,28 @@
+// The aircraft menu's first Icarus livery for Boscali, as a player meets it: the mission names no Icarus livery (the player
+// flies the template's KR-67) and no choice is saved, so LoadoutSelector.LoadDefaults would draw one at random.
+// [Diagnostics] OpenAircraftMenu opens the game's menu at Sandrift (held by Boscali in this mission) and shows the Icarus four times, each a fresh preview
+// that runs LoadDefaults (src/Icarus/AircraftMenuProbe.cs). Pass: every show chose BDF Bare Metal AND the preview jet wears
+// its texture (Icarus_livery_7), and the game never dropped a second livery load ("LiveryBehaviour.Load called multiple
+// times"), and no choice stayed saved after a preview, so every show went through the first pick. A pick made after the first load (a second SetLiveryKey) shows Bare Metal in the dropdown while the jet keeps
+// the random livery, which fails the wears check whenever the random draw is not Bare Metal.
+// From the repo root: no-agentic run tests/scenarios/icarus_menu_boscali.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "icarus_menu_boscali.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "path": "own.alive", "eq": true }, "label": "the player in the mission's KR-67" },
+    { "mark": { "label": "menu" } },
+    { "config": { "guid": "baanish.icarus", "section": "Diagnostics", "key": "OpenAircraftMenu", "value": "Sandrift Airbase" } },
+    { "wait": { "log": "menu-livery Boscali done", "source": "F-204 Icarus II", "since": "menu" }, "timeout": 40, "label": "four shows of the Icarus in the menu" },
+    { "screenshot": { "name": "menu_boscali" } },
+    { "check": { "log": "menu-livery Boscali done: chose BDF Bare Metal,BDF Bare Metal,BDF Bare Metal,BDF Bare Metal; wore Icarus_livery_7,Icarus_livery_7,Icarus_livery_7,Icarus_livery_7; saved no,no,no,no", "source": "F-204 Icarus II", "since": "menu" }, "label": "every show chose BDF Bare Metal, the jet wears it, and no choice stayed saved" },
+    { "check": { "not": { "log": "LiveryBehaviour.Load called multiple times", "since": "menu" } }, "label": "no livery load was dropped" },
+  ],
+}

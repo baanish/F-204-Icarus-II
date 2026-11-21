@@ -924,6 +924,27 @@ MonoBehaviour:
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
+  - name: BDF Matte Gray
+    faction: {fileID: 11400000, guid: 8068e626c537c8041ba1e4fc2a6759a6, type: 2}
+    assetReference:
+      m_AssetGUID: 0970d604f0b5e494abd23da98d114e6e
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: BDF Gray Camo
+    faction: {fileID: 11400000, guid: 8068e626c537c8041ba1e4fc2a6759a6, type: 2}
+    assetReference:
+      m_AssetGUID: 334f868dcbd47764e9f5ed891dd8ad6d
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: BDF Bare Metal
+    faction: {fileID: 11400000, guid: 8068e626c537c8041ba1e4fc2a6759a6, type: 2}
+    assetReference:
+      m_AssetGUID: 19976a221e36f0e459170c348caa73a2
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
   StatusDisplay: {fileID: 6924495073706621936, guid: 8ede1fec56a24134d889d46b0c7476d2,
     type: 3}
   HUDExtras: {fileID: 1103936501734876095, guid: c1692063c85d6ab4dae549122c43f019,

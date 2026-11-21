@@ -68,9 +68,39 @@ def template(name):
 
 
 m = template("runway_start")
+# The aircraft menu's first pick (BareMetalFirstPick): the template's KR-67 for each side on Sandrift's runway, Sandrift held
+# by that side, so nothing in the mission names an Icarus livery and the menu opens on Sandrift with no saved choice.
+for side in ("Primeva", "Boscali"):
+    menu = copy.deepcopy(m)
+    menu["aircraft"][0]["faction"] = side
+    next(a for a in menu["airbases"] if a["UniqueName"] == "Sandrift Airbase")["faction"] = side
+    save(menu, f"icarus_menu_{side.lower()}", f"the template's KR-67 for {side} parked on Sandrift Airbase's runway (Heartland), "
+         f"Sandrift held by {side}, for opening the aircraft menu there; no Icarus livery named; no opponent.")
 icarus(m["aircraft"][0], 1.0, {"x": 27877.0, "y": round(SANDRIFT_SURFACE + SPAWN_UP + 0.12, 2), "z": -19300.0}, rotation(0, REST_PITCH), 0.0)
 save(m, "icarus_runway", "the player's Icarus for Primeva parked on Sandrift Airbase's runway (Heartland) facing north, at rest, "
      "full fuel, clean, for fly mode=takeoff; no opponent.")
+runway = m
+
+# The aircraft's livery list as the Unity author orders it (IcarusAuthor.Materials.cs LiverySpecs): by id, so livery id n is
+# index n - 1. A mission's livery is an index into that list.
+LIVERIES = sorted((json.loads(p.read_text(encoding="utf-8")) for p in (here.parents[1] / "art/textures/liveries").glob("*.json")),
+                  key=lambda s: s["id"])
+for index, spec in enumerate(LIVERIES):
+    m = copy.deepcopy(runway)
+    m["aircraft"][0]["livery"] = index
+    save(m, f"icarus_livery_{spec['id']}", f"the player's Icarus for Primeva in {spec['name']} (livery {index} of the list) parked on "
+         "Sandrift Airbase's runway (Heartland) facing north, at rest, full fuel, clean, for a livery shot; no opponent.")
+
+# The same runway spot as Boscali's: the player's Icarus for Boscali in BDF Bare Metal with its tip tanks and arrestor hook,
+# so the faction's livery list, its first livery and Bare Metal's paint on the stores read on one jet.
+m = copy.deepcopy(runway)
+m["aircraft"][0]["faction"] = "Boscali"
+m["aircraft"][0]["livery"] = next(i for i, s in enumerate(LIVERIES) if s["faction"] == "BDF" and s["pattern"] == "bands")
+for station, key in enumerate(("baanish_icarus_tip_tank", "", "", HOOK)):
+    m["aircraft"][0]["savedLoadout"]["Selected"][station]["Key"] = key
+save(m, "icarus_boscali_runway", "the player's Icarus for Boscali in BDF Bare Metal parked on Sandrift Airbase's runway (Heartland) "
+     "facing north, at rest, full fuel, its tip tanks and arrestor hook, for the Boscali livery list and Bare Metal on the stores; "
+     "no opponent.")
 
 # Sandrift's runway Start is (27839, -19545), heading 4.3 (the framework's runway read, as its sortie example lands there).
 # 19 km out on its extended centreline at 1,200 m is the framework landing example's straight-in hand-over. 23% fuel leaves

@@ -57,7 +57,7 @@ namespace Icarus.Editor
         }
 
         // The airframe skin, its UVs on the fairing's paint (art/blender/tail_hook.py paint), as the tip tank wears the
-        // wing's: the plugin hands the hook the livery the jet wears (src/Icarus/TailHookFairing.cs).
+        // wing's. The stock mount applies the livery, and the plugin supplies the fin's metallic map.
         private static Material TailHookMaterial() => Load<Material>(SkinPath);
 
         private static Object AuthorTailHookMount()
@@ -93,7 +93,9 @@ namespace Icarus.Editor
                 arm.localPosition = Vector3.zero;
                 arm.localRotation = Quaternion.Euler(stowed, 0f, 0f);
                 arm.GetComponent<MeshFilter>().sharedMesh = mesh;
-                arm.GetComponent<MeshRenderer>().sharedMaterials = new[] { TailHookMaterial() };
+                var skin = arm.GetComponent<MeshRenderer>();
+                skin.sharedMaterials = new[] { TailHookMaterial() };
+                AuthorMountPaint(root, skin);
                 end.localPosition = new Vector3(0f, 0f, -Convert.ToSingle(layout["length"]));
                 // TailHook.ApplyForce reads the cable's pull against castPoint's axes: the Compass's, on the point, turned half
                 // a turn about X and CastPointFromEnd back up the arm (the Icarus arm is the Compass's length).

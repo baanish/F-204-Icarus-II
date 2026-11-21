@@ -1,0 +1,31 @@
+// An intake hit hard enough kills the engine: the Icarus holds 10 km at 0.8 throttle over Ignus, then its left intake
+// (intake_duct_L, a part of its own as the Revoker's intakes are) takes 60 HP of damage through the game's own damage
+// (act damage). The intake is one of the Turbojet's criticalParts (IcarusAuthor.Engine.cs EngineCriticalParts); below
+// the engine's damageThreshold of 50 HP its condition reaches 0 and Turbojet.KillEngine stops it (Turbojet_OnApplyDamage),
+// so the engine spools down to no thrust. Pass: the intake takes the damage and thrust falls under 1 kN within 30 s,
+// the aircraft still flying.
+// From the repo root: no-agentic run tests/scenarios/icarus_engine_intake.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
+    { "check": { "path": "own.engines.0.thrust_n", "gt": 10000 }, "label": "the engine running" },
+    { "mark": { "label": "hit" } },
+    { "act": { "damage": "intake_duct_L", "amount": 0.6 } },
+    { "check": { "event": "damage", "since": "hit" }, "within": 5, "label": "the left intake takes the damage" },
+    { "check": { "path": "own.engines.0.thrust_n", "lt": 1000 }, "within": 30, "label": "the engine dies with its intake under 50 HP" },
+    { "check": { "path": "own.alive", "eq": true }, "label": "the aircraft still flying" },
+    { "record": { "path": "own.engines.0.rpm_frac" }, "label": "engine rpm after the intake hit" },
+  ],
+}

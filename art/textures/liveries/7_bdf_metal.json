@@ -1,0 +1,1 @@
+{"id":7,"name":"BDF Bare Metal","faction":"BDF","lower":[0.80,0.81,0.82],"upper":[0.76,0.78,0.80],"dominant":[197,202,207],"demarcation":[0.12,0.30],"pattern":"bands","band":[0.0,0.212,0.451],"source":"bare_metal.png","source_scale_m":1.8,"wear_strength":0.15,"glossiness":0.0,"light_markings":false,"number_colour":[0.031,0.031,0.031]}

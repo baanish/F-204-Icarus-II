@@ -15,14 +15,15 @@ import bpy
 import build_icarus as bi
 
 # Global limits: (target, hard limit), triangles drawn. The Unity author draws every skin triangle from both sides
-# (IcarusAuthor.SkinFirst gives each a back-facing twin, as stock jets have), so these count the skin twice; module BUDGETs
-# count the triangles modelled here, once.
+# (IcarusAuthor.SkinFirst gives each a back-facing twin, as stock jets have), so these count the skin twice, except on
+# the parts marked single_sided_skin (skeleton.SINGLE_SIDED); module BUDGETs count the triangles modelled here, once.
 EXTERIOR = (135000, 140000)  # exterior LOD0, internals and cockpit proxies included, cockpit_view renderers excluded
 SKIN_MAX = 92000  # 2,000 of it variant D's ventral fin and fairing (tail_hook.py HOOKED_FIN), drawn only with the hook
 TRIM_SHARE = (0.27, 0.58)  # jet_mechanical and aircraft_structure, of exterior LOD0
 TRIMS = ("jet_mechanical", "aircraft_structure")
 COCKPIT_MAX = 35000
-LOD1_PER_HULL, LOD1_TOTAL = 56, 814  # hulls.LOD1_TOTAL
+WHOLE_MAX = 150000  # the whole jet drawn, exterior and cockpit together: the design limit for 0.4.0's skeleton
+LOD1_PER_HULL, LOD1_TOTAL = 56, 858  # hulls.LOD1_TOTAL
 
 
 def tris(obj):
@@ -93,10 +94,12 @@ def report(icarus):
     cockpit = [o for o in meshes(icarus) if is_cockpit(o)]
     hulls = [o for o in bpy.data.collections["LOD1"].objects] if "LOD1" in bpy.data.collections else []
     colliders = [o for o in bpy.data.collections["Colliders"].objects] if "Colliders" in bpy.data.collections else []
-    twins = sum(skin_tris(o) for o in exterior if o not in hulls and o not in colliders)
-    lines = ["budget: exterior LOD0 %d triangles drawn (%d modelled, %d skin twins) on %d renderers; cockpit %d on %d"
+    twins = sum(skin_tris(o) for o in exterior if o not in hulls and o not in colliders and not o.get("single_sided_skin"))
+    whole = sum(map(tris, exterior)) + twins + sum(map(tris, cockpit))
+    lines = ["budget: exterior LOD0 %d triangles drawn (%d modelled, %d skin twins) on %d renderers; cockpit %d on %d; "
+             "whole jet %d (limit %d)%s"
              % (sum(map(tris, exterior)) + twins, sum(map(tris, exterior)), twins, len(exterior),
-                sum(map(tris, cockpit)), len(cockpit))]
+                sum(map(tris, cockpit)), len(cockpit), whole, WHOLE_MAX, " OVER" if whole > WHOLE_MAX else "")]
 
     per_mat = {}
     for o in exterior:

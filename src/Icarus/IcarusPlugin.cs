@@ -10,13 +10,13 @@ namespace Icarus;
 
 /// <summary>
 /// The F-204 Icarus II plugin: config (BepInEx/config/baanish.icarus.cfg), the "[Icarus]" logger, the Harmony install,
-/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver, the cockpit's live instruments, the tip tanks' fuel and the live tuning knobs.
+/// the startup hold, AI supply repair and stock-mission supply, the iris nozzle driver, the cockpit's live instruments, the tip tanks' fuel, the live tuning knobs and its liveries' Workshop tag.
 /// </summary>
 [BepInPlugin(Guid, "F-204 Icarus II", Version)]
 public sealed class IcarusPlugin : BaseUnityPlugin
 {
     public const string Guid = "baanish.icarus";
-    public const string Version = "0.3.0";
+    public const string Version = "0.4.0";
 
     /// <summary>AircraftDefinition.jsonKey of the Icarus (IcarusAuthor.JsonKey).</summary>
     public const string JsonKey = "baanish_icarus";
@@ -24,7 +24,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Seconds between a mission starting and the supply repair and stock-mission supply, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(ContactOffset.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(AiTaxiSpeed.PatchTargets).Concat(TipTanks.PatchTargets).Concat(TailHookFairing.PatchTargets).Concat(LiveryFallback.PatchTargets).Concat(HelipadLaunch.PatchTargets).Concat(LeadingEdgeFlaps.PatchTargets).Concat(DamageRegistrations.PatchTargets).Concat(OriginShiftPoses.PatchTargets).Concat(AiApproachSpeed.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(TankFireLog.PatchTargets).Concat(ContactOffset.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(AiTaxiSpeed.PatchTargets).Concat(TipTanks.PatchTargets).Concat(TailHookFairing.PatchTargets).Concat(BareMetalFirstPick.PatchTargets).Concat(HelipadLaunch.PatchTargets).Concat(LeadingEdgeFlaps.PatchTargets).Concat(DamageRegistrations.PatchTargets).Concat(OriginShiftPoses.PatchTargets).Concat(AiApproachSpeed.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 
@@ -48,23 +48,39 @@ public sealed class IcarusPlugin : BaseUnityPlugin
         StockMissionSupply.Install(Config, Log);
         HelipadLaunch.Install(Config);
         DamageRegistrations.Install(Config);
+        AircraftMenuProbe.Install(Config, this);
         harmony = new Harmony(Guid);
         FeaturesOff = PatchTarget.InstallAll(harmony, PatchTargets, Log);
     }
 
     void OnDestroy() => harmony?.UnpatchSelf();
 
-    /// <summary>The active loadout, including empty hardpoint sets, for scenario setup guards.</summary>
+    /// <summary>
+    /// For scenario checks: the active loadout, including empty hardpoint sets; the liveries the aircraft menu offers the
+    /// player's faction (the game's own LoadoutSelector.GetLiveryOptions); the faction's first livery, which a jet wears
+    /// until its own loads (AircraftParameters.GetFirstLiveryForFaction); and the livery it wears.
+    /// </summary>
     public object? AgenticState()
     {
         if (!GameManager.GetLocalAircraft(out var aircraft) || aircraft.definition.jsonKey != JsonKey ||
             aircraft.Networkloadout == null) return null;
-        return new { loadout = string.Join("|", aircraft.Networkloadout.weapons.Select(m => m != null ? m.jsonKey : "")) };
+        var parameters = aircraft.definition.aircraftParameters;
+        var faction = aircraft.NetworkHQ != null ? aircraft.NetworkHQ.faction : null;
+        var options = new List<(LiveryKey key, string label)>();
+        LoadoutSelector.GetLiveryOptions(options, aircraft.definition, faction != null ? faction.factionName : null, true);
+        var key = aircraft.NetworkLiveryKey;
+        return new
+        {
+            loadout = string.Join("|", aircraft.Networkloadout.weapons.Select(m => m != null ? m.jsonKey : "")),
+            liveries = string.Join("|", options.Select(o => o.label)),
+            first_livery = parameters.liveries[parameters.GetFirstLiveryForFaction(faction)].name,
+            livery = key.Type == LiveryKey.KeyType.Builtin && key.Index < parameters.liveries.Count ? parameters.liveries[key.Index].name : "",
+        };
     }
 
     void Update()
     {
-        Log.Tick();
+        LiveryWorkshopTag.Update(Log);
         Tuning.Update();
 
         bool running = MissionManager.IsRunning;

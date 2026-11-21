@@ -310,9 +310,10 @@ def main():
         for hp_name, hp in hardpoints:
             pos, rot, _ = plane.world(hp)
             side = "L" if pos[0] < 0 else "R"
-            # the wing skin, whole or in its pieces (wing_skin_<piece>_<side>)
-            skin = np.concatenate([plane.posed(plane.find(n))[0] for n in sorted({n["name"] for n in plane.nodes.values()})
-                                   if n.startswith("wing_skin_") and n.endswith("_" + side) and n != "wing_skin_visible"])
+            # the wing's meshes: the wing boxes', which the author joins the skin pieces into (IcarusAuthor JoinPartMeshes),
+            # or the skin pieces where they still draw; the tip face is the skin's, outboard of every rib
+            skin = np.concatenate([plane.posed(t)[0] for t in (plane.find(n) for n in sorted({n["name"] for n in plane.nodes.values()})
+                                   if n.startswith(("wing_skin_", "wing_spar_")) and n.endswith("_" + side)) if t in plane.meshes])
             outer = np.abs(skin[:, 0]).max()
             face = skin[np.abs(skin[:, 0]) > outer - 0.001]
             le, te = face[:, 2].max(), face[:, 2].min()

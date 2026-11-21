@@ -11,9 +11,11 @@ Detail a package builds as its own object tagged merge_into = "<part>" joins tha
 takes the part's livery and damage without a renderer of its own.
 """
 import math
+from types import SimpleNamespace
 
 import bmesh
 import bpy
+import numpy as np
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
@@ -23,6 +25,7 @@ import checks
 import gear
 import internals as interior
 import lights
+import skeleton
 import stations
 
 SKIN = "Icarus_Body"
@@ -50,11 +53,10 @@ BUDGET = {
     # wells' ribs, rivets, lines and anchor brackets (joined into fuselage_tail), 3,078 measured.
     "structure_cores": {"target": 3100, "cap": 3140, "objects": ("fuselage_forward", "fuselage_mid", "fuselage_aft", "fuselage_tail",
                                                                     "fuselage_truss_")},
-    "wing_spars": {"target": 3000, "cap": 3000, "objects": ("wing_spar_",)},
-    # Coarse cells (internals.INTERNALS cell_mesh) come to about 3,160.
-    "fuel_cells": {"target": 3000, "cap": 3200, "objects": ("fuel_",)},
-    "engine": {"target": 600, "cap": 700, "objects": ("engine_core", "engine_afterburner")},
+    # No fuel cells, spar plates or engine tube: the cells' geometry goes after the fold (chunks.drop_bladders), the
+    # plates' and the tube's after the checks, the skeleton drawn in their place (skeleton.REPLACED).
     "radar_avionics_cockpit": {"target": 1000, "cap": 1100, "objects": ("radar_tray", "avionics_tray", "cockpit_cell")},
+    **skeleton.BUDGET,
 }
 FRONT_HINGE_CLEAR = 0.03  # a gear well's floor opened this far ahead of a front-hinged door's hinge (open_bays)
 GEAR_DOOR_SPECS = {spec[0]: spec for spec in gear.GEAR["doors"]}
@@ -87,6 +89,9 @@ TREE = {
     "engine_core": ("fuselage_aft", 1500),
     "engine_afterburner": ("engine_core", 0),  # its share of engine_core's 1,500
     "nozzle": ("engine_core", 130),  # the afterburner's in a split build (LATE_PARENTS)
+    # Each intake is a part of its own, as the Revoker's are, that the engine needs (IcarusAuthor.Engine.cs
+    # criticalParts); its duct's 100 kg, which folded into the root before, stays on it (chunks.INTERNALS). In a split
+    # build it is the fairing's outside chunk, the duct staying on the root (split_intakes).
     "intake_duct_L": ("fuselage_mid", 100),
     "intake_duct_R": ("fuselage_mid", 100),
     "wing_spar_L": ("fuselage_mid", 230),
@@ -323,7 +328,7 @@ def full_tree():
 # A skin family is cut into pieces named <family>_<piece>_<side> (split_pieces); these are the piece codes, and the
 # families are the skins whose names start with SKIN_FAMILIES. Other parts keep whatever their names hold
 # (pylon_inner_L, light_nav_lower_L, wing_spar_outer_L).
-PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower")
+PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower", "intake")
 SKIN_FAMILIES = ("skin_", "wing_skin_", "dorsal_cover")
 # The skin families split_pieces cuts: family -> (cut planes, pieces). Each plane, (point, normal) in Blender world
 # space, bisects the family's sheet, or with a third member where(world face centre) only the sheet faces it holds for
@@ -381,13 +386,77 @@ def lower_lap_planes(sd, a, b):
     return planes
 
 
+# Each intake part is its fairing's outside chunk, as the Revoker's intake parts are (a design decision): the
+# cowl lip and the fairing's skin from the lip back to the butt joint at INTAKE_END, between the upper lap joint
+# (INTAKE_UPPER_DEG, over the root's upper longeron, skeleton.ROOT) and the line INTAKE_LOWER_DEG round the body centre,
+# above the wing root and clear above the main gear door's hole (gear.GEAR doors, up to about -8 degrees there), whose
+# opening would meet the chunk's walls. Shot off, it takes that skin and its lip and shows the Y-duct, its frames and
+# the root's frames and stringers under the fairing, which stay on the root (split_intakes). Each line is a plane in
+# each bay of the paint's knots, as the lap joints are drawn.
+INTAKE_END, INTAKE_UPPER_DEG, INTAKE_LOWER_DEG = 9.4, 45.0, -4.0
+INTAKE_LIP = bi.PARAMS["intake"][0][0]
+
+
+def round_distance(c, deg):
+    """How far a world point lies above the line deg round the body centre on its side, in its bay, as
+    panels.lap_distances measures a lap joint."""
+    zc = float(np.interp(station(c), _LINES["knots"], _LINES["knot_zc"]))
+    t = math.radians(deg)
+    return (c.z - zc) * math.cos(t) - abs(c.x) * math.sin(t)
+
+
+def in_intake(c, sd, margin=0.0):
+    """Whether a world point lies on side sd's intake chunk, grown by margin metres."""
+    return ((c.x >= 0) == (sd == "L") and INTAKE_LIP - margin <= station(c) <= INTAKE_END + margin
+            and round_distance(c, INTAKE_UPPER_DEG) < margin and round_distance(c, INTAKE_LOWER_DEG) > -margin)
+
+
+def around_intake(points, edge=0.01):
+    """Indices of a mid panel's world points in groups whose convex hulls stay off its side's intake chunk: above
+    the chunk's upper line, below its lower line, and the band between them ahead of and behind it. A point within edge
+    metres of a group's border joins it too, so neighbouring hulls meet."""
+    upper = [round_distance(c, INTAKE_UPPER_DEG) for c in points]
+    lower = [round_distance(c, INTAKE_LOWER_DEG) for c in points]
+    band = [i for i in range(len(points)) if upper[i] < edge and lower[i] > -edge]
+    groups = ([i for i in range(len(points)) if upper[i] > -edge], [i for i in range(len(points)) if lower[i] < edge],
+              [i for i in band if station(points[i]) < INTAKE_LIP + edge],
+              [i for i in band if station(points[i]) > INTAKE_END - edge])
+    return [g for g in groups if len(g) >= 4]
+
+
+def round_planes(sd, deg, a, b):
+    """The plane through the line deg round the body centre on side sd in each bay of the paint's knots, cutting only
+    that bay's faces between stations a and b round the intake chunk (lower_lap_planes' rule at any angle)."""
+    x = 1.0 if sd == "L" else -1.0
+    t = math.radians(deg)
+    knots, zc = list(_LINES["knots"]), list(_LINES["knot_zc"])
+    planes = []
+    for k0, k1, z0, z1 in zip(knots, knots[1:], zc, zc[1:]):
+        if k1 <= a or k0 >= b:
+            continue
+        dk, dz = k1 - k0, z1 - z0
+        planes.append(((0.0, k0 - bi.S0, float(z0)), (-x * math.sin(t) * dk, -math.cos(t) * dz, math.cos(t) * dk),
+                       lambda c, lo=max(k0, a), hi=min(k1, b): lo <= station(c) <= hi and in_intake(c, sd, 0.1)))
+    return planes
+
+
+def intake_planes(sd):
+    """The intake chunk's outline on side sd: the lip's and INTAKE_END's stations, then its upper and lower lines."""
+    ends = [((0.0, s - bi.S0, 0.0), (0.0, 1.0, 0.0), lambda c, s=s: abs(station(c) - s) < 0.3 and in_intake(c, sd, 0.1))
+            for s in (INTAKE_LIP, INTAKE_END)]
+    return (ends + round_planes(sd, INTAKE_UPPER_DEG, INTAKE_LIP, INTAKE_END)
+            + round_planes(sd, INTAKE_LOWER_DEG, INTAKE_LIP, INTAKE_END))
+
+
 for _sd in ("L", "R"):
     # each forward panel at its lower lap joint, the belly below it
     SPLITS["skin_forward_" + _sd] = (lower_lap_planes(_sd, RADOME_END, FORWARD_END), [
         ("skin_forward_belly_" + _sd, "fuselage_forward", lambda c, side: below_lap(c)),
         ("skin_forward_" + _sd, "fuselage_forward", lambda c, side: True)])
-    # each mid panel at the truss break and its lower lap joint
-    SPLITS["skin_mid_" + _sd] = ([((0.0, TRUSS_BREAK - bi.S0, 0.0), (0.0, 1.0, 0.0))] + lower_lap_planes(_sd, FORWARD_END, MID_END), [
+    # each mid panel round its intake chunk, at the truss break and at its lower lap joint
+    SPLITS["skin_mid_" + _sd] = (intake_planes(_sd) + [((0.0, TRUSS_BREAK - bi.S0, 0.0), (0.0, 1.0, 0.0))]
+                                 + lower_lap_planes(_sd, FORWARD_END, MID_END), [
+        ("skin_mid_intake_" + _sd, "intake_duct_" + _sd, lambda c, side, sd=_sd: in_intake(c, sd))] + [
         ("skin_mid_%s%s_%s" % (half, belly, _sd), "fuselage_mid",
          lambda c, side, front=(half == "front"), low=(belly == "_belly"):
             (station(c) < TRUSS_BREAK) == front and below_lap(c) == low)
@@ -446,7 +515,257 @@ def split_pieces(icarus, splits=None):
     made = {}
     for name, (planes, pieces) in splits.items():
         made[name] = cut_family(icarus, O[name], planes, pieces)
+    if any(piece.name.startswith("skin_mid_intake_") for pieces in made.values() for piece in pieces):
+        print(split_intakes(icarus))
+    if splits is SPLITS:
+        print(fire_origin())
     return made
+
+
+# A tank's fire comes out of its part's origin: FuelTank.IgnitionEffects spawns it at the tank's transform (localPosition
+# zero), and the tank sits on its part's GameObject. Stock forward tanks burn well behind the pilot (the Revoker's
+# fuselage part 3.7 m, the Ifrit's fuselage_F 3.2 m), but the forward section's pinned origin (CORE_ORIGINS) lies under
+# the pilot's eye, so its fire came out of the seat. In a split build, once the atlas is packed, its origin moves to its
+# fuel cell's centre (fuel_aux, behind the cockpit's aft bulkhead), every child where it was (fire_origin). Every part
+# carrying fuel keeps its origin FIRE_EYE_CLEAR from the design eye and out of the cockpit (fire_clear).
+FIRE_EYE_CLEAR = 1.5
+
+
+def move_origin(obj, point):
+    """Move obj's origin to a world point, its mesh and its children where they are: its basis moves by the offset in
+    its own frame and each child takes it back, exactly, whatever the scene last evaluated. A mesh child at an identity
+    transform (a hull or LOD1 hull, which the export reads in its part's space) takes it in its vertices, any other
+    child in its basis."""
+    bpy.context.view_layer.update()
+    shift = Matrix.Translation(obj.matrix_world.inverted() @ point)
+    back = shift.inverted()
+    obj.data.transform(back)
+    obj.matrix_basis = obj.matrix_basis @ shift
+    identity = Matrix.Identity(4)
+    for c in obj.children:
+        at_identity = all(abs(a - b) < 1e-9 for m in (c.matrix_parent_inverse, c.matrix_basis)
+                          for row, ref in zip(m, identity) for a, b in zip(row, ref))
+        if c.type == "MESH" and at_identity:
+            c.data.transform(back)
+        else:
+            c.matrix_basis = c.matrix_parent_inverse.inverted() @ back @ c.matrix_parent_inverse @ c.matrix_basis
+    bpy.context.view_layer.update()
+
+
+def fire_origin():
+    """Move fuselage_forward's origin to its fuel cell's bounds' centre; returns a report line."""
+    O = bpy.data.objects
+    cell, part = O["fuel_aux"], O["fuselage_forward"]
+    pts = [cell.matrix_world @ v.co for v in cell.data.vertices]
+    centre = sum((Vector([f(p[i] for p in pts) for i in range(3)]) for f in (min, max)), Vector()) / 2
+    was = part.matrix_world.translation.copy()
+    move_origin(part, centre)
+    part["origin_moved"] = [float(x) for x in centre]
+    bpy.context.view_layer.update()
+    return "fire origin: fuselage_forward's origin from %s to its fuel cell's centre %s" % (
+        tuple(round(x, 4) for x in was), tuple(round(x, 4) for x in centre))
+
+
+# A blast aims each collider's frag at its part's origin (DamageEffects.BlastFrag; hulls.aim_points): parts whose pinned
+# origins (SPLIT_ORIGINS, CORE_ORIGINS, kept for the atlas until it is packed) stand outside their hulls move, once the
+# hulls are final, to a point inside one: a box's to the centre of its hull's corners, the aft section's to that of its
+# hull piece nearest its pin, so a trace across it from either side, above or below meets that piece. Every child stays
+# where it is; lift acts where the Unity author places each part's lift frame, in world space (IcarusAuthor.Aero.cs).
+AIM_MOVES = ("fuselage_aft", "wing_spar_L", "wing_spar_R", "wing_spar_outer_L", "wing_spar_outer_R")
+
+
+def aim_origins(icarus):
+    """Move AIM_MOVES' origins inside their hulls (split build, after clearance.carve); returns a report line."""
+    import numpy as np
+
+    from clearance import part_of
+
+    cols = [c for c in bpy.data.collections["Colliders"].objects if part_of(c) is not None]
+    report = []
+    for name in AIM_MOVES:
+        part = bpy.data.objects[name]
+        pieces = [np.array([(c.matrix_world @ v.co)[:] for v in c.data.vertices]) for c in cols if part_of(c) is part]
+        was = np.array(part.matrix_world.translation[:])
+        centre = min((p.mean(0) for p in pieces), key=lambda c: np.linalg.norm(c - was))
+        move_origin(part, Vector(centre))
+        part["origin_moved"] = [float(x) for x in centre]
+        report.append("%s %s to %s" % (name, tuple(round(float(x), 3) for x in was), tuple(round(float(x), 3) for x in centre)))
+    bpy.context.view_layer.update()
+    return "aim origins: " + "; ".join(report)
+
+
+def fire_clear(icarus):
+    """Every part carrying fuel has its origin, where its fire spawns, FIRE_EYE_CLEAR or more from the design eye and
+    outside the cockpit interior's bounds; returns a report line."""
+    eye = bi.P(*canopy.EYE)
+    room = bpy.data.objects.get("cockpit_interior")
+    pts = [room.matrix_world @ v.co for v in room.data.vertices] if room is not None else []
+    lo = Vector([min(p[i] for p in pts) for i in range(3)]) if pts else None
+    hi = Vector([max(p[i] for p in pts) for i in range(3)]) if pts else None
+    rows, problems = [], []
+    for o in sorted((o for o in icarus.all_objects if o.get("fuel_kg", 0) > 0), key=lambda o: o.name):
+        at = o.matrix_world.translation
+        d = (at - eye).length
+        inside = lo is not None and all(lo[i] <= at[i] <= hi[i] for i in range(3))
+        rows.append("%s %.2f m" % (o.name, d))
+        if d < FIRE_EYE_CLEAR or inside:
+            problems.append("%s's origin %.2f m from the eye%s" % (o.name, d, ", inside the cockpit" if inside else ""))
+    if problems:
+        raise ValueError("parts: tank fires spawn too near the pilot: " + "; ".join(problems))
+    return "tank fire origins from the design eye (at least %.1f m, outside the cockpit): %s" % (FIRE_EYE_CLEAR, ", ".join(rows))
+
+
+INTAKE_INNER = 0.02  # how far the intake chunk's inner face lies inside its skin, metres
+INNER_DISSOLVE_DEG, INNER_RING_EVERY = 10.0, 3  # the inner face's faces merged where they turn less than this
+
+
+def split_intakes(icarus):
+    """Make each intake part its fairing's outside chunk, once split_pieces has cut its skin (skin_mid_intake_<side>):
+    the part keeps the cowl lip and takes an inner face and edge walls a little inside that skin, on the stock inner
+    face trim (aircraft_structure, as the stock doors and bays carry), so the chunk is not paper thin when it comes
+    away; the Y-duct branch, its shock cone, mounted on the body side as on the F-104, and the compressor face move to
+    duct_<side>, a visual of the root, and the duct's frames (skeleton.INTAKE) to the root. Faces only change objects,
+    so the atlas is the unsplit build's. The part's origin moves to its new bounds' centre, the game's blast aim point
+    (DamageEffects.BlastFrag aims each collider's trace at its transform), and its mass marker keeps the duct's place
+    along and up the body (mass_marker), so the balance holds. Returns a report line."""
+    import chunks
+    import hulls
+    import trims
+
+    O = bpy.data.objects
+    colliders = bpy.data.collections["Colliders"]
+    report = []
+    for sd in ("L", "R"):
+        intake, chunk, root = O["intake_duct_" + sd], O["skin_mid_intake_" + sd], O["fuselage_mid"]
+        old = [c for c in intake.children if c.name in colliders.objects]
+        was = chunks.box_centre(old)
+        # The cowl lip is the island at the lip; the rest (duct, cone, compressor face) goes to the root's visual.
+        bm = bmesh.new()
+        bm.from_mesh(intake.data)
+        lip = set()
+        for island in islands_of(bm.faces):
+            s = [station(intake.matrix_world @ v.co) for f in island for v in f.verts]
+            if INTAKE_LIP - 0.02 < min(s) and max(s) < INTAKE_LIP + 0.1:
+                lip.update(f.index for f in island)
+        bm.free()
+        duct = intake.copy()
+        duct.data = intake.data.copy()
+        for collection in intake.users_collection:
+            collection.objects.link(duct)
+        keep_faces_by_index(duct, lambda i: i not in lip)
+        keep_faces_by_index(intake, lambda i: i in lip)
+        for key in list(duct.keys()):
+            del duct[key]
+        duct.name = duct.data.name = "duct_" + sd
+        duct["role"] = "visual"
+        duct["folded_into"] = root.name  # the Unity author joins it into the root's mesh, its livery and damage
+        duct.parent = root
+        duct.matrix_world = intake.matrix_world.copy()
+        skel = O["skel_intake_duct_" + sd]
+        world = skel.matrix_world.copy()
+        skel.parent = root
+        skel.matrix_world = world
+        skel["skeleton_owner"] = skel["parent_part"] = root.name
+        if sd == "L":
+            shell = inner_shell(chunk)
+        else:  # the left's mirror image, so the pair stays twins (uvs.MIRROR_PAIRS)
+            bmesh.ops.scale(shell, vec=(-1.0, 1.0, 1.0), verts=shell.verts)
+            bmesh.ops.reverse_faces(shell, faces=shell.faces[:])
+        add_shell(intake, shell)
+        trims.project(SimpleNamespace(all_objects=[intake]))
+        # the origin to the chunk's bounds' centre, its riders where they were
+        pts = [o.matrix_world @ v.co for o in (intake, chunk) for v in o.data.vertices]
+        centre = sum((Vector([f(p[i] for p in pts) for i in range(3)]) for f in (min, max)), Vector()) / 2
+        move_origin(intake, centre)
+        for c in old:
+            data = c.data
+            bpy.data.objects.remove(c, do_unlink=True)
+            bpy.data.meshes.remove(data)
+        bpy.context.view_layer.update()
+        hulls.attach_colliders(intake, [hulls.capped([intake.matrix_world @ v.co for v in intake.data.vertices],
+                                                     hulls.COLLIDER_TRIS)], colliders)
+        intake["mass_marker"] = [centre.x, was[1], was[2]]
+        report.append("%s: lip %d faces, duct_%s %d faces, origin %s" % (
+            intake.name, len(intake.data.polygons), sd, len(duct.data.polygons), tuple(round(x, 4) for x in centre)))
+    shell.free()
+    bpy.context.view_layer.update()
+    return "intakes as outside chunks: " + "; ".join(report)
+
+
+def keep_faces_by_index(obj, keep):
+    """Drop the faces of obj whose index keep() rejects, and the corners left with none."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if not keep(f.index)], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
+def inner_shell(chunk):
+    """An inner face INTAKE_INNER inside the chunk's skin, facing in, and walls round its edges, world space."""
+    skin_slot = [m.name if m else "" for m in chunk.data.materials].index(SKIN)
+    bm = bmesh.new()
+    bm.from_mesh(chunk.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index != skin_slot], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.transform(chunk.matrix_world)
+    bm.normal_update()
+    out = bmesh.new()
+    outer = {v: out.verts.new(v.co) for v in bm.verts}
+    inner = {v: out.verts.new(v.co - v.normal * INTAKE_INNER) for v in bm.verts}
+    sheet = [out.faces.new([inner[v] for v in reversed(f.verts)]) for f in bm.faces]
+    # Coarse, as the stock trim's inner faces are: the sheet's inside dissolved within INNER_DISSOLVE_DEG, its edge
+    # corners kept, which the walls stand on, and every INNER_RING_EVERY-th ring of edges round the body kept, so no
+    # merged face runs further along it than the trim strip takes (trims.project).
+    edge = {v for e in out.edges if len(e.link_faces) == 1 for v in e.verts}
+    around = [e for e in bm.edges if abs(e.verts[0].co.y - e.verts[1].co.y) < 1e-4]  # the skin's rings, before the offset
+    kept = set(sorted({round(e.verts[0].co.y, 4) for e in around})[::INNER_RING_EVERY])
+    keep = {out.edges.get([inner[e.verts[0]], inner[e.verts[1]]]) for e in around if round(e.verts[0].co.y, 4) in kept}
+    keep.discard(None)
+    out.normal_update()  # dissolve_limit weighs the turn between face normals
+    bmesh.ops.dissolve_limit(out, angle_limit=math.radians(INNER_DISSOLVE_DEG), use_dissolve_boundaries=False,
+                             verts=[v for v in inner.values() if v not in edge and not any(e in keep for e in v.link_edges)],
+                             edges=list({e for f in sheet for e in f.edges} - keep))
+    for e in bm.edges:
+        if len(e.link_faces) != 1 or all(abs(station(v.co) - INTAKE_LIP) < 1e-4 for v in e.verts):
+            continue  # an inside edge, or the front one, which the cowl lip closes
+        f = e.link_faces[0]
+        a, b = (e.verts if next(l for l in f.loops if l.vert == e.verts[0]).link_loop_next.vert == e.verts[1]
+                else reversed(e.verts))
+        out.faces.new([outer[b], outer[a], inner[a], inner[b]])
+    for v in [v for v in outer.values() if not v.link_faces]:
+        out.verts.remove(v)
+    bm.free()
+    return out
+
+
+def add_shell(intake, shell):
+    """Join a world-space shell (inner_shell) into the intake's mesh on the stock inner face trim (aircraft_structure,
+    as the stock doors and bays carry)."""
+    import materials
+
+    structure = materials.stock("aircraft_structure")
+    slots = [m.name if m else "" for m in intake.data.materials]
+    if structure.name not in slots:
+        intake.data.materials.append(structure)
+        slots.append(structure.name)
+    out = shell.copy()
+    for f in out.faces:
+        f.material_index = slots.index(structure.name)
+    out.transform(intake.matrix_world.inverted())
+    me = bpy.data.meshes.new("inner")
+    for m in intake.data.materials:  # to_mesh clamps each face's material index to the mesh's slots
+        me.materials.append(m)
+    out.to_mesh(me)
+    out.free()
+    bm = bmesh.new()
+    bm.from_mesh(intake.data)
+    bm.from_mesh(me)
+    bm.to_mesh(intake.data)
+    bm.free()
+    bpy.data.meshes.remove(me)
 
 
 def sheet_faces(bm, skin_slot):
@@ -784,7 +1103,8 @@ def _organise(p, icarus, internals, structure_mat):
     if leftover:
         raise ValueError("objects outside the part tree: %s" % ", ".join(sorted(leftover)))
     for obj in icarus.objects:
-        if obj.type == "MESH" and not obj.name.startswith(("intake_duct", "speed_brake_well_", "ventral_fin_fairing")) and obj.get("role") != "cockpit_view":
+        if (obj.type == "MESH" and not obj.name.startswith(("intake_duct", "speed_brake_well_", "ventral_fin_fairing"))
+                and obj.get("role") != "cockpit_view" and not obj.get("inner_face")):
             face_outward(obj)
     return parts
 
@@ -816,8 +1136,12 @@ def check(icarus):
     if over:
         raise ValueError("parts: over the triangle caps: " + "; ".join(over))
     # within the float noise of parenting (forward and aft hang off mid), far under any real drift
+    pins = {**CORE_ORIGINS, **SPLIT_ORIGINS}
+    for name in pins:  # fire_origin's and aim_origins' moves, in a split build
+        if "origin_moved" in bpy.data.objects[name]:
+            pins[name] = tuple(bpy.data.objects[name]["origin_moved"])
     moved = ["%s at %s" % (name, tuple(bpy.data.objects[name].matrix_world.translation))
-             for name, origin in {**CORE_ORIGINS, **SPLIT_ORIGINS}.items()
+             for name, origin in pins.items()
              if (bpy.data.objects[name].matrix_world.translation - Vector(origin)).length > 1e-5]
     if moved:
         raise ValueError("parts: structure core or wing box origins off their pins: " + "; ".join(moved))
@@ -825,7 +1149,9 @@ def check(icarus):
     if lef[1] != bi.WING_CRANK:
         raise ValueError("parts: the wing crank %.3f is not the leading-edge flap's inboard end %.3f" % (bi.WING_CRANK, lef[1]))
     print(seam_check(icarus))
+    print(fire_clear(icarus))
     print(surface_sweep(icarus))
+    print(skeleton.check(icarus))
 
 
 SEAM_PLANE, SEAM_SHARED, SEAM_NORMAL_DEG, SEAM_SURFACE_DEG = 0.005, 0.0002, 1.0, 30.0  # seam_check's limits, metres and degrees

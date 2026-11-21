@@ -37,18 +37,23 @@ FRONT = {
     # enough that display A's centre stays 0.25 m under the eye (Cockpit rule 16); the face above it, under the rim,
     # carries the warning lamps. Raised from under the 16 degree line along the face's own slope, so the cheeks and
     # wings stay as far forward of the stock throttle's sweep as they stood.
-    "glass_top": (3.5361, 0.700),
+    "glass_top": (2.7861, 0.645),
+    # The whole front office scales about the glass top line's centre: the face, displays, bezels, plates, controls
+    # and rim, smaller with the layout unchanged, so its top corners pass inside the windscreen's and the hood's
+    # frames and the opening hood with the crew station forward. Where it meets what does not scale (the console
+    # tops, the shroud's skirt, the pedestal, the side panels) it is joined at world heights.
+    "scale": 0.900,
     "half_width": 0.300,  # the display face, between the cheeks
     "stem_half_width": 0.130,
-    "face_bottom_z": 0.479,  # the display face's bottom edge; the stem runs on down
-    "stem_bottom_z": 0.307,  # the wings hinge on the stem's sides, so its height is theirs
+    "face_bottom_z": 0.454,  # the display face's bottom edge; the stem runs on down
+    "stem_bottom_z": 0.282,  # the wings hinge on the stem's sides, so its height is theirs
     # the top frame narrow: it stands under the rim, which hides most of it from the eye
     "bezel": {"side": 0.024, "top": 0.012, "bottom": 0.026, "column": 0.020, "height": 0.006, "step": 0.0025},
     "rim": {"depth": 0.074, "behind": 0.05, "thickness": 0.026, "radius": 0.010, "corner": 0.045, "seg": 6},
     "margin": 0.005,  # under the over-nose line
     # the wings turn about the stem's side edges, their outer edges toward the eye, to land on the cheeks' inner faces
-    "wing_yaw": 14.0,
-    "pedestal": {"s0": 3.58, "half_width": 0.105},
+    "wing_yaw": 2.0,
+    "pedestal": {"s0": 2.83, "half_width": 0.105},
 }
 # The coaming deck between the windscreen and the rim runs under this line (the old 16 degree over-nose line): the rim,
 # on the over-nose line, hides it from the eye, so it stays low and clear of the windscreen and the hood's front bow.
@@ -61,14 +66,19 @@ def deck_z(s):
 
 
 def face_frame():
-    """The display face's placement: origin on the glass top line at the centreline."""
+    """The display face's placement: origin on the glass top line at the centreline, scaled by FRONT scale."""
     s, z = FRONT["glass_top"]
-    return frame(P(s, 0.0, z), FACE_UP, FACE_N)
+    return frame(P(s, 0.0, z), FACE_UP, FACE_N) @ Matrix.Scale(FRONT["scale"], 4)
 
 
 def face_y(z):
-    """Local Y on the display face of height z."""
+    """Local Y on the display face of height z, before the face is scaled."""
     return (z - FRONT["glass_top"][1]) / math.cos(TILT)
+
+
+def face_y_at(z):
+    """Local Y where the scaled display face stands at world height z: where it meets what does not scale."""
+    return face_y(z) / FRONT["scale"]
 
 
 # --- the screen layout ----------------------------------------------------------------------------------------------
@@ -116,9 +126,9 @@ def face_top_y():
     """Local Y where the display face meets the rim's underside: the rim's top runs FRONT margin under the over-nose
     line, its underside the rim's thickness below that."""
     m = face_frame()
-    thick = FRONT["rim"]["thickness"]
+    thick = FRONT["rim"]["thickness"] * FRONT["scale"]
     b_up = Vector((0.0, -math.sin(ALONG), math.cos(ALONG)))
-    lo, hi = 0.0, 0.08
+    lo, hi = 0.0, 0.25
     for _ in range(40):
         y = (lo + hi) / 2
         p = m @ Vector((0.0, y, 0.0))
@@ -163,25 +173,26 @@ def rim_rings(y_top, y_bottom, section=None, at_a=None):
         # b: outward from the opening, perpendicular to A_DIR, turning from up (top run) to sideways (cheeks)
         b = side * abs(nx) + b_top * max(ny, 0.0)
         b = (b - A_DIR * b.dot(A_DIR)).normalized()
+        k = FRONT["scale"]  # the section scales with the face
         if at_a is not None:
-            rings.append(o + A_DIR * at_a + b * FRONT["rim"]["thickness"])
+            rings.append(o + (A_DIR * at_a + b * FRONT["rim"]["thickness"]) * k)
         else:
-            rings.append([o + A_DIR * a + b * bb for a, bb in sec])
+            rings.append([o + (A_DIR * a + b * bb) * k for a, bb in sec])
     return rings
 
 
 def rim_depth(y):
-    """The rim stands its full depth round the hood and down the cheeks to 0.50 m, then narrows to 50 mm by 0.43 m,
+    """The rim stands its full depth round the hood and down the cheeks to 0.47 m, then narrows to 50 mm by 0.40 m,
     clear of the stock throttle's grip beside it."""
-    z = FRONT["glass_top"][1] + y * math.cos(TILT)
-    t = min(max((z - 0.43) / 0.07, 0.0), 1.0)
+    z = FRONT["glass_top"][1] + y * math.cos(TILT) * FRONT["scale"]  # world height: the stock grip does not scale
+    t = min(max((z - 0.40) / 0.07, 0.0), 1.0)
     return 0.050 + (FRONT["rim"]["depth"] - 0.050) * t
 
 
 def rim(g, atlas):
     """The hood's rounded rim over the displays, turning down both sides of the panel as cheeks to the console fronts."""
     y_top = face_top_y()
-    y_bottom = face_y(ck.LAYOUT["console"]["top_z"])
+    y_bottom = face_y_at(ck.LAYOUT["console"]["top_z"])
     rings = rim_rings(y_top, y_bottom)
     # an open sweep: its section's buried back stays open, the ends meet the consoles
     chart = atlas.chart("rim", "rim")
@@ -504,7 +515,7 @@ def wing_frame(side):
     if (turn @ Vector((side, 0.0, 0.0))).y < 0:  # the outer edge comes aft (+Y), toward the eye
         turn = Matrix.Rotation(-math.radians(FRONT["wing_yaw"]), 3, FACE_UP)
     n = turn @ FACE_N
-    return frame(corner, FACE_UP, n), n, corner
+    return frame(corner, FACE_UP, n) @ Matrix.Scale(FRONT["scale"], 4), n, corner
 
 
 def wing_size():
@@ -655,8 +666,8 @@ def pedestal(g, kit, atlas, uv):
     lighting knobs and anti-ice toggles."""
     pd = FRONT["pedestal"]
     m = face_frame()
-    z_top = FRONT["stem_bottom_z"]
-    s_aft = (m @ Vector((0.0, face_y(z_top), 0.0))).y + bi.S0
+    foot = m @ Vector((0.0, face_y(FRONT["stem_bottom_z"]), 0.0))  # the stem's foot, where the scaled face puts it
+    z_top, s_aft = foot.z, foot.y + bi.S0
     hw, floor = pd["half_width"], ck.LAYOUT["floor_z"]
     fm = frame(P(s_aft, 0.0, (z_top + floor) / 2), Z, Y)
     h = (z_top - floor) / 2
@@ -692,7 +703,7 @@ SIDE_PANELS = {
     1: ("BRAKES", [("button", 0.0, 0.118, "ANTI\nSKID"), ("button", -0.012, 0.072, "NWS"), ("button", 0.016, 0.072, "PARK")]),
     -1: ("ECS", [("knob", 0.0, 0.118, "TEMP"), ("button", -0.012, 0.066, "DEFOG"), ("button", 0.016, 0.066, "RAM")]),
 }
-SIDE_PANEL = {"low": (ck.LAYOUT["console"]["s0"], ck.LAYOUT["console"]["top_z"]), "high": (3.680, 0.470), "inner": 0.339}
+SIDE_PANEL = {"low": (ck.LAYOUT["console"]["s0"], ck.LAYOUT["console"]["top_z"]), "high": (2.930, 0.375), "inner": 0.339}
 
 
 def side_panels(g, kit, atlas, uv, space):
@@ -708,7 +719,7 @@ def side_panels(g, kit, atlas, uv, space):
     length = (P(s1, 0.0, z1) - P(s0, 0.0, z0)).length
     faces = []
     for side in (1, -1):
-        x_in = SIDE_PANEL["inner"]
+        x_in = SIDE_PANEL["inner"] * FRONT["scale"]  # just off the scaled cheek
         x_out = min(space.wall_x(s, z) for s, z in ((s0, z0), (s1, z1), ((s0 + s1) / 2, (z0 + z1) / 2))) - 0.004
         xc = (x_in + x_out) / 2
         m = frame(P(s0, side * xc, z0), up, normal)
@@ -740,10 +751,12 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     s0, s_coam, inset = ck.LAYOUT["coaming"]
     margin = FRONT["margin"]
     deck = lambda s: deck_z(s) - margin
-    rows_s = sorted(set(bi.spaced(s0, s_coam, 8) + bi.spaced(3.08, 3.40, 5) + [canopy.CANOPY["windscreen_end_s"]]))
+    rows_s = sorted(set(bi.spaced(s0, s_coam, 8) + bi.spaced(2.33, 2.65, 5) + [canopy.CANOPY["windscreen_end_s"]]))
     foot = {s: row[3] - 0.010 for s, row in zip(rows_s, bi.resample(canopy.PROFILE, rows_s))}
-    hood_w = FRONT["half_width"] + FRONT["rim"]["thickness"]
-    skirt_z = 0.462
+    hood_w = (FRONT["half_width"] + FRONT["rim"]["thickness"]) * FRONT["scale"]
+    skirt_z = 0.437
+    rim_s = min(q.y for q in rim_rings(y_top, face_y_at(skirt_z), at_a=-FRONT["rim"]["behind"])) + bi.S0
+    rows_s = [s for s in rows_s if s0 <= s < rim_s - 0.02]
     n = 13 if proxy else 17  # the rim hides the deck from the eye: coarse, on a strip
     if proxy:
         rows_s = rows_s[::2]
@@ -751,9 +764,9 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
     for s in rows_s:
         z0 = deck(s)
         if s <= 3.0:
-            # ahead of the hood the deck rises to just under the windscreen's foot: a sight line that low meets the
-            # skin anyway, so the deck hides no more of the view over the nose, and no well opens under the glass
-            z0 = max(z0, foot[s] - WINDSCREEN_DECK)
+            # ahead of the hood the deck runs just under the windscreen's foot, clear of its base rails: the rim, on
+            # the over-nose line, hides it, and no well opens under the glass
+            z0 = foot[s] - WINDSCREEN_DECK
             side = [(space.skin_x(s, z, inset), z) for z in bi.spaced(foot[s], z0, 4)]
         else:
             # under the hood: the skirt at the cheeks' outer face
@@ -772,7 +785,7 @@ def shroud(g, atlas, uv, space, y_top, group="front", proxy=False):
         rows.append(resample_line(line, n))
     # the last rows: the rim's buried outer edge, from the cheeks' skirt height over the top
     r = FRONT["rim"]
-    edge = rim_rings(y_top, face_y(skirt_z), at_a=-r["behind"])
+    edge = rim_rings(y_top, face_y_at(skirt_z), at_a=-r["behind"])
     rows.append(resample_line(edge, n))
     g.put(ck.grid_sheet(uv, rows, "structure"), None, group)
     # the front wall at the windscreen's front: the first section filled up to 5 mm over the skin's line over the top

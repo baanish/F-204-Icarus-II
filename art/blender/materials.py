@@ -8,7 +8,8 @@ them. Icarus_Body packs the skin atlas. Icarus_NavFairing projects the wing's ex
 """
 import bpy
 
-STOCK = ("jet_mechanical", "aircraft_structure", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear",
+FUEL_CELL = "Icarus_FuelCell"  # the bladders' slot, which chunks.drop_bladders clears after the fold
+STOCK = ("jet_mechanical", "aircraft_structure", "honeycomb", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear",
          "fighter1_canopy", "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats",
          "light_red_off", "light_green_off", "slimelight_on")
 
@@ -57,12 +58,15 @@ def build():
         "seal": material("Icarus_Seal", (0.27, 0.26, 0.25, 1.0), 0.85, 0.4),
         "strut": material("Icarus_Strut", (0.70, 0.71, 0.72, 1.0), 1.0, 0.25),
         "tyre": material("Icarus_Tyre", (0.03, 0.03, 0.03, 1.0), 0.0, 0.9),
-        # Hidden structure on the stock trims (Exterior rule 4): spars and ribs on aircraft_structure;
-        # equipment, bays and the coves of moving surfaces on jet_mechanical.
+        # Hidden structure on the stock trims (Exterior rule 4). Frames, ribs and spars go on jet_mechanical, as both
+        # stock jets carry them (skeleton.py), with equipment, bays and the coves of moving surfaces;
+        # aircraft_structure is the stock jets' inner face of doors and bays, and here the older spar plates'.
         "structure": stock("aircraft_structure"),
         "mechanical": stock("jet_mechanical"),
+        # The inner faces of thin moving surfaces, as the stock jets line theirs (skeleton.py).
+        "honeycomb": stock("honeycomb"),
         # Rubberised fuel bladders stay matte and nonmetallic beside the stock mechanical trim.
-        "fuel_tank": material("Icarus_FuelCell", (0.10, 0.075, 0.035, 1.0), 0.0, 0.85),
+        "fuel_tank": material(FUEL_CELL, (0.10, 0.075, 0.035, 1.0), 0.0, 0.85),
         "engine": stock("jet_mechanical"),
         "avionics": stock("jet_mechanical"),
         "radar": stock("jet_mechanical"),

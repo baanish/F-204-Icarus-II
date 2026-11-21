@@ -103,8 +103,9 @@ namespace Icarus.Editor
         }
 
         // A22: the breakup tree as authored. Every part hangs on its tree parent at its class's strength, its only other
-        // joints the tail braces with their tensors; the pieces of each family split in the export weigh what the family
-        // did; the balance is the pinned one; and the damage registrations leave room.
+        // joints the braces with their tensors, the cockpit's the Revoker cockpit's; every part has its class's Revoker
+        // armour; the pieces of each family split in the export weigh what the family did; the balance is the pinned one;
+        // and the damage registrations leave room.
         private static string CheckBreakupTree(Build b, List<string> p)
         {
             var spec = b.Specs.ToDictionary(s => s.Name);
@@ -121,15 +122,43 @@ namespace Icarus.Editor
                 {
                     var joint = joints.GetArrayElementAtIndex(i);
                     var to = i == 0 ? s.Parent : braces[i - 1].To;
-                    var tensor = i == 0 ? null : b.Part(braces[i - 1].Tensor);
-                    if (joint.FindPropertyRelative("connectedPart").objectReferenceValue != b.Part(to))
+                    var connected = joint.FindPropertyRelative("connectedPart").objectReferenceValue;
+                    if (connected != b.Part(to))
                         p.Add($"{s.Name}: joint {i} isn't to {to}");
-                    if (joint.FindPropertyRelative("tensor").objectReferenceValue != tensor)
+                    var actualForce = joint.FindPropertyRelative("breakForce").floatValue;
+                    var actualTensor = joint.FindPropertyRelative("tensor").objectReferenceValue;
+                    if (s.Name == "cockpit_cell" && connected == b.Part(RootPart))
+                    {
+                        var actualTorque = joint.FindPropertyRelative("breakTorque").floatValue;
+                        var expectedForce = JointForces[JointClass.CockpitBrace];
+                        if (actualForce != expectedForce || actualTorque != expectedForce || actualTensor != b.Part("fuselage_forward"))
+                            p.Add($"the cockpit's brace to {RootPart} has {actualForce} N, {actualTorque} N m, tensor {actualTensor?.name ?? "none"} (expected {expectedForce} N, {expectedForce} N m, tensor fuselage_forward)");
+                        continue;
+                    }
+                    var tensor = i == 0 ? null : b.Part(braces[i - 1].Tensor);
+                    if (actualTensor != tensor)
                         p.Add($"{s.Name}: joint {i}'s tensor isn't {(tensor == null ? "none" : tensor.name)}");
                     var jointClass = JointClassOf(spec[s.Name], i);
-                    if (joint.FindPropertyRelative("breakForce").floatValue != JointForces[jointClass])
-                        p.Add($"{s.Name}: joint {i} breaks at {joint.FindPropertyRelative("breakForce").floatValue}, not its {jointClass} class's {JointForces[jointClass]}");
+                    if (actualForce != JointForces[jointClass])
+                        p.Add($"{s.Name}: joint {i} breaks at {actualForce}, not its {jointClass} class's {JointForces[jointClass]}");
                 }
+            }
+            // The cockpit's brace is the Revoker cockpit's joint to its root (torque equal to force, its fuselage as tensor),
+            // its strength grown with the mass the cockpit carries (CockpitBrace); and every part keeps its armour class's
+            // Revoker armour and thresholds (AuthorDamage overrides none, so the forward section's structuralThreshold is the
+            // Revoker fuselage's -200).
+            var donorBrace = b.Donor.CockpitBrace;
+            bool OnCockpit(string name) => name == "cockpit_cell" || spec[name].Parent != null && OnCockpit(spec[name].Parent);
+            var carried = b.Specs.Where(s => OnCockpit(s.Name)).Sum(s => b.Mass[s.Name]);
+            var braceForce = Mathf.Round(donorBrace.Force * Mathf.Max(1f, carried / donorBrace.CarriedMass) / 1000f) * 1000f;
+            if (donorBrace.Torque != donorBrace.Force || donorBrace.Tensor != "fuselage" || JointForces[JointClass.CockpitBrace] != braceForce
+                || !Braces.Any(t => t.Owner == "cockpit_cell" && t.To == RootPart && t.Tensor == "fuselage_forward" && t.Class == JointClass.CockpitBrace))
+                p.Add($"the cockpit's brace isn't the Revoker cockpit's ({donorBrace.Force} N, {donorBrace.Torque} N m, tensor {donorBrace.Tensor ?? "none"}) grown by {carried:0} kg against {donorBrace.CarriedMass:0} to {braceForce} N; it is {JointForces[JointClass.CockpitBrace]} N");
+            foreach (var s in b.Specs)
+            {
+                var so = new SerializedObject(b.Part(s.Name));
+                foreach (var v in b.Donor.Armour[s.Armour].Where(v => Mathf.Abs(Prop(so, v.Key).floatValue - v.Value) > 1e-4f))
+                    p.Add($"{s.Name}: {v.Key} {Prop(so, v.Key).floatValue}, not the Revoker {(s.Armour == "" ? "root" : s.Armour)}'s {v.Value}");
             }
             var families = SplitFamilies(b);
             foreach (var family in families)
@@ -146,6 +175,29 @@ namespace Icarus.Editor
                 hulls.Expand(1e-4f);
                 if (!hulls.Contains(marker)) p.Add($"{n}: its centre-of-mass marker lies outside its hulls' bounds");
             }
+            if (b.Specs.Count != DesignedParts) p.Add($"{b.Specs.Count} parts, the design has {DesignedParts}");
+            // Each part's impact damage and fragments as the Revoker part of its kind (AuthorDamage); the intakes in the
+            // Revoker intake's armour class, with neither.
+            foreach (var s in b.Specs.Where(x => !KeepImpact.Contains(x.Name)))
+            {
+                var so = new SerializedObject(b.Part(s.Name));
+                var (threshold, multiplier, fragments) = b.Donor.Impact[ImpactKinds.TryGetValue(s.Name, out var kind) ? kind : s.Armour];
+                var impact = Prop(so, "impactDamage");
+                if (impact.FindPropertyRelative("threshold").floatValue != threshold || impact.FindPropertyRelative("multiplier").floatValue != multiplier
+                    || !GetList(Prop(so, "disintegrationEffects")).SequenceEqual(fragments))
+                    p.Add($"{s.Name}: impact damage or fragments aren't the Revoker {kind ?? s.Armour}'s");
+            }
+            foreach (var intake in new[] { "intake_duct_L", "intake_duct_R" })
+            {
+                var so = new SerializedObject(b.Part(intake));
+                if (spec[intake].Armour != "fuselage/intake_L" || b.Donor.Armour["fuselage/intake_L"].Any(v => Mathf.Abs(Prop(so, v.Key).floatValue - v.Value) > 1e-4f))
+                    p.Add(intake + " isn't in the Revoker intake's armour class");
+                if (b.Donor.Impact["fuselage/intake_L"].Multiplier != 0 || b.Donor.Impact["fuselage/intake_L"].Fragments.Length != 0)
+                    p.Add("the Revoker's intake takes impact damage or sheds fragments, which this design assumed it doesn't");
+                if (Prop(so, "dragArea").floatValue <= 0 || b.Part(intake).GetComponents<MeshCollider>().Any(c => c.sharedMaterial == null
+                    || c.sharedMaterial.staticFriction > 0 || c.sharedMaterial.dynamicFriction > 0 || c.sharedMaterial.frictionCombine != PhysicMaterialCombine.Minimum))
+                    p.Add(intake + " lacks its drag or its frictionless hulls, so freed it stays on the wing (Intakes)");
+            }
             var (empty, full) = Balance(b.Root);
             foreach (var (name, at, pin) in new[] { ("empty", empty, PinnedEmptyCg), ("full fuel", full, PinnedFullCg) })
                 if (Mathf.Max(Mathf.Abs(at.x - pin.x), Mathf.Abs(at.y - pin.y), Mathf.Abs(at.z - pin.z)) > BalanceTolerance)
@@ -154,7 +206,7 @@ namespace Icarus.Editor
             var registrations = (damageType == null ? 0 : b.Root.GetComponentsInChildren(damageType, true).Length) + LoadoutRegistrations;
             if (registrations > RegistrationLimit)
                 p.Add($"{registrations} damage registrations at spawn, over {RegistrationLimit}");
-            return $"{b.Specs.Count} parts on their tree joints, {Braces.Length} braces; {families.Length} split families weigh what they did, every marker inside its piece; " +
+            return $"{b.Specs.Count} parts on their tree joints (both intakes in the Revoker intake's class, with drag and frictionless hulls), {Braces.Length} braces (the cockpit's as the Revoker's {donorBrace.Force / 1000:0} kN grown by {carried:0} kg against {donorBrace.CarriedMass:0} to {JointForces[JointClass.CockpitBrace] / 1000:0} kN, tensor fuselage_forward), Revoker armour and thresholds by class, impact damage and fragments by kind; {families.Length} split families weigh what they did, every marker inside its piece; " +
                 $"centre of mass {empty.ToString("F4")} empty, {full.ToString("F4")} full (pins within {BalanceTolerance} m); {registrations} damage registrations at spawn";
         }
 

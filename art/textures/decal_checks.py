@@ -2,7 +2,7 @@
 
 Run from the repository root after `compose_skin.py compose`:  python art/textures/decal_checks.py
 
-Each placement in insignia.PLACEMENTS, on each side, must be:
+Each placement of each faction (insignia.placements), on each of its sides, must be:
 - whole: every inked source pixel lands on a side-facing or upper-facing texel of its parts, so no edge, crease or leading edge
   clips it;
 - clear of physical edges: inked texels stay EDGE_CLEAR_M from every edge of their skin sheet (the canopy cut and
@@ -24,7 +24,7 @@ from scipy.ndimage import label
 from scipy.spatial import cKDTree
 
 from bare_metal import visibility_bands
-from insignia import PLACEMENTS, SIDE_FACING, TOP_PARTS, covered, projection_coordinates, sources
+from insignia import FACTION_ROUNDELS, SIDE_FACING, covered, placements, projection_coordinates, sources
 from panel_checks import JOIN_M, STRUCTURE, groups_of
 from panels import FASTENERS, ROW_OFFSET, layout_fields
 from rasterize import OUT, extend_geometry, sample
@@ -78,7 +78,7 @@ def fitting_points(structure, step=.005):
 
 def whole(position, side_mask, placement, decal, to_uv, side):
     """Inked source pixels with no eligible texel under them in the placement's projection."""
-    _, _, _, cy, cz, width, height = placement
+    _, _, _, cy, cz, width, height, face, _ = placement
     ph, pw = decal.shape[:2]
     stride = max(1, int(.003 / max(width / pw, height / ph)))  # source pixels about 3 mm apart
     v, u = np.mgrid[:ph:stride, :pw:stride]
@@ -86,7 +86,7 @@ def whole(position, side_mask, placement, decal, to_uv, side):
     u, v = u[ink] / (pw - 1), v[ink] / (ph - 1)
     # Invert the same affine projection used by the compositor, including the right wing's signed x centre and the
     # quarter-turned lettering, whose u follows the second coordinate.
-    centre = cy * side if placement[2][0] in TOP_PARTS else cy
+    centre = cy * side if face != 'side' else cy
     u0, v0 = to_uv(np.array([centre, centre + 1, centre]), np.array([cz, cz, cz + 1]), side)
     step = np.array([[u0[1] - u0[0], u0[2] - u0[0]], [v0[1] - v0[0], v0[2] - v0[0]]])
     y, z = np.array([[centre], [cz]]) + np.linalg.solve(step, np.stack((u - u0[0], v - v0[0])))
@@ -113,17 +113,21 @@ def check(write=True):
     seam_pieces = layout_report['seam_pieces']
     if any(seam.startswith('access_panel_seam') for seams in PAINT_OVER.values() for seam in seams):
         raise ValueError('decal placement: an access panel opens, so no decal may paint over its outline')
-    decals = sources()
+    decals = sources(roundels=True)
     fittings = fitting_points(structure)
     fitting_tree = cKDTree(fittings) if len(fittings) else None
     sheets = groups_of(names)
     edges_by_sheet = {}
     report, problems = {}, []
-    for placement in PLACEMENTS:
-        label_, source, allowed, cy, cz, width, height = placement
+    unique = {}
+    for faction in FACTION_ROUNDELS:
+        for placement in placements(faction):
+            unique[f'{faction}:{placement[0]}' if placement[1] in FACTION_ROUNDELS or placement[0] == 'pala' else placement[0]] = placement
+    for key, placement in unique.items():
+        label_, source, allowed, cy, cz, width, height, face, sides = placement
         decal = decals[source]
         selected, side, to_uv = covered(pos, normal, part, names, placement, decal)
-        top = allowed[0] in TOP_PARTS
+        top = face != 'side'
         coordinates = projection_coordinates(pos, placement)
         u, v = to_uv(coordinates[..., 0], coordinates[..., 1], side)
         alpha = np.zeros(part.shape, np.float32)
@@ -138,9 +142,9 @@ def check(write=True):
         near = used & ~own & (abs(across - cy) < reach) & (abs(coordinates[..., 1] - cz) < reach)
         others = pos[near].astype(np.float64)
         other_tree = cKDTree(others) if len(others) else None
-        allowed_seams = set(PAINT_OVER.get(label_, ()))
+        allowed_seams = set(PAINT_OVER.get(key, ()))
         entry = {}
-        for name, sign in (('left', 1), ('right', -1)):
+        for name, sign in [(n, s) for n, s in (('left', 1), ('right', -1)) if s in sides]:
             ink = selected & (alpha > INK) & (side == sign)
             p, n = pos[ink].astype(np.float64), normal[ink].astype(np.float64)
             missing, where = whole(pos, selected & (side == sign), placement, decal, to_uv, sign)
@@ -164,7 +168,7 @@ def check(write=True):
                            'seam_clear_m': round(float(distance.min()), 4) if len(distance) else None,
                            'nearest_seam': nearest, 'seams_crossed': crossed,
                            'fitting_clear_m': round(fitting, 4) if fitting is not None else None, 'band_texels': bands}
-            where_text = f'{label_} ({name})'
+            where_text = f'{key} ({name})'
             if not ink.any():
                 problems.append(f'{where_text} prints no ink')
                 continue
@@ -183,7 +187,7 @@ def check(write=True):
             if bands:
                 problems.append(f'{where_text} reaches the Bare Metal bands on {bands} texels')
         centre_key = 'centre_xy' if top else 'centre_yz'
-        report[label_] = {'source': source, 'parts': list(allowed), centre_key: [cy, cz], 'size_m': [width, height],
+        report[key] = {'source': source, 'parts': list(allowed), centre_key: [cy, cz], 'size_m': [width, height], 'face': face,
                           'paint_over': sorted(allowed_seams), **entry}
     result = {'placements': report, 'fittings': sorted(structure.get('fittings', {})),
               'thresholds': {'ink_alpha': INK, 'edge_clear_m': EDGE_CLEAR_M, 'seam_clear_m': SEAM_CLEAR_M,
@@ -193,11 +197,11 @@ def check(write=True):
     if write:
         (OUT / 'decal_checks.json').write_text(json.dumps(result, indent=2) + '\n')
     for label_, entry in report.items():
-        sides = [entry['left'], entry['right']]
+        sides = [entry[s] for s in ('left', 'right') if s in entry]
         clear = lambda key: min((s[key] for s in sides if s[key] is not None), default=None)
         fitting = clear('fitting_clear_m')
         print(f"decal {label_}: edge {clear('edge_clear_m') * 1000:.0f} mm, seam {clear('seam_clear_m') * 1000:.0f} mm "
-              f"({entry['left']['nearest_seam']})" + (f', fitting {fitting * 1000:.0f} mm' if fitting is not None else ''))
+              f"({sides[0]['nearest_seam']})" + (f', fitting {fitting * 1000:.0f} mm' if fitting is not None else ''))
     if problems:
         raise ValueError('decal placement: ' + '; '.join(problems))
     print(f'DECAL PLACEMENT CHECK PASS: {len(report)} placements a side whole, uncovered, '

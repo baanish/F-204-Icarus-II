@@ -1,19 +1,19 @@
 # F-204 Icarus II
 
-A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): a Primeva interceptor that runs past Mach 2.6 at 10 km on a modern afterburning turbojet. It was built by AI agents, with a person reviewing every iteration, and the [devlog](docs/devlog/) shows how.
+A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): a Primeva interceptor that runs past Mach 2.6 at 10 km on a modern afterburning turbojet.
 
 ![The Icarus II in the Bare Metal livery](docs/img/icarus-bare-metal.jpg)
 
-Version 0.3.0, an early prerelease. It flies, fights and comes apart in game, and it is still being tuned and polished.
+Version 0.4.0 is a prerelease. See the [changelog](CHANGELOG.md) for what changed.
 
 ## What you get
 
-- A flyable Primeva jet with a damage model built like the stock jets': the fuselage and wings break up in whole sections that collide with the rest of the jet, a missile hit tears off wings, the tail and the aft section with the engine, and an undamaged airframe holds together in full-stick pulls.
+- A damage model built like the stock jets'. The fuselage and wings break up in whole sections, damage holes show the frames, ribs and spars underneath, and either intake can break away and kill the engine.
 - A custom cockpit on the game's own displays and HUD, with a live standby attitude ball, fuel gauge and clock.
 - Six stations: a wingtip that carries a droppable Starfighter tip tank or a missile rail, an underwing pylon and a semi-recessed conformal belly station on each side. Stock weapons only, and no gun.
 - Carrier operations from the Hyperion. It spawns on the deck and launches over the ski jump, and an arrestor hook on every standard loadout catches the wire on recovery.
 - An iris nozzle that opens with afterburner and vectors thrust up to 4 degrees in pitch and yaw.
-- Four PALA liveries: Navy, Black, Desert splinter, and Bare Metal with high-visibility bands.
+- Seven liveries with faction roundels. Primeva gets PALA Navy, Black, Desert and Bare Metal. Boscali gets BDF Matte Gray, Gray Camo and Bare Metal. The aircraft menu opens in your faction's Bare Metal until you pick a livery.
 - Its own engine, gear and belly-scrape sounds.
 
 ![A low, fast pass over the desert in Bare Metal, afterburner lit](docs/img/icarus-flyby.gif)
@@ -28,7 +28,7 @@ Version 0.3.0, an early prerelease. It flies, fights and comes apart in game, an
 - [BepInEx 5](https://github.com/BepInEx/BepInEx) installed in the game.
 - Blueprinter 2.1.1 or later, which loads the aircraft content.
 
-The mod contains no game files. It needs your own copy of the game, whose assets it builds on.
+The mod needs your own copy of the game and uses the game's faction roundels on its liveries.
 
 ## Install
 
@@ -37,11 +37,15 @@ The mod contains no game files. It needs your own copy of the game, whose assets
 1. Download `Icarus-v<version>-plugin-only.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). It holds the two files that make up the mod, `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle, in `BepInEx/plugins/baanish.icarus/`. To build them yourself instead, follow [BUILD.md](BUILD.md).
 2. Close the game.
 3. Extract the ZIP into the game folder, so both files land in `BepInEx/plugins/baanish.icarus/`. They only work as a pair, so always replace both together. Keep only one copy. If a second `icarus_<version>.nobp` sits anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
-4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.3.0 (baanish.icarus)`.
+4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.4.0 (baanish.icarus)`.
 
 ### Mod managers
 
 The Icarus is listed in NOMM. Install it from there, with BepInEx 5 and Blueprinter 2.1.1 or later installed and Blueprinter enabled.
+
+### Paint your own livery
+
+Download `icarus_livery_kit_0.4.0.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). The [livery kit guide](docs/livery-kit/README.md) shows how to paint on the 3D model or a flat template and install the result with the kit's builder.
 
 ## Flying it
 
@@ -85,19 +89,19 @@ The `[Tuning.*]` sections of `BepInEx/config/baanish.icarus.cfg` hold the engine
 
 ## Credits
 
-- Made by baanish. Claude and GPT models did the research, art, code and testing, and Grok joined the plan reviews. The [devlog](docs/devlog/) says which model did what.
-- Texture base art was drawn by Codex's built-in image generation from the Icarus's own renders and UV layouts. The prompt and generation record of each generated image are in [`art/textures/generated/`](art/textures/generated/). The images themselves, losslessly recompressed without their original C2PA content credentials, are in each release's `Icarus-v<version>-texture-sources.zip`.
+- The texture source records are in [`art/textures/generated/`](art/textures/generated/). The source images and arrays are in `Icarus-v<version>-texture-sources.zip`.
 - The engine sound comes from a public-domain DVIDS hush-house recording of an F110 engine. The gear and scrape sounds are resynthesized from CC0 recordings on Freesound, using [Earshot](https://github.com/Leonxlnx/earshot). [`Audio/CREDITS.md`](unity/Assets/Blueprinter/Mods/icarus/Audio/CREDITS.md) lists every source.
 - The cockpit lettering uses the [Barlow](https://github.com/jpt/barlow) font.
 - The aircraft is authored onto the game's FS-12 Revoker and loads through Blueprinter.
 
 ## Licence
 
-The project is under the [MIT licence](LICENSE). Two parts keep their own licences: the Barlow font is under the SIL Open Font License ([`art/textures/fonts/OFL.txt`](art/textures/fonts/OFL.txt)), and each audio clip carries the licence its source gave it ([`Audio/CREDITS.md`](unity/Assets/Blueprinter/Mods/icarus/Audio/CREDITS.md)). Nuclear Option and its assets belong to their owners. None of them are included here, and the mod needs your own copy of the game.
+The project is under the [MIT licence](LICENSE). The Barlow font is under the SIL Open Font License ([`art/textures/fonts/OFL.txt`](art/textures/fonts/OFL.txt)), and each audio clip carries the licence its source gave it ([`Audio/CREDITS.md`](unity/Assets/Blueprinter/Mods/icarus/Audio/CREDITS.md)). Nuclear Option and its faction roundels belong to their owners.
 
 ## More
 
 - [Vision](docs/VISION.md): the aircraft, its numbers, and how it is built
 - [Devlog](docs/devlog/): each stage, what changed and why
+- [0.4.0 devlog](docs/devlog/015-structure-and-paint.md)
 - [Building from source](BUILD.md)
 - [Changelog](CHANGELOG.md)

@@ -41,6 +41,8 @@ SUPERSAMPLE = 4
 PREFIX = "Icarus_status"
 REFERENCE = "v0.1.0"  # the release whose diagram the coverage check holds every later one to
 EDGE_PX = 2  # the reference's coverage is shrunk by this much first: antialiasing and the tip fairing's redraw
+# Parts the diagram leaves off, as the Revoker's leaves its intakes: their meshes draw as the part they sit in.
+OFF_DIAGRAM = ("intake_duct_",)
 
 
 # --- inside Blender ---------------------------------------------------------------------------------------------
@@ -54,7 +56,8 @@ def blender_main(out):
 
     build_icarus.build_cached()
     objects = list(bpy.data.collections["Icarus"].all_objects)
-    parts = {o.name.removesuffix("_visible") for o in objects if o.type == "MESH" and o.get("mass_kg", 0) > 0}
+    parts = {o.name.removesuffix("_visible") for o in objects if o.type == "MESH" and o.get("mass_kg", 0) > 0
+             and not o.name.startswith(OFF_DIAGRAM)}
     depsgraph = bpy.context.evaluated_depsgraph_get()
     tris, owners = {}, {}
     for obj in objects:

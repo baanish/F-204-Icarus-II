@@ -16,8 +16,8 @@ from rasterize import GUTTER_PX, PAINT_SIZE, SIZE, sample
 ROOT = Path(__file__).resolve().parents[2]
 FULL = ROOT / '.cache/review/wave2/p9b-round2/full'
 BAKE = ROOT / '.cache/review/wave2/p9b/02'
-MAPS = [f'Icarus_livery_{i}.png' for i in range(1, 5)] + [
-    f'Icarus_skin_{suffix}.png' for suffix in ('n', 'm', 'ao', 'dmg_b', 'dmg_n')] + ['Icarus_livery_4_m.png']
+MAPS = [f'Icarus_livery_{i}.png' for i in range(1, 8)] + [
+    f'Icarus_skin_{suffix}.png' for suffix in ('n', 'm', 'ao', 'dmg_b', 'dmg_n')] + ['Icarus_livery_4_m.png', 'Icarus_livery_7_m.png']
 STITCHED_GROUPS = {'canopy_all', 'skin_forward_L_lower',
                    'pylon_inner_plug_L_all', 'wing_skin_L_lower_front'}
 
@@ -422,7 +422,7 @@ def map_checks(full, bake, composition, report):
         path = folder / name
         record = image_evidence(path)
         report['maps'][name] = record
-        mode = 'RGBA' if name in ('Icarus_skin_m.png', 'Icarus_skin_dmg_b.png', 'Icarus_livery_4_m.png') else 'RGB'
+        mode = 'RGBA' if name in ('Icarus_skin_m.png', 'Icarus_skin_dmg_b.png') or name.endswith('_m.png') else 'RGB'
         require(record['size'] == [SIZE, SIZE] and record['mode'] == mode, f'Wrong dimensions/mode: {name}')
         if '_dmg_' in name and composition.get('damage_policy') == 'unchanged shipped damage images':
             original = ROOT / 'art/export/textures' / name
@@ -505,7 +505,7 @@ def seam_checks(full, bake, used, owner, groups, report):
         selectors[name] = ((lookup(mask, coords[:, 0])[:, 0] > .1) |
                            (lookup(mask, coords[:, 1])[:, 0] > .1))
     failures = []
-    for livery in range(1, 5):
+    for livery in range(1, 8):
         rgb = pixels(full / 'art/export/textures' / f'Icarus_livery_{livery}.png').astype(np.float32)
         delta = abs(lookup(rgb, coords[:, 0]) - lookup(rgb, coords[:, 1])).mean(axis=1)
         entry = stats(delta)

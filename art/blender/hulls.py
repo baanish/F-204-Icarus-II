@@ -6,7 +6,7 @@ so its vertices are in the part's own space. Unity caps a convex collider at 255
 
 LOD1 is one hull per part seen from outside, its triangles capped by LOD1_TRIS so the set stays inside Exterior rule
 27's 56 per hull and, with the wing skins split in four a side and the fuselage panels in their pieces (parts.SPLITS,
-each piece at least LOD1_DEFAULT), 814 in all. The parts under the skin get none: at that distance the skin's hulls hide
+each piece at least LOD1_DEFAULT), 858 in all. The parts under the skin get none: at that distance the skin's hulls hide
 them, and the hooked ventral fin none either: the ventral fin's stands in for it. A hull over its cap keeps the points
 that reach furthest out (hull_mesh), so it never grows past the part.
 
@@ -53,11 +53,17 @@ SKIP_ROLES = ("visual", "cockpit_view")
 LOD1_TRIS = (("skin_", 40), ("radome", 32), ("nozzle", 32), ("dorsal_cover", 24), ("canopy_visible", 24),
              ("wing_skin_", 24), ("stabilator", 24), ("fin_skin", 20))
 LOD1_DEFAULT = 12
-LOD1_PER_HULL, LOD1_TOTAL = 56, 814
+LOD1_GROUP_MIN = 6  # each hull of a mid panel cut round an intake chunk (rebuild_pieces)
+LOD1_PER_HULL, LOD1_TOTAL = 56, 858  # with 24 for the intakes' own hulls and 32 for the mid panels cut round them
 # Parts inside the skin's LOD1 hulls, which get none of their own, and the hooked ventral fin (tail_hook.HOOKED_FIN),
-# which the ventral fin's stands in for: a LOD1 hull is always drawn, and the fins take turns.
+# which the ventral fin's stands in for: a LOD1 hull is always drawn, and the fins take turns. An intake's own stand-in
+# is its skin chunk's hull (skin_mid_intake_<side>), so it leaves with the intake.
 LOD1_HIDDEN = ("fuselage_", "wing_spar_", "fin_spar", "engine_core", "engine_afterburner", "cockpit_cell", "radar_tray", "avionics_tray",
                "fuel_", "intake_duct_", "ventral_fin_hooked")
+# Mirrored parts whose meshes meet on the centreline (the Y-duct's branches at the engine face, each its intake's): each
+# one's hull stops MIDLINE_GAP short of it, half the gap clearance.py needs between unjointed parts and its slack, so
+# the two stay mirror images rather than the carve cutting one against the other.
+MIDLINE_PAIRS, MIDLINE_GAP = ("intake_duct_",), 0.004
 COLLIDER_TRIS = 24  # a mesh's own hull before the merge
 MERGED_TRIS = 48  # a part's hull, or each piece of it
 KEEP_SHARE = 0.6
@@ -65,13 +71,16 @@ MIN_WIDTH = 0.002  # thinner, a hull is a plane: bmesh's hull of coplanar points
 
 # LOD1 and collider limits, by collection: triangles in total (budget.py sums them).
 BUDGET = {
-    "lod1": {"target": 814, "cap": 814, "collection": "LOD1"},
-    # 26 parts' hulls and the pieces round the cockpit cell and the tail cone's front (1,370 measured, the cap 2% over)
-    "colliders": {"target": 1370, "cap": 1400, "collection": "Colliders"},
+    "lod1": {"target": 858, "cap": 858, "collection": "LOD1"},
+    # 28 parts' hulls and the pieces round the cockpit cell, the tail cone's front and the intakes (1,704 measured, the cap
+    # 2% over)
+    "colliders": {"target": 1705, "cap": 1740, "collection": "Colliders"},
 }
 CLOSEUPS = {}
-# One hull for each of the 26 parts, four each for the forward and aft sections (32 measured; the Revoker has 28).
-COLLIDER_HULLS = 32
+# One hull for each of the 28 parts and four each for the forward and aft sections: 34 in the split build the game takes,
+# where each intake is an outside chunk (parts.split_intakes); the Revoker has 34 on its 28. The unsplit build the skin
+# bake runs keeps the intakes inside the root, which splits round them the same both sides (clearance.mirror_missing): 39.
+COLLIDER_HULLS = 39
 
 
 def check(icarus):
@@ -133,11 +142,72 @@ def check(icarus):
     if len(cols) > COLLIDER_HULLS or col_tris > BUDGET["colliders"]["cap"]:
         raise ValueError("hulls check: colliders %d hulls, %d triangles, over %d or %d" % (
             len(cols), col_tris, COLLIDER_HULLS, BUDGET["colliders"]["cap"]))
+    # the game's hulls are the split build's; the unsplit build (the skin bake) keeps the skin families whole
+    aims = aim_points(cols) if bpy.data.objects.get("skin_mid_L") is None else "blast aim points: unsplit build, not judged"
     print("hulls check PASS: LOD1 %d hulls, %d triangles, largest %d, %d skin faces (%d on a point of the atlas); "
-          "colliders %d hulls (cap %d), %d triangles (cap %d), outside the skin by at most %.3f m (cap %.2f): %s"
+          "colliders %d hulls (cap %d), %d triangles (cap %d), outside the skin by at most %.3f m (cap %.2f): %s; %s"
           % (len(lods), sum(sizes), max(sizes), skin_faces, point_faces, len(cols), COLLIDER_HULLS, col_tris,
              BUDGET["colliders"]["cap"], reach[0][0][0], SKIN_REACH,
-             ", ".join("%s %.3f" % (name, d) for (d, _), name in reach if d > 0)))
+             ", ".join("%s %.3f" % (name, d) for (d, _), name in reach if d > 0), aims))
+
+
+# A blast traces one frag at each collider in its reach, aimed at the collider's transform, which is its part's origin,
+# and harms that collider only where the trace meets it (DamageEffects.BlastFrag and FragTrace): a part whose one hull
+# holds its origin is met from every side (parts.aim_origins moves the origins that would not). The canopy's stands
+# outside its hull and cannot move: it is the sill hinge the hood turns about. A part listed here whose origin comes
+# inside its hull fails the check, so the list stays the parts it names.
+AIM_OUTSIDE = ("canopy",)
+# One hull each, so the origin check above judges that hull: the root and the intakes cut from its fairing.
+SINGLE_HULL = ("fuselage_mid", "intake_duct_L", "intake_duct_R")
+AIM_SLACK = 0.001  # metres outside a hull's face that still counts as on it: a hinge line on the hull's face
+
+
+def outside_hull(col, point):
+    """How far a world point lies outside the convex hull col, negative inside: measured on the hull rebuilt from its
+    corners (outside()), since a carved hull's stored face normals need not all face out."""
+    bm = convex([col.matrix_world @ v.co for v in col.data.vertices])
+    distance = float(outside(bm, np.array([point[:]]))[0])
+    bm.free()
+    return distance
+
+
+def aim_points(cols):
+    """Fail where a single-hull part not in AIM_OUTSIDE has its origin outside its hull, or one listed has it inside;
+    report the parts of several hulls (the fuselage sections cut round their neighbours): whether a hull holds the
+    origin, and which hulls a trace through it along each axis meets."""
+    from mathutils.bvhtree import BVHTree
+
+    from clearance import part_of
+
+    by_part = {}
+    for col in cols:
+        by_part.setdefault(part_of(col), []).append(col)
+    problems, several = [], []
+    for part, cs in sorted(by_part.items(), key=lambda kv: kv[0].name):
+        at = part.matrix_world.translation
+        out = min(outside_hull(c, at) for c in cs)
+        if len(cs) == 1:
+            if (out > AIM_SLACK) != (part.name in AIM_OUTSIDE):
+                problems.append("%s's origin %.3f m %s its hull%s" % (
+                    part.name, abs(out), "outside" if out > 0 else "inside",
+                    "" if out > AIM_SLACK else ", off the AIM_OUTSIDE list now"))
+            continue
+        met = []
+        for axis in range(3):
+            d = Vector([1.0 if i == axis else 0.0 for i in range(3)])
+            hit = [c for c in cs if BVHTree.FromPolygons([c.matrix_world @ v.co for v in c.data.vertices],
+                                                         [list(f.vertices) for f in c.data.polygons]).ray_cast(at - d * 30.0, d, 60.0)[0]]
+            met.append("xyz"[axis] + " %d" % len(hit))
+        several.append("%s %d hulls, origin %s, a trace along %s" % (
+            part.name, len(cs), "inside one" if out <= AIM_SLACK else "%.3f m outside all" % out, ", ".join(met)))
+    hulls_of = {part.name: cs for part, cs in by_part.items()}  # a part with none is absent, and fails here too
+    problems += ["%s has %d hulls, one by design" % (name, len(hulls_of.get(name, ()))) for name in SINGLE_HULL
+                 if len(hulls_of.get(name, ())) != 1]
+    if problems:
+        raise ValueError("hulls check: blast aim points: " + "; ".join(problems))
+    return "blast aim points: %d single-hull parts hold their origins, %d listed outside (%s); %s" % (
+        sum(1 for cs in by_part.values() if len(cs) == 1) - len(AIM_OUTSIDE), len(AIM_OUTSIDE), ", ".join(AIM_OUTSIDE),
+        "; ".join(several) if several else "no part of several hulls")
 
 
 def tris_of(bm):
@@ -279,6 +349,28 @@ def hull_mesh(name, points, max_tris):
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
+    return me
+
+
+def joined_hulls(name, groups, max_tris):
+    """The convex hulls of several point groups as one mesh, each hull in its share of max_tris by points but at least
+    LOD1_GROUP_MIN (a LOD1 stand-in is drawn, never collided with, so it need not be convex), or None if none has
+    volume."""
+    out = bmesh.new()
+    total = sum(len(g) for g in groups)
+    for points in groups:
+        bm = capped(points, max(LOD1_GROUP_MIN, round(max_tris * len(points) / total)))
+        if solid(bm):
+            made = {v: out.verts.new(v.co) for v in bm.verts}
+            for f in bm.faces:
+                out.faces.new([made[v] for v in f.verts])
+        bm.free()
+    if not out.faces:
+        out.free()
+        return None
+    me = bpy.data.meshes.new(name)
+    out.to_mesh(me)
+    out.free()
     return me
 
 
@@ -585,6 +677,11 @@ def build(icarus):
             if not points:
                 points = parts.SHELL_POINTS.get(name, [])
             shapes = [capped(points, COLLIDER_TRIS)] if len(points) >= 4 else []
+            if name.startswith(MIDLINE_PAIRS) and shapes:
+                side = 1.0 if name.endswith("_L") else -1.0
+                halved = cut(shapes[0], Vector((-side, 0.0, 0.0)), -MIDLINE_GAP)
+                shapes[0].free()
+                shapes = [halved] if halved is not None else []
         kept = [bm for bm in shapes if solid(bm)]
         for bm in shapes:
             if bm not in kept:
@@ -617,15 +714,27 @@ def attach_colliders(owner, shapes, colliders):
 
 
 def rebuild_pieces(made):
-    """One collider per split piece, with its family's LOD1 triangles shared by skin area."""
+    """One collider per split piece, with its family's LOD1 triangles shared by skin area. A mid panel beside an intake
+    chunk takes one LOD1 hull per group of parts.around_intake, sharing its triangles by points, so no hull of the root's
+    spans the chunk: with the intake shot off, the root's far stand-in shows the gap its LOD0 does."""
+    import parts
     from uvs import SKIN
 
     colliders, lods = bpy.data.collections["Colliders"], bpy.data.collections["LOD1"]
+    chunked = {p.name[-1] for pieces in made.values() for p in pieces if p.name.startswith("skin_mid_intake_")}
     for name, pieces in made.items():
         areas = [sum(f.area for f in p.data.polygons if p.data.materials[f.material_index].name == SKIN) for p in pieces]
         for piece, area in zip(pieces, areas):
             tris = max(LOD1_DEFAULT, round(lod_tris(name) * area / sum(areas)))
-            lod = hull_mesh(piece.name + "_lod1", [v.co.copy() for v in piece.data.vertices], tris)
+            local = [v.co.copy() for v in piece.data.vertices]
+            lod = None
+            if piece.name.startswith(LOD1_HIDDEN):
+                pass
+            elif name.startswith("skin_mid_") and name[-1] in chunked and not piece.name.startswith("skin_mid_intake_"):
+                groups = parts.around_intake([piece.matrix_world @ c for c in local])
+                lod = joined_hulls(piece.name + "_lod1", [[local[i] for i in g] for g in groups], tris)
+            else:
+                lod = hull_mesh(piece.name + "_lod1", local, tris)
             if lod is not None:
                 attach(piece.name + "_lod1", lod, piece, lods)
             if piece.get("mass_kg", 0) > 0 or piece.get("role") == "fuel_tank":

@@ -9,16 +9,19 @@
 // acceleration before the turn and the autopilot's changing load, so this turn check uses the measured reference.
 // The runner cannot command 9 g: wait for over 8 g, record the actual load and speed, then observe two five-second holds.
 // Pass: intact after spawn and the pull, TAS within 10 m/s of 478.8, altitude within 500 m, nothing detached.
-// From the repo root: no-agentic run tests/scenarios/sustained_turn.scenario.jsonc --realtime
+// From the repo root: no-agentic run tests/scenarios/sustained_turn.scenario.jsonc
 {
   "mission": "icarus_ignus_10km_half.mission.json",
   "mods": "clean",
   "plugins": [
     "installed:com.nikkorap.blueprinter",
     "../../.cache/build-staging/dotnet",
-    "content:../../build/icarus_0.3.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
   "measure": true,
+  // 1x: at 4x the steps after the 10 s mark fall up to a second apart, and the last check reads the jet unloading and
+  // accelerating out of the turn (497.7 m/s where 1x reads 479.2).
+  "speed": 1,
   "sample_hz": 20,
   "timeout": 180,
   "steps": [

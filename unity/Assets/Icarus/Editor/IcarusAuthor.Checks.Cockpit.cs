@@ -9,8 +9,9 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
-        // The stock seat's rail (EjectionSeat, the PilotDismounted nozzle's up in the cockpit frame), the last step where its
-        // colliders turn on and its end, and the pilot capsule swept along it (radius, ends below and above the Pilot).
+        // The stock seat's rail (EjectionSeat, the PilotDismounted nozzle's up in the cockpit frame, before the export's seat
+        // recline turns it), the last step where its colliders turn on and its end, and the pilot capsule swept along it
+        // (radius, ends below and above the Pilot).
         private static readonly Vector3 SeatRail = new Vector3(-0.024f, 0.973f, 0.230f);
         private const float RailCollidable = 1.44f, RailEnd = 1.50f, CapsuleRadius = 0.25f, CapsuleBelow = 0.40f, CapsuleAbove = 0.90f;
 
@@ -62,7 +63,9 @@ namespace Icarus.Editor
             var partNames = All(b, "AeroPart").Select(a => a.gameObject.name).ToArray();
             foreach (var image in images)
                 if (partNames.Count(n => n == image) != 1) p.Add($"damage diagram image {image} matches {partNames.Count(n => n == image)} parts");
-            foreach (var part in partNames.Except(images))
+            // The intakes are parts without an image, as on the stock Revoker's diagram, whose intakes are outside chunks
+            // carrying their own skin too.
+            foreach (var part in partNames.Except(images).Except(new[] { "intake_duct_L", "intake_duct_R" }))
                 p.Add($"part {part} has no damage diagram image");
             if (images.Length == 0) p.Add("no damage diagram images");
             var cameras = new[] { "camMountForward", "camMountRear" }.Select(f => (Transform)Prop(new SerializedObject(b.Parts["radome"].GetComponent(GameType("TargetCam"))), f).objectReferenceValue).ToArray();
@@ -116,7 +119,8 @@ namespace Icarus.Editor
                 probe.center = new Vector3(0, (CapsuleAbove - CapsuleBelow) / 2, 0);
                 foreach (var rail in new[] { RailCollidable, RailEnd })
                 {
-                    probe.transform.position = pilots[0].transform.position + b.Parts["cockpit_cell"].transform.TransformDirection(SeatRail) * rail;
+                    probe.transform.position = pilots[0].transform.position
+                        + b.Blockout.Rotation("cockpit_seat") * b.Parts["cockpit_cell"].transform.TransformDirection(SeatRail) * rail;
                     Physics.SyncTransforms();
                     foreach (var c in airframe)
                         if (Physics.ComputePenetration(probe, probe.transform.position, probe.transform.rotation, c, c.transform.position, c.transform.rotation, out _, out var depth) && depth > 0.001f)
@@ -157,8 +161,7 @@ namespace Icarus.Editor
             Renderer Named(string n) => view.FirstOrDefault(r => r.name == n);
             foreach (var n in new[] { "cockpit_interior", "canopy_frame_inner", "windscreen_frame_inner", ThrottleLever }.Concat(CockpitInstruments))
                 if (Named(n) != null && (Named(n).sharedMaterials.Length != 1 || Named(n).sharedMaterial.name != CockpitSlot)) p.Add(n + " isn't on the cockpit atlas");
-            // The plugin shortens each tip tank bar toward its origin along its mesh's middle (src/Icarus/StandbyInstruments.cs
-            // Bar), so the origin must be the bar's foot on the bar's own plane.
+            // BarFoot aligns local Y with the mesh's middle, so the origin must be the bar's foot on the bar's own plane.
             foreach (var n in new[] { "cockpit_tip_fuel_L", "cockpit_tip_fuel_R" })
             {
                 var mesh = Named(n) == null ? null : Named(n).GetComponent<MeshFilter>().sharedMesh;
@@ -205,8 +208,9 @@ namespace Icarus.Editor
             var frame = Named("canopy_frame_inner");
             if (interior == null || frame == null)
                 return "no interior";
-            // Cockpit rule 2's 13,500 raised to 16,000 for the cockpit's detail (owner, 2026-10-22; art/blender/cockpit.py RULES)
-            if (Count(interior) < 10500 || Count(interior) > 16000) p.Add($"the interior has {Count(interior)} triangles, outside 10,500 to 16,000");
+            // Cockpit rule 2's 13,500 raised to 16,550 for the cockpit's detail and the crew station's tub (a design
+            // decision; art/blender/cockpit.py RULES interior_tris)
+            if (Count(interior) < 10500 || Count(interior) > 16550) p.Add($"the interior has {Count(interior)} triangles, outside 10,500 to 16,550");
             if (Count(frame) < 1300 || Count(frame) > 8000) p.Add($"the hood's inner frame has {Count(frame)} triangles, outside 1,300 to 8,000");
             if (total > 35000) p.Add($"the cockpit renderers have {total} triangles, over 35,000");
             return $"{view.Length} cockpit renderers on layer 3 serialized off, {total} triangles (interior {Count(interior)}, inner frames {Count(frame)} + {Count(Named("windscreen_frame_inner"))}); " +

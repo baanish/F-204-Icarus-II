@@ -1,0 +1,29 @@
+// Damage to the tail cone degrades the engine: the Icarus holds 10 km at full throttle over Ignus, then its tail cone
+// (fuselage_tail, round the afterburner) takes 30 HP of damage through the game's own damage (act damage). The tail
+// cone is one of the Turbojet's criticalParts (IcarusAuthor.Engine.cs EngineCriticalParts), so at 70 HP its condition
+// falls to (70 - 50) / 50 = 0.4 and the engine's top rpm to minRPM + (maxRPM - minRPM) x 0.7 (Turbojet.FixedUpdate).
+// Pass: rpm falls under 0.9 of its maximum within 20 s, the engine still running.
+// From the repo root: no-agentic run tests/scenarios/icarus_engine_tail_cone.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 1.0 } },
+    { "wait": { "path": "own.engines.0.rpm_frac", "gt": 0.95 }, "hold": 3, "timeout": 30, "label": "the engine at full rpm" },
+    { "mark": { "label": "hit" } },
+    { "act": { "damage": "fuselage_tail", "amount": 0.3 } },
+    { "check": { "event": "damage", "since": "hit" }, "within": 5, "label": "the tail cone takes the damage" },
+    { "check": { "path": "own.engines.0.rpm_frac", "lt": 0.9 }, "within": 20, "label": "the engine loses rpm with its tail cone at 70 HP" },
+    { "check": { "path": "own.engines.0.thrust_n", "gt": 1000 }, "label": "the engine still running" },
+    { "record": { "path": "own.engines.0.rpm_frac" }, "label": "engine rpm after the tail cone hit" },
+  ],
+}

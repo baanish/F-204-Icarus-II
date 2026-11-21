@@ -61,7 +61,7 @@ def even_odd_area(segs, x_range=None):
 
 def duct_areas(stations):
     O = bpy.data.objects
-    ducts = [O["intake_duct_L"], O["intake_duct_R"]]
+    ducts = [O["duct_L"], O["duct_R"]]  # the duct itself; intake_duct_<side> is the lip and fairing chunk
     rows = []
     for s in stations:
         segs = [seg for d in ducts for seg in segments(d, s)]
@@ -137,7 +137,7 @@ def duct_to_gear():
     import gear
 
     O = bpy.data.objects
-    ducts = [O["intake_duct_L"], O["intake_duct_R"]]
+    ducts = [O["duct_L"], O["duct_R"]]  # the duct itself; intake_duct_<side> is the lip and fairing chunk
     legs = [m for leg in ("L", "R") for m in gear.leg_meshes(leg)]
     import stations
 
@@ -160,7 +160,6 @@ def triangles():
 
     icarus = bpy.data.collections["Icarus"]
     out = {k: budget.measure(icarus, v) for k, v in propulsion.BUDGET.items() if k.startswith("intake")}
-    out["fuel_cells"] = budget.measure(icarus, parts.BUDGET["fuel_cells"])
     out["structure_cores"] = budget.measure(icarus, parts.BUDGET["structure_cores"])
     return out
 
@@ -177,7 +176,7 @@ LOOK_IN = {  # down each branch from ahead and outboard of its lip, and head on
     "head_on_L": ((0.8, -16.0, 0.22), (0.8, -1.0, 0.22), 140),
     "head_on_R": ((-0.8, -16.0, 0.22), (-0.8, -1.0, 0.22), 140),
 }
-COLOURS = {"intake_duct_": (0.20, 0.45, 0.85, 1), "fuel_": (0.95, 0.55, 0.15, 1), "engine_core": (0.55, 0.55, 0.55, 1),
+COLOURS = {"duct_": (0.20, 0.45, 0.85, 1), "fuel_": (0.95, 0.55, 0.15, 1), "engine_core": (0.55, 0.55, 0.55, 1),
            "gear_": (0.25, 0.25, 0.28, 1)}
 MAIN_GEAR = tuple("gear_%s_%s" % (kind, side) for kind in ("leg", "wheel", "arm", "strut", "piston") for side in "LR")
 

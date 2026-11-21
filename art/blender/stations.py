@@ -134,7 +134,7 @@ def check(icarus):
         problems.append("plugs %s triangles, not 14 to 32" % tris)
     if problems:
         raise ValueError("stations check: " + "; ".join(problems))
-    print("stations check PASS: blades %s, plugs %s triangles; trough clear of ducts, fuel cells and colliders" % (
+    print("stations check PASS: blades %s, plugs %s triangles; trough clear of ducts and colliders" % (
         [budget.tris(icarus.objects[n]) for n in BLADES], tris))
 
 
@@ -455,12 +455,11 @@ def tree_of(objs):
 
 
 def trough_clearance(icarus):
-    """Every body CLEAR of the skin, and the trough's skin at least DUCT_CLEARANCE from the intake ducts and the
-    fuel cells."""
+    """Every body CLEAR of the skin, and the trough's skin at least DUCT_CLEARANCE from the intake ducts."""
     problems = []
     skins = [o for o in icarus.objects if o.name.startswith("skin_")]
     skin = tree_of(skins)
-    inner = tree_of([o for o in icarus.objects if o.name.startswith(("intake_duct", "fuel_"))])
+    inner = tree_of([o for o in icarus.objects if o.name.startswith(("intake_duct", "duct_"))])  # duct_: parts.split_intakes
     for key, m in MOUNTS.items():
         for side in (1, -1):
             worst = min((skin.find_nearest(q)[3], q) for q in body_points(m, side))
@@ -477,9 +476,9 @@ def trough_clearance(icarus):
     if not trough:
         problems.append("no skin follows the trough")
     elif near[0] < DUCT_CLEARANCE:
-        problems.append("trough skin %.3f m from a duct or fuel cell at s %.2f x %.3f z %.3f" % (
+        problems.append("trough skin %.3f m from a duct at s %.2f x %.3f z %.3f" % (
             near[0], near[1].y + bi.S0, near[1].x, near[1].z))
-    print("stations: trough %d skin vertices, nearest duct or fuel cell %.3f m" % (len(trough), near[0] or 0.0))
+    print("stations: trough %d skin vertices, nearest duct %.3f m" % (len(trough), near[0] or 0.0))
     return problems
 
 

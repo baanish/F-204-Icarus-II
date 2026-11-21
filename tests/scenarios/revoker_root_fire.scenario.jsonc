@@ -1,0 +1,35 @@
+// The stock comparison for icarus_root_fire.scenario.jsonc: an FS-12 Revoker at 10 km, 400 m/s and half fuel over Ignus
+// (the frame-time runs' mission) takes the same fire damage on its root part (to 30 HP), which carries its main fuselage tank. The
+// Icarus plugin is loaded only for its "tank-fire" stage lines, which log every aircraft's tanks.
+// From the repo root: no-agentic run tests/scenarios/revoker_root_fire.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "frames_Fighter1_1.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "Fighter1" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the FS-12 Revoker airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 120, "pitch_deg": 10 } },
+    { "mark": { "label": "fire" } },
+    { "act": { "damage": "Fighter1", "amount": 0.7 } },
+    { "check": { "event": "damage", "since": "fire" }, "within": 5, "label": "the root takes the damage" },
+    { "check": { "log": "tank-fire", "source": "F-204 Icarus II", "since": "fire" }, "within": 5, "label": "a tank lights" },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 5, "timeout": 8, "label": "5 s of fire" },
+    { "screenshot": { "name": "fire_05" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 15, "timeout": 18, "label": "20 s of fire" },
+    { "screenshot": { "name": "fire_20" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 20, "timeout": 23, "label": "40 s of fire" },
+    { "screenshot": { "name": "fire_40" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 20, "timeout": 23, "label": "60 s of fire" },
+    { "record": { "event": "part_detached", "field": "part", "since": "fire" }, "label": "parts lost to the fire" },
+    { "record": { "path": "own.hp_frac" }, "label": "hit points after 60 s of fire" },
+  ],
+}

@@ -11,7 +11,7 @@ namespace Icarus;
 /// </summary>
 public sealed class PatchTarget
 {
-    public PatchTarget(string feature, Type type, string method, Type[]? parameters = null, MethodInfo? prefix = null, MethodInfo? postfix = null, MethodInfo? transpiler = null, bool diagnostic = false)
+    public PatchTarget(string feature, Type type, string method, Type[]? parameters = null, MethodInfo? prefix = null, MethodInfo? postfix = null, bool diagnostic = false, MethodInfo? finalizer = null)
     {
         Feature = feature;
         Type = type;
@@ -19,7 +19,7 @@ public sealed class PatchTarget
         Parameters = parameters;
         Prefix = prefix;
         Postfix = postfix;
-        Transpiler = transpiler;
+        Finalizer = finalizer;
         Diagnostic = diagnostic;
     }
 
@@ -29,7 +29,7 @@ public sealed class PatchTarget
     public Type[]? Parameters { get; }
     public MethodInfo? Prefix { get; }
     public MethodInfo? Postfix { get; }
-    public MethodInfo? Transpiler { get; }
+    public MethodInfo? Finalizer { get; }
     /// <summary>Exists only to measure or log: installed only when Diagnostics.StageLogging is on at startup, so players
     /// run no diagnostic hooks (AGENTS.md rule 12).</summary>
     public bool Diagnostic { get; }
@@ -60,7 +60,7 @@ public sealed class PatchTarget
                     original,
                     target.Prefix == null ? null : new HarmonyMethod(target.Prefix),
                     target.Postfix == null ? null : new HarmonyMethod(target.Postfix),
-                    target.Transpiler == null ? null : new HarmonyMethod(target.Transpiler));
+                    finalizer: target.Finalizer == null ? null : new HarmonyMethod(target.Finalizer));
             }
             catch (Exception e)
             {
@@ -69,7 +69,7 @@ public sealed class PatchTarget
                 {
                     var entry = installed[i];
                     if (entry.Target.Feature != target.Feature) continue;
-                    foreach (MethodInfo? patch in new[] { entry.Target.Prefix, entry.Target.Postfix, entry.Target.Transpiler })
+                    foreach (MethodInfo? patch in new[] { entry.Target.Prefix, entry.Target.Postfix, entry.Target.Finalizer })
                     {
                         if (patch != null) harmony.Unpatch(entry.Original, patch);
                     }

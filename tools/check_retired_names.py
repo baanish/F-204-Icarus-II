@@ -35,6 +35,9 @@ ALLOW = {
 } | {
     ("tools/review_propulsion.py", "skin_mid_L")
 } | {
+    # open_root_caps finds the wing skin's pieces by family (parts.families), whole or split
+    ("art/blender/skeleton.py", name) for name in ("wing_skin_L", "wing_skin_R")
+} | {
     ("tools/check_retired_names.py", name) for name in RETIRED
 } | {
     ("tools/test_breakup_split.py", name) for name in RETIRED

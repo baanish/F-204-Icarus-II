@@ -37,7 +37,7 @@ $clock = [Diagnostics.Stopwatch]::StartNew()
 $deadline = [TimeSpan]::FromMinutes(30)
 $licenseFailure = 'No valid Unity Editor license found'
 $maxLicenseRetries = 3
-$checks = (1..19 + 21..23) | ForEach-Object { "A$_" }  # A20 (section inertia) was retired with the boxes
+$checks = (1..19 + 21..24) | ForEach-Object { "A$_" }  # A20 (section inertia) was retired with the boxes
 
 function Fail([string]$why) {
     Write-Output "B0 FAIL: $why ($([int]$clock.Elapsed.TotalSeconds) s)"
@@ -49,6 +49,12 @@ if (-not (Test-Path -LiteralPath (Join-Path $repo 'art/export/blockout.json'))) 
 }
 & python (Join-Path $repo 'tools/export_manifest.py')
 if ($LASTEXITCODE -ne 0) { Fail 'exports do not match art/export-manifest.json' }
+# The liveries Unity builds carry the game's faction roundels, painted from the local asset export onto the logo-free
+# maps in art/export/textures; without the export this stops here with the one line that names it.
+$marks = @(& python (Join-Path $repo 'art/textures/faction_marks.py') 2>&1)
+if ($LASTEXITCODE -ne 0) { Fail (($marks | Select-Object -Last 1) -replace '^FACTION MARKS FAIL: ', 'faction roundels: ') }
+$marks = @(& python (Join-Path $repo 'art/textures/faction_marks.py') verify-marked 2>&1)
+if ($LASTEXITCODE -ne 0) { Fail "faction roundels: $(@($marks | Where-Object { "$_" -match '^FACTION MARKS FAIL' })[0])" }
 
 # The plugin and the bundle ship as a pair, so they carry one version.
 $csproj = Join-Path $repo 'src/Icarus/Icarus.csproj'

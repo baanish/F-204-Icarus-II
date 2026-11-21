@@ -1,0 +1,41 @@
+// A Boscali Icarus on Sandrift's runway in BDF Bare Metal with its tip tanks and arrestor hook. Pass: the aircraft menu's
+// list for Boscali (the game's LoadoutSelector.GetLiveryOptions) is exactly the three BDF liveries by id, Bare Metal last,
+// Boscali's first livery (AircraftParameters.GetFirstLiveryForFaction) is BDF Matte Gray, the jet wears BDF Bare Metal, and
+// the shots show Bare Metal on the tanks and hook. A parked Boscali Icarus in PALA Bare Metal beside it shows PALA's Bare Metal
+// on the same stores (spawned aircraft carry the default Interceptor loadout: tip tanks and hook). Shots are read by eye.
+// From the repo root: no-agentic run tests/scenarios/icarus_boscali_liveries.scenario.jsonc
+{
+  "mission": "icarus_boscali_runway.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 240,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "require": { "path": "mods.baanish.icarus.liveries", "eq": "BDF Matte Gray|BDF Gray Camo|BDF Bare Metal" }, "within": 3, "label": "Boscali's menu offers the three BDF liveries by id" },
+    { "check": { "not": { "log": "patch bare-metal-first-pick", "source": "F-204 Icarus II" } }, "label": "the first-pick patch installed (a failed patch logs its feature name)" },
+    { "check": { "path": "mods.baanish.icarus.first_livery", "eq": "BDF Matte Gray" }, "label": "Boscali's first livery is BDF Matte Gray, its first listed" },
+    { "check": { "path": "mods.baanish.icarus.livery", "eq": "BDF Bare Metal" }, "label": "the jet wears BDF Bare Metal" },
+    { "check": { "path": "mods.baanish.icarus.loadout", "eq": "baanish_icarus_tip_tank|||baanish_icarus_tail_hook" }, "label": "tip tanks and hook fitted" },
+    { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 11, "hdg_deg": 300, "pitch_deg": 12 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: tip tank and hook from the left rear" },
+    { "screenshot": { "name": "bdf_bare_metal_stores" } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 7, "hdg_deg": 200, "pitch_deg": -20 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: hook from below behind" },
+    { "screenshot": { "name": "bdf_bare_metal_hook" } },
+    { "spawn": { "kind": "aircraft", "type": "baanish_icarus", "faction": "Boscali", "left_m": 25, "speed_mps": 0, "name": "pala_metal", "livery": "PALA Bare Metal" } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 8, "hold": 6, "label": "the parked jet loads its livery and stores" },
+    { "camera": { "mode": "orbit", "target": "pala_metal", "distance_m": 11, "hdg_deg": 300, "pitch_deg": 12 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles on the PALA Bare Metal jet" },
+    { "screenshot": { "name": "pala_bare_metal_stores" } },
+    { "camera": { "mode": "orbit", "target": "pala_metal", "distance_m": 7, "hdg_deg": 200, "pitch_deg": -20 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles under its tail" },
+    { "screenshot": { "name": "pala_bare_metal_hook" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is still the player's aircraft after the shots" },
+    { "camera": { "mode": "game" } },
+  ],
+}

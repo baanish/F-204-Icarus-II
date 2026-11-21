@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import shutil
+import sys
 
 from record_paths import portable_record, portable_text, resolve_record
 import numpy as np
@@ -14,9 +15,12 @@ from scipy.ndimage import distance_transform_edt, median_filter
 from rasterize import (ROOT, OUT, SOURCE, EXPORT, SIZE, PAINT_SIZE, PX_PER_M, GUTTER_PX, extend_geometry, read_source,
                        save_map, sample, smoothstep, triplanar, upsample)
 from liveries import PAINT_GRAIN, SOURCE_BLUR_PX, specifications, paint, paint_grain, soften
-from insignia import sources, place_decals
+from insignia import FACTION_ROUNDELS, mark_footprints, sources, place_decals
 from panels import bare_aft, layout_fields, surface_height, tangent_normal
 from damage import compose_damage
+
+sys.path.insert(0, str(ROOT / 'art/blender'))
+import atlas_guard  # noqa: E402
 
 REGIONS = {'nw': (0, 0), 'ne': (896, 0), 'sw': (0, 896), 'se': (896, 896)}
 STRUCTURE = ROOT / '.cache/review/wave2/p9b-round2/structure.json'
@@ -56,7 +60,9 @@ def compose(part_manifest=None):
     paint_bake = np.load(OUT / 'geometry_maps.npz')
     paint_part = paint_bake['part']
     paint_used = paint_part > 0
-    names = resolve_record(json.loads((OUT / 'atlas_triangles.json').read_text()))['parts']
+    baked = resolve_record(json.loads((OUT / 'atlas_triangles.json').read_text()))
+    atlas_guard.require_same(exported_atlas(), baked.get('atlas'), 'skin compose')
+    names = baked['parts']
     atlas = np.load(OUT / 'atlas_geometry.npz')
     pos, normal, part = atlas['position'][..., :3], atlas['normal'][..., :3], atlas['part']
     if part.shape != (SIZE, SIZE) or paint_part.shape != (PAINT_SIZE, PAINT_SIZE):
@@ -142,38 +148,68 @@ def compose(part_manifest=None):
     for spec in specifications():
         source = soften(read_source(spec['source']))
         baseline = paint(pos, normal, source, spec)
-        if spec['id'] == 4:
-            from bare_metal import finish, painted_parts, surface_map, METALLIC_MAP
+        metal = spec['pattern'] == 'bands'
+        metal_key = 'bare_metal' if spec['id'] == 4 else 'bare_metal_' + str(spec['id'])
+        if metal:
+            from bare_metal import finish, painted_parts, surface_map
+            METALLIC_MAP = 'Icarus_livery_' + str(spec['id']) + '_m.png'
             baseline, sheet_tone, metal_report = finish(baseline, pos, normal, fields['panel'], used)
-            report['bare_metal'] = metal_report
-            report['bare_metal']['analytic_reflection_scope'] = 'world scheme before atlas sheet tones; current UV seam samples check the finished atlas'
+            report[metal_key] = metal_report
+            report[metal_key]['analytic_reflection_scope'] = 'world scheme before atlas sheet tones; current UV seam samples check the finished atlas'
         colour = np.clip(baseline * (1 + residual[..., None]), 0, 1)
         paint_coverage = None
-        if spec['id'] == 4:
+        if metal:
             _, glare = painted_parts(pos, normal, part, names)
             colour = colour * (1 - glare[..., None]) + np.array([.035, .043, .045]) * glare[..., None]
             paint_coverage = np.zeros(part.shape, np.float32)
         save_map(OUT / ('unmarked_' + str(spec['id']) + '.png'), colour, used)
         mask, marks, actual = place_decals(colour, pos, normal, part, names, decals, spec, paint_coverage, dx, dy)
-        finish_kind = 'metal' if spec['id'] == 4 else 'paint'
+        finish_kind = 'metal' if metal else 'paint'
         colour *= (1 - SEAM_SHADE[finish_kind] * seam - FASTENER_SHADE[finish_kind] * fastener)[..., None]
-        if spec['id'] == 4:
+        if metal:
             material, masks = surface_map(metallic, pos, normal, part, names, paint_coverage, sheet_tone, relief)
             save_map(EXPORT / METALLIC_MAP, material, used)
-            np.savez_compressed(OUT / 'bare_metal_masks.npz', **masks)
-            report['bare_metal']['material'] = {'map': METALLIC_MAP, 'metal_red': .98,
+            np.savez_compressed(OUT / ('bare_metal_masks.npz' if spec['id'] == 4 else metal_key + '_masks.npz'), **masks)
+            report[metal_key]['material'] = {'map': METALLIC_MAP, 'metal_red': .98,
                 'polished_alpha': [.82, .96], 'painted_alpha': .42, 'anti_glare_alpha': .18,
                 'glossiness': spec['glossiness'], 'paint_mask': 'same bands, anti-glare and sampled decal alpha as livery compose; radome uses sheet metal',
                 'protected_texels': int((used & (masks['protected'] >= 1)).sum())}
         save_map(EXPORT / ('Icarus_livery_' + str(spec['id']) + '.png'), colour, used)
         Image.fromarray(mask.astype(np.uint8) * 255).save(OUT / ('decal_mask_' + str(spec['id']) + '.png'))
         reflected = paint(pos[used] * (-1, 1, 1), normal[used] * (-1, 1, 1), source, spec)
-        reflection_baseline = paint(pos, normal, source, spec) if spec['id'] == 4 else baseline
+        reflection_baseline = paint(pos, normal, source, spec) if metal else baseline
         report['liveries'][str(spec['id'])] = {'name': spec['name'], 'markings': marks, 'actual_decal_parts': actual,
             'analytic_reflection_max_rgb_levels': float(abs(reflected - reflection_baseline[used]).max() * 255)}
         print('SKIN LIVERY', spec['id'], spec['name'], flush=True)
     (OUT / 'composition.json').write_text(portable_text(json.dumps(portable_record(report), indent=2) + '\n'))
-    print(f'SKIN COMPOSE PASS: ten {SIZE} maps')
+    write_mark_record(pos, normal, part, names, seam, fastener)
+    print(f'SKIN COMPOSE PASS: {len(specifications())} liveries and six shared maps at {SIZE}, logo-free')
+
+
+MARK_RECORD = ROOT / 'art/textures/faction_marks.json'
+
+
+def exported_atlas():
+    """The skin atlas record of the meshes the export shipped (art/export/blockout.json atlas, atlas_guard)."""
+    return json.loads((ROOT / 'art/export/blockout.json').read_text(encoding='utf-8')).get('atlas')
+
+
+def write_mark_record(pos, normal, part, names, seam, fastener):
+    """faction_marks.json: what faction_marks.py needs to paint the game's roundels onto these logo-free maps."""
+    liveries = {}
+    for spec in specifications():
+        metal = spec['pattern'] == 'bands'
+        name = 'Icarus_livery_' + str(spec['id'])
+        sha = lambda file: hashlib.sha256((EXPORT / file).read_bytes()).hexdigest()
+        liveries[str(spec['id'])] = {'name': spec['name'], 'faction': spec['faction'], 'finish': 'metal' if metal else 'paint',
+                                     'map': name + '.png', 'map_sha256': sha(name + '.png'),
+                                     'metallic_map': name + '_m.png' if metal else None,
+                                     'metallic_map_sha256': sha(name + '_m.png') if metal else None}
+    # the footprints are texels of this atlas: faction_marks.py paints them only onto maps for the same skin UVs
+    record = {'atlas_size': SIZE, 'skin_uv_sha256': atlas_guard.whole(exported_atlas()['skin_uv_sha256']), 'roundels': FACTION_ROUNDELS, 'shade': {'seam': SEAM_SHADE, 'fastener': FASTENER_SHADE},
+              'painted_smoothness': .42, 'liveries': liveries,
+              'marks': mark_footprints(pos, normal, part, names, seam, fastener)}
+    MARK_RECORD.write_text(json.dumps(record, separators=(',', ':')) + '\n')
 
 
 def response_regions(painted, relief):
@@ -223,8 +259,8 @@ def measure():
             'mirror_uv_max_rgb_levels': 0.0, 'mirror_pairs': geometry['uv']['mirrors'],
             'analytic_reflection_max_rgb_levels': composition['liveries'][str(spec['id'])]['analytic_reflection_max_rgb_levels']}
     expected = ['Icarus_skin_' + key + '.png' for key in ('n', 'm', 'ao', 'dmg_b', 'dmg_n')]
-    expected += ['Icarus_livery_' + str(i) + '.png' for i in range(1, 5)]
-    expected += ['Icarus_livery_4_m.png']
+    expected += ['Icarus_livery_' + str(spec['id']) + '.png' for spec in specifications()]
+    expected += ['Icarus_livery_' + str(spec['id']) + '_m.png' for spec in specifications() if spec['pattern'] == 'bands']
     for name in expected:
         path = EXPORT / name
         with Image.open(path) as image:
@@ -232,7 +268,7 @@ def measure():
                 raise ValueError('Wrong map size: ' + name)
             if name.startswith('Icarus_livery') and not name.endswith('_m.png') and image.mode != 'RGB':
                 raise ValueError('Livery must have no alpha')
-            if name == 'Icarus_livery_4_m.png' and image.mode != 'RGBA':
+            if name.startswith('Icarus_livery') and name.endswith('_m.png') and image.mode != 'RGBA':
                 raise ValueError('Bare Metal material map must retain smoothness alpha')
             report['maps'][name] = {'path': str(path), 'size': list(image.size), 'mode': image.mode,
                                    'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
@@ -285,7 +321,8 @@ def measure():
             gate_inputs.append(path)
     gate = {'pipeline_accepted': False, 'geometry_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
             'inputs': {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest() for path in gate_inputs if path.is_file()},
-            'outputs': {name: entry['sha256'] for name, entry in report['maps'].items()}}
+            'outputs': {**{name: entry['sha256'] for name, entry in report['maps'].items()},
+                        'faction_marks.json': hashlib.sha256(MARK_RECORD.read_bytes()).hexdigest()}}
     (ROOT / 'art/textures/gate.json').write_text(portable_text(json.dumps(portable_record(gate), indent=2) + '\n'))
     print(json.dumps(portable_record({k: {s: v for s, v in entry.items() if s != 'mirror_pairs'} for k, entry in report['liveries'].items()}), indent=2))
     if any(entry['median'] > 2.26 for entry in report['liveries'].values()):

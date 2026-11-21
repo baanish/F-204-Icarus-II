@@ -18,14 +18,15 @@ import build_icarus as bi
 
 # Triangles per component: target and cap (budget.py sums them). 500 of each intake's cap went to the gear doors.
 BUDGET = {
-    "intake_L": {"target": 3500, "cap": 4100, "objects": ("intake_duct_L",)},
-    "intake_R": {"target": 3500, "cap": 4100, "objects": ("intake_duct_R",)},
+    # the intake part and, in a split build, the duct it leaves on the root (parts.split_intakes)
+    "intake_L": {"target": 3500, "cap": 4100, "objects": ("intake_duct_L", "duct_L")},
+    "intake_R": {"target": 3500, "cap": 4100, "objects": ("intake_duct_R", "duct_R")},
     # The owner asked for visible mechanical detail: a bell-crank horn, spine and ribs on each of the 16 petals, and
-    # eight ram mounts with gussets, pins and hydraulic lines on the shroud.
-    "nozzle": {"target": 6100, "cap": 6600, "exact": ("nozzle",), "objects": ("nozzle_petal_", "nozzle_seal_")},
+    # eight ram mounts with gussets and hydraulic lines on the shroud.
+    "nozzle": {"target": 5200, "cap": 5400, "exact": ("nozzle",), "objects": ("nozzle_petal_", "nozzle_seal_")},
     # The owner asked for the actuation hardware the F-15 ACTIVE shows, with visible detail: a ring at the nozzle
-    # root with a fork for each of 16 pinned arms and a lug for each of eight rams. Boxes and 6- to 10-sided tubes.
-    "nozzle_actuation": {"target": 5000, "cap": 5400, "objects": ("nozzle_sync_ring", "nozzle_link_", "nozzle_ram_")},
+    # root with a fork for each of 16 arms and a lug for each of eight rams. Boxes and tubes of ACTUATION_SIDES.
+    "nozzle_actuation": {"target": 1410, "cap": 1500, "objects": ("nozzle_sync_ring", "nozzle_link_", "nozzle_ram_")},
 }
 # The P&W pitch/yaw balance beam nozzle (F-15 ACTIVE) drives its flaps from a sync ring that hydraulic rams on the
 # fixed structure move; an arm from the ring to a clevis on each flap's back turns that flap on its hinge. Here the
@@ -55,6 +56,11 @@ ACTUATION = {
     "vector_deg": 4.0,
     "link_error": 0.004,  # the most a link may miss its clevis eye: the rigid ring fits 16 petals by least squares
 }
+# The actuation's coarseness, chosen for the 150,000-triangle whole jet: sides round the sync ring and the rams' barrels
+# and rods. Every piece the design calls for stays; the ring's, arms' and rams' pin heads went, too small to see from a
+# chase camera. The shroud, its lip and the ram brackets keep their detail: they are the nozzle's mesh, whose points
+# make its collider (hulls.build), so coarsening them would move the tail's merged hulls.
+ACTUATION_SIDES = {"ring": 16, "barrel": 6, "rod": 4}
 # The Y-duct's mesh: rings from the lip to the engine face, and points along each half's wall (bi.duct_ring).
 DUCT = {"stations": 35, "points": 33}
 # The Y-duct's flow area, both sides, m2 (check_duct_areas): one constant tube from tube_s's first station to its
@@ -490,12 +496,12 @@ def facing(verts, faces, direction):
 
 
 def afterburner(n, mats):
-    """The tailpipe's afterburner in front of its dark backplate, seen only from behind: a ring of 16 fuel spray
+    """The tailpipe's afterburner in front of its dark backplate, seen only from behind: a ring of eight fuel spray
     bars, then two V-gutter flameholder rings joined by eight radial gutters, opening aft, round the tail cone."""
     s = n["shroud_start"] + 0.07
     vee = ((s + 0.008, -0.014), (s - 0.012, 0.0), (s + 0.008, 0.014))  # (station, offset across the gutter)
     verts, faces = [], []
-    for r, count in ((0.12, 24), (0.24, 40)):
+    for r, count in ((0.12, 12), (0.24, 20)):
         start = len(verts)
         verts += [bi.P(t, (r + d) * math.cos(a), n["z"] + (r + d) * math.sin(a))
                   for a in [2 * math.pi * k / count for k in range(count)] for t, d in vee]
@@ -512,8 +518,8 @@ def afterburner(n, mats):
     verts.append(bi.P(n["shroud_start"] + 0.16, 0, n["z"]))
     faces += [(base + k, base + (k + 1) % 16, base + 16) for k in range(16)]
     faces = facing(verts, faces, Vector((0, 1, 0)))
-    for k in range(16):
-        a = 2 * math.pi * (k + 0.25) / 16
+    for k in range(8):
+        a = 2 * math.pi * (k + 0.25) / 8
         radial = Vector((math.cos(a), 0, math.sin(a)))
         frame = Matrix.Translation(bi.P(s - 0.035, 0, n["z"])) @ Matrix(
             (Vector((math.sin(a), 0, -math.cos(a))), Vector((0, 1, 0)), radial)).transposed().to_4x4()
@@ -656,15 +662,14 @@ def build_nozzle(p, mats):
 
 def petal_clevis(hinge_name, hinge, mats):
     """The bell-crank horn on a petal's back that its arm pins into: two cheek plates rising 4 cm off the petal either
-    side of the arm's eye, a web between them behind it and pin heads outside, then a spine with two ribs down the
-    petal. Trim, in the petal's hinge frame (X across, Y down the petal, Z out of its face); it rides the petal."""
-    y, h = ACTUATION["clevis"]
+    side of the arm's eye and a web between them behind it, then a spine with two ribs down the petal; no pin heads,
+    which are too small to see from a chase camera. Trim, in the petal's hinge frame (X across, Y down the petal, Z out
+    of its face); it rides the petal."""
+    y, _ = ACTUATION["clevis"]
     lo, hi = Vector, Vector
     cheek = ((y - 0.012, -0.002), (y + 0.070, -0.002), (y + 0.016, 0.040), (y - 0.012, 0.026))
-    eye = hinge @ Matrix.Translation((0.0, y, h))
     pieces = [prism(cheek, sign * 0.0065, sign * 0.0095, hinge) for sign in (-1, 1)]
     pieces += [box(lo((-0.0066, y + 0.022, 0.002)), hi((0.0066, y + 0.050, 0.020)), hinge)]
-    pieces += pins(0.0045, 0.0094, 0.0115, eye)
     pieces += [box(lo((-0.006, y + 0.068, -0.002)), hi((0.006, 0.30, 0.010)), hinge)]
     pieces += [box(lo((-0.020, at - 0.004, -0.002)), hi((0.020, at + 0.004, 0.007)), hinge) for at in (0.17, 0.24)]
     verts, faces = joined(pieces)
@@ -757,17 +762,15 @@ def build_actuation(p, mats):
                                  Vector((v.x, 0, v.z)).normalized())).transposed().to_4x4()
     (a0, a1), (r0, r1) = ACTUATION["section"]
     rings = [[Vector((r * math.cos(a), dy, r * math.sin(a))) for dy, r in ((a0, r0), (a1, r0), (a1, r1), (a0, r1))]
-             for a in [2 * math.pi * k / 48 for k in range(48)]]
+             for a in [2 * math.pi * k / ACTUATION_SIDES["ring"] for k in range(ACTUATION_SIDES["ring"])]]
     pieces = [sweep_shape(rings, closed=True)]
-    for e in rest["eyes"]:  # a fork for each arm: cheeks either side of its eye, pin heads outside
+    for e in rest["eyes"]:  # a fork for each arm: cheeks either side of its eye
         at = Matrix.Translation(e) @ frame_at(e)
         pieces += [box(lo((sign * 0.0065, -0.010, -0.008)), hi((sign * 0.0095, 0.009, r1 - e.xz.length)), at)
                    for sign in (-1, 1)]
-        pieces += pins(0.0045, 0.0094, 0.0115, at)
-    for e in rest["ram_eyes"]:  # a lug for each ram, its pin's heads outside
+    for e in rest["ram_eyes"]:  # a lug for each ram
         at = Matrix.Translation(e) @ frame_at(e)
         pieces += [box(lo((-0.007, -0.007, r1 - 0.002 - e.xz.length)), hi((0.007, 0.007, 0.008)), at)]
-        pieces += pins(0.0045, 0.0069, 0.009, at)
     ring = bi.finish(bi.mesh_object("nozzle_sync_ring", *joined(pieces)), mech, smooth=False)
     ring.matrix_world = rest["ring"]
     ring["parent_part"] = "nozzle"
@@ -784,14 +787,12 @@ def build_actuation(p, mats):
         raise ValueError("propulsion: ram stroke %.3f m too long for its %.3f m length" % (longest - shortest, shortest))
     rod_length = sum(reach) / 2
     eye_block = box(lo((-0.006, -0.007, -0.007)), hi((0.006, 0.007, 0.007)))
-    # An arm: a 10 by 12 mm bar between two 16 mm eyes with pin bosses, symmetric about its middle.
-    arm_eye = lambda y: [box(lo((-0.005, y - 0.008, -0.008)), hi((0.005, y + 0.008, 0.008)))] + pins(
-        0.0045, 0.0049, 0.006, Matrix.Translation((0.0, y, 0.0)))
-    shapes = {"link": arm_eye(0.0) + arm_eye(length) +
-                      [box(lo((-0.005, 0.008, -0.006)), hi((0.005, length - 0.008, 0.006)))],
-              "cylinder": [eye_block, tube(0.008, *barrel, 10), tube(0.0095, barrel[1] - 0.008, barrel[1], 10),
-                           tube(0.0095, barrel[0], barrel[0] + 0.006, 10)],  # barrel, gland and head collars
-              "rod": [eye_block, tube(0.0045, 0.006, rod_length, 8)]}
+    # An arm: a 10 by 14 mm bar running 8 mm past each eye, symmetric about its middle.
+    sides = ACTUATION_SIDES
+    shapes = {"link": [box(lo((-0.005, -0.008, -0.007)), hi((0.005, length + 0.008, 0.007)))],
+              "cylinder": [eye_block, tube(0.008, *barrel, sides["barrel"]),
+                           tube(0.0095, barrel[1] - 0.008, barrel[1], sides["barrel"])],  # barrel and gland collar
+              "rod": [eye_block, tube(0.0045, 0.006, rod_length, sides["rod"])]}
     for name, matrix in actuation_matrices(p).items():
         kind = "link" if name.startswith("nozzle_link_") else name.split("_")[-1]
         if kind not in shapes:

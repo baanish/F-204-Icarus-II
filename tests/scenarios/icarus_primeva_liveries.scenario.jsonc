@@ -1,0 +1,22 @@
+// A Primeva Icarus on Sandrift's runway in PALA Bare Metal. Pass: the aircraft menu's list for Primeva (the game's
+// LoadoutSelector.GetLiveryOptions) is exactly the four PALA liveries in their 0.3.0 order, Bare Metal last; Primeva's
+// first livery (AircraftParameters.GetFirstLiveryForFaction), which a jet wears until its own loads, is PALA Navy; and the
+// jet wears PALA Bare Metal. The menu's first pick is icarus_menu_primeva.
+// From the repo root: no-agentic run tests/scenarios/icarus_primeva_liveries.scenario.jsonc
+{
+  "mission": "icarus_livery_4.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "require": { "path": "mods.baanish.icarus.liveries", "eq": "PALA Navy|PALA Black|PALA Desert|PALA Bare Metal" }, "within": 3, "label": "Primeva's menu offers the four PALA liveries in their 0.3.0 order" },
+    { "check": { "not": { "log": "patch bare-metal-first-pick", "source": "F-204 Icarus II" } }, "label": "the first-pick patch installed (a failed patch logs its feature name)" },
+    { "check": { "path": "mods.baanish.icarus.first_livery", "eq": "PALA Navy" }, "label": "Primeva's first livery is PALA Navy, its first listed" },
+    { "check": { "path": "mods.baanish.icarus.livery", "eq": "PALA Bare Metal" }, "label": "the jet wears PALA Bare Metal" },
+  ],
+}

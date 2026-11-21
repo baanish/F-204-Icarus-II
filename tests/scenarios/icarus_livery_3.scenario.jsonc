@@ -1,5 +1,6 @@
-// Livery 3 of 4: the Icarus parked on Sandrift's runway in livery index 2 (icarus_pala_3), shot from the same orbit as the other three. Pass: the run completes and the screenshot
-// shows the aircraft in that livery. The verdict is read from the screenshot; the steps only set the shot up.
+// Livery 3 of 7, PALA Desert (PALA): the Icarus parked on Sandrift's runway in livery index 2 of
+// the authored list (by id: PALA's four, then BDF's three). Pass: the plugin reports that
+// livery on the player's jet, the run completes, and the screenshots show it with its roundels; the shots are read by eye.
 // From the repo root: no-agentic run tests/scenarios/icarus_livery_3.scenario.jsonc
 {
   "mission": "icarus_livery_3.mission.json",
@@ -7,16 +8,20 @@
   "plugins": [
     "installed:com.nikkorap.blueprinter",
     "../../.cache/build-staging/dotnet",
-    "content:../../build/icarus_0.3.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
-  "timeout": 120,
+  "timeout": 150,
   "steps": [
     { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "require": { "path": "mods.baanish.icarus.livery", "eq": "PALA Desert" }, "within": 3, "label": "it wears PALA Desert" },
     { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
     { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 330, "pitch_deg": 10 } },
-    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles on the orbit" },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: front-left orbit" },
     { "screenshot": { "name": "livery_3" } },
-    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is still the player's aircraft after the shot" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 16, "hdg_deg": 270, "pitch_deg": 3 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: left side" },
+    { "screenshot": { "name": "livery_3_left" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is still the player's aircraft after the shots" },
     { "camera": { "mode": "game" } },
   ],
 }

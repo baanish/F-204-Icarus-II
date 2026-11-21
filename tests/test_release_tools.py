@@ -1,15 +1,24 @@
 """Offline release contract checks. Never invokes the publisher or accesses GitHub."""
 
 import hashlib
+import io
 import json
+import struct
 import subprocess
+import sys
 import tempfile
 import unittest
 import warnings
 import zipfile
+import zlib
 from pathlib import Path
 
+from PIL import Image
+
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "tools"))
+import livery_kit as kit  # noqa: E402
+
 TAG = "v0.0.1"
 
 
@@ -24,7 +33,8 @@ class ReleaseToolsTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
 
-    def package(self, *, local=False, extra=None, mismatch=False, metadata=None, sources=None):
+    def package(self, *, local=False, extra=None, mismatch=False, metadata=None, sources=None, kit_root=None,
+                invalid_kit_png=None, invalid_kit_data=b"placeholder text"):
         meta = {
             "id": "baanish.icarus", "sourceCommit": "a" * 40, "local": local,
             "bundle": {"fileName": "icarus_0.0.1.nobp", "hash": "sha256:" + sha256(b"bundle")},
@@ -64,6 +74,20 @@ class ReleaseToolsTests(unittest.TestCase):
         with zipfile.ZipFile(self.root / names[-1], "w") as archive:
             for path, data in sorted(entries.items()):
                 archive.writestr(zipfile.ZipInfo(path, date_time=(2026, 1, 1, 0, 0, 0)), data)
+        self.kit_name = f"icarus_livery_kit_{TAG[1:]}{suffix}.zip"
+        names.append(self.kit_name)
+        top = kit_root or kit.kit_name(TAG[1:])
+        png = io.BytesIO()
+        Image.new("RGB", (1, 1)).save(png, format="PNG")
+        kit_payload = {f"maps/{name}": (kit.EXPORT / name).read_bytes() for name in kit.SHARED_MAPS}
+        kit_payload["install/IcarusLiveryBuilder.cs"] = (kit.DOCS / "IcarusLiveryBuilder.cs").read_bytes()
+        kit_payload["install/meta.json"] = json.dumps({"AircraftKey": kit.JSON_KEY}).encode()
+        if invalid_kit_png:
+            kit_payload[invalid_kit_png] = invalid_kit_data
+        with zipfile.ZipFile(self.root / self.kit_name, "w") as archive:
+            for path in kit.expected_files(kit.specifications()):
+                data = kit_payload.get(path, png.getvalue() if path.endswith(".png") else b"kit fixture")
+                archive.writestr(zipfile.ZipInfo(f"{top}/{path}", date_time=kit.FIXED_TIME), data)
         (self.root / "RELEASE-NOTES.md").write_text("Prerelease, Blueprinter required.")
         self.assets = names + ["RELEASE-NOTES.md", "SHA256SUMS.txt"]
         self.checksums()
@@ -103,6 +127,38 @@ class ReleaseToolsTests(unittest.TestCase):
         self.assertIn("Checksum mismatch", self.verify().stderr)
         self.package(mismatch=True)
         self.assertIn("Archives disagree", self.verify().stderr)
+
+    def test_livery_kit_requires_a_checksum_and_the_versioned_root(self):
+        self.package()
+        self.assets.remove(self.kit_name)
+        self.checksums()
+        self.assertIn("must cover every archive", self.verify().stderr)
+        self.package()
+        with (self.root / self.kit_name).open("ab") as stream:
+            stream.write(b"tampered")
+        self.assertIn(f"Checksum mismatch: {self.kit_name}", self.verify().stderr)
+        self.package(kit_root="icarus_livery_kit_0.0.2")
+        self.assertIn("Invalid livery kit", self.verify().stderr)
+
+    def test_livery_kit_rejects_placeholder_png_with_matching_checksum(self):
+        entry = "examples/Icarus_livery_1.png"
+        self.package(invalid_kit_png=entry)
+        result = self.verify()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(f"{kit.kit_name(TAG[1:])}/{entry} is not a valid PNG", result.stderr)
+
+    def test_livery_kit_rejects_png_whose_pixels_do_not_decode(self):
+        def chunk(kind, data):
+            return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data))
+
+        # every chunk checksum is right, but the pixel stream holds one byte where a 1 by 1 RGB row needs four
+        png = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
+               + chunk(b"IDAT", zlib.compress(b"\x00")) + chunk(b"IEND", b""))
+        entry = "examples/Icarus_livery_1.png"
+        self.package(invalid_kit_png=entry, invalid_kit_data=png)
+        result = self.verify()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(f"{kit.kit_name(TAG[1:])}/{entry} is not a valid PNG", result.stderr)
 
     def test_required_credits_sorted_entries_and_fixed_time(self):
         for mutation in ("missing-credit", "reordered", "timestamp", "duplicate"):
@@ -150,6 +206,40 @@ class ReleaseToolsTests(unittest.TestCase):
                 self.package(sources=mutate)
                 self.assertNotEqual(self.verify().returncode, 0)
 
+    def painted_hashes(self, data):
+        """A stand-in for faction_marks.py's record of the liveries it painted with the game's roundels."""
+        path = self.root / "marks.json"
+        path.write_text(json.dumps({"inputs": {}, "outputs": {"Icarus_livery_1.png": sha256(data)}}))
+        return {**__import__("os").environ, "ICARUS_FACTION_MARKS_HASHES": str(path)}
+
+    def test_texture_sources_reject_a_painted_livery(self):
+        env = self.painted_hashes(b"painted livery")
+        self.package(sources=lambda e: e.update({"art/textures/generated/full/painted.png": b"painted livery"}) or
+                     e.update({"texture-sources.json": json.dumps({"files": {
+                         path: sha256(data) for path, data in e.items() if path != "texture-sources.json"}}).encode()}))
+        result = subprocess.run(["pwsh", "-NoProfile", "-File", str(REPO / "tools/Verify-Release.ps1"),
+                                 "-Directory", str(self.root), "-Tag", TAG], capture_output=True, text=True, env=env)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Game art in", result.stderr + result.stdout)
+
+    def test_public_check_rejects_a_painted_livery_in_a_tracked_path(self):
+        env = self.painted_hashes(b"painted livery")
+        repo = self.root / "repo"
+        (repo / "art").mkdir(parents=True)
+        subprocess.run(["git", "init", "-q", str(repo)], check=True)
+        def check(name, data):
+            (repo / "art" / name).write_bytes(data)
+            subprocess.run(["git", "-C", str(repo), "add", "art/" + name], check=True)
+            result = subprocess.run(["pwsh", "-NoProfile", "-File", str(REPO / "tools/Check-Public.ps1"), "-Repo", str(repo)],
+                                    capture_output=True, text=True, env=env)
+            subprocess.run(["git", "-C", str(repo), "rm", "-q", "--cached", "art/" + name], check=True)
+            return result
+        result = check("clean.png", b"logo-free")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = check("Icarus_livery_1.png", b"painted livery")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("is the painted Icarus_livery_1.png", result.stdout)
+
     def test_skip_build_cannot_produce_a_publishable_release(self):
         result = subprocess.run([
             "pwsh", "-NoProfile", "-File", str(REPO / "tools/Package-Release.ps1"), "-SkipBuild",
@@ -178,7 +268,8 @@ class ReleaseToolsTests(unittest.TestCase):
         release["prerelease"] = False
         self.assertIn("published prerelease", verify_release().stderr)
         release["prerelease"] = True
-        release["assets"][0]["digest"] = "sha256:" + "0" * 64
+        kit_asset = next(asset for asset in release["assets"] if asset["name"] == self.kit_name)
+        kit_asset["digest"] = "sha256:" + "0" * 64
         self.assertIn("GitHub asset mismatch", verify_release().stderr)
 
 
