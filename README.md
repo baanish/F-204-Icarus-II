@@ -2,7 +2,7 @@
 
 A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/): a Primeva interceptor that runs past Mach 2.6 at 10 km on a modern afterburning turbojet.
 
-![The Icarus II in the Bare Metal livery](docs/img/icarus-bare-metal.jpg)
+![The Icarus II in PALA Navy on the Hyperion's deck](docs/img/icarus-hero.jpg)
 
 Version 0.4.0 is a prerelease. See the [changelog](CHANGELOG.md) for what changed.
 
