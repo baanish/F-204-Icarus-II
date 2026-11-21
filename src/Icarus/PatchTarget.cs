@@ -81,7 +81,7 @@ public sealed class PatchTarget
         int diagnosticCount = 0;
         foreach (var entry in installed)
             if (entry.Target.Diagnostic && !off.Contains(entry.Target.Feature)) diagnosticCount++;
-        log.Info($"diagnostic patches: {diagnosticCount} installed (StageLogging={log.StageEnabled})");
+        log.Info($"diagnostic patches: {diagnosticCount} installed (stage logging enabled: {log.StageEnabled})");
         return off;
     }
 }

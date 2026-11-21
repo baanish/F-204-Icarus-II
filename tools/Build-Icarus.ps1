@@ -14,10 +14,12 @@
 
 param(
     [string]$ExecuteMethod = 'Icarus.Editor.IcarusBuild.Build',
-    [string]$UnityPath
+    [string]$UnityPath,
+    [switch]$Dev
 )
 
 $ErrorActionPreference = 'Stop'
+$buildKind = if ($Dev) { 'dev' } else { 'release' }
 # One build at a time machine-wide: the Unity project, the export folder and build/ are shared. A build that dies leaves
 # the mutex abandoned, which the next one takes.
 $buildLock = [System.Threading.Mutex]::new($false, 'Global\IcarusBuild')
@@ -40,7 +42,7 @@ $maxLicenseRetries = 3
 $checks = (1..19 + 21..24) | ForEach-Object { "A$_" }  # A20 (section inertia) was retired with the boxes
 
 function Fail([string]$why) {
-    Write-Output "B0 FAIL: $why ($([int]$clock.Elapsed.TotalSeconds) s)"
+    Write-Output "B0 FAIL: $why ($buildKind build, $([int]$clock.Elapsed.TotalSeconds) s)"
     exit 1
 }
 
@@ -80,7 +82,9 @@ if (-not $gameDir) { Fail 'Nuclear Option not found in any Steam library; set NU
 $env:NUCLEAR_OPTION_DIR = $gameDir
 $dotnetOut = Join-Path $repo '.cache/build-staging/dotnet'
 # --no-incremental: an up-to-date skip would leave a DLL older than this run.
-& dotnet build $csproj -c Release --no-incremental -o $dotnetOut --nologo | Out-Host
+$devProperty = if ($Dev) { 'true' } else { 'false' }
+& dotnet build $csproj -c Release "-p:IcarusDev=$devProperty" --no-incremental -o $dotnetOut --nologo |
+    ForEach-Object { Write-Host "[$buildKind build] $_" }
 if ($LASTEXITCODE -ne 0) { Fail "dotnet build exited $LASTEXITCODE" }
 $dll = Join-Path $dotnetOut 'Icarus.dll'
 if (-not (Test-Path -LiteralPath $dll) -or (Get-Item -LiteralPath $dll).LastWriteTimeUtc -lt $runStart) { Fail "dotnet build produced no fresh $dll" }
@@ -98,7 +102,7 @@ foreach ($name in 'BepInEx.dll', '0Harmony.dll', 'Mono.Cecil.dll', 'MonoMod.Util
         Copy-Item -LiteralPath $source -Destination $target -Force
     }
 }
-Write-Output 'dotnet: built and copied Icarus.dll to unity/Assets/Plugins'
+Write-Output "dotnet: built and copied Icarus.dll ($buildKind build) to unity/Assets/Plugins"
 
 $versionLine = Select-String -LiteralPath (Join-Path $project 'ProjectSettings/ProjectVersion.txt') -Pattern '^m_EditorVersion: (\S+)$'
 $unityVersion = $versionLine.Matches[0].Groups[1].Value
@@ -198,4 +202,4 @@ $sums = foreach ($file in $outputs) {
     (Get-FileHash -LiteralPath (Join-Path $build $name) -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + $name
 }
 [IO.File]::WriteAllLines((Join-Path $build 'SHA256SUMS.txt'), [string[]]$sums)
-Write-Output "B0 PASS: build/$(Split-Path -Leaf $nobp) $($sums[0].Substring(0, 12)) with Icarus.dll $($sums[1].Substring(0, 12)), checks $($passed -join ' '), $attempt Unity attempt(s) ($([int]$clock.Elapsed.TotalSeconds) s)"
+Write-Output "B0 PASS: build/$(Split-Path -Leaf $nobp) $($sums[0].Substring(0, 12)) with Icarus.dll $($sums[1].Substring(0, 12)) ($buildKind build), checks $($passed -join ' '), $attempt Unity attempt(s) ($([int]$clock.Elapsed.TotalSeconds) s)"

@@ -19,6 +19,7 @@
 - With the Aryx Weaponry Pack installed, the Icarus carries seven of its weapons: the IRM-S5 Gladius, MRM-S4 Broadsword, ARAD-45, AGM-27 Pyre, AGR-37 Jester, AGM-76 Atlatl and PGM-400LR. The Gladius and Jester also fit the conformal stations, and the PGM-400LR the centreline.
 - With Meridian Works installed, the Icarus carries ten of its weapons: the SRM-8 Kukri, SRM-20 Merlin, AAM-120C, AAM-63 Falchion, AAM-90 Estoc, AAM-7 Sparrow, AGM-58, AGM-58F, AGM-190A Black Arrow and AGM-33L. The Kukri and Merlin also go on the wingtips, and the Kukri, Merlin, Falchion, AGM-58, AGM-58F and Black Arrow fit the conformal stations.
 - Both packs are optional. Without one, the game log gains a "Weapon not found" line for each of its mounts and nothing else changes.
+- The settings page lists only the player options, stock mission supply and helipad spawn. The diagnostics and the tuning knobs are in dev builds only (`tools/Build-Icarus.ps1 -Dev`); a released Icarus flies on its shipped values.
 - The Icarus now has the `F-204 Icarus II` Steam Workshop tag the uploader requires for liveries. The tag was checked in game. A Workshop upload has yet to be tested end to end.
 
 The game code falls back to PALA Navy for Primeva and BDF Matte Gray for Boscali when another player lacks your custom livery. This fallback has yet to be tested in multiplayer.

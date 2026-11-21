@@ -1,3 +1,4 @@
+#if ICARUS_DEV
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,3 +75,4 @@ static class AircraftMenuProbe
         IcarusPlugin.Log.Info($"menu-livery {faction} done: chose {string.Join(",", chosen)}; wore {string.Join(",", worn)}; saved {string.Join(",", saved)}");
     }
 }
+#endif

@@ -100,6 +100,16 @@ foreach ($name in @($nommName, $manualName)) {
         }
         foreach ($requiredName in $required) { if (-not $seen.Contains($requiredName)) { throw "$name is missing $requiredName" } }
         if ($name -ceq $nommName) {
+            # Latin-1 preserves every byte, so the UTF-16LE literal can match at any offset.
+            $stream = $archive.GetEntry('Icarus.dll').Open()
+            $dll = [IO.MemoryStream]::new()
+            try {
+                $stream.CopyTo($dll)
+                $marker = [Text.Encoding]::Latin1.GetString([Text.Encoding]::Unicode.GetBytes('StageLogging'))
+                if ([Text.Encoding]::Latin1.GetString($dll.ToArray()).Contains($marker, [StringComparison]::Ordinal)) {
+                    throw 'Icarus.dll is a dev build. Build without -Dev before packaging.'
+                }
+            } finally { $dll.Dispose(); $stream.Dispose() }
             $reader = [IO.StreamReader]::new($archive.GetEntry('meta.json').Open())
             try { $metaText = $reader.ReadToEnd(); $meta = $metaText | ConvertFrom-Json } finally { $reader.Dispose() }
             if ($metaText -match '(?i)[a-z]:[\\/]|\\\\|"(?:path|enabled)"') { throw 'meta.json contains a local path or enabled state' }
@@ -129,4 +139,4 @@ if ($ReleaseJson) {
             $asset.size -ne (Get-Item -LiteralPath $path).Length -or $asset.digest -cne "sha256:$(Get-Sha256 $path)") { throw "GitHub asset mismatch: $($asset.name)" }
     }
 }
-Write-Output "RELEASE VERIFY PASS: $Tag$suffix checksums, dependencies, commit, paired archives, texture sources, livery kit and sorted asset names"
+Write-Output "RELEASE VERIFY PASS: $Tag$suffix checksums, dependencies, commit, release plugin, paired archives, texture sources, livery kit and sorted asset names"

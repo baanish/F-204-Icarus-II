@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if ICARUS_DEV
 using System.IO;
+#endif
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,18 +26,24 @@ namespace Icarus;
 static class Tuning
 {
     /// <summary>Degrees each petal opens at full afterburner; visual only, so it isn't locked to the shipped value.</summary>
+#if ICARUS_DEV
     internal static float NozzleOpenDegrees => nozzleOpen == null ? DefaultNozzleOpen : nozzleOpen.Value;
+#else
+    internal static float NozzleOpenDegrees => DefaultNozzleOpen;
+#endif
 
     const float DefaultNozzleOpen = 15f;
     // The main wing's AeroParts whose area WingArea scales; the leading-edge and trailing-edge flaps have their area held
     // by a HighLiftDevice, which WingArea rescales through its cached endpoints.
     static readonly string[] MainWing = { "wing_spar_L", "wing_spar_R", "wing_spar_outer_L", "wing_spar_outer_R", "aileron_L", "aileron_R", "flap_L", "flap_R", "lef_L", "lef_R" };
 
+#if ICARUS_DEV
     sealed class Knob
     {
         public string Section = "", Key = "", Unit = "";
         public ConfigEntry<float> Entry = null!;
     }
+#endif
 
     sealed class Part
     {
@@ -66,23 +74,26 @@ static class Tuning
     static readonly FieldInfo HldPosition = AccessTools.Field(typeof(HighLiftDevice), "position");
     static readonly FieldInfo HldPart = AccessTools.Field(typeof(HighLiftDevice), "aeroPart");
 
+#if ICARUS_DEV
     static readonly List<Knob> knobs = new();
-    static readonly List<Record> records = new();
     static ConfigFile config = null!;
-    static IcarusLog log = null!;
     static ConfigEntry<float>? nozzleOpen;
     static ConfigEntry<string> altitudeThrust = null!;
-    static AircraftParameters? parameters;
-    static readonly Dictionary<string, float> shippedParameters = new();
     static FileSystemWatcher? watcher;
     static volatile bool fileChanged;
+#endif
+    static readonly List<Record> records = new();
+    static IcarusLog log = null!;
+    static AircraftParameters? parameters;
+    static readonly Dictionary<string, float> shippedParameters = new();
     static bool pending, locked;
     static string lastSummary = "";
 
     public static void Install(ConfigFile file, IcarusLog logger)
     {
-        config = file;
         log = logger;
+#if ICARUS_DEV
+        config = file;
         Bind("Tuning.Engine", "MaxThrust", "N", "Turbojet core thrust at sea level, before altitudeThrust (Turbojet.maxThrust)");
         Bind("Tuning.Engine", "MaxSpeed", "m/s", "Core thrust falls linearly to zero from this speed to 1.2 times it (Turbojet.maxSpeed)");
         Bind("Tuning.Engine", "MinDensity", "kg/m3", "The engine runs only above this air density (Turbojet.minDensity)");
@@ -119,8 +130,10 @@ static class Tuning
         };
         watcher.Changed += (_, _) => fileChanged = true;
         log.Info($"tuning: watching {Path.GetFileName(path)}; {knobs.Count + 1} live knobs, below 0 (or blank) is the shipped value");
+#endif
     }
 
+#if ICARUS_DEV
     static void Bind(string section, string key, string unit, string description)
     {
         knobs.Add(new Knob
@@ -129,6 +142,7 @@ static class Tuning
             Entry = config.Bind(section, key, -1f, $"{description}. In {unit}; below 0 is the shipped value. Locked to shipped while a remote peer is connected."),
         });
     }
+#endif
 
     /// <summary>Captures the aircraft's shipped values; the first apply waits a frame for every part's Start.</summary>
     public static void Track(Aircraft aircraft)
@@ -184,6 +198,7 @@ static class Tuning
 
     public static void Update()
     {
+#if ICARUS_DEV
         if (fileChanged)
         {
             fileChanged = false;
@@ -200,6 +215,7 @@ static class Tuning
                     log.Stage("tuning-file", $"reload deferred: {e.Message}");
             }
         }
+#endif
 
         // Every frame, so a peer that connects is under shipped values within the frame, before its scene load and spawns.
         RefreshLock();
@@ -228,7 +244,9 @@ static class Tuning
         if (remote == locked) return;
         locked = remote;
         pending = true;
+#if ICARUS_DEV
         log.Info(locked ? "tuning: a remote peer is connected; every knob reads its shipped value" : "tuning: no remote peer; the tuning file applies again");
+#endif
     }
 
     /// <summary>Hosting with any client in, or a client connecting or connected to anyone.</summary>
@@ -250,8 +268,12 @@ static class Tuning
 
     static float Value(string key, float shipped)
     {
+#if ICARUS_DEV
         Knob knob = knobs.First(k => k.Key == key);
         return locked || knob.Entry.Value < 0f ? shipped : knob.Entry.Value;
+#else
+        return shipped;
+#endif
     }
 
     static void Apply(Record r)
@@ -264,7 +286,10 @@ static class Tuning
         SetField(engine, "spoolRate", Value("SpoolRate", r.Shipped["spoolRate"]));
         SetField(engine, "fuelConsumptionMin", Value("FuelMin", r.Shipped["fuelConsumptionMin"]));
         SetField(engine, "fuelConsumptionMax", Value("FuelMax", r.Shipped["fuelConsumptionMax"]));
-        AnimationCurve curve = locked ? r.ShippedAltitude : ParseCurve(altitudeThrust.Value) ?? r.ShippedAltitude;
+        AnimationCurve curve = r.ShippedAltitude;
+#if ICARUS_DEV
+        if (!locked) curve = ParseCurve(altitudeThrust.Value) ?? curve;
+#endif
         AccessTools.Field(typeof(Turbojet), "altitudeThrust").SetValue(engine, new AnimationCurve(curve.keys));
         var vectoring = new Vector3(Value("PitchDegrees", r.ShippedVectoring.x), Value("YawDegrees", r.ShippedVectoring.y), r.ShippedVectoring.z);
         AccessTools.Field(typeof(Turbojet), "thrustVectoring").SetValue(engine, vectoring);
@@ -338,6 +363,7 @@ static class Tuning
 
     static float GetField(Turbojet engine, string name) => (float)AccessTools.Field(typeof(Turbojet), name).GetValue(engine);
 
+#if ICARUS_DEV
     static AnimationCurve? ParseCurve(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
@@ -363,6 +389,8 @@ static class Tuning
             return null;
         }
     }
+
+#endif
 
     static string CurveText(AnimationCurve curve) => string.Join(", ", curve.keys.Select(k => Invariant($"{k.time}:{k.value}")));
 

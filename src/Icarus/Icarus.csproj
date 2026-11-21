@@ -8,6 +8,7 @@
     <Version>0.4.0</Version>
     <Authors>baanish</Authors>
     <LangVersion>latest</LangVersion>
+    <DefineConstants Condition="'$(IcarusDev)' == 'true'">$(DefineConstants);ICARUS_DEV</DefineConstants>
     <Nullable>enable</Nullable>
     <Deterministic>true</Deterministic>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

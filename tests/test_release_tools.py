@@ -37,21 +37,21 @@ class ReleaseToolsTests(unittest.TestCase):
         self.env = self.painted_hashes(b"painted livery")
 
     def package(self, *, local=False, extra=None, mismatch=False, metadata=None, sources=None, kit_root=None,
-                invalid_kit_png=None, invalid_kit_data=b"placeholder text"):
+                invalid_kit_png=None, invalid_kit_data=b"placeholder text", plugin=b"plugin"):
         meta = {
             "id": "baanish.icarus", "sourceCommit": "a" * 40, "local": local,
             "bundle": {"fileName": "icarus_0.0.1.nobp", "hash": "sha256:" + sha256(b"bundle")},
             "artifact": {
                 "fileName": "Icarus.dll", "version": "0.0.1", "category": "preRelease",
                 "type": "plugin", "gameVersion": "0.34.2", "downloadUrl": "",
-                "hash": "sha256:" + sha256(b"plugin"),
+                "hash": "sha256:" + sha256(plugin),
                 "dependencies": [{"id": "com.nikkorap.blueprinter", "version": "2.1.1"}],
             },
         }
         if metadata:
             metadata(meta)
         payload = {
-            "Icarus.dll": b"plugin", "icarus_0.0.1.nobp": b"bundle",
+            "Icarus.dll": plugin, "icarus_0.0.1.nobp": b"bundle",
             "meta.json": json.dumps(meta).encode(), "README.md": b"install",
             "LICENSE": b"MIT", "audio/CREDITS.md": b"audio credits", "fonts/OFL.txt": b"font license",
         }
@@ -130,6 +130,12 @@ class ReleaseToolsTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         # PowerShell wraps and colours the error to the console's width, so the match ignores escapes, breaks and gutters.
         self.assertIn("ROUNDELFAIL:nostockroundels", re.sub(r"\x1b\[[0-9;]*m|[\s|]", "", result.stderr))
+
+    def test_verification_rejects_dev_plugin(self):
+        self.package(plugin=b"!" + "StageLogging".encode("utf-16-le"))
+        result = self.verify()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Icarus.dll is a dev build", result.stderr)
 
     def test_allowlist_rejects_loader_debug_and_path_entries(self):
         for extra in ("BepInEx.dll", "Blueprinter.dll", "Icarus.pdb", "Icarus.xml", "Icarus.deps.json", "../outside"):

@@ -1,5 +1,7 @@
 using HarmonyLib;
+#if ICARUS_DEV
 using UnityEngine;
+#endif
 
 namespace Icarus;
 
@@ -21,6 +23,7 @@ static class DamageRegistrations
             postfix: AccessTools.Method(typeof(DamageRegistrations), nameof(AfterSpawnWeapons)), diagnostic: true),
     };
 
+#if ICARUS_DEV
     internal static void Install(BepInEx.Configuration.ConfigFile config)
     {
         if (!IcarusPlugin.Log.StageEnabled) return;
@@ -28,6 +31,7 @@ static class DamageRegistrations
             "Test support: raising it gives every Icarus this machine's server owns a fresh copy of its loadout, respawning its mounts");
         reload.SettingChanged += (_, _) => ReloadAll();
     }
+#endif
 
     static void AfterSpawnWeapons(WeaponManager __instance)
     {
@@ -38,6 +42,7 @@ static class DamageRegistrations
         IcarusPlugin.Log.Info($"damage-registrations {aircraft.UniqueName}: {aircraft.damageables.Count} after a loadout spawn");
     }
 
+#if ICARUS_DEV
     static void ReloadAll()
     {
         if (!IcarusPlugin.Log.StageEnabled) return;
@@ -51,4 +56,5 @@ static class DamageRegistrations
             aircraft.Networkloadout = new NuclearOption.SavedMission.Loadout { weapons = new(aircraft.Networkloadout.weapons) };
         }
     }
+#endif
 }

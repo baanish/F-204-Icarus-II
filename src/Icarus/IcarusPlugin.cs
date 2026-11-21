@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
-using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
 
@@ -31,7 +30,6 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Features whose patch target was missing or failed; their code stands down.</summary>
     internal static HashSet<string> FeaturesOff = new();
 
-    ConfigEntry<bool> stageLogging = null!;
     Harmony harmony = null!;
     bool missionRunning;
     float supplyRepairAt = float.PositiveInfinity;
@@ -39,16 +37,22 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     void Awake()
     {
         Log = new IcarusLog(Logger);
-        stageLogging = Config.Bind("Diagnostics", "StageLogging", false,
+#if ICARUS_DEV
+        var stageLogging = Config.Bind("Diagnostics", "StageLogging", false,
             "Log diagnostic stages, at most one line per key per second. Restart the game after changing this to install or remove diagnostic patches.");
         Log.StageEnabled = stageLogging.Value;
         stageLogging.SettingChanged += (_, _) => Log.StageEnabled = stageLogging.Value;
-        Log.Info($"F-204 Icarus II {Version} ({Guid}); Diagnostics.StageLogging={stageLogging.Value}");
+        Log.Info($"F-204 Icarus II {Version} ({Guid}); dev build; Diagnostics.StageLogging={stageLogging.Value}");
+#else
+        Log.Info($"F-204 Icarus II {Version} ({Guid}); release build; stage logging off");
+#endif
         Tuning.Install(Config, Log);
         StockMissionSupply.Install(Config, Log);
         HelipadLaunch.Install(Config);
+#if ICARUS_DEV
         DamageRegistrations.Install(Config);
         AircraftMenuProbe.Install(Config, this);
+#endif
         harmony = new Harmony(Guid);
         FeaturesOff = PatchTarget.InstallAll(harmony, PatchTargets, Log);
     }
