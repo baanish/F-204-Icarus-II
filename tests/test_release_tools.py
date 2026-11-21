@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import struct
 import subprocess
 import sys
@@ -127,8 +128,8 @@ class ReleaseToolsTests(unittest.TestCase):
         self.env["ICARUS_SKIP_ROUNDEL_EXPORT"] = "1"
         result = self.verify()
         self.assertNotEqual(result.returncode, 0)
-        # PowerShell wraps and colours the error to the console's width, so only a short marker is sure to be unbroken.
-        self.assertIn("ROUNDEL FAIL: no stock roundels", result.stderr)
+        # PowerShell wraps and colours the error to the console's width, so the match ignores escapes, breaks and gutters.
+        self.assertIn("ROUNDELFAIL:nostockroundels", re.sub(r"\x1b\[[0-9;]*m|[\s|]", "", result.stderr))
 
     def test_allowlist_rejects_loader_debug_and_path_entries(self):
         for extra in ("BepInEx.dll", "Blueprinter.dll", "Icarus.pdb", "Icarus.xml", "Icarus.deps.json", "../outside"):
