@@ -27,6 +27,9 @@ LEG_R = 0.06  # the leg's half-width about its line, pivot to wheel centre
 # Stores the folding gear must keep STORE_GAP from, by hardpoint name part, and the airframe it cannot pass through,
 # by mesh name prefix: everything else on its way is skin a door opens or structure a well clears.
 STORE_HARDPOINTS = ("innerwing_L", "conformal_L", "centreline")
+# The optional weapon packs' mount keys begin so (IcarusAuthor.Identity.cs AryxPackMounts, MeridianWorksMounts): one
+# whose pack has no mod_bundles entry is skipped and named; any other key that resolves nowhere is an error.
+PACK_KEY_PREFIXES = ("aryx_", "meridian")
 HARD = ("wing_skin_inner_upper_L", "wing_skin_inner_lower_L", "wing_skin_outer_upper_L", "wing_skin_outer_lower_L",
         "intake_duct_L", "engine_core")
 # And skin no door can open, as (s from, s to, x from, x to) boxes of skin faces wholly inside them below z -0.1: the
@@ -173,9 +176,11 @@ def clearance_scene(nobp):
                     meshes = [mesh]
                 else:
                     holder = next((bundle for bundle in holders if key in bundle.bundle_mounts), None)
-                    if holder is None:  # a weapon pack's mount, with no mod_bundles entry for its pack
+                    if holder is None and key.lower().startswith(PACK_KEY_PREFIXES):
                         unswept.add(key)
                         continue
+                    if holder is None:
+                        raise SystemExit(f"{key}, offered on {set_name}, is missing from the game export and the Icarus bundle")
                     if seat is None:
                         mesh, _ = holder.mount(key, stock_mesh)
                         meshes = [mesh]
