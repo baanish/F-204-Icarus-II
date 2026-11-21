@@ -3,8 +3,10 @@
 Usage: Run-Blender.ps1 --background --factory-startup --python-exit-code 1 --python tools/livery_kit_model.py -- SKIN_BLEND OUT
 
 Writes OUT/icarus_paint_model.blend, OUT/icarus_paint_model.fbx and OUT/skin_uv.json. The model is the exterior skin only:
-every face on the skin material, one object per skin part, in world position, with the shipped atlas UVs untouched.
-Its material reads the kit's maps at ../maps/ and the first example livery at ../examples/, so a painter swaps one file.
+every face on the skin material, the skin parts joined into one object, in world position, with the shipped atlas UVs
+untouched. One object because Blender's texture paint paints the active object: saved active and selected, the whole skin
+paints at once. Its material reads the kit's maps at ../maps/ and the first example livery at ../examples/, so a painter
+swaps one file.
 skin_uv.json holds every skin polygon's UV loop per part, which tools/livery_kit.py draws into the layout and part map.
 """
 import json
@@ -21,6 +23,7 @@ from scrub_fbx import scrub_file  # noqa: E402
 import uvs  # noqa: E402
 
 MODEL = 'icarus_paint_model'
+SKIN_OBJECT = 'Icarus_skin'
 MATERIAL = 'Icarus_livery'
 # Relative to the model's folder inside the kit; tools/livery_kit.py lays the kit out to match.
 BASE_COLOUR = '../examples/Icarus_livery_1.png'
@@ -86,6 +89,31 @@ def skin_copy(obj, collection, mat):
     return copy
 
 
+def uv_faces(objects):
+    """Every polygon's UV loop, in loop order, sorted: what a join must leave unchanged."""
+    return sorted(tuple(tuple(o.data.uv_layers.active.data[i].uv) for i in p.loop_indices)
+                  for o in objects for p in o.data.polygons)
+
+
+def triangles_of(objects):
+    return sum(len(p.vertices) - 2 for o in objects for p in o.data.polygons)
+
+
+def join_parts(copies):
+    """The skin copies as one mesh object, active and selected."""
+    before = triangles_of(copies), uv_faces(copies)
+    for obj in copies:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = copies[0]
+    with bpy.context.temp_override(active_object=copies[0], selected_objects=copies, selected_editable_objects=copies):
+        bpy.ops.object.join()
+    joined = copies[0]
+    joined.name = joined.data.name = SKIN_OBJECT
+    if (triangles_of([joined]), uv_faces([joined])) != before:
+        raise SystemExit('LIVERY KIT MODEL FAIL: joining the skin parts changed their triangles or UVs')
+    return joined
+
+
 def uv_record(obj):
     uv = obj.data.uv_layers.active.data
     # Full precision: tools/livery_kit.py holds these to the export's atlas record (atlas_guard) before drawing them.
@@ -105,7 +133,6 @@ def main():
     collection = bpy.data.collections.new('Icarus_skin')
     scene.collection.children.link(collection)
     mat = paint_material()
-    names = [o.name for o in sources]
     copies = [skin_copy(o, collection, mat) for o in sources]
     for other in [s for s in bpy.data.scenes if s != scene]:
         bpy.data.scenes.remove(other)
@@ -115,13 +142,15 @@ def main():
         bpy.data.collections.remove(other)
     for world in list(bpy.data.worlds):
         bpy.data.worlds.remove(world)
+    model = join_parts(copies)
     bpy.data.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
-    for copy, name in zip(copies, names):
-        copy.name = name
     blend = out / (MODEL + '.blend')
     # The kit names no folder of the machine that built it: the scene alone and what it uses (no window or file browser
     # state, which hold local folders), with the render output path cleared, and the path the file was saved to
     # (FileGlobal.filepath, a NUL-terminated field) blanked. Uncompressed so those bytes can be found; the zip compresses.
+    # The output path is a fixed 1024-byte field and clearing it ends the string at its first byte only, so the bake's
+    # old path stays after that NUL: filled with spaces first, nothing of it is saved.
+    scene.render.filepath = ' ' * 1023
     scene.render.filepath = ''
     bpy.data.libraries.write(str(blend), {scene}, path_remap='NONE', fake_user=False, compress=False)
     data = blend.read_bytes()
@@ -129,13 +158,17 @@ def main():
         data = data.replace(saved, bytes(len(saved)))
     blend.write_bytes(data)
     fbx = out / (MODEL + '.fbx')
+    # The exporter writes each image's path relative to the FBX from the image's absolute path, which it resolves
+    # against the current file: still the bake's skin.blend, since libraries.write saves a copy. Absolute at the kit's
+    # layout beside OUT, so the FBX stores ../maps and ../examples; the absolute FileName is blanked by scrub_file.
+    for image in bpy.data.images:
+        image.filepath = str((out.resolve() / image.filepath[2:]).resolve())
     bpy.ops.export_scene.fbx(filepath=str(fbx), use_selection=False, object_types={'MESH'},
                              path_mode='RELATIVE', embed_textures=False, mesh_smooth_type='FACE',
                              add_leaf_bones=False, bake_anim=False)
     scrub_file(fbx)
-    faces = sum(len(c.data.polygons) for c in copies)
-    triangles = sum(len(p.vertices) - 2 for c in copies for p in c.data.polygons)
-    print(f'LIVERY KIT MODEL PASS: {len(copies)} skin parts, {faces} faces, {triangles} triangles', flush=True)
+    print(f'LIVERY KIT MODEL PASS: {len(sources)} skin parts in one object {model.name}, {len(model.data.polygons)} faces, '
+          f'{triangles_of([model])} triangles', flush=True)
 
 
 main()

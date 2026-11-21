@@ -1416,8 +1416,11 @@ def footwell_detail(g, uv, kit, space, side, s_front):
                               for s in (s0 + 0.01, s1 - 0.01)], "metal", along=Y), None, "tub")
     # the tread: ribs along the floor beside the wall, from the plate's front to its back
     out = min(space.wall_x(s, floor + 0.005) for s in (s0, s1)) - 0.012
-    for k in range(TREAD_RIBS):
-        x = out - 0.006 * k
+    for k in range(TREAD_RIBS):  # each a low ridge of two sloping faces, 3 mm high: 4 triangles, ends open
+        x = side * (out - 0.006 * k)
+        x0, x1 = sorted((x - side * 0.005, x))
+        g.put(grid_sheet(uv, [[P(s, x0, floor), P(s, (x0 + x1) / 2, floor + 0.003), P(s, x1, floor)]
+                              for s in (s0 + 0.01, s1 - 0.01)], "knurl", keep=True), None, "tub")
     # the wall's stiffeners: a frame up the wall aft of the breakers, from over the kick panel's edge, and three
     # stringers along it
     d, h = 0.012, 0.008
@@ -1428,8 +1431,6 @@ def footwell_detail(g, uv, kit, space, side, s_front):
     for zc in STRINGERS:
         g.put(loft_piece(uv, [[wall(s, zc - h, 0.001), wall(s, zc + h, 0.001), wall(s, zc + h, d), wall(s, zc - h, d)]
                               for s in bi.spaced(s_front + STRINGER_RUN[0], s_front + STRINGER_RUN[1], 6)], "structure", along=Y), None, "tub")
-        xs = sorted((side * (x - 0.005), side * x))
-        g.put(block(uv, s0 + 0.01, s1 - 0.01, xs[0], xs[1], floor, floor + 0.003, lambda i: "knurl"), None, "tub")
 
 
 def pedals(g, uv, kit):

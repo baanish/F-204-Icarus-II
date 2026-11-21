@@ -24,8 +24,10 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import posixpath
 import re
 import shutil
+import struct
 import sys
 import zipfile
 
@@ -36,11 +38,13 @@ from scipy import ndimage
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'art/textures'))
 sys.path.insert(0, str(ROOT / 'art/blender'))
+sys.path.insert(0, str(ROOT / 'tools'))
 import atlas_guard  # noqa: E402
 import faction_marks  # noqa: E402
 from compose_skin import FASTENER_SHADE, SEAM_SHADE, exported_atlas  # noqa: E402
 from liveries import specifications  # noqa: E402
-from rasterize import EXPORT, GUTTER_PX, OUT as BAKE, SIZE  # noqa: E402
+from rasterize import EXPORT, GUTTER_PX, OUT as BAKE, SIZE, dilate  # noqa: E402
+from scrub_fbx import read_tree  # noqa: E402
 
 JSON_KEY = 'baanish_icarus'
 DOCS = ROOT / 'docs/livery-kit'
@@ -165,8 +169,9 @@ def panel_lines(seam, fastener, used):
     """Black at the alpha that darkens paint as compose did: over any colour c it gives c * shade. One layer, at the
     painted finish's strength, since a player's livery always gets the painted finish in game; the two Bare Metal
     examples were composed with the lighter metal strength, so this layer over their base darkens their joints a little
-    more than their shipped maps (the guide says so)."""
-    alpha = (SEAM_SHADE['paint'] * seam + FASTENER_SHADE['paint'] * fastener) * used
+    more than their shipped maps (the guide says so). The shading runs GUTTER_PX past each island, as compose's maps
+    pad it (rasterize.dilate), so a livery stacked from the layers carries it into the gutters the game filters across."""
+    alpha = dilate((SEAM_SHADE['paint'] * seam + FASTENER_SHADE['paint'] * fastener) * used, used)
     out = np.zeros((*alpha.shape, 4), np.uint8)
     out[..., 3] = np.uint8(np.clip(alpha, 0, 1) * 255 + .5)
     return Image.fromarray(out)
@@ -364,15 +369,59 @@ DRIVE_PATH = re.compile(rb'[A-Za-z]:[\\/][A-Za-z0-9 _.\\/-]{8,}')
 
 def local_paths(stage, model):
     """Files that name a folder of the machine that built them: the repository, the model step's output or the home
-    folder anywhere, and in the model files any absolute drive path."""
+    folder anywhere, and in the model files any absolute drive path. Folders are sought without their drive too: a
+    path left in a fixed-size .blend field after a shorter one was saved over it can have lost its first bytes."""
     folders = {ROOT, model.resolve(), Path.home()}
-    needles = {form.encode() for folder in folders for form in (str(folder), folder.as_posix())}
+    needles = {form[len(folder.drive):].encode() for folder in folders for form in (str(folder), folder.as_posix())}
     found = []
     for path in sorted(p for p in stage.rglob('*') if p.is_file()):
         data = path.read_bytes()
         if any(n in data for n in needles) or (path.parent.name == 'model' and DRIVE_PATH.search(data)):
             found.append(path.relative_to(stage).as_posix())
     return found
+
+
+def fbx_texture_paths(data):
+    """The texture paths a binary FBX stores (FileName, RelativeFilename and Path properties), blanked ones aside."""
+    found = []
+
+    def walk(nodes):
+        for name, props, children in nodes:
+            strings = [p[5:].decode('utf-8', 'replace') for p in props if p[:1] == b'S']
+            if strings and (name.lower() in (b'filename', b'relativefilename') or name == b'P' and strings[0] == 'Path'):
+                if strings[-1].strip():
+                    found.append(strings[-1])
+            walk(children)
+    walk(read_tree(data)[0])
+    return found
+
+
+def blend_texture_paths(data):
+    """The image paths an uncompressed .blend stores: printable runs ending in .png that hold a folder separator (an
+    image datablock's name has none)."""
+    runs = re.findall(rb'(?<![\x20-\x7e])[\x20-\x7e]+?\.png(?=\x00)', data, re.IGNORECASE)
+    return [run.decode('ascii') for run in runs if b'/' in run or b'\\' in run]
+
+
+def model_texture_problems(archive, top, files):
+    """Each model file's texture paths must be relative and land on a kit file from the model's own folder, so the
+    kit works wherever it is unpacked: Blender's start with //, and the FBX's are bare relative paths."""
+    problems = []
+    for name, paths, blender in (('model/icarus_paint_model.fbx', fbx_texture_paths, False),
+                                 ('model/icarus_paint_model.blend', blend_texture_paths, True)):
+        try:
+            found = paths(archive.read(f'{top}/{name}'))
+        except (ValueError, struct.error) as error:
+            problems.append(f'{name} cannot be read: {error}')
+            continue
+        if not found:
+            problems.append(f'{name} stores no texture path')
+        for stored in found:
+            relative = stored[2:] if blender and stored.startswith('//') else None if blender else stored
+            target = posixpath.normpath('model/' + relative.replace('\\', '/')) if relative is not None else None
+            if relative is None or re.match(r'[A-Za-z]:|[\\/]', relative) or target not in files:
+                problems.append(f'{name} stores texture path {stored!r}, which is not a kit file beside model/')
+    return problems
 
 
 def check_zip(path, top, specs):
@@ -415,6 +464,8 @@ def check_zip(path, top, specs):
             require(False, f'{meta} is not valid JSON: {error}')
         require(isinstance(metadata, dict) and metadata.get('AircraftKey') == JSON_KEY,
                 f'{meta} must set AircraftKey to {JSON_KEY}')
+        problems = model_texture_problems(archive, top, set(expected_files(specs)))
+        require(not problems, '; '.join(problems))
 
 
 def main():
@@ -443,7 +494,7 @@ def main():
     write_zip(stage, out, top)
     check_zip(out, top, specifications())
     (ROOT / '.cache/livery-kit/report.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(f'LIVERY KIT PASS: {out.relative_to(ROOT).as_posix()} {out.stat().st_size} bytes sha256 {sha256(out)}')
+    print(f'LIVERY KIT PASS: {out.as_posix()} {out.stat().st_size} bytes sha256 {sha256(out)}')
 
 
 if __name__ == '__main__':

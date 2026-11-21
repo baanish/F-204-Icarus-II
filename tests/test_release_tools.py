@@ -82,6 +82,13 @@ class ReleaseToolsTests(unittest.TestCase):
         kit_payload = {f"maps/{name}": (kit.EXPORT / name).read_bytes() for name in kit.SHARED_MAPS}
         kit_payload["install/IcarusLiveryBuilder.cs"] = (kit.DOCS / "IcarusLiveryBuilder.cs").read_bytes()
         kit_payload["install/meta.json"] = json.dumps({"AircraftKey": kit.JSON_KEY}).encode()
+        # model files that store one texture path each, beside model/ (livery_kit.model_texture_problems)
+        texture = b"..\\examples\\Icarus_livery_1.png"
+        node = b"RelativeFilename" + b"S" + struct.pack("<I", len(texture)) + texture
+        kit_payload["model/icarus_paint_model.fbx"] = (
+            b"Kaydara FBX Binary  \x00\x1a\x00" + struct.pack("<I", 7400)
+            + struct.pack("<IIIB", 27 + 13 + len(node), 1, len(node) - 16, 16) + node + bytes(13))
+        kit_payload["model/icarus_paint_model.blend"] = b"BLENDER-v405\x00\x01//../maps/Icarus_skin_n.png\x00"
         if invalid_kit_png:
             kit_payload[invalid_kit_png] = invalid_kit_data
         with zipfile.ZipFile(self.root / self.kit_name, "w") as archive:

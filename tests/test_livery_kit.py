@@ -2,11 +2,14 @@
 when tools/Build-LiveryKit.ps1 has made it, and the roundel checks when the local asset export is set."""
 
 import io
+import os
+import struct
 import sys
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 from PIL import Image
@@ -23,11 +26,13 @@ BUILT = REPO / "build" / (TOP + ".zip")
 
 
 def roundels_available():
+    """Every example's faction roundel is on disk; a checkout without the asset export maps no faction at all."""
     try:
-        return all(path.is_file() for path in kit.faction_marks.roundel_paths(
-            __import__("json").loads(kit.faction_marks.RECORD.read_text())).values())
+        paths = kit.faction_marks.roundel_paths(__import__("json").loads(kit.faction_marks.RECORD.read_text()))
     except (OSError, ValueError):
         return False
+    factions = {spec["faction"] for spec in SPECS}
+    return factions <= paths.keys() and all(paths[faction].is_file() for faction in factions)
 
 
 class LiveryKitContractTests(unittest.TestCase):
@@ -56,7 +61,20 @@ class LiveryKitContractTests(unittest.TestCase):
             (stage / name).write_bytes(payloads.get(name, name.encode()))
         return stage
 
-    def test_zip_is_deterministic_and_held_to_the_contract(self):
+    @staticmethod
+    def fbx_storing(path):
+        """A binary FBX holding one RelativeFilename node."""
+        name, value = b"RelativeFilename", path.encode()
+        prop = b"S" + struct.pack("<I", len(value)) + value
+        node = struct.pack("<IIIB", 27 + 13 + len(name) + len(prop), 1, len(prop), len(name)) + name + prop
+        return b"Kaydara FBX Binary  \x00\x1a\x00" + struct.pack("<I", 7400) + node + bytes(13)
+
+    @staticmethod
+    def blend_storing(path):
+        """An uncompressed .blend's bytes round an image path and an image datablock's name."""
+        return b"BLENDER-v405\x00\x01" + path.encode() + b"\x00\x02IMIcarus_livery_1.png\x00"
+
+    def payloads(self, fbx_path="..\\examples\\Icarus_livery_1.png", blend_path="//../maps/Icarus_skin_n.png"):
         names = kit.expected_files(SPECS)
         png = io.BytesIO()
         Image.new("RGB", (1, 1)).save(png, format="PNG")
@@ -64,6 +82,12 @@ class LiveryKitContractTests(unittest.TestCase):
         payloads.update({f"maps/{name}": (kit.EXPORT / name).read_bytes() for name in kit.SHARED_MAPS})
         payloads["install/IcarusLiveryBuilder.cs"] = (kit.DOCS / "IcarusLiveryBuilder.cs").read_bytes()
         payloads["install/meta.json"] = kit.meta_example().encode()
+        payloads["model/icarus_paint_model.fbx"] = self.fbx_storing(fbx_path)
+        payloads["model/icarus_paint_model.blend"] = self.blend_storing(blend_path)
+        return names, payloads
+
+    def test_zip_is_deterministic_and_held_to_the_contract(self):
+        names, payloads = self.payloads()
         stage = self.stage(names, payloads)
         first, second = self.root / "a.zip", self.root / "b.zip"
         kit.write_zip(stage, first, TOP)
@@ -74,6 +98,16 @@ class LiveryKitContractTests(unittest.TestCase):
         kit.write_zip(self.stage(["examples/stray.png"]), extra, TOP)
         with self.assertRaises(SystemExit):
             kit.check_zip(extra, TOP, SPECS)
+
+    def test_model_texture_paths_must_land_in_the_kit(self):
+        for fbx_path, blend_path in (("..\\..\\bake\\examples\\Icarus_livery_1.png", "//../maps/Icarus_skin_n.png"),
+                                     ("..\\examples\\Icarus_livery_1.png", "//../maps/missing.png"),
+                                     ("..\\examples\\Icarus_livery_1.png", "C:/kit/maps/Icarus_skin_n.png")):
+            names, payloads = self.payloads(fbx_path, blend_path)
+            path = self.root / "paths.zip"
+            kit.write_zip(self.stage(names, payloads), path, TOP)
+            with self.assertRaises(SystemExit, msg=(fbx_path, blend_path)):
+                kit.check_zip(path, TOP, SPECS)
 
     def test_panel_line_overlay_darkens_paint_as_compose_did(self):
         seam = np.array([[0, 1, .5, 0]], np.float64)
@@ -86,10 +120,39 @@ class LiveryKitContractTests(unittest.TestCase):
         self.assertTrue(np.all(np.abs(over - expected) <= 1), (over, expected))
         self.assertEqual(overlay[0, :, 3].astype(int).tolist(), [0, 77, 48, 41])
 
+    def test_panel_line_overlay_runs_into_the_gutter_as_the_shipped_maps(self):
+        width = kit.GUTTER_PX + 4
+        seam = np.zeros((1, width + 2))
+        seam[0, :2] = (.5, 1)
+        used = np.zeros_like(seam, bool)
+        used[0, :2] = True
+        alpha = np.asarray(kit.panel_lines(seam, np.zeros_like(seam), used))[0, :, 3].astype(int)
+        inside = alpha[1]
+        self.assertGreater(inside, 0)
+        # padded with the nearest island texel for GUTTER_PX texels, as rasterize.dilate pads the albedo
+        self.assertEqual(alpha[2:2 + kit.GUTTER_PX].tolist(), [inside] * kit.GUTTER_PX)
+        self.assertEqual(alpha[2 + kit.GUTTER_PX:].tolist(), [0] * (width - kit.GUTTER_PX))
+
+    def test_pass_line_names_an_output_outside_the_repository(self):
+        repo, elsewhere = self.root / "repo", self.root / "elsewhere"
+        repo.mkdir()
+        elsewhere.mkdir()
+        write = lambda stage, path, top: path.write_bytes(b"kit")
+        argv = ["livery_kit.py", "--model", str(self.root), "--version", "9.9.9", "--out", "kit.zip"]
+        cwd = os.getcwd()
+        os.chdir(elsewhere)
+        self.addCleanup(os.chdir, cwd)
+        with mock.patch.object(kit, "ROOT", repo), mock.patch.object(sys, "argv", argv),                 mock.patch.object(kit, "check_inputs"), mock.patch.object(kit, "stage_kit", return_value={}),                 mock.patch.object(kit, "local_paths", return_value=[]), mock.patch.object(kit, "write_zip", write),                 mock.patch.object(kit, "check_zip"), mock.patch("builtins.print") as said:
+            kit.main()
+        self.assertIn("LIVERY KIT PASS: kit.zip 3 bytes", said.call_args.args[0])
+
     def test_local_paths_are_found(self):
         stage = self.stage(["model/clean.fbx"])
         (stage / "model/leak.fbx").write_bytes(b"\0" + str(REPO).encode() + b"\\x.png\0")
         self.assertEqual(kit.local_paths(stage, self.root), ["model/leak.fbx"])
+        # the tail of an older, longer path, its first byte overwritten by the NUL that ended a shorter one
+        (stage / "model/stale.blend").write_bytes(b"\0" + str(REPO)[1:].encode() + b"\\x.png\0")
+        self.assertEqual(kit.local_paths(stage, self.root), ["model/leak.fbx", "model/stale.blend"])
 
 
 class LiveryWorkshopTagTests(unittest.TestCase):

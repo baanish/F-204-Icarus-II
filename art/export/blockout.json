@@ -102,7 +102,7 @@
     "cockpit_clock_hour": "8014c63e947068dea98f00062d419c179f29616cc32aa0b5eac96f1ce363d047",
     "cockpit_clock_minute": "4afb61c4781273978f4dab16bfa9026052ef0576c4be3705e49f00fe91d1c236",
     "cockpit_fuel_needle": "4afb61c4781273978f4dab16bfa9026052ef0576c4be3705e49f00fe91d1c236",
-    "cockpit_interior": "c2191a0df13d1edeede4afee7e6c96966abe4db9ef40c1bb6a6aed78ca260418",
+    "cockpit_interior": "89aabd8b9b327b09628063f8ed07ab18981757770eaad287c6d7aed1c3ed4ecc",
     "cockpit_standby_ball": "4e97df0bb6af71d842c65b26e9b0110695ead5dc1de20b607e78e41c47c8ddb2",
     "cockpit_throttle_lever": "835767f7332d9f5f40d19d752856de488e563dc28f45b600ea94a3168bd70ca6",
     "cockpit_tip_fuel_L": "57fc1fc154852edcafe504a434c847a7ccad6eb3511529042d0937f6db681494",
@@ -1579,7 +1579,7 @@
      1.52259
     ]
    ],
-   "sha256": "0e60136a502be1ba28061d48a086a030e7d4e37a5ccf0a0ed2122a8e903a1390",
+   "sha256": "5f6242243d90b8a36bbc4c124d3f8616057696f5848da7ccf4f25c1c1f202443",
    "drawn": true,
    "colliders": [],
    "lod1": null,
@@ -1595,11 +1595,11 @@
      0.5352
     ]
    ],
-   "tris": 16513,
+   "tris": 16533,
    "materials": [
     [
      "Icarus_Cockpit",
-     16513
+     16533
     ]
    ],
    "uv_layers": [
@@ -3594,7 +3594,7 @@
      1.95624
     ]
    ],
-   "sha256": "ce78057fef4d4817037cb0007c70f16d42571e5a1f9f8e9b17325232ad3b7a82",
+   "sha256": "a62e26b0618b65d234a9cbac4d58b38c5266762bf97eb979081188f09bef79ff",
    "drawn": true,
    "colliders": [
     {
@@ -3711,7 +3711,7 @@
      1.69
     ]
    ],
-   "sha256": "936fe85b11900f223208da2ad87602d80a4906b3e703637f9db124f0678829fe",
+   "sha256": "e8e2b9c290eedbbc420037a2f7346ed1bec7a2765522914aae1744180fdc5dc8",
    "drawn": true,
    "colliders": [
     {
@@ -6422,7 +6422,7 @@
      1.278
     ]
    ],
-   "sha256": "e7fa1119a1bf4445993234aa4b6211da9c41e8502b35b6b85e42dacd2a09079e",
+   "sha256": "b3734b892ed5ab183b487ada69c67f56382342d9e5b974848d6c565659680950",
    "drawn": true,
    "colliders": [
     {
@@ -6543,7 +6543,7 @@
      1.278
     ]
    ],
-   "sha256": "1da0b95008ee6f072f8f26aa99d0bffb607535506443280048249e71eb4cfdce",
+   "sha256": "09355c8398d5de7fb2cfb7e7f59b8bb29cc5426f5bef0f0293b5e0ace7db3f19",
    "drawn": true,
    "colliders": [
     {
@@ -14318,7 +14318,7 @@
      0.675
     ]
    ],
-   "sha256": "11f20f031a28031b56793e37ad1211ebaba09f81be7c764047dbc7dc273c1571",
+   "sha256": "dccc47bf7a29182b157d6f3aefdc00f94b93bf1e18a7ee59100647424cbe838d",
    "drawn": true,
    "colliders": [],
    "lod1": null,
@@ -15695,7 +15695,7 @@
      -0.19986
     ]
    ],
-   "sha256": "bb97f0deec54277a00c6789a642e23d30172ad4ee5c629683baf275688139af0",
+   "sha256": "5d0d5602175164d0d5943cdbf1ac18c8690d91db9e67fdef5f2f5cb6595898a8",
    "drawn": true,
    "colliders": [],
    "lod1": null,
@@ -16957,7 +16957,7 @@
      2.01282
     ]
    ],
-   "sha256": "b61d5037a4ba06046399384d0ec095c5b4687923f2d9bb8a24e3bcdabf85ae8c",
+   "sha256": "f2ea326a775b8a5294df3488617a377e873f98163806e5493bd8093b85dbcef7",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17032,7 +17032,7 @@
      2.01282
     ]
    ],
-   "sha256": "a18971c8074afbc1625c689d6b1842e99f6e7a435042f2436a01e3f7ef0cd79d",
+   "sha256": "5635344da3c2820bb2889b029d20a9a266d3a04d4ccf292eb1375f66a5370a3a",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17107,7 +17107,7 @@
      2.01282
     ]
    ],
-   "sha256": "8ddeb150497b7e94c5655dbfa2b066090edcb1b33f79dd00e109b1a57797a199",
+   "sha256": "8631f6a7436eb5b18ddff8e25c1edf6aeb14b6d746b4c25d0d83ba5e8f620b80",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17182,7 +17182,7 @@
      2.01282
     ]
    ],
-   "sha256": "944a10a33664308a6627793d136e0c4725076c2a25458a62b7e9b3d4ad133ca3",
+   "sha256": "7f5becffc53e22c308c65c99280f451ef0f3705ff7fe73413872ee4a5f1e094d",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17257,7 +17257,7 @@
      1.28426
     ]
    ],
-   "sha256": "cf596466a5d519e85f3c1e6d3ed86a8c654f62b83054fe467b8353dd85834a8b",
+   "sha256": "b01bfae2d0d7fa5d5be0c877bf84ea49489de930f3bcf3c925903cbda2dd2612",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17332,7 +17332,7 @@
      1.28426
     ]
    ],
-   "sha256": "fa3d511dae07208b316d326b86a894bd7f2c6ac8274424b2dc7bffbf19b2cd0d",
+   "sha256": "5e3adf2a01e0529a2ee8655b37b4ca5263cc6592a06e7b520d932a931d11047c",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17407,7 +17407,7 @@
      1.28426
     ]
    ],
-   "sha256": "f410106bb2664131ee6f101bd60f0e2107b740bd27c5646ea6099e29d58a7e47",
+   "sha256": "e20d8256a3d415bef7816d20b8b77af66b4dfc9bd92d17dffad6d92e4e0f133a",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17482,7 +17482,7 @@
      1.28426
     ]
    ],
-   "sha256": "5d1dd7ac39325cbbbd3ec18211386506c2268b5f1d7f0649079ed4880265cbbb",
+   "sha256": "74562fa8738a3006d18c412fa08198f21a43d372ee5080ca04369b26e9b5c0c5",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17557,7 +17557,7 @@
      1.275
     ]
    ],
-   "sha256": "c2e1716b841d8010142eb3ad8a39f704c021d2b5b80e82bbf2c0c25d5c4af3d1",
+   "sha256": "2525b4139e3c65e2d5b5b80b11b340347d93edf4d41cd7194b74aa68b922bc90",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17632,7 +17632,7 @@
      1.275
     ]
    ],
-   "sha256": "dd9fefcfc557efb91bcded5cf1fab8f55de096e3c813ec13a80f91a7089c6772",
+   "sha256": "5ed7a860316182e8c771be4800f33470cd22960fb2ca9d51fdf30ac63239ad20",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17707,7 +17707,7 @@
      1.3648
     ]
    ],
-   "sha256": "a75f96f56754d63ff179a2394a0cfbb121a02fbf6ba035dd503b812c727d415c",
+   "sha256": "c9cfbd74e05841f03585501e8e6afcc542f16bba5b8c465fd77ed465a68e7337",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17782,7 +17782,7 @@
      1.3648
     ]
    ],
-   "sha256": "826b97c61538da9ab798c0f75f27b774119a7266f9470bfc50060f25b725e1e5",
+   "sha256": "c0e81b5912481eb3384c95c004918e555044856baf9dbd9284fba5fe4e6663c7",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17857,7 +17857,7 @@
      1.3648
     ]
    ],
-   "sha256": "c7325656a0dd96a0fc9e03b1178c639b54e3a5cc93a8f364187610bac443967f",
+   "sha256": "de8daed9b4720f6354228704417d84970fd5126a9b342386d98b31bbad82515e",
    "drawn": true,
    "colliders": [],
    "lod1": {
@@ -17932,7 +17932,7 @@
      1.3648
     ]
    ],
-   "sha256": "9aae914d196628e6149df4007f1c62b7796579d467e33868fa26d8930f7df0ea",
+   "sha256": "173c7c0d6bbd5233cb94a50f3766efcd530702c5a1b27c00514d848933ade00b",
    "drawn": true,
    "colliders": [],
    "lod1": {

@@ -17,13 +17,18 @@ static class TankFireLog
             prefix: AccessTools.Method(typeof(TankFireLog), nameof(BeforeUpdateStatus)), diagnostic: true),
     };
 
-    static readonly AccessTools.FieldRef<FuelTank, bool> Lit = AccessTools.FieldRefAccess<FuelTank, bool>("onFire");
-    static readonly AccessTools.FieldRef<FuelTank, UnitPart> TankPart = AccessTools.FieldRefAccess<FuelTank, UnitPart>("part");
+    // Resolved on the diagnostic's first run, not with PatchTargets: the plugin reads PatchTargets at startup, so a
+    // field a game update renames would otherwise fail the type's initializer and stop the whole plugin loading.
+    static AccessTools.FieldRef<FuelTank, bool>? lit;
+    static AccessTools.FieldRef<FuelTank, UnitPart>? tankPart;
 
     static void BeforeUpdateStatus(FuelTank __instance, bool onFire)
     {
-        if (!IcarusPlugin.Log.StageEnabled || !onFire || Lit(__instance) || IcarusPlugin.FeaturesOff.Contains("tank-fire-log")) return;
-        UnitPart part = TankPart(__instance);
+        if (!IcarusPlugin.Log.StageEnabled || !onFire || IcarusPlugin.FeaturesOff.Contains("tank-fire-log")) return;
+        lit ??= AccessTools.FieldRefAccess<FuelTank, bool>("onFire");
+        tankPart ??= AccessTools.FieldRefAccess<FuelTank, UnitPart>("part");
+        if (lit(__instance)) return;
+        UnitPart part = tankPart(__instance);
         float radius = part.GetAverageRadius() * 1.5f;
         var inside = Physics.OverlapSphere(__instance.transform.position, radius)
             .Select(c => c.GetComponent<UnitPart>()).Where(p => p != null && p.parentUnit == part.parentUnit)

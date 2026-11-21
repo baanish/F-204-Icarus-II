@@ -12,7 +12,9 @@ namespace Icarus;
 /// </summary>
 static class DamageRegistrations
 {
-    static readonly AccessTools.FieldRef<WeaponManager, Aircraft> AircraftOf = AccessTools.FieldRefAccess<WeaponManager, Aircraft>("aircraft");
+    // Resolved on the diagnostic's first run, not with PatchTargets: the plugin reads PatchTargets at startup, so a
+    // field a game update renames would otherwise fail the type's initializer and stop the whole plugin loading.
+    static AccessTools.FieldRef<WeaponManager, Aircraft>? aircraftOf;
     internal static readonly PatchTarget[] PatchTargets =
     {
         new("damage-registrations", typeof(WeaponManager), nameof(WeaponManager.SpawnWeapons),
@@ -30,7 +32,8 @@ static class DamageRegistrations
     static void AfterSpawnWeapons(WeaponManager __instance)
     {
         if (!IcarusPlugin.Log.StageEnabled) return;
-        Aircraft aircraft = AircraftOf(__instance);
+        aircraftOf ??= AccessTools.FieldRefAccess<WeaponManager, Aircraft>("aircraft");
+        Aircraft aircraft = aircraftOf(__instance);
         if (aircraft == null || aircraft.definition == null || aircraft.definition.jsonKey != IcarusPlugin.JsonKey) return;
         IcarusPlugin.Log.Info($"damage-registrations {aircraft.UniqueName}: {aircraft.damageables.Count} after a loadout spawn");
     }

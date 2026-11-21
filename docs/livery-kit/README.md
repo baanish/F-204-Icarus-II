@@ -8,7 +8,7 @@ Status of this guide: the kit's files are checked against the mod's own maps and
 
 | File | What it is |
 |---|---|
-| `model/icarus_paint_model.blend` | The jet's outer skin, ready to paint on in Blender. It shows the first example livery. |
+| `model/icarus_paint_model.blend` | The jet's outer skin as one object, ready to paint on in Blender. It shows the first example livery. |
 | `model/icarus_paint_model.fbx` | The same model for other 3D paint programs, such as Substance Painter. |
 | `examples/Icarus_livery_1.png` to `_7.png` | The seven shipped liveries, faction roundels included (list below). |
 | `examples/Icarus_livery_4_m.png`, `_7_m.png` | The metal maps of the two Bare Metal liveries. They show how the shipped Bare Metal works; your livery cannot use one (see [What the game does with your paint](#what-the-game-does-with-your-paint)). |
@@ -41,7 +41,7 @@ This is the recommended way. You paint straight onto the jet and the program wri
 
 1. Unzip the kit and keep its folders together: the model finds its pictures through them.
 2. Pick a starting picture and copy it into `examples/` under a new name, for example `my_livery.png`. `examples/Icarus_livery_5.png` (BDF Matte Gray) is a plain grey jet with markings. `template/layers/Icarus_livery_5_base.png` is the same grey with no markings at all.
-3. Open `model/icarus_paint_model.blend` in Blender and switch to the **Texture Paint** workspace (tab at the top).
+3. Open `model/icarus_paint_model.blend` in Blender. The whole skin is one object, `Icarus_skin`, already selected and active, so the brush reaches every part of the jet. Switch to the **Texture Paint** workspace (tab at the top). If you clicked elsewhere first and the jet no longer shows an orange outline, click it once in the viewport before switching.
 4. In the image editor on the left, choose **Image > Open** and open your `my_livery.png`.
 5. In the panel on the right, open the **Tool** tab, find **Texture Slots**, set **Mode** to **Single Image** and pick `my_livery.png`. You now paint into your picture and see it on the jet.
 6. Paint. Turn the view with the middle mouse button; set brush colour, size and strength in the tool settings at the top.
@@ -57,6 +57,7 @@ If you would rather draw flat, open your starting picture in an image editor tha
 - **Find a part.** `Icarus_part_labels.png` names the larger pieces. `Icarus_uv_layout.png` shows every piece's outline.
 - **Ignore the thin strips.** The many thin strips are the edges of the wings and tail, the gear doors, the pylons and the 32 small pieces of the engine nozzle. Together they hold about a tenth of the picture. Fill the whole picture with your base colour first and they take it. The fuselage sides, wings, fin and tailplane are where a livery shows.
 - **Rebuild a shipped livery.** Stack `layers/Icarus_livery_<n>_base.png`, then `layers/Icarus_livery_<n>_markings.png`, then `Icarus_panel_lines.png` (normal blending), and you get that shipped livery back, within one colour step on almost every pixel. The two Bare Metal liveries are the exception: their shipped panel joints are shaded a little lighter than painted ones (22% darker at a joint where paint is 30% darker), so rebuilt with this layer their joints come out slightly darker than shipped. Recolour the base layer to make a new scheme with the same markings.
+- **Recolouring leaves a fringe.** The markings layer's edge pixels were blended with the original base colour when the shipped livery was made, and the layer keeps them fully opaque. Over a base close to the original you will not see it; over a very different one (a white base under the grey jet's markings, say) each marking keeps a thin outline of the old colour, about a pixel wide. Paint over or erase that outline on the markings layer in your new colour, or start from the example picture itself and paint your new colours up to the markings.
 
 Save the result as a PNG, 4096 by 4096 pixels, without transparency.
 
@@ -70,7 +71,8 @@ Your picture is only the colour of the paint. The game adds everything else from
 - **Damage**: soot, scorches and holes come from the jet's damage maps and appear over your paint as the parts are hit. You paint nothing for damage.
 - **Mirrored parts**: the leading-edge flaps, speed brakes, intake ducts, nose and main gear doors, and wing pylons each share one piece of the picture between the left and right side (`Icarus_parts.csv` lists them). Whatever you paint there shows on both sides, and text there reads backwards on the right side. Wings, flaps, ailerons, fuselage and fin have separate left and right pieces, so numbers and lettering read correctly on both sides there.
 - **Roundels**: the game adds no national markings. Keep the roundels from the markings layer, or paint your own.
-- **Stores**: the tip tanks and other stores take their colour from your livery's main colours, which the builder picks from your picture.
+- **Tip tanks**: both tanks wear your picture, but only two small spots of it, about 3 pixels across, on the left wing's piece (`wing_skin_L`): their upper halves take the colour round pixel (479, 2035) and their lower halves the colour round pixel (1294, 2612), counting from the picture's top-left corner. These are points on the left wing's upper and lower skin, so a plain wing gives the tanks its colour. To give the tanks another colour, paint a patch a few pixels wide round each spot; a marking or panel line across a spot shows on the tanks as a smear of its colour.
+- **Other stores** take their colour from your livery's main colours, which the builder picks from your picture.
 
 ## Install your livery
 
