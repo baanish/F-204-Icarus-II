@@ -59,6 +59,7 @@ namespace Icarus.Editor
             Item("A21", "map and HUD icons", p => CheckIcons(definition, p));
             Item("A22", "breakup tree", p => CheckBreakupTree(b, p));
             Item("A23", "tail hook and carrier hangars", p => CheckTailHook(b, parameters, p));
+            Item("A24", "blast aim points and tank fire origins", p => CheckAimAndFires(b, p));
             if (failures.Count > 0)
                 throw new InvalidDataException("Icarus authoring checks failed:\n  " + string.Join("\n  ", failures));
         }
@@ -128,7 +129,8 @@ namespace Icarus.Editor
             if (thrust != null && Quaternion.Angle(thrust.localRotation, Quaternion.identity) > 0.01f) p.Add("thrust_vector isn't at rest (the Turbojet writes absolute angles)");
             if (thrust != null && thrust.GetComponent(GameType("JetNozzle")) != nozzles[0]) p.Add("the JetNozzle isn't on thrust_vector");
             var critical = GetList(Prop(te, "criticalParts"));
-            if (critical.Length != 1 || critical[0] != b.Part("fuselage_aft")) p.Add("criticalParts isn't [fuselage_aft]");
+            if (!critical.SequenceEqual(EngineCriticalParts.Select(n => (Object)b.Part(n))))
+                p.Add($"criticalParts isn't [{string.Join(", ", EngineCriticalParts)}]");
             if (Prop(te, "damageThreshold").floatValue != EngineDamageThreshold) p.Add("damageThreshold " + Prop(te, "damageThreshold").floatValue);
             if (GetList(Prop(te, "nozzles")).SingleOrDefault() != nozzles[0]) p.Add("Turbojet.nozzles isn't the JetNozzle");
             if (Prop(te, "maxThrust").floatValue != MaxThrust || Prop(te, "maxSpeed").floatValue != EngineMaxSpeed) p.Add("core thrust or maxSpeed off the first-cut design");
@@ -148,7 +150,7 @@ namespace Icarus.Editor
             }
             var petals = b.Visuals["nozzle_vector"].Cast<Transform>().Count(t => t.name.StartsWith("nozzle_petal_", StringComparison.Ordinal) || t.name.StartsWith("nozzle_seal_", StringComparison.Ordinal));
             if (petals == 0) p.Add("no petals under nozzle_vector for NozzleDriver");
-            return $"one Turbojet ({MaxThrust / 1000:0} kN, maxSpeed {EngineMaxSpeed}), vectoring {ThrustVectoring} below {VectoringMaxAirspeed} m/s on thrust_vector, criticalParts fuselage_aft at {EngineDamageThreshold}, one afterburner, {petals} petals";
+            return $"one Turbojet ({MaxThrust / 1000:0} kN, maxSpeed {EngineMaxSpeed}), vectoring {ThrustVectoring} below {VectoringMaxAirspeed} m/s on thrust_vector, criticalParts {string.Join(", ", EngineCriticalParts)} at {EngineDamageThreshold}, one afterburner, {petals} petals";
         }
 
         private static string CheckStripped(Build b, List<string> p)
@@ -241,10 +243,20 @@ namespace Icarus.Editor
                 else if (Mathf.Abs(Prop(so, "fuelCapacity").floatValue - b.Blockout.Parts[name].Number("fuel_kg")) > 0.01f) p.Add(name + ": capacity isn't its part's fuel_kg");
                 if (part == null || part.gameObject != tank.gameObject || part.GetType().Name != "AeroPart") p.Add(name + ": tank.part isn't its own AeroPart");
                 if (GetList(Prop(so, "connectedTanks")).Any(c => c == null || !Inside(b, c))) p.Add(tank.name + ": a dead connected tank");
+                // leak, fire, fireball and ignition as the stock tank of its role (TankKinds)
+                if (!TankKinds.TryGetValue(name, out var kind)) p.Add(name + " has no stock tank role in TankKinds");
+                else
+                {
+                    var stock = new SerializedObject(b.Donor.TankTemplates[kind]);
+                    foreach (var field in new[] { "leakThreshold", "leakPerHP", "maxLeakRate", "ruptureGMin", "ruptureGMax", "ignitionGMin", "ignitionGMax",
+                                 "ignitionPierceMin", "ignitionPierceMax", "ignitionBlastMin", "ignitionBlastMax", "fireIntensity", "leakEffect", "fireEffect", "fireball" })
+                        if (!SerializedProperty.DataEquals(Prop(so, field), Prop(stock, field)))
+                            p.Add($"{name}: {field} isn't the Revoker {(kind == "" ? "root" : kind)} tank's");
+                }
                 total += Prop(so, "fuelCapacity").floatValue;
             }
             if (Mathf.Abs(total - FuelMass) > 1f) p.Add($"capacity {total} kg, not the design load {FuelMass}");
-            return $"{tanks.Length} tanks on the fuselage and wing parts the cells fold into, {total:0} kg ({string.Join(", ", tanks.Select(t => t.gameObject == b.Root ? RootPart : t.name))})";
+            return $"{tanks.Length} tanks on the fuselage and wing parts, {total:0} kg, each as its role's Revoker tank ({string.Join(", ", tanks.Select(t => t.gameObject == b.Root ? RootPart : t.name).Select(n => n + " as " + (TankKinds.TryGetValue(n, out var k) ? (k == "" ? "root" : k) : "?")))})";
         }
 
         private static string CheckSensors(Build b, List<string> p)

@@ -92,7 +92,7 @@ function Test-PublicText([string]$Path, [string[]]$Views) {
 try {
     if (-not $MessageFile -and (Read-GitBytes @('ls-files', '-u')).Length) { throw 'resolve unmerged index entries first' }
     $paths = if ($MessageFile) { @() }
-             elseif ($All) { @(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z')) }
+             elseif ($All) { @(@(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z')) | Where-Object { Test-Path -LiteralPath (Join-Path $Repo $_) }) }
              else { @(Read-GitPaths @('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z')) }
     $rules = [ordered]@{
         'Steam ID' = '(?<!\d)7656119\d{10}(?!\d)'
@@ -120,6 +120,9 @@ try {
         }
     } else { Write-Output 'PUBLIC NOTE: no tools/public-check-terms.json, so only the generic rules ran' }
     $failures = [Collections.Generic.List[string]]::new()
+    # Images go to faction_marks.py check-clean in one call: none may be the game's roundel art or a livery painted with it.
+    $images = [IO.Path]::Combine([IO.Path]::GetTempPath(), 'icarus-public-' + [guid]::NewGuid().ToString('N'))
+    $imageCount = 0
     if ($MessageFile) {
         $text = [IO.File]::ReadAllText($MessageFile)
         Test-PublicText 'commit message' @($text, $text.Replace([string][char]0, ''))
@@ -133,6 +136,11 @@ try {
             $failures.Add("${path}: game or third-party binary")
         }
         $bytes = Read-TreeBytes $path
+        if ($path -match '(?i)\.(png|jpe?g|tga)$') {
+            if (-not $imageCount) { $null = New-Item -ItemType Directory -Path $images }
+            [IO.File]::WriteAllBytes((Join-Path $images "$imageCount`__$(Split-Path $path -Leaf)"), $bytes)
+            $imageCount++
+        }
         $text = [Text.Encoding]::Latin1.GetString((Read-ScanBytes $bytes $path))
         $views = @($path, $text, $text.Replace([string][char]0, ''))
         Test-PublicText $path $views
@@ -146,11 +154,26 @@ try {
         }
     }
 
+    if ($imageCount) {
+        try {
+            $copies = @(Get-ChildItem -LiteralPath $images -File | ForEach-Object FullName)
+            $scan = @(& python (Join-Path $PSScriptRoot '../art/textures/faction_marks.py') check-clean @copies 2>&1)
+            $scanCode = $LASTEXITCODE
+        } finally { Remove-Item -LiteralPath $images -Recurse -Force }
+        foreach ($line in $scan) {
+            if ("$line" -match '^ROUNDEL FAIL: .*?(\d+)__(.+?): (.*)$') { $failures.Add("image $($Matches[2]) (#$($Matches[1])): $($Matches[3])") }
+            elseif ("$line" -match '^ROUNDEL NOTE: ') { Write-Output "PUBLIC NOTE: $("$line".Substring(14))" }
+        }
+        if ($scanCode -ne 0 -and -not ($scan -match '^ROUNDEL FAIL: ')) { $failures.Add("roundel check could not run: $($scan -join ' ')") }
+    }
+
     $changed = if ($MessageFile) { @() } else { @(Read-GitPaths @('diff', '--cached', '--name-only', '-z')) }
     if (-not $MessageFile -and ($All -or @($changed | Where-Object { $_ -eq 'art/export-manifest.json' -or $_.StartsWith('art/export/') }).Count)) {
         $manifestBytes = Read-TreeBytes 'art/export-manifest.json'
         $manifest = [Text.Encoding]::UTF8.GetString($manifestBytes) | ConvertFrom-Json -AsHashtable
-        $exports = @(Read-GitPaths @('ls-files', '-z', '--', 'art/export/'))
+        # The working tree's exports with -All (an export may delete a tracked FBX), the index's otherwise.
+        $exports = @(if ($All) { @(Read-GitPaths @('ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', 'art/export/')) | Where-Object { Test-Path -LiteralPath (Join-Path $Repo $_) } }
+                     else { Read-GitPaths @('ls-files', '-z', '--', 'art/export/') })
         if (-not $exports.Count) { throw 'staged export manifest has no exports' }
         foreach ($path in @($exports + @($manifest.Keys) | Sort-Object -Unique)) {
             if ($path -notin $exports -or -not $manifest.ContainsKey($path)) {

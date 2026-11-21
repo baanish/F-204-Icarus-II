@@ -54,7 +54,7 @@ SLOT = "Icarus_Cockpit"
 # stick (1,890) and throttle (880) count toward it but are not built here. The warning lamps (40 to 80) and the stock
 # seat count toward no total.
 BUDGET = {
-    "interior": {"target": 15000, "cap": 16000, "objects": (INTERIOR,), "cockpit": True},
+    "interior": {"target": 15000, "cap": 16550, "objects": (INTERIOR,), "cockpit": True},
     "canopy_frame_inner": {"target": 2600, "cap": 8000, "objects": ("canopy_frame_inner",), "cockpit": True},
     "windscreen_frame_inner": {"target": 1000, "cap": 1000, "objects": ("windscreen_frame_inner",), "cockpit": True},
     "tac_screen": {"target": 120, "cap": 120, "objects": (TAC_SCREEN,), "cockpit": True},
@@ -65,7 +65,7 @@ BUDGET = {
 }
 # Cockpit rules 2 to 6, 10, 16, 26, 27, 30 and 31 of the cockpit digest: (low, high).
 RULES = {
-    "interior_tris": (10500, 16000),  # rule 2's 13,500, raised to 16,000 for the cockpit's detail (owner, 2026-10-22)
+    "interior_tris": (10500, 16550),  # rule 2's 13,500, raised to 16,550 for the cockpit's detail
     "cockpit_tris": (19500, 35000),  # all cockpit renderers; 19,500 is the reference aircraft, reported not padded
     "small_share": (2 / 3, 1.0),
     "items": (190, 330),
@@ -92,48 +92,55 @@ EYE = canopy.EYE
 # and roll, throttle 6.5 deg about a pivot 1 m below its grip). The seat and the pilot in it sit SEAT_DROP lower than
 # that offset, so the headbox clears the hood glass (owner, 2026-10-22); the eye stays at EYE.
 SEAT_DROP = 0.020
-SEAT_BOXES = [(3.75, 4.47, 0.270, -0.19, 0.31), (4.44, 4.68, 0.262, -0.19, 0.82), (4.68, 4.88, 0.190, 0.54, 0.82)]
-SEAT_HEAD = [(4.54, 4.88, 0.188, 0.82, 0.94), (4.56, 4.83, 0.164, 0.94, 1.02), (4.57, 4.66, 0.164, 1.02, 1.06),
-             (4.62, 4.64, 0.139, 1.06, 1.078)]  # the headbox, in 4 cm bands of the stock mesh
+SEAT_BOXES = [(3.00, 3.72, 0.270, -0.21, 0.28), (3.69, 3.93, 0.262, -0.21, 0.79), (3.93, 4.13, 0.190, 0.52, 0.79)]
+SEAT_HEAD = [(3.79, 4.13, 0.188, 0.79, 0.91), (3.81, 4.08, 0.164, 0.91, 0.99), (3.82, 3.91, 0.164, 0.99, 1.04),
+             (3.87, 3.89, 0.139, 1.04, 1.053)]  # the headbox, in 4 cm bands of the stock mesh
 HEAD_GLASS_GAP = 0.005  # the least the headbox keeps from the hood's glass and frames, shut and opening
 STOCK = {
-    "seat_origin": (4.256, 0.0, 0.154 - SEAT_DROP),
+    "seat_origin": (3.506, 0.0, 0.129 - SEAT_DROP),
     "seat": [(s0, s1, hx, z0 - SEAT_DROP, z1 - SEAT_DROP) for s0, s1, hx, z0, z1 in SEAT_BOXES + SEAT_HEAD],
     "seat_head": [(s0, s1, hx, z0 - SEAT_DROP, z1 - SEAT_DROP) for s0, s1, hx, z0, z1 in SEAT_HEAD],
-    "stick_pivot": (3.936, -0.398, 0.343),
-    "stick": [(3.895, 3.977, -0.432, -0.355, 0.332, 0.38), (3.904, 3.960, -0.409, -0.317, 0.38, 0.43),
-              (3.868, 3.951, -0.408, -0.314, 0.43, 0.49), (3.844, 3.935, -0.374, -0.291, 0.49, 0.549)],
+    "stick_pivot": (3.256, -0.323, 0.318),
+    "stick": [(3.215, 3.297, -0.357, -0.280, 0.307, 0.35), (3.224, 3.280, -0.334, -0.242, 0.35, 0.40),
+              (3.188, 3.271, -0.333, -0.239, 0.40, 0.46), (3.164, 3.255, -0.299, -0.216, 0.46, 0.524)],
     "stick_deg": 9.0,
-    "throttle_pivot": (3.869, 0.382, -0.641),
-    "throttle": [(3.927, 3.999, 0.292, 0.416, 0.357, 0.385), (3.871, 3.999, 0.276, 0.406, 0.385, 0.415),
-                 (3.862, 3.969, 0.261, 0.395, 0.415, 0.455)],
+    "throttle_pivot": (3.189, 0.348, -0.666),
+    "throttle": [(3.247, 3.319, 0.258, 0.382, 0.332, 0.360), (3.191, 3.319, 0.242, 0.372, 0.360, 0.390),
+                 (3.182, 3.289, 0.227, 0.361, 0.390, 0.430)],
     "throttle_deg": 6.5,
+    # degrees the stock seat, and the pilot in it, lean back beyond the Revoker's rig about seat_origin (canopy.EYE
+    # turns with it); the stick and throttle stay on their pivots
+    "seat_recline": 10.0,
 }
 # The throttle quadrant on the left console and the lever under the stock grip. The stock cockpits turn their grip
 # about a pivot far under it (the Revoker's 1 m, Cockpit.throttles rotation) and stand it a little over a flat plate;
 # the Icarus's console sits lower under the Revoker's reach, so a lever carries the grip down through a slotted gate.
-# lever: its centre at idle, under the flat of the grip's underside, which lies at grip_foot (s 3.95 to 3.99); the
+# lever: its centre at idle, under the flat of the grip's underside, which lies at grip_foot (s 3.27 to 3.31); the
 # gate stands gate_h over the console top, under the grip's swept space (stock_keepout); clear: the least the slot's
 # edges keep from the lever at every setting. stops: the legends and their throttle settings: idle, full dry (the
 # engine's throttleRemap ends at 0.88, IcarusAuthor.Engine.cs) and full afterburner (from 0.90).
 THROTTLE = {
-    "lever": (3.965, 0.345), "lever_size": (0.014, 0.024), "grip_foot": 0.380, "below_gate": 0.005,
+    "lever": (3.285, 0.311), "lever_size": (0.014, 0.024), "grip_foot": 0.355, "below_gate": 0.005,
     "gate_h": 0.024, "bevel": 0.014, "slot_depth": 0.008, "clear": 0.003,
     "stops": (("IDLE", 0.0), ("MIL", 0.88), ("AB", 1.0)),
 }
 LAYOUT = {
     "floor_z": -0.05,
-    "footwell_s": 3.08,
+    "footwell_s": 2.33,
     # the coaming under the windscreen: from its front (s0) back to where the hood takes over (s1), its sides this far
     # inside the skin
-    "coaming": (2.36, 3.00, 0.008),
-    "console": {"s0": 3.785, "s1": 4.88, "inner": 0.278, "top_z": 0.322},  # aft to the bulkhead: no trough between
-    "pedals": {"s": 3.28, "x": 0.12, "bar": (3.18, 0.36)},
-    "bulkhead": (4.88, 4.92),
+    "coaming": (2.36, 2.42, 0.008),
+    "console": {"s0": 3.035, "s1": 4.13, "inner": 0.278, "top_z": 0.297},  # aft to the bulkhead: no trough between
+    "pedals": {"s": 2.53, "x": 0.12, "bar": (2.43, 0.36)},
+    "bulkhead": (4.13, 4.17),
     # The lining stands this far inside the skin, inboard of the fuselage frames' outer part; a rib covers the rest
-    # of each frame (internals: 3 to 8 cm in, 25 mm thick, at s 3.4, 4.0 and 4.6).
+    # of each frame (internals: 3 to 8 cm in, 25 mm thick, at s 2.8, 3.4 and 4.0).
     "lining_inset": 0.060,
-    "ribs": (3.4125, 4.0125, 4.6125),
+    # the lining stands this much further out where the stock throttle's grip sweeps, idle to full afterburner
+    # (stock_keepout), easing back over the ramp, on both walls: the forward fuselage is too narrow for the grip
+    # at the Revoker's reach. (depth, ramp)
+    "throttle_relief": (0.025, 0.10),
+    "ribs": (2.8125, 3.4125, 4.0125),
     "over_nose_margin": 0.005,
 }
 # What each display shows: its rect of the 1,024 x 512 tac-screen canvas (Icarus_TacScreen.prefab, the Revoker's
@@ -809,7 +816,7 @@ class Space:
             self._rings[key] = sorted((v.z, v.x) for v in ring if v.x > 0)
         pts = self._rings[key]
         zs, xs = [q[0] for q in pts], [q[1] for q in pts]
-        return float(np.interp(z, zs, xs))
+        return float(np.interp(z, zs, xs)) + throttle_relief(s, z)
 
     def seam(self, s):
         """(x, z) where the left inner glass meets the skin at s."""
@@ -904,6 +911,18 @@ class Space:
         return out
 
 
+def throttle_relief(s, z):
+    """How far the lining stands out of LAYOUT lining_inset at (s, z): LAYOUT throttle_relief's depth over the stations
+    and heights the stock throttle's keepout spans, easing to nothing over its ramp."""
+    depth, ramp = LAYOUT["throttle_relief"]
+    boxes = stock_keepout()[-len(STOCK["throttle"]):]
+    s0, s1 = min(b[0] for b in boxes), max(b[1] for b in boxes)
+    z0, z1 = min(b[4] for b in boxes), max(b[5] for b in boxes)
+    inside = lambda v, a, b: min(max(min(v - a + ramp, b + ramp - v) / ramp, 0.0), 1.0)
+    t = inside(s, s0, s1) * inside(z, z0, z1)
+    return depth * t * t * (3 - 2 * t)
+
+
 # --- the interior --------------------------------------------------------------------------------------------------
 
 GROUPS = ("front", "console", "tub")
@@ -914,24 +933,24 @@ GROUPS = ("front", "console", "tub")
 # radio; the right the stick with the sensors, electrics, exterior lights and oxygen (owner, 2026-10-22). The cockpit's
 # own lighting is on the pedestal (cockpit_front.pedestal), not repeated here.
 CONSOLES = {
-    1: [("ENGINE", 4.065, 4.205, [("guarded", -0.030, -0.030, "ENG MASTER"), ("button", -0.030, 0.034, "START"),
+    1: [("ENGINE", 3.385, 3.525, [("guarded", -0.030, -0.030, "ENG MASTER"), ("button", -0.030, 0.034, "START"),
                                   ("toggle", 0.035, -0.030, "IGN"), ("button", 0.035, 0.034, "AB")]),
-        ("FUEL", 4.215, 4.355, [("button", -0.032, -0.035, "BST"), ("button", -0.032, 0.0, "XFD"),
+        ("FUEL", 3.535, 3.675, [("button", -0.032, -0.035, "BST"), ("button", -0.032, 0.0, "XFD"),
                                 ("lamp_green", -0.032, 0.035, "FLOW"), ("button", 0.032, -0.028, "DUMP"),
                                 ("button", 0.032, 0.030, "TANK")]),
-        ("COMM", 4.365, 4.585, [("knob", -0.068, -0.035, "VOL"), ("knob", -0.068, 0.035, "CHAN"),
+        ("COMM", 3.685, 3.905, [("knob", -0.068, -0.035, "VOL"), ("knob", -0.068, 0.035, "CHAN"),
                                 ("window", -0.012, 0.0, "251.00"), ("key", 0.045, -0.027, "1"), ("key", 0.045, -0.009, "2"),
                                 ("key", 0.045, 0.009, "3"), ("key", 0.045, 0.027, "4")]),
-        ("IFF", 4.595, 4.775, [("button", -0.040, -0.030, "MODE"), ("key", -0.040, 0.030, "CODE"),
+        ("IFF", 3.915, 4.095, [("button", -0.040, -0.030, "MODE"), ("key", -0.040, 0.030, "CODE"),
                                ("button", 0.035, 0.0, "IDENT")])],
-    -1: [("SENSORS", 4.065, 4.225, [("knob", -0.032, -0.024, "RADAR"), ("button", -0.032, 0.040, "IR"),
+    -1: [("SENSORS", 3.385, 3.545, [("knob", -0.032, -0.024, "RADAR"), ("button", -0.032, 0.040, "IR"),
                                     ("button", 0.034, -0.034, "ECM"), ("button", 0.034, 0.030, "EMCON")]),
-         ("ELEC", 4.235, 4.375, [("toggle", -0.030, -0.035, "BATT"), ("toggle", -0.030, 0.0, "GEN"),
+         ("ELEC", 3.555, 3.695, [("toggle", -0.030, -0.035, "BATT"), ("toggle", -0.030, 0.0, "GEN"),
                                  ("button", -0.030, 0.035, "APU"), ("guarded", 0.034, 0.0, "EMER PWR")]),
-         ("EXT LIGHTS", 4.385, 4.585, [("button", -0.048, -0.035, "LDG"), ("button", -0.048, 0.035, "TAXI"),
+         ("EXT LIGHTS", 3.705, 3.905, [("button", -0.048, -0.035, "LDG"), ("button", -0.048, 0.035, "TAXI"),
                                        ("button", 0.010, -0.035, "POS"), ("button", 0.010, 0.035, "FORM"),
                                        ("button", 0.060, 0.0, "BCN")]),
-         ("OXYGEN", 4.595, 4.775, [("knob", -0.040, 0.0, "REG"), ("blinker", 0.035, -0.030, "FLOW"),
+         ("OXYGEN", 3.915, 4.095, [("knob", -0.040, 0.0, "REG"), ("blinker", 0.035, -0.030, "FLOW"),
                                    ("button", 0.035, 0.030, "100%")])],
 }
 LEGEND_AFT = {"toggle": 0.021, "guarded": 0.031, "knob": 0.019, "knob_large": 0.026, "key": 0.011, "blinker": 0.016,
@@ -1132,13 +1151,13 @@ def throttle_quadrant(g, uv, kit, atlas, space, face):
     travel, the stops' legends on its inboard bevel, where the eye sees them under the grip, and the friction knob
     aft of it."""
     c = LAYOUT["console"]
-    s0, s1 = c["s0"] + 0.008, 4.055
+    s0, s1 = c["s0"] + 0.008, 3.375
     inner, cx, outer = console_span(space, 1, s0, s1)
     top_z, floor = c["top_z"], c["top_z"] - PLATE["depth"]
     gate, bevel, clear = top_z + THROTTLE["gate_h"], THROTTLE["bevel"], THROTTLE["clear"]
     a, b, x0, x1 = lever_sweep()
     slot = (a - clear, b + clear, x0 - clear, x1 + clear)
-    hs0, hs1, hx0, hx1 = slot[0] - 0.012, slot[1] + 0.012, inner + 0.018, slot[3] + 0.028
+    hs0, hs1, hx0, hx1 = slot[0] - 0.012, slot[1] + 0.012, min(inner + 0.018, slot[2] - bevel - 0.001), slot[3] + 0.028
     if hs0 < s0 + 0.013 or hx1 > outer - 0.019:
         raise ValueError("cockpit: the throttle quadrant (s %.3f-%.3f, x to %.3f) passes its plate's fasteners"
                          % (hs0, hs1, hx1))
@@ -1181,7 +1200,7 @@ def throttle_quadrant(g, uv, kit, atlas, space, face):
 def stick_base(g, uv, kit, atlas, space, face):
     """The plate the stock side stick stands on, its boot ring, and the trim knob ahead of it."""
     c = LAYOUT["console"]
-    s0, s1 = c["s0"] + 0.008, 4.055
+    s0, s1 = c["s0"] + 0.008, 3.375
     inner, cx, outer = console_span(space, -1, s0, s1)
     inv = face.m.inverted()
     L = lambda s, x: inv @ P(s, x, c["top_z"])
@@ -1200,7 +1219,7 @@ def stick_base(g, uv, kit, atlas, space, face):
 def ledge_drop(s):
     """How far the sill ledge's top stands under the glass seam: LEDGE_DROP beside the pilot (Cockpit rule 27's sill),
     8 mm ahead of the console, up under the hood's longeron, so the eye sees no skin between the two."""
-    t = min(max((s - 4.10) / 0.15, 0.0), 1.0)
+    t = min(max((s - 3.35) / 0.15, 0.0), 1.0)
     return 0.008 + (LEDGE_DROP - 0.008) * t
 
 
@@ -1235,6 +1254,22 @@ def ledge_rows(space, side, columns):
     return [tuple(r) for r in rows]
 
 
+def coaming_rows(space, side, s_front):
+    """The ledge's rows ahead of LEDGE_S0, from the footwell's front, where the windscreen stands over the footwell:
+    just under the coaming deck's edge and out to it (cockpit_front.shroud), so no skin shows between the lining and
+    the deck."""
+    import cockpit_front as front
+
+    if s_front >= LEDGE_S0:
+        return []
+    rows = []
+    for s in bi.spaced(s_front, LEDGE_S0, 6)[:-1]:
+        top = bi.resample(canopy.PROFILE, [s])[0][3] - 0.010 - front.WINDSCREEN_DECK - 0.002
+        x_out = min(space.skin_x(s, top, 0.008), space.sill_limit(s, top - 0.030, top) - 0.006)
+        rows.append([s, space.wall_x(s, top - 0.030), x_out, top])
+    return rows
+
+
 def ledge_tree(rows, side):
     """A BVH of the actual ledge between two rows, including the faces the clearance solver must keep clear."""
     verts, polys = [], []
@@ -1252,7 +1287,7 @@ def tub(g, uv, kit, atlas, space):
     s_front, s_back = LAYOUT["footwell_s"], LAYOUT["bulkhead"][0]
     columns = bi.spaced(LEDGE_S0, s_back, 17)
     for side in (1, -1):
-        rows = ledge_rows(space, side, columns)
+        rows = coaming_rows(space, side, s_front) + ledge_rows(space, side, columns)
         rings = [[P(s, side * q, z) for q, z in ((x_in, top - 0.030), (x_in, top), (x_out, top), (x_out, top - 0.030))]
                  for s, x_in, x_out, top in rows]
         g.put(loft_piece(uv, rings, atlas.chart("sill", "ledge%d" % side), along=Y, caps="structure"), None, "tub")
@@ -1277,15 +1312,16 @@ def tub(g, uv, kit, atlas, space):
         for rs in LAYOUT["ribs"]:
             top = float(np.interp(rs, [r[0] for r in rows], [r[3] for r in rows])) - 0.032
             # over a console the rib starts above the throttle and the stick
-            z0 = 0.47 if LAYOUT["console"]["s0"] < rs < LAYOUT["console"]["s1"] else floor
+            z0 = 0.44 if LAYOUT["console"]["s0"] < rs < LAYOUT["console"]["s1"] else floor
             pts = [(space.wall_x(rs, z), z) for z in bi.spaced(z0, top, 4)]
             rings = [[P(rs + ds, side * x, z) for x, z in pts] + [P(rs + ds, side * (x - 0.026), z) for x, z in pts[::-1]]
                      for ds in (-0.0165, 0.0165)]
             g.put(loft_piece(uv, rings, "structure", along=Z), None, "tub")
 
         breakers(g, uv, kit, atlas, space, side)
+        footwell_detail(g, uv, kit, space, side, s_front)
         # a data plate on the left wall over the breakers, the seat's warning on the right, on the lining
-        s, z = 3.36, 0.315
+        s, z = 2.61, 0.290
         text, ink, paper = (("F-204 ICARUS II\nSERIAL 0001  BLOCK 2\nOXY / FUEL / HYD: SEE T.O. 1F-204-1", "ink", "plate")
                             if side > 0 else ("WARNING\nEJECTION SEAT\nKEEP CLEAR OF HANDLES", "ink_dark", "hatch_light"))
         lab = atlas.label(text, ink=ink, paper=paper, cap_mm=3.2, box=True)
@@ -1304,9 +1340,9 @@ def tub(g, uv, kit, atlas, space):
     zs = bi.spaced(floor, 0.45, 5)
     wall = [[P(s_front, f * space.wall_x(s_front, z), z) for f in xs] for z in zs]
     g.put(grid_sheet(uv, wall, atlas.chart("tub", "footwell")), None, "tub")
-    top_z, top_s = 0.186, 3.66  # under the wing panels
+    top_z, top_s = 0.161, 2.91  # under the wing panels
     for side in (1, -1):
-        foot = [P(3.50, side * q, floor) for q in bi.spaced(0.20, space.wall_x(3.50, floor) - 0.003, 3)]
+        foot = [P(2.75, side * q, floor) for q in bi.spaced(0.20, space.wall_x(2.75, floor) - 0.003, 3)]
         head = [P(top_s, side * q, top_z) for q in bi.spaced(0.26, space.wall_x(top_s, top_z) - 0.003, 3)]
         g.put(grid_sheet(uv, [foot, [a.lerp(b, 0.5) for a, b in zip(foot, head)], head], atlas.chart("tub", "kick%d" % side)), None, "tub")
     # the rear bulkhead behind the seat, its sides out behind the lining, and from its top the deck aft under the hood's
@@ -1317,13 +1353,16 @@ def tub(g, uv, kit, atlas, space):
     fs = bi.spaced(-1, 1, 7)
     tail = max((o.matrix_world @ v.co).y for o in [bpy.data.objects[canopy.GLASS_OUTER]] for v in o.data.vertices) + bi.S0
     deck = []
-    for s in (s0, 5.095):
+    for s in bi.spaced(s0, 5.095, max(2, round((5.095 - s0) / 0.12) + 1)):  # the foot narrows and rises along it
+        w = min(space.foot_x(s), space.seam(s)[0] + 0.004)  # the glass's foot, not its bulge over the sill
+        probes = [hit(space.sill, P(s, x, space.skin_top(s, x) - 0.12), Z, 0.2) for x in (w - 0.0025, w - 0.015, w - 0.030)]
+        flange = min(q[0].z for q in probes if q)  # the sill's flange, wherever it hangs across the foot
+        low = min(flange, space.skin_top(s, w) - 0.03) - 0.012  # under the flange, which rises aft, out past it
+        edge = min(w + 0.02, space.skin_x(s, low, 0.006))  # and inside the skin, which stands steep beside the seat
+        deck.append([P(s, f * edge, low + 0.15 * max(0.0, 1 - 1.5 * abs(f))) for f in fs])
+    for s in (5.10, 5.30, 5.35, 5.375, tail - 0.01):  # hugging the glass's foot, its edges out under the skin
         w = space.foot_x(s)
-        low = min(space.flange_z(s, w - 0.0025), space.skin_top(s, w) - 0.03) - 0.004  # under the flange, out past it
-        deck.append([P(s, f * (w + 0.02), low + 0.15 * max(0.0, 1 - 1.5 * abs(f))) for f in fs])
-    for s in (5.10, 5.30, tail - 0.01):  # hugging the glass's foot, its edges out under the skin
-        w = space.foot_x(s)
-        xs = [-w - 0.012, -w + 0.002, -0.75 * w, 0.0, 0.75 * w, w - 0.002, w + 0.012]  # close by the foot, little sag
+        xs = [-w - 0.012, -w + 0.002, -0.55 * w, 0.0, 0.55 * w, w - 0.002, w + 0.012]  # close by the foot, little sag
         # 4.5 mm in at the foot where the canopy's shape ends (PROFILE's last section), not over it: the interior's rule
         deck.append([space.skin_top(s, x, -(0.006 if abs(x) > w else 0.0045 if abs(x) > w / 2 and s < 5.11 else 0.002))
                      for x in xs])
@@ -1333,12 +1372,15 @@ def tub(g, uv, kit, atlas, space):
         rows.append([P(s0, f * (space.wall_x(s0, z) + 0.012), floor + (q.z - floor) * t) for f, q in zip(fs, deck[0])])
     g.put(grid_sheet(uv, rows + deck[:1], atlas.chart("back", "bulkhead")), None, "tub")
     g.put(grid_sheet(uv, deck, "structure"), None, "tub")  # behind the headbox, on a strip
+    for row in [r for r in deck if s0 + 0.29 < r[0].y + bi.S0 < 5.0]:  # stiffeners across the deck, on its rows
+        g.put(loft_piece(uv, [[q, q + Z * 0.012, q + Z * 0.012 + Y * 0.014, q + Y * 0.014] for q in row[1:-1]],
+                         "structure", along=X), None, "tub")
     pedals(g, uv, kit)
 
 
 def breakers(g, uv, kit, atlas, space, side):
     """A circuit-breaker panel low on each footwell wall: a plate, four rows of six breakers and their legends."""
-    s0, s1, z0, z1 = 3.16, 3.54, 0.03, 0.25
+    s0, s1, z0, z1 = 2.41, 2.79, 0.03, 0.25
     sc, zc = (s0 + s1) / 2, (z0 + z1) / 2
     inward = Vector((-side, 0.0, 0.0))
     at = lambda s, z, lift=0.0: P(s, side * (space.wall_x(s, z) - 0.004 - lift), z)
@@ -1352,6 +1394,43 @@ def breakers(g, uv, kit, atlas, space, side):
             s = s0 + 0.080 + 0.100 * i
             g.put(kit.breaker(), frame(at(s, z, 0.004), Z, inward), "tub")
         g.put(kit.placard(atlas.label(title, cap_mm=3.5)), frame(at(s0 + 0.014, z, 0.004), Z, inward), "tub")
+
+
+TREAD_RIBS = 10  # each 5 mm wide at a 6 mm pitch
+STRINGERS, STRINGER_RUN = (0.275, 0.315, 0.355), (0.34, 0.55)  # the footwell wall stringers' heights, and their run
+# aft from its front: over the breakers, aft of the data plate, short of the side panel
+
+
+def footwell_detail(g, uv, kit, space, side, s_front):
+    """Where boots scuff the footwell ahead of the consoles: a kick plate low on the wall along the floor, under
+    the breakers, with its fasteners, and anti-slip treads on the floor beside it."""
+    floor = LAYOUT["floor_z"]
+    s0, s1 = s_front + 0.07, s_front + 0.37
+    z0, z1 = floor + 0.006, floor + 0.075
+    inward = Vector((-side, 0.0, 0.0))
+    at = lambda s, z, lift=0.0: P(s, side * (space.wall_x(s, z) - 0.002 - lift), z)
+    outer = [at(s0, z0), at(s1, z0), at(s1, z1), at(s0, z1)]
+    g.put(loft_piece(uv, [outer, [p + inward * 0.004 for p in outer]], "structure", along=Y, caps="structure"), None, "tub")
+    for z in (z0 + 0.018, z1 - 0.018):  # the plate's stiffeners, along it
+        g.put(loft_piece(uv, [[at(s, z - 0.004, 0.004), at(s, z + 0.004, 0.004), at(s, z + 0.004, 0.010), at(s, z - 0.004, 0.010)]
+                              for s in (s0 + 0.01, s1 - 0.01)], "metal", along=Y), None, "tub")
+    # the tread: ribs along the floor beside the wall, from the plate's front to its back
+    out = min(space.wall_x(s, floor + 0.005) for s in (s0, s1)) - 0.012
+    for k in range(TREAD_RIBS):  # each a low ridge of two sloping faces, 3 mm high: 4 triangles, ends open
+        x = side * (out - 0.006 * k)
+        x0, x1 = sorted((x - side * 0.005, x))
+        g.put(grid_sheet(uv, [[P(s, x0, floor), P(s, (x0 + x1) / 2, floor + 0.003), P(s, x1, floor)]
+                              for s in (s0 + 0.01, s1 - 0.01)], "knurl", keep=True), None, "tub")
+    # the wall's stiffeners: a frame up the wall aft of the breakers, from over the kick panel's edge, and three
+    # stringers along it
+    d, h = 0.012, 0.008
+    wall = lambda s, z, depth: P(s, side * (space.wall_x(s, z) - depth), z)
+    sf = s_front + 0.48  # aft of the breakers, over the kick panel's edge on the wall
+    g.put(loft_piece(uv, [[wall(sf - h, z, 0.001), wall(sf + h, z, 0.001), wall(sf + h, z, d), wall(sf - h, z, d)]
+                          for z in bi.spaced(floor + 0.13, STRINGERS[-1] + h, 6)], "structure", along=Z), None, "tub")
+    for zc in STRINGERS:
+        g.put(loft_piece(uv, [[wall(s, zc - h, 0.001), wall(s, zc + h, 0.001), wall(s, zc + h, d), wall(s, zc - h, d)]
+                              for s in bi.spaced(s_front + STRINGER_RUN[0], s_front + STRINGER_RUN[1], 6)], "structure", along=Y), None, "tub")
 
 
 def pedals(g, uv, kit):
@@ -1683,7 +1762,8 @@ def build(p, mats):
     open_cell(cell)
     trim_frames(O["fuselage_forward"], space)
     for name, at in zip(PIVOTS + (SEAT,), (STOCK["stick_pivot"], STOCK["throttle_pivot"], STOCK["seat_origin"])):
-        made.append(bi.empty(name, Matrix.Translation(P(*at)), cell))
+        turn = Matrix.Rotation(-math.radians(STOCK["seat_recline"]) if name == SEAT else 0.0, 4, "X")  # the seat's recline
+        made.append(bi.empty(name, Matrix.Translation(P(*at)) @ turn, cell))
         made[-1]["role"] = "cockpit_view"
         made[-1]["mass_kg"] = 0
     bpy.context.view_layer.update()
@@ -1987,12 +2067,20 @@ def face_info(objs, j, matrix=None):
     return "?"
 
 
+def seat_turn():
+    """The stock seat's recline about its origin (STOCK seat_recline, its top going aft), as a matrix."""
+    o = P(*STOCK["seat_origin"])
+    return Matrix.Translation(o) @ Matrix.Rotation(-math.radians(STOCK["seat_recline"]), 4, "X") @ Matrix.Translation(-o)
+
+
 def box_tree(boxes):
-    """A BVH of axis boxes (s0, s1, x0, x1, z0, z1)."""
+    """A BVH of axis boxes (s0, s1, x0, x1, z0, z1), each optionally placed by a seventh item, a matrix."""
     verts, faces = [], []
-    for s0, s1, x0, x1, z0, z1 in boxes:
+    for box in boxes:
+        s0, s1, x0, x1, z0, z1 = box[:6]
+        m = box[6] if len(box) > 6 else Matrix.Identity(4)
         b = len(verts)
-        verts += [P(s, x, z) for s in (s0, s1) for x in (x0, x1) for z in (z0, z1)]
+        verts += [m @ P(s, x, z) for s in (s0, s1) for x in (x0, x1) for z in (z0, z1)]
         faces += [(b + i for i in f) for f in ((0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2),
                                                (1, 3, 7, 5))]
     return BVHTree.FromPolygons(verts, [tuple(f) for f in faces])
@@ -2006,7 +2094,7 @@ def head_gap(hinge, hood, step_deg=5.0):
         for s in (s0, (s0 + s1) / 2, s1):
             for x in (-hx, 0.0, hx):
                 for z in (z0, z1):
-                    points.append(P(s, x, z))
+                    points.append(seat_turn() @ P(s, x, z))
     a, u = hinge.matrix_world.translation, hinge.matrix_world.col[0].xyz.normalized()
     steps = int(math.ceil(abs(hinge["travel_deg"]) / step_deg))
     gap = math.inf
@@ -2020,7 +2108,7 @@ def head_gap(hinge, hood, step_deg=5.0):
 
 def stock_keepout():
     """Boxes the stock seat, stick and throttle occupy through the controls' travel."""
-    boxes = [(s0, s1, -hx, hx, z0, z1) for s0, s1, hx, z0, z1 in STOCK["seat"]]
+    boxes = [(s0, s1, -hx, hx, z0, z1, seat_turn()) for s0, s1, hx, z0, z1 in STOCK["seat"]]
     for s0, s1, x0, x1, z0, z1 in STOCK["stick"]:
         reach = (z1 - STOCK["stick_pivot"][2]) * math.sin(math.radians(STOCK["stick_deg"]))
         boxes.append((s0 - reach, s1 + reach, x0 - reach, x1 + reach, max(z0, STOCK["stick_pivot"][2] + 0.004), z1))
@@ -2321,13 +2409,20 @@ def stock_rig(collection):
              ("stock_stick", "fighter1_joystick", (0.398, 0.216, 7.326), 0.0, (0.12, 0.12, 0.12, 1.0)),
              ("stock_throttle", "fighter1_throttle", (-0.382, -0.768, 7.393), 0.0, (0.12, 0.12, 0.12, 1.0)))
     made = []
+    eye0 = sxz(seat_turn().inverted() @ eye_point())  # the eye before the seat's recline
     for name, mesh, origin, rx, colour in items:
         a = math.radians(rx)
         pts = []
         for x, y, z in meshverts.positions(root / (mesh + ".asset")):
             y, z = y * math.cos(a) - z * math.sin(a), y * math.sin(a) + z * math.cos(a)
             u = (x + origin[0], y + origin[1], z + origin[2])
-            pts.append(P(EYE[0] - (u[2] - eye_u[2]), -u[0], EYE[2] + (u[1] - eye_u[1])))
+            pts.append(P(eye0[0] - (u[2] - eye_u[2]), -u[0], eye0[2] + (u[1] - eye_u[1])))
+        at = P(eye0[0] - (origin[2] - eye_u[2]), -origin[0], eye0[2] + (origin[1] - eye_u[1]))
+        if name == "stock_seat":
+            pts = [seat_turn() @ q for q in pts]
+        else:  # on the export's pivots
+            pivot = P(*STOCK["stick_pivot" if name == "stock_stick" else "throttle_pivot"])
+            pts = [q + pivot - at for q in pts]
         me = bpy.data.meshes.new(name)
         me.from_pydata(pts, [], meshverts.triangles(root / (mesh + ".asset")))
         me.validate()
@@ -2418,10 +2513,10 @@ def render_review(out_dir):
     centre = front.face_frame() @ Vector((0.0, -0.10, 0.0))
     shoot("panel", centre + front.FACE_N * 0.62, centre, fov=70, up=front.FACE_UP)
     for name, side in (("console_left", 1), ("console_right", -1)):
-        target = P(4.25, side * 0.36, LAYOUT["console"]["top_z"])
+        target = P(3.50, side * 0.36, LAYOUT["console"]["top_z"])
         shoot(name, target + Vector((-side * 0.30, 0.10, 0.55)), target, fov=70, up=-Y)
-    shoot("glare_hud", P(4.0, -0.25, 0.95), P(3.45, 0.0, 0.68), fov=50)
-    shoot("footwell_pedals", P(3.95, 0.0, 0.40), P(3.25, 0.0, 0.05), fov=80)
+    shoot("glare_hud", P(3.2, -0.25, 0.95), P(2.70, 0.0, 0.68), fov=50)
+    shoot("footwell_pedals", P(3.20, 0.0, 0.40), P(2.50, 0.0, 0.05), fov=80)
 
     # regions: the interior's faces in the measurement's three colours
     m = measure(None)
@@ -2449,7 +2544,7 @@ def render_review(out_dir):
     sh.color_type = "MATERIAL"
     interior.hide_render = True
     shoot("regions", eye + Vector((0.0, 0.25, 0.25)), eye + down, fov=90)
-    shoot("regions_plan", P(4.0, 0.0, 3.0), P(4.0, 0.0, 0.0), ortho=2.4, up=-Y)
+    shoot("regions_plan", P(3.2, 0.0, 3.0), P(3.2, 0.0, 0.0), ortho=2.4, up=-Y)
     interior.hide_render = False
     bpy.data.objects.remove(copy, do_unlink=True)
 

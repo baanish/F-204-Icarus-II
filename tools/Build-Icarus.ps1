@@ -14,10 +14,12 @@
 
 param(
     [string]$ExecuteMethod = 'Icarus.Editor.IcarusBuild.Build',
-    [string]$UnityPath
+    [string]$UnityPath,
+    [switch]$Dev
 )
 
 $ErrorActionPreference = 'Stop'
+$buildKind = if ($Dev) { 'dev' } else { 'release' }
 # One build at a time machine-wide: the Unity project, the export folder and build/ are shared. A build that dies leaves
 # the mutex abandoned, which the next one takes.
 $buildLock = [System.Threading.Mutex]::new($false, 'Global\IcarusBuild')
@@ -37,10 +39,10 @@ $clock = [Diagnostics.Stopwatch]::StartNew()
 $deadline = [TimeSpan]::FromMinutes(30)
 $licenseFailure = 'No valid Unity Editor license found'
 $maxLicenseRetries = 3
-$checks = (1..19 + 21..23) | ForEach-Object { "A$_" }  # A20 (section inertia) was retired with the boxes
+$checks = (1..19 + 21..24) | ForEach-Object { "A$_" }  # A20 (section inertia) was retired with the boxes
 
 function Fail([string]$why) {
-    Write-Output "B0 FAIL: $why ($([int]$clock.Elapsed.TotalSeconds) s)"
+    Write-Output "B0 FAIL: $why ($buildKind build, $([int]$clock.Elapsed.TotalSeconds) s)"
     exit 1
 }
 
@@ -49,6 +51,12 @@ if (-not (Test-Path -LiteralPath (Join-Path $repo 'art/export/blockout.json'))) 
 }
 & python (Join-Path $repo 'tools/export_manifest.py')
 if ($LASTEXITCODE -ne 0) { Fail 'exports do not match art/export-manifest.json' }
+# The liveries Unity builds carry the game's faction roundels, painted from the local asset export onto the logo-free
+# maps in art/export/textures; without the export this stops here with the one line that names it.
+$marks = @(& python (Join-Path $repo 'art/textures/faction_marks.py') 2>&1)
+if ($LASTEXITCODE -ne 0) { Fail (($marks | Select-Object -Last 1) -replace '^FACTION MARKS FAIL: ', 'faction roundels: ') }
+$marks = @(& python (Join-Path $repo 'art/textures/faction_marks.py') verify-marked 2>&1)
+if ($LASTEXITCODE -ne 0) { Fail "faction roundels: $(@($marks | Where-Object { "$_" -match '^FACTION MARKS FAIL' })[0])" }
 
 # The plugin and the bundle ship as a pair, so they carry one version.
 $csproj = Join-Path $repo 'src/Icarus/Icarus.csproj'
@@ -74,7 +82,9 @@ if (-not $gameDir) { Fail 'Nuclear Option not found in any Steam library; set NU
 $env:NUCLEAR_OPTION_DIR = $gameDir
 $dotnetOut = Join-Path $repo '.cache/build-staging/dotnet'
 # --no-incremental: an up-to-date skip would leave a DLL older than this run.
-& dotnet build $csproj -c Release --no-incremental -o $dotnetOut --nologo | Out-Host
+$devProperty = if ($Dev) { 'true' } else { 'false' }
+& dotnet build $csproj -c Release "-p:IcarusDev=$devProperty" --no-incremental -o $dotnetOut --nologo |
+    ForEach-Object { Write-Host "[$buildKind build] $_" }
 if ($LASTEXITCODE -ne 0) { Fail "dotnet build exited $LASTEXITCODE" }
 $dll = Join-Path $dotnetOut 'Icarus.dll'
 if (-not (Test-Path -LiteralPath $dll) -or (Get-Item -LiteralPath $dll).LastWriteTimeUtc -lt $runStart) { Fail "dotnet build produced no fresh $dll" }
@@ -92,7 +102,7 @@ foreach ($name in 'BepInEx.dll', '0Harmony.dll', 'Mono.Cecil.dll', 'MonoMod.Util
         Copy-Item -LiteralPath $source -Destination $target -Force
     }
 }
-Write-Output 'dotnet: built and copied Icarus.dll to unity/Assets/Plugins'
+Write-Output "dotnet: built and copied Icarus.dll ($buildKind build) to unity/Assets/Plugins"
 
 $versionLine = Select-String -LiteralPath (Join-Path $project 'ProjectSettings/ProjectVersion.txt') -Pattern '^m_EditorVersion: (\S+)$'
 $unityVersion = $versionLine.Matches[0].Groups[1].Value
@@ -192,4 +202,4 @@ $sums = foreach ($file in $outputs) {
     (Get-FileHash -LiteralPath (Join-Path $build $name) -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + $name
 }
 [IO.File]::WriteAllLines((Join-Path $build 'SHA256SUMS.txt'), [string[]]$sums)
-Write-Output "B0 PASS: build/$(Split-Path -Leaf $nobp) $($sums[0].Substring(0, 12)) with Icarus.dll $($sums[1].Substring(0, 12)), checks $($passed -join ' '), $attempt Unity attempt(s) ($([int]$clock.Elapsed.TotalSeconds) s)"
+Write-Output "B0 PASS: build/$(Split-Path -Leaf $nobp) $($sums[0].Substring(0, 12)) with Icarus.dll $($sums[1].Substring(0, 12)) ($buildKind build), checks $($passed -join ' '), $attempt Unity attempt(s) ($([int]$clock.Elapsed.TotalSeconds) s)"

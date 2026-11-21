@@ -104,7 +104,9 @@ def prepare():
         for t in obj.data.loop_triangles:
             if t.polygon_index in skin:
                 triangles.append({"part": part_id, "uv": [list(obj.data.uv_layers.active.data[i].uv) for i in t.loops]})
-    (OUT / "atlas_triangles.json").write_text(json.dumps({"parts": parts, "triangles": triangles}))
+    # atlas: what compose_skin.py checks against the export's record (atlas_guard), so a bake never meets other meshes
+    (OUT / "atlas_triangles.json").write_text(json.dumps({"parts": parts, "triangles": triangles,
+                                                          "atlas": uvs.atlas_record(icarus)}))
     mesh = bpy.data.meshes.new("Skin_bake_mesh")
     mesh.from_pydata(verts, [], faces)
     mesh.update()

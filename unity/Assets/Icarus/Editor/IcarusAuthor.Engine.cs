@@ -25,7 +25,10 @@ namespace Icarus.Editor
         // (912 m/s, where the thrust taper ends): the Revoker's 250 m/s left the Icarus, rarely that slow, without it.
         private static readonly Vector3 ThrustVectoring = new Vector3(4f, 4f, 0f);
         private const float VectoringMaxAirspeed = 1000f;
-        // The engine fails with fuselage_aft, the section it rides in, as the Revoker's fails with its tail, at its threshold.
+        // The engine fails with any of the parts it needs, as the Revoker's with its root, fuselage, tail and both intakes:
+        // fuselage_aft, the section it rides in, the root it bolts to, the tail cone round its afterburner, and both
+        // intakes, at the Revoker's threshold.
+        private static readonly string[] EngineCriticalParts = { "fuselage_aft", RootPart, "fuselage_tail", "intake_duct_L", "intake_duct_R" };
         private const float EngineDamageThreshold = 50f;
         // fighter1_afterburner_nozzle's bounds: the glow cylinder the Revoker's nozzle is sized to.
         private const float RevokerGlowRadius = 0.517f, RevokerGlowLength = 0.6f;
@@ -144,7 +147,7 @@ namespace Icarus.Editor
             Prop(te, "thrustVectoringMaxAirspeed").floatValue = VectoringMaxAirspeed;
             Prop(te, "damageThreshold").floatValue = EngineDamageThreshold;
             SetList(Prop(te, "vectoringTransforms"), new Object[] { thrust });
-            SetList(Prop(te, "criticalParts"), new Object[] { aft });
+            SetList(Prop(te, "criticalParts"), EngineCriticalParts.Select(n => (Object)b.Part(n)).ToArray());
             SetList(Prop(te, "nozzles"), new Object[] { jet });
             te.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add($"engine: {MaxThrust / 1000:0} kN core + {AfterburnerThrust / 1000:0} kN afterburner, maxSpeed {EngineMaxSpeed}, fuel {FuelMin}..{FuelMax} + {AfterburnerFuel}, " +

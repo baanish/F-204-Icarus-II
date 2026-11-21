@@ -41,3 +41,6 @@ unity/Assets/Blueprinter/Mods/icarus/Meshes/*_twosided.asset.meta
 # art/textures/texture-sources.json pins them and their prompts and records stay tracked.
 art/textures/generated/**/*.png
 art/textures/generated/**/*.npz
+# Livery textures carrying the game's faction roundels: art/textures/faction_marks.py paints them from the local asset
+# export into the Unity project, so they never enter the repository. Their .meta files stay tracked for stable GUIDs.
+unity/Assets/Blueprinter/Mods/icarus/Liveries/Icarus_livery_*.png

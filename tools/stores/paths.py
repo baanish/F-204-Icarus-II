@@ -4,6 +4,8 @@ keys). Relative paths are from the repo root.
 game_export      the AssetRipper export's Assets folder of the installed game: the stock mount prefabs, meshes and
                  colliders, which cannot be in the public repo
 python_packages  optional: a folder holding UnityPy, when it isn't installed in the Python that runs the tool
+mod_bundles      optional: other mods' Blueprinter bundles (.nobp) whose mounts the Icarus offers, such as the Aryx
+                 Weaponry Pack's
 """
 import json
 import sys
@@ -24,4 +26,4 @@ def load():
     packages = paths.get("python_packages")
     if packages:
         sys.path.insert(0, str(REPO / packages))
-    return {"game_export": export}
+    return {"game_export": export, "mod_bundles": [REPO / bundle for bundle in paths.get("mod_bundles", [])]}

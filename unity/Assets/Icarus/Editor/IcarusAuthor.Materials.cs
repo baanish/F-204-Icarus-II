@@ -36,7 +36,7 @@ namespace Icarus.Editor
         // The stock slots (materials.py STOCK), each the game material Blueprinter patches in for its placeholder.
         private static readonly string[] StockSlots =
         {
-            "jet_mechanical", "aircraft_structure", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear", "fighter1_canopy",
+            "jet_mechanical", "aircraft_structure", "honeycomb", "Matte_black", "Mirror", "Aircraft_wheels", "Fighter1_gear", "fighter1_canopy",
             "fighter1_canopy_int", "tacScreenDisplay", "CockpitWarningLight", "hotas", "Seats", "light_red_off", "light_green_off",
             "slimelight_on",
         };
@@ -94,20 +94,26 @@ namespace Icarus.Editor
 
         private static Texture2D ImportSkinTexture(string name, bool sRgb, bool normalMap, TextureImporterFormat format)
         {
-            var source = Path.Combine(ExportFolder, "textures", name);
-            var gate = (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(RepoRoot, "art/textures/gate.json")));
-            var hashes = (Dictionary<string, object>)gate["outputs"];
-            var bytes = File.ReadAllBytes(source);
-            if (!hashes.TryGetValue(name, out var expected) || Sha256(bytes) != (string)expected)
-                throw new InvalidDataException("skin texture differs from gate.json: " + name);
-            var path = (name.StartsWith("Icarus_livery_") ? LiveryFolder : SkinFolder) + "/" + name;
-            if (!File.Exists(path) || Sha256(File.ReadAllBytes(path)) != (string)expected)
+            string path;
+            if (name.StartsWith("Icarus_livery_"))
+                path = RequireFactionMarked(name);
+            else
             {
-                File.WriteAllBytes(path, bytes);
-                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+                var source = Path.Combine(ExportFolder, "textures", name);
+                var gate = (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(Path.Combine(RepoRoot, "art/textures/gate.json")));
+                var hashes = (Dictionary<string, object>)gate["outputs"];
+                var bytes = File.ReadAllBytes(source);
+                if (!hashes.TryGetValue(name, out var expected) || Sha256(bytes) != (string)expected)
+                    throw new InvalidDataException("skin texture differs from gate.json: " + name);
+                path = SkinFolder + "/" + name;
+                if (!File.Exists(path) || Sha256(File.ReadAllBytes(path)) != (string)expected)
+                {
+                    File.WriteAllBytes(path, bytes);
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+                }
+                if (Sha256(File.ReadAllBytes(path)) != (string)expected)
+                    throw new InvalidDataException("skin texture copy SHA mismatch: " + name);
             }
-            if (Sha256(File.ReadAllBytes(path)) != (string)expected)
-                throw new InvalidDataException("skin texture copy SHA mismatch: " + name);
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = normalMap ? TextureImporterType.NormalMap : TextureImporterType.Default;
             importer.sRGBTexture = sRgb;
@@ -133,25 +139,63 @@ namespace Icarus.Editor
             return texture;
         }
 
+        // The livery textures carry the game's faction roundels, so they are never in the repository:
+        // art/textures/faction_marks.py paints them into the Liveries folder and records their hashes. Only those exact
+        // files build; a missing or logo-free texture stops B0 here instead of shipping a livery without its roundels.
+        private static string RequireFactionMarked(string name)
+        {
+            const string fix = "run `python art/textures/faction_marks.py` (it reads the roundels from game_export in tools/local-paths.json)";
+            var record = Path.Combine(RepoRoot, ".cache/faction-marks/marks.json");
+            if (!File.Exists(record))
+                throw new InvalidDataException($"no faction-marked livery textures yet: {fix}");
+            var marks = (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(record));
+            var inputs = (Dictionary<string, object>)marks["inputs"];
+            if ((string)inputs["record"] != Sha256(File.ReadAllBytes(Path.Combine(RepoRoot, "art/textures/faction_marks.json"))))
+                throw new InvalidDataException($"the faction-marked textures predate art/textures/faction_marks.json: {fix}");
+            var outputs = (Dictionary<string, object>)marks["outputs"];
+            var path = LiveryFolder + "/" + name;
+            if (!outputs.TryGetValue(name, out var expected) || !File.Exists(path) || Sha256(File.ReadAllBytes(path)) != (string)expected)
+                throw new InvalidDataException($"{name} is not the faction-marked texture: {fix}");
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            return path;
+        }
+
         private sealed class LiveryEntry
         {
             public string Name;
             public Object Faction, Data;
         }
 
+        // Livery specifications as the aircraft's list holds them, by id: a mission saves a jet's livery as its index in
+        // this list (SavedAircraft.livery), so the four PALA liveries 0.3.0 shipped keep indices 0 to 3 and BDF's follow
+        // as 4 to 6. AircraftParameters.GetFirstLiveryForFaction, the livery a jet wears until its own loads, is
+        // therefore PALA Navy and BDF Matte Gray. tests/scenarios/make_missions.py indexes its missions by the same order.
+        private static List<Dictionary<string, object>> LiverySpecs() =>
+            Directory.GetFiles(Path.Combine(RepoRoot, "art/textures/liveries"), "*.json")
+                .Select(f => (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(f)))
+                .OrderBy(s => System.Convert.ToInt32(s["id"]))
+                .ToList();
+
+        private static Object FactionAsset(string faction) => faction switch
+        {
+            "PALA" => Load<Object>(Stock + "MonoBehaviour/Primeva_PLACEHOLDER.asset"),
+            "BDF" => Load<Object>(Stock + "MonoBehaviour/Boscali_PLACEHOLDER.asset"),
+            _ => throw new InvalidDataException("unknown livery faction " + faction),
+        };
+
         private static List<LiveryEntry> AuthorLiveries(Texture2D skinLivery)
         {
             var result = new List<LiveryEntry>();
             foreach (var old in new[] { "icarus_pala_blockout", "icarus_pala_steel" })
                 AssetDatabase.DeleteAsset(LiveryFolder + "/" + old + ".asset");
-            var files = Directory.GetFiles(Path.Combine(RepoRoot, "art/textures/liveries"), "*.json").OrderBy(f => f).ToArray();
-            if (files.Length != 4) throw new InvalidDataException("expected four PALA livery specifications");
-            foreach (var file in files)
+            var specs = LiverySpecs();
+            if (specs.Count != 7) throw new InvalidDataException("expected seven livery specifications, four PALA and three BDF");
+            foreach (var spec in specs)
             {
-                var spec = (Dictionary<string, object>)MiniJson.Parse(File.ReadAllText(file));
                 var id = System.Convert.ToInt32(spec["id"]);
+                var faction = (string)spec["faction"];
                 var data = ScriptableObject.CreateInstance(GameType("LiveryData"));
-                data.name = "icarus_pala_" + id;
+                data.name = "icarus_" + faction.ToLowerInvariant() + "_" + id;
                 var so = new SerializedObject(data);
                 Prop(so, "Texture").objectReferenceValue = id == 1 ? skinLivery : ImportSkinTexture("Icarus_livery_" + id + ".png", true, false, TextureImporterFormat.DXT1);
                 Prop(so, "Glossiness").floatValue = System.Convert.ToSingle(spec["glossiness"]);
@@ -164,7 +208,7 @@ namespace Icarus.Editor
                 result.Add(new LiveryEntry
                 {
                     Name = (string)spec["name"],
-                    Faction = Load<Object>(Stock + "MonoBehaviour/Primeva_PLACEHOLDER.asset"),
+                    Faction = FactionAsset(faction),
                     Data = SaveAsset(data, LiveryFolder + "/" + data.name + ".asset"),
                 });
             }
@@ -173,18 +217,26 @@ namespace Icarus.Editor
 
         private static void AuthorLiveryMaterialCarrier(Build b)
         {
-            var bare = new Material(b.Skin) { name = "Icarus_bare_metal" };
-            bare.SetTexture("_Livery", Load<Texture2D>(LiveryFolder + "/Icarus_livery_4.png"));
-            bare.SetTexture("_Metallic", ImportSkinTexture("Icarus_livery_4_m.png", false, false, TextureImporterFormat.DXT5));
-            bare = SaveAsset(bare, SkinFolder + "/Icarus_bare_metal.mat");
-            // BareMetalLivery reads slots 0/1 as the untouched skin and the Bare Metal livery/map pair.
+            // One material per Bare Metal livery (PALA's 4, BDF's 7) holding its livery and its own metallic map.
+            var held = new List<Material> { b.Skin };
+            foreach (var id in BareMetalLiveryIds())
+            {
+                var bare = new Material(b.Skin) { name = id == 4 ? "Icarus_bare_metal" : "Icarus_bare_metal_" + id };
+                bare.SetTexture("_Livery", Load<Texture2D>(LiveryFolder + "/Icarus_livery_" + id + ".png"));
+                bare.SetTexture("_Metallic", ImportSkinTexture("Icarus_livery_" + id + "_m.png", false, false, TextureImporterFormat.DXT5));
+                held.Add(SaveAsset(bare, SkinFolder + "/" + bare.name + ".mat"));
+            }
+            // BareMetalLivery reads slot 0 as the untouched skin and every later slot as a Bare Metal livery/map pair.
             var carrier = new GameObject("Icarus_livery_materials") { layer = 3 };
             carrier.SetActive(false);
             carrier.transform.SetParent(b.Root.transform, false);
             var renderer = carrier.AddComponent<MeshRenderer>();
             renderer.enabled = false;
-            renderer.sharedMaterials = new[] { b.Skin, bare };
+            renderer.sharedMaterials = held.ToArray();
         }
+
+        private static int[] BareMetalLiveryIds() =>
+            LiverySpecs().Where(s => (string)s["pattern"] == "bands").Select(s => System.Convert.ToInt32(s["id"])).OrderBy(i => i).ToArray();
 
         // Every mesh renderer wearing the skin goes in its part's damageMaterial.renderers, the only renderers UnitPart.SetLivery
         // paints and tints with damage.

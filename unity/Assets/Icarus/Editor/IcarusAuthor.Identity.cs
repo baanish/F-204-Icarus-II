@@ -13,15 +13,17 @@ namespace Icarus.Editor
     {
         // The hardpoint set order is an API: loadouts and Blueprinter registrations address sets by position.
         // The tip tanks share the Wingtip set with its missiles: the tank mount seats its tank upright on the rolled
-        // hardpoint (AuthorTipTankMount), so no set precludes another. The Tail Hook set comes last (TailHookSet).
-        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal", "Tail Hook" };
+        // hardpoint (AuthorTipTankMount). The Tail Hook set (TailHookSet) and the Centreline set (CentrelineSet) were each
+        // appended, so loadouts saved before them keep their indices. The Conformal and Centreline sets preclude each other.
+        private static readonly string[] SetNames = { "Wingtip", "Inner Wing", "Conformal", "Tail Hook", "Centreline" };
 
         // What each set carries: a starter jet, so a Starfighter's kind of load and little that is advanced. The wingtip
         // stations take the MMR-S3 and IRM-S2 on their own rails, or the tip tank; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
         // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie, the GPO-N (1.5 kt and 250 kt) and the pods, one store
         // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations the MMR-S3, IRM-S2 and
         // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
-        // Auger, and no other double or triple racks (a rocket pod is one store).
+        // Auger, and no other double or triple racks (a rocket pod is one store). The centreline station takes one bomb on
+        // its own pylon: the 500 kg bomb or the GPO-N of either yield (the owner's picks, IcarusAuthor.Centreline.cs).
         private static readonly string[][] StationKeys =
         {
             new[] { "AAM1_single", "AAM3_single", TipTank },
@@ -30,6 +32,34 @@ namespace Icarus.Editor
                     "SpecialSmokePod", "SpecialFlarePod" },
             new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2 },
             new[] { TailHook },
+            new[] { "bomb_500_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external" },
+        };
+        // Mounts of the Aryx Weaponry Pack, by its keys and the sets that offer them: the owner's picks, the pack's
+        // anti-radiation missile and glide bomb among them. The pack is another mod and stays optional: its mounts are no
+        // asset of this project, so they are registered by key alone, and without the pack a player's log gains one
+        // "Weapon ... not found" line a key and nothing else. Only rail missiles that leave forward go on a wingtip. The
+        // two on the conformal set are seated in the trough as they spawn (src/Icarus/PackMountFit.cs).
+        private static readonly (string Key, int[] Sets)[] AryxPackMounts =
+        {
+            ("Aryx_SRIRM1_Single", new[] { 0, 1, 2 }), ("Aryx_LRIRM1_Single", new[] { 0, 1 }), ("Aryx_Wep_ARM2_single", new[] { 1 }),
+            ("Aryx_SRIRM1_Double", new[] { 1 }), ("Aryx_LRIRM1_Double", new[] { 1 }), ("Aryx_FastAGM1_x1", new[] { 1 }),
+            ("Aryx_HeavyRocket1_x1", new[] { 1, 2 }), ("Aryx_SmallCruiseMissile1_Single", new[] { 1 }),
+            ("aryx_glidebomb400_single", new[] { 1, CentrelineSet }),
+        };
+        // Mounts of Meridian Works, on the same terms: the owner's picks. Its two short air-to-air missiles go on the
+        // wingtips, where they are spawned as they hang and light a moment later. Twin racks stay under the 370 kg of
+        // the heaviest stock twin. The singles on the conformal set are seated as the Aryx ones are; the fins of the
+        // AAM-120C, AAM-90 and AGM-33L have no place in a trough (the owner's call). One of the picks is not offered:
+        // tools/store_clearance.py finds the AAM-90 twin rack in the main wheel's path as the gear folds (Stores rule 12).
+        private static readonly (string Key, int[] Sets)[] MeridianWorksMounts =
+        {
+            ("MeridianSRM8_single", new[] { 0, 1, 2 }), ("MeridianSRM20_single", new[] { 0, 1, 2 }),
+            ("MeridianAMRAAM_single", new[] { 1 }), ("MeridianAAM63_single", new[] { 1, 2 }), ("MeridianScreamer_single", new[] { 1 }),
+            ("MeridianAAM7_single", new[] { 1 }), ("MeridianJackal_single", new[] { 1, 2 }), ("MeridianAGM58F_single", new[] { 1, 2 }),
+            ("MeridianBlackArrow_single", new[] { 1, 2 }), ("MeridianAGM33L_single", new[] { 1 }),
+            ("MeridianSRM8_double_compact", new[] { 1 }), ("MeridianSRM20_double", new[] { 1 }), ("MeridianAMRAAM_double", new[] { 1 }),
+            ("MeridianJackal_x2", new[] { 1 }), ("MeridianAGM58F_x2", new[] { 1 }),
+            ("MeridianBlackArrow_x2", new[] { 1 }),
         };
         // The conformal mounts' jsonKeys (art/blender/stations.py MOUNTS).
         private const string ConformalAAM1 = "baanish_icarus_AAM1_conformal", ConformalAAM3 = "baanish_icarus_AAM3_conformal",
@@ -52,10 +82,10 @@ namespace Icarus.Editor
 
         private static readonly (string Name, string[] Keys)[] StandardLoadouts =
         {
-            ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook }),
-            ("Air Superiority", new[] { "AAM1_single", "AAM2_double", ConformalAAM2, TailHook }),
-            ("Strike", new[] { "AAM1_single", "bomb_500_single", ConformalAAM2, TailHook }),
-            ("Close Support", new[] { "AAM1_single", "AGM_heavy_single", ConformalAAM2, TailHook }),
+            ("Interceptor", new[] { TipTank, "AAM4_single", ConformalAAM2, TailHook, null }),
+            ("Air Superiority", new[] { "AAM1_single", "AAM2_double", ConformalAAM2, TailHook, null }),
+            ("Strike", new[] { "AAM1_single", "bomb_500_single", ConformalAAM2, TailHook, null }),
+            ("Close Support", new[] { "AAM1_single", "AGM_heavy_single", ConformalAAM2, TailHook, null }),
         };
 
         private static string KeyOf(Object mount) => new SerializedObject(mount).FindProperty("jsonKey")?.stringValue;
@@ -369,6 +399,8 @@ namespace Icarus.Editor
                 offered.Remove(key);
             if (unknown.Length > 0)
                 Debug.Log("[Icarus] note: not registered, unknown to OpReferenceIndex: " + string.Join(", ", unknown));
+            foreach (var (key, packSets) in AryxPackMounts.Concat(MeridianWorksMounts))
+                offered.Add(key, packSets.ToList());
             foreach (var path in Directory.GetFiles(ModFolder, "OpAddWeaponToHardpoint_*.asset"))
                 if (!offered.ContainsKey(Path.GetFileNameWithoutExtension(path).Substring("OpAddWeaponToHardpoint_".Length)))
                     if (!AssetDatabase.DeleteAsset(path.Replace('\\', '/')))

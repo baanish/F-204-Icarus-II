@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.0
+
+- The pilot sits 0.75 m farther forward, with the seat reclined 10 degrees, so the helmet sits between the canopy frames. The instrument panel is smaller and sits 3 cm lower.
+- Damage holes expose frames, ribs and spars in the fuselage, wings and tail.
+- The visible fuel bladders are gone. The fuselage and wing sections still hold fuel.
+- Each intake can be shot off on its own, exposing the duct, cone and frames beneath. Losing either intake stops the engine.
+- The engine can also die from damage to the centre section or tail cone.
+- Missile hits can set the main fuel tank on fire again.
+- The forward tank's fire now starts at the fuel cell behind the seat, not under the pilot.
+- A brace between the cockpit and centre section keeps the whole nose on in most missile hits. In matched tests the nose came off in 8 of 15 hits before the brace and 7 of 72 with it.
+- Seven liveries wear their faction's roundels on the fin and wings. Boscali players see BDF Matte Gray, pixel Gray Camo and Bare Metal in place of the four Primeva liveries.
+- Saved missions keep the four original livery numbers, so jets already placed in a mission keep their paint.
+- The aircraft menu opens in your side's Bare Metal until you pick another livery.
+- The tip tanks and arrestor hook take their paint from the game's own livery system, and both Bare Metal schemes give them the polished finish. Their paint after a rearm has not been checked in the game.
+- The [livery kit](docs/livery-kit/README.md) gives you a paint model, templates and all seven liveries as starting points. Build your PNG with the kit's builder in the game's Unity livery project, then pick the installed livery from the Icarus's livery list.
+- A centreline station carries one GPO-500 or one GPO-N of either yield. It and the conformal stations block each other in the loadout menu, as they share the belly. It is last in the list, so saved loadouts keep their stations, and missions saved before it keep their Icarus loadouts.
+- With the Aryx Weaponry Pack installed, the Icarus carries seven of its weapons: the IRM-S5 Gladius, MRM-S4 Broadsword, ARAD-45, AGM-27 Pyre, AGR-37 Jester, AGM-76 Atlatl and PGM-400LR. The Gladius and Jester also fit the conformal stations, and the PGM-400LR the centreline.
+- With Meridian Works installed, the Icarus carries ten of its weapons: the SRM-8 Kukri, SRM-20 Merlin, AAM-120C, AAM-63 Falchion, AAM-90 Estoc, AAM-7 Sparrow, AGM-58, AGM-58F, AGM-190A Black Arrow and AGM-33L. The Kukri and Merlin also go on the wingtips, and the Kukri, Merlin, Falchion, AGM-58, AGM-58F and Black Arrow fit the conformal stations.
+- Both packs are optional. Without one, the game log gains a "Weapon not found" line for each of its mounts and nothing else changes.
+- The settings page lists only the player options, stock mission supply and helipad spawn. The diagnostics and the tuning knobs are in dev builds only (`tools/Build-Icarus.ps1 -Dev`); a released Icarus flies on its shipped values.
+- The Icarus now has the `F-204 Icarus II` Steam Workshop tag the uploader requires for liveries. The tag was checked in game. A Workshop upload has yet to be tested end to end.
+
+The game code falls back to PALA Navy for Primeva and BDF Matte Gray for Boscali when another player lacks your custom livery. This fallback has yet to be tested in multiplayer.
+
 ## 0.3.0
 
 - Big missions run at nearly the unmodded frame rate. The mod searched every aircraft in the mission on every frame, even with no Icarus flying, which halved the frame rate in operations like Escalation. It now searches only when the game shifts the world origin.

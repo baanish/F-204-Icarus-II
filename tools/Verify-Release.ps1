@@ -18,7 +18,8 @@ $suffix = if ($AllowLocal) { '-LOCAL' } else { '' }
 $nommName = "Icarus-$Tag$suffix-nomm.zip"
 $manualName = "Icarus-$Tag$suffix-plugin-only.zip"
 $sourcesName = "Icarus-$Tag$suffix-texture-sources.zip"
-$assetNames = @($nommName, $manualName, $sourcesName, 'RELEASE-NOTES.md')
+$kitName = "icarus_livery_kit_$version$suffix.zip"
+$assetNames = @($nommName, $manualName, $sourcesName, $kitName, 'RELEASE-NOTES.md')
 $releaseAssetNames = [string[]]($assetNames + 'SHA256SUMS.txt')
 [Array]::Sort($releaseAssetNames, [StringComparer]::OrdinalIgnoreCase)
 if ($releaseAssetNames[0] -cne $nommName) { throw 'Release asset names must sort with the NOMM archive first' }
@@ -33,6 +34,8 @@ foreach ($line in Get-Content -LiteralPath (Join-Path $Directory 'SHA256SUMS.txt
     if ((Get-Sha256 (Join-Path $Directory $name)) -cne $sums[$name]) { throw "Checksum mismatch: $name" }
 }
 if ($sums.Count -ne $assetNames.Count) { throw 'SHA256SUMS.txt must cover every archive and the release notes' }
+& python (Join-Path $PSScriptRoot 'livery_kit.py') --check (Join-Path $Directory $kitName) --version $version
+if ($LASTEXITCODE -ne 0) { throw "Invalid livery kit: $kitName" }
 # The texture-sources archive holds only pinned generated sources, each matching its own manifest entry.
 $archive = [IO.Compression.ZipFile]::OpenRead((Join-Path $Directory $sourcesName))
 try {
@@ -56,6 +59,23 @@ try {
         $count++
     }
     if ($count -ne $pinned.Count) { throw "$sourcesName lacks pinned texture sources" }
+    # The pack is public: no entry may be the game's roundel art or a livery painted with it.
+    $scan = Join-Path ([IO.Path]::GetTempPath()) ('icarus-verify-' + [guid]::NewGuid().ToString('N'))
+    $null = New-Item -ItemType Directory -Path $scan
+    try {
+        $index = 0
+        foreach ($entry in $archive.Entries | Where-Object { $_.FullName -match '\.png$' }) {
+            [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, (Join-Path $scan "$index`__$($entry.Name)"))
+            $index++
+        }
+        # In batches: every path in one command line passes Windows' length limit, and python then fails to start.
+        $extracted = @(Get-ChildItem -LiteralPath $scan -File | ForEach-Object FullName)
+        for ($first = 0; $first -lt $extracted.Count; $first += 100) {
+            $batch = @($extracted[$first..([Math]::Min($first + 99, $extracted.Count - 1))])
+            $clean = @(& python (Join-Path $PSScriptRoot '../art/textures/faction_marks.py') check-clean --require-references @batch 2>&1)
+            if ($LASTEXITCODE -ne 0) { throw "Game art in $sourcesName could not be ruled out: $($clean | Select-Object -First 1)" }
+        }
+    } finally { Remove-Item -LiteralPath $scan -Recurse -Force }
 } finally { $archive.Dispose() }
 $payloadHashes = @{}
 foreach ($name in @($nommName, $manualName)) {
@@ -80,6 +100,16 @@ foreach ($name in @($nommName, $manualName)) {
         }
         foreach ($requiredName in $required) { if (-not $seen.Contains($requiredName)) { throw "$name is missing $requiredName" } }
         if ($name -ceq $nommName) {
+            # Latin-1 preserves every byte, so the UTF-16LE literal can match at any offset.
+            $stream = $archive.GetEntry('Icarus.dll').Open()
+            $dll = [IO.MemoryStream]::new()
+            try {
+                $stream.CopyTo($dll)
+                $marker = [Text.Encoding]::Latin1.GetString([Text.Encoding]::Unicode.GetBytes('StageLogging'))
+                if ([Text.Encoding]::Latin1.GetString($dll.ToArray()).Contains($marker, [StringComparison]::Ordinal)) {
+                    throw 'Icarus.dll is a dev build. Build without -Dev before packaging.'
+                }
+            } finally { $dll.Dispose(); $stream.Dispose() }
             $reader = [IO.StreamReader]::new($archive.GetEntry('meta.json').Open())
             try { $metaText = $reader.ReadToEnd(); $meta = $metaText | ConvertFrom-Json } finally { $reader.Dispose() }
             if ($metaText -match '(?i)[a-z]:[\\/]|\\\\|"(?:path|enabled)"') { throw 'meta.json contains a local path or enabled state' }
@@ -109,4 +139,4 @@ if ($ReleaseJson) {
             $asset.size -ne (Get-Item -LiteralPath $path).Length -or $asset.digest -cne "sha256:$(Get-Sha256 $path)") { throw "GitHub asset mismatch: $($asset.name)" }
     }
 }
-Write-Output "RELEASE VERIFY PASS: $Tag$suffix checksums, dependencies, commit, paired archives, texture sources and sorted asset names"
+Write-Output "RELEASE VERIFY PASS: $Tag$suffix checksums, dependencies, commit, release plugin, paired archives, texture sources, livery kit and sorted asset names"

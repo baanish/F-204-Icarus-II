@@ -33,7 +33,7 @@ namespace Icarus.Editor
             var donorKey = Prop(new SerializedObject(Load<Object>(DonorDefinition)), "jsonKey").stringValue;
             if (revoker != donorKey) p.Add($"the plugin's factories alternate with {revoker}, the Revoker is {donorKey}");
             var primeva = Prop(new SerializedObject(Load<Object>(Stock + "MonoBehaviour/Primeva_PLACEHOLDER.asset")), "factionName").stringValue;
-            if (faction != primeva) p.Add($"the plugin supplies faction {faction}, the liveries are {primeva}'s");
+            if (faction != primeva) p.Add($"the plugin supplies faction {faction}, the Icarus's home faction is {primeva}");
             if (reserve <= 0) p.Add("StartingReserve " + reserve);
             return $"the plugin adds {reserve} {pluginKey} to {faction} and has {revoker} factories build both in turn";
         }

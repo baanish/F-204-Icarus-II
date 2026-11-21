@@ -1,0 +1,38 @@
+// A fire in the Icarus's main tank, beside the same fire in a Revoker's (revoker_root_fire.scenario.jsonc): the Icarus
+// holds 10 km at 400 m/s and half fuel over Ignus, and its root part (fuselage_mid, the prefab's root, Icarus in game),
+// which carries the main fuselage tank, takes fire damage to 30 HP, under its tank's 50 HP leak threshold, through the game's own damage (act damage). Each tank that lights
+// logs a "tank-fire" stage line (src/Icarus/TankFireLog.cs) with the sphere its fire damages once a second and the parts
+// inside it. Shots 5, 20 and 40 s after the hit from the camera of the frame-time runs; 60 s of fire in all.
+// Measured: the tanks alight and when (read from the stage lines), the parts lost, hit points at the end.
+// From the repo root: no-agentic run tests/scenarios/icarus_root_fire.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 180,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 120, "pitch_deg": 10 } },
+    { "mark": { "label": "fire" } },
+    { "act": { "damage": "Icarus", "amount": 0.7 } },
+    { "check": { "event": "damage", "since": "fire" }, "within": 5, "label": "the root takes the damage" },
+    { "check": { "log": "tank-fire", "source": "F-204 Icarus II", "since": "fire" }, "within": 5, "label": "a tank lights" },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 5, "timeout": 8, "label": "5 s of fire" },
+    { "screenshot": { "name": "fire_05" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 15, "timeout": 18, "label": "20 s of fire" },
+    { "screenshot": { "name": "fire_20" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 20, "timeout": 23, "label": "40 s of fire" },
+    { "screenshot": { "name": "fire_40" } },
+    { "wait": { "path": "sample_ms", "gt": -1 }, "hold": 20, "timeout": 23, "label": "60 s of fire" },
+    { "record": { "event": "part_detached", "field": "part", "since": "fire" }, "label": "parts lost to the fire" },
+    { "record": { "path": "own.hp_frac" }, "label": "hit points after 60 s of fire" },
+  ],
+}

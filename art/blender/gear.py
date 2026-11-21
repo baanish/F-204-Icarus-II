@@ -161,8 +161,9 @@ BUDGET = {
     # Built to the speed brakes' standard (rim, ribs, stringer, hinge knuckles): the stock F-99's bay doors run 824
     # triangles each, the Ifrit's gear doors 2,266 in all. Taking all of the skin's rings and columns added about 1,000,
     # nearly all on the flaps; the intakes' caps gave up the 1,000. Splitting the aft door into a clamshell added a
-    # second tray, rim and knuckles a side, about 800; the canopy glass's caps gave those up.
-    "doors": {"target": 5750, "cap": 5800, "objects": ("gear_door_",)},
+    # second tray, rim and knuckles a side, about 800; the canopy glass's caps gave those up. Trays coarsened to one face
+    # per pocket along the door (DOOR_SHAPE cell) for the 150,000-triangle whole jet: 4,796 measured.
+    "doors": {"target": 4800, "cap": 4850, "objects": ("gear_door_",)},
 }
 DOOR_TRIS = (32, 1250)  # each door, outer skin and inner trim (Exterior rule 22, raised for the detailed doors)
 # Stock wheel layout, measured on _donotship/Texture2D/aircraft_wheels_b_PLACEHOLDER.png (512 px): the tread strip
@@ -1039,7 +1040,9 @@ def gapped(grid, hinge_edge):
 # and a stringer along its middle stand frame_depth deep, the inner sheet between them sheet_depth (a honeycomb-cored
 # door would be thicker; these follow the speed brakes, whose panels are the same skin). Hinge knuckles on the hinge
 # line knuckle_inset from each end and at the middle, each with a lug back into the rim.
-DOOR_SHAPE = {"frame_depth": 0.026, "sheet_depth": 0.005, "rim": 0.028, "rib": 0.014, "rib_pitch": 0.30, "cell": 0.15,
+# cell, the largest tray face, is the rib pitch: one face per pocket along the door, as coarse as the stock bay doors'
+# trays, for the 150,000-triangle whole jet.
+DOOR_SHAPE = {"frame_depth": 0.026, "sheet_depth": 0.005, "rim": 0.028, "rib": 0.014, "rib_pitch": 0.30, "cell": 0.30,
               "knuckle_r": 0.009, "knuckle_half": 0.016, "knuckle_inset": 0.07, "lug": 0.030}
 # A shallower tray for the nose well's narrow pairs: a deep rim on a door that narrow swings into the well's edge.
 DOOR_DEPTH = {"gear_door_N2": 0.010, "gear_door_flap": 0.012, "gear_door_flap_out": 0.012}

@@ -6,9 +6,8 @@ using UnityEngine;
 namespace Icarus;
 
 /// <summary>
-/// Gives the arrestor hook the hooked fin's livery after Hardpoint.SpawnMount fits it.
-/// The hook's UVs sample the fairing's paint (art/blender/tail_hook.py paint), and <see cref="TailHookPaint"/>
-/// follows the fin's livery changes on each peer without sending network messages.
+/// Matches the arrestor hook's metallic map to the hooked fin after Hardpoint.SpawnMount fits it.
+/// ColorableMount supplies the paint sampled by the hook's UVs (art/blender/tail_hook.py paint).
 /// </summary>
 public static class TailHookFairing
 {
@@ -33,13 +32,12 @@ public static class TailHookFairing
 }
 
 /// <summary>
-/// The hook's paint: every half second, the livery the hooked fin wears (UnitPart.SetLivery sets _Livery and _Glossiness,
-/// BareMetalLivery the _Metallic map), as TipTanks dresses its stores from the wing.
+/// The stock mount livery has no metallic map, so the hook takes the map BareMetalLivery puts on the hooked fin.
 /// </summary>
 sealed class TailHookPaint : MonoBehaviour
 {
     const float RefreshS = 0.5f;
-    static readonly int LiveryId = Shader.PropertyToID("_Livery"), GlossId = Shader.PropertyToID("_Glossiness"), MetallicId = Shader.PropertyToID("_Metallic");
+    static readonly int MetallicId = Shader.PropertyToID("_Metallic");
 
     internal Renderer? Fin;
     Renderer[] hook = Array.Empty<Renderer>();
@@ -57,13 +55,11 @@ sealed class TailHookPaint : MonoBehaviour
         if (Time.time < next || Fin == null || block == null) return;
         next = Time.time + RefreshS;
         Material livery = Fin.sharedMaterial;
-        if (livery == null) return;
+        if (livery == null || !livery.HasProperty(MetallicId) || livery.GetTexture(MetallicId) is not Texture metallic) return;
         foreach (Renderer renderer in hook)
         {
             renderer.GetPropertyBlock(block);
-            if (livery.HasProperty(LiveryId) && livery.GetTexture(LiveryId) is Texture paint) block.SetTexture(LiveryId, paint);
-            if (livery.HasProperty(MetallicId) && livery.GetTexture(MetallicId) is Texture metallic) block.SetTexture(MetallicId, metallic);
-            if (livery.HasProperty(GlossId)) block.SetFloat(GlossId, livery.GetFloat(GlossId));
+            block.SetTexture(MetallicId, metallic);
             renderer.SetPropertyBlock(block);
         }
     }

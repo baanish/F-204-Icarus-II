@@ -152,6 +152,14 @@ namespace Icarus.Editor
         // The lens objects' names; src/Icarus/TipTanks.cs finds them by this prefix.
         private const string TipTankLensPrefix = "tip_tank_lens_";
 
+        private static void AuthorMountPaint(GameObject root, Renderer skin)
+        {
+            var paint = new SerializedObject(root.AddComponent(GameType("ColorableMount")));
+            Prop(paint, "colorableRenderers").arraySize = 0;
+            SetList(Prop(paint, "skinnableRenderers"), new Object[] { skin });
+            paint.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         private static Object AuthorTipTankMount()
         {
             BlueprinterAssets.EnsureFolder(MountFolder);
@@ -278,6 +286,7 @@ namespace Icarus.Editor
                     fairing.enabled = false;
                 store.name = "tip_tank";
                 DressTipTank(store, mesh, layout);
+                AuthorMountPaint(root, store.GetComponent<MeshRenderer>());
                 var launcher = new SerializedObject(store.GetComponent(GameType("MountedMissile")));
                 Prop(launcher, "railDirection").intValue = 3; // RailDirection.Left: outboard on the left tip
                 Num(launcher, "railLength", TipTankEjectLength);

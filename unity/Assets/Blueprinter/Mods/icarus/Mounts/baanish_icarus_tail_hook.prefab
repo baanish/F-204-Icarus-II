@@ -73,6 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4884547391421755}
   - component: {fileID: 114099118695303065}
+  - component: {fileID: 6418501922242139758}
   m_Layer: 0
   m_Name: baanish_icarus_tail_hook
   m_TagString: Untagged
@@ -116,6 +117,21 @@ MonoBehaviour:
   mass: 100
   stowedAngle: 189.946
   deployedAngle: 151.543
+--- !u!114 &6418501922242139758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1246182341, guid: 06dd3d5416bf43ea368cc39ff96e6d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorableRenderers: []
+  skinnableRenderers:
+  - {fileID: 23709867586078768}
 --- !u!1 &1724804207875695
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@
     "Path": ""
   },
   "missionSettings": {
-    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva parked on Sandrift Airbase's runway (Heartland) facing north, at rest, full fuel, clean, for fly mode=takeoff; no opponent.",
+    "description": "F-204 Icarus II test mission: the player's Icarus for Primeva in PALA Navy (livery 0 of the list) parked on Sandrift Airbase's runway (Heartland) facing north, at rest, full fuel, clean, for a livery shot; no opponent.",
     "allowEventContent": false,
     "Tags": [],
     "playerMode": "SingleAndMultiplayer",
@@ -81,6 +81,9 @@
       "playerControlledPriority": 0,
       "savedLoadout": {
         "Selected": [
+          {
+            "Key": ""
+          },
           {
             "Key": ""
           },

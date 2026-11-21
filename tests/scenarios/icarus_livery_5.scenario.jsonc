@@ -1,0 +1,36 @@
+// Livery 5 of 7, BDF Matte Gray (BDF): the Icarus parked on Sandrift's runway in livery index 4 of
+// the authored list (by id: PALA's four, then BDF's three). Pass: the plugin reports that
+// livery on the player's jet, the run completes, and the screenshots show it with its roundels; the shots are read by eye.
+// From the repo root: no-agentic run tests/scenarios/icarus_livery_5.scenario.jsonc
+{
+  "mission": "icarus_livery_5.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 240,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is the player's aircraft" },
+    { "require": { "path": "mods.baanish.icarus.livery", "eq": "BDF Matte Gray" }, "within": 3, "label": "BDF Matte Gray is selected" },
+    { "wait": { "path": "own.gs_mps", "lt": 0.2 }, "timeout": 10, "hold": 3, "label": "settled on its gear" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 40, "hdg_deg": 330, "pitch_deg": 10 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: front-left orbit" },
+    { "screenshot": { "name": "livery_5" } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 16, "hdg_deg": 270, "pitch_deg": 3 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: left side" },
+    { "screenshot": { "name": "livery_5_left" } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 9, "hdg_deg": 235, "pitch_deg": 12 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: fin from aft left" },
+    { "screenshot": { "name": "livery_5_fin" } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 8, "hdg_deg": 290, "pitch_deg": 55 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: left wing from above" },
+    { "screenshot": { "name": "livery_5_wing_upper" } },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 7, "hdg_deg": 90, "pitch_deg": -7 } },
+    { "wait": { "path": "own.alive", "eq": true }, "timeout": 6, "hold": 3, "label": "the camera settles: wing from below" },
+    { "screenshot": { "name": "livery_5_wing_lower" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" } ] }, "label": "the Icarus is still the player's aircraft after the shots" },
+    { "camera": { "mode": "game" } },
+  ],
+}

@@ -66,7 +66,7 @@ HINGE_CLEAR = 0.035  # the hinge line stands this far outboard of the left seam,
 SKIN = "Icarus_Body"
 # The design eye, (s, x, z) as in PARAMS: where the stock seat's pilot looks from. tools/export_blockout.py writes it to
 # blockout.json, and the Unity author fits the cockpit to it.
-EYE = (4.365, 0.0, 0.885)
+EYE = (3.7438, 0.0, 0.8297)
 # Cockpit rule 27, from the eye to the inner glass and the cockpit cell's sill: (low, high) metres.
 EYE_BANDS = {"overhead": (0.23, 0.36), "side": (0.35, 0.46), "sill": (0.27, 0.35)}
 # The glare shield's top runs under this 6 degree line down from the eye, so it meets the airframe's own over-nose
@@ -605,8 +605,9 @@ def eye_geometry(eye_sxz):
     glass = bvh([O[GLASS_INNER], O[WINDSCREEN_INNER]])
     reach = lambda d: must(hit(glass, eye, d), "inner glass from the eye")[0] - eye
     cell = O["cockpit_cell"]
-    sill = max(q.z for q in (cell.matrix_world @ v.co for v in cell.data.vertices)
-               if abs(q.y - eye.y) < 0.1 and abs(q.x) > 0.2 and q.z < eye.z)
+    import internals
+
+    sill = max(z for x, z in internals.section_points(cell, eye_sxz[0]) if abs(x) > 0.2 and z < eye.z)
     skin = bvh([o for o in bi.TARGET.all_objects if o.type == "MESH" and o.get("role") == "skin"])
     over = next(d / 10 for d in range(400) if hit(skin, eye, Vector((0, -math.cos(math.radians(d / 10)), -math.sin(math.radians(d / 10)))), 20) is not None)
     return {"overhead": reach(Z).length, "side": min(reach(X).length, reach(-X).length), "sill": eye.z - sill,

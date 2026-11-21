@@ -78,9 +78,7 @@ sealed class TipTanks : MonoBehaviour
         public bool Attached;
         public Renderer? Skin;
         public Renderer? Top, Bottom;
-        // The livery last put on the skin: SetLivery and BareMetalLivery change the wing's material in place.
-        public (Texture? Paint, Texture? Metallic, float? Gloss) Painted;
-        public bool IsPainted;
+        public Texture? Metallic;
     }
 
     // The wing skin beside a tip: its nav lenses (NavLights swaps their materials) and the skin mesh the upper sits on.
@@ -331,9 +329,8 @@ sealed class TipTanks : MonoBehaviour
         }
     }
 
-    // Each hanging tank's lenses show the wing lens beside them (NavLights swaps that lens's material), and its skin the
-    // livery the wing wears (UnitPart.SetLivery sets _Livery and _Glossiness, BareMetalLivery the _Metallic map). Either
-    // can change at any refresh, so each compares what the wing wears with what the tank has and copies only a change.
+    // NavLights swaps the wing lens's material, and BareMetalLivery changes the wing's metallic map. ColorableMount
+    // supplies the hanging tank's paint and gloss, but its lenses and metallic map still follow the wing.
     void Dress()
     {
         foreach (Tank t in tanks)
@@ -343,17 +340,19 @@ sealed class TipTanks : MonoBehaviour
                 wings[t.Side] = wing = FindWing(IcarusSystems.Parts(aircraft), t.Side);
             if (wing == null) continue;
             DressLenses(wing, t.Top, t.Bottom);
-            var livery = LiveryOf(wing);
-            if (t.Skin == null || livery == null || t.IsPainted && t.Painted == livery.Value) continue;
-            Paint(t.Skin, livery.Value, paint);
-            t.Painted = livery.Value;
-            t.IsPainted = true;
+            Material? livery = wing.Skin != null ? wing.Skin.sharedMaterial : null;
+            if (t.Skin == null || livery == null || !livery.HasProperty(MetallicId) ||
+                livery.GetTexture(MetallicId) is not Texture metallic || t.Metallic == metallic) continue;
+            t.Skin.GetPropertyBlock(paint);
+            paint.SetTexture(MetallicId, metallic);
+            t.Skin.SetPropertyBlock(paint);
+            t.Metallic = metallic;
         }
     }
 
     static Wing? FindWing(AeroPart[] parts, string side)
     {
-        // The wing skin meshes that carry the lenses (the outer upper and lower pieces of the wing skin), on the outer box.
+        // The lenses hang on the outer wing skin's pieces, on the outer box; the box's one mesh draws those pieces, skin first.
         Transform? Lens(string name) => parts.Where(p => p != null).SelectMany(p => p.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == name);
         Transform? upperLens = Lens("navlight_" + side);
         AeroPart? wing = upperLens == null ? null : upperLens.GetComponentInParent<AeroPart>();
@@ -363,8 +362,8 @@ sealed class TipTanks : MonoBehaviour
             Lens = upperLens!,
             Upper = upperLens!.GetComponent<Renderer>(),
             Lower = Lens("navlight_lower_" + side)?.GetComponent<Renderer>(),
-            // the skin mesh the lens sits on
-            Skin = upperLens.parent != null ? upperLens.parent.GetComponent<Renderer>() : null,
+            // the mesh that draws the skin the lens sits on
+            Skin = upperLens.parent != null ? upperLens.parent.GetComponentInParent<Renderer>() : null,
         };
     }
 

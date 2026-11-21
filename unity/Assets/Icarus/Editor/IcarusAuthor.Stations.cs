@@ -24,6 +24,8 @@ namespace Icarus.Editor
             // main wheels' wells (art/blender/stations.py).
             { "hardpoint_conformal_L", (new Vector3(-0.550f, -0.453f, 1.170f), 0f) },
             { "hardpoint_conformal_R", (new Vector3(0.550f, -0.453f, 1.170f), 0f) },
+            // 0.005 m inside the belly skin, where a store's own pylon bears.
+            { "hardpoint_centreline", (new Vector3(0f, -0.7496f, CentrelineStation), 0f) },
         };
         private const float MeasuredTolerance = 0.001f;
         // The left Wingtip hardpoint's roll about the forward axis (the right one's is the opposite): it turns a mount's
@@ -197,15 +199,19 @@ namespace Icarus.Editor
             // A conformal station sits 0.005 m inside the trough floor right above it (Stores rule 9), where its mount's
             // shoe bears; x and z are the station's own (art/blender/stations.py CONFORMAL).
             var conformal = Vec3(ConformalLayout()["hardpoint_unity"]) - b.Blockout.Origin;
-            Vector3 ConformalPoint(string side)
+            // The lowest skin the vertical line through (x, z) crosses: the belly.
+            float Belly(float x, float z)
             {
-                var x = (side == "L" ? 1f : -1f) * conformal.x;
-                var z = conformal.z;
                 var skin = new[] { RootPart, "intake_duct_L", "intake_duct_R" }.Concat(FamilyParts(b, "skin_mid_L")).Concat(FamilyParts(b, "skin_mid_R"))
                     .SelectMany(n => Crossings(n, x, z)).ToArray();
                 if (skin.Length == 0)
-                    throw new InvalidDataException($"no belly skin above the conformal station at x {x}, z {z:F2}");
-                return new Vector3(x, skin.Min() + 0.005f, z);
+                    throw new InvalidDataException($"no belly skin above the station at x {x}, z {z:F2}");
+                return skin.Min();
+            }
+            Vector3 ConformalPoint(string side)
+            {
+                var x = (side == "L" ? 1f : -1f) * conformal.x;
+                return new Vector3(x, Belly(x, conformal.z) + 0.005f, conformal.z);
             }
 
             // Pylon names the blade and plug a wing station shows and hides by load. Roll is the left station's turn about
@@ -266,6 +272,9 @@ namespace Icarus.Editor
                 }
             }
             lines.Add(BuildTailHookStation(b, list.GetArrayElementAtIndex(TailHookSet)));
+            // A hair off the centreline: the belly's two halves meet in a seam there, which a vertical line can slip through.
+            lines.Add(BuildCentrelineStation(b, list.GetArrayElementAtIndex(CentrelineSet), list.GetArrayElementAtIndex(ConformalSet),
+                new Vector3(0f, Belly(0.002f, CentrelineStation) + 0.005f, CentrelineStation)));
             so.ApplyModifiedPropertiesWithoutUndo();
             b.Report.Add("stations: " + string.Join("; ", lines));
         }

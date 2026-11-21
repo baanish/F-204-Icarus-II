@@ -1,0 +1,29 @@
+// Takeoff with a centreline bomb: the game's takeoff AI runs the Icarus off Sandrift's runway at full fuel with one 500 kg
+// bomb on its Centreline station, which hangs 0.19 m off the ground at rest (tools/store_clearance.py). Pass: the jet rotates
+// and climbs away with the bomb still aboard, no damage and nothing detached from spawn to 75 m up.
+// From the repo root: no-agentic run tests/scenarios/icarus_centreline_takeoff.scenario.jsonc
+{
+  "mission": "icarus_centreline_runway.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "speed": 1,
+  "timeout": 240,
+  "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||||bomb_500_single" }, "within": 3, "label": "loadout: the 500 kg bomb on the Centreline station alone" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "lt": 1 }, { "path": "own.gear", "eq": "down" } ] }, "label": "the Icarus parked on the runway, gear down" },
+    { "mark": { "label": "start" } },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "damage", "since": "start" } },
+                          { "not": { "event": "part_detached", "since": "start" } } ] }, "for": 5, "label": "the airframe and the bomb sit undamaged for 5 s on the runway" },
+    { "screenshot": { "name": "centreline_runway" } },
+    { "fly": { "mode": "takeoff", "alt_msl_m": 1200, "hdg_deg": 4, "throttle": 0.85 } },
+    { "wait": { "path": "own.alt_agl_m", "gt": 75 }, "timeout": 120, "label": "airborne, 75 m up" },
+    { "act": { "station": 0 } },
+    { "check": { "path": "own.station.ammo", "eq": 1 }, "within": 3, "label": "the bomb is still aboard" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "damage", "since": "start" } },
+                          { "not": { "event": "part_detached", "since": "start" } } ] }, "label": "no damage and nothing detached from spawn through the takeoff run" },
+  ],
+}

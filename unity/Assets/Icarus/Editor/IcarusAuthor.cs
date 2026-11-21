@@ -92,10 +92,14 @@ namespace Icarus.Editor
             public int[] MaterialTris = Array.Empty<int>();
             public int ColliderCount;
             public bool HasLod1, IsHinge;
+            // False for a part the skeleton is drawn in place of (art/blender/skeleton.py REPLACED): its FBX holds only
+            // its colliders.
+            public bool Drawn = true;
             public Dictionary<string, object> Props;
 
             public float Number(string key) => Props.TryGetValue(key, out var v) ? Convert.ToSingle(v) : 0f;
             public string Text(string key) => Props.TryGetValue(key, out var v) ? v as string : null;
+            public bool Flag(string key) => Props.TryGetValue(key, out var v) && v is bool f && f;
         }
 
         private sealed class Blockout
@@ -136,6 +140,7 @@ namespace Icarus.Editor
                         ColliderCount = part.TryGetValue("colliders", out var c) && c is List<object> list ? list.Count : 0,
                         HasLod1 = part.TryGetValue("lod1", out var l) && l is Dictionary<string, object>,
                         IsHinge = props.ContainsKey("hinge_axis"),
+                        Drawn = !(part.TryGetValue("drawn", out var d) && d is bool drawn && !drawn),
                         Props = props,
                     };
                 }
@@ -197,23 +202,23 @@ namespace Icarus.Editor
                 Mesh Named(string name) => assets.SingleOrDefault(m => Regex.Replace(m.name, @"\.\d{3}$", "") == name);
                 var meshes = new PartMeshes
                 {
-                    Render = Named(part.Name),
+                    Render = part.Drawn ? Named(part.Name) : null,
                     Colliders = Enumerable.Range(0, part.ColliderCount).Select(i => Named(part.Name + "_colmesh" + i)).ToArray(),
                     Lod1 = part.HasLod1 ? Named(part.Name + "_lod1") : null,
                 };
-                if (meshes.Render == null || meshes.Colliders.Contains(null) || part.HasLod1 && meshes.Lod1 == null)
+                if (part.Drawn && meshes.Render == null || meshes.Colliders.Contains(null) || part.HasLod1 && meshes.Lod1 == null)
                     throw new InvalidDataException($"{target} lacks the {part.Name} mesh, one of its {part.ColliderCount} collider pieces or its LOD1 hull; it holds [{string.Join(", ", assets.Select(a => a.name))}].");
                 // Catches an axis or scale slip in the FBX round trip before it reaches the prefab.
-                var bounds = meshes.Render.bounds;
+                var bounds = part.Drawn ? meshes.Render.bounds : new Bounds(part.Min, Vector3.zero);
                 if ((bounds.min - part.Min).magnitude > 0.02f || (bounds.max - part.Max).magnitude > 0.02f)
                     throw new InvalidDataException($"{part.Name}: imported bounds {bounds.min}..{bounds.max} differ from the export's {part.Min}..{part.Max}.");
                 var renderers = AssetDatabase.LoadAssetAtPath<GameObject>(target).GetComponentsInChildren<MeshRenderer>(true);
                 Material[] MaterialsOf(Mesh mesh) => renderers.Single(r => r.GetComponent<MeshFilter>().sharedMesh == mesh).sharedMaterials;
-                meshes.Materials = MaterialsOf(meshes.Render);
+                meshes.Materials = part.Drawn ? MaterialsOf(meshes.Render) : new Material[0];
                 meshes.Lod1Materials = meshes.Lod1 != null ? MaterialsOf(meshes.Lod1) : null;
                 // The importer orders submeshes its own way and remaps each slot to its material by name; every submesh
                 // must be one of the export's slots with its triangles, less the few degenerate ones the importer drops.
-                var submeshes = Enumerable.Range(0, meshes.Render.subMeshCount).Select(i =>
+                var submeshes = Enumerable.Range(0, part.Drawn ? meshes.Render.subMeshCount : 0).Select(i =>
                     (slots: i < meshes.Materials.Length && meshes.Materials[i] != null && slotOf.TryGetValue(meshes.Materials[i], out var s) ? s : new string[0],
                      tris: (int)meshes.Render.GetSubMesh(i).indexCount / 3)).ToArray();
                 bool Matches((string[] slots, int tris) sub) => part.Materials.Select((name, i) => (name, i))
@@ -245,7 +250,10 @@ namespace Icarus.Editor
                     if (points > 255 || collider.triangles.Length / 3 > 255)
                         throw new InvalidDataException($"{collider.name} has {points} points and {collider.triangles.Length / 3} triangles; the limit is 255.");
                 }
-                (meshes.Render, meshes.Materials) = SkinFirst(meshes.Render, meshes.Materials, slots[SkinSlot], true);
+                // Twins only where the skin can be seen from inside: a part marked single_sided_skin (art/blender/skeleton.py
+                // SINGLE_SIDED) has an inner face of its own, or is closed.
+                if (part.Drawn)
+                    (meshes.Render, meshes.Materials) = SkinFirst(meshes.Render, meshes.Materials, slots[SkinSlot], !part.Flag("single_sided_skin"));
                 if (meshes.Lod1 != null)
                     (meshes.Lod1, meshes.Lod1Materials) = SkinFirst(meshes.Lod1, meshes.Lod1Materials, slots[SkinSlot], false);
                 result[part.Name] = meshes;
@@ -375,6 +383,7 @@ namespace Icarus.Editor
             public readonly Dictionary<string, Transform> Visuals = new Dictionary<string, Transform>();
             public readonly Dictionary<string, List<string>> Joints = new Dictionary<string, List<string>>(); // part -> parent, then its TailBraces
             public readonly List<Renderer> Lod1 = new List<Renderer>();
+            public readonly Dictionary<Renderer, string[]> DrawnFrom = new Dictionary<Renderer, string[]>(); // a joined mesh's export pieces (JoinPartMeshes)
             public readonly HashSet<Transform> Placed = new HashSet<Transform>(); // effects and markers moved off donor offsets
             public readonly List<string> Report = new List<string>();
             public DonorCapture Donor;
@@ -417,6 +426,7 @@ namespace Icarus.Editor
                 BuildStations(b);
                 BuildTacScreen(b);
                 SetRestPose(b, definition);
+                JoinPartMeshes(b); // after everything that measures a piece by its own mesh
                 AddLods(b);
                 ListLiveryRenderers(b);
                 FinishRoot(b);
@@ -568,7 +578,7 @@ namespace Icarus.Editor
 
         // A skin family is cut into pieces named <family>_<piece>_<side> (art/blender/parts.py split_pieces); SkinFamily is
         // parts.family: a skin's name less its piece codes, whole tokens only, and any other name as it is.
-        private static readonly string[] PieceCodes = { "front", "rear", "belly", "inner", "outer", "upper", "lower" };
+        private static readonly string[] PieceCodes = { "front", "rear", "belly", "inner", "outer", "upper", "lower", "intake" };
 
         private static string SkinFamily(string name) =>
             name.StartsWith("skin_", StringComparison.Ordinal) || name.StartsWith("wing_skin_", StringComparison.Ordinal) || name.StartsWith("dorsal_cover", StringComparison.Ordinal)

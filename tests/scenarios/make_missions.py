@@ -28,7 +28,7 @@ AIRCRAFT, TITLE = "baanish_icarus", "F-204 Icarus II"
 # -0.21 (nose up). Four hardpoint sets (Wingtip, Inner Wing, Conformal, Tail Hook); four empty keys fly it clean, and a
 # list of any other length silently loads the default loadout (WeaponManager.InitializeWeaponManager).
 SPAWN_UP, REST_PITCH = 1.49, -0.21
-CLEAN = {"Selected": [{"Key": ""} for _ in range(4)]}
+CLEAN = {"Selected": [{"Key": ""} for _ in range(5)]}
 HOOK = "baanish_icarus_tail_hook"  # the Tail Hook set's one mount (IcarusAuthor.TailHook.cs)
 
 # Sandrift's runway surface under runway_start's spot (x 27877, z -19300) is 136.93 m, as the framework's make_missions.py
@@ -68,9 +68,39 @@ def template(name):
 
 
 m = template("runway_start")
+# The aircraft menu's first pick (BareMetalFirstPick): the template's KR-67 for each side on Sandrift's runway, Sandrift held
+# by that side, so nothing in the mission names an Icarus livery and the menu opens on Sandrift with no saved choice.
+for side in ("Primeva", "Boscali"):
+    menu = copy.deepcopy(m)
+    menu["aircraft"][0]["faction"] = side
+    next(a for a in menu["airbases"] if a["UniqueName"] == "Sandrift Airbase")["faction"] = side
+    save(menu, f"icarus_menu_{side.lower()}", f"the template's KR-67 for {side} parked on Sandrift Airbase's runway (Heartland), "
+         f"Sandrift held by {side}, for opening the aircraft menu there; no Icarus livery named; no opponent.")
 icarus(m["aircraft"][0], 1.0, {"x": 27877.0, "y": round(SANDRIFT_SURFACE + SPAWN_UP + 0.12, 2), "z": -19300.0}, rotation(0, REST_PITCH), 0.0)
 save(m, "icarus_runway", "the player's Icarus for Primeva parked on Sandrift Airbase's runway (Heartland) facing north, at rest, "
      "full fuel, clean, for fly mode=takeoff; no opponent.")
+runway = m
+
+# The aircraft's livery list as the Unity author orders it (IcarusAuthor.Materials.cs LiverySpecs): by id, so livery id n is
+# index n - 1. A mission's livery is an index into that list.
+LIVERIES = sorted((json.loads(p.read_text(encoding="utf-8")) for p in (here.parents[1] / "art/textures/liveries").glob("*.json")),
+                  key=lambda s: s["id"])
+for index, spec in enumerate(LIVERIES):
+    m = copy.deepcopy(runway)
+    m["aircraft"][0]["livery"] = index
+    save(m, f"icarus_livery_{spec['id']}", f"the player's Icarus for Primeva in {spec['name']} (livery {index} of the list) parked on "
+         "Sandrift Airbase's runway (Heartland) facing north, at rest, full fuel, clean, for a livery shot; no opponent.")
+
+# The same runway spot as Boscali's: the player's Icarus for Boscali in BDF Bare Metal with its tip tanks and arrestor hook,
+# so the faction's livery list, its first livery and Bare Metal's paint on the stores read on one jet.
+m = copy.deepcopy(runway)
+m["aircraft"][0]["faction"] = "Boscali"
+m["aircraft"][0]["livery"] = next(i for i, s in enumerate(LIVERIES) if s["faction"] == "BDF" and s["pattern"] == "bands")
+for station, key in enumerate(("baanish_icarus_tip_tank", "", "", HOOK)):
+    m["aircraft"][0]["savedLoadout"]["Selected"][station]["Key"] = key
+save(m, "icarus_boscali_runway", "the player's Icarus for Boscali in BDF Bare Metal parked on Sandrift Airbase's runway (Heartland) "
+     "facing north, at rest, full fuel, its tip tanks and arrestor hook, for the Boscali livery list and Bare Metal on the stores; "
+     "no opponent.")
 
 # Sandrift's runway Start is (27839, -19545), heading 4.3 (the framework's runway read, as its sortie example lands there).
 # 19 km out on its extended centreline at 1,200 m is the framework landing example's straight-in hand-over. 23% fuel leaves
@@ -226,3 +256,22 @@ for faction in m["factions"]:
 save(m, "icarus_hyperion_ai", "the player's Icarus 30 km north of the Hyperion at 6,000 m, out of the AI's count; Primeva's only airbase the Hyperion carrier (Ignus, at rest where the game's Carrier Duel "
      "puts it) and its only supply four Icarus, room for one AI aircraft, for the game's AI to spawn, launch and recover an Icarus there; "
      "Boscali flies nothing.")
+
+# The Centreline station (hardpoint set 4) loaded, on missions made above or kept beside this script: the 500 kg bomb on
+# Sandrift's runway for the takeoff run, 19 km out for the landing and astern of the Hyperion with the hook for the trap,
+# to see the bomb clear the ground and the deck; and each centreline bomb at height for its release, the GPO-N in the
+# mission that allows nuclear weapons.
+CENTRELINE = 4
+for name, base, key, what in [
+    ("icarus_centreline_runway", "icarus_runway", "bomb_500_single", "parked on Sandrift Airbase's runway (Heartland), full fuel, for fly mode=takeoff"),
+    ("icarus_centreline_final_19km", "icarus_sandrift_final_19km", "bomb_500_single", "19 km out on Sandrift Airbase's runway centreline at 1,200 m, 23% fuel, for a straight-in fly mode=land"),
+    ("icarus_centreline_hyperion_final", "icarus_hyperion_final", "bomb_500_single", "15 km astern of the Hyperion carrier (Ignus) with its arrestor hook, 20% fuel, for fly mode=land onto the deck"),
+    ("icarus_centreline_bomb", "icarus_ignus_3km_300", "bomb_500_single", "at 3,000 m MSL and 300 m/s over the sea (Ignus), half fuel, for the release"),
+    ("icarus_centreline_gpo_n", "icarus_gpo_n", "nuclearBomb1_external", "at 10,000 m in the mission that allows nuclear weapons, for the release"),
+    ("icarus_centreline_gpo_n_strategic", "icarus_gpo_n", "nuclearBomb1_strategic_external", "at 10,000 m in the mission that allows nuclear weapons, for the release"),
+]:
+    m = json.loads((here / f"{base}.mission.json").read_text(encoding="utf-8"))
+    if base == "icarus_gpo_n":
+        m["aircraft"][0]["savedLoadout"]["Selected"][1]["Key"] = ""
+    m["aircraft"][0]["savedLoadout"]["Selected"][CENTRELINE]["Key"] = key
+    save(m, name, f"the player's Icarus for Primeva with {key} on its Centreline station, {what}; no opponent.")

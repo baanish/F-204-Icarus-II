@@ -29,11 +29,6 @@ static class IcarusSystems
             __instance.gameObject.AddComponent<NozzleDriver>();
         }
 
-        if (!__instance.TryGetComponent<StandbyInstruments>(out _))
-        {
-            __instance.gameObject.AddComponent<StandbyInstruments>();
-        }
-
         if (IcarusPlugin.Log.StageEnabled && !__instance.TryGetComponent<EjectLog>(out _))
         {
             __instance.gameObject.AddComponent<EjectLog>();
@@ -42,6 +37,11 @@ static class IcarusSystems
         if (!__instance.TryGetComponent<TipTanks>(out _))
         {
             __instance.gameObject.AddComponent<TipTanks>();
+        }
+
+        if (__instance.TryGetComponent<StandbyInstruments>(out var instruments))
+        {
+            instruments.enabled = true;
         }
 
         InnerGlass.RemoveGrime(__instance);

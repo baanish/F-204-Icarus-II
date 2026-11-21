@@ -852,11 +852,13 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
+    - {fileID: 0}
   - weapons:
     - {fileID: 11400000, guid: 74cb9ee272ed6824e9ee531ac5a45054, type: 2}
     - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
     - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
     - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+    - {fileID: 0}
   StandardLoadouts:
   - disabled: 0
     Name: Interceptor
@@ -866,6 +868,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: f321ea741f65ba3448ab5e95a57e56b8, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   - disabled: 0
     Name: Air Superiority
@@ -875,6 +878,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 69b5e66560c97414da73449d867e708a, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   - disabled: 0
     Name: Strike
@@ -884,6 +888,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 5bc769201eee23f4bb7308f851746cbc, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   - disabled: 0
     Name: Close Support
@@ -893,6 +898,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 0c2cc046e6d0fce4ab6dbcbefc89824d, type: 2}
       - {fileID: 11400000, guid: ad6967c25dcad2448b195f72a3bd4204, type: 2}
       - {fileID: 11400000, guid: 21624eda314f0ae4e8640d898ee6302c, type: 2}
+      - {fileID: 0}
     FuelRatio: 1
   DefaultFuelLevel: 1
   liveries:
@@ -921,6 +927,27 @@ MonoBehaviour:
     faction: {fileID: 11400000, guid: 781c80aa02e6c3c43810c5793ae051ea, type: 2}
     assetReference:
       m_AssetGUID: a84af4be014743c42bdebc317dd2bff9
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: BDF Matte Gray
+    faction: {fileID: 11400000, guid: 8068e626c537c8041ba1e4fc2a6759a6, type: 2}
+    assetReference:
+      m_AssetGUID: 0970d604f0b5e494abd23da98d114e6e
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: BDF Gray Camo
+    faction: {fileID: 11400000, guid: 8068e626c537c8041ba1e4fc2a6759a6, type: 2}
+    assetReference:
+      m_AssetGUID: 334f868dcbd47764e9f5ed891dd8ad6d
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+  - name: BDF Bare Metal
+    faction: {fileID: 11400000, guid: 8068e626c537c8041ba1e4fc2a6759a6, type: 2}
+    assetReference:
+      m_AssetGUID: 19976a221e36f0e459170c348caa73a2
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0

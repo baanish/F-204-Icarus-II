@@ -61,7 +61,7 @@ A custom cockpit: a modernized US-style layout with Primeva components in it, mo
 
 ### Tuning
 
-The plugin's config file, `BepInEx/config/baanish.icarus.cfg`, holds the flight-model scalars the game reads live, in its `[Tuning.*]` sections. Saving the file applies them to every Icarus in flight. Each value is also an ordinary BepInEx setting, so a configuration manager plugin, if you have one installed, can change it in game. A value below 0 means the shipped value.
+In a dev build (`tools/Build-Icarus.ps1 -Dev`), the plugin's config file, `BepInEx/config/baanish.icarus.cfg`, holds the flight-model scalars the game reads live, in its `[Tuning.*]` sections; a release build flies on the shipped values and has none. Saving the file applies them to every Icarus in flight. Each value is also an ordinary BepInEx setting, so a configuration manager plugin, if you have one installed, can change it in game. A value below 0 means the shipped value.
 
 | Live now | Values |
 |---|---|

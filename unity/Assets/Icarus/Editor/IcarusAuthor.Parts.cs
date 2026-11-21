@@ -31,17 +31,20 @@ namespace Icarus.Editor
         // Section is the tail cone's joint, which the speed brakes load alone (their drag sits on the tail cone): at 50 kN
         // they tore it off from about Mach 1.62 at 0.3 km; 55 kN moves that to about Mach 1.70, the owner's call to make
         // the breakup harder to reach.
-        private enum JointClass { Frame, ForwardSection, Cockpit, Section, Spar, OuterWing, Primary, Surface, Flap, Panel }
+        // CockpitBrace is the Revoker cockpit's own joint to its root (30 kN, its fuselage as tensor) by the same rule: the
+        // Icarus cockpit carries its radome, canopy and nose gear, 921 kg, where the Revoker's carries its nose, 430 kg
+        // (x2.14, so 64 kN; A22 recomputes it from the donor). At the Revoker's 30 kN the brace ran at 0.91 to 0.98 of its
+        // limit in the full-stick pulls (tests/scenarios/full_stick_*), at 64 kN 0.43 to 0.46. It is pinned where the hulls
+        // meet, as every Icarus joint is, not at the cockpit's origin as the Revoker's: there it took half the nose's load,
+        // and missile hits broke the forward section's joint more often.
+        private enum JointClass { Frame, ForwardSection, Cockpit, CockpitBrace, Section, Spar, OuterWing, Primary, Surface, Flap, Panel }
 
         private static readonly Dictionary<JointClass, float> JointForces = new Dictionary<JointClass, float>
         {
-            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 77000f }, { JointClass.Cockpit, 80000f }, { JointClass.Section, 55000f },
-            { JointClass.Spar, 100000f }, { JointClass.OuterWing, 60000f }, { JointClass.Primary, 40000f },
+            { JointClass.Frame, 100000f }, { JointClass.ForwardSection, 77000f }, { JointClass.Cockpit, 80000f }, { JointClass.CockpitBrace, 64000f },
+            { JointClass.Section, 55000f }, { JointClass.Spar, 100000f }, { JointClass.OuterWing, 60000f }, { JointClass.Primary, 40000f },
             { JointClass.Surface, 30000f }, { JointClass.Flap, 15000f }, { JointClass.Panel, 10000f },
         };
-        // The forward section's Revoker "fuselage" armour keeps two thirds of its joint at 0 HP (structuralThreshold -200);
-        // the Vagrant's sections keep half (-100).
-        private const float ForwardSectionThreshold = -100f;
         // The Revoker runs 6 to 8; the light skins and dry tanks hang off cores ten to sixty times their mass.
         private const int JointSolverIterations = 12;
         // The stabilator (120 kg), the fin skin and the rudder (185 kg together) hang on fin_spar, a 100 kg slab with little
@@ -56,9 +59,15 @@ namespace Icarus.Editor
         // full tip tanks and fuel (tests/scenarios/full_stick_low_fast_tip_tanks.scenario.jsonc), so it holds at Spar class.
         // fuselage_aft carries the tail cone and the fin: on their own joints, in a 9 g pull, the tail cone sat 1.4 deg off it,
         // and the fin turned 1.0 deg in a rolling pull. Each also joins the root, with fuselage_aft as its tensor, which held
-        // them to 0.1 and 0.3 deg (check A18). A brace with no class of its own takes its owner's.
+        // them to 0.1 and 0.3 deg (check A18). The cockpit also joins the root, as the Revoker's cockpit does, with the
+        // forward section as its tensor: on its own joint the whole nose (cockpit, radome, canopy and nose gear, 1.9 t with
+        // the forward section at half fuel) hung on the forward section's one joint to the root, which the blast's shoves on
+        // the wings and tail broke by torque in about half of the missile hits that left the Revoker's forward fuselage on,
+        // some at full HP, and a belly landing broke at full HP (tests/scenarios/breakup_missile_hit.scenario.jsonc). A brace
+        // with no class of its own takes its owner's.
         private static readonly (string Owner, string To, string Tensor, JointClass? Class)[] Braces =
         {
+            ("cockpit_cell", RootPart, "fuselage_forward", JointClass.CockpitBrace),
             ("stabilator", "fuselage_aft", "fin_spar", null), ("rudder", "fuselage_aft", "fin_spar", null), ("fin_skin", "fuselage_aft", "fin_spar", null),
             ("wing_spar_outer_L", RootPart, "wing_spar_L", JointClass.Spar), ("wing_spar_outer_R", RootPart, "wing_spar_R", JointClass.Spar),
             ("fuselage_tail", RootPart, "fuselage_aft", null), ("fin_spar", RootPart, "fuselage_aft", null),
@@ -76,6 +85,26 @@ namespace Icarus.Editor
 
         private static PartSpec P(string name, string parent, JointClass joint, string armour, string reuse = null) =>
             new PartSpec { Name = name, Parent = parent, Joint = joint, Armour = armour, Reuse = reuse };
+
+        // Where a part takes its impact damage and fragments (AeroPart impactDamage, disintegrationEffects) from a Revoker
+        // part of its kind other than its armour class's (AuthorDamage): the outer wing box is the Revoker's wing2, the
+        // outer wing panel that carries fuel (impact 30 x 1, small fragments), though it takes the wingtip's armour. The
+        // gear legs keep what they have (the template's), as the 0.4.0 damage pass leaves the gear alone.
+        private static readonly Dictionary<string, string> ImpactKinds = new Dictionary<string, string>
+        {
+            ["wing_spar_outer_L"] = "fuselage/wing1a_L/wing2_L", ["wing_spar_outer_R"] = "fuselage/wing1a_L/wing2_L",
+        };
+        private static readonly string[] KeepImpact = { "gear_leg_N", "gear_leg_L", "gear_leg_R" };
+
+        // Each tank's Revoker tank of the same role (leak threshold and rate, fire, fireball, ignition ranges; capacity and
+        // part are its own): the root's main fuselage tank the root's, the forward section's the fuselage's, the inner
+        // wing boxes' the inner wing's (wing1a), the outer boxes' the outer wing panel's (wing2). The Revoker has a tank in
+        // each role, so the Ifrit's (Multirole1) aren't needed.
+        private static readonly Dictionary<string, string> TankKinds = new Dictionary<string, string>
+        {
+            [RootPart] = "", ["fuselage_forward"] = "fuselage", ["wing_spar_L"] = "fuselage/wing1a_L", ["wing_spar_R"] = "fuselage/wing1a_L",
+            ["wing_spar_outer_L"] = "fuselage/wing1a_L/wing2_L", ["wing_spar_outer_R"] = "fuselage/wing1a_L/wing2_L",
+        };
 
         // Designed damage tree, with the stabilator as one all-moving piece; parents before children. Armour is the
         // Revoker part whose armour class the part takes. Reuse is the Revoker GameObject that becomes the part, carrying
@@ -110,7 +139,15 @@ namespace Icarus.Editor
             P("gear_leg_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
             P("fuselage_truss_front", RootPart, JointClass.Primary, ""),
             P("fuselage_truss_rear", RootPart, JointClass.Primary, ""),
+            // The intakes, parts of their own as the Revoker's (fuselage/intake_L: 150 kg, joints to the fuselage and the
+            // weapon bay at 40 kN, the cheek at 20, the cockpit at 10), and engine-critical (Turbojet criticalParts). Each
+            // Icarus intake is its fairing's outside chunk, the lip and the skin round it, with the duct behind it on the
+            // root, so the root is its one joint, the Revoker intake's strongest, to the fuselage, 40 kN.
+            P("intake_duct_L", RootPart, JointClass.Primary, "fuselage/intake_L"),
+            P("intake_duct_R", RootPart, JointClass.Primary, "fuselage/intake_L"),
         };
+        // 26 parts and the two intakes; the Revoker has 28.
+        private const int DesignedParts = 28;
 
         // A part's export entry: its mesh, or for a hinged surface the hinge empty whose _visible child is the mesh.
         private static BlockoutPart MeshEntry(Blockout blockout, string name) =>
@@ -145,7 +182,10 @@ namespace Icarus.Editor
                     || Quaternion.Angle(entry.Rotation, b.Blockout.Rotation(spec.Name)) > 0.01f))
                     throw new InvalidDataException($"{spec.Name}: its _visible mesh doesn't sit at its hinge, so its colliders can't sit on the part.");
                 SetColliders(b, go, entry.Name);
-                if (!b.Blockout.Parts[spec.Name].IsHinge)
+                if (Intakes.Contains(spec.Name))
+                    foreach (var col in go.GetComponents<MeshCollider>())
+                        col.sharedMaterial = IntakeSlide();
+                if (!b.Blockout.Parts[spec.Name].IsHinge && b.Blockout.Parts[spec.Name].Drawn)
                 {
                     Ensure<MeshFilter>(go).sharedMesh = b.Meshes[spec.Name].Render;
                     Ensure<MeshRenderer>(go).sharedMaterials = b.Meshes[spec.Name].Materials;
@@ -156,9 +196,10 @@ namespace Icarus.Editor
                 var fuel = b.Blockout.Parts[spec.Name].Number("fuel_kg");
                 if (fuel > 0)
                 {
-                    // On the part's own GameObject, for Unit.RpcFuelTankStatus's same-transform lookup.
+                    // On the part's own GameObject, for Unit.RpcFuelTankStatus's same-transform lookup; leak, fire,
+                    // fireball and ignition from the stock tank of its role (TankKinds).
                     var tank = go.AddComponent(GameType("FuelTank"));
-                    EditorUtility.CopySerialized(b.Donor.TankTemplate, tank);
+                    EditorUtility.CopySerialized(b.Donor.TankTemplates[TankKinds[spec.Name]], tank);
                     var so = new SerializedObject(tank);
                     Prop(so, "fuelCapacity").floatValue = fuel;
                     Prop(so, "part").objectReferenceValue = go.GetComponent(aeroType);
@@ -219,6 +260,18 @@ namespace Icarus.Editor
                 throw new InvalidDataException("Designed part tree check failed:\n  " + string.Join("\n  ", problems));
             Debug.Log($"[Icarus] check base tree PASS: {Tree.Length} parts, {dry:0} kg dry, {b.Tanks.Count} tanks with {fuel:0} kg");
         }
+
+        // A freed intake rests on its wing box: it is the fairing's outside chunk, above the wing root, where the Revoker's
+        // hangs under its wing root and falls away. Its drag at 10 km is about half its weight, under the default friction
+        // of that rest, so its hulls are frictionless and the airflow slides it the 0.5 m AeroPart.CheckAttachment needs.
+        private static readonly string[] Intakes = { "intake_duct_L", "intake_duct_R" };
+        private const string IntakeSlidePath = ModFolder + "/IntakeSlide.physicMaterial";
+
+        private static PhysicMaterial IntakeSlide() => SaveAsset(new PhysicMaterial("IntakeSlide")
+        {
+            dynamicFriction = 0f, staticFriction = 0f, bounciness = 0f,
+            frictionCombine = PhysicMaterialCombine.Minimum, bounceCombine = PhysicMaterialCombine.Minimum,
+        }, IntakeSlidePath);
 
         // The export's convex pieces, in the part's own frame (the part sits where its mesh does).
         private static void SetColliders(Build b, GameObject go, string meshName)
@@ -282,6 +335,119 @@ namespace Icarus.Editor
             b.Report.Add($"folded: {placed} panels and internals placed on the parts they fold into");
         }
 
+        // One mesh per part, as stock: each part's folded skin panels and internals (art/blender/chunks.py folded_into) and
+        // its skeleton (art/blender/skeleton.py skeleton_owner) join the part's own mesh, or a hinged surface's _visible
+        // mesh, or the plain mesh a skeleton rides (the ventral fins, which the hook's loadout swaps), the skin as slot 0
+        // and the rest as one slot a material. Runs after everything that measures a piece by its own mesh (aero, lights,
+        // stations, rest pose), so those still read the pieces, and each piece keeps its transform, without a renderer,
+        // for what hangs on it (lenses, LOD1 hulls) and the checks that place by it. The renderers the cockpit view hides
+        // on their own (Aircraft.exteriorRenderers: the trays) keep theirs. Twins were made per piece on import
+        // (SkinFirst), so a single-sided piece stays single-sided inside a joined mesh. Hinged and animated children
+        // (surfaces, doors, petals, actuation, gear, lenses, pylons, glass) stay their own renderers, as on stock jets.
+        private static void JoinPartMeshes(Build b)
+        {
+            var hidden = new HashSet<Object>(GetList(Prop(new SerializedObject(b.Aircraft), "exteriorRenderers")));
+            var joins = new Dictionary<Transform, List<(string Name, MeshRenderer Renderer)>>();
+            var hosts = new Dictionary<Transform, string>();
+            foreach (var piece in b.Blockout.Parts.Values.Where(p => p.Fbx != null && p.Drawn).OrderBy(p => p.Name, StringComparer.Ordinal))
+            {
+                var target = piece.Text("folded_into") ?? piece.Text("skeleton_owner");
+                if (target == null || !b.Visuals.TryGetValue(piece.Name, out var at) || !at.TryGetComponent<MeshRenderer>(out var renderer) || hidden.Contains(renderer))
+                    continue;
+                while (b.Blockout.Parts[target].Text("folded_into") != null)
+                    target = b.Blockout.Parts[target].Text("folded_into");
+                var hostName = b.Blockout.Parts[target].IsHinge ? target + "_visible" : target;
+                var host = b.Parts.TryGetValue(hostName, out var part) && !b.Blockout.Parts[hostName].IsHinge ? part.transform
+                    : b.Visuals.TryGetValue(hostName, out var visual) ? visual : throw new InvalidDataException($"{piece.Name} joins {hostName}, which has no place in the prefab");
+                if (!joins.TryGetValue(host, out var list))
+                    joins[host] = list = new List<(string, MeshRenderer)>();
+                list.Add((piece.Name, renderer));
+                hosts[host] = hostName;
+            }
+            var doomed = new List<Object>();
+            var before = b.Root.GetComponentsInChildren<MeshRenderer>(true).Count(r => r.gameObject.layer != 3);
+            foreach (var entry in joins.OrderBy(e => hosts[e.Key], StringComparer.Ordinal))
+            {
+                var host = entry.Key;
+                var filter = Ensure<MeshFilter>(host.gameObject);
+                var own = host.GetComponent<MeshRenderer>();
+                var sources = new List<(Mesh Mesh, Material[] Materials, Matrix4x4 ToHost)>();
+                if (filter.sharedMesh != null && own != null)
+                    sources.Add((filter.sharedMesh, own.sharedMaterials, Matrix4x4.identity));
+                foreach (var (_, renderer) in entry.Value)
+                    sources.Add((renderer.GetComponent<MeshFilter>().sharedMesh, renderer.sharedMaterials, host.worldToLocalMatrix * renderer.transform.localToWorldMatrix));
+                var (mesh, materials) = JoinMeshes(hosts[entry.Key] + "_joined", sources, b.Skin);
+                filter.sharedMesh = SaveMesh(mesh);
+                own = own != null ? own : host.gameObject.AddComponent<MeshRenderer>();
+                own.sharedMaterials = materials;
+                b.DrawnFrom[own] = (sources.Count > entry.Value.Count ? new[] { hosts[entry.Key] } : new string[0]).Concat(entry.Value.Select(p => p.Name)).ToArray();
+                foreach (var (_, renderer) in entry.Value)
+                    doomed.AddRange(new Object[] { renderer, renderer.GetComponent<MeshFilter>() });
+            }
+            // Every list that named a piece's renderer (a part's damage renderers) drops it; ListLiveryRenderers lists the
+            // joined one.
+            DestroyWithReferences(b, doomed);
+            var after = b.Root.GetComponentsInChildren<MeshRenderer>(true).Count(r => r.gameObject.layer != 3);
+            b.Report.Add($"one mesh per part: {joins.Values.Sum(l => l.Count)} pieces joined into {joins.Count} meshes; {before} renderers before, {after} after (LOD1 hulls not yet placed)");
+        }
+
+        // The sources' meshes, each moved into the host's frame by its matrix, as one mesh with a submesh a material: the
+        // skin first, then the rest in the order they first appear.
+        private static (Mesh Mesh, Material[] Materials) JoinMeshes(string name, IList<(Mesh Mesh, Material[] Materials, Matrix4x4 ToHost)> sources, Material skin)
+        {
+            var materials = sources.SelectMany(s => s.Materials).Distinct().OrderBy(m => m == skin ? 0 : 1).ToList();
+            var vertices = new List<Vector3>();
+            var normals = new List<Vector3>();
+            var tangents = new List<Vector4>();
+            var colors = new List<Color>();
+            var hasColors = sources.Any(s => s.Mesh.colors.Length > 0);
+            var channels = Enumerable.Range(0, 8).Where(c => sources.Any(s => s.Mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.TexCoord0 + c))).ToArray();
+            var uvs = Enumerable.Range(0, 8).Select(_ => new List<Vector2>()).ToArray();
+            var triangles = materials.Select(_ => new List<int>()).ToArray();
+            foreach (var (mesh, slots, toHost) in sources)
+            {
+                var start = vertices.Count;
+                var count = mesh.vertexCount;
+                vertices.AddRange(mesh.vertices.Select(v => toHost.MultiplyPoint3x4(v)));
+                var n = mesh.normals;
+                normals.AddRange(n.Length == count ? n.Select(v => toHost.MultiplyVector(v).normalized) : Enumerable.Repeat(Vector3.up, count));
+                var t = mesh.tangents;
+                tangents.AddRange(t.Length == count ? t.Select(v =>
+                {
+                    var d = toHost.MultiplyVector(new Vector3(v.x, v.y, v.z));
+                    return new Vector4(d.x, d.y, d.z, v.w);
+                }) : Enumerable.Repeat(new Vector4(1f, 0f, 0f, 1f), count));
+                if (hasColors)
+                    colors.AddRange(mesh.colors.Length == count ? mesh.colors : Enumerable.Repeat(Color.white, count).ToArray());
+                foreach (var channel in channels)
+                {
+                    var attribute = UnityEngine.Rendering.VertexAttribute.TexCoord0 + channel;
+                    if (mesh.HasVertexAttribute(attribute) && mesh.GetVertexAttributeDimension(attribute) != 2)
+                        throw new InvalidDataException($"{mesh.name}: UV channel {channel} isn't 2D");
+                    var list = new List<Vector2>();
+                    mesh.GetUVs(channel, list);
+                    uvs[channel].AddRange(list.Count == count ? list : Enumerable.Repeat(Vector2.zero, count));
+                }
+                for (var i = 0; i < mesh.subMeshCount && i < slots.Length; i++)
+                    triangles[materials.IndexOf(slots[i])].AddRange(mesh.GetTriangles(i).Select(k => k + start));
+            }
+            var joined = new Mesh { name = name };
+            if (vertices.Count > ushort.MaxValue)
+                joined.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            joined.SetVertices(vertices);
+            joined.SetNormals(normals);
+            joined.SetTangents(tangents);
+            if (hasColors)
+                joined.SetColors(colors);
+            foreach (var channel in channels)
+                joined.SetUVs(channel, uvs[channel]);
+            joined.subMeshCount = materials.Count;
+            for (var i = 0; i < materials.Count; i++)
+                joined.SetTriangles(triangles[i], i, false);
+            joined.RecalculateBounds();
+            return (joined, materials.ToArray());
+        }
+
         // Armour, thresholds and hit points from each part's Revoker armour class; every part starts at 100 HP by design.
         private static void AuthorDamage(Build b)
         {
@@ -290,8 +456,17 @@ namespace Icarus.Editor
                 var so = new SerializedObject(b.Part(spec.Name));
                 foreach (var value in b.Donor.Armour[spec.Armour])
                     Prop(so, value.Key).floatValue = value.Value;
-                if (spec.Name == "fuselage_forward")
-                    Prop(so, "structuralThreshold").floatValue = ForwardSectionThreshold;
+                // Impact damage and fragments from the Revoker part of its kind, its armour class's unless ImpactKinds
+                // names another: the Revoker damages only its root, fuselage, tail and wing boxes on impact and sheds
+                // fragments only from its sections, wing boxes, cheeks and bays.
+                if (!KeepImpact.Contains(spec.Name))
+                {
+                    var (threshold, multiplier, fragments) = b.Donor.Impact[ImpactKinds.TryGetValue(spec.Name, out var kind) ? kind : spec.Armour];
+                    var impact = Prop(so, "impactDamage");
+                    impact.FindPropertyRelative("threshold").floatValue = threshold;
+                    impact.FindPropertyRelative("multiplier").floatValue = multiplier;
+                    SetList(Prop(so, "disintegrationEffects"), fragments);
+                }
                 Num(so, "hitPoints", 100f);
                 var critical = Prop(so, "criticalPart");
                 if (critical.propertyType == SerializedPropertyType.Boolean)

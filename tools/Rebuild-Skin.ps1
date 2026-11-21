@@ -57,9 +57,9 @@ try {
 
     $reviewTextures = Join-Path $reviewRoot 'art/export/textures'
     New-Item -ItemType Directory -Force $reviewTextures | Out-Null
-    $maps = @(1..4 | ForEach-Object { "Icarus_livery_$_.png" })
+    $maps = @(1..7 | ForEach-Object { "Icarus_livery_$_.png" })
     $maps += @('n', 'm', 'ao', 'dmg_b', 'dmg_n' | ForEach-Object { "Icarus_skin_$_.png" })
-    $maps += 'Icarus_livery_4_m.png'
+    $maps += @('Icarus_livery_4_m.png', 'Icarus_livery_7_m.png')
     foreach ($name in $maps) {
         Copy-Item -LiteralPath (Join-Path 'art/export/textures' $name) -Destination $reviewTextures
     }
@@ -74,6 +74,10 @@ try {
         Invoke-SkinStep 'python' @('tools/skin_cache.py', 'publish', '--geometry', $skinFingerprint)
     }
     }
+    if ($Part -ne 'blender') {
+        # The game's faction roundels go onto the logo-free maps here, into the gitignored textures Unity builds from.
+        Invoke-SkinStep 'python' @('art/textures/faction_marks.py')
+    }
     if ($BuildPlugin) {
         Invoke-SkinStep 'dotnet' @('build', 'src/Icarus', '-c', 'Release', '-o', '.cache/build-staging/dotnet')
     }
@@ -85,7 +89,7 @@ try {
             '--python-exit-code', '1', '--python', 'art/blender/skin_closeups.py', '--',
             '--out', (Join-Path $repoRoot '.cache/review/share/texture_art'))
     }
-    Write-Host 'SKIN REBUILD PASS: ten production maps, export manifest and measurement gate'
+    Write-Host 'SKIN REBUILD PASS: seven logo-free liveries and their maps, export manifest, measurement gate, roundels painted for Unity'
 }
 finally {
     if (Test-Path -LiteralPath $reviewRoot) {

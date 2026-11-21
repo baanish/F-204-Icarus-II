@@ -22,7 +22,9 @@ def xyz(d):
     return np.array([d["x"], d["y"], d["z"]], float)
 
 
-class Aircraft:
+class Bundle:
+    """Any Blueprinter bundle: its transform trees and the mounts whose prefabs travel in it."""
+
     def __init__(self, path):
         import UnityPy  # from tools/local-paths.json python_packages when not installed
 
@@ -59,43 +61,22 @@ class Aircraft:
             if o.type.name == "MonoBehaviour":
                 d = T(pid)
                 behaviours.setdefault(scripts.get(d["m_Script"]["m_PathID"]), []).append(d)
-        manager = next(d for d in behaviours["WeaponManager"] if d.get("hardpointSets"))
-        self.root = self._root_of(self.go_transform[manager["m_GameObject"]["m_PathID"]])
-        self.sets = [(s["name"], [(self.nodes[h["transform"]["m_PathID"]]["name"], h["transform"]["m_PathID"]) for h in s["hardpoints"]])
-                     for s in manager["hardpointSets"]]
-        definition = next(d for d in behaviours["AircraftDefinition"])
-        self.spawn_offset, self.rest_rotation = xyz(definition["spawnOffset"]), xyz(definition["restRotation"])
-        self.gear = [self._gear(d) for d in behaviours["LandingGear"]]
-
-        # The stock mounts arrive through Blueprinter's OpAddWeaponToHardpoint, by set index (patch_manifest.json).
-        manifest = next(json.loads(T(pid)["m_Script"].lstrip("﻿")) for pid, o in objs.items()
-                        if o.type.name == "TextAsset" and T(pid)["m_Name"] == "patch_manifest")
-        self.mounts = [[] for _ in self.sets]
-        for op in manifest["Ops"]:
-            if op["opId"] != "OpAddWeaponToHardpoint":
-                continue
-            payload = json.loads(op["payloadJson"])
-            for target in payload["aircraft"]:
-                for i in target["hardpointIndices"]:
-                    self.mounts[i].append(payload["weaponJsonKey"])
-
         # Every mount whose prefab travels in the bundle, by jsonKey: the mod's own, and the stock ones it depends on.
         self.bundle_mounts = {d["jsonKey"]: d["prefab"]["m_PathID"] for d in behaviours.get("WeaponMount", []) if d.get("jsonKey")}
         self._launchers = behaviours.get("MountedMissile", [])
         self._objs, self._T, self._comps = objs, T, self._components(objs, comp_go)
         self._cache = {}
-        self.meshes = {}  # transform -> (name, local verts, tris) of every enabled, active renderer under the root
-        for go, comps in self._comps.items():
-            transform = self.go_transform.get(go)
-            if transform is None or self._root_of(transform) != self.root:
-                continue
-            found = self._rendered(go, comps)
-            if found is not None and not re.search(r"_lod\d|colmesh", self.names[go]):
-                self.meshes[transform] = (self.names[go],) + found
+        self._behaviours = behaviours
+        self.manifest = next(json.loads(T(pid)["m_Script"].lstrip("﻿")) for pid, o in objs.items()
+                             if o.type.name == "TextAsset" and T(pid)["m_Name"] == "patch_manifest")
+        # The stock mesh a prefab borrows, by the prefab's name and the path under it: Blueprinter patches it in at load.
+        self._borrowed = {(place["asset"]["name"], place["hierarchyPath"]): patch["GameAsset"]["asset"]["name"]
+                          for patch in self.manifest["Patches"] if patch["GameAsset"]["asset"]["type"].startswith("UnityEngine.Mesh,")
+                          for place in patch["PatchLocations"] if place["componentType"].startswith("UnityEngine.MeshFilter,")}
 
     def _rendered(self, go, comps, external=None):
         """(verts, tris) of a GameObject's mesh, local, when it is active and draws it; else None. A mesh the bundle only
-        references (a stock one Blueprinter patches in at load) comes from external(GameObject name), when given."""
+        references (a stock one Blueprinter patches in at load) comes from external(the stock mesh's name), when given."""
         objs, T = self._objs, self._T
         if not T(go).get("m_IsActive", 1):
             return None
@@ -105,13 +86,21 @@ class Aircraft:
             return None
         mesh = T(filters[0])["m_Mesh"]["m_PathID"]
         if mesh not in objs:
-            return external(self.names[go]) if external else None
+            return external(self._borrowed_name(go)) if external else None
         if mesh not in self._cache:
             text = objs[mesh].read().export()
             verts = [(-float(a), float(b), float(c)) for a, b, c in (l.split()[1:4] for l in text.splitlines() if l.startswith("v "))]
             faces = [[int(w.split("/")[0]) - 1 for w in l.split()[1:4]] for l in text.splitlines() if l.startswith("f ")]
             self._cache[mesh] = (np.asarray(verts, float).reshape(-1, 3), np.asarray(faces, int).reshape(-1, 3))
         return self._cache[mesh]
+
+    def _borrowed_name(self, go):
+        """The stock mesh the manifest patches into this GameObject; its own name where the manifest names none."""
+        path, t = [], self.go_transform[go]
+        while self.nodes[t]["parent"] in self.nodes:
+            path.append(self.nodes[t]["name"])
+            t = self.nodes[t]["parent"]
+        return self._borrowed.get((self.nodes[t]["name"], "/".join(reversed(path))), self.names[go])
 
     def mount(self, key, external=None):
         """A mount from the bundle in the form stores.mounts.load_mount gives a stock one: its rendered meshes merged
@@ -149,6 +138,22 @@ class Aircraft:
         mesh = (np.concatenate(verts) if verts else np.zeros((0, 3)), np.concatenate(tris) if tris else np.zeros((0, 3), int))
         return mesh, colliders
 
+    def seated(self, key, origin, pitch_deg, length, external=None):
+        """A mount's missiles as a seat hangs them, in ejected()'s form: each alone, its own origin at origin in the mount
+        frame, pitched nose down, sliding length along its own -y before its motor lights."""
+        a = np.radians(pitch_deg)
+        rot = np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+        root = self.go_transform[self.bundle_mounts[key]]
+        out = []
+        for d in self._launchers:
+            go = d["m_GameObject"]["m_PathID"]
+            t = self.go_transform[go]
+            if self._root_of(t) != root:
+                continue
+            verts, tris = self._missile(t, external)
+            out.append(((np.asarray(origin) + verts @ rot.T, tris), rot @ RAIL_DIRECTIONS[1], length))
+        return out
+
     def ejected(self, key, external=None):
         """A bundle mount's rail-launched missiles, each as (mesh, direction, length) in the mount's frame: the rendered
         missile, and the unit vector and distance MountedMissile.RailLaunch slides it, with its parent, before the game
@@ -159,10 +164,27 @@ class Aircraft:
             t = self.go_transform[d["m_GameObject"]["m_PathID"]]
             if self._root_of(t) != root:
                 continue
-            pos, rot, scale = self.world(t)
-            verts, tris = self._rendered(d["m_GameObject"]["m_PathID"], self._comps.get(d["m_GameObject"]["m_PathID"], []), external)
-            out.append(((pos + (verts * scale) @ rot.T, tris), rot @ RAIL_DIRECTIONS[d["railDirection"]], d["railLength"]))
+            pos, rot, _ = self.world(t)
+            verts, tris = self._missile(t, external)
+            out.append(((pos + verts @ rot.T, tris), rot @ RAIL_DIRECTIONS[d["railDirection"]], d["railLength"]))
         return out
+
+    def _missile(self, t, external=None):
+        """(verts, tris) of every mesh drawn on a MountedMissile's transform t or under it, in t's own frame, in metres."""
+        pos, rot, _ = self.world(t)
+        verts, tris = [], []
+        for node, n in self.nodes.items():
+            if not self.under(node, t):
+                continue
+            found = self._rendered(n["go"], self._comps.get(n["go"], []), external)
+            if found is None:
+                continue
+            at, turn, scale = self.world(node)
+            tris.append(found[1] + sum(len(v) for v in verts))
+            verts.append((at + (found[0] * scale) @ turn.T - pos) @ rot)
+        if not verts:
+            raise ValueError(f"the missile on {self.nodes[t]['name']} draws no mesh")
+        return np.concatenate(verts), np.concatenate(tris)
 
     def _quat(self, t):
         """Rotation of transform t in its root's frame, as a quaternion (x, y, z, w)."""
@@ -233,3 +255,34 @@ class Aircraft:
                 return True
             t = self.nodes[t]["parent"]
         return False
+
+class Aircraft(Bundle):
+    def __init__(self, path):
+        super().__init__(path)
+        objs, T, behaviours = self._objs, self._T, self._behaviours
+        manager = next(d for d in behaviours["WeaponManager"] if d.get("hardpointSets"))
+        self.root = self._root_of(self.go_transform[manager["m_GameObject"]["m_PathID"]])
+        self.sets = [(s["name"], [(self.nodes[h["transform"]["m_PathID"]]["name"], h["transform"]["m_PathID"]) for h in s["hardpoints"]])
+                     for s in manager["hardpointSets"]]
+        definition = next(d for d in behaviours["AircraftDefinition"])
+        self.spawn_offset, self.rest_rotation = xyz(definition["spawnOffset"]), xyz(definition["restRotation"])
+        self.gear = [self._gear(d) for d in behaviours["LandingGear"]]
+
+        # The stock mounts arrive through Blueprinter's OpAddWeaponToHardpoint, by set index (patch_manifest.json).
+        self.mounts = [[] for _ in self.sets]
+        for op in self.manifest["Ops"]:
+            if op["opId"] != "OpAddWeaponToHardpoint":
+                continue
+            payload = json.loads(op["payloadJson"])
+            for target in payload["aircraft"]:
+                for i in target["hardpointIndices"]:
+                    self.mounts[i].append(payload["weaponJsonKey"])
+
+        self.meshes = {}  # transform -> (name, local verts, tris) of every enabled, active renderer under the root
+        for go, comps in self._comps.items():
+            transform = self.go_transform.get(go)
+            if transform is None or self._root_of(transform) != self.root:
+                continue
+            found = self._rendered(go, comps)
+            if found is not None and not re.search(r"_lod\d|colmesh", self.names[go]):
+                self.meshes[transform] = (self.names[go],) + found

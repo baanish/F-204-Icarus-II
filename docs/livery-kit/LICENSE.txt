@@ -1,0 +1,9 @@
+F-204 Icarus II livery kit: licence
+
+Everything in this kit is part of the F-204 Icarus II mod and is under the MIT licence below, except the faction
+roundels.
+
+The PALA and BDF roundels on the example liveries (examples/) and in the markings layers (template/layers/) are
+Nuclear Option's own art and belong to the game's developer. They are in the kit so a livery you make can wear them
+the way the game's own aircraft do. They are not covered by the MIT licence.
+

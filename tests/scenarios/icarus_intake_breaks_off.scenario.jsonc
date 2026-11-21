@@ -1,0 +1,33 @@
+// An intake breaks off as its own piece: the Icarus holds 10 km at 0.8 throttle over Ignus, then its left intake
+// (intake_duct_L) takes all its 100 HP through the game's own damage (act damage). In the Revoker intake's armour class
+// its structuralThreshold is 0, so at 0 HP its joint to the root weakens to nothing (AeroPart.ApplyDamage) and the
+// intake comes away under the airflow and the jet's manoeuvres; AeroPart.CheckAttachment detaches it once it has moved
+// 0.5 m from its attach pose. Pass: the jet reports intake_duct_L detached within 30 s, and the engine, which needs it,
+// has stopped. The intake is its fairing's outside chunk, its hull outboard of the root's; if no detach arrives, look at
+// the run's [Icarus] self-collision and part-contact lines for it caught against the root or the wing.
+// From the repo root: no-agentic run tests/scenarios/icarus_intake_breaks_off.scenario.jsonc
+{
+  "config": { "baanish.icarus": { "Diagnostics": { "StageLogging": true } } },
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "timeout": 150,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 5, "timeout": 30, "label": "settled" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 25, "hdg_deg": 60, "pitch_deg": 10 } },
+    { "mark": { "label": "hit" } },
+    { "act": { "damage": "intake_duct_L", "amount": 1.0 } },
+    { "check": { "event": "damage", "since": "hit" }, "within": 5, "label": "the left intake takes the damage" },
+    { "check": { "event": "part_detached", "since": "hit", "part": "intake_duct_L" }, "within": 30, "label": "the left intake breaks off as its own piece" },
+    { "screenshot": { "name": "intake_off" } },
+    { "check": { "path": "own.engines.0.thrust_n", "lt": 1000 }, "within": 30, "label": "the engine stopped without its intake" },
+    { "record": { "event": "part_detached", "field": "part", "since": "hit" }, "label": "parts detached after the hit" },
+  ],
+}

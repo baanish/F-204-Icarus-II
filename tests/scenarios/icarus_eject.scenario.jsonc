@@ -1,0 +1,27 @@
+// Command ejection from level flight at 10 km and 400 m/s over Ignus. Pass when the canopy ejection callback
+// (Aircraft.cs) emits the eject event and the canopy detaches, both after the eject mark, each within its step's own timeout.
+// Seat clearance is unchecked.
+// From the repo root: no-agentic run tests/scenarios/icarus_eject.scenario.jsonc
+{
+  "mission": "icarus_ignus_10km_half.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "sample_hz": 20,
+  "timeout": 120,
+  "steps": [
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_msl_m", "gt": 9500 } ] },
+      "label": "the Icarus airborne at 10 km" },
+    { "fly": { "mode": "hold", "alt_msl_m": 10000, "hdg_deg": 90, "throttle": 0.8 } },
+    { "wait": { "path": "own.pitch_rate_dps", "between": [-1, 1] }, "hold": 3, "timeout": 30, "label": "settled" },
+    { "camera": { "mode": "orbit", "target": "own", "distance_m": 25, "hdg_deg": 150, "pitch_deg": 20 } },
+    { "mark": { "label": "eject" } },
+    { "act": { "eject": true } },
+    { "check": { "event": "eject", "since": "eject" }, "within": 5, "label": "the canopy callback signals ejection" },
+    { "check": { "event": "part_detached", "since": "eject", "part": "canopy" }, "within": 2, "label": "the canopy detaches from the aircraft" },
+    { "screenshot": { "name": "eject" } },
+  ],
+}

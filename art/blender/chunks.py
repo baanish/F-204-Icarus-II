@@ -15,7 +15,8 @@ the balance holds empty and full.
 
 The radome, canopy and fin skin stay parts: the radome carries the radar and target camera, the canopy the escape
 path, the fin skin the fin's lift. So does the cockpit cell, the cockpit section the Revoker's cockpit part becomes,
-with the crew, weapon manager and displays, the radome, canopy and nose gear on it.
+with the crew, weapon manager and displays, the radome, canopy and nose gear on it. So do the intake ducts, as the
+Revoker's intakes are parts of their own that the engine needs (its Turbojet's criticalParts).
 """
 import bmesh
 import bpy
@@ -23,7 +24,7 @@ import numpy as np
 from mathutils import Vector
 
 FOLDED = ("skin_", "wing_skin_", "dorsal_cover")
-INTERNALS = ("intake_duct_", "radar_tray", "avionics_tray", "engine_core", "engine_afterburner", "nozzle")
+INTERNALS = ("radar_tray", "avionics_tray", "engine_core", "engine_afterburner", "nozzle")
 
 
 def is_part(obj):
@@ -50,7 +51,7 @@ def box_centre(colliders):
     return (corners.min(0) + corners.max(0)) / 2
 
 
-PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower")  # IcarusAuthor.cs PieceCodes
+PIECE_CODES = ("front", "rear", "belly", "inner", "outer", "upper", "lower", "intake")  # IcarusAuthor.cs PieceCodes
 
 
 def family_of(obj):
@@ -69,12 +70,13 @@ def markers(icarus):
     """Every part's centre-of-mass marker as the Unity author placed it before the fold: ConfigurePart's box centre,
     then for each split family (family_mass_kg) KeepFamilyMoments' moves along and up the body (Blender z and y),
     from the hulls' world boxes, dry and full fuel; a fuselage section's or truss half's box is its pinned one
-    (parts.CORE_MASS_BOXES)."""
+    (parts.CORE_MASS_BOXES), and a part with a mass_marker (an intake chunk, parts.split_intakes) has it."""
     from parts import CORE_MASS_BOXES
 
     pinned = lambda o: tuple(np.array(v) for v in CORE_MASS_BOXES[o.name])
     parts = [o for o in icarus.all_objects if o.type == "MESH" and is_part(o) and hulls_of(o)]
-    out = {o: sum(pinned(o)) / 2 if o.name in CORE_MASS_BOXES else box_centre(hulls_of(o)) for o in parts}
+    out = {o: sum(pinned(o)) / 2 if o.name in CORE_MASS_BOXES else np.array(o["mass_marker"][:]) if "mass_marker" in o
+           else box_centre(hulls_of(o)) for o in parts}
     families = {}
     for o in parts:
         if o.get("family_mass_kg", 0) > 0:
@@ -133,7 +135,38 @@ def fold_hulls(icarus):
     for panel in panels:
         move_hulls(panel, host_of(panel))
     bpy.context.view_layer.update()
+    drop_bladders(icarus, keep_objects=True)
     return "chunks: %d panels' and internals' hulls folded into their parts" % len(panels)
+
+
+def drop_bladders(icarus, keep_objects=False):
+    """Drop the fuel bladders' geometry once their hulls (and in the split build their mass and fuel) are in their
+    sections: a stock jet's fuel is a FuelTank on its section with no tank of its own drawn (a design decision). The
+    bladders still size each tank's fuel and place its marker before this. keep_objects keeps the fuselage cells as
+    empty meshes, for the unsplit build's reviews that read their mass and fuel; the wing boxes' cells are faces of
+    the boxes' own meshes."""
+    import materials
+
+    for o in sorted((o for o in icarus.all_objects if o.type == "MESH"), key=lambda o: o.name):
+        names = [m.name if m else "" for m in o.data.materials]
+        if o.get("role") == "fuel_tank":
+            if keep_objects:
+                o.data.clear_geometry()
+            else:
+                data = o.data
+                bpy.data.objects.remove(o, do_unlink=True)
+                if data.users == 0:
+                    bpy.data.meshes.remove(data)
+        elif materials.FUEL_CELL in names:
+            slot = names.index(materials.FUEL_CELL)
+            bm = bmesh.new()
+            bm.from_mesh(o.data)
+            bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == slot], context="FACES")
+            for f in bm.faces:
+                f.material_index -= f.material_index > slot
+            bm.to_mesh(o.data)
+            bm.free()
+            o.data.materials.pop(index=slot)
 
 
 def fold(icarus):
@@ -185,6 +218,7 @@ def fold(icarus):
             raise ValueError("chunks: %s's centre of mass %s would leave its hulls' bounds" % (host.name, at.round(3)))
         host["fold_centre"] = [float(x) for x in at]
     bpy.context.view_layer.update()
+    drop_bladders(icarus)
     return "chunks: %d panels and internals folded into %s; %.1f kg of fuel into %s" % (len(panels), ", ".join(
         "%s (%d)" % (h.name, len(e) - 1) for h, e in sorted(carried.items(), key=lambda kv: kv[0].name)),
         sum(w for f in fuel.values() for w, _ in f), ", ".join(sorted(h.name for h in fuel)))
@@ -216,8 +250,8 @@ def join_bare(icarus):
     import parts
 
     lods, joined = bpy.data.collections["LOD1"], []
-    for host in sorted((o for o in icarus.all_objects if o.type == "MESH" and is_part(o) and not o.data.polygons),
-                       key=lambda o: o.name):
+    for host in sorted((o for o in icarus.all_objects if o.type == "MESH" and is_part(o) and not o.data.polygons
+                        and not o.get("drawn_by_skeleton")), key=lambda o: o.name):
         panels = sorted((o for o in icarus.all_objects if o.get("folded_into") == host.name and o.name.startswith(FOLDED)),
                         key=lambda o: o.name)
         lod_hulls = [c for p in panels for c in p.children if c.name in lods.objects]

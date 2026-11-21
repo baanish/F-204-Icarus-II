@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 namespace Icarus;
@@ -20,92 +19,38 @@ sealed class StandbyInstruments : MonoBehaviour
     // The fuel scale, degrees clockwise from straight up (art/blender/cockpit_atlas.py dial_fuel): E at -135, F at +135.
     const float FuelEmptyDeg = -135f, FuelSweepDeg = 270f;
 
-    sealed class Needle
-    {
-        public Transform Pivot = null!;
-        public Quaternion Rest;
-        public Vector3 Clockwise; // the axis, in the needle's own frame, a positive turn about which goes clockwise
-    }
+    [SerializeField] Renderer shown = null!;
+    [SerializeField] Transform fuel = null!, hour = null!, minute = null!;
+    [SerializeField] Transform tipLeft = null!, tipRight = null!;
 
     Aircraft aircraft = null!;
     Transform ball = null!;
-    Renderer shown = null!;
-    Needle? fuel, hour, minute;
     TipTanks? tips;
-    Transform? tipLeft, tipRight;
-    Quaternion aircraftInParent, ballRest;
+    Quaternion aircraftInParent, ballRest, fuelRest, hourRest, minuteRest;
     readonly Quaternion caseTilt = Quaternion.AngleAxis(CaseTiltDeg, Vector3.right);
 
     void Start()
     {
         aircraft = GetComponent<Aircraft>();
-        // Complex physics unparents the parts from the root, so the cockpit's meshes are found under the parts.
-        var all = IcarusSystems.Parts(aircraft).SelectMany(p => p.GetComponentsInChildren<Transform>(true)).ToArray();
-        Transform? Find(string name) => all.FirstOrDefault(t => t.name == name);
-        Transform? found = Find("cockpit_standby_ball");
-        if (found == null || found.parent == null)
+        if (shown == null || fuel == null || hour == null || minute == null || tipLeft == null || tipRight == null)
         {
-            IcarusPlugin.Log.Error("standby instruments: no cockpit_standby_ball; the ball, fuel needle and clock stay still");
+            IcarusPlugin.Log.Error("standby instruments: missing cockpit instrument references; the instruments stay still");
             enabled = false;
             return;
         }
 
-        ball = found;
-        shown = ball.GetComponent<Renderer>();
+        ball = shown.transform;
         aircraftInParent = Quaternion.Inverse(ball.parent.rotation) * aircraft.transform.rotation;
         ballRest = Quaternion.Inverse(aircraft.transform.rotation) * ball.rotation;
-        fuel = Pointer(Find("cockpit_fuel_needle"));
-        hour = Pointer(Find("cockpit_clock_hour"));
-        minute = Pointer(Find("cockpit_clock_minute"));
+        fuelRest = fuel.localRotation;
+        hourRest = hour.localRotation;
+        minuteRest = minute.localRotation;
         tips = GetComponent<TipTanks>();
-        tipLeft = Bar(Find("cockpit_tip_fuel_L"));
-        tipRight = Bar(Find("cockpit_tip_fuel_R"));
     }
 
-    // A needle's axis: its mesh is the needle's top faces only, so their mean normal is the dial's, out toward the pilot.
-    // Which way about it is clockwise is measured: a quarter turn from straight up must bring the tip to the pilot's right.
-    Needle? Pointer(Transform? t)
+    static void Fill(Transform foot, float share)
     {
-        Mesh? mesh = t != null ? t.GetComponent<MeshFilter>()?.sharedMesh : null;
-        if (t == null || mesh == null)
-        {
-            IcarusPlugin.Log.Error($"standby instruments: missing {(t == null ? "needle" : t.name + "'s mesh")}; it stays still");
-            return null;
-        }
-
-        Vector3 axis = mesh.normals.Aggregate(Vector3.zero, (a, n) => a + n).normalized;
-        Vector3 tip = mesh.vertices.OrderByDescending(v => v.sqrMagnitude).First();
-        Vector3 turned = t.TransformDirection(Quaternion.AngleAxis(90f, axis) * tip);
-        if (Vector3.Dot(turned, aircraft.transform.right) < 0f) axis = -axis;
-        return new Needle { Pivot = t, Rest = t.localRotation, Clockwise = axis };
-    }
-
-    static void Turn(Needle? needle, float degrees)
-    {
-        if (needle != null) needle.Pivot.localRotation = needle.Rest * Quaternion.AngleAxis(degrees, needle.Clockwise);
-    }
-
-    // A tape's bar: its origin is its foot, so its mesh's middle lies half the bar up the lane. A parent on the foot,
-    // its up turned along the lane, shortens the bar toward its foot by its Y scale alone. Returns that parent.
-    Transform? Bar(Transform? t)
-    {
-        Mesh? mesh = t != null ? t.GetComponent<MeshFilter>()?.sharedMesh : null;
-        if (t == null || mesh == null)
-        {
-            IcarusPlugin.Log.Error($"standby instruments: missing {(t == null ? "tip tank bar" : t.name + "'s mesh")}; it stays full");
-            return null;
-        }
-
-        var foot = new GameObject(t.name + "_foot").transform;
-        foot.SetParent(t.parent, false);
-        foot.SetPositionAndRotation(t.position, Quaternion.FromToRotation(Vector3.up, t.TransformVector(mesh.bounds.center)));
-        t.SetParent(foot, true);
-        return foot;
-    }
-
-    static void Fill(Transform? foot, float share)
-    {
-        if (foot != null) foot.localScale = new Vector3(1f, Mathf.Clamp01(share), 1f);
+        foot.localScale = new Vector3(1f, Mathf.Clamp01(share), 1f);
     }
 
     void LateUpdate()
@@ -120,15 +65,15 @@ sealed class StandbyInstruments : MonoBehaviour
         // A world-steady ball turns against the attitude; about the case's axes, so its horizon rolls round the window.
         ball.rotation = attitude * caseTilt * Quaternion.Inverse(level) * Quaternion.Inverse(caseTilt) * ballRest;
 
-        Turn(fuel, FuelEmptyDeg + FuelSweepDeg * Mathf.Clamp01(aircraft.GetFuelLevel()));
+        fuel.localRotation = fuelRest * Quaternion.AngleAxis(FuelEmptyDeg + FuelSweepDeg * Mathf.Clamp01(aircraft.GetFuelLevel()), Vector3.forward);
         Fill(tipLeft, tips != null ? tips.Fill("L") : 0f);
         Fill(tipRight, tips != null ? tips.Fill("R") : 0f);
         LevelInfo? info = NetworkSceneSingleton<LevelInfo>.i;
         if (info != null)
         {
             float hours = info.timeOfDay;
-            Turn(hour, (hours % 12f) * 30f);
-            Turn(minute, (hours % 1f) * 360f);
+            hour.localRotation = hourRest * Quaternion.AngleAxis((hours % 12f) * 30f, Vector3.forward);
+            minute.localRotation = minuteRest * Quaternion.AngleAxis((hours % 1f) * 360f, Vector3.forward);
         }
     }
 }

@@ -8,17 +8,23 @@ Set the same numeric version in `src/Icarus/IcarusPlugin.cs`, `src/Icarus/Icarus
 
 To package from a worktree, first run `pwsh -NoProfile -File tools/Link-WorktreeAssets.ps1` and provide the ignored `tools/local-paths.json` described in BUILD.md. Each checkout writes its own `build/` and `.cache/release/`.
 
-Every release also carries the texture-sources ZIP, so the checkout needs the texture sources that git ignores. In a checkout without them, fetch the previous release's first:
+Package the release from the checkout that built its skin. That checkout has the texture sources for the release ZIP and the skin bake the livery kit needs. The kit reads `.cache/review/wave2/p9b/02/skin.blend` from the bake that matches the release's pinned exports and maps.
+
+If the UV layout changed, export the geometry before running `tools/Rebuild-Skin.ps1` so the exported atlas matches the new bake. Follow the export and compose order in [the skin build guide](../art/textures/README.md). Commit the rebuilt `art/textures/gate.json` with the skin changes before packaging.
+
+A clean checkout can fetch a published release's texture sources only if they match the hashes pinned in `art/textures/texture-sources.json`. Once the same version is published, run:
 
 ```powershell
-pwsh -NoProfile -File tools/Fetch-TextureSources.ps1 -Version <previous version>
+pwsh -NoProfile -File tools/Fetch-TextureSources.ps1
 ```
+
+The packager compares tracked files before and after the build. It allows changes only to regenerated prefabs. On different hardware, Unity can change the last digits of floating-point values in joined control surface meshes and fail that check. If this happens, build on the hardware that produced the committed meshes, or review and commit the regenerated meshes as a separate change before packaging again.
 
 ```powershell
 pwsh -NoProfile -File tools/Package-Release.ps1
 ```
 
-The command refuses to run while any tracked file is modified or any untracked file exists. It then checks the versions, the export manifest and that the texture sources are present, runs the offline release tests, builds both payloads with `tools/Build-Icarus.ps1` and packs the texture sources with `tools/Build-TextureSources.ps1`. Because the tree is clean, the build's inputs are the release commit's files. The build must leave every tracked input unchanged except the prefab fileIDs Unity regenerates. Text hashes normalize CRLF line endings before comparing. To change an existing CRLF file with Python, use `read_bytes` and `write_bytes` so its line endings survive.
+The command refuses to run while any tracked file is modified or any untracked file exists. It checks the versions, export manifest and texture sources, then runs the offline release tests. It builds both mod payloads with `tools/Build-Icarus.ps1`, packs the texture sources with `tools/Build-TextureSources.ps1` and builds the livery kit with `tools/Build-LiveryKit.ps1`. The tracked build inputs come from the release commit. Text hashes normalize CRLF line endings before comparing. To change an existing CRLF file with Python, use `read_bytes` and `write_bytes` so its line endings survive.
 
 The final line must say `RELEASE PASS`. Outputs are under `.cache/release/v<version>-<UTC time>/`:
 
@@ -27,7 +33,8 @@ The final line must say `RELEASE PASS`. Outputs are under `.cache/release/v<vers
 | `Icarus-v<version>-nomm.zip` | Flat payload. NOMM supplies the install folder. |
 | `Icarus-v<version>-plugin-only.zip` | Manual install. Unzip it beside `NuclearOption.exe`, and its entries land in `BepInEx/plugins/baanish.icarus/`. |
 | `Icarus-v<version>-texture-sources.zip` | The generated images and arrays under `art/textures/generated/`, for rebuilding the skin. Installing and playing do not need it. |
-| `SHA256SUMS.txt` | SHA-256 hashes of the three archives and of `RELEASE-NOTES.md`. |
+| `icarus_livery_kit_<version>.zip` | The paint model, templates, example liveries and builder described in the [livery kit guide](livery-kit/README.md). |
+| `SHA256SUMS.txt` | SHA-256 hashes of the four archives and of `RELEASE-NOTES.md`. |
 | `RELEASE-NOTES.md` | Prerelease notes with absolute source and download links. |
 
 The NOMM and plugin-only archives contain exactly `Icarus.dll`, `icarus_<version>.nobp`, `meta.json`, `README.md`, `LICENSE`, `audio/CREDITS.md` and `fonts/OFL.txt`. The DLL and bundle stay together when NOMM enables or disables the mod. Entries are sorted and carry fixed timestamps, so identical payloads produce byte-identical archives. The texture-sources archive holds every file `art/textures/texture-sources.json` pins, at its repository path, plus a copy of that manifest; `tools/Fetch-TextureSources.ps1` unpacks it.
@@ -39,7 +46,7 @@ Options:
 - `-NotesFile <markdown-file>` adds release-specific changes to the notes.
 - `-CheckOnly` checks the tree, versions, credits and exports without building.
 - `-AllowDirty` permits an uncommitted local rehearsal. Archive names and the output directory carry `-LOCAL`, and `meta.json` records `local: true`. `sourceCommit` then identifies the base commit, not all payload changes. Version disagreement and build failures still stop packaging. These outputs cannot be published.
-- `-SkipBuild -AllowDirty` reuses this checkout's `build/Icarus.dll` and `build/icarus_<version>.nobp` after checking their hashes against `build/SHA256SUMS.txt`. It is for testing the packaging step with fixed artifacts. Publishable packages always require a fresh build.
+- `-SkipBuild -AllowDirty` reuses this checkout's `build/Icarus.dll` and `build/icarus_<version>.nobp` after checking their hashes against `build/SHA256SUMS.txt`. The reused build must be a release build, made without `-Dev`; the packager stops at once on a dev build. It still builds the livery kit, which runs Blender if the paint model is uncached. Publishable packages always require a fresh build.
 
 ## Packaging is reproducible, Unity builds are not
 
@@ -49,13 +56,13 @@ Full Unity rebuilds are not byte-reproducible: authoring regenerates prefab obje
 
 ## Verify a package
 
-Verify a release without Unity:
+Verify a release without Unity. The roundel scan needs stock roundels from the local game asset export or recorded painted-output hashes from `faction_marks.py`.
 
 ```powershell
-pwsh -NoProfile -File tools/Verify-Release.ps1 -Directory <package-directory> -Tag v0.3.0
+pwsh -NoProfile -File tools/Verify-Release.ps1 -Directory <package-directory> -Tag v0.4.0
 ```
 
-For `-LOCAL` outputs, add `-AllowLocal` and keep the numeric tag. Verification checks checksums, exact paths, fixed timestamps, entry order, paired payloads, credits, dependency metadata and the embedded commit, and checks every texture source against the manifest inside its archive.
+For `-LOCAL` outputs, add `-AllowLocal` and keep the numeric tag. Verification checks checksums, exact paths, fixed timestamps, entry order, paired payloads, credits, dependency metadata and the embedded commit. It checks every texture source against its manifest and checks the livery kit's versioned folder, file list and timestamps.
 
 ## Publish after owner approval
 
@@ -64,9 +71,9 @@ Keep releases as prereleases until multiplayer is tested on two PCs. Packaging c
 Push the reviewed source and tag that exact commit `v<version>`. The repository must be public with matching unobfuscated source before publication. To release ahead of making the repository public, add `-AllowPrivate`; the release stays out of NOMM's reach until the repository goes public. Then, after the owner authorizes publishing:
 
 ```powershell
-pwsh -NoProfile -File tools/Publish-Release.ps1 -Directory <package-directory> -Tag v0.3.0
+pwsh -NoProfile -File tools/Publish-Release.ps1 -Directory <package-directory> -Tag v0.4.0
 ```
 
-The publisher verifies local assets, checks that the existing remote tag matches `meta.json`'s source commit, creates a draft prerelease, and uploads the NOMM ZIP first, then the plugin-only and texture-sources ZIPs. It checks every uploaded size and SHA-256 digest and the full returned asset order before publishing. Asset names sort with the NOMM ZIP first for catalog discovery. A failed upload or draft check leaves the draft unpublished for inspection.
+The publisher verifies local assets, checks that the existing remote tag matches `meta.json`'s source commit, creates a draft prerelease, and uploads the NOMM ZIP first, then the plugin-only, texture-sources and livery kit ZIPs. It checks every uploaded size and SHA-256 digest and the full returned asset order before publishing. Asset names sort with the NOMM ZIP first for catalog discovery. A failed upload or draft check leaves the draft unpublished for inspection.
 
 After publication it verifies the returned tag, URL, prerelease flag, asset order and digests, then downloads the NOMM ZIP and compares its hash. It never creates tags or pushes source. NOMM catalog registration is a separate first-release task.

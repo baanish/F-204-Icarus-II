@@ -75,6 +75,13 @@ namespace Icarus.Editor
             foreach (var (r, tris) in hulls.Where(h => h.tris > Lod1PerHull))
                 p.Add($"LOD1 hull {r.name} has {tris} triangles, over {Lod1PerHull}");
             if (hulls.Sum(h => h.tris) > Lod1Total) p.Add($"LOD1 hulls have {hulls.Sum(h => h.tris)} triangles, over {Lod1Total}");
+            // JoinPartMeshes: one mesh per part, as stock; a folded piece or a skeleton piece keeps no renderer of its own,
+            // but for the trays the cockpit view hides on their own
+            var hiddenInCockpit = new HashSet<Object>(GetList(Prop(new SerializedObject(b.Aircraft), "exteriorRenderers")));
+            foreach (var piece in b.Blockout.Parts.Values.Where(x => x.Fbx != null && x.Drawn && (x.Text("folded_into") ?? x.Text("skeleton_owner")) != null))
+                if (b.Visuals.TryGetValue(piece.Name, out var at) && at.TryGetComponent<MeshRenderer>(out var own) && !hiddenInCockpit.Contains(own))
+                    p.Add(piece.Name + " still draws its own renderer, not its part's one mesh");
+            var drawnRenderers = b.Root.GetComponentsInChildren<Renderer>(true).Count(x => x.gameObject.layer != 3 && !(x is ParticleSystemRenderer) && !b.Lod1.Contains(x));
             var pieces = b.Root.GetComponentsInChildren<MeshCollider>(true).Where(c => c.sharedMesh != null).ToArray();
             // After the braces, no two parts without a joint between them may overlap.
             var linked = new HashSet<(Object, Object)>();
@@ -105,7 +112,8 @@ namespace Icarus.Editor
                 }
             return $"{parts.Length} AeroParts, {mass:0} kg, every part jointed to its parent and collidable, convex hulls, {colliders.Length} colliders " +
                 $"({pieces.Length} mesh hulls, {pieces.Sum(c => c.sharedMesh.triangles.Length / 3)} triangles) with {overlaps.Count} unjointed overlaps{(overlaps.Count > 0 ? " (" + string.Join("; ", overlaps.Take(10)) + ")" : "")}, {dangling} dangling references, " +
-                $"LOD in {groups.Length} part groups, {hulls.Length} LOD1 hulls of {hulls.Sum(h => h.tris)} triangles (largest {hulls.Max(h => h.tris)})";
+                $"LOD in {groups.Length} part groups, {hulls.Length} LOD1 hulls of {hulls.Sum(h => h.tris)} triangles (largest {hulls.Max(h => h.tris)}); " +
+                $"{drawnRenderers} exterior renderers, each part's pieces joined into one mesh ({b.DrawnFrom.Count} joined)";
         }
     }
 }

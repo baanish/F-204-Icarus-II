@@ -6,7 +6,8 @@ The Icarus collection holds meshes and hinge empties. Every hinge has local X al
 its axis and a <name>_visible mesh child. Optional Colliders and LOD1 meshes must
 be identity-parented to their owner. Pivots and axes are world-space; mesh bounds
 are part-local. hinge_axis_unity is world-space positive Blender hinge X. Each mesh part lists its uv_layers, and
-design_eye is the canopy's design eye point (canopy.EYE), world-space, and conformal the conformal
+design_eye is the canopy's design eye point (canopy.EYE), world-space; the cockpit_seat empty's axes carry the stock seat's
+recline beyond the donor's pilot rig (cockpit.STOCK seat_recline), about its pivot; and conformal the conformal
 hardpoint and the Icarus's own conformal mounts (stations.export), and tip_tank the tip tank store (tip_tanks.export) and
 tail_hook the arrestor hook (tail_hook.export), each with its own FBX, in the mount's frame.
 Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
@@ -116,6 +117,24 @@ def export_fbx(path, objects):
     scrub_file(path)
 
 
+def cockpit_atlas_record(coll):
+    """The cockpit trim sheet's UVs as atlas_guard records the skin's: per part with faces on it, a digest of their
+    loops' UVs (cockpit_atlas.py packs this sheet itself, and this export bakes its maps, art/export/textures)."""
+    import atlas_guard
+    import cockpit
+    import cockpit_atlas
+
+    parts = {}
+    for obj in sorted((o for o in coll.all_objects if o.type == "MESH"), key=lambda o: o.name):
+        slots = [i for i, m in enumerate(obj.data.materials) if m is not None and m.name == cockpit.SLOT]
+        if not slots or not obj.data.uv_layers.active:
+            continue
+        uv = obj.data.uv_layers.active.data
+        parts[obj.name] = atlas_guard.uv_digest((tuple(uv[i].uv) for f in obj.data.polygons if f.material_index in slots
+                                                 for i in f.loop_indices), cockpit_atlas.W)
+    return {"size": [cockpit_atlas.W, cockpit_atlas.H], "uv_sha256": parts}
+
+
 def remove_previous(out):
     manifest = out / "blockout.json"
     if not manifest.exists():
@@ -138,14 +157,21 @@ def main():
     out = args.out.resolve()
     # The skin bake and the reviews build the aircraft with its skin families whole (split=False): that build's
     # checks must pass too, in a Blender of its own (one scene holds one build), before this one exports.
-    unsplit = "import sys; sys.path.insert(0, %r); import build_icarus; build_icarus.build_cached(split=False)" % str(REPO / "art/blender")
+    # That build has the skin families whole, as the skin bake does (bake_skin.py prepare), so it also records the skin
+    # atlas the bake must match (atlas_guard).
+    atlas_path = REPO / ".cache/export_atlas.json"
+    atlas_path.unlink(missing_ok=True)
+    unsplit = ("import sys, json, bpy; sys.path.insert(0, %r); import build_icarus, uvs; build_icarus.build_cached(split=False); "
+               "open(%r, 'w').write(json.dumps(uvs.atlas_record(bpy.data.collections['Icarus'])))") % (str(REPO / "art/blender"), str(atlas_path))
     threads = sys.argv[sys.argv.index("--threads"):sys.argv.index("--threads") + 2] if "--threads" in sys.argv else []  # Run-Blender's share
     subprocess.run([bpy.app.binary_path, *threads, "--background", "--factory-startup", "--python-exit-code", "1", "--python-expr", unsplit],
                    check=True)
+    atlas = json.loads(atlas_path.read_text(encoding="utf-8"))
     build_icarus.build_cached()
     coll = bpy.data.collections.get("Icarus")
     if coll is None:
         raise ValueError("generator did not create the Icarus collection")
+    cockpit_atlas = cockpit_atlas_record(coll)
     objs = [o for o in coll.all_objects if o.type in ("MESH", "EMPTY")]
     by_name = {o.name: o for o in objs}
     if not any(o.type == "MESH" for o in objs):
@@ -185,7 +211,13 @@ def main():
             entry["hinge_axis_unity"] = to_unity(rotation @ Vector((1, 0, 0)))
         if obj.type == "EMPTY":
             continue
-        meshes = [(name, evaluated_mesh(obj, name))]
+        # A part the skeleton is drawn in place of (skeleton.REPLACED) has no faces left: its FBX carries only its
+        # colliders, and a folded one with none of those exports nothing, a node like an empty.
+        render = evaluated_mesh(obj, name)
+        drawn = len(render.polygons) > 0
+        if not drawn:
+            bpy.data.meshes.remove(render)
+        meshes = [(name, render)] if drawn else []
         pieces = []
         for i, collider in enumerate(colliders.get(name, [])):
             piece_name = f"{name}_colmesh{i}"
@@ -201,19 +233,20 @@ def main():
                 raise ValueError(f"{name}: expected one LOD1 hull")
             lod = evaluated_mesh(lods[name][0], f"{name}_lod1")
             meshes.append((lod.name, lod))
+        if not meshes:
+            continue
         temps = [bpy.data.objects.new(n, m) for n, m in meshes]
         for temp in temps:
             scratch.objects.link(temp)
         fbx = out / f"{name}.fbx"
         export_fbx(fbx, temps)
-        render = meshes[0][1]
-        lo, hi = mesh_bounds(render)
-        entry.update({"fbx": fbx.name, "sha256": sha256(fbx),
-                      "bounds_blender": [[round(c, 5) for c in v] for v in (lo, hi)],
-                      "bounds_unity": bounds_unity(lo, hi), "tris": tris(render),
-                      "materials": material_tris(render), "uv_layers": [layer.name for layer in render.uv_layers],
-                      "colliders": pieces,
+        entry.update({"fbx": fbx.name, "sha256": sha256(fbx), "drawn": drawn, "colliders": pieces,
                       "lod1": {"tris": tris(lod)} if lod else None})
+        if drawn:
+            lo, hi = mesh_bounds(render)
+            entry.update({"bounds_blender": [[round(c, 5) for c in v] for v in (lo, hi)],
+                          "bounds_unity": bounds_unity(lo, hi), "tris": tris(render),
+                          "materials": material_tris(render), "uv_layers": [layer.name for layer in render.uv_layers]})
         for temp in temps:
             bpy.data.objects.remove(temp, do_unlink=True)
         for _, mesh in meshes:
@@ -251,6 +284,7 @@ def main():
     manifest = {"source_generator": source.relative_to(REPO).as_posix(), "source_sha256": sha256(source),
                 "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
                 "design_eye": {"blender": [round(c, 5) for c in eye], "unity": to_unity(eye)},
+                "atlas": dict(atlas, cockpit=cockpit_atlas),
                 "conformal": stations.export(to_unity),
                 "tip_tank": store,
                 "tail_hook": hook_store,

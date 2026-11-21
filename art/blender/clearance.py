@@ -54,7 +54,7 @@ RANK_MOVING, RANK_DEFAULT = 6, 1
 # Braces: second joints, as IcarusAuthor.Parts.cs Braces (A22 checks that table against the tree).
 BRACES = (("stabilator", "fuselage_aft"), ("rudder", "fuselage_aft"), ("fin_skin", "fuselage_aft"),
           ("wing_spar_outer_L", "fuselage_mid"), ("wing_spar_outer_R", "fuselage_mid"), ("fuselage_tail", "fuselage_mid"),
-          ("fin_spar", "fuselage_mid"))
+          ("fin_spar", "fuselage_mid"), ("cockpit_cell", "fuselage_mid"))
 GEAR = ("gear_leg_",)  # outside the clearance: their trigger touches nothing
 TOLERANCE = 0.0002
 # The carve clears this much past REQUIRED, so float error in the cut never leaves a pair a hair short in the check.
@@ -291,6 +291,33 @@ def trim(icarus):
     return trimmed
 
 
+def mirror_missing(cs):
+    """Give each of a centreline part's hulls that has no mirror image among them one: clear() splits a hull round a
+    mirrored pair of obstacles (the intakes inside the root) greedily, one obstacle first, and can keep pieces round one
+    and none round the other, which symmetric can't restore. The obstacles are mirror images, so a piece's reflection is
+    as clear of them as the piece (check() judges it)."""
+    def box(c, sign=1.0):
+        pts = world(c) * np.array([sign, 1.0, 1.0])
+        return pts.min(0), pts.max(0)
+
+    def share(a, b):
+        inside = np.prod(np.clip(np.minimum(a[1], b[1]) - np.maximum(a[0], b[0]), 0, None))
+        return float(inside / max(np.prod(a[1] - a[0]), 1e-12))
+
+    for c in list(cs):
+        if any(share(box(c, -1.0), box(o)) > 0.5 for o in cs):
+            continue
+        bm = hulls.convex([Vector((-p[0], p[1], p[2])) for p in world(c)])
+        bm.transform(c.parent.matrix_world.inverted())
+        me = bpy.data.meshes.new("%s_mirror" % c.name)
+        bm.to_mesh(me)
+        bm.free()
+        twin = hulls.attach(me.name, me, c.parent, bpy.data.collections["Colliders"])
+        twin.display_type = "WIRE"
+        bpy.context.view_layer.update()  # its world matrix, for the next piece's test
+        cs.append(twin)
+
+
 def carve(icarus):
     """Cut every hull clear of the hulls of unjointed parts that outrank it; returns a report line."""
     bpy.context.view_layer.update()  # the split pieces' hulls were parented since the last update: their world matrices are stale
@@ -367,6 +394,7 @@ def carve(icarus):
             bm.transform(c.matrix_world.inverted())
             bm.to_mesh(c.data)
             bm.free()
+        mirror_missing(cs)
     trimmed = trim(icarus)
     after = {}
     for c in bpy.data.collections["Colliders"].objects:

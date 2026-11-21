@@ -12,10 +12,31 @@ STRIPS = {'jet_mechanical': {'source': 'jet_mechanical_AlbedoTransparency_PLACEH
 # END MEASURED STRIPS
 
 
+# Stock textures that tile rather than pack strips: metres per repeat of the box projection.
+TILED = {"honeycomb": 0.5}
+
+
+def project_tiled(obj):
+    """Box-project the faces on a TILED material, one repeat per TILED metres."""
+    faces = [f for f in obj.data.polygons if obj.data.materials and obj.data.materials[f.material_index].name in TILED]
+    if not faces:
+        return
+    uv = obj.data.uv_layers.get("UVMap") or obj.data.uv_layers.new(name="UVMap")
+    rotation = obj.matrix_world.to_3x3()
+    for face in faces:
+        tile = TILED[obj.data.materials[face.material_index].name]
+        normal = rotation @ face.normal
+        axes = [a for a in range(3) if a != max(range(3), key=lambda i: abs(normal[i]))]
+        for i in face.loop_indices:
+            p = obj.matrix_world @ obj.data.vertices[obj.data.loops[i].vertex_index].co
+            uv.data[i].uv = (p[axes[0]] / tile, p[axes[1]] / tile)
+
+
 def project(icarus):
     for obj in icarus.all_objects:
         if obj.type != "MESH":
             continue
+        project_tiled(obj)
         faces = [f for f in obj.data.polygons if obj.data.materials[f.material_index].name in STRIPS]
         if not faces:
             continue

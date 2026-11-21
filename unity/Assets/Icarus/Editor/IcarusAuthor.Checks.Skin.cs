@@ -8,6 +8,16 @@ namespace Icarus.Editor
 {
     public static partial class IcarusAuthor
     {
+        // The livery list by index, pinned here rather than read from the specifications the author sorts too: a mission
+        // saves a jet's livery as its index (SavedAircraft.livery), so 0 to 3 stay the four 0.3.0 shipped, and the three
+        // BDF liveries follow.
+        private static readonly (string Name, string Faction, string Texture)[] ReleasedLiveries =
+        {
+            ("PALA Navy", "PALA", "Icarus_livery_1"), ("PALA Black", "PALA", "Icarus_livery_2"), ("PALA Desert", "PALA", "Icarus_livery_3"),
+            ("PALA Bare Metal", "PALA", "Icarus_livery_4"), ("BDF Matte Gray", "BDF", "Icarus_livery_5"),
+            ("BDF Gray Camo", "BDF", "Icarus_livery_6"), ("BDF Bare Metal", "BDF", "Icarus_livery_7"),
+        };
+
         private static string CheckSkin(Build b, List<string> p)
         {
             var renderers = b.Root.GetComponentsInChildren<MeshRenderer>(true);
@@ -19,25 +29,31 @@ namespace Icarus.Editor
             else
             {
                 var held = maps.sharedMaterials;
-                if (held.Length != 2 || held[0] != b.Skin || held[1] == null)
-                    p.Add("bare metal carrier must hold shared skin and alternate material");
+                var bareIds = BareMetalLiveryIds();
+                if (held.Length != 1 + bareIds.Length || held[0] != b.Skin || held.Skip(1).Any(m => m == null))
+                    p.Add("bare metal carrier must hold the shared skin and one material per Bare Metal livery (" + string.Join(", ", bareIds) + ")");
                 else
-                {
-                    var metal = held[1].GetTexture("_Metallic") as Texture2D;
-                    var livery = held[1].GetTexture("_Livery");
-                    if (metal == null || metal.width != SkinSize || metal.height != SkinSize || metal.format != TextureFormat.DXT5)
-                        p.Add("bare metal map must be " + SkinSize + " square DXT5");
-                    else
+                    for (var k = 0; k < bareIds.Length; k++)
                     {
-                        var importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(metal));
-                        if (importer.sRGBTexture || importer.alphaSource != TextureImporterAlphaSource.FromInput)
-                            p.Add("bare metal map must retain linear smoothness alpha");
+                        var metal = held[k + 1].GetTexture("_Metallic") as Texture2D;
+                        var livery = held[k + 1].GetTexture("_Livery");
+                        if (metal == null || metal.width != SkinSize || metal.height != SkinSize || metal.format != TextureFormat.DXT5)
+                            p.Add($"bare metal map {bareIds[k]} must be {SkinSize} square DXT5");
+                        else
+                        {
+                            var importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(metal));
+                            if (importer.sRGBTexture || importer.alphaSource != TextureImporterAlphaSource.FromInput)
+                                p.Add($"bare metal map {bareIds[k]} must retain linear smoothness alpha");
+                        }
+                        if (livery != Load<Texture2D>(LiveryFolder + "/Icarus_livery_" + bareIds[k] + ".png") || metal == b.Skin.GetTexture("_Metallic")
+                            || held.Skip(1).Count(m => m.GetTexture("_Metallic") == metal) != 1)
+                            p.Add($"bare metal carrier slot {k + 1} must identify livery {bareIds[k]} and its own metallic map");
                     }
-                    if (livery != Load<Texture2D>(LiveryFolder + "/Icarus_livery_4.png") || metal == b.Skin.GetTexture("_Metallic"))
-                        p.Add("bare metal carrier must identify livery 4 and a distinct metallic map");
-                }
             }
             if (skinRenderers.Length == 0) p.Add("no skin renderers");
+            var singles = b.Blockout.Parts.Values.Where(x => x.Flag("single_sided_skin")).Select(x => x.Name).ToArray();
+            if (singles.Length != SingleSidedCount || singles.Any(n => !SingleSidedNames.IsMatch(n)))
+                p.Add($"single-sided skin on [{string.Join(", ", singles)}], expected the {SingleSidedCount} doors, speed brakes, nozzle, petals, seals, canopy frame and pylons");
             var drawn = 0;
             foreach (var renderer in renderers.Where(r => r.name.Contains("_detail_")))
                 p.Add("unmerged detail renderer: " + renderer.name);
@@ -74,13 +90,15 @@ namespace Icarus.Editor
                         p.Add(renderer.name + " skin UV outside [0,1]");
                         break;
                     }
-                // SkinFirst twins every skin triangle so a hole or a break shows the inside of the skin, not the sky; LOD1
-                // hulls are closed and never holed.
+                // SkinFirst twins every skin triangle so a hole or a break shows the inside of the skin, not the sky, but on a
+                // piece marked single_sided_skin, which an inner face covers; a joined mesh holds its pieces' skins as each
+                // came (JoinPartMeshes). LOD1 hulls are closed and never holed.
                 var skin = mesh.GetIndices(skinSlot);
                 if (!b.Lod1.Contains(renderer))
                 {
-                    if (2 * OneSided(mesh.vertices, skin).Length != skin.Length)
-                        p.Add($"{renderer.name}: {OneSided(mesh.vertices, skin).Length / 3} of {skin.Length / 3} skin triangles lack a back-facing twin");
+                    var single = SingleSidedSkin(b, renderer);
+                    if (2 * OneSided(mesh.vertices, skin).Length - skin.Length != 3 * single)
+                        p.Add($"{renderer.name}: {OneSided(mesh.vertices, skin).Length / 3} of {skin.Length / 3} skin triangles lack a back-facing twin, {single} single-sided by design");
                     drawn += skin.Length / 3;
                 }
             }
@@ -101,14 +119,35 @@ namespace Icarus.Editor
                     p.Add("metallic map must preserve smoothness alpha in DXT5");
             }
             var liveries = Prop(new SerializedObject(b.Parameters), "liveries");
-            if (liveries.arraySize != 4) p.Add("expected four liveries, got " + liveries.arraySize);
+            var specs = LiverySpecs();
+            if (liveries.arraySize != specs.Count) p.Add($"expected {specs.Count} liveries, got {liveries.arraySize}");
+            if (liveries.arraySize != ReleasedLiveries.Length) p.Add($"{liveries.arraySize} liveries, the pinned list has {ReleasedLiveries.Length}");
             var textures = new HashSet<Object>();
-            var primeva = Load<Object>(Stock + "MonoBehaviour/Primeva_PLACEHOLDER.asset");
-            for (var i = 0; i < liveries.arraySize; i++)
+            var factions = new HashSet<Object>();
+            // The plugin's first pick (src/Icarus/BareMetalFirstPick.cs) finds each side's Bare Metal by its index here.
+            var plugin = System.AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "Icarus");
+            int PluginIndex(string name) => (int)(plugin?.GetType("Icarus.BareMetalFirstPick", true)
+                .GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.GetRawConstantValue() ?? -1);
+            var bareMetal = plugin == null ? new Dictionary<string, int>()
+                : new Dictionary<string, int> { ["PALA"] = PluginIndex("PalaBareMetal"), ["BDF"] = PluginIndex("BdfBareMetal") };
+            if (plugin == null) p.Add("Icarus.dll isn't loaded in the editor, so the first pick's Bare Metal indices go unchecked");
+            foreach (var side in bareMetal)
+                if (side.Value < 0 || side.Value >= specs.Count || (string)specs[side.Value]["faction"] != side.Key || (string)specs[side.Value]["pattern"] != "bands")
+                    p.Add($"the plugin's {side.Key} Bare Metal index {side.Value} is not {side.Key}'s Bare Metal in the livery list");
+            for (var i = 0; i < Mathf.Min(liveries.arraySize, specs.Count); i++)
             {
                 var entry = liveries.GetArrayElementAtIndex(i);
-                if (entry.FindPropertyRelative("faction").objectReferenceValue != primeva)
-                    p.Add("livery " + i + " faction is not Primeva");
+                var spec = specs[i];
+                var faction = entry.FindPropertyRelative("faction").objectReferenceValue;
+                if (faction == null || faction != FactionAsset((string)spec["faction"]))
+                    p.Add($"livery {i} ({spec["name"]}) must belong to {(spec["faction"] as string == "PALA" ? "Primeva" : "Boscali")}");
+                else
+                    factions.Add(faction);
+                // A mission saves the index (SavedAircraft.livery): livery id n stays at n - 1, as 0.3.0 shipped ids 1 to 4.
+                if (System.Convert.ToInt32(spec["id"]) != i + 1)
+                    p.Add($"livery {i} ({spec["name"]}) is id {spec["id"]}, but a saved mission's livery {i} means id {i + 1}");
+                if (entry.FindPropertyRelative("name").stringValue != (string)spec["name"])
+                    p.Add($"livery {i} is named {entry.FindPropertyRelative("name").stringValue}, expected {spec["name"]}");
                 var guid = entry.FindPropertyRelative("assetReference").FindPropertyRelative("m_AssetGUID").stringValue;
                 var data = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(guid));
                 if (data == null)
@@ -121,8 +160,16 @@ namespace Icarus.Editor
                 if (texture == null || texture.width != SkinSize || texture.height != SkinSize || texture.format != TextureFormat.DXT1)
                     p.Add("livery " + i + " must be " + SkinSize + " square DXT1");
                 if (texture != null && !textures.Add(texture)) p.Add("liveries share a texture");
+                if (i < ReleasedLiveries.Length)
+                {
+                    var pinned = ReleasedLiveries[i];
+                    if (entry.FindPropertyRelative("name").stringValue != pinned.Name || faction != FactionAsset(pinned.Faction) || texture == null || texture.name != pinned.Texture)
+                        p.Add($"livery {i} is {entry.FindPropertyRelative("name").stringValue} ({(texture != null ? texture.name : "no texture")}), " +
+                              $"pinned as {pinned.Name} of {pinned.Faction} wearing {pinned.Texture}");
+                }
                 if (Prop(so, "Colors").arraySize == 0) p.Add("livery " + i + " has no dominant paint");
             }
+            if (factions.Count != 2) p.Add("the liveries must cover Primeva and Boscali");
             var count = b.Root.GetComponentsInChildren<LODGroup>(true).Sum(g => g.GetLODs().Length == 0 ? 0 : g.GetLODs()[0].renderers.Length);
             // LOD1 hulls wear their part's paint (art/blender/hulls.py paint_lods), so the livery and the Bare Metal swap
             // reach them; on stock's flat grey LOD material every livery fell off at range. The skin renderer checks above
@@ -151,8 +198,22 @@ namespace Icarus.Editor
                 if (3 * spread < 2 * (tris.Length / 3))
                     p.Add($"{hull.name}: {spread} of {tris.Length / 3} skin triangles span the atlas; the rest sample a point");
             }
-            return $"{skinRenderers.Length} registered skin renderers, {drawn} skin triangles drawn from both sides, four Primeva liveries, exterior LOD0 {count} renderers, " +
+            return $"{skinRenderers.Length} registered skin renderers, {drawn} skin triangles drawn from both sides, seven liveries by id (four Primeva at their 0.3.0 indices, three Boscali; Bare Metal at {string.Join(" and ", bareMetal.Values)} for the first pick), exterior LOD0 {count} renderers, " +
                 $"{b.Lod1.Count} LOD1 hulls on their parts' paint ({skinHulls} on the skin)";
+        }
+
+        // The skin drawn from one side only (art/blender/skeleton.py SINGLE_SIDED): the doors, speed brakes, nozzle, its
+        // petals and seals, the canopy frame and the pylons, 50 meshes.
+        private static readonly System.Text.RegularExpressions.Regex SingleSidedNames = new System.Text.RegularExpressions.Regex(
+            @"^(gear_door_\w+_visible|speed_brake_[LR]_visible|nozzle|nozzle_(petal|seal)_\d\d_visible|canopy_visible|pylon_inner_\w+)$");
+        private const int SingleSidedCount = 50;
+
+        // A renderer's skin triangles from single-sided pieces: its own mesh's, or a joined mesh's pieces'.
+        private static int SingleSidedSkin(Build b, Renderer renderer)
+        {
+            var names = b.DrawnFrom.TryGetValue(renderer, out var from) ? from : new[] { renderer.name };
+            return names.Where(n => b.Blockout.Has(n) && b.Blockout.Parts[n].Flag("single_sided_skin") && b.Meshes.ContainsKey(n))
+                .Sum(n => b.Meshes[n].Materials.Length > 0 && b.Meshes[n].Materials[0] == b.Skin ? (int)b.Meshes[n].Render.GetSubMesh(0).indexCount / 3 : 0);
         }
 
         // Triangles of a renderer's mesh with a two-sided skin counted once (OneSided); -1 without a mesh.

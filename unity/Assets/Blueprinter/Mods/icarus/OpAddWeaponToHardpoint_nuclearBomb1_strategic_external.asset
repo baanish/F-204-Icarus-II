@@ -15,4 +15,4 @@ MonoBehaviour:
   weaponJsonKey: nuclearBomb1_strategic_external
   aircraft:
   - aircraftJsonKey: baanish_icarus
-    hardpointIndices: 01000000
+    hardpointIndices: 0100000004000000

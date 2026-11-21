@@ -1,0 +1,32 @@
+// Landing with a centreline bomb: the game's landing AI brings the Icarus onto Sandrift's runway from 19 km out with one
+// 500 kg bomb on its Centreline station, which hangs 0.19 m off the ground at rest while the main gear can compress
+// 0.43 m more (tools/store_clearance.py). Pass: touchdown and rollout to a stop with the bomb still aboard, no damage and
+// nothing detached. The game's landing AI sometimes pitches to about 20 deg angle of attack on final with a bomb load and
+// stalls: in five runs each it did so once with the centreline bomb, three times with a 500 kg bomb on each wing pylon and
+// never clean. A FAIL with that on final is the landing AI, not the bomb striking the ground.
+// From the repo root: no-agentic run tests/scenarios/icarus_centreline_landing.scenario.jsonc
+{
+  "mission": "icarus_centreline_final_19km.mission.json",
+  "mods": "clean",
+  "plugins": [
+    "installed:com.nikkorap.blueprinter",
+    "../../.cache/build-staging/dotnet",
+    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+  ],
+  "speed": 1,
+  "timeout": 480,
+  "steps": [
+    { "require": { "path": "mods.baanish.icarus.loadout", "eq": "||||bomb_500_single" }, "within": 3, "label": "loadout: the 500 kg bomb on the Centreline station alone" },
+    { "require": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.type", "eq": "baanish_icarus" }, { "path": "own.alt_agl_m", "gt": 800 } ] }, "label": "the Icarus airborne 19 km out" },
+    { "mark": { "label": "land" } },
+    { "fly": { "mode": "land" } },
+    { "wait": { "any": [ { "event": "touchdown", "since": "land" }, { "event": "destroyed", "since": "land" } ] }, "timeout": 360, "label": "touchdown (or the jet is lost first)" },
+    { "check": { "event": "touchdown", "since": "land" }, "label": "the Icarus touched down" },
+    { "screenshot": { "name": "centreline_touchdown" } },
+    { "wait": { "path": "own.gs_mps", "lt": 1 }, "timeout": 90, "label": "rolled out to a stop" },
+    { "act": { "station": 0 } },
+    { "check": { "path": "own.station.ammo", "eq": 1 }, "within": 3, "label": "the bomb is still aboard" },
+    { "check": { "all": [ { "path": "own.alive", "eq": true }, { "path": "own.hp_frac", "eq": 1 }, { "not": { "event": "damage", "since": "land" } },
+                          { "not": { "event": "part_detached", "since": "land" } } ] }, "label": "no damage and nothing detached through touchdown and rollout" },
+  ],
+}

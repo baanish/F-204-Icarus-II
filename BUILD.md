@@ -8,7 +8,7 @@ The build has only been run on the developer's machine. If a step fails on yours
 
 - Windows, PowerShell 7, Git and [Git LFS](https://git-lfs.com/). The textures are stored in Git LFS, so a clone without it holds small pointer files instead of images.
 - The .NET SDK (8 or later).
-- Python 3.9 or later, available as `python`, for the export hash check.
+- Python 3.10 or later, available as `python`. The build and the public file check need NumPy, Pillow and SciPy. Install them with `python -m pip install numpy pillow scipy`.
 - Unity Editor **2022.3.62f2**.
 - A purchased copy of Nuclear Option **0.34.2** with BepInEx 5 installed in it. The build reads the game's assemblies and BepInEx's from there. The build finds the game in your Steam libraries. If it can't, set `NUCLEAR_OPTION_DIR` to the game folder.
 - An export of your game install from **AssetRipper 2.0.0** (Script Content Level **Level 1**, Script Export Format **Decompilation**). The repository holds no game assets; the build clones the FS-12 Revoker and other stock settings from your local import.
@@ -45,11 +45,17 @@ git config core.hooksPath .githooks
 pwsh -NoProfile -File tools/Check-Public.ps1 -All
 ```
 
-The hook checks staged blobs. `-All` checks tracked files and untracked, non-ignored files as they are on disk. Both resolve Git LFS pointers, check binary metadata and verify export hashes. To also catch your own account name, email and machine names, list them in the gitignored `tools/public-check-terms.json` as `{"terms": [...]}`. Each is matched as a whole word, and the names never appear in the tracked checker. Without that file, only the generic path and ID rules run. These checks cover the current tree, not Git history.
+The hook checks staged blobs. `-All` checks tracked files and untracked, non-ignored files as they are on disk. Both resolve Git LFS pointers, check binary metadata and verify export hashes. Every image also goes through `art/textures/faction_marks.py check-clean`: none may be a stock roundel or a livery painted with one (by hash), and no livery map may show a roundel where the build paints one (by its correlation with the roundel, which needs the asset export). To also catch your own account name, email and machine names, list them in the gitignored `tools/public-check-terms.json` as `{"terms": [...]}`. Each is matched as a whole word, and the names never appear in the tracked checker. Without that file, only the generic path and ID rules run. These checks cover the current tree, not Git history.
 
 Texture provenance records store paths relative to the repository root, and the tools that read them resolve those paths from that root whatever the working directory. After importing older records, run `python tools/Make-TextureRecordsPortable.py` to convert their paths and update the metadata hashes that depend on them. Running it again changes no files. It leaves external image-generation identifiers and native image hashes in place as provenance.
 
 Test mission generation reads `ICARUS_MISSION_TEMPLATES`, or `mission_templates` in the ignored `tools/local-paths.json`, for the test framework's mission templates folder. Relative template paths resolve from this repository's root. The bare-metal report cites installed game source by assembly and filename, without a local checkout path.
+
+## Point the build at your asset export (once)
+
+The liveries carry the game's own PALA and BDF roundels, which are the game's art and so are not in this repository. The maps in `art/export/textures` are complete except for the roundels; the build paints them in from your AssetRipper export. Copy `tools/local-paths.example.json` to `tools/local-paths.json` (git ignores it) and set `game_export` to the export's `Assets` folder, the one holding `Texture2D`. The build reads `Texture2D/PALA_roundel.png` and `Texture2D/BDF_roundel.png` from there.
+
+`python art/textures/faction_marks.py` does the painting: it places each roundel where `art/textures/faction_marks.json` says, on the maps in `art/export/textures`, and writes the results to `unity/Assets/Blueprinter/Mods/icarus/Liveries/`, where git ignores them, with their hashes in `.cache/faction-marks/marks.json`. `tools/Build-Icarus.ps1` and `tools/Rebuild-Skin.ps1` run it for you. Without the export it stops with one line that names the missing file and the setting, and the build stops with it: there is no build without roundels.
 
 ## Build
 
@@ -59,7 +65,9 @@ From the repository root:
 pwsh -NoProfile -File tools/Build-Icarus.ps1
 ```
 
-It checks every export against `art/export-manifest.json`, builds the plugin, copies it and BepInEx's assemblies into the Unity project, authors the aircraft from the pinned exports on the Revoker, checks the result against the authoring checklist (A1 to A21: the donor strip, stations, gear, cockpit, audio, structure and icons, one `[Icarus] check` line each in the Unity log), and builds the bundle. The last line is the verdict, `B0 PASS: build/icarus_<version>.nobp ...` or `B0 FAIL: <why>`. Unity's logs stay in `build/logs`. Pass `-UnityPath <Unity.exe>` if it can't find Unity 2022.3.62f2.
+Pass `-Dev` to include the diagnostics and tuning settings. Release packages are built without `-Dev`, and the test scenarios under `tests/scenarios` require a dev build.
+
+It checks every export against `art/export-manifest.json`, paints the faction roundels onto the liveries and checks that each carries them, builds the plugin, copies it and BepInEx's assemblies into the Unity project, authors the aircraft from the pinned exports on the Revoker, checks the result against the authoring checklist (A1 to A21: the donor strip, stations, gear, cockpit, audio, structure and icons, one `[Icarus] check` line each in the Unity log), and builds the bundle. The last line is the verdict, `B0 PASS: build/icarus_<version>.nobp ...` or `B0 FAIL: <why>`. Unity's logs stay in `build/logs`. Pass `-UnityPath <Unity.exe>` if it can't find Unity 2022.3.62f2.
 
 The build rewrites the authored assets under `unity/Assets/Blueprinter/Mods/icarus`; Unity regenerates their object IDs.
 
@@ -69,7 +77,7 @@ To package your build as reproducible release archives, or to publish it, see [R
 
 Close the game, then copy `build/Icarus.dll` and `build/icarus_<version>.nobp` into `BepInEx/plugins/baanish.icarus/` in the game folder. Blueprinter 2.1.1 or later must be installed and enabled; 2.1.1 is the version the current build is tested with. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II <version> (baanish.icarus)`.
 
-The flight-model knobs live in `BepInEx/config/baanish.icarus.cfg` under `[Tuning.*]`. A value below 0 is the shipped value; saving the file applies the rest to every Icarus in flight. While another player is connected, every knob reads its shipped value.
+In a dev build, the flight-model knobs live in `BepInEx/config/baanish.icarus.cfg` under `[Tuning.*]`. A value below 0 is the shipped value; saving the file applies the rest to every Icarus in flight. While another player is connected, every knob reads its shipped value.
 
 ## Change the model
 
@@ -84,7 +92,7 @@ Before rebuilding, copy `tools/local-paths.example.json` to `tools/local-paths.j
 
 ## Rebuild the skin
 
-The ten skin maps are composed from generated images and arrays that are not in git. Each release ships them as `Icarus-v<version>-texture-sources.zip`. Fetch the ZIP for this checkout's version before rebuilding the skin:
+The skin maps are composed from generated images and arrays that are not in git. Each release ships them as `Icarus-v<version>-texture-sources.zip`. Fetch the ZIP for this checkout's version before rebuilding the skin:
 
 ```powershell
 pwsh -NoProfile -File tools/Fetch-TextureSources.ps1

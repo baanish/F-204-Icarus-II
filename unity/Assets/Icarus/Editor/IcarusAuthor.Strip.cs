@@ -15,12 +15,18 @@ namespace Icarus.Editor
         private sealed class DonorCapture
         {
             public readonly Dictionary<string, Dictionary<string, float>> Armour = new Dictionary<string, Dictionary<string, float>>();
-            public Component AeroTemplate, TankTemplate, SurfaceTemplate, DeviceTemplate, CanopyTemplate;
+            // Each ArmourSources part's impact damage and fragments (AeroPart impactDamage, disintegrationEffects).
+            public readonly Dictionary<string, (float Threshold, float Multiplier, Object[] Fragments)> Impact = new Dictionary<string, (float, float, Object[])>();
+            public readonly Dictionary<string, Component> TankTemplates = new Dictionary<string, Component>(); // by Revoker part, as TankKinds names them
+            public Component AeroTemplate, SurfaceTemplate, DeviceTemplate, CanopyTemplate;
             public float PitchSense, RollSense, YawSense;
             public Vector3 Eye;
             public float GroundY; // the Revoker's ground line under its root, from its definition's spawnOffset
             public Material FormationLit; // the Revoker's formation strips' lit material and switching
             public int FormationState;
+            // The Revoker cockpit's joint to its root (the cockpit's second PartJoint) and the mass that hangs on the
+            // cockpit (the cockpit and its nose): A22 sizes the Icarus's brace from them.
+            public (float Force, float Torque, string Tensor, float CarriedMass) CockpitBrace;
         }
 
         // Revoker parts the Icarus parts take their armour from, reusing stock armour classes.
@@ -50,6 +56,9 @@ namespace Icarus.Editor
                     if (it.propertyType == SerializedPropertyType.Float)
                         values[it.propertyPath] = it.floatValue;
                 capture.Armour[path] = values;
+                var impact = Prop(so, "impactDamage");
+                capture.Impact[path] = (impact.FindPropertyRelative("threshold").floatValue, impact.FindPropertyRelative("multiplier").floatValue,
+                    GetList(Prop(so, "disintegrationEffects")));
             }
 
             Component Template(Component source, string name)
@@ -60,8 +69,19 @@ namespace Icarus.Editor
                 EditorUtility.CopySerialized(source, copy);
                 return copy;
             }
+            var cockpitJoints = Prop(new SerializedObject(b.Find("fuselage/cockpit").GetComponent(aeroType)), "joints");
+            var rootPart = b.Root.GetComponent(aeroType);
+            for (var i = 0; i < cockpitJoints.arraySize; i++)
+            {
+                var joint = cockpitJoints.GetArrayElementAtIndex(i);
+                if (joint.FindPropertyRelative("connectedPart").objectReferenceValue == rootPart)
+                    capture.CockpitBrace = (joint.FindPropertyRelative("breakForce").floatValue, joint.FindPropertyRelative("breakTorque").floatValue,
+                        (joint.FindPropertyRelative("tensor").objectReferenceValue as Component)?.name,
+                        new[] { "fuselage/cockpit", "fuselage/cockpit/nose" }.Sum(path => Prop(new SerializedObject(b.Find(path).GetComponent(aeroType)), "mass").floatValue));
+            }
             capture.AeroTemplate = Template(b.Find("fuselage/wing1a_L").GetComponent(aeroType), "aeropart_template");
-            capture.TankTemplate = Template(b.Root.GetComponent(GameType("FuelTank")), "tank_template");
+            foreach (var path in TankKinds.Values.Distinct())
+                capture.TankTemplates[path] = Template((path == "" ? b.Root.transform : b.Find(path)).GetComponent(GameType("FuelTank")), "tank_template_" + path.Replace('/', '_'));
             capture.SurfaceTemplate = Template(b.Find("fuselage/wing1a_L/wing2_L/wingtip_L/aileron_L").GetComponent(GameType("ControlSurface")), "surface_template");
             capture.DeviceTemplate = Template(b.Find("fuselage/wing1a_L/wing2_L/flap_L").GetComponent(GameType("HighLiftDevice")), "device_template");
             capture.CanopyTemplate = Template(b.Find("fuselage/cockpit/canopyHingea/canopyHingeb/canopyFrame").GetComponent(GameType("Canopy")), "canopy_template");

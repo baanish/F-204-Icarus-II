@@ -53,8 +53,8 @@ INTERNALS = {
     # z0 is the axis height at the face, z1 at the nozzle; the face sits high enough for the stowed main wheels below.
     "engine": {"face_s": 9.70, "core_end_s": 13.10, "radius": 0.46, "ab_radius": 0.36, "end_s": 15.00,
                "z0": 0.35, "z1": 0.37, "mass_kg": 1450},
-    # The fuselage's frame stations: 0.6 m apart, as the painted panel lines are (art/textures/panels.py). No frame,
-    # stringer or wall is drawn, as on stock jets. Meshless cores and truss halves use inset skin points at these
+    # The fuselage's frame stations: 0.6 m apart, as the painted panel lines are (art/textures/panels.py); skeleton.py
+    # draws its frames on them. Meshless cores and truss halves use inset skin points at these
     # stations and just inside each break for their fallback hulls and pivot bounds (shell_rings, parts.shell_points).
     "frames": {"s0": 1.6, "s1": 14.8, "pitch": 0.6, "inset": 0.03, "web": 0.08, "flange": 0.05,
                "ends": ((5.57, 5.92, 10.97, 11.03, 12.97, 13.075, 14.76), 0.02, 0.035)},
@@ -565,5 +565,7 @@ def _build(p, mats):
             bi.finish(obj, mats["structure"], smooth=False)
             parts.append(tag(obj, "structure", "wing" + suffix, sp["mass_kg_side"] / len(pieces)))
 
-    return parts
+    import skeleton
+
+    return parts + skeleton.build(p, mats)
 

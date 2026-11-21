@@ -1502,6 +1502,9 @@ def _build(repo, split=True):
                       "lods": len(bpy.data.collections["LOD1"].objects)}
         tree = {name: obj for name, obj in tree.items() if name not in pieces}
         tree.update((piece.name, piece) for made in pieces.values() for piece in made)
+    import skeleton
+
+    print(skeleton.open_root_caps(TARGET))  # render meshes only, after the hulls, the UVs and the split
     tail_hook.fin_hulls(TARGET)  # include the variant fins before the part hulls merge
     part_tree.drop_split_sides(TARGET)
     import chunks
@@ -1513,6 +1516,8 @@ def _build(repo, split=True):
         print(chunks.fold_hulls(TARGET))
     hulls.merge(TARGET)
     print(clearance.carve(TARGET))  # last, on the final hulls: unjointed parts stand apart
+    if split:
+        print(part_tree.aim_origins(TARGET))  # the blast aim points, inside the final hulls
     hull_count = {"colliders": len(bpy.data.collections["Colliders"].objects),
                   "lods": len(bpy.data.collections["LOD1"].objects)}
     hulls.paint_lods()
@@ -1520,7 +1525,6 @@ def _build(repo, split=True):
     import checks
 
     checks.intake_wing_junction(TARGET)
-    checks.fuel_cell_clearance(TARGET)
     checks.internals_inside_skin(TARGET)
     checks.interior_visibility(TARGET)
     checks.canopy_fit(TARGET)
@@ -1528,6 +1532,8 @@ def _build(repo, split=True):
     for module in modules():
         module.check(TARGET)
     import budget
+
+    print(skeleton.retire_replaced(TARGET))
 
     print(budget.report(TARGET))
     if split:
