@@ -127,13 +127,15 @@ def clearance_scene(nobp):
     local = paths.load()
     from stores import meshverts
     from stores.bodies import mesh_path
-    from stores.bundle import Aircraft
+    from stores.bundle import Aircraft, Bundle
+    from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS
     from stores.mounts import load_mount
     from stores.prefab_tree import asset_index
 
     # the aircraft root frame (Unity: +x right, +y up, +z forward) to Blender's
     blender = lambda u: np.stack([-u[:, 0], -(u[:, 2] - 0.375), u[:, 1] + 0.2652], axis=1)
     plane = Aircraft(Path(nobp))
+    holders = [plane] + [Bundle(bundle) for bundle in local["mod_bundles"]]
     root = local["game_export"]
     index = asset_index(root, "Mesh")
 
@@ -159,15 +161,31 @@ def clearance_scene(nobp):
                                & (c[..., 2] < -0.1), axis=1)
             hard.append(surface_points(v, tris[keep], 0.008))  # the tyre passes these closest
     stores = []
-    for s, (_, hardpoints) in enumerate(plane.sets):
+    for s, (set_name, hardpoints) in enumerate(plane.sets):
         for hp_name, hp in hardpoints:
             if not any(k in hp_name for k in STORE_HARDPOINTS):
                 continue
             pos, rotm, _ = plane.world(hp)
             for key in plane.mounts[s]:
-                stock = (root / "GameObject" / (key + ".prefab")).exists()
-                (verts, tris), _ = load_mount(root, index, key) if stock else plane.mount(key, stock_mesh)
-                stores.append(surface_points(blender(pos + verts @ rotm.T), np.asarray(tris).reshape(-1, 3)))
+                seat = CONFORMAL_SEATS.get(key) if set_name == "Conformal" else None
+                if seat is None and (root / "GameObject" / (key + ".prefab")).exists():
+                    mesh, _ = load_mount(root, index, key)
+                    meshes = [mesh]
+                else:
+                    holder = next((bundle for bundle in holders if key in bundle.bundle_mounts), None)
+                    if holder is None:
+                        raise SystemExit(f"{key}, offered on {set_name}, is missing from the game export, "
+                                         "the Icarus bundle and the mod_bundles in tools/local-paths.json")
+                    if seat is None:
+                        mesh, _ = holder.mount(key, stock_mesh)
+                        meshes = [mesh]
+                    else:
+                        launches = holder.seated(key, seat, CONFORMAL_PITCH_DEG, CONFORMAL_EJECT, stock_mesh)
+                        meshes = [mesh for mesh, _, _ in launches]
+                lift = MERIDIAN_MOUNT_LIFTS.get((hp_name, key), 0.0)
+                for verts, tris in meshes:
+                    hung = pos + (verts + (0.0, lift, 0.0)) @ rotm.T
+                    stores.append(surface_points(blender(hung), np.asarray(tris).reshape(-1, 3)))
     centre = blender(plane.posed(next(t for t, m in plane.meshes.items() if m[0] == "gear_wheel_L_visible"))[0]).mean(0)
     stores, hard = np.concatenate(stores), np.concatenate(hard)
     return {"tyre": tyre - centre, "centre": centre, "stores": cKDTree(stores), "hard": cKDTree(hard),

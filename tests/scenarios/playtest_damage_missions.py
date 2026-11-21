@@ -15,7 +15,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ICARUS = "baanish_icarus"
-AIR_TO_AIR = ["AAM1_single", "AAM4_single", "baanish_icarus_AAM2_conformal", ""]
+AIR_TO_AIR = ["AAM1_single", "AAM4_single", "baanish_icarus_AAM2_conformal", "", ""]
 INTERCEPTOR = ["autocannon_27mm_internal", "AAM4_triple_internal", "AAM4_triple_internal",
                "AAM3_single_internal", "AAM2_double", "AAM1_double", ""]
 
@@ -111,6 +111,7 @@ def verify_contracts():
     shot = shot_down()
     assert len(shot["aircraft"]) == 7
     assert shot["aircraft"][0]["globalPosition"]["y"] == 9000
+    assert len(shot["aircraft"][0]["savedLoadout"]["Selected"]) == 5  # IcarusAuthor.Identity.cs SetNames
     assert shot["aircraft"][0]["savedLoadout"]["Selected"] == [{"Key": k} for k in AIR_TO_AIR]
     assert shot["objectives"][1]["seconds"] == 120
     assert shot["outcomes"][1]["UnitsToSpawn"] == [f"Interceptor {i}" for i in range(3, 7)]
