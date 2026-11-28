@@ -21,18 +21,20 @@ namespace Icarus.Editor
         // stations take the MMR-S3 and IRM-S2 on their own rails, or the tip tank; the wing pylons the missiles (the AAM-36 Scimitar is the interceptor's
         // one long-range shot), the AGM-68 against armour, the 500 kg and cluster bombs, the Genie, the GPO-N (1.5 kt and 250 kt) and the pods, one store
         // each, or a twin rack of MMR-S3, IRM-S2 or AAM-29; the semi-recessed conformal stations the MMR-S3, IRM-S2 and
-        // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
+        // AAM-29 on the Icarus's own low mounts (AuthorConformalMounts), or a pair of 20 mm gun pods banked to the belly
+        // (src/Icarus/GunPodSeats.cs). No ARADs, AGM-99, Tusko-B, GBM-500LR or GPO-2P
         // Auger, and no other double or triple racks (a rocket pod is one store). The centreline station takes one bomb on
-        // its own pylon: the 500 kg bomb or the GPO-N of either yield (the owner's picks, IcarusAuthor.Centreline.cs).
+        // its own pylon, the 500 kg bomb or the GPO-N of either yield, or a gun pod: the stock 20 mm autocannon or the stock
+        // 25 mm rotary in the Icarus's own body (the owner's picks, IcarusAuthor.Centreline.cs, IcarusAuthor.GunPod.cs).
         private static readonly string[][] StationKeys =
         {
-            new[] { "AAM1_single", "AAM3_single", TipTank },
+            new[] { "AAM1_single", "AAM3_single", TipTank, "gunpod_20mm" },
             new[] { "AAM1_single", "AAM3_single", "AAM2_single", "AAM4_single", "AAM1_double", "AAM3_double", "AAM2_double",
                     "AGM_heavy_single", "bomb_500_single", "bomb_cluster1_single", "AIR-2_Genie_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external", "Rocket2_4Pod",
-                    "SpecialSmokePod", "SpecialFlarePod" },
-            new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2 },
+                    "SpecialSmokePod", "SpecialFlarePod", "gunpod_20mm" },
+            new[] { ConformalAAM1, ConformalAAM3, ConformalAAM2, "gunpod_20mm" },
             new[] { TailHook },
-            new[] { "bomb_500_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external" },
+            new[] { "bomb_500_single", "nuclearBomb1_external", "nuclearBomb1_strategic_external", GunPod25, "gunpod_20mm" },
         };
         // Mounts of the Aryx Weaponry Pack, by its keys and the sets that offer them: the owner's picks, the pack's
         // anti-radiation missile and glide bomb among them. The pack is another mod and stays optional: its mounts are no
@@ -66,6 +68,9 @@ namespace Icarus.Editor
             ConformalAAM2 = "baanish_icarus_AAM2_conformal";
         // Blueprinter's stand-ins for stock mounts the Revoker doesn't carry (the IRM-S2).
         private const string MountPlaceholders = "Assets/Blueprinter/_donotship/MonoBehaviour/";
+        // The stand-ins are named after the stock asset, which is the mount's jsonKey for every mount but the gun pods.
+        private static string MountPlaceholder(string key) => MountPlaceholders
+            + (key == "gunpod_20mm" ? "gun_20mm_pod" : key) + "_PLACEHOLDER.asset";
 
         private sealed class Stations
         {
@@ -99,12 +104,13 @@ namespace Icarus.Editor
                 stations.ByKey[own.Key] = own.Value;
             stations.ByKey[TipTank] = AuthorTipTankMount();
             stations.ByKey[TailHook] = AuthorTailHookMount();
+            stations.ByKey[GunPod25] = AuthorGunPodMount();
             for (var i = 0; i < sets.arraySize; i++)
                 foreach (var mount in GetList(sets.GetArrayElementAtIndex(i).FindPropertyRelative("weaponOptions")).Where(o => o != null))
                     stations.ByKey[KeyOf(mount)] = mount;
             Object Mount(string key) => stations.ByKey.TryGetValue(key, out var mount) ? mount
-                : stations.ByKey[key] = AssetDatabase.LoadAssetAtPath<Object>(MountPlaceholders + key + "_PLACEHOLDER.asset")
-                    ?? throw new InvalidDataException($"no stock mount {key}: not on the Revoker and no {MountPlaceholders}{key}_PLACEHOLDER.asset");
+                : stations.ByKey[key] = AssetDatabase.LoadAssetAtPath<Object>(MountPlaceholder(key))
+                    ?? throw new InvalidDataException($"no stock mount {key}: not on the Revoker and no {MountPlaceholder(key)}");
             for (var i = 0; i < SetNames.Length; i++)
             {
                 stations.Options[i] = StationKeys[i].Select(Mount).ToList();

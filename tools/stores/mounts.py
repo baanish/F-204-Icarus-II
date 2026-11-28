@@ -9,6 +9,11 @@ from stores import meshverts
 from stores.prefab_tree import docs_of, f3, qmul, qrot
 
 COLLIDER = {65: "Box", 136: "Capsule", 135: "Sphere", 64: "Mesh"}
+STOCK_PREFAB_NAMES = {"gunpod_25mm_trainer": "gun_25mm_trainer_pod", "gunpod_20mm": "gun_20mm_pod"}
+
+
+def stock_prefab(root, key):
+    return root / "GameObject" / (STOCK_PREFAB_NAMES.get(key, key) + ".prefab")
 
 
 def add(a, b):
@@ -19,7 +24,7 @@ def load_mount(root, index, name, nodes=None):
     """(mesh, colliders): every enabled renderer's triangles merged into one mesh (verts, tris), and the colliders as
     dicts: kind, name, trigger, centre and rot, plus r, axis and half_len (capsule) or half (box). A nodes dict gets
     each transform's path -> (position, rotation, scale) in the mount frame."""
-    docs = docs_of(root / "GameObject" / (name + ".prefab"))
+    docs = docs_of(stock_prefab(root, name))
     gos = {fid: d for fid, d in docs.items() if d["type"] == 1}
     comps = {}
     for fid, d in docs.items():

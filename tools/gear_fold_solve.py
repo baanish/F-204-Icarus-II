@@ -14,7 +14,7 @@ the best.
 
     python -I tools/gear_fold_solve.py --pivot 9.85,0.20,-0.28 --wheel 9.84,1.24,-0.95 --stow 0.335,-0.085 --fold 109.5
     python -I tools/gear_fold_solve.py --pivot 10.47,0.30,-0.20 --wheel 9.84,1.24,-0.95 --stow 0.335,-0.055 \\
-        --bundle build/icarus_0.4.0.nobp --scan
+        --bundle build/icarus_0.4.1.nobp --scan
 """
 import argparse
 import math
@@ -131,8 +131,8 @@ def clearance_scene(nobp):
     from stores import meshverts
     from stores.bodies import mesh_path
     from stores.bundle import Aircraft, Bundle
-    from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS
-    from stores.mounts import load_mount
+    from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS, gun_pod_seat, quat_matrix
+    from stores.mounts import load_mount, stock_prefab
     from stores.prefab_tree import asset_index
 
     # the aircraft root frame (Unity: +x right, +y up, +z forward) to Blender's
@@ -171,8 +171,11 @@ def clearance_scene(nobp):
             pos, rotm, _ = plane.world(hp)
             for key in plane.mounts[s]:
                 seat = CONFORMAL_SEATS.get(key) if set_name == "Conformal" else None
-                if seat is None and (root / "GameObject" / (key + ".prefab")).exists():
+                if seat is None and stock_prefab(root, key).exists():
                     mesh, _ = load_mount(root, index, key)
+                    if pod_seat := gun_pod_seat(hp_name, key, pos[0] < 0):
+                        offset, q = pod_seat
+                        mesh = (mesh[0] @ quat_matrix(q).T + offset, mesh[1])
                     meshes = [mesh]
                 else:
                     holder = next((bundle for bundle in holders if key in bundle.bundle_mounts), None)

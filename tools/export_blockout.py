@@ -9,7 +9,8 @@ are part-local. hinge_axis_unity is world-space positive Blender hinge X. Each m
 design_eye is the canopy's design eye point (canopy.EYE), world-space; the cockpit_seat empty's axes carry the stock seat's
 recline beyond the donor's pilot rig (cockpit.STOCK seat_recline), about its pivot; and conformal the conformal
 hardpoint and the Icarus's own conformal mounts (stations.export), and tip_tank the tip tank store (tip_tanks.export) and
-tail_hook the arrestor hook (tail_hook.export), each with its own FBX, in the mount's frame.
+tail_hook the arrestor hook (tail_hook.export) and gun_pod the centreline 25 mm pod's body (gun_pod.export), each with its
+own FBX, in the mount's frame.
 Blender (x, y, z) maps to Unity (-x, z, -y), in metres.
 """
 
@@ -29,6 +30,7 @@ sys.path.insert(0, str(REPO / "art/blender"))
 from scrub_fbx import scrub_file
 import build_icarus
 import canopy
+import gun_pod
 import stations
 import tail_hook
 import tip_tanks
@@ -192,6 +194,7 @@ def main():
     parent_of = {o.name: o.parent.name if o.parent else None for o in objs}
     tank_layout = tip_tanks.export(to_unity, coll)  # reads the wing by its name, before the renames below
     hook_layout = tail_hook.export(to_unity, coll)
+    pod_layout = gun_pod.export(to_unity, coll)
     # Free the part names: Unity names each imported mesh after its FBX node.
     for obj in objs:
         obj.name = "source_" + obj.name
@@ -279,6 +282,19 @@ def main():
                       materials=material_tris(mesh), uv_layers=[l.name for l in mesh.uv_layers])
     bpy.data.objects.remove(temp, do_unlink=True)
     bpy.data.meshes.remove(mesh)
+    # The centreline gun pod's body, a store: its mesh in the mount's frame.
+    pod = bpy.data.objects[gun_pod.NAME]
+    pod.name = pod.data.name = "source_" + gun_pod.NAME
+    mesh = evaluated_mesh(pod, gun_pod.NAME)
+    temp = bpy.data.objects.new(mesh.name, mesh)
+    scratch.objects.link(temp)
+    fbx = out / f"{gun_pod.NAME}.fbx"
+    export_fbx(fbx, [temp])
+    lo, hi = mesh_bounds(mesh)
+    pod_store = dict(pod_layout, fbx=fbx.name, sha256=sha256(fbx), tris=tris(mesh), bounds_unity=bounds_unity(lo, hi),
+                     materials=material_tris(mesh), uv_layers=[l.name for l in mesh.uv_layers])
+    bpy.data.objects.remove(temp, do_unlink=True)
+    bpy.data.meshes.remove(mesh)
     source = REPO / "art/blender/build_icarus.py"
     eye = build_icarus.P(*canopy.EYE)
     manifest = {"source_generator": source.relative_to(REPO).as_posix(), "source_sha256": sha256(source),
@@ -288,6 +304,7 @@ def main():
                 "conformal": stations.export(to_unity),
                 "tip_tank": store,
                 "tail_hook": hook_store,
+                "gun_pod": pod_store,
                 "parts": report}
     (out / "blockout.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
     count = sum(p["fbx"] is not None for p in report.values())

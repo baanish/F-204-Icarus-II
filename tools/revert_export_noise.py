@@ -17,7 +17,8 @@ sys.path.insert(0, str(REPO / "tools"))
 from compare_exports import fbx_content
 
 UNITY = {"tip_tank.fbx": "unity/Assets/Blueprinter/Mods/icarus/Mounts/tip_tank.fbx",
-         "tail_hook.fbx": "unity/Assets/Blueprinter/Mods/icarus/Mounts/tail_hook.fbx"}
+         "tail_hook.fbx": "unity/Assets/Blueprinter/Mods/icarus/Mounts/tail_hook.fbx",
+         "gunpod_25mm_body.fbx": "unity/Assets/Blueprinter/Mods/icarus/Mounts/gunpod_25mm_body.fbx"}
 
 
 def git(*args):
@@ -36,7 +37,7 @@ def main():
     newline = "\r\n" if b"\r\n" in raw else "\n"
     data = json.loads(raw)
     fixed = 0
-    for entry in list(data["parts"].values()) + [data["tip_tank"], data["tail_hook"]]:
+    for entry in list(data["parts"].values()) + [data["tip_tank"], data["tail_hook"], data["gun_pod"]]:
         if entry.get("fbx"):
             digest = hashlib.sha256((REPO / "art/export" / entry["fbx"]).read_bytes()).hexdigest()
             if entry.get("sha256") != digest:

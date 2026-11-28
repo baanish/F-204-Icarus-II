@@ -16,7 +16,7 @@
   "plugins": [
     "installed:com.nikkorap.blueprinter",
     "../../.cache/build-staging/dotnet",
-    "content:../../build/icarus_0.4.0.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
+    "content:../../build/icarus_0.4.1.nobp host=com.nikkorap.blueprinter keys=baanish_icarus",
   ],
   "measure": true,
   // 1x: at 4x the steps after the 10 s mark fall up to a second apart, and the last check reads the jet unloading and

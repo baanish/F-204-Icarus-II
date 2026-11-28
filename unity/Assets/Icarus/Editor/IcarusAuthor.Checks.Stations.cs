@@ -90,6 +90,27 @@ namespace Icarus.Editor
         // every airframe collider not on the hardpoint's own part (Physics.ComputePenetration). A mounted store's collider
         // joins its part's body, so one that sinks into a neighbouring part's collider fights it. Fails above StoreOverlap.
         private const float StoreOverlap = 0.005f;
+        // The stock 20 mm pod's seat on the right conformal hardpoint, mirrored on the left, as src/Icarus/GunPodSeats.cs
+        // applies it at spawn (tools/stores/geometry.py GUN_POD_SEATS repeats it): an offset to its pieces' place, a turn
+        // about the pod's origin, and its root capsule moved with it.
+        private static readonly Vector3 GunPodSeatOffset = new Vector3(-0.086f, -0.2166f, 0.672f), GunPodSeatEuler = new Vector3(0f, 0f, 84.4f);
+
+        private static void SeatGunPod(GameObject store, Transform point, Transform root)
+        {
+            var pod = store.transform.Find("gunpod") ?? throw new InvalidOperationException("gunpod_20mm has no gunpod");
+            var (offset, euler) = (GunPodSeatOffset, GunPodSeatEuler);
+            if (root.InverseTransformPoint(point.position).x < 0f)
+            {
+                offset.x = -offset.x;
+                euler = new Vector3(euler.x, -euler.y, -euler.z);
+            }
+            var turn = Quaternion.Euler(euler);
+            var origin = pod.localPosition;
+            pod.localPosition = origin + offset;
+            pod.localRotation = turn * pod.localRotation;
+            if (store.GetComponent<CapsuleCollider>() is CapsuleCollider capsule)
+                capsule.center = origin + offset + turn * (capsule.center - origin);
+        }
 
         private static string CheckStoreColliders(Build b, List<string> p)
         {
@@ -110,10 +131,12 @@ namespace Icarus.Editor
                     var others = airframe.Where(c => c.GetComponentInParent(unitPart) != part).ToArray();
                     foreach (var key in StationKeys[i])
                     {
-                        var mount = AssetDatabase.LoadAssetAtPath<Object>(MountFolder + "/" + key + ".asset") ?? Load<Object>(MountPlaceholders + key + "_PLACEHOLDER.asset");
+                        var mount = AssetDatabase.LoadAssetAtPath<Object>(MountFolder + "/" + key + ".asset") ?? Load<Object>(MountPlaceholder(key));
                         var store = (GameObject)Object.Instantiate((GameObject)GetRef(mount, "prefab"), point.position, point.rotation);
                         try
                         {
+                            if (key == "gunpod_20mm" && point.name.StartsWith("hardpoint_conformal"))
+                                SeatGunPod(store, point, b.Root.transform);
                             Physics.SyncTransforms();
                             hung++;
                             foreach (var s in store.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger))

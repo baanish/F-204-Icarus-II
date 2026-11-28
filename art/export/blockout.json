@@ -1,6 +1,6 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "5497221e13d7d544d3ec5e5ff5a2671d07621b890e3458ad524565ec0a288863",
+ "source_sha256": "e0a8db9db904e4288d7b80c1ba0dd87b98432a790b297e54235c1407b703bce8",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
  "design_eye": {
   "blender": [
@@ -377,6 +377,50 @@
    [
     "Icarus_Body",
     908
+   ]
+  ],
+  "uv_layers": [
+   "UVMap"
+  ]
+ },
+ "gun_pod": {
+  "key": "baanish_icarus_gunpod_25mm",
+  "part": "fuselage_mid",
+  "hardpoint_unity": [
+   -0.0,
+   -0.49452,
+   0.425
+  ],
+  "gun_axis_y": -0.1066,
+  "opening": 0.068,
+  "collider": {
+   "centre": [
+    0.0,
+    -0.0694,
+    0.24
+   ],
+   "radius": 0.031,
+   "length": 1.46
+  },
+  "fbx": "gunpod_25mm_body.fbx",
+  "sha256": "c6fc035c68ea247ab1b99ab72d4ad5e37d006d8b77a29491d09d87b43dbc6a2f",
+  "tris": 3190,
+  "bounds_unity": [
+   [
+    -0.32992,
+    -0.1916,
+    -1.35
+   ],
+   [
+    0.32992,
+    0.10711,
+    1.66
+   ]
+  ],
+  "materials": [
+   [
+    "Icarus_Body",
+    3190
    ]
   ],
   "uv_layers": [
@@ -6422,7 +6466,7 @@
      1.278
     ]
    ],
-   "sha256": "b3734b892ed5ab183b487ada69c67f56382342d9e5b974848d6c565659680950",
+   "sha256": "8a3bc6f73789d52691858537d43685909388f7e7d80e97d87d5a49fc759e7d82",
    "drawn": true,
    "colliders": [
     {
@@ -6543,7 +6587,7 @@
      1.278
     ]
    ],
-   "sha256": "09355c8398d5de7fb2cfb7e7f59b8bb29cc5426f5bef0f0293b5e0ace7db3f19",
+   "sha256": "19015b900024866b1f3acbb3cf6f950d7bb2e76a0236f3dcd21d0f54e1c5b4b6",
    "drawn": true,
    "colliders": [
     {

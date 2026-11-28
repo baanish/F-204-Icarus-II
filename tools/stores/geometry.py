@@ -6,6 +6,8 @@ and edge-to-edge distance between them, which is the exact minimum over both sur
 """
 import numpy as np
 
+from stores.prefab_tree import qmul
+
 CHUNK = 1_000_000  # pairs per vectorised batch
 
 
@@ -27,6 +29,25 @@ CONFORMAL_SEATS = {
     "MeridianAGM58F_single": (0.0, -0.1296, 0.18), "MeridianBlackArrow_single": (0.0, -0.1356, 0.18),
 }
 CONFORMAL_PITCH_DEG, CONFORMAL_EJECT = 0.5, 1.5
+
+# Spawn-time seat of a stock gun pod by (hardpoint, or "hardpoint_conformal" for both, and mount key): an offset (x, y, z)
+# in metres added to the pieces' prefab place and Unity Euler angles (x, y, z) in degrees turning them about the mount's
+# origin, for a hardpoint right of the centreline; the left one mirrors it (src/Icarus/GunPodSeats.cs).
+GUN_POD_SEATS = {
+    ("hardpoint_conformal", "gunpod_20mm"): ((-0.086, -0.2166, 0.672), (0.0, 0.0, 84.4)),
+}
+
+
+def gun_pod_seat(hp_name, key, left):
+    """The (offset, quaternion) seating a gun pod on a hardpoint, or None: GUN_POD_SEATS mirrored for a left one."""
+    station = "hardpoint_conformal" if hp_name.startswith("hardpoint_conformal") else hp_name
+    seat = GUN_POD_SEATS.get((station, key))
+    if seat is None:
+        return None
+    (x, y, z), (ex, ey, ez) = seat
+    if left:
+        x, ey, ez = -x, -ey, -ez
+    return np.array((x, y, z)), qmul(axis_quat((0, 1, 0), ey), qmul(axis_quat((1, 0, 0), ex), axis_quat((0, 0, 1), ez)))
 
 # Spawn-time lift in metres along the mount's +Y, as Meridian Works' Diagnostics log reports it on the Icarus.
 # Mirrors Meridian Works 1.3.0.
