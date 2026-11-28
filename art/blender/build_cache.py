@@ -15,10 +15,14 @@ import numpy as np
 
 import build_icarus as bi
 import cycles_device
+import gun_pod
+import tip_tanks
 from cache_root import cache_root
 
 
-COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References", "Stores", "TailHook", "GunPod")
+COLLECTIONS = ("Icarus", "Internals", "Colliders", "LOD1", "References", "TailHook")
+# The stores' generators, left out of the key: build_icarus builds the stores on the airframe after it loads.
+STORE_SOURCES = ("tip_tanks.py", "gun_pod.py")
 TEXTURES = tuple("Icarus_Cockpit_" + suffix + ".png" for suffix in ("b", "n", "m", "ao"))
 
 
@@ -27,7 +31,7 @@ def digest(path):
 
 
 def inputs(repo, parameters):
-    sources = sorted((repo / "art/blender").rglob("*.py"))
+    sources = sorted(path for path in (repo / "art/blender").rglob("*.py") if path.name not in STORE_SOURCES)
     references = parameters["references"]
     sources += [repo / references["dir"] / references[view]["file"] for view in ("top", "side", "front")]
     scene = bpy.context.scene
@@ -55,7 +59,8 @@ def load_or_build(repo=None, overrides=None, split=True):
     repo = Path(repo or Path(__file__).resolve().parents[2]).resolve()
     # Appending into an already-built scene would rename materials and objects.
     # Live edits and repeated variant builds retain build()'s existing semantics.
-    if os.environ.get("ICARUS_NO_BUILD_CACHE") == "1" or any(bpy.data.collections.get(n) for n in COLLECTIONS):
+    if os.environ.get("ICARUS_NO_BUILD_CACHE") == "1" or any(bpy.data.collections.get(n) for n in
+                                                             COLLECTIONS + (tip_tanks.STORES, gun_pod.COLLECTION)):
         return bi.build(str(repo), overrides, split)
     parameters = dict(bi.PARAMS, **(overrides or {}))
     fingerprint = dict(inputs(repo, parameters), split=split)
@@ -94,15 +99,13 @@ def load_or_build(repo=None, overrides=None, split=True):
         for name in TEXTURES:
             shutil.copyfile(folder / key / name, textures / name)
         bpy.context.view_layer.update()
-        # Store choices and the local stock meshes are outside the scene fingerprint.
-        import lights
-
-        lights.check(bi.TARGET)
+        # The stores, the store choices and the local stock meshes are outside the scene fingerprint.
+        bi.build(str(repo), overrides, split, airframe=False)
         print("BUILD CACHE HIT " + key + ": all build checks passed", flush=True)
         return record["metrics"]
 
     print("BUILD CACHE MISS " + key, flush=True)
-    metrics = bi.build(str(repo), overrides, split)
+    metrics = bi.build(str(repo), overrides, split, stores=False)
     import cockpit
 
     folder.mkdir(parents=True, exist_ok=True)
@@ -119,6 +122,8 @@ def load_or_build(repo=None, overrides=None, split=True):
         record = {"key": key, "inputs": fingerprint, "checks_passed": True, "metrics": metrics,
                   "cockpit": state, "blend_sha256": digest(snapshot),
                   "textures": {name: digest(staging / name) for name in TEXTURES}}
+        # The store checks also check the airframe (lights), so the snapshot publishes only once they pass.
+        bi.build(str(repo), overrides, split, airframe=False)
         # Publish the manifest last, so an interrupted writer cannot create a hit.
         (folder / key).mkdir(exist_ok=True)
         for name in TEXTURES:

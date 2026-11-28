@@ -120,6 +120,8 @@ def report(icarus):
     lines.append("components (module: component today / target / cap):")
     for module in bi.modules():
         for name, item in module.BUDGET.items():
+            if "collection" in item and item["collection"] not in bpy.data.collections:
+                continue  # a store not yet built: its own check measures it
             today = measure(icarus, item)
             flag = " OVER" if today > item["cap"] else ""
             lines.append("  %s: %s %d / %d / %d%s" % (module.__name__, name, today, item["target"], item["cap"], flag))

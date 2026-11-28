@@ -1411,16 +1411,20 @@ def metrics(objs):
     }
 
 
-def build(repo=None, overrides=None, split=True):
+def build(repo=None, overrides=None, split=True, airframe=True, stores=True):
     """Rebuild the aircraft. overrides replaces top-level PARAMS entries for this build only (variant renders). split
-    False leaves the skin families whole (parts.split_pieces), as the skin bake reads them."""
+    False leaves the skin families whole (parts.split_pieces), as the skin bake reads them. airframe False builds only
+    the stores, on an airframe already in the scene; stores False leaves them out (build_cache)."""
     global TARGET, PARAMS
     base = PARAMS
     if overrides:
         PARAMS = dict(base, **overrides)
     geometry_cache.clear()
     try:
-        return _build(repo, split)
+        out = _build(repo, split) if airframe else None
+        if stores:
+            _build_stores()
+        return out
     finally:
         PARAMS = base
         geometry_cache.clear()
@@ -1443,6 +1447,28 @@ def modules():
     import importlib
 
     return [importlib.import_module(name) for name in MODULES]
+
+
+# The checks that read the stores, so they run once the stores are built (_build_stores).
+STORE_CHECKS = ("lights", "tip_tanks")
+
+
+def _build_stores():
+    """The tip tank and the centreline 25 mm pod's body, each in its own collection and painted from the finished
+    airframe's atlas. They read the airframe and the airframe never reads them, so the build cache keys and keeps the
+    airframe without them (build_cache.STORE_SOURCES)."""
+    global TARGET
+    import gun_pod
+    import tip_tanks
+
+    TARGET = bpy.data.collections["Icarus"]
+
+    mats = {"body": bpy.data.materials["Icarus_Body"]}
+    tip_tanks.build(PARAMS, mats, TARGET)
+    gun_pod.build(PARAMS, mats, TARGET)
+    for module in modules():
+        if module.__name__ in STORE_CHECKS:
+            module.check(TARGET)
 
 
 def _build(repo, split=True):
@@ -1491,13 +1517,7 @@ def _build(repo, split=True):
 
     uvs.unwrap(TARGET)
     lights.project_nav_paint(TARGET)
-    import tip_tanks
-
-    tip_tanks.build(p, mats, TARGET)  # a store in its own collection, painted from the wing's atlas
     tail_hook.paint(TARGET)  # the hook, painted from the fairing's
-    import gun_pod
-
-    gun_pod.build(p, mats, TARGET)  # the centreline 25 mm pod's body, a store, painted from the belly's atlas
     if split:
         pieces = part_tree.split_pieces(TARGET)  # after every pass that reads a skin family whole
         hulls.rebuild_pieces(pieces)
@@ -1533,7 +1553,8 @@ def _build(repo, split=True):
     checks.canopy_fit(TARGET)
     checks.pilot_eye_leaks(TARGET)
     for module in modules():
-        module.check(TARGET)
+        if module.__name__ not in STORE_CHECKS:
+            module.check(TARGET)
     import budget
 
     print(skeleton.retire_replaced(TARGET))

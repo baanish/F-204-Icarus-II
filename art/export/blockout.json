@@ -1,6 +1,6 @@
 {
  "source_generator": "art/blender/build_icarus.py",
- "source_sha256": "e0a8db9db904e4288d7b80c1ba0dd87b98432a790b297e54235c1407b703bce8",
+ "source_sha256": "d7191ec5a2e103932d35aaa8fb5ced4ea38004f91c6721c2e3edff6a31a30383",
  "axes": "Unity = (-x, z, -y) of Blender; pivots and hinge_axis_unity are world-space; bounds are part-local (in axes_unity)",
  "design_eye": {
   "blender": [
@@ -321,7 +321,7 @@
   "dry_kg": 70.0,
   "volume_l": 719.2,
   "fbx": "tip_tank.fbx",
-  "sha256": "3a9544740722a6299b1e5cdbbdee605eaa31336bd5daafcd85649fdc5ced1f85",
+  "sha256": "81a7056f36c2f6669ec6d92d822ac8ee54c6c6ca876c9cebd0a426db14dbd4b5",
   "tris": 1872,
   "bounds_unity": [
    [
