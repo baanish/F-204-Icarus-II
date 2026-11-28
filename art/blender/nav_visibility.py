@@ -248,7 +248,7 @@ LIGHT_BLOCKERS = {"gunpod_20mm"}
 
 def check(icarus):
     result = measure(icarus)
-    if any(r["blocked"] for r in result["results"] if r["store"] not in LIGHT_BLOCKERS):
+    if any(r["blocked"] and r["store"] not in LIGHT_BLOCKERS for r in result["results"]):
         raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store or tip tank")
     result["aft"] = measure_aft(icarus)
     if result["aft"]["worst_fraction"]:

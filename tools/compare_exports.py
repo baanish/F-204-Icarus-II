@@ -44,6 +44,7 @@ def blockout_content(text):
     data = json.loads(text)
     data.pop("source_sha256", None)
     data.get("tip_tank", {}).pop("sha256", None)
+    data.get("gun_pod", {}).pop("sha256", None)
     for part in data.get("parts", {}).values():
         part.pop("sha256", None)
     return data

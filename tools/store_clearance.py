@@ -41,7 +41,7 @@ from stores import paths
 LOCAL = paths.load()
 from stores.bundle import Aircraft, Bundle  # noqa: E402
 from stores.geometry import axis_quat, bounds, box_gap, mesh_distance, quat_matrix, segment_distance, turn_upright  # noqa: E402
-from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS, gun_pod_seat  # noqa: E402
+from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, GUN_POD_SEATS, MERIDIAN_MOUNT_LIFTS, gun_pod_seat  # noqa: E402
 from stores.prefab_tree import qmul, qrot  # noqa: E402
 from stores import meshverts  # noqa: E402
 from stores.bodies import mesh_path  # noqa: E402
@@ -54,6 +54,7 @@ STEP = 0.01  # largest gear vertex move between two poses of a sweep
 REACH = 0.5  # gaps beyond this are reported as "> REACH"
 TIP_INSET, TIP_CHORD, TIP_TOLERANCE = 0.005, 0.545, 0.001  # Stores rule 5
 EJECT_CLEAR = 1.0  # Stores rule 18
+GUN_PODS = {key for _, key in GUN_POD_SEATS}  # fire, never launch: no rule 18 path
 LEG = re.compile(r"^gear_(leg|unsprung|arm|strut|piston)_[NLR](_visible)?$")
 TYRE = re.compile(r"^gear_wheel_[NLR]_visible$")
 DOOR = re.compile(r"^gear_door_\w+_visible$")
@@ -317,6 +318,8 @@ def main():
         for hp_name, hp in hardpoints:
             pos, rot, _ = plane.world(hp)
             for key in plane.mounts[s]:
+                if key in GUN_PODS:
+                    continue
                 for (verts, tris), direction, length in launches(key, set_name):
                     body, along = pos + verts @ rot.T, rot @ direction
                     lit = (body + along * length, tris)

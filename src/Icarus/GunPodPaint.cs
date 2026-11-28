@@ -13,7 +13,6 @@ static class GunPodPaint
 {
     const string Feature = "gun-pod-paint", OwnPod = "baanish_icarus_gunpod_25mm", OwnBody = "gunpod_25mm_body", StockPod = "gunpod_20mm";
     static readonly int LiveryId = Shader.PropertyToID("_Livery");
-    static readonly AccessTools.FieldRef<UnitPart, DamageMaterial> DamageMaterialOf = AccessTools.FieldRefAccess<UnitPart, DamageMaterial>("damageMaterial");
 
     internal static readonly PatchTarget[] PatchTargets =
     {
@@ -28,7 +27,7 @@ static class GunPodPaint
             || weaponMount.jsonKey != OwnPod && weaponMount.jsonKey != StockPod) return;
         UnitPart part = __instance.part;
         // The part's own skin: the renderers its livery paints, which BareMetalLivery gives the Bare Metal maps.
-        Renderer? skin = DamageMaterialOf(part)?.renderers.FirstOrDefault(r => r != null && r.sharedMaterial != null && r.sharedMaterial.HasProperty(LiveryId));
+        Renderer? skin = Traverse.Create(part).Field<DamageMaterial>("damageMaterial").Value?.renderers.FirstOrDefault(r => r != null && r.sharedMaterial != null && r.sharedMaterial.HasProperty(LiveryId));
         if (skin == null)
         {
             IcarusPlugin.Log.Warning($"{weaponMount.jsonKey}: no skin renderer on {part.name} to follow");

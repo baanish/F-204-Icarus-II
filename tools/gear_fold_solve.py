@@ -132,7 +132,7 @@ def clearance_scene(nobp):
     from stores.bodies import mesh_path
     from stores.bundle import Aircraft, Bundle
     from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS
-    from stores.mounts import load_mount
+    from stores.mounts import load_mount, stock_prefab
     from stores.prefab_tree import asset_index
 
     # the aircraft root frame (Unity: +x right, +y up, +z forward) to Blender's
@@ -171,7 +171,7 @@ def clearance_scene(nobp):
             pos, rotm, _ = plane.world(hp)
             for key in plane.mounts[s]:
                 seat = CONFORMAL_SEATS.get(key) if set_name == "Conformal" else None
-                if seat is None and (root / "GameObject" / (key + ".prefab")).exists():
+                if seat is None and stock_prefab(root, key).exists():
                     mesh, _ = load_mount(root, index, key)
                     meshes = [mesh]
                 else:

@@ -77,7 +77,7 @@ namespace Icarus.Editor
                 capsule.direction = 2;
                 capsule.radius = Float(collider, "radius");
                 capsule.height = Float(collider, "length") + 2f * capsule.radius;
-                capsule.center = pod.InverseTransformPoint(root.transform.TransformPoint(Vec3(collider["centre"])));
+                capsule.center = pod.InverseTransformPoint(root.transform.TransformPoint(offset + Vec3(collider["centre"])));
                 var body = new GameObject(GunPodBody) { layer = pod.gameObject.layer };
                 body.transform.SetParent(root.transform, false);
                 body.transform.localPosition = offset;
