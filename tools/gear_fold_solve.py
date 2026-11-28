@@ -131,7 +131,7 @@ def clearance_scene(nobp):
     from stores import meshverts
     from stores.bodies import mesh_path
     from stores.bundle import Aircraft, Bundle
-    from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS
+    from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS, gun_pod_seat, quat_matrix
     from stores.mounts import load_mount, stock_prefab
     from stores.prefab_tree import asset_index
 
@@ -173,6 +173,9 @@ def clearance_scene(nobp):
                 seat = CONFORMAL_SEATS.get(key) if set_name == "Conformal" else None
                 if seat is None and stock_prefab(root, key).exists():
                     mesh, _ = load_mount(root, index, key)
+                    if pod_seat := gun_pod_seat(hp_name, key, pos[0] < 0):
+                        offset, q = pod_seat
+                        mesh = (mesh[0] @ quat_matrix(q).T + offset, mesh[1])
                     meshes = [mesh]
                 else:
                     holder = next((bundle for bundle in holders if key in bundle.bundle_mounts), None)
