@@ -4,7 +4,7 @@ A modernized F-104 Starfighter for [Nuclear Option](https://store.steampowered.c
 
 ![The Icarus II in PALA Navy on the Hyperion's deck](docs/img/icarus-hero.jpg)
 
-Version 0.4.0 is a prerelease. See the [changelog](CHANGELOG.md) for what changed.
+Version 0.4.1 is a prerelease. See the [changelog](CHANGELOG.md) for what changed.
 
 ## What you get
 
@@ -37,7 +37,7 @@ The mod needs your own copy of the game and uses the game's faction roundels on 
 1. Download `Icarus-v<version>-plugin-only.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). It holds the two files that make up the mod, `Icarus.dll`, the plugin, and `icarus_<version>.nobp`, the aircraft bundle, in `BepInEx/plugins/baanish.icarus/`. To build them yourself instead, follow [BUILD.md](BUILD.md).
 2. Close the game.
 3. Extract the ZIP into the game folder, so both files land in `BepInEx/plugins/baanish.icarus/`. They only work as a pair, so always replace both together. Keep only one copy. If a second `icarus_<version>.nobp` sits anywhere under `BepInEx/plugins`, Blueprinter skips the duplicate and the Icarus doesn't load.
-4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.4.0 (baanish.icarus)`.
+4. Start the game. `BepInEx/LogOutput.log` names the version on load: `F-204 Icarus II 0.4.1 (baanish.icarus)`.
 
 ### Mod managers
 
@@ -45,7 +45,7 @@ The Icarus is listed in NOMM. Install it from there, with BepInEx 5 and Blueprin
 
 ### Paint your own livery
 
-Download `icarus_livery_kit_0.4.0.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). The [livery kit guide](docs/livery-kit/README.md) shows how to paint on the 3D model or a flat template and install the result with the kit's builder.
+Download `icarus_livery_kit_0.4.1.zip` from the [releases page](https://github.com/baanish/F-204-Icarus-II/releases). The [livery kit guide](docs/livery-kit/README.md) shows how to paint on the 3D model or a flat template and install the result with the kit's builder.
 
 ## Flying it
 

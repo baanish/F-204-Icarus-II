@@ -110,7 +110,7 @@ namespace Icarus.Editor
                     var others = airframe.Where(c => c.GetComponentInParent(unitPart) != part).ToArray();
                     foreach (var key in StationKeys[i])
                     {
-                        var mount = AssetDatabase.LoadAssetAtPath<Object>(MountFolder + "/" + key + ".asset") ?? Load<Object>(MountPlaceholders + key + "_PLACEHOLDER.asset");
+                        var mount = AssetDatabase.LoadAssetAtPath<Object>(MountFolder + "/" + key + ".asset") ?? Load<Object>(MountPlaceholder(key));
                         var store = (GameObject)Object.Instantiate((GameObject)GetRef(mount, "prefab"), point.position, point.rotation);
                         try
                         {

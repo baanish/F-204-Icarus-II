@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1
+
+- The centreline's 25mm Rotary Cannon pod has a body of its own, drawn for the Icarus. It sits close under the belly, stops short of the conformal troughs and covers the barrels from below, with a rounded nose around them. The gun rides higher, inside it.
+- The 20mm Autocannon pod fits the conformal stations as a pair. Each pod sits in its trough, rolled toward the belly.
+- The 20mm Autocannon pod also goes on the inner wing pylons and the wingtips. On a wingtip it hides part of the position light from straight ahead.
+- Under both Bare Metal liveries, the 25mm pod body and the 20mm pods turn bare metal with the airframe.
+
 ## 0.4.0
 
 - The pilot sits 0.75 m farther forward, with the seat reclined 10 degrees, so the helmet sits between the canopy frames. The instrument panel is smaller and sits 3 cm lower.

@@ -41,10 +41,11 @@ from stores import paths
 LOCAL = paths.load()
 from stores.bundle import Aircraft, Bundle  # noqa: E402
 from stores.geometry import axis_quat, bounds, box_gap, mesh_distance, quat_matrix, segment_distance, turn_upright  # noqa: E402
-from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS  # noqa: E402
+from stores.geometry import CONFORMAL_EJECT, CONFORMAL_PITCH_DEG, CONFORMAL_SEATS, MERIDIAN_MOUNT_LIFTS, gun_pod_seat  # noqa: E402
+from stores.prefab_tree import qmul, qrot  # noqa: E402
 from stores import meshverts  # noqa: E402
 from stores.bodies import mesh_path  # noqa: E402
-from stores.mounts import load_mount  # noqa: E402
+from stores.mounts import load_mount, stock_prefab  # noqa: E402
 from stores.prefab_tree import asset_index  # noqa: E402
 from stores.lights import check_tip_lamps, stock_lens, wingtip_keys  # noqa: E402
 
@@ -242,7 +243,7 @@ def main():
                 if (key, seated) not in mounts:
                     # a stock mount from the game export; a mod's from the bundle that carries its prefab; a seated one
                     # is its missile alone (its capsule goes unreported)
-                    stock = (root / "GameObject" / (key + ".prefab")).exists()
+                    stock = stock_prefab(root, key).exists()
                     if seated:
                         meshes = [mesh for mesh, _, _ in launches(key, set_name)]
                         starts = np.cumsum([0] + [len(v) for v, _ in meshes[:-1]])
@@ -252,9 +253,12 @@ def main():
                 (verts, tris), colliders = turn_upright(key, mounts[key, seated], rot)
                 lift = MERIDIAN_MOUNT_LIFTS.get((hp_name, key), 0.0)
                 if lift:
-                    offset = (0.0, lift, 0.0)
-                    verts = verts + offset
-                    colliders = [dict(c, centre=np.asarray(c["centre"]) + offset) for c in colliders]
+                    verts = verts + (0.0, lift, 0.0)
+                    colliders = [dict(c, centre=np.asarray(c["centre"]) + (0.0, lift, 0.0)) for c in colliders]
+                if seat := gun_pod_seat(hp_name, key, pos[0] < 0):
+                    offset, q = seat
+                    verts = verts @ quat_matrix(q).T + offset
+                    colliders = [dict(c, centre=np.asarray(qrot(q, c["centre"])) + offset, rot=qmul(q, c["rot"])) for c in colliders]
                 store = (pos + verts @ rot.T, tris)
                 store_bounds = bounds(store[0])
                 angle = strike(store[0])

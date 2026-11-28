@@ -1495,6 +1495,9 @@ def _build(repo, split=True):
 
     tip_tanks.build(p, mats, TARGET)  # a store in its own collection, painted from the wing's atlas
     tail_hook.paint(TARGET)  # the hook, painted from the fairing's
+    import gun_pod
+
+    gun_pod.build(p, mats, TARGET)  # the centreline 25 mm pod's body, a store, painted from the belly's atlas
     if split:
         pieces = part_tree.split_pieces(TARGET)  # after every pass that reads a skin family whole
         hulls.rebuild_pieces(pieces)

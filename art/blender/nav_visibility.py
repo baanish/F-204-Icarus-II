@@ -241,9 +241,14 @@ def measure(icarus):
                 store_bounds={k: (m[0].max(0) - m[0].min(0)).tolist() for k, (m, _) in mounts.items()})
 
 
+# Wingtip stores allowed to hide part of the position light: the 20 mm gun pod's front half reaches ahead of the wing's
+# lens and has none of its own (the owner's call, 2026-11-28).
+LIGHT_BLOCKERS = {"gunpod_20mm"}
+
+
 def check(icarus):
     result = measure(icarus)
-    if any(r["blocked"] for r in result["results"]):
+    if any(r["blocked"] for r in result["results"] if r["store"] not in LIGHT_BLOCKERS):
         raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store or tip tank")
     result["aft"] = measure_aft(icarus)
     if result["aft"]["worst_fraction"]:

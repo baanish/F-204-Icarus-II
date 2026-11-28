@@ -15,7 +15,7 @@ namespace Icarus;
 public sealed class IcarusPlugin : BaseUnityPlugin
 {
     public const string Guid = "baanish.icarus";
-    public const string Version = "0.4.0";
+    public const string Version = "0.4.1";
 
     /// <summary>AircraftDefinition.jsonKey of the Icarus (IcarusAuthor.JsonKey).</summary>
     public const string JsonKey = "baanish_icarus";
@@ -23,7 +23,7 @@ public sealed class IcarusPlugin : BaseUnityPlugin
     /// <summary>Seconds between a mission starting and the supply repair and stock-mission supply, so the HQs have loaded.</summary>
     const float SupplyRepairDelayS = 3f;
 
-    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(TankFireLog.PatchTargets).Concat(ContactOffset.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(AiTaxiSpeed.PatchTargets).Concat(TipTanks.PatchTargets).Concat(TailHookFairing.PatchTargets).Concat(BareMetalFirstPick.PatchTargets).Concat(HelipadLaunch.PatchTargets).Concat(LeadingEdgeFlaps.PatchTargets).Concat(DamageRegistrations.PatchTargets).Concat(OriginShiftPoses.PatchTargets).Concat(AiApproachSpeed.PatchTargets).Concat(PackMountFit.PatchTargets).Concat(FourSetLoadouts.PatchTargets).ToArray();
+    static readonly PatchTarget[] PatchTargets = StartupHold.PatchTargets.Concat(IcarusSystems.PatchTargets).Concat(JointAnchors.PatchTargets).Concat(PartContactLog.PatchTargets).Concat(TankFireLog.PatchTargets).Concat(ContactOffset.PatchTargets).Concat(TailFlex.PatchTargets).Concat(StockMissionSupply.PatchTargets).Concat(CockpitCamera.PatchTargets).Concat(BareMetalLivery.PatchTargets).Concat(GroundSteering.PatchTargets).Concat(AiTaxiSpeed.PatchTargets).Concat(TipTanks.PatchTargets).Concat(TailHookFairing.PatchTargets).Concat(BareMetalFirstPick.PatchTargets).Concat(HelipadLaunch.PatchTargets).Concat(LeadingEdgeFlaps.PatchTargets).Concat(DamageRegistrations.PatchTargets).Concat(OriginShiftPoses.PatchTargets).Concat(AiApproachSpeed.PatchTargets).Concat(PackMountFit.PatchTargets).Concat(GunPodSeats.PatchTargets).Concat(GunPodPaint.PatchTargets).Concat(FourSetLoadouts.PatchTargets).ToArray();
 
     internal static IcarusLog Log = null!;
 
