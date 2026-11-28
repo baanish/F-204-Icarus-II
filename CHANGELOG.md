@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- The tip tanks no longer carry nav lenses of their own. Those lenses looked lit but gave off no light. With tip tanks fitted, the tanks hide part of the wingtip position lights.
+
 ## 0.4.1
 
 - The centreline's 25mm Rotary Cannon pod has a body of its own, drawn for the Icarus. It sits close under the belly, stops short of the conformal troughs and covers the barrels from below, with a rounded nose around them. The gun rides higher, inside it.
