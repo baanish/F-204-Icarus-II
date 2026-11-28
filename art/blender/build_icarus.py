@@ -1457,8 +1457,11 @@ def _build_stores():
     """The tip tank and the centreline 25 mm pod's body, each in its own collection and painted from the finished
     airframe's atlas. They read the airframe and the airframe never reads them, so the build cache keys and keeps the
     airframe without them (build_cache.STORE_SOURCES)."""
+    global TARGET
     import gun_pod
     import tip_tanks
+
+    TARGET = bpy.data.collections["Icarus"]
 
     mats = {"body": bpy.data.materials["Icarus_Body"]}
     tip_tanks.build(PARAMS, mats, TARGET)

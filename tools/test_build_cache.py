@@ -82,8 +82,8 @@ class BuildCacheTests(unittest.TestCase):
         sample(bi.PARAMS, 1.)
         base = bi.PARAMS
         with patch.object(bi, "_build", side_effect=lambda repo, split: sample(bi.PARAMS, 1.)):
-            bi.build()
-            bi.build(overrides={"blend": .3})
+            bi.build(stores=False)
+            bi.build(overrides={"blend": .3}, stores=False)
         self.assertIs(base, bi.PARAMS)
         self.assertEqual(3, len(calls))
 

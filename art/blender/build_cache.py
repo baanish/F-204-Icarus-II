@@ -15,6 +15,8 @@ import numpy as np
 
 import build_icarus as bi
 import cycles_device
+import gun_pod
+import tip_tanks
 from cache_root import cache_root
 
 
@@ -57,7 +59,8 @@ def load_or_build(repo=None, overrides=None, split=True):
     repo = Path(repo or Path(__file__).resolve().parents[2]).resolve()
     # Appending into an already-built scene would rename materials and objects.
     # Live edits and repeated variant builds retain build()'s existing semantics.
-    if os.environ.get("ICARUS_NO_BUILD_CACHE") == "1" or any(bpy.data.collections.get(n) for n in COLLECTIONS):
+    if os.environ.get("ICARUS_NO_BUILD_CACHE") == "1" or any(bpy.data.collections.get(n) for n in
+                                                             COLLECTIONS + (tip_tanks.STORES, gun_pod.COLLECTION)):
         return bi.build(str(repo), overrides, split)
     parameters = dict(bi.PARAMS, **(overrides or {}))
     fingerprint = dict(inputs(repo, parameters), split=split)
@@ -119,6 +122,8 @@ def load_or_build(repo=None, overrides=None, split=True):
         record = {"key": key, "inputs": fingerprint, "checks_passed": True, "metrics": metrics,
                   "cockpit": state, "blend_sha256": digest(snapshot),
                   "textures": {name: digest(staging / name) for name in TEXTURES}}
+        # The store checks also check the airframe (lights), so the snapshot publishes only once they pass.
+        bi.build(str(repo), overrides, split, airframe=False)
         # Publish the manifest last, so an interrupted writer cannot create a hit.
         (folder / key).mkdir(exist_ok=True)
         for name in TEXTURES:
@@ -132,5 +137,4 @@ def load_or_build(repo=None, overrides=None, split=True):
             path.unlink()
         staging.rmdir()
     print("BUILD CACHE SAVED " + key, flush=True)
-    bi.build(str(repo), overrides, split, airframe=False)
     return metrics
