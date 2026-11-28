@@ -201,19 +201,13 @@ def sector(side, sign, emitters, trees):
     return total, blocked, each, examples
 
 
-def tank_lamps(icarus, lenses):
-    """With a tip tank on each Wingtip station: its mesh as a BVH per side, and each tank's two lenses (Blender
-    world vertices and the stock triangles), named after the wing lens they follow."""
+def tank_trees(icarus):
+    """With a tip tank on each Wingtip station: its mesh as a BVH per side."""
     import tip_tanks
 
     tank = bpy.data.objects[tip_tanks.NAME]
-    trees, lamps = [], {}
-    for side, station in tip_tanks.stations_world(icarus).items():
-        trees.append(BVHTree.FromPolygons([station @ v.co for v in tank.data.vertices], [tuple(p.vertices) for p in tank.data.polygons]))
-        verts, tris = lenses[side]
-        for name, anchor in tip_tanks.lens_anchors().items():
-            lamps["tip_tank_lens_%s_%s" % (name, side)] = ([station @ anchor @ blender(v) for v in verts], tris)
-    return trees, lamps
+    return [BVHTree.FromPolygons([station @ v.co for v in tank.data.vertices], [tuple(p.vertices) for p in tank.data.polygons])
+            for station in tip_tanks.stations_world(icarus).values()]
 
 
 def measure(icarus):
@@ -225,8 +219,7 @@ def measure(icarus):
     results = []
     loads = [(key, [mesh_tree((pos + mesh[0] @ rot.T, mesh[1])) for pos, rot in stations.values()], {})
              for key, (mesh, _) in mounts.items()]
-    tank_trees, tank = tank_lamps(icarus, lenses)
-    loads.append(("tip_tank", tank_trees, {name: triangles(points, tris) for name, (points, tris) in tank.items()}))
+    loads.append(("tip_tank", tank_trees(icarus), {}))
     for key, stores, extra in loads:
         for side, sign in (("L", 1), ("R", -1)):
             lit = {name: faces for name, faces in list(emitters.items()) + list(extra.items()) if name.endswith("_" + side)}
@@ -241,17 +234,17 @@ def measure(icarus):
                 store_bounds={k: (m[0].max(0) - m[0].min(0)).tolist() for k, (m, _) in mounts.items()})
 
 
-# Wingtip stores allowed to hide part of the position light: the 20 mm gun pod's front half reaches ahead of the wing's
-# lens and has none of its own (the owner's call, 2026-11-28).
-LIGHT_BLOCKERS = {"gunpod_20mm"}
+# Wingtip stores allowed to hide the position light: the 20 mm gun pod's front half reaches ahead of the wing's lens, and
+# the tip tank's body hangs outboard of it; neither carries lights of its own (the owner's calls, 2026-11-28).
+LIGHT_BLOCKERS = {"gunpod_20mm", "tip_tank"}
 
 
 def check(icarus):
     result = measure(icarus)
     if any(r["blocked"] and r["store"] not in LIGHT_BLOCKERS for r in result["results"]):
-        raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store or tip tank")
+        raise ValueError("lights: position-light sector has blocked rays with a loaded wingtip store")
     result["aft"] = measure_aft(icarus)
     if result["aft"]["worst_fraction"]:
         raise ValueError("lights: rear position-light sector has blocked rays across stabilator travel")
-    print("nav visibility PASS: zero blocked directions for every allowed tip store, the tip tanks and every rear lamp pose")
+    print("nav visibility PASS: zero blocked directions for every tip store outside LIGHT_BLOCKERS and every rear lamp pose")
     return result

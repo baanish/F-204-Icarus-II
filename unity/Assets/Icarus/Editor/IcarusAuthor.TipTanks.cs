@@ -65,8 +65,8 @@ namespace Icarus.Editor
             return mesh;
         }
 
-        // The tank on a store transform: its mesh on the skin, its capsule fitted inside the body where the tip face meets
-        // it, and the two stock nav lenses on its bosses. The plugin shows each lens the wing lens's state and colour.
+        // The tank on a store transform: its mesh on the skin, and its capsule fitted inside the body where the tip face meets
+        // it.
         private static void DressTipTank(Transform store, Mesh mesh, Dictionary<string, object> layout)
         {
             store.localPosition = Vector3.zero;
@@ -83,36 +83,11 @@ namespace Icarus.Editor
             capsules[0].radius = Convert.ToSingle(layout["capsule_radius"]);
             capsules[0].height = Convert.ToSingle(layout["length"]);
             capsules[0].center = Vec3(layout["centre_unity"]);
-            var lensMesh = Load<Mesh>(Stock + "Mesh/fighter1_navLight_L_PLACEHOLDER.asset");
-            var lensMaterial = Load<Material>(Stock + "Material/light_red_off_PLACEHOLDER.mat");
-            var renderers = new List<Renderer> { store.GetComponent<MeshRenderer>() };
-            foreach (var entry in ((Dictionary<string, object>)layout["lenses"]).OrderBy(e => e.Key, StringComparer.Ordinal))
-            {
-                var anchor = (Dictionary<string, object>)entry.Value;
-                var lens = store.Find(TipTankLensPrefix + entry.Key);
-                if (lens == null)
-                    lens = new GameObject(TipTankLensPrefix + entry.Key) { layer = store.gameObject.layer }.transform;
-                lens.SetParent(store, false);
-                lens.localRotation = Quaternion.Euler(0f, 0f, Convert.ToSingle(anchor["roll_deg"]));
-                lens.localScale = Vector3.one;
-                // The anchor is the lens's bounds centre, as PlaceSystems places the wing lenses.
-                lens.localPosition = Vec3(anchor["position"]) - lens.localRotation * lensMesh.bounds.center;
-                // Unity's own null check: a missing component reads as a live object to ??.
-                var filter = lens.GetComponent<MeshFilter>();
-                if (filter == null)
-                    filter = lens.gameObject.AddComponent<MeshFilter>();
-                filter.sharedMesh = lensMesh;
-                var renderer = lens.GetComponent<MeshRenderer>();
-                if (renderer == null)
-                    renderer = lens.gameObject.AddComponent<MeshRenderer>();
-                renderer.sharedMaterials = new[] { lensMaterial };
-                renderers.Add(renderer);
-            }
             var lod = store.GetComponent<LODGroup>();
             if (lod != null)
             {
                 var levels = lod.GetLODs();
-                levels[0].renderers = renderers.ToArray();
+                levels[0].renderers = new Renderer[] { store.GetComponent<MeshRenderer>() };
                 lod.SetLODs(levels);
                 lod.RecalculateBounds();
             }
@@ -148,9 +123,6 @@ namespace Icarus.Editor
             importer.SaveAndReimport();
             return Load<Sprite>(TipTankIconPath);
         }
-
-        // The lens objects' names; src/Icarus/TipTanks.cs finds them by this prefix.
-        private const string TipTankLensPrefix = "tip_tank_lens_";
 
         private static void AuthorMountPaint(GameObject root, Renderer skin)
         {

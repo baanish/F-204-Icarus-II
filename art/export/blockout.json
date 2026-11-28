@@ -291,24 +291,6 @@
    0.0,
    0.0585
   ],
-  "lenses": {
-   "top": {
-    "position": [
-     -0.0,
-     0.2701,
-     0.2
-    ],
-    "roll_deg": 0.0
-   },
-   "bottom": {
-    "position": [
-     -0.0,
-     -0.2701,
-     0.2
-    ],
-    "roll_deg": 180.0
-   }
-  },
   "length": 5.44,
   "radius": 0.26,
   "capsule_radius": 0.22,
@@ -321,12 +303,12 @@
   "dry_kg": 70.0,
   "volume_l": 719.2,
   "fbx": "tip_tank.fbx",
-  "sha256": "81a7056f36c2f6669ec6d92d822ac8ee54c6c6ca876c9cebd0a426db14dbd4b5",
-  "tris": 1872,
+  "sha256": "31c2c030295c00571ae85eb6c2730384d2798126e80e958d2f94345b93380bfd",
+  "tris": 1828,
   "bounds_unity": [
    [
     -0.26,
-    -0.262,
+    -0.26,
     -2.84
    ],
    [
@@ -338,7 +320,7 @@
   "materials": [
    [
     "Icarus_Body",
-    1872
+    1828
    ]
   ],
   "uv_layers": [

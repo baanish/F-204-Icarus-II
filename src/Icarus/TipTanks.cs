@@ -24,11 +24,11 @@ namespace Icarus;
 /// capacity while they hang. Firing one tank releases the other on the same station, so the pair goes together and the
 /// jet never flies with one full tank on one tip. An AI-flown Icarus drops its tanks once dry or when it starts landing.
 ///
-/// Each tank's nav lenses show the state and colour of the wing lens beside them, and its skin takes the jet's livery.
+/// Each tank's skin takes the jet's livery. A tank has no nav lights: hung on the tip, it hides the wing's own.
 ///
 /// The Wingtip hardpoints are rolled -90 and +90 degrees and the tank mount undoes the left one's roll
 /// (IcarusAuthor.TipTanks.cs), so the right tank spawns upside down. <see cref="AfterSpawnMount"/> turns that tank's rack,
-/// and with it the store, its lenses and the round it spawns, half a roll about the tank's axis, and points its eject rail
+/// and with it the store and the round it spawns, half a roll about the tank's axis, and points its eject rail
 /// outboard. It reads only the geometry the game has just built, identical on every peer, so it sends nothing.
 /// </summary>
 sealed class TipTanks : MonoBehaviour
@@ -42,8 +42,6 @@ sealed class TipTanks : MonoBehaviour
     /// <summary>kg/s into the internal cells: more than full afterburner burns, so the cells stay full while a tank has fuel.</summary>
     const float TransferRate = 30f;
     const float RefreshS = 0.5f, ReportS = 5f;
-    // IcarusAuthor.TipTankLensPrefix: the tank's lenses, "top" and "bottom".
-    const string LensPrefix = "tip_tank_lens_";
 
     internal static readonly PatchTarget[] PatchTargets =
     {
@@ -77,15 +75,14 @@ sealed class TipTanks : MonoBehaviour
         public float Fuel, Moved, Returned;
         public bool Attached;
         public Renderer? Skin;
-        public Renderer? Top, Bottom;
         public Texture? Metallic;
     }
 
-    // The wing skin beside a tip: its nav lenses (NavLights swaps their materials) and the skin mesh the upper sits on.
+    // The wing skin beside a tip, found by its upper nav lens: the skin mesh that lens sits on.
     sealed class Wing
     {
         public Transform Lens = null!;
-        public Renderer? Upper, Lower, Skin;
+        public Renderer? Skin;
     }
 
     Aircraft aircraft = null!;
@@ -136,18 +133,15 @@ sealed class TipTanks : MonoBehaviour
             {
                 if (weapon == null || tanks.Exists(t => t.Weapon == weapon)) continue;
                 bool attached = weapon.IsAttached() && weapon.GetAmmoLoaded() > 0;
-                Renderer[] lenses = weapon.GetComponentsInChildren<Renderer>(true);
                 var tank = new Tank
                 {
                     Weapon = weapon, Station = station, Attached = attached, Fuel = attached ? FuelKg : 0f,
                     Side = aircraft.transform.InverseTransformPoint(weapon.transform.position).x < 0 ? "L" : "R",
                     Skin = weapon.GetComponent<Renderer>(),
-                    Top = lenses.FirstOrDefault(r => r.name == LensPrefix + "top"),
-                    Bottom = lenses.FirstOrDefault(r => r.name == LensPrefix + "bottom"),
                 };
                 tanks.Add(tank);
                 if (IcarusPlugin.Log.StageEnabled)
-                    IcarusPlugin.Log.Stage("tip-tanks-" + tank.Side, $"tip tank {tank.Side} on {aircraft.persistentID}: attached {attached}, {tank.Fuel:0} kg, lenses {tank.Top != null && tank.Bottom != null}, local sim {aircraft.LocalSim}");
+                    IcarusPlugin.Log.Stage("tip-tanks-" + tank.Side, $"tip tank {tank.Side} on {aircraft.persistentID}: attached {attached}, {tank.Fuel:0} kg, local sim {aircraft.LocalSim}");
             }
         }
 
@@ -329,8 +323,8 @@ sealed class TipTanks : MonoBehaviour
         }
     }
 
-    // NavLights swaps the wing lens's material, and BareMetalLivery changes the wing's metallic map. ColorableMount
-    // supplies the hanging tank's paint and gloss, but its lenses and metallic map still follow the wing.
+    // BareMetalLivery changes the wing's metallic map. ColorableMount supplies the hanging tank's paint and gloss, but its
+    // metallic map still follows the wing.
     void Dress()
     {
         foreach (Tank t in tanks)
@@ -339,7 +333,6 @@ sealed class TipTanks : MonoBehaviour
             if (!wings.TryGetValue(t.Side, out Wing? wing) || wing != null && wing.Lens == null)
                 wings[t.Side] = wing = FindWing(IcarusSystems.Parts(aircraft), t.Side);
             if (wing == null) continue;
-            DressLenses(wing, t.Top, t.Bottom);
             Material? livery = wing.Skin != null ? wing.Skin.sharedMaterial : null;
             if (t.Skin == null || livery == null || !livery.HasProperty(MetallicId) ||
                 livery.GetTexture(MetallicId) is not Texture metallic || t.Metallic == metallic) continue;
@@ -352,25 +345,16 @@ sealed class TipTanks : MonoBehaviour
 
     static Wing? FindWing(AeroPart[] parts, string side)
     {
-        // The lenses hang on the outer wing skin's pieces, on the outer box; the box's one mesh draws those pieces, skin first.
-        Transform? Lens(string name) => parts.Where(p => p != null).SelectMany(p => p.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == name);
-        Transform? upperLens = Lens("navlight_" + side);
+        // The lens hangs on the outer wing skin's pieces, on the outer box; the box's one mesh draws those pieces, skin first.
+        Transform? upperLens = parts.Where(p => p != null).SelectMany(p => p.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == "navlight_" + side);
         AeroPart? wing = upperLens == null ? null : upperLens.GetComponentInParent<AeroPart>();
         if (wing == null) return null;
         return new Wing
         {
             Lens = upperLens!,
-            Upper = upperLens!.GetComponent<Renderer>(),
-            Lower = Lens("navlight_lower_" + side)?.GetComponent<Renderer>(),
             // the mesh that draws the skin the lens sits on
-            Skin = upperLens.parent != null ? upperLens.parent.GetComponentInParent<Renderer>() : null,
+            Skin = upperLens!.parent != null ? upperLens.parent.GetComponentInParent<Renderer>() : null,
         };
-    }
-
-    static void DressLenses(Wing wing, Renderer? top, Renderer? bottom)
-    {
-        if (top != null && wing.Upper != null && top.sharedMaterial != wing.Upper.sharedMaterial) top.sharedMaterial = wing.Upper.sharedMaterial;
-        if (bottom != null && wing.Lower != null && bottom.sharedMaterial != wing.Lower.sharedMaterial) bottom.sharedMaterial = wing.Lower.sharedMaterial;
     }
 
     static (Texture? Paint, Texture? Metallic, float? Gloss)? LiveryOf(Wing wing)
@@ -391,7 +375,7 @@ sealed class TipTanks : MonoBehaviour
         skin.SetPropertyBlock(block);
     }
 
-    // The mount's rack carries the store, and the store's lenses are its children, so turning the rack turns the lot; the
+    // The mount's rack carries the store, so turning the rack turns the store with it; the
     // rack's origin is the tank's, so the tank stays where the mount put it. The round spawns where the store is, so it
     // spawns upright too. The rail is authored for the left tip (the store's -X, outboard there); once the store is upright
     // outboard is the store's +X on the right tip.
@@ -413,18 +397,16 @@ sealed class TipTanks : MonoBehaviour
     }
 
     // A released tank falls as its own round, a fresh copy of the round prefab the game spawns on every peer
-    // (Spawner.SpawnMissile), not the store that hung: it takes the livery and lens state of the wing it left, as the
+    // (Spawner.SpawnMissile), not the store that hung: it takes the livery of the wing it left, as the
     // store had them. StartMissile runs on every peer once the round knows its owner.
     static void AfterStartMissile(Missile __instance)
     {
         if (IcarusPlugin.FeaturesOff.Contains("tip-tanks") || __instance.definition == null || __instance.definition.jsonKey != RoundKey
             || __instance.owner is not Aircraft aircraft) return;
         string side = aircraft.transform.InverseTransformPoint(__instance.transform.position).x < 0 ? "L" : "R";
-        Renderer[] renderers = __instance.GetComponentsInChildren<Renderer>(true);
         Wing? wing = FindWing(IcarusSystems.Parts(aircraft), side);
         if (wing != null)
         {
-            DressLenses(wing, renderers.FirstOrDefault(r => r.name == LensPrefix + "top"), renderers.FirstOrDefault(r => r.name == LensPrefix + "bottom"));
             Renderer? skin = __instance.GetComponent<Renderer>();
             var livery = LiveryOf(wing);
             if (skin != null && livery != null) Paint(skin, livery.Value, new MaterialPropertyBlock());

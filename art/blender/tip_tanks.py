@@ -14,10 +14,8 @@ down, and the plugin (src/Icarus/TipTanks.cs) turns it back half a roll about it
 axis sits outboard of the tip face by the radius less EMBED, so the wing's tip face runs EMBED into the tank's side along
 the whole tip chord, as on the real jet.
 
-The tank carries a stock nav lens on top and one underneath, each on a boss (LENSES): a 0.52 m body outboard of the
-tip blocks the wing's own lenses outboard, so the tank's lenses light the sector while it hangs, and the plugin
-(src/Icarus/TipTanks.cs) shows each the state and colour of the wing lens beside it. nav_visibility.measure holds the
-tank's sector to zero blocked directions.
+The tank carries no nav lights. A 0.52 m body outboard of the tip blocks the wing's own lenses outboard, so with the
+tanks on, the wingtip position lights are hidden (nav_visibility.LIGHT_BLOCKERS).
 
 It wears the airframe skin with every face's UVs on one point of the skin atlas: the upper faces on a clean panel of
 the wing's upper skin, the lower on its lower skin (PAINT), so the tank takes the jet's paint, two-tone where the
@@ -42,9 +40,6 @@ EMBED = 0.03
 # outboard-left, +x, round through up): the two horizontal fins and the top one. The horizontal fins stay inside the
 # body's own radius, so the inboard one keeps the tank's bounds outboard of the wing's nav lenses (Stores rule 14).
 FIN = {"root": (0.95, 1.85), "tip_chord": 0.30, "sweep": 0.40, "thickness": 0.014, "tips": {0: 0.255, 90: 0.41, 180: 0.255}}
-# The lens bosses: how far each stands proud of the cylinder, how deep it reaches in, and where along the tank, metres
-# back from the hardpoint (forward of the fins, on the cylinder).
-LENSES = {"proud": 0.002, "depth": 0.012, "station": -0.20}
 # The skin points the paint comes from: the wing's upper and lower surface at this span and chord fraction, a clean
 # panel between the spars, where every livery is one flat colour for three texels round the point
 # (tools/review_tip_tanks.py paint.json). Each face's UVs spread over SPREAD of the atlas round its point (a few
@@ -121,18 +116,6 @@ def hardpoint(icarus):
     return Vector((t["x"] + TANK["radius"] - EMBED, (t["le"] + t["te"]) / 2, t["z"]))
 
 
-def lens_anchors():
-    """Each lens's bounds centre and frame in the mount, Blender axes: the top one up, the lower one turned over."""
-    height = TANK["radius"] + LENSES["proud"] + LENS_HALF_HEIGHT
-    top = Matrix.Translation((0, LENSES["station"], height))
-    bottom = Matrix.Translation((0, LENSES["station"], -height)) @ Matrix.Rotation(math.pi, 4, "Y")
-    return {"top": top, "bottom": bottom}
-
-
-# The stock lens's base sits this far under its bounds centre (fighter1_navLight: 0.0162 m tall).
-LENS_HALF_HEIGHT = 0.0081
-
-
 def body(segments):
     """Vertices and faces of the body of revolution, nose apex first, in the mount frame."""
     rows = profile()
@@ -181,35 +164,6 @@ def fins(verts, faces):
             faces.append(away(verts, tuple(base + i for i in f), centre))
 
 
-def lens_foot():
-    """The stock lens's eight-edge base, centred, as (lateral, along) pairs in Blender axes."""
-    import nav_visibility
-
-    _, lenses = nav_visibility.stock_geometry()
-    verts = lenses["L"][0]
-    base_y = min(v[1] for v in verts)
-    foot = [v for v in verts if abs(v[1] - base_y) < 0.000002]
-    if len(foot) != 8:
-        raise ValueError("tip tank: expected the stock lens's eight-edge base")
-    return [(-v[0], -v[2]) for v in foot]
-
-
-def bosses(verts, faces):
-    """A boss under each lens: the lens's foot outline from inside the body up to LENSES["proud"] above the
-    cylinder, its top flat under the lens base."""
-    foot = sorted(lens_foot(), key=lambda p: math.atan2(p[1], p[0]))
-    for up in (1, -1):
-        base = len(verts)
-        for height in (TANK["radius"] - LENSES["depth"], TANK["radius"] + LENSES["proud"]):
-            for x, y in foot:
-                verts.append(Vector((x, y + LENSES["station"], up * height)))
-        n = len(foot)
-        centre = sum(verts[base:], Vector()) / (2 * n)
-        for k in range(n):
-            j = (k + 1) % n
-            faces.append(away(verts, (base + k, base + j, base + n + j, base + n + k), centre))
-        faces.append(away(verts, tuple(base + n + k for k in range(n)), centre))
-
 
 def away(verts, face, centre):
     """The face wound so its normal points away from centre."""
@@ -257,7 +211,6 @@ def build(p, mats, icarus):
     collection = bi.collection(STORES)
     verts, faces = body(TANK["segments"])
     fins(verts, faces)
-    bosses(verts, faces)
     mesh = bpy.data.meshes.new(NAME)
     mesh.from_pydata([tuple(v) for v in verts], [], faces)
     mesh.validate()
@@ -288,16 +241,13 @@ def volume():
 
 def export(to_unity, icarus):
     """The tank for blockout.json: its key, its left origin (world, Unity axes) and that origin's offset from the left
-    Wingtip hardpoint (aircraft axes, Stores rule 5), the lens anchors and collider in the tank's frame (Unity axes), and
+    Wingtip hardpoint (aircraft axes, Stores rule 5), the collider in the tank's frame (Unity axes), and
     its fuel and mass."""
     import nav_visibility
 
     wingtip = nav_visibility.tip_stations(icarus)["L"][0]
     offset = [round(a - float(b), 5) for a, b in zip(to_unity(hardpoint(icarus)), wingtip)]
-    anchors = {}
-    for name, m in lens_anchors().items():
-        anchors[name] = {"position": to_unity(m.translation), "roll_deg": 180.0 if name == "bottom" else 0.0}
-    return {"key": KEY, "hardpoint_unity": to_unity(hardpoint(icarus)), "wingtip_offset_unity": offset, "lenses": anchors,
+    return {"key": KEY, "hardpoint_unity": to_unity(hardpoint(icarus)), "wingtip_offset_unity": offset,
             "length": TANK["length"], "radius": TANK["radius"], "capsule_radius": CAPSULE_RADIUS,
             "centre_unity": to_unity(Vector((0, TANK["length"] / 2 - nose_offset(), 0))),
             "fuel_kg": FUEL_KG, "dry_kg": DRY_KG, "volume_l": round(volume(), 1)}
@@ -327,7 +277,7 @@ def check(icarus):
             worst = min(worst, radius_at(along) - radial)
     if worst < 0.005:
         problems.append("the tip face stands %.3f m clear of the tank's skin" % -worst)
-    # The wing's own nav lenses stay outside the tank's bounds, fins and bosses included, as Stores rule 14 measures them;
+    # The wing's own nav lenses stay outside the tank's bounds, fins included, as Stores rule 14 measures them;
     # 0.03 m covers the lens's and its fairing's half-width beyond the lens anchor.
     lens_x = max((o.matrix_world.translation.x for o in icarus.all_objects if o.get("light") == "nav" and o.name.endswith("_L")))
     inboard = hp.x + min(v.co.x for v in obj.data.vertices)
