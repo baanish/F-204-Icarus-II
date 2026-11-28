@@ -4,7 +4,7 @@ pwsh -NoProfile -File tools/Run-Blender.ps1 --background --factory-startup --pyt
 
 Writes side, front and three-quarter views, a close-up of the left tip from ahead and above, and paint.json (each
 livery's colour round the tank's upper and lower paint points, art/blender/tip_tanks.py PAINT, and its spread) under
-.cache/review/share/tip_tanks/. The lenses glow red and green for the views; in game they follow the wing lenses.
+.cache/review/share/tip_tanks/.
 """
 import json
 import math
@@ -19,7 +19,6 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(REPO / "art/blender"), str(REPO / "tools")]
 import build_icarus as bi
 import full_skin_review
-import nav_visibility as nv
 import review_sheet
 import tip_tanks
 
@@ -44,19 +43,6 @@ def paint_report():
             report["livery_%d_%s" % (livery, name)] = dict(uv=[round(c, 5) for c in uv], rgb_255=[round(float(c) * 255) for c in mean],
                                                          max_deviation_255=round(float(np.abs(patch - mean).max()) * 255, 1))
     return report
-
-
-def lens(name, matrix, colour):
-    _, lenses = nv.stock_geometry()
-    verts, tris = lenses["L"]
-    mat = bpy.data.materials.new(name)
-    mat.use_nodes = True
-    bsdf = mat.node_tree.nodes["Principled BSDF"]
-    bsdf.inputs["Base Color"].default_value = (*colour, 1)
-    bsdf.inputs["Emission Color"].default_value = (*colour, 1)
-    bsdf.inputs["Emission Strength"].default_value = 8
-    obj = bi.mesh_object(name, [matrix @ nv.blender(v) for v in verts], tris[:, ::-1].tolist())
-    obj.data.materials.append(mat)
 
 
 def main():
@@ -85,9 +71,6 @@ def main():
     right = tank.copy()
     bi.TARGET.objects.link(right)
     right.matrix_world = stations["R"]
-    for side, colour in (("L", (1, 0.002, 0.001)), ("R", (0.001, 1, 0.01))):
-        for name, anchor in tip_tanks.lens_anchors().items():
-            lens("tip_tank_lens_%s_%s" % (name, side), stations[side] @ anchor, colour)
 
     scene = review_sheet.setup_scene()
     scene.render.engine = "CYCLES"

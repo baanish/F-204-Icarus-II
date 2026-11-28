@@ -84,7 +84,7 @@ class NavVisibility(unittest.TestCase):
         enclosing = BVHTree.FromPolygons(corners, faces)
         with patch.object(nv, "stock_geometry", return_value=({"synthetic": (distant, [])}, lenses)), \
                 patch.object(nv, "tip_stations", return_value={s: (np.zeros(3), np.eye(3)) for s in ("L", "R")}), \
-                patch.object(nv, "tank_lamps", return_value=([], {})):
+                patch.object(nv, "tank_trees", return_value=[]):
             for tree, blocked in ((clear, 0), (enclosing, 20091)):
                 with patch.object(nv.solids, "bvh", return_value=tree):
                     report = nv.measure(collection)
